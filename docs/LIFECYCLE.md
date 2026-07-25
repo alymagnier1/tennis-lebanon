@@ -12,7 +12,7 @@ draft → open → full → ready_to_book → booking_pending → confirmed → 
 Side exits: cancelled | expired | disputed
 ```
 
-`disputed` is typically entered from `completed` or during result workflow; see E7.
+`match_status.disputed` is reserved for explicit platform-admin action on the match itself. A disputed **result** does not change match status: the match stays `completed` with `result_status = disputed` until ops or admin resolves it (see E7).
 
 ## Transition table
 
@@ -30,7 +30,7 @@ Side exits: cancelled | expired | disputed
 | `in_progress`       | `completed`       | Result confirmed or admin resolution                   | System / admin     |
 | `*` (pre-confirmed) | `cancelled`       | Creator cancel or policy-based mass cancel             | Creator / system   |
 | `open` / `full`     | `expired`         | Expiry rules below                                     | Scheduled job      |
-| `completed`         | `disputed`        | Result disputed                                        | Participant        |
+| `*`                 | `disputed`        | Platform admin flags match for ops review              | Platform admin     |
 
 Invalid transitions must fail in RPC with a stable error code.
 
@@ -70,12 +70,9 @@ Revert **not** allowed except via platform admin audit action.
 
 ## Completion rules (`→ completed`)
 
-Set `status = completed` when:
+Set `status = completed` when the result workflow reaches `confirmed` or admin `resolved`.
 
-- Result workflow reaches `confirmed` or admin `resolved`, **or**
-- All participants marked attended and match marked walkover/no contest via ops tool (edge case)
-
-Attendance-only completion without result is **not** allowed in v1 — result or ops resolution required for rating.
+Attendance confirmation alone does **not** complete a match in v1. A mutually confirmed result (or admin resolution) is required for completion, rating, and the north-star metric.
 
 ## Cancellation and leave (placeholder policy)
 

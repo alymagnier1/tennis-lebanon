@@ -17,7 +17,7 @@ Launch in one dense Lebanese area with 5–8 partner clubs and approximately 300
 
 ### North-star metric
 
-**Completed matches per week.** A completed match has an accepted booking or confirmed venue, required participants, and post-match attendance confirmation.
+**Completed matches per week.** A completed match has an accepted booking, required participants, and a mutually confirmed result (or admin resolution).
 
 ### Pilot guardrails
 
@@ -62,8 +62,8 @@ Can manage clubs, resolve reports/disputes, suspend accounts, correct operationa
 - Singles: two required participants.
 - Doubles: four required participants.
 - Matches may be public, invite-only, or private.
-- Creator defines level range, preferred zones, gender preference if legally/product-approved, social/competitive intent, and up to three proposed time slots.
-- A match becomes `ready_to_book` only when full and one time option has sufficient participant agreement.
+- Creator defines level range, preferred zones, social/competitive intent, and up to three proposed time slots.
+- A match becomes `ready_to_book` only when full and all required participants approve one time option.
 
 ### Booking
 

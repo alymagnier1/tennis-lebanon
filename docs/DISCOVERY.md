@@ -380,15 +380,11 @@ Items outside pure discovery that still affect M2 or adjacent milestones. Track 
 
 ### 8. Auth method undecided
 
-**Issue:** Blocks M1.
-
-**Proposal:** Founder must choose before M1. Recommendation for Lebanon pilot: **email magic link** plus **Apple/Google** if app-store requirements demand; SMS OTP as optional later due to cost and deliverability.
+**Status:** **Resolved** — email magic link only for v1 per `docs/DECISIONS.md` (2026-07-25).
 
 ### 9. Juniors policy undecided
 
-**Issue:** Safeguarding risk.
-
-**Proposal:** **Exclude minors from v1** (`is_adult_confirmed = true` required for public discovery and matchmaking). Revisit with guardian flow post-pilot.
+**Status:** **Resolved** — minors excluded from v1 matchmaking per `docs/DECISIONS.md` (2026-07-25). `is_adult_confirmed = true` required for public discovery and matchmaking.
 
 ### 10. Analytics provider
 

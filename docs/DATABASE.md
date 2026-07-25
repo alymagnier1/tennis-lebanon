@@ -27,6 +27,7 @@ The initial migration is `supabase/migrations/001_initial_schema.sql`. It establ
 ### Matches and coordination
 
 - `matches`: core match and state
+- `match_zones`: preferred zones for a match listing
 - `match_participants`: roles, join state, attendance
 - `match_time_options`: proposed slots
 - `match_time_votes`: one vote per participant/option
@@ -98,6 +99,8 @@ Raw authentication tokens, secret keys, unmasked contact details, home address, 
 - One active booking request exists per match.
 - Accepted court bookings cannot overlap.
 - A booking allows at most one club-proposed alternative; after that the requester must accept, reject, or cancel rather than receive a further counter-alternative.
+- Milestone 5 migration adds nullable `proposed_court_id`, `proposed_start_at`, and `proposed_end_at` on `bookings` when `status = alternative_proposed`. The accept-alternative RPC must validate those fields against `court_blocks` and `court_operating_hours` before acceptance.
+- Match join capacity is enforced in Milestone 3 via a `FOR UPDATE` join RPC; add an optional deferred constraint trigger as defense in depth if race tests justify it.
 - One result workflow exists per match.
 - One rating event per player per finalized result.
 - Suspended/deleted users cannot create or join public matches. Suspension does not retroactively remove a user from matches/bookings already in progress; it blocks new public activity going forward, cancels their own pending unaccepted booking requests, and leaves existing chat history visible to remaining participants. Full cascade behavior is an operations decision to confirm before Milestone 8.

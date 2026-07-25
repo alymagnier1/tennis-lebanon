@@ -118,3 +118,30 @@ Record decisions using this template:
 - Alternatives considered: block M1 until legal review; omit policy content; hard-code a personal founder email.
 - Consequences: no public pilot may use the development drafts; founder/legal review and a real support address remain release blockers.
 - Owner: Founder/legal reviewer
+
+## 2026-07-25 — Completed match definition
+
+- Status: accepted
+- Context: PRD north-star metric, LIFECYCLE completion rules, and rating rules used different completion criteria.
+- Decision: A completed match requires an accepted booking, required participants, and a mutually confirmed result (or admin resolution). Attendance confirmation alone does not complete a match in v1.
+- Alternatives considered: attendance-only completion; "confirmed venue" without a club booking row.
+- Consequences: north-star metric, state machine, and rating all use the same bar; PRD and LIFECYCLE aligned.
+- Owner: Founder
+
+## 2026-07-25 — Result dispute does not flip match status
+
+- Status: accepted
+- Context: `match_status.disputed` and `result_status.disputed` overlapped without clear transition ownership.
+- Decision: A disputed result sets `result_status = disputed` while the match remains `completed`. `match_status.disputed` is reserved for explicit platform-admin action on the match itself.
+- Alternatives considered: flip match to `disputed` on any result dispute; remove `match_status.disputed`.
+- Consequences: match hub can show completed state with a pending result dispute; ops queue uses result status.
+- Owner: Founder/technical reviewer
+
+## 2026-07-25 — Unanimous time agreement
+
+- Status: accepted
+- Context: PRD said "sufficient participant agreement" while E4/LIFECYCLE implied all required participants must approve one slot.
+- Decision: A match becomes `ready_to_book` only when all required participants vote yes on the same time option.
+- Alternatives considered: majority vote; creator-selected slot after partial votes.
+- Consequences: vote RPC and UI copy use unanimous threshold; no ambiguity in M4 implementation.
+- Owner: Founder
