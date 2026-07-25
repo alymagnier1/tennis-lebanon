@@ -557,6 +557,35 @@ export type Database = {
           },
         ];
       };
+      discovery_search_log: {
+        Row: {
+          id: number;
+          searched_at: string;
+          surface: string;
+          user_id: string;
+        };
+        Insert: {
+          id?: number;
+          searched_at?: string;
+          surface: string;
+          user_id: string;
+        };
+        Update: {
+          id?: number;
+          searched_at?: string;
+          surface?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "discovery_search_log_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       match_invitations: {
         Row: {
           accepted_at: string | null;
@@ -1398,6 +1427,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      assert_discovery_caller_eligible: { Args: never; Returns: string };
       complete_onboarding: {
         Args: {
           p_birth_year: number;
@@ -1415,7 +1445,88 @@ export type Database = {
         };
         Returns: undefined;
       };
+      completed_match_count_for_user: {
+        Args: { p_user_id: string };
+        Returns: number;
+      };
+      discover_compatible_players: {
+        Args: {
+          p_cursor_user_id?: string;
+          p_format?: Database["public"]["Enums"]["match_format"];
+          p_horizon_days?: number;
+          p_intent?: Database["public"]["Enums"]["play_intent"];
+          p_level_window?: number;
+          p_limit?: number;
+          p_require_availability_overlap?: boolean;
+          p_zone_ids?: string[];
+        };
+        Returns: Database["public"]["CompositeTypes"]["discover_compatible_player_card"][];
+        SetofOptions: {
+          from: "*";
+          to: "discover_compatible_player_card";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      discover_open_matches: {
+        Args: {
+          p_cursor_created_at?: string;
+          p_format?: Database["public"]["Enums"]["match_format"];
+          p_horizon_days?: number;
+          p_intent?: Database["public"]["Enums"]["play_intent"];
+          p_limit?: number;
+          p_zone_ids?: string[];
+        };
+        Returns: Database["public"]["CompositeTypes"]["discover_open_match_card"][];
+        SetofOptions: {
+          from: "*";
+          to: "discover_open_match_card";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      enforce_discovery_rate_limit: {
+        Args: { p_surface: string; p_user_id: string };
+        Returns: undefined;
+      };
+      expand_user_availability: {
+        Args: { p_range_end: string; p_range_start: string; p_user_id: string };
+        Returns: {
+          ends_at: string;
+          starts_at: string;
+        }[];
+      };
+      has_availability_overlap: {
+        Args: {
+          p_range_end: string;
+          p_range_start: string;
+          p_user_a: string;
+          p_user_b: string;
+        };
+        Returns: boolean;
+      };
+      is_blocked: {
+        Args: { p_user_a: string; p_user_b: string };
+        Returns: boolean;
+      };
+      match_participant_count: {
+        Args: { p_match_id: string };
+        Returns: number;
+      };
       request_account_deletion: { Args: never; Returns: undefined };
+      skill_band_rank: {
+        Args: { p_band: Database["public"]["Enums"]["skill_band"] };
+        Returns: number;
+      };
+      viewer_match_time_overlap: {
+        Args: {
+          p_match_id: string;
+          p_range_end: string;
+          p_range_start: string;
+          p_viewer_id: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       account_status: "active" | "suspended" | "deletion_requested" | "deleted";
@@ -1460,7 +1571,43 @@ export type Database = {
       vote_value: "yes" | "no";
     };
     CompositeTypes: {
-      [_ in never]: never;
+      discover_compatible_player_card: {
+        user_id: string | null;
+        display_name: string | null;
+        avatar_path: string | null;
+        skill_band: Database["public"]["Enums"]["skill_band"] | null;
+        play_intent: Database["public"]["Enums"]["play_intent"] | null;
+        prefers_singles: boolean | null;
+        prefers_doubles: boolean | null;
+        zones: Json | null;
+        provisional_rating_label: string | null;
+        completed_match_count: number | null;
+        level_fit: boolean | null;
+        zone_overlap: boolean | null;
+        availability_overlap: boolean | null;
+        intent_fit: boolean | null;
+        format_fit: boolean | null;
+      };
+      discover_open_match_card: {
+        match_id: string | null;
+        format: Database["public"]["Enums"]["match_format"] | null;
+        intent: Database["public"]["Enums"]["play_intent"] | null;
+        visibility: Database["public"]["Enums"]["match_visibility"] | null;
+        status: Database["public"]["Enums"]["match_status"] | null;
+        requires_creator_approval: boolean | null;
+        min_skill: Database["public"]["Enums"]["skill_band"] | null;
+        max_skill: Database["public"]["Enums"]["skill_band"] | null;
+        zones: Json | null;
+        proposed_times: Json | null;
+        participant_count: number | null;
+        capacity: number | null;
+        creator_display_name: string | null;
+        creator_avatar_path: string | null;
+        level_fit: boolean | null;
+        zone_overlap: boolean | null;
+        availability_overlap: boolean | null;
+        created_at: string | null;
+      };
     };
   };
 };
