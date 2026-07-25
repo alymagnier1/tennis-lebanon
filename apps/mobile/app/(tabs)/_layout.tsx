@@ -32,6 +32,10 @@ export default function TabsLayout() {
         options={{ title: t("tabs.home"), headerTitle: t("tabs.home") }}
       />
       <Tabs.Screen
+        name="discover"
+        options={{ title: t("tabs.discover"), headerTitle: t("tabs.discover") }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{ title: t("tabs.profile"), headerTitle: t("tabs.profile") }}
       />

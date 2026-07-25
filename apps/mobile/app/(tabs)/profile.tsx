@@ -26,6 +26,10 @@ export default function ProfileScreen() {
         </Text>
       </View>
       <PrimaryButton
+        label={t("profile.availability")}
+        onPress={() => router.push("/profile/availability")}
+      />
+      <PrimaryButton
         label={t("settings.title")}
         onPress={() => router.push("/(tabs)/settings")}
       />

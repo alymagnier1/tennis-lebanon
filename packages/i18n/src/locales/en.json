@@ -144,11 +144,12 @@
   },
   "tabs": {
     "home": "Home",
+    "discover": "Discover",
     "profile": "Profile"
   },
   "home": {
     "title": "Welcome, {{name}}",
-    "m1Description": "Your account and tennis profile are ready. Match discovery arrives in the next milestone."
+    "m1Description": "Your account and tennis profile are ready. Browse compatible players and open matches on Discover."
   },
   "profile": {
     "title": "Profile",
@@ -156,7 +157,57 @@
     "languages": "Languages",
     "adultStatus": "Adult status",
     "confirmed": "Confirmed",
-    "incomplete": "Incomplete"
+    "incomplete": "Incomplete",
+    "availability": "Manage availability"
+  },
+  "discover": {
+    "title": "Discover",
+    "description": "Find compatible players and open matches in your areas.",
+    "playersTab": "Players",
+    "matchesTab": "Open matches",
+    "filters": "Filters",
+    "requireOverlap": "Must overlap my availability",
+    "anyFormat": "Any format",
+    "anyIntent": "Any intent",
+    "loading": "Searching for matches and players…",
+    "error": "We could not load discovery results.",
+    "emptyPlayersTitle": "No compatible players yet",
+    "emptyPlayersBody": "Try widening your level range, turning off availability overlap, or adding more areas.",
+    "emptyMatchesTitle": "No open matches yet",
+    "emptyMatchesBody": "Try widening your filters or create a match to start liquidity.",
+    "widenLevel": "Show nearby levels",
+    "widenLevelBanner": "Showing players within two skill bands.",
+    "toggleOverlap": "Include players without overlap",
+    "createMatchSoon": "Create a match (coming in Milestone 3)",
+    "spotsRemaining": "{{count}} spots left",
+    "overlapHint": "Times overlap this week",
+    "zoneHint": "Plays in your areas",
+    "levelHint": "Similar level",
+    "blockPlayer": "Block player",
+    "blockConfirmTitle": "Block this player?",
+    "blockConfirmBody": "They will no longer appear in your discovery results.",
+    "blockSuccess": "Player blocked.",
+    "blockError": "We could not block this player."
+  },
+  "availability": {
+    "title": "Availability",
+    "description": "Set when you are generally free to play. Other players only see overlap hints, never your full calendar.",
+    "loadError": "We could not load your availability.",
+    "empty": "Add a weekly window so compatible players can find you.",
+    "addFriday": "Add Friday evenings",
+    "addSaturday": "Add Saturday mornings",
+    "remove": "Remove",
+    "saveError": "We could not save this availability window.",
+    "recurringLabel": "Every {{weekday}} {{start}}–{{end}}",
+    "weekdays": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    }
   },
   "settings": {
     "title": "Settings",

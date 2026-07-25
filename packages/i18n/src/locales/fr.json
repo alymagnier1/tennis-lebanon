@@ -144,11 +144,12 @@
   },
   "tabs": {
     "home": "Accueil",
+    "discover": "Découvrir",
     "profile": "Profil"
   },
   "home": {
     "title": "Bienvenue, {{name}}",
-    "m1Description": "Votre compte et votre profil de tennis sont prêts. La recherche de matchs arrivera lors de la prochaine étape."
+    "m1Description": "Votre compte et votre profil de tennis sont prêts. Parcourez les joueurs compatibles et les matchs ouverts dans Découvrir."
   },
   "profile": {
     "title": "Profil",
@@ -156,7 +157,57 @@
     "languages": "Langues",
     "adultStatus": "Statut de majorité",
     "confirmed": "Confirmé",
-    "incomplete": "Incomplet"
+    "incomplete": "Incomplet",
+    "availability": "Gérer la disponibilité"
+  },
+  "discover": {
+    "title": "Découvrir",
+    "description": "Trouvez des joueurs compatibles et des matchs ouverts dans vos zones.",
+    "playersTab": "Joueurs",
+    "matchesTab": "Matchs ouverts",
+    "filters": "Filtres",
+    "requireOverlap": "Doit chevaucher ma disponibilité",
+    "anyFormat": "Tout format",
+    "anyIntent": "Toute intention",
+    "loading": "Recherche de joueurs et de matchs…",
+    "error": "Impossible de charger les résultats.",
+    "emptyPlayersTitle": "Aucun joueur compatible pour le moment",
+    "emptyPlayersBody": "Élargissez le niveau, désactivez le chevauchement ou ajoutez plus de zones.",
+    "emptyMatchesTitle": "Aucun match ouvert pour le moment",
+    "emptyMatchesBody": "Élargissez les filtres ou créez un match pour lancer la liquidité.",
+    "widenLevel": "Afficher les niveaux proches",
+    "widenLevelBanner": "Affichage des joueurs sur deux bandes de niveau.",
+    "toggleOverlap": "Inclure sans chevauchement",
+    "createMatchSoon": "Créer un match (bientôt à l'étape 3)",
+    "spotsRemaining": "{{count}} places restantes",
+    "overlapHint": "Créneaux qui se chevauchent cette semaine",
+    "zoneHint": "Joue dans vos zones",
+    "levelHint": "Niveau similaire",
+    "blockPlayer": "Bloquer le joueur",
+    "blockConfirmTitle": "Bloquer ce joueur ?",
+    "blockConfirmBody": "Il n'apparaîtra plus dans vos résultats de découverte.",
+    "blockSuccess": "Joueur bloqué.",
+    "blockError": "Impossible de bloquer ce joueur."
+  },
+  "availability": {
+    "title": "Disponibilité",
+    "description": "Indiquez quand vous êtes généralement libre. Les autres joueurs ne voient que des indices de chevauchement, jamais votre calendrier complet.",
+    "loadError": "Impossible de charger votre disponibilité.",
+    "empty": "Ajoutez une plage hebdomadaire pour être trouvé par des joueurs compatibles.",
+    "addFriday": "Ajouter les vendredis soir",
+    "addSaturday": "Ajouter les samedis matin",
+    "remove": "Supprimer",
+    "saveError": "Impossible d'enregistrer cette plage.",
+    "recurringLabel": "Chaque {{weekday}} {{start}}–{{end}}",
+    "weekdays": {
+      "0": "dimanche",
+      "1": "lundi",
+      "2": "mardi",
+      "3": "mercredi",
+      "4": "jeudi",
+      "5": "vendredi",
+      "6": "samedi"
+    }
   },
   "settings": {
     "title": "Paramètres",

@@ -30,6 +30,8 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(onboarding)" />
             <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="player/[id]" />
+            <Stack.Screen name="profile/availability" />
             <Stack.Screen name="policies" />
           </Stack>
         </OnboardingProvider>

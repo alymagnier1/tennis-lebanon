@@ -2,6 +2,7 @@ import type { PropsWithChildren, ReactNode } from "react";
 import {
   ActivityIndicator,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -21,11 +22,23 @@ export function Screen({
   title,
   description,
   children,
-}: PropsWithChildren<{ title: string; description?: string }>) {
+  refreshing = false,
+  onRefresh,
+}: PropsWithChildren<{
+  title: string;
+  description?: string;
+  refreshing?: boolean;
+  onRefresh?: () => void;
+}>) {
   return (
     <ScrollView
       contentContainerStyle={styles.screen}
       keyboardShouldPersistTaps="handled"
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        ) : undefined
+      }
     >
       <Text accessibilityRole="header" style={styles.title}>
         {title}
@@ -176,6 +189,54 @@ export const formStyles = StyleSheet.create({
   summaryValue: {
     color: colors.neutral[900],
     fontSize: typography.size.md,
+  },
+  description: {
+    color: colors.neutral[700],
+    fontSize: typography.size.md,
+    lineHeight: 24,
+  },
+  title: {
+    color: colors.neutral[900],
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
+  },
+  hintText: {
+    color: colors.neutral[700],
+    fontSize: typography.size.sm,
+  },
+  errorText: {
+    color: colors.danger[700],
+    fontSize: typography.size.sm,
+  },
+  card: {
+    borderWidth: 1,
+    borderColor: colors.neutral[300],
+    borderRadius: radii.md,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  segmentRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  segmentButton: {
+    flex: 1,
+    minHeight: minTouchTargetPx,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.neutral[300],
+    borderRadius: radii.md,
+    paddingHorizontal: spacing.md,
+  },
+  segmentButtonActive: {
+    borderColor: colors.brand[600],
+    backgroundColor: colors.brand[50],
+  },
+  segmentButtonText: {
+    color: colors.neutral[900],
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
   },
 });
 
