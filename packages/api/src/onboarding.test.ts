@@ -1,18 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { POLICY_VERSIONS } from "@tennis-lebanon/domain";
-import {
-  completeOnboarding,
-  requestAccountDeletion,
-} from "./onboarding";
+import { POLICY_VERSIONS, type OnboardingInput } from "@tennis-lebanon/domain";
+import { completeOnboarding, requestAccountDeletion } from "./onboarding";
 import type { TennisSupabaseClient } from "./client";
 
-const validInput = {
+const validInput: OnboardingInput = {
   displayName: "Player One",
   birthYear: 1990,
-  isAdultConfirmed: true as const,
-  languages: ["en"] as const,
-  skillBand: "intermediate" as const,
-  playIntent: "either" as const,
+  isAdultConfirmed: true,
+  languages: ["en"],
+  skillBand: "intermediate",
+  playIntent: "either",
   prefersSingles: true,
   prefersDoubles: false,
   zoneIds: ["aaaaaaaa-0001-0001-0001-000000000001"],
