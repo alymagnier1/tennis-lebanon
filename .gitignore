@@ -1,0 +1,33 @@
+node_modules/
+.pnpm-store/
+dist/
+build/
+.next/
+.expo/
+.expo-shared/
+.expo-smoke/
+.turbo/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+
+.env
+.env.local
+.env.*.local
+
+# Supabase local runtime state (not the committed config/migrations)
+supabase/.branches/
+supabase/.temp/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Expo / EAS
+*.orig.*
+web-build/
+
+# Sentry
+.sentryclirc

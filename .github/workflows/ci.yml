@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Client-safe placeholders only. Never put real secrets here.
+  EXPO_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+  EXPO_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+  NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+  EXPO_PUBLIC_APP_ENV: local
+  NEXT_PUBLIC_APP_ENV: local
+
+jobs:
+  lint-typecheck-test:
+    name: Lint, typecheck, unit test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pnpm
+        run: npm install -g pnpm@10.34.5
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Migration file checks
+        run: pnpm db:validate
+
+  db-migration-smoke:
+    name: Supabase local migration smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.109.1
+
+      - name: Start local Supabase and apply migrations
+        run: supabase start
+
+      - name: Reset database (re-applies migrations + seed)
+        run: supabase db reset
+
+      - name: Run database authorization tests
+        run: supabase test db supabase/tests/database --local
+
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "globalEnv": [
+    "EXPO_PUBLIC_SUPABASE_URL",
+    "EXPO_PUBLIC_SUPABASE_ANON_KEY",
+    "EXPO_PUBLIC_SENTRY_DSN",
+    "EXPO_PUBLIC_APP_ENV",
+    "EXPO_PUBLIC_SUPPORT_EMAIL",
+    "EXPO_PUBLIC_AUTH_REDIRECT_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_SENTRY_DSN",
+    "NEXT_PUBLIC_APP_ENV",
+    "NEXT_PUBLIC_SUPPORT_EMAIL",
+    "NEXT_PUBLIC_AUTH_REDIRECT_URL",
+    "SUPABASE_SERVICE_ROLE_KEY"
+  ],
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

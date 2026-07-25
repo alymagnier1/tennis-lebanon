@@ -1,0 +1,176 @@
+{
+  "common": {
+    "appName": "Tennis Lebanon",
+    "continue": "Continue",
+    "back": "Back",
+    "cancel": "Cancel",
+    "retry": "Try again"
+  },
+  "health": {
+    "title": "System health",
+    "ok": "All systems operational",
+    "checking": "Checking status\u2026",
+    "error": "Could not reach backend services"
+  },
+  "rtlCheck": {
+    "title": "RTL layout check",
+    "description": "This screen verifies that Arabic right-to-left layout renders correctly, including mirrored navigation and aligned text.",
+    "directionLabel": "Text direction",
+    "sampleSentence": "A player near you is available to play tomorrow evening.",
+    "switchLanguage": "Switch language"
+  },
+  "welcome": {
+    "title": "Find your next tennis match",
+    "description": "Meet compatible players, agree on a time, and arrange a court in Lebanon.",
+    "continue": "Get started"
+  },
+  "auth": {
+    "signInTitle": "Sign in or create an account",
+    "signInBody": "Enter your email to receive a secure sign-in link.",
+    "emailLabel": "Email",
+    "emailInvalid": "Enter a valid email address.",
+    "sendLink": "Send sign-in link",
+    "sendError": "We could not send the link. Please try again.",
+    "cooldownError": "Please wait one minute before requesting another link.",
+    "rateLimitNotice": "For your security, repeated requests may be temporarily limited.",
+    "checkEmailTitle": "Check your email",
+    "checkEmailBody": "Open the sign-in link on this device to continue.",
+    "openedLink": "I opened the link",
+    "useAnotherEmail": "Use another email",
+    "callbackTitle": "Signing you in",
+    "callbackWorking": "We are securely completing your sign-in.",
+    "callbackError": "This sign-in link is invalid or expired.",
+    "tryAgain": "Try signing in again",
+    "restoring": "Restoring your session\u2026",
+    "sessionError": "We could not restore your session.",
+    "signOut": "Sign out",
+    "signOutError": "We could not sign you out. Please try again."
+  },
+  "onboarding": {
+    "consent": {
+      "title": "Before you continue",
+      "description": "Review and accept each development policy draft.",
+      "terms": "I accept the Terms of Use draft",
+      "readTerms": "Read Terms of Use",
+      "privacy": "I accept the Privacy Notice draft",
+      "readPrivacy": "Read Privacy Notice",
+      "community": "I accept the Community Rules draft",
+      "readCommunity": "Read Community Rules"
+    },
+    "identity": {
+      "title": "Tell us about yourself",
+      "description": "Use a public display name and confirm that you are an adult.",
+      "name": "Display name",
+      "birthYear": "Birth year",
+      "adultConfirm": "I confirm that I am 18 or older",
+      "nameError": "Enter a display name between 2 and 50 characters.",
+      "adultError": "You must be 18 or older to join this pilot.",
+      "languageError": "Choose at least one language."
+    },
+    "tennis": {
+      "title": "Your tennis profile",
+      "description": "Answer a few questions for a provisional skill band.",
+      "questions": {
+        "experience": "How much tennis experience do you have?",
+        "frequency": "How often do you currently play?",
+        "rally": "How comfortably can you sustain a rally?",
+        "matchExperience": "How much match experience do you have?"
+      },
+      "answerLevels": {
+        "0": "New or limited",
+        "1": "Some experience",
+        "2": "Confident and regular"
+      },
+      "provisional": "Choose your play style and preferred formats.",
+      "formatError": "Choose singles, doubles, or both."
+    },
+    "zones": {
+      "title": "Where do you want to play?",
+      "description": "Choose one or more broad areas. We never ask for your home address.",
+      "loadError": "We could not load the available areas.",
+      "empty": "No pilot areas are available yet."
+    },
+    "notifications": {
+      "title": "Stay up to date",
+      "description": "Notifications can help with invitations, match updates, and safety notices.",
+      "continue": "Enable notifications",
+      "notNow": "Not now"
+    },
+    "review": {
+      "title": "Review your profile",
+      "description": "Check your details before completing setup.",
+      "skill": "Provisional skill",
+      "zones": "Preferred areas",
+      "error": "We could not save your profile. Please try again.",
+      "finish": "Finish setup"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "ar": "Arabic",
+    "fr": "French"
+  },
+  "playIntent": {
+    "social": "Social",
+    "competitive": "Competitive",
+    "either": "Either"
+  },
+  "formats": {
+    "singles": "Singles",
+    "doubles": "Doubles"
+  },
+  "skillBands": {
+    "beginner": "Beginner",
+    "improving": "Improving",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "competitive": "Competitive"
+  },
+  "policies": {
+    "developmentWarning": "DEVELOPMENT DRAFT — not legally approved and not for public release.",
+    "version": "Version: {{version}}",
+    "terms": {
+      "title": "Terms of Use",
+      "body": "Adult-only pilot. Use the service lawfully and respectfully. Match and court arrangements are not guaranteed."
+    },
+    "privacy": {
+      "title": "Privacy Notice",
+      "body": "We collect minimal account, profile, coarse-area, and match data to operate the pilot. Contact details are not shown to other players."
+    },
+    "community": {
+      "title": "Community Rules",
+      "body": "Be respectful, communicate honestly, protect privacy, and report unsafe or abusive behavior."
+    }
+  },
+  "tabs": {
+    "home": "Home",
+    "profile": "Profile"
+  },
+  "home": {
+    "title": "Welcome, {{name}}",
+    "m1Description": "Your account and tennis profile are ready. Match discovery arrives in the next milestone."
+  },
+  "profile": {
+    "title": "Profile",
+    "provisional": "Your skill band is provisional while you build match history.",
+    "languages": "Languages",
+    "adultStatus": "Adult status",
+    "confirmed": "Confirmed",
+    "incomplete": "Incomplete"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage policies, account access, and deletion requests.",
+    "policies": "View policies",
+    "requestDeletion": "Request account deletion",
+    "deleteTitle": "Request account deletion?",
+    "deleteDescription": "This submits a deletion request and may restrict account access while it is reviewed.",
+    "deleteError": "We could not submit your deletion request. Please try again."
+  },
+  "account": {
+    "unavailableTitle": "Account unavailable",
+    "suspendedBody": "This account is suspended. Contact support from the official support channel for a review.",
+    "deletionPendingBody": "Your deletion request is pending and account access is restricted.",
+    "contactSupport": "Contact support"
+  }
+}

@@ -1,0 +1,43 @@
+appId: com.tennislebanon.dev
+name: M1 email authentication and onboarding
+---
+- launchApp:
+    clearState: true
+- tapOn: "Get started"
+- tapOn: "Email"
+- inputText: ${TEST_EMAIL}
+- tapOn: "Send magic link"
+- assertVisible: "Check your email"
+# Set MAGIC_LINK from the local Supabase inbox before running this step.
+- openLink: ${MAGIC_LINK}
+- assertVisible: "Before you continue"
+- tapOn: "I accept the Terms of Use draft"
+- tapOn: "I accept the Privacy Notice draft"
+- tapOn: "I accept the Community Rules draft"
+- tapOn: "Continue"
+- tapOn: "Display name"
+- inputText: "Maestro Player"
+- tapOn: "Birth year"
+- inputText: "1990"
+- tapOn: "I confirm that I am 18 or older"
+- tapOn: "Continue"
+- tapOn:
+    text: "Some experience"
+    index: 0
+- tapOn:
+    text: "Some experience"
+    index: 1
+- tapOn:
+    text: "Some experience"
+    index: 2
+- tapOn:
+    text: "Some experience"
+    index: 3
+- tapOn: "Continue"
+- tapOn:
+    text: "Pilot Central"
+- tapOn: "Continue"
+- tapOn: "Not now"
+- tapOn: "Finish setup"
+- assertVisible:
+    text: "Welcome, Maestro Player"

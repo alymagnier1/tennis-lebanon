@@ -1,0 +1,36 @@
+{
+  "name": "@tennis-lebanon/config",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Shared lint, TypeScript, and environment validation configuration.",
+  "type": "module",
+  "exports": {
+    "./eslint": "./eslint/index.mjs",
+    "./env": "./src/env.ts"
+  },
+  "files": [
+    "eslint",
+    "tsconfig",
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^20",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "^8.63.0",
+    "vitest": "^4.1.10"
+  }
+}

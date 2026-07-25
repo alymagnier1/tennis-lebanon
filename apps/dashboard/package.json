@@ -1,0 +1,34 @@
+{
+  "name": "dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"no unit tests yet\" && exit 0",
+    "clean": "rimraf .next"
+  },
+  "dependencies": {
+    "@sentry/nextjs": "^10.68.0",
+    "@tennis-lebanon/config": "workspace:*",
+    "@tennis-lebanon/i18n": "workspace:*",
+    "@tennis-lebanon/ui": "workspace:*",
+    "i18next": "^25.6.1",
+    "next": "16.2.11",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-i18next": "^16.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.11",
+    "typescript": "6.0.3"
+  }
+}

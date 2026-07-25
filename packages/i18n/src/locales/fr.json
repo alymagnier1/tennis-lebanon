@@ -1,0 +1,176 @@
+{
+  "common": {
+    "appName": "Tennis Liban",
+    "continue": "Continuer",
+    "back": "Retour",
+    "cancel": "Annuler",
+    "retry": "Réessayer"
+  },
+  "health": {
+    "title": "État du système",
+    "ok": "Tous les systèmes fonctionnent normalement",
+    "checking": "Vérification du statut…",
+    "error": "Impossible de contacter les services"
+  },
+  "rtlCheck": {
+    "title": "Vérification de la mise en page RTL",
+    "description": "Cet écran vérifie que la mise en page arabe de droite à gauche s’affiche correctement, y compris la navigation inversée et l’alignement du texte.",
+    "directionLabel": "Sens du texte",
+    "sampleSentence": "Un joueur près de vous est disponible pour jouer demain soir.",
+    "switchLanguage": "Changer de langue"
+  },
+  "welcome": {
+    "title": "Trouvez votre prochain match",
+    "description": "Rencontrez des joueurs compatibles, convenez d’un horaire et organisez un terrain au Liban.",
+    "continue": "Commencer"
+  },
+  "auth": {
+    "signInTitle": "Se connecter ou créer un compte",
+    "signInBody": "Saisissez votre adresse e-mail pour recevoir un lien de connexion sécurisé.",
+    "emailLabel": "Adresse e-mail",
+    "emailInvalid": "Saisissez une adresse e-mail valide.",
+    "sendLink": "Envoyer le lien de connexion",
+    "sendError": "Impossible d’envoyer le lien. Veuillez réessayer.",
+    "cooldownError": "Attendez une minute avant de demander un autre lien.",
+    "rateLimitNotice": "Pour votre sécurité, les demandes répétées peuvent être temporairement limitées.",
+    "checkEmailTitle": "Consultez vos e-mails",
+    "checkEmailBody": "Ouvrez le lien de connexion sur cet appareil pour continuer.",
+    "openedLink": "J’ai ouvert le lien",
+    "useAnotherEmail": "Utiliser une autre adresse",
+    "callbackTitle": "Connexion en cours",
+    "callbackWorking": "Nous finalisons votre connexion de manière sécurisée.",
+    "callbackError": "Ce lien de connexion est invalide ou expiré.",
+    "tryAgain": "Réessayer de se connecter",
+    "restoring": "Restauration de votre session…",
+    "sessionError": "Impossible de restaurer votre session.",
+    "signOut": "Se déconnecter",
+    "signOutError": "Impossible de vous déconnecter. Veuillez réessayer."
+  },
+  "onboarding": {
+    "consent": {
+      "title": "Avant de continuer",
+      "description": "Consultez et acceptez chaque projet de politique de développement.",
+      "terms": "J’accepte le projet de conditions d’utilisation",
+      "readTerms": "Lire les conditions d’utilisation",
+      "privacy": "J’accepte le projet d’avis de confidentialité",
+      "readPrivacy": "Lire l’avis de confidentialité",
+      "community": "J’accepte le projet de règles de la communauté",
+      "readCommunity": "Lire les règles de la communauté"
+    },
+    "identity": {
+      "title": "Parlez-nous de vous",
+      "description": "Utilisez un nom d’affichage public et confirmez que vous êtes majeur.",
+      "name": "Nom d’affichage",
+      "birthYear": "Année de naissance",
+      "adultConfirm": "Je confirme avoir au moins 18 ans",
+      "nameError": "Saisissez un nom d’affichage de 2 à 50 caractères.",
+      "adultError": "Vous devez avoir au moins 18 ans pour participer à ce pilote.",
+      "languageError": "Choisissez au moins une langue."
+    },
+    "tennis": {
+      "title": "Votre profil de tennis",
+      "description": "Répondez à quelques questions pour obtenir un niveau provisoire.",
+      "questions": {
+        "experience": "Quelle est votre expérience du tennis ?",
+        "frequency": "À quelle fréquence jouez-vous actuellement ?",
+        "rally": "Avec quelle aisance tenez-vous un échange ?",
+        "matchExperience": "Quelle est votre expérience des matchs ?"
+      },
+      "answerLevels": {
+        "0": "Débutant ou peu expérimenté",
+        "1": "Une certaine expérience",
+        "2": "À l’aise et régulier"
+      },
+      "provisional": "Choisissez votre style de jeu et vos formats préférés.",
+      "formatError": "Choisissez le simple, le double ou les deux."
+    },
+    "zones": {
+      "title": "Où souhaitez-vous jouer ?",
+      "description": "Choisissez une ou plusieurs zones générales. Nous ne demandons jamais votre adresse personnelle.",
+      "loadError": "Impossible de charger les zones disponibles.",
+      "empty": "Aucune zone pilote n’est disponible pour le moment."
+    },
+    "notifications": {
+      "title": "Restez informé",
+      "description": "Les notifications vous informent des invitations, des matchs et des avis de sécurité.",
+      "continue": "Activer les notifications",
+      "notNow": "Pas maintenant"
+    },
+    "review": {
+      "title": "Vérifiez votre profil",
+      "description": "Vérifiez vos informations avant de terminer la configuration.",
+      "skill": "Niveau provisoire",
+      "zones": "Zones préférées",
+      "error": "Impossible d’enregistrer votre profil. Veuillez réessayer.",
+      "finish": "Terminer la configuration"
+    }
+  },
+  "languages": {
+    "en": "Anglais",
+    "ar": "Arabe",
+    "fr": "Français"
+  },
+  "playIntent": {
+    "social": "Loisir",
+    "competitive": "Compétition",
+    "either": "Les deux"
+  },
+  "formats": {
+    "singles": "Simple",
+    "doubles": "Double"
+  },
+  "skillBands": {
+    "beginner": "Débutant",
+    "improving": "En progression",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé",
+    "competitive": "Compétition"
+  },
+  "policies": {
+    "developmentWarning": "PROJET DE DÉVELOPPEMENT — non approuvé juridiquement et non destiné à une diffusion publique.",
+    "version": "Version : {{version}}",
+    "terms": {
+      "title": "Conditions d’utilisation",
+      "body": "Pilote réservé aux adultes. Utilisez le service légalement et respectueusement. Les matchs et les réservations de terrains ne sont pas garantis."
+    },
+    "privacy": {
+      "title": "Avis de confidentialité",
+      "body": "Nous recueillons le minimum de données de compte, de profil, de zone générale et de match pour exploiter le pilote. Vos coordonnées ne sont pas affichées aux autres joueurs."
+    },
+    "community": {
+      "title": "Règles de la communauté",
+      "body": "Soyez respectueux, communiquez honnêtement, protégez la vie privée et signalez tout comportement dangereux ou abusif."
+    }
+  },
+  "tabs": {
+    "home": "Accueil",
+    "profile": "Profil"
+  },
+  "home": {
+    "title": "Bienvenue, {{name}}",
+    "m1Description": "Votre compte et votre profil de tennis sont prêts. La recherche de matchs arrivera lors de la prochaine étape."
+  },
+  "profile": {
+    "title": "Profil",
+    "provisional": "Votre niveau reste provisoire pendant que vous construisez votre historique de matchs.",
+    "languages": "Langues",
+    "adultStatus": "Statut de majorité",
+    "confirmed": "Confirmé",
+    "incomplete": "Incomplet"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "description": "Gérez les politiques, l’accès au compte et les demandes de suppression.",
+    "policies": "Consulter les politiques",
+    "requestDeletion": "Demander la suppression du compte",
+    "deleteTitle": "Demander la suppression du compte ?",
+    "deleteDescription": "Cette action envoie une demande de suppression et peut limiter l’accès au compte pendant son examen.",
+    "deleteError": "Impossible d’envoyer votre demande de suppression. Veuillez réessayer."
+  },
+  "account": {
+    "unavailableTitle": "Compte indisponible",
+    "suspendedBody": "Ce compte est suspendu. Contactez l’assistance via le canal officiel pour demander un examen.",
+    "deletionPendingBody": "Votre demande de suppression est en attente et l’accès au compte est limité.",
+    "contactSupport": "Contacter l’assistance"
+  }
+}

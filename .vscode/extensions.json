@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-azuretools.vscode-docker",
+    "expo.vscode-expo-tools",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg",
+    "lokalise.i18n-ally",
+    "eamodio.gitlens",
+    "usernamehw.errorlens"
+  ],
+  "unwantedRecommendations": []
+}
