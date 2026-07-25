@@ -5,10 +5,7 @@ import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { requestAccountDeletion } from "@tennis-lebanon/api";
-import {
-  SUPPORTED_LOCALES,
-  type SupportedLocale,
-} from "@tennis-lebanon/i18n";
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@tennis-lebanon/i18n";
 import {
   Choice,
   ErrorNotice,

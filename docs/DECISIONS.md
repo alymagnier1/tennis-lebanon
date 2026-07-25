@@ -31,7 +31,7 @@ Record decisions using this template:
 
 ## 2026-07-25 — Discovery via Postgres RPCs
 
-- Status: proposed
+- Status: accepted
 - Context: Player and open-match discovery requires availability overlap, block exclusion, and privacy-safe projections; client-side filtering would leak calendar data and bypass authorization.
 - Decision: Implement `discover_open_matches` and `discover_compatible_players` as validated `security definer` RPCs; list views return coarse compatibility hints only.
 - Alternatives considered: PostgREST views with broad RLS; client-side filter after fetching profiles; materialized discovery index refreshed nightly.
