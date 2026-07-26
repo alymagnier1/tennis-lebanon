@@ -34,6 +34,7 @@ export type OpenMatchCard = {
   capacity: number;
   creator_display_name: string;
   creator_avatar_path: string | null;
+  notes: string | null;
   level_fit: boolean;
   zone_overlap: boolean;
   availability_overlap: boolean;
@@ -82,4 +83,16 @@ export async function discoverOpenMatches(
 
   if (error) throw error;
   return (data ?? []) as OpenMatchCard[];
+}
+
+export async function getPublicPlayerCard(
+  client: TennisSupabaseClient,
+  userId: string,
+): Promise<CompatiblePlayerCard> {
+  const { data, error } = await client.rpc("get_public_player_card", {
+    p_user_id: userId,
+  });
+
+  if (error) throw error;
+  return data as CompatiblePlayerCard;
 }

@@ -1,10 +1,23 @@
-import { config } from "dotenv";
+import { config as loadEnv } from "dotenv";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import type { NextConfig } from "next";
 
-// Load shared env from the monorepo root (.env), not only apps/dashboard/.env.
-config({ path: path.resolve(__dirname, "../../.env") });
+const dashboardDir = __dirname;
+const rootEnvPath = path.resolve(dashboardDir, "../../.env");
+const localEnvPath = path.resolve(dashboardDir, ".env.local");
 
-const nextConfig: NextConfig = {/* config options here */};
+// Prefer app-local .env.local (what Next.js loads natively); also load root .env.
+if (existsSync(rootEnvPath)) {
+  loadEnv({ path: rootEnvPath });
+}
+if (existsSync(localEnvPath)) {
+  loadEnv({ path: localEnvPath, override: true });
+}
+
+const nextConfig: NextConfig = {
+  // Required when opening the dev server via 127.0.0.1.
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
+};
 
 export default nextConfig;

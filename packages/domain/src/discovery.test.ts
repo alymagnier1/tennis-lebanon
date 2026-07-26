@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_LEVEL_WINDOW,
+  discoveryFiltersForMatchInvite,
   expandRecurringAvailability,
   hasMinimumOverlap,
   isWithinLevelWindow,
   recurringWindowFromTimes,
   skillBandRank,
   widenLevelWindow,
+  widenDiscoveryZoneIds,
 } from "./discovery";
 
 describe("discovery domain rules", () => {
@@ -24,6 +26,14 @@ describe("discovery domain rules", () => {
   it("widens the level window once", () => {
     expect(widenLevelWindow(DEFAULT_LEVEL_WINDOW)).toBe(2);
     expect(widenLevelWindow(2)).toBe(2);
+  });
+
+  it("widens discovery zones to all active zones", () => {
+    const zones = [
+      "aaaaaaaa-0001-0001-0001-000000000001",
+      "aaaaaaaa-0001-0001-0001-000000000002",
+    ];
+    expect(widenDiscoveryZoneIds(zones)).toEqual(zones);
   });
 
   it("requires at least 60 minutes of overlap", () => {
@@ -57,5 +67,28 @@ describe("discovery domain rules", () => {
     const rangeEnd = new Date("2026-08-07T00:00:00.000Z");
     const expanded = expandRecurringAvailability(windows, rangeStart, rangeEnd);
     expect(expanded.length).toBeGreaterThan(0);
+  });
+
+  it("maps match invite filters without over-tightening intent", () => {
+    expect(
+      discoveryFiltersForMatchInvite({
+        format: "singles",
+        intent: "either",
+      }),
+    ).toEqual({
+      format: "singles",
+      intent: undefined,
+      requireAvailabilityOverlap: true,
+      levelWindow: DEFAULT_LEVEL_WINDOW,
+      horizonDays: 14,
+      limit: 20,
+    });
+
+    expect(
+      discoveryFiltersForMatchInvite({
+        format: "doubles",
+        intent: "social",
+      }).intent,
+    ).toBe("social");
   });
 });

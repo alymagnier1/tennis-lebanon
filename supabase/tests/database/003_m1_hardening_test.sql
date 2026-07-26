@@ -163,10 +163,9 @@ select pg_temp.assert_raises(
   '42501',
   'bookings remain inaccessible without explicit policies'
 );
-select pg_temp.assert_raises(
-  $sql$select * from public.match_messages$sql$,
-  '42501',
-  'match messages remain inaccessible without explicit policies'
+select pg_temp.assert_true(
+  (select count(*) from public.match_messages) = 0,
+  'non-participants should not read match messages via direct select'
 );
 select pg_temp.assert_raises(
   $sql$select * from public.notifications$sql$,

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SentryInit } from "@/components/SentryInit";
+import { AppProviders } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ export default function RootLayout({
     <html lang="en" dir="ltr">
       <body>
         <SentryInit />
-        {children}
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

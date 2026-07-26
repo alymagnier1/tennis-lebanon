@@ -145,3 +145,147 @@ Record decisions using this template:
 - Alternatives considered: majority vote; creator-selected slot after partial votes.
 - Consequences: vote RPC and UI copy use unanimous threshold; no ambiguity in M4 implementation.
 - Owner: Founder
+
+## 2026-07-25 — Milestone 3 match RPCs and Matches tab
+
+- Status: accepted
+- Context: Match creation, joins, invites, and hub reads must enforce capacity, blocks, and visibility without exposing privileged table writes to clients.
+- Decision: Add `007_matches.sql` security-definer RPCs (`create_and_publish_match`, `join_match`, `respond_to_join_request`, `leave_match`, `cancel_match`, `create_match_invite`, `accept_match_invite`, `get_match_hub`, `list_my_matches`); hash invite tokens with `extensions.digest(..., 'sha256')` hex; add a fourth mobile tab **Matches**; all write RPCs are `VOLATILE`.
+- Alternatives considered: direct client inserts on `matches` / `match_participants`; storing raw invite tokens in the database; keeping match management on Home only.
+- Consequences: mobile uses API wrappers only; share-sheet deep links use `tennislebanon://invite/{token}`; leave/cancel copy uses placeholder policy keys until M8 numeric windows.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — Leave match reopens discovery and rejoin
+
+- Status: accepted
+- Context: On web, `Alert.alert` with cancel/confirm buttons does not invoke destructive callbacks, so leave never ran. Even when leave succeeded, `discover_open_matches` excluded any prior participant row (including `left`), and `join_match` could not reinsert because of the `(match_id, user_id)` primary key.
+- Decision: Use `window.confirm` on web for destructive confirmations; treat only active participant statuses (`accepted`, `requested`, `invited`) as discovery exclusions; reactivate `left`/`declined`/`removed` rows on rejoin instead of inserting duplicates.
+- Alternatives considered: delete participant rows on leave; show full matches in discover.
+- Consequences: departed players can find and rejoin open matches; `009_leave_and_rejoin.sql` updates RPCs accordingly.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — Milestone 3.5 invites inbox and borrowed player UX
+
+- Status: accepted
+- Context: Pilot testing showed that creating a match from a player card does not notify the target player; share-link invites work but are easy to miss. Competitor apps (e.g. RacketPal) emphasize player outreach and in-app invite surfaces. Full chat, feed, leagues, multi-sport, and coach marketplace remain out of MVP scope per PRD.
+- Decision: Add **Milestone 3.5** before M4: in-app **Invites** inbox (`list_my_match_invites`, accept/decline), **multi-invite** from player cards with singles first-accept-wins, and clearer **player card CTAs** (create match / invite to open match). Optional **last active** on discover cards. Defer push notifications to M6; defer favorite clubs and read-only coach lists to M5; defer Google/phone auth to M8 unless onboarding metrics require earlier; defer padel to post-pilot.
+- Alternatives considered: chat-first coordination like RacketPal; notifications-only without inbox; blocking M4 until invites ship inside M3.
+- Consequences: `docs/ROADMAP.md` includes M3.5 and a borrowed-UX table; M3 backend (`match_invitations`, `accept_match_invite`) is extended rather than replaced; match lifecycle (vote → book → play) unchanged.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — Milestone 4 unanimous time voting
+
+- Status: accepted
+- Context: After a match is full, participants must agree on one proposed slot before court booking (M5). Majority vote is insufficient when any player cannot make a time.
+- Decision: Add `cast_match_time_vote`, `withdraw_match_time_option`, `add_match_time_option`, and `refresh_match_time_agreement`; transition `full` → `ready_to_book` only when at capacity and every accepted participant has voted `yes` on the same active option; revert to `full` when agreement is lost; extend `get_match_hub` with vote counts and `time_agreed` next action.
+- Alternatives considered: first-yes-wins; creator picks time unilaterally; majority vote.
+- Consequences: `011_time_voting.sql`; hub shows yes/no per slot; creator can add (max 3 active) or withdraw options before booking; `refresh_match_open_state` clears `selected_time_option_id` when capacity drops.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — Match-first invite UX (M3.5 refinement)
+
+- Status: accepted
+- Context: Pilot flow tied “invite player” to “create new match”, forcing duplicate matches per invite and a four-step create wizard.
+- Decision: Single-page create → publish → **Invite players** screen with compatible player cards; player profiles use **Invite to match** when the viewer has an open match, otherwise **Create match**; hub exposes **Invite players** for creators with spare capacity.
+- Alternatives considered: keep create-and-invite from player card; chat-first outreach; defer UX until post-pilot polish only.
+- Consequences: removes `invitePlayerIds` draft auto-send; old create sub-routes redirect to `/match/create`; acceptance test #1 starts at create → invite screen.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — One active hosted match per format (P0)
+
+- Status: accepted
+- Context: Acceptance testing produced many forgotten `open` 1/2 singles matches; invite and create flows became confusing.
+- Decision: Enforce at most one creator-hosted match per `match_format` while `status in ('open', 'full', 'ready_to_book')`; block `create_and_publish_match` with `active_hosted_match_exists`; create UI shows continue-inviting redirect; creator may `cancel_match` through `ready_to_book`.
+- Alternatives considered: unlimited matches with UI-only grouping; hard delete of stale rows; global cap across formats.
+- Consequences: `012_active_hosted_match_limit.sql`; P1 stale badges + expiry job and P2 reminder notifications tracked in `docs/ROADMAP.md`.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — M4.5 design foundation (sky blue, reference flow)
+
+- Status: accepted
+- Context: M4 acceptance passed; founder provided RacketPal-style references (pill tabs, bottom sheets, chip pickers, organise-game CTA, player cards with avatar/level/location).
+- Decision: Add **Milestone 4.5** before M5: switch primary brand to sky blue (`#2ab1f5`), introduce shared mobile UI primitives, restore a **3-step create wizard**, and restyle Discover/Matches/hub/invite anchor screens. Full RTL/animation polish remains post-M5/M6.
+- Alternatives considered: full polish only after M6; keep green brand; single-page create with styling only.
+- Consequences: `packages/ui` tokens; `apps/mobile/src/components/AppUi.tsx`; create flow routes `details` → `schedule` → `review`; player cards show `avatar_path`, skill band, and zone labels.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — Create flow visibility as discover toggle
+
+- Status: accepted
+- Context: The three-way visibility picker (`public` / `invite_only` / `private`) confused creators during M4.5 setup; most users only need “show on Discover” vs “invite people I choose.”
+- Decision: Replace the visibility chip picker with **List on Discover** (maps to `public` when on, `invite_only` when off) plus **Approve join requests** (only when listed). Drop `private` from the create UI; keep the enum in the API/schema for future use.
+- Alternatives considered: keep all three options with tooltips; default everything to invite-only; remove approval toggle entirely.
+- Consequences: `visibilityFromListOnDiscover` / `listOnDiscoverFromVisibility` in `@tennis-lebanon/domain`; create step 1 grouped into Match type / Match level / Who can join; review summary shows join settings instead of raw visibility labels.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — Draft-first match creation
+
+- Status: accepted
+- Context: Creators reaching the invite screen had matches already live; finishing the flow felt like leaving before publish, and invite-then-publish better matches user mental model.
+- Decision: Add `create_match_draft` (status `draft`) and `publish_match`. Review creates a draft; invite screen sends invites on draft; **Publish match** transitions draft → `open`. Invited players only see inbox invites after publish. `create_and_publish_match` remains as draft + publish for atomic callers/tests.
+- Alternatives considered: client-only publish flag without DB draft state; allowing invite acceptance before publish.
+- Consequences: `013_draft_match_publish.sql`; `draft` counts toward one-hosted-match-per-format limit; `list_my_matches` includes drafts for creator.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — M5 booking UX (RacketPal borrowings, manual request model)
+
+- Status: accepted
+- Context: Competitor apps (e.g. RacketPal) emphasise venue directory, favourite clubs, and shortcuts from an organised match toward a court. Lebanese pilot clubs are unlikely to expose real-time inventory or in-app payments in v1. PRD already requires manual club accept/reject/alternative.
+- Decision: M5 delivers a **rich club directory**, **favourite clubs**, and a hub **Request court** shortcut when `ready_to_book`, wired to **manual booking requests** and the E8 staff queue. **Pay at club** is informational copy only. **Pilot club onboarding** uses a structured dashboard form, not venue API integration. **Chat-first venue coordination** stays out of M5; M6 match chat supplements coordination but does not replace booking RPCs.
+- Alternatives considered: Playtomic-style instant book and payment; chat-only coordination like early RacketPal flows; deferring directory polish until post-pilot.
+- Consequences: `docs/ROADMAP.md` M5/M6 scope and borrowed-UX table updated; implementation must not add payments or guaranteed inventory in M5.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — M5.1 booking RPCs and creator-only request
+
+- Status: accepted
+- Context: First vertical slice for E5 needs DB-enforced booking without a club dashboard UI yet.
+- Decision: Add `014_bookings.sql` with alternative columns, `player_favorite_clubs`, and RPCs (`request_match_booking`, staff accept/reject/propose alternative, player respond/cancel). **Only the match creator** may request a court. Match transitions: `ready_to_book` → `booking_pending` → `confirmed` (accept) or back to `ready_to_book` (reject/cancel/decline alternative). Hub `next_action` values: `request_court`, `awaiting_club`, `review_alternative`, `pay_at_club`. Club dashboard UI deferred to M5.2; staff actions verified via DB tests with seeded club staff.
+- Alternatives considered: any accepted participant can request; building dashboard queue in the same slice.
+- Consequences: mobile hub CTA + `/match/[id]/book` + `/clubs` screens; staff queue pages still pending.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — M5.2 club dashboard booking queue
+
+- Status: accepted
+- Context: M5.1 delivered player booking RPCs and staff mutations tested via SQL; E8 requires a staff UI for accept/reject/alternative.
+- Decision: Add `015_club_bookings_queue.sql` with `list_staff_clubs`, `list_club_booking_requests`, and `get_club_booking_detail`. Dashboard routes: `/login`, `/bookings`, `/bookings/[id]` with password sign-in for local dev (seeded club staff). Hours/prices/blocks editors remain a follow-up within M5.2.
+- Alternatives considered: magic-link-only auth for staff; server-side SSR session via `@supabase/ssr` in the first slice.
+- Consequences: end-to-end manual booking loop testable from mobile request through dashboard response; club admin configuration UI still pending.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — M5.2 club admin onboarding and configuration
+
+- Status: accepted
+- Context: M5.2 booking queue shipped; clubs still needed self-serve profile/court/hour setup for pilot onboarding.
+- Decision: Add `016_club_admin.sql` with `register_pilot_club`, admin detail/profile/court/hour RPCs, and staff block RPCs. Dashboard routes: `/onboarding`, `/settings`, `/courts`, `/hours`. One club admin per user in v1; new clubs are active immediately in local pilot (platform review can be added later).
+- Alternatives considered: platform-admin-only club creation; mobile club onboarding.
+- Consequences: M5.2 complete; M6 chat/notifications is next milestone.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — M5.3 optional WhatsApp booking mode
+
+- Status: accepted
+- Context: Lebanese pilot clubs often prefer WhatsApp for court booking. Schema already had `booking_mode = external_link` and `club_private_contacts.booking_phone`, but no admin UI or player flow.
+- Decision: Clubs may opt into **WhatsApp booking** (`external_link`) with a private booking phone configured in dashboard settings. Players see **Book on WhatsApp** (not the raw number) on club detail and match booking screens; tapping fetches a server-built `wa.me` payload with prefilled match context. In-app `manual_request` flow remains default and unchanged.
+- Alternatives considered: showing phone in directory cards; replacing in-app booking entirely; chat-first coordination only.
+- Consequences: `017_whatsapp_booking.sql`; no audit trail for WhatsApp-only clubs; match status stays `ready_to_book` until players confirm offline.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — M3.5 P1 stale match expiry and extend
+
+- Status: accepted
+- Context: Open matches without activity should not linger forever in discovery. `docs/LIFECYCLE.md` defines 7-day listing cap and 24h grace after proposed times.
+- Decision: Add `listing_extended_at`, `expire_stale_matches()` (service-role job), `extend_match_listing()` (**Still looking?** for creators), stale warnings on `list_my_matches` and `get_match_hub`.
+- Alternatives considered: auto-expire without warning; chat-only nudges without extend action.
+- Consequences: `018_match_expiry.sql`; reminder notifications deferred to M6 P2.
+- Owner: Founder/technical reviewer
+
+## 2026-07-26 — M6.1 match participant chat
+
+- Status: accepted
+- Context: E6 requires participant-only chat supplementing the structured match flow from M5.
+- Decision: RPCs `list_match_messages` and `send_match_message` with accepted-participant gate, 60 messages/hour rate limit, RLS select for Realtime, hub chat panel with live inserts.
+- Alternatives considered: chat-first booking; polling-only without Realtime.
+- Consequences: `019_match_chat.sql`; push notifications and notification outbox remain M6 follow-up.
+- Owner: Founder/technical reviewer

@@ -3,3 +3,7 @@ export * from "./onboarding";
 export * from "./discovery";
 export * from "./availability";
 export * from "./blocks";
+export * from "./matches";
+export * from "./bookings";
+export * from "./club-admin";
+export * from "./chat";

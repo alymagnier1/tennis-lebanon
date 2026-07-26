@@ -5,11 +5,11 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
   type TextInputProps,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   colors,
   minTouchTargetPx,
@@ -17,6 +17,9 @@ import {
   spacing,
   typography,
 } from "@tennis-lebanon/ui";
+import { AppText } from "./AppText";
+import { useLayoutDirection } from "../lib/layout-direction";
+import { useResponsiveLayout } from "../lib/responsive";
 
 export function Screen({
   title,
@@ -24,15 +27,92 @@ export function Screen({
   children,
   refreshing = false,
   onRefresh,
+  contentGrow = true,
+  showTitle = true,
+  fixedHeader,
 }: PropsWithChildren<{
   title: string;
   description?: string;
   refreshing?: boolean;
   onRefresh?: () => void;
+  contentGrow?: boolean;
+  showTitle?: boolean;
+  fixedHeader?: ReactNode;
 }>) {
+  const insets = useSafeAreaInsets();
+  const { horizontalPadding, titleFontSize } = useResponsiveLayout();
+  const { writingDirection } = useLayoutDirection();
+  const edgePadding = Math.max(horizontalPadding, insets.left, insets.right);
+
+  const titleBlock =
+    (showTitle && title) || description ? (
+      <>
+        {showTitle && title ? (
+          <AppText
+            accessibilityRole="header"
+            style={[styles.title, { fontSize: titleFontSize, writingDirection }]}
+            maxLines={2}
+          >
+            {title}
+          </AppText>
+        ) : null}
+        {description ? (
+          <AppText style={[styles.description, { writingDirection }]}>
+            {description}
+          </AppText>
+        ) : null}
+      </>
+    ) : null;
+
+  if (fixedHeader) {
+    return (
+      <View style={styles.screenRoot}>
+        <View
+          style={[
+            styles.fixedHeader,
+            {
+              paddingHorizontal: edgePadding,
+              paddingTop: spacing.sm,
+            },
+          ]}
+        >
+          {titleBlock}
+          {fixedHeader}
+        </View>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[
+            styles.screen,
+            styles.screenBelowFixedHeader,
+            !contentGrow && styles.screenCompact,
+            {
+              paddingHorizontal: edgePadding,
+              paddingBottom: Math.max(insets.bottom, spacing.lg),
+            },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            onRefresh ? (
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            ) : undefined
+          }
+        >
+          {children}
+        </ScrollView>
+      </View>
+    );
+  }
+
   return (
     <ScrollView
-      contentContainerStyle={styles.screen}
+      contentContainerStyle={[
+        styles.screen,
+        !contentGrow && styles.screenCompact,
+        {
+          paddingHorizontal: edgePadding,
+          paddingBottom: Math.max(insets.bottom, spacing.lg),
+        },
+      ]}
       keyboardShouldPersistTaps="handled"
       refreshControl={
         onRefresh ? (
@@ -40,12 +120,7 @@ export function Screen({
         ) : undefined
       }
     >
-      <Text accessibilityRole="header" style={styles.title}>
-        {title}
-      </Text>
-      {description ? (
-        <Text style={styles.description}>{description}</Text>
-      ) : null}
+      {titleBlock}
       {children}
     </ScrollView>
   );
@@ -80,7 +155,9 @@ export function PrimaryButton({
       {loading ? (
         <ActivityIndicator color={colors.neutral[0]} />
       ) : (
-        <Text style={styles.primaryButtonText}>{label}</Text>
+        <AppText style={styles.primaryButtonText} maxLines={2}>
+          {label}
+        </AppText>
       )}
     </Pressable>
   );
@@ -90,24 +167,66 @@ export function SecondaryButton({
   label,
   onPress,
   disabled = false,
+  loading = false,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
+  loading?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      disabled={disabled}
+      disabled={disabled || loading}
       onPress={onPress}
       style={({ pressed }) => [
         styles.secondaryButton,
-        disabled && styles.disabled,
+        (disabled || loading) && styles.disabled,
         pressed && styles.pressed,
       ]}
     >
-      <Text style={styles.secondaryButtonText}>{label}</Text>
+      {loading ? (
+        <ActivityIndicator color={colors.brand[600]} />
+      ) : (
+        <AppText style={styles.secondaryButtonText} maxLines={2}>
+          {label}
+        </AppText>
+      )}
+    </Pressable>
+  );
+}
+
+export function DestructiveButton({
+  label,
+  onPress,
+  disabled = false,
+  loading = false,
+}: {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      disabled={disabled || loading}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.destructiveButton,
+        (disabled || loading) && styles.disabled,
+        pressed && styles.pressed,
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator color={colors.danger[700]} />
+      ) : (
+        <AppText style={styles.destructiveButtonText} maxLines={2}>
+          {label}
+        </AppText>
+      )}
     </Pressable>
   );
 }
@@ -119,17 +238,18 @@ export function FormField({
 }: TextInputProps & { label: string; error?: string }) {
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      <AppText style={styles.label}>{label}</AppText>
       <TextInput
         accessibilityLabel={label}
+        maxFontSizeMultiplier={1.3}
         style={[styles.input, error ? styles.inputError : null]}
         placeholderTextColor={colors.neutral[500]}
         {...props}
       />
       {error ? (
-        <Text accessibilityRole="alert" style={styles.error}>
+        <AppText accessibilityRole="alert" style={styles.error}>
           {error}
-        </Text>
+        </AppText>
       ) : null}
     </View>
   );
@@ -146,29 +266,70 @@ export function Choice({
   onPress: () => void;
   description?: string;
 }) {
+  const { rowDirection } = useLayoutDirection();
+
   return (
     <Pressable
       accessibilityRole="checkbox"
       accessibilityState={{ checked: selected }}
       onPress={onPress}
-      style={[styles.choice, selected && styles.choiceSelected]}
+      style={[
+        styles.choice,
+        { flexDirection: rowDirection },
+        selected && styles.choiceSelected,
+      ]}
     >
       <View style={styles.choiceText}>
-        <Text style={styles.choiceLabel}>{label}</Text>
+        <AppText style={styles.choiceLabel} maxLines={2}>
+          {label}
+        </AppText>
         {description ? (
-          <Text style={styles.choiceDescription}>{description}</Text>
+          <AppText style={styles.choiceDescription} maxLines={3}>
+            {description}
+          </AppText>
         ) : null}
       </View>
-      <Text style={styles.checkmark}>{selected ? "✓" : ""}</Text>
+      <AppText style={styles.checkmark}>{selected ? "✓" : ""}</AppText>
     </Pressable>
   );
 }
 
 export function ErrorNotice({ children }: { children: ReactNode }) {
   return (
-    <Text accessibilityRole="alert" style={styles.errorNotice}>
+    <AppText accessibilityRole="alert" style={styles.errorNotice}>
       {children}
-    </Text>
+    </AppText>
+  );
+}
+
+export function SummaryRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  const { rowDirection, writingDirection } = useLayoutDirection();
+
+  if (!value) {
+    return null;
+  }
+
+  return (
+    <View style={[formStyles.summaryRow, { flexDirection: rowDirection }]}>
+      <AppText style={formStyles.summaryRowLabel} maxLines={1}>
+        {label}
+      </AppText>
+      <AppText
+        style={[
+          formStyles.summaryRowValue,
+          { writingDirection, textAlign: writingDirection === "rtl" ? "left" : "right" },
+        ]}
+        maxLines={2}
+      >
+        {value}
+      </AppText>
+    </View>
   );
 }
 
@@ -176,6 +337,7 @@ export const formStyles = StyleSheet.create({
   stack: { gap: spacing.md },
   actions: { gap: spacing.sm, marginTop: spacing.md },
   row: { flexDirection: "row", gap: spacing.sm },
+  flex: { flex: 1 },
   summary: {
     backgroundColor: colors.neutral[50],
     borderRadius: radii.md,
@@ -210,10 +372,42 @@ export const formStyles = StyleSheet.create({
   },
   card: {
     borderWidth: 1,
-    borderColor: colors.neutral[300],
+    borderColor: colors.neutral[100],
+    borderRadius: radii.lg,
+    padding: spacing.lg,
+    gap: spacing.xs,
+    backgroundColor: colors.neutral[0],
+  },
+  compactCard: {
+    borderWidth: 1,
+    borderColor: colors.neutral[100],
     borderRadius: radii.md,
     padding: spacing.md,
-    gap: spacing.xs,
+    gap: 6,
+    backgroundColor: colors.neutral[0],
+  },
+  compactCardTitle: {
+    color: colors.neutral[900],
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    marginBottom: 2,
+  },
+  summaryRow: {
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: spacing.sm,
+  },
+  summaryRowLabel: {
+    color: colors.neutral[500],
+    fontSize: typography.size.xs,
+    flexShrink: 0,
+    minWidth: 56,
+  },
+  summaryRowValue: {
+    color: colors.neutral[900],
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    flex: 1,
   },
   segmentRow: {
     flexDirection: "row",
@@ -224,28 +418,51 @@ export const formStyles = StyleSheet.create({
     minHeight: minTouchTargetPx,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-    borderRadius: radii.md,
+    borderRadius: radii.full,
     paddingHorizontal: spacing.md,
+    backgroundColor: colors.neutral[50],
   },
   segmentButtonActive: {
-    borderColor: colors.brand[600],
-    backgroundColor: colors.brand[50],
+    backgroundColor: colors.neutral[0],
+    shadowColor: colors.neutral[900],
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
   },
   segmentButtonText: {
-    color: colors.neutral[900],
+    color: colors.neutral[700],
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
+  },
+  segmentButtonTextActive: {
+    color: colors.brand[600],
   },
 });
 
 const styles = StyleSheet.create({
-  screen: {
-    flexGrow: 1,
-    padding: spacing.xl,
+  screenRoot: {
+    flex: 1,
+    backgroundColor: colors.neutral[0],
+  },
+  scroll: {
+    flex: 1,
+  },
+  fixedHeader: {
     gap: spacing.lg,
     backgroundColor: colors.neutral[0],
+  },
+  screen: {
+    flexGrow: 1,
+    paddingTop: spacing.lg,
+    gap: spacing.lg,
+    backgroundColor: colors.neutral[0],
+  },
+  screenBelowFixedHeader: {
+    paddingTop: spacing.sm,
+  },
+  screenCompact: {
+    flexGrow: 0,
   },
   title: {
     color: colors.neutral[900],
@@ -258,18 +475,19 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   primaryButton: {
-    minHeight: minTouchTargetPx,
+    minHeight: 52,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
-    backgroundColor: colors.brand[600],
-    borderRadius: radii.md,
+    backgroundColor: colors.brand[500],
+    borderRadius: radii.full,
   },
   primaryButtonText: {
     color: colors.neutral[0],
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
+    textAlign: "center",
   },
   secondaryButton: {
     minHeight: minTouchTargetPx,
@@ -278,13 +496,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderWidth: 1,
-    borderColor: colors.brand[600],
-    borderRadius: radii.md,
+    borderColor: colors.brand[500],
+    borderRadius: radii.full,
+    backgroundColor: colors.neutral[0],
   },
   secondaryButtonText: {
     color: colors.brand[700],
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
+    textAlign: "center",
+  },
+  destructiveButton: {
+    minHeight: minTouchTargetPx,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.danger[500],
+    borderRadius: radii.full,
+    backgroundColor: colors.neutral[0],
+  },
+  destructiveButtonText: {
+    color: colors.danger[700],
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
+    textAlign: "center",
   },
   disabled: { opacity: 0.5 },
   pressed: { opacity: 0.8 },
@@ -313,19 +550,19 @@ const styles = StyleSheet.create({
   },
   choice: {
     minHeight: minTouchTargetPx,
-    flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colors.neutral[300],
-    borderRadius: radii.md,
+    borderRadius: radii.lg,
+    backgroundColor: colors.neutral[0],
   },
   choiceSelected: {
-    borderColor: colors.brand[600],
+    borderColor: colors.brand[500],
     backgroundColor: colors.brand[50],
   },
-  choiceText: { flex: 1, gap: spacing.xs },
+  choiceText: { flex: 1, gap: spacing.xs, minWidth: 0 },
   choiceLabel: {
     color: colors.neutral[900],
     fontSize: typography.size.md,

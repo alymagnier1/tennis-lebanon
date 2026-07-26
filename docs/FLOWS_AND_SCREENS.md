@@ -7,7 +7,7 @@ Primary tabs after onboarding:
 1. **Home** — next action, upcoming match, open requests, quick create
 2. **Discover** — open matches and compatible players
 3. **Create** — prominent modal/flow, not a persistent content feed
-4. **Matches** — invitations, active, upcoming, completed
+4. **Matches** — pending invites inbox and active matches
 5. **Profile** — availability, preferences, reliability, settings
 
 ## Player screens
@@ -40,6 +40,7 @@ Primary tabs after onboarding:
 - Create match: areas and proposed times
 - Create match: review and publish
 - Invite player / share link
+- Matches tab: **Invites** inbox (accept/decline) and **Active** list
 - Match hub
 - Time voting
 - Participant list

@@ -5,7 +5,12 @@
     "allowJs": true,
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@tennis-lebanon/api": ["../../packages/api/src/index.ts"],
+      "@tennis-lebanon/types": ["../../packages/types/src/index.ts"],
+      "@supabase/supabase-js": [
+        "../../packages/api/node_modules/@supabase/supabase-js"
+      ]
     }
   },
   "include": [

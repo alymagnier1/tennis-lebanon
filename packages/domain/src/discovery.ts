@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { playIntentSchema, type SkillBand } from "./onboarding";
+import { playIntentSchema, type PlayIntent, type SkillBand } from "./onboarding";
 
 export const SKILL_BAND_RANK: Record<SkillBand, number> = {
   beginner: 1,
@@ -67,6 +67,24 @@ export function widenLevelWindow(currentWindow: number): number {
   return currentWindow < WIDENED_LEVEL_WINDOW
     ? WIDENED_LEVEL_WINDOW
     : currentWindow;
+}
+
+export function widenDiscoveryZoneIds(allZoneIds: string[]): string[] {
+  return [...allZoneIds];
+}
+
+export function discoveryFiltersForMatchInvite(input: {
+  format: string;
+  intent: string;
+}): DiscoveryFiltersInput {
+  return {
+    format: input.format as "singles" | "doubles",
+    intent: input.intent === "either" ? undefined : (input.intent as PlayIntent),
+    requireAvailabilityOverlap: true,
+    levelWindow: DEFAULT_LEVEL_WINDOW,
+    horizonDays: DEFAULT_DISCOVERY_HORIZON_DAYS,
+    limit: 20,
+  };
 }
 
 export function overlapMinutes(a: TimeInterval, b: TimeInterval): number {

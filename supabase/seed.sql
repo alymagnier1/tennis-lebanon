@@ -1,7 +1,7 @@
 -- Local development seed data. Runs after migrations on `supabase db reset`.
 -- Contains fictional test data only — never use these credentials in production.
 --
--- Test accounts (all use password: dev-password-change-me):
+-- Test accounts (all use password: password):
 --   player-a@tennis-lebanon.test
 --   player-b@tennis-lebanon.test
 --   club-staff@tennis-lebanon.test
@@ -69,6 +69,7 @@ insert into public.clubs (
   latitude,
   longitude,
   booking_mode,
+  amenities,
   is_active
 )
 values (
@@ -81,9 +82,118 @@ values (
   33.893800,
   35.501800,
   'manual_request',
+  array['parking', 'showers', 'pay_as_you_play']::text[],
   true
 )
-on conflict do nothing;
+on conflict (id) do update
+set
+  amenities = excluded.amenities,
+  description = excluded.description,
+  booking_mode = excluded.booking_mode;
+
+insert into public.courts (
+  id,
+  club_id,
+  name,
+  surface,
+  is_indoor,
+  price_minor,
+  currency,
+  slot_minutes,
+  is_active
+)
+values
+  (
+    'cccccccc-0001-0001-0001-000000000001',
+    'bbbbbbbb-0001-0001-0001-000000000001',
+    'Court 1',
+    'hard',
+    false,
+    4000,
+    'USD',
+    90,
+    true
+  ),
+  (
+    'cccccccc-0001-0001-0001-000000000002',
+    'bbbbbbbb-0001-0001-0001-000000000001',
+    'Court 2',
+    'clay',
+    false,
+    4500,
+    'USD',
+    90,
+    true
+  )
+on conflict (id) do update
+set
+  price_minor = excluded.price_minor,
+  currency = excluded.currency,
+  slot_minutes = excluded.slot_minutes,
+  is_active = excluded.is_active;
+
+insert into public.court_operating_hours (
+  court_id,
+  weekday,
+  opens_at,
+  closes_at
+)
+select
+  courts.court_id,
+  weekdays.weekday,
+  time '07:00',
+  time '22:00'
+from (
+  values
+    ('cccccccc-0001-0001-0001-000000000001'::uuid),
+    ('cccccccc-0001-0001-0001-000000000002'::uuid)
+) as courts(court_id)
+cross join generate_series(0, 6) as weekdays(weekday)
+where not exists (
+  select 1
+  from public.court_operating_hours as coh
+  where coh.court_id = courts.court_id
+    and coh.weekday = weekdays.weekday
+);
+
+insert into public.clubs (
+  id,
+  zone_id,
+  name,
+  slug,
+  description,
+  address_public,
+  latitude,
+  longitude,
+  booking_mode,
+  amenities,
+  is_active
+)
+values (
+  'bbbbbbbb-0001-0001-0001-000000000002',
+  'aaaaaaaa-0001-0001-0001-000000000002',
+  'WhatsApp Tennis Club',
+  'whatsapp-tennis-club',
+  'Pilot club that accepts bookings via WhatsApp instead of the in-app queue.',
+  'WhatsApp booking demo, Beirut area',
+  33.888000,
+  35.510000,
+  'external_link',
+  array['parking', 'pay_as_you_play']::text[],
+  true
+)
+on conflict (id) do update
+set
+  booking_mode = excluded.booking_mode,
+  description = excluded.description;
+
+insert into public.club_private_contacts (club_id, booking_phone)
+values (
+  'bbbbbbbb-0001-0001-0001-000000000002',
+  '+96170123456'
+)
+on conflict (club_id) do update
+set booking_phone = excluded.booking_phone;
 
 insert into public.courts (
   id,
@@ -97,17 +207,21 @@ insert into public.courts (
   is_active
 )
 values (
-  'cccccccc-0001-0001-0001-000000000001',
-  'bbbbbbbb-0001-0001-0001-000000000001',
+  'cccccccc-0001-0001-0001-000000000003',
+  'bbbbbbbb-0001-0001-0001-000000000002',
   'Court 1',
   'hard',
   false,
-  4000,
+  3500,
   'USD',
-  60,
+  90,
   true
 )
-on conflict do nothing;
+on conflict (id) do update
+set
+  price_minor = excluded.price_minor,
+  currency = excluded.currency,
+  is_active = excluded.is_active;
 
 -- ---------------------------------------------------------------------------
 -- Auth test users (local Supabase only)
@@ -116,7 +230,7 @@ on conflict do nothing;
 do $$
 declare
   v_instance_id uuid := '00000000-0000-0000-0000-000000000000';
-  v_password text := crypt('dev-password-change-me', gen_salt('bf'));
+  v_password text := crypt('password', gen_salt('bf'));
 begin
   -- Player A
   insert into auth.users (
@@ -367,7 +481,7 @@ on conflict do nothing;
 do $$
 declare
   v_instance_id uuid := '00000000-0000-0000-0000-000000000000';
-  v_password text := crypt('dev-password-change-me', gen_salt('bf'));
+  v_password text := crypt('password', gen_salt('bf'));
   v_player record;
 begin
   for v_player in
@@ -424,7 +538,14 @@ values
 on conflict (id) do update
 set display_name = excluded.display_name,
     account_status = excluded.account_status,
-    onboarding_completed_at = excluded.onboarding_completed_at;
+    onboarding_completed_at = excluded.onboarding_completed_at,
+    is_adult_confirmed = excluded.is_adult_confirmed,
+    terms_version = excluded.terms_version,
+    terms_accepted_at = excluded.terms_accepted_at,
+    privacy_version = excluded.privacy_version,
+    privacy_accepted_at = excluded.privacy_accepted_at,
+    community_rules_version = excluded.community_rules_version,
+    community_rules_accepted_at = excluded.community_rules_accepted_at;
 
 insert into public.player_profiles (
   user_id, skill_band, play_intent, prefers_singles, prefers_doubles
@@ -495,7 +616,9 @@ values
   ('d4444444-4444-4444-4444-444444444444', '13131313-1313-1313-1313-131313131313', 'singles', 'public', 'open', 'competitive', 'advanced', 'competitive', false),
   ('d5555555-5555-5555-5555-555555555555', '88888888-8888-8888-8888-888888888888', 'singles', 'public', 'open', 'social', 'beginner', 'improving', false),
   ('d6666666-6666-6666-6666-666666666666', '14141414-1414-1414-1414-141414141414', 'singles', 'private', 'open', 'social', 'improving', 'intermediate', false),
-  ('d7777777-7777-7777-7777-777777777777', '12121212-1212-1212-1212-121212121212', 'doubles', 'invite_only', 'open', 'either', 'intermediate', 'advanced', false)
+  ('d7777777-7777-7777-7777-777777777777', '12121212-1212-1212-1212-121212121212', 'doubles', 'invite_only', 'open', 'either', 'intermediate', 'advanced', false),
+  ('d8888888-8888-8888-8888-888888888888', '88888888-8888-8888-8888-888888888888', 'singles', 'public', 'open', 'social', 'improving', 'intermediate', false),
+  ('d9999999-9999-9999-9999-999999999999', '11111111-1111-1111-1111-111111111111', 'singles', 'public', 'open', 'social', 'improving', 'intermediate', true)
 on conflict (id) do nothing;
 
 insert into public.match_zones (match_id, zone_id)
@@ -506,7 +629,9 @@ values
   ('d4444444-4444-4444-4444-444444444444', 'aaaaaaaa-0001-0001-0001-000000000002'),
   ('d5555555-5555-5555-5555-555555555555', 'aaaaaaaa-0001-0001-0001-000000000002'),
   ('d6666666-6666-6666-6666-666666666666', 'aaaaaaaa-0001-0001-0001-000000000002'),
-  ('d7777777-7777-7777-7777-777777777777', 'aaaaaaaa-0001-0001-0001-000000000001')
+  ('d7777777-7777-7777-7777-777777777777', 'aaaaaaaa-0001-0001-0001-000000000001'),
+  ('d8888888-8888-8888-8888-888888888888', 'aaaaaaaa-0001-0001-0001-000000000002'),
+  ('d9999999-9999-9999-9999-999999999999', 'aaaaaaaa-0001-0001-0001-000000000002')
 on conflict do nothing;
 
 insert into public.match_participants (match_id, user_id, status, is_creator)
@@ -518,7 +643,10 @@ values
   ('d4444444-4444-4444-4444-444444444444', '13131313-1313-1313-1313-131313131313', 'accepted', true),
   ('d5555555-5555-5555-5555-555555555555', '88888888-8888-8888-8888-888888888888', 'accepted', true),
   ('d6666666-6666-6666-6666-666666666666', '14141414-1414-1414-1414-141414141414', 'accepted', true),
-  ('d7777777-7777-7777-7777-777777777777', '12121212-1212-1212-1212-121212121212', 'accepted', true)
+  ('d7777777-7777-7777-7777-777777777777', '12121212-1212-1212-1212-121212121212', 'accepted', true),
+  ('d8888888-8888-8888-8888-888888888888', '88888888-8888-8888-8888-888888888888', 'accepted', true),
+  ('d8888888-8888-8888-8888-888888888888', '14141414-1414-1414-1414-141414141414', 'accepted', false),
+  ('d9999999-9999-9999-9999-999999999999', '11111111-1111-1111-1111-111111111111', 'accepted', true)
 on conflict do nothing;
 
 insert into public.match_time_options (id, match_id, starts_at, ends_at, proposed_by)
@@ -529,5 +657,7 @@ values
   ('e4444444-4444-4444-4444-444444444444', 'd4444444-4444-4444-4444-444444444444', now() + interval '5 days', now() + interval '5 days 90 minutes', '13131313-1313-1313-1313-131313131313'),
   ('e5555555-5555-5555-5555-555555555555', 'd5555555-5555-5555-5555-555555555555', now() - interval '2 days', now() - interval '2 days' + interval '90 minutes', '88888888-8888-8888-8888-888888888888'),
   ('e6666666-6666-6666-6666-666666666666', 'd6666666-6666-6666-6666-666666666666', now() + interval '6 days', now() + interval '6 days 90 minutes', '14141414-1414-1414-1414-141414141414'),
-  ('e7777777-7777-7777-7777-777777777777', 'd7777777-7777-7777-7777-777777777777', now() + interval '7 days', now() + interval '7 days 90 minutes', '12121212-1212-1212-1212-121212121212')
+  ('e7777777-7777-7777-7777-777777777777', 'd7777777-7777-7777-7777-777777777777', now() + interval '7 days', now() + interval '7 days 90 minutes', '12121212-1212-1212-1212-121212121212'),
+  ('e8888888-8888-8888-8888-888888888888', 'd8888888-8888-8888-8888-888888888888', now() + interval '8 days', now() + interval '8 days 90 minutes', '88888888-8888-8888-8888-888888888888'),
+  ('e9999999-9999-9999-9999-999999999999', 'd9999999-9999-9999-9999-999999999999', now() + interval '9 days', now() + interval '9 days 90 minutes', '11111111-1111-1111-1111-111111111111')
 on conflict do nothing;

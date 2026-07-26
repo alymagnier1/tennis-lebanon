@@ -100,10 +100,11 @@ select pg_temp.assert_true(
       'd4444444-4444-4444-4444-444444444444',
       'd5555555-5555-5555-5555-555555555555',
       'd6666666-6666-6666-6666-666666666666',
-      'd7777777-7777-7777-7777-777777777777'
+      'd7777777-7777-7777-7777-777777777777',
+      'd8888888-8888-8888-8888-888888888888'
     )
   ),
-  'wrong-level, past-time, private, and invite-only matches stay hidden'
+  'wrong-level, past-time, private, invite-only, and full matches stay hidden'
 );
 
 reset role;
@@ -180,6 +181,69 @@ select pg_temp.assert_raises(
   $sql$select * from public.discover_compatible_players()$sql$,
   '42501',
   'suspended users cannot call discovery RPCs'
+);
+
+reset role;
+
+set local role authenticated;
+select set_config(
+  'request.jwt.claim.sub',
+  '22222222-2222-2222-2222-222222222222',
+  true
+);
+select set_config('request.jwt.claim.role', 'authenticated', true);
+
+select pg_temp.assert_true(
+  not exists (
+    select 1
+    from public.discover_compatible_players(
+      p_require_availability_overlap => false,
+      p_level_window => 4
+    ) as result
+    where result.user_id = '90000000-0000-0000-0000-000000000099'
+  ),
+  'suspended users do not appear in discovery results'
+);
+
+reset role;
+
+insert into public.discovery_search_log (user_id, surface, searched_at)
+select
+  '11111111-1111-1111-1111-111111111111',
+  'compatible_players',
+  now() - ((gs.i || ' milliseconds')::interval)
+from generate_series(1, 30) as gs(i);
+
+set local role authenticated;
+select set_config(
+  'request.jwt.claim.sub',
+  '11111111-1111-1111-1111-111111111111',
+  true
+);
+select set_config('request.jwt.claim.role', 'authenticated', true);
+
+select pg_temp.assert_raises(
+  $sql$select * from public.discover_compatible_players()$sql$,
+  'P0001',
+  'discovery rate limit blocks excessive searches'
+);
+
+reset role;
+
+set local role authenticated;
+select set_config(
+  'request.jwt.claim.sub',
+  '11111111-1111-1111-1111-111111111111',
+  true
+);
+select set_config('request.jwt.claim.role', 'authenticated', true);
+
+select pg_temp.assert_true(
+  (
+    select result.display_name = 'Player B'
+    from public.get_public_player_card('22222222-2222-2222-2222-222222222222') as result
+  ),
+  'public player detail RPC returns a safe card projection'
 );
 
 reset role;

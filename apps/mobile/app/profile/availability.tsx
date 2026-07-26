@@ -1,4 +1,5 @@
-import { ActivityIndicator, Alert, Text, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,19 +9,36 @@ import {
   listOwnAvailability,
 } from "@tennis-lebanon/api";
 import {
+  Choice,
+  FormField,
   PrimaryButton,
   Screen,
   SecondaryButton,
   formStyles,
 } from "../../src/components/FormUi";
+import {
+  beirutLocalToUtcIso,
+  formatUtcInBeirut,
+} from "../../src/lib/beirut-time";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
+
+type AvailabilityMode = "recurring" | "oneOff";
+
+const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6] as const;
 
 export default function AvailabilityScreen() {
   const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const userId = session?.user.id;
+  const [mode, setMode] = useState<AvailabilityMode>("recurring");
+  const [weekday, setWeekday] = useState<number>(5);
+  const [localStart, setLocalStart] = useState("18:00");
+  const [localEnd, setLocalEnd] = useState("21:00");
+  const [oneOffDate, setOneOffDate] = useState("");
+  const [oneOffStart, setOneOffStart] = useState("18:00");
+  const [oneOffEnd, setOneOffEnd] = useState("21:00");
 
   const availabilityQuery = useQuery({
     queryKey: ["own-availability", userId],
@@ -28,23 +46,38 @@ export default function AvailabilityScreen() {
     enabled: Boolean(userId),
   });
 
+  const invalidateDiscovery = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["own-availability"] });
+    await queryClient.invalidateQueries({ queryKey: ["discover-players"] });
+  };
+
   const addWindow = useMutation({
-    mutationFn: (input: {
-      weekday: number;
-      localStart: string;
-      localEnd: string;
-    }) =>
-      createAvailabilityWindow(supabase, {
-        user_id: userId!,
-        weekday: input.weekday,
-        local_start: input.localStart,
-        local_end: input.localEnd,
+    mutationFn: async () => {
+      if (!userId) throw new Error("Authentication required");
+
+      if (mode === "recurring") {
+        return createAvailabilityWindow(supabase, {
+          user_id: userId,
+          weekday,
+          local_start: localStart,
+          local_end: localEnd,
+          timezone: "Asia/Beirut",
+          is_recurring: true,
+        });
+      }
+
+      if (!oneOffDate) throw new Error("Date required");
+      return createAvailabilityWindow(supabase, {
+        user_id: userId,
+        starts_at: beirutLocalToUtcIso(oneOffDate, oneOffStart),
+        ends_at: beirutLocalToUtcIso(oneOffDate, oneOffEnd),
         timezone: "Asia/Beirut",
-        is_recurring: true,
-      }),
+        is_recurring: false,
+      });
+    },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["own-availability"] });
-      await queryClient.invalidateQueries({ queryKey: ["discover-players"] });
+      await invalidateDiscovery();
+      setOneOffDate("");
     },
     onError: () => Alert.alert(t("availability.saveError")),
   });
@@ -52,10 +85,7 @@ export default function AvailabilityScreen() {
   const removeWindow = useMutation({
     mutationFn: (windowId: string) =>
       deleteAvailabilityWindow(supabase, windowId),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["own-availability"] });
-      await queryClient.invalidateQueries({ queryKey: ["discover-players"] });
-    },
+    onSuccess: invalidateDiscovery,
     onError: () => Alert.alert(t("availability.saveError")),
   });
 
@@ -84,7 +114,12 @@ export default function AvailabilityScreen() {
                   start: window.local_start?.slice(0, 5),
                   end: window.local_end?.slice(0, 5),
                 })
-              : `${window.starts_at} – ${window.ends_at}`}
+              : t("availability.oneOffLabel", {
+                  start: window.starts_at
+                    ? formatUtcInBeirut(window.starts_at)
+                    : "",
+                  end: window.ends_at ? formatUtcInBeirut(window.ends_at) : "",
+                })}
           </Text>
           <SecondaryButton
             label={t("availability.remove")}
@@ -93,28 +128,107 @@ export default function AvailabilityScreen() {
         </View>
       ))}
 
-      <PrimaryButton
-        label={t("availability.addFriday")}
-        loading={addWindow.isPending}
-        onPress={() =>
-          addWindow.mutate({
-            weekday: 5,
-            localStart: "18:00",
-            localEnd: "21:00",
-          })
-        }
-      />
-      <SecondaryButton
-        label={t("availability.addSaturday")}
-        onPress={() =>
-          addWindow.mutate({
-            weekday: 6,
-            localStart: "09:00",
-            localEnd: "12:00",
-          })
-        }
-      />
+      <View style={formStyles.card}>
+        <Text style={formStyles.title}>{t("availability.addWindow")}</Text>
+        <View style={formStyles.segmentRow}>
+          <PressableSegment
+            label={t("availability.recurringTab")}
+            selected={mode === "recurring"}
+            onPress={() => setMode("recurring")}
+          />
+          <PressableSegment
+            label={t("availability.oneOffTab")}
+            selected={mode === "oneOff"}
+            onPress={() => setMode("oneOff")}
+          />
+        </View>
+
+        {mode === "recurring" ? (
+          <>
+            <Text style={formStyles.summaryLabel}>
+              {t("availability.weekdayLabel")}
+            </Text>
+            {WEEKDAYS.map((value) => (
+              <Choice
+                key={value}
+                label={t(`availability.weekdays.${value}`)}
+                selected={weekday === value}
+                onPress={() => setWeekday(value)}
+              />
+            ))}
+            <FormField
+              label={t("availability.startTime")}
+              value={localStart}
+              onChangeText={setLocalStart}
+              placeholder="18:00"
+              autoCapitalize="none"
+            />
+            <FormField
+              label={t("availability.endTime")}
+              value={localEnd}
+              onChangeText={setLocalEnd}
+              placeholder="21:00"
+              autoCapitalize="none"
+            />
+          </>
+        ) : (
+          <>
+            <FormField
+              label={t("availability.date")}
+              value={oneOffDate}
+              onChangeText={setOneOffDate}
+              placeholder="2026-07-25"
+              autoCapitalize="none"
+            />
+            <FormField
+              label={t("availability.startTime")}
+              value={oneOffStart}
+              onChangeText={setOneOffStart}
+              placeholder="18:00"
+              autoCapitalize="none"
+            />
+            <FormField
+              label={t("availability.endTime")}
+              value={oneOffEnd}
+              onChangeText={setOneOffEnd}
+              placeholder="21:00"
+              autoCapitalize="none"
+            />
+          </>
+        )}
+
+        <PrimaryButton
+          label={t("availability.addWindow")}
+          loading={addWindow.isPending}
+          onPress={() => addWindow.mutate()}
+        />
+      </View>
+
       <SecondaryButton label={t("common.back")} onPress={() => router.back()} />
     </Screen>
+  );
+}
+
+function PressableSegment({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={[
+        formStyles.segmentButton,
+        selected && formStyles.segmentButtonActive,
+      ]}
+    >
+      <Text style={formStyles.segmentButtonText}>{label}</Text>
+    </Pressable>
   );
 }

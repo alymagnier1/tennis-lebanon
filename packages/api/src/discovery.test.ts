@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { discoverCompatiblePlayers, discoverOpenMatches } from "./discovery";
+import {
+  discoverCompatiblePlayers,
+  discoverOpenMatches,
+  getPublicPlayerCard,
+} from "./discovery";
 import type { TennisSupabaseClient } from "./client";
 
 function createMockClient() {
@@ -65,5 +69,23 @@ describe("discovery API wrappers", () => {
       p_limit: 20,
       p_cursor_created_at: "2026-07-25T10:00:00.000Z",
     });
+  });
+
+  it("loads a public player card via RPC", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({
+      data: { user_id: "22222222-2222-2222-2222-222222222222" },
+      error: null,
+    });
+
+    const player = await getPublicPlayerCard(
+      client,
+      "22222222-2222-2222-2222-222222222222",
+    );
+
+    expect(rpc).toHaveBeenCalledWith("get_public_player_card", {
+      p_user_id: "22222222-2222-2222-2222-222222222222",
+    });
+    expect(player.user_id).toBe("22222222-2222-2222-2222-222222222222");
   });
 });

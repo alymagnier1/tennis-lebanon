@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@sentry/nextjs": "^10.68.0",
+    "@supabase/supabase-js": "^2.110.8",
+    "@tennis-lebanon/api": "workspace:*",
     "@tennis-lebanon/config": "workspace:*",
     "@tennis-lebanon/i18n": "workspace:*",
     "@tennis-lebanon/ui": "workspace:*",

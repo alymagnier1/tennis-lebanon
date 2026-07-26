@@ -6,12 +6,12 @@
 
 export const colors = {
   brand: {
-    50: "#eefdf3",
-    100: "#d5f7e1",
-    300: "#7de3ac",
-    500: "#1f9d55",
-    600: "#187e44",
-    700: "#136535",
+    50: "#eef7ff",
+    100: "#d6ecff",
+    300: "#7cc4fa",
+    500: "#2ab1f5",
+    600: "#1a9ee0",
+    700: "#0f7fb8",
   },
   neutral: {
     0: "#ffffff",
@@ -44,9 +44,10 @@ export const spacing = {
 } as const;
 
 export const radii = {
-  sm: 6,
-  md: 10,
+  sm: 8,
+  md: 12,
   lg: 16,
+  xl: 24,
   full: 999,
 } as const;
 

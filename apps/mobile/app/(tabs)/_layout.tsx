@@ -36,6 +36,14 @@ export default function TabsLayout() {
         options={{ title: t("tabs.discover"), headerTitle: t("tabs.discover") }}
       />
       <Tabs.Screen
+        name="matches"
+        options={{ title: t("tabs.matches"), headerTitle: t("tabs.matches") }}
+      />
+      <Tabs.Screen
+        name="clubs"
+        options={{ title: t("tabs.clubs"), headerTitle: t("tabs.clubs") }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{ title: t("tabs.profile"), headerTitle: t("tabs.profile") }}
       />

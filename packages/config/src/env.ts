@@ -29,6 +29,10 @@ export type ClientEnv = z.infer<typeof clientSchema>;
  * Reads and validates client-safe env vars from a prefixed source
  * (`EXPO_PUBLIC_*` for mobile, `NEXT_PUBLIC_*` for the dashboard).
  *
+ * For Next.js / Turbopack, the caller must pass an object with **static**
+ * `process.env.NEXT_PUBLIC_*` property reads. Dynamic keys on `process.env`
+ * are not inlined into the client bundle and will appear as undefined.
+ *
  * Throws with a readable message at startup rather than failing deep inside
  * the app the first time a missing variable is used.
  */
