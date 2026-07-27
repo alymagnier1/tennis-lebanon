@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Animated,
   Image,
@@ -563,16 +563,18 @@ export function BottomSheet({
   const { horizontalPadding } = useResponsiveLayout();
   const { writingDirection } = useLayoutDirection();
   const [rendered, setRendered] = useState(visible);
-  const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
+  const [opacity] = useState(() => new Animated.Value(visible ? 1 : 0));
 
   useEffect(() => {
     if (visible) {
-      setRendered(true);
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: SHEET_FADE_MS,
-        useNativeDriver: true,
-      }).start();
+      void Promise.resolve().then(() => {
+        setRendered(true);
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: SHEET_FADE_MS,
+          useNativeDriver: true,
+        }).start();
+      });
       return;
     }
 

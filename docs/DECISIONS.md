@@ -289,3 +289,30 @@ Record decisions using this template:
 - Alternatives considered: chat-first booking; polling-only without Realtime.
 - Consequences: `019_match_chat.sql`; push notifications and notification outbox remain M6 follow-up.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M6.2 Expo push token registration
+
+- Status: accepted
+- Context: M6 requires device token storage before the notification outbox worker can deliver push messages.
+- Decision: RPCs `register_device_push_token` and `deactivate_device_push_token` with authenticated upsert per user/device, token reassignment deactivates prior rows, mobile sync on permission grant/app resume, and deactivate on sign-out. Onboarding notifications screen requests OS permission before continuing.
+- Alternatives considered: direct table writes from the client; deferring registration until the outbox ships.
+- Consequences: `020_push_tokens.sql`; notification outbox and deep links remain M6.3+.
+- Owner: Founder/technical reviewer
+
+## 2026-07-27 — M6.3 notification outbox and deep links
+
+- Status: accepted
+- Context: M6 requires deduplicated push delivery and deep links before pilot reminders and invite notifications can ship reliably.
+- Decision: Add `enqueue_notification`, `claim_due_notifications`, delivery state RPCs, `schedule_stale_match_reminders` + expired-match enqueue in `expire_stale_matches`, targeted invite enqueue in `create_match_invite`, `process-notifications` Edge Function for Expo delivery, and mobile notification deep-link routing.
+- Alternatives considered: client-side polling for invites only; direct Expo calls from mobile without outbox.
+- Consequences: `021_notification_outbox.sql`; cron must call `run_notification_jobs` then `process-notifications`; booking nudges and attendance prompts remain later M6/M7 slices.
+- Owner: Founder/technical reviewer
+
+## 2026-07-27 — M6.4 lifecycle scheduled jobs
+
+- Status: accepted
+- Context: `docs/LIFECYCLE.md` requires `confirmed → in_progress` transitions and booking-timeout nudges; M6.3 outbox existed but cron and lifecycle RPCs were not wired.
+- Decision: Add `start_in_progress_matches`, `booking_stale_reminders` (4h club nudge / 24h participant notice), extend `run_notification_jobs`, register `pg_cron` schedules for SQL jobs, and have `process-notifications` invoke lifecycle RPCs before claiming due notifications.
+- Alternatives considered: client-only status display; separate edge functions per job.
+- Consequences: `022_lifecycle_jobs.sql`; production must also schedule `process-notifications` via `pg_net` + Vault (attendance prompts remain M7).
+- Owner: Founder/technical reviewer

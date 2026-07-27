@@ -40,7 +40,19 @@ export function CourtsEditor() {
 
   useEffect(() => {
     if (!clubId || !isAdmin) return;
-    void load();
+
+    let cancelled = false;
+
+    void (async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+      await load();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, clubId, isAdmin]);
 
   const resetForm = () => {

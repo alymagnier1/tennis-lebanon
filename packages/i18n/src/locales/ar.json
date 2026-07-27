@@ -15,7 +15,9 @@
       "emailLabel": "البريد الإلكتروني",
       "passwordLabel": "كلمة المرور",
       "submit": "تسجيل الدخول",
+      "submitting": "جارٍ تسجيل الدخول…",
       "error": "تعذر تسجيل الدخول. تحقق من البريد وكلمة المرور.",
+      "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة. إذا غيّرت كلمة مرور التطوير للتو، شغّل pnpm db:reset.",
       "devHint": "التطوير المحلي: club-staff@tennis-lebanon.test / password"
     },
     "nav": {

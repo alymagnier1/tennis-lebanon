@@ -56,15 +56,28 @@ export function HoursEditor() {
 
   useEffect(() => {
     if (!clubId || !isAdmin) return;
-    void load();
+
+    let cancelled = false;
+
+    void (async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+      await load();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, clubId, isAdmin]);
 
-  useEffect(() => {
-    const court = detail?.courts.find((item) => item.court_id === courtId);
+  const onCourtChange = (nextCourtId: string) => {
+    setCourtId(nextCourtId);
+    const court = detail?.courts.find((item) => item.court_id === nextCourtId);
     if (court) {
       setHours(court.hours.length ? court.hours : defaultHours());
     }
-  }, [courtId, detail]);
+  };
 
   const updateHour = (weekday: number, field: "opens_at" | "closes_at", value: string) => {
     setHours((current) =>
@@ -149,7 +162,7 @@ export function HoursEditor() {
     <DashboardShell title={t("dashboard.hours.title")}>
       <label style={labelStackStyle}>
         <span>{t("dashboard.hours.courtLabel")}</span>
-        <select value={courtId} onChange={(e) => setCourtId(e.target.value)} style={fieldStyle}>
+        <select value={courtId} onChange={(e) => onCourtChange(e.target.value)} style={fieldStyle}>
           {(detail?.courts ?? []).map((court) => (
             <option key={court.court_id} value={court.court_id}>
               {court.name}

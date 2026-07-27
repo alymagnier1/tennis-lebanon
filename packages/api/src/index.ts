@@ -7,3 +7,4 @@ export * from "./matches";
 export * from "./bookings";
 export * from "./club-admin";
 export * from "./chat";
+export * from "./push-tokens";

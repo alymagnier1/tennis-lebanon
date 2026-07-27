@@ -204,7 +204,10 @@ export default function MatchHubScreen() {
     (hub?.participants as HubParticipant[] | undefined) ?? [];
   const pendingRequests =
     (hub?.pending_requests as HubRequest[] | undefined) ?? [];
-  const proposedTimes = hub?.proposed_times ?? [];
+  const proposedTimes = useMemo(
+    () => hub?.proposed_times ?? [],
+    [hub?.proposed_times],
+  );
 
   const joinAction = useMemo(() => {
     if (!hub) return "none";

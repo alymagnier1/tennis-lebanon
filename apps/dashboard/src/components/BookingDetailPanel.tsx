@@ -72,7 +72,17 @@ export function BookingDetailPanel({ bookingId }: { bookingId: string }) {
   };
 
   useEffect(() => {
-    void load();
+    let cancelled = false;
+
+    void (async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+      await load();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookingId, client]);
 

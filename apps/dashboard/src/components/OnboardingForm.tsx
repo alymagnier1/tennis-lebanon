@@ -33,6 +33,7 @@ export function OnboardingForm() {
   const [priceMinor, setPriceMinor] = useState("4000");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   useEffect(() => {
     void listActiveZones(getSupabaseBrowserClient()).then((data) => {
@@ -42,12 +43,6 @@ export function OnboardingForm() {
       }
     });
   }, []);
-
-  useEffect(() => {
-    if (!slug && name) {
-      setSlug(slugify(name));
-    }
-  }, [name, slug]);
 
   const toggleAmenity = (amenity: string) => {
     setAmenities((current) =>
@@ -97,12 +92,31 @@ export function OnboardingForm() {
       <form onSubmit={(event) => void onSubmit(event)} style={cardStyle}>
         <label style={labelStackStyle}>
           <span>{t("dashboard.onboarding.nameLabel")}</span>
-          <input value={name} onChange={(e) => setName(e.target.value)} required style={fieldStyle} />
+          <input
+            value={name}
+            onChange={(e) => {
+              const nextName = e.target.value;
+              setName(nextName);
+              if (!slugManuallyEdited) {
+                setSlug(slugify(nextName));
+              }
+            }}
+            required
+            style={fieldStyle}
+          />
         </label>
 
         <label style={labelStackStyle}>
           <span>{t("dashboard.onboarding.slugLabel")}</span>
-          <input value={slug} onChange={(e) => setSlug(slugify(e.target.value))} required style={fieldStyle} />
+          <input
+            value={slug}
+            onChange={(e) => {
+              setSlugManuallyEdited(true);
+              setSlug(slugify(e.target.value));
+            }}
+            required
+            style={fieldStyle}
+          />
         </label>
 
         <label style={labelStackStyle}>

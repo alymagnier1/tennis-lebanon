@@ -91,7 +91,13 @@ Deliver E5 and E8 minimum vertical slice.
 
 **M3.5 P1 (done):** Stale-match warnings on Matches tab and hub, **Still looking?** listing extend, and `expire_stale_matches` job RPC.
 
-**M6.1 (in progress):** Participant-only match chat on hub with Realtime updates. Push notifications and outbox job remain next within M6.
+**M6.1 (done):** Participant-only match chat on hub with Realtime updates.
+
+**M6.2 (done):** Expo push token registration per device with secure RPC upsert/deactivate on sign-out and onboarding opt-in.
+
+**M6.3 (done):** Notification outbox, Expo delivery worker, deep links, and stale/expired match reminder enqueue.
+
+**M6.4 (done):** Lifecycle jobs — `start_in_progress_matches`, `booking_stale_reminders`, `pg_cron` schedules, and `process-notifications` orchestration.
 
 **Player mobile (match-first booking — not chat-first, not instant book):**
 

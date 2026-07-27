@@ -11,6 +11,7 @@ import type { Session } from "@supabase/supabase-js";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOwnProfile } from "@tennis-lebanon/api";
 import { deriveAccessState, type AccessState } from "../lib/access-state";
+import { unregisterDevicePushToken } from "../lib/push-notifications";
 import { supabase } from "../lib/supabase";
 
 type Profile = Awaited<ReturnType<typeof getOwnProfile>>;
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [queryClient]);
 
   const signOut = useCallback(async () => {
+    await unregisterDevicePushToken().catch(() => undefined);
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   }, []);

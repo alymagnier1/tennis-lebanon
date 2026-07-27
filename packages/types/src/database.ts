@@ -1022,6 +1022,7 @@ export type Database = {
       }
       notifications: {
         Row: {
+          attempt_count: number
           created_at: string
           deduplication_key: string
           entity_id: string | null
@@ -1037,6 +1038,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          attempt_count?: number
           created_at?: string
           deduplication_key: string
           entity_id?: string | null
@@ -1052,6 +1054,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          attempt_count?: number
           created_at?: string
           deduplication_key?: string
           entity_id?: string | null
@@ -1507,6 +1510,7 @@ export type Database = {
         }
         Returns: string
       }
+      assert_authenticated_caller: { Args: never; Returns: string }
       assert_club_admin: { Args: { p_club_id: string }; Returns: string }
       assert_club_staff: { Args: { p_club_id: string }; Returns: string }
       assert_discovery_caller_eligible: { Args: never; Returns: string }
@@ -1542,6 +1546,7 @@ export type Database = {
         }
       }
       assert_marketplace_caller: { Args: never; Returns: string }
+      booking_stale_reminders: { Args: never; Returns: Json }
       cancel_booking_request: {
         Args: { p_booking_id: string }
         Returns: undefined
@@ -1557,6 +1562,17 @@ export type Database = {
           p_vote: Database["public"]["Enums"]["vote_value"]
         }
         Returns: undefined
+      }
+      claim_due_notifications: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempt_count: number
+          kind: string
+          notification_id: string
+          payload: Json
+          push_tokens: string[]
+          user_id: string
+        }[]
       }
       complete_onboarding: {
         Args: {
@@ -1624,6 +1640,10 @@ export type Database = {
         Args: { p_invited_user_id?: string; p_match_id: string }
         Returns: string
       }
+      deactivate_device_push_token: {
+        Args: { p_device_id: string }
+        Returns: boolean
+      }
       decline_match_invitation: {
         Args: { p_invitation_id: string }
         Returns: undefined
@@ -1668,6 +1688,18 @@ export type Database = {
       enforce_discovery_rate_limit: {
         Args: { p_surface: string; p_user_id: string }
         Returns: undefined
+      }
+      enqueue_notification: {
+        Args: {
+          p_deduplication_key: string
+          p_entity_id: string
+          p_entity_type: string
+          p_kind: string
+          p_payload?: Json
+          p_scheduled_at?: string
+          p_user_id: string
+        }
+        Returns: string
       }
       expand_user_availability: {
         Args: { p_range_end: string; p_range_start: string; p_user_id: string }
@@ -1837,6 +1869,14 @@ export type Database = {
           slug: string
         }[]
       }
+      mark_notification_failed: {
+        Args: { p_failure_code: string; p_notification_id: string }
+        Returns: undefined
+      }
+      mark_notification_sent: {
+        Args: { p_notification_id: string }
+        Returns: undefined
+      }
       match_active_time_option_count: {
         Args: { p_match_id: string }
         Returns: number
@@ -1884,6 +1924,10 @@ export type Database = {
         Args: { p_match_id: string }
         Returns: undefined
       }
+      register_device_push_token: {
+        Args: { p_device_id: string; p_platform: string; p_token: string }
+        Returns: string
+      }
       register_pilot_club: {
         Args: {
           p_address_public?: string
@@ -1919,6 +1963,8 @@ export type Database = {
         Args: { p_except_invitation_id?: string; p_match_id: string }
         Returns: undefined
       }
+      run_notification_jobs: { Args: never; Returns: Json }
+      schedule_stale_match_reminders: { Args: never; Returns: number }
       send_match_message: {
         Args: { p_body: string; p_match_id: string }
         Returns: string
@@ -1935,6 +1981,7 @@ export type Database = {
         Args: { p_band: Database["public"]["Enums"]["skill_band"] }
         Returns: number
       }
+      start_in_progress_matches: { Args: never; Returns: number }
       update_club_booking_settings: {
         Args: {
           p_booking_mode: string

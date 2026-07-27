@@ -15,7 +15,9 @@
       "emailLabel": "E-mail",
       "passwordLabel": "Mot de passe",
       "submit": "Se connecter",
+      "submitting": "Connexion en cours…",
       "error": "Connexion impossible. Vérifiez l'e-mail et le mot de passe.",
+      "invalidCredentials": "E-mail ou mot de passe invalide. Si vous venez de changer le mot de passe de dev, exécutez pnpm db:reset.",
       "devHint": "Dev local : club-staff@tennis-lebanon.test / password"
     },
     "nav": {

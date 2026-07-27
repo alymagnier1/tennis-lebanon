@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/AuthProvider";
-import { colors, spacing, typography } from "@tennis-lebanon/ui";
+import { colors, typography } from "@tennis-lebanon/ui";
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();

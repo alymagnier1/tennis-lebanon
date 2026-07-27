@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { initSentry } from "../src/lib/sentry";
 import { AuthProvider } from "../src/providers/AuthProvider";
 import { OnboardingProvider } from "../src/providers/OnboardingProvider";
+import { PushTokenRegistration } from "../src/components/PushTokenRegistration";
+import { NotificationDeepLinkHandler } from "../src/components/NotificationDeepLinkHandler";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,6 +27,8 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <PushTokenRegistration />
+          <NotificationDeepLinkHandler />
           <OnboardingProvider>
             <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />

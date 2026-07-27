@@ -82,10 +82,12 @@ export function BookingsQueue() {
     if (!clubId) return;
 
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
     void (async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+      setLoading(true);
+      setError(null);
       try {
         const data = await listClubBookingRequests(client, clubId, {
           statuses: showAll ? [...ALL_STATUSES] : [...PENDING_STATUSES],

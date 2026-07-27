@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { ClubsDirectoryList } from "../../src/components/ClubsDirectoryList";
 import { Screen } from "../../src/components/FormUi";

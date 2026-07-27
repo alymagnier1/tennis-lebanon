@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Alert } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,6 @@ import {
   FormField,
   PrimaryButton,
   Screen,
-  formStyles,
 } from "../../../src/components/FormUi";
 import { beirutLocalToUtcIso } from "../../../src/lib/beirut-time";
 import { supabase } from "../../../src/lib/supabase";
