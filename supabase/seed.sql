@@ -7,6 +7,8 @@
 --   club-staff@tennis-lebanon.test
 --   club-admin@tennis-lebanon.test
 --   platform-admin@tennis-lebanon.test
+--
+-- See docs/PILOT_OPERATIONS.md for roles and workflow rehearsal steps.
 
 -- ---------------------------------------------------------------------------
 -- Pilot placeholder zones (replace with real geography before public pilot)

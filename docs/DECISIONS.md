@@ -397,3 +397,12 @@ Record decisions using this template:
 - Alternatives considered: defer virtualization until post-pilot; rely on manual QA only without a flow registry.
 - Consequences: no product-rule changes; matches tab remains scroll-mapped for now due to heterogeneous row actions.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M8.4 pilot operations guide
+
+- Status: accepted
+- Context: Milestone 8 exit requires rehearsed partner-club workflows and documented test identities without SQL access (`docs/ROADMAP.md`, `docs/TESTING_SECURITY.md`).
+- Decision: Add `docs/PILOT_OPERATIONS.md` with seeded accounts, club references, five workflow rehearsals, and admin escalation paths; export `PILOT_WORKFLOW_REHEARSALS` aligned with `PILOT_CRITICAL_FLOWS`.
+- Alternatives considered: wiki-only ops notes; ad-hoc Slack runbook.
+- Consequences: placeholder zones/clubs still must be replaced before public pilot; backup/restore drill remains separate.
+- Owner: Founder/technical reviewer

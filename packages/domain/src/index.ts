@@ -11,4 +11,5 @@ export * from "./rating-display";
 export * from "./disputes";
 export * from "./reports";
 export * from "./critical-flows";
+export * from "./pilot-workflows";
 export * from "./cancellation-policy";

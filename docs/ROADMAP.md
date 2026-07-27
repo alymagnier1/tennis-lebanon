@@ -161,6 +161,8 @@ Exit: repeated requests cannot double-apply rating; disputed results remain unra
 
 **M8.3 (done):** Performance and accessibility hardening — virtualized discover lists, composite card labels, tab/chip/toolbar screen-reader labels, pilot critical-flow registry, and dashboard login form semantics.
 
+**M8.4 (done):** Pilot operations guide (`docs/PILOT_OPERATIONS.md`), seeded account reference, and five workflow rehearsal registry for partner-club sign-off.
+
 ## Milestone 8 — Pilot hardening
 
 Deliver:
