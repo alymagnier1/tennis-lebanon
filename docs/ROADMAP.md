@@ -151,6 +151,8 @@ Exit: repeated requests cannot double-apply rating; disputed results remain unra
 
 **M7.4 (done):** Provisional band + badge until five confirmed results; earned numeric rating on public cards and own profile.
 
+**M7.5 (done):** Platform admin dispute queue with confirm/void resolution, audit events, and rating on confirm only.
+
 ## Milestone 8 — Pilot hardening
 
 Deliver:

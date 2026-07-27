@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/providers/AuthProvider";
+import { usePlatformOperator } from "@/hooks/usePlatformOperator";
 import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
 
 export function DashboardShell({
@@ -14,6 +15,7 @@ export function DashboardShell({
 }) {
   const { t } = useTranslation();
   const { signOut } = useAuth();
+  const isOperator = usePlatformOperator();
 
   return (
     <div style={{ minHeight: "100vh", background: colors.neutral[50] }}>
@@ -58,6 +60,14 @@ export function DashboardShell({
             >
               {t("dashboard.nav.hours")}
             </Link>
+            {isOperator ? (
+              <Link
+                href="/admin/disputes"
+                style={{ color: colors.danger[700], textDecoration: "none" }}
+              >
+                {t("dashboard.nav.disputes")}
+              </Link>
+            ) : null}
             <Link
               href="/onboarding"
               style={{ color: colors.brand[600], textDecoration: "none" }}

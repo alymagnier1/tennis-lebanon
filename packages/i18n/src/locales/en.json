@@ -26,7 +26,24 @@
       "courts": "Courts",
       "hours": "Hours & blocks",
       "onboarding": "Register club",
+      "disputes": "Result disputes",
       "signOut": "Sign out"
+    },
+    "disputes": {
+      "title": "Result disputes",
+      "description": "Review disputed match results. Every action requires a reason and is audited.",
+      "loading": "Loading disputes…",
+      "empty": "No disputed results in the queue.",
+      "loadError": "We could not load disputed results.",
+      "actionError": "We could not resolve this dispute.",
+      "reasonRequired": "Enter a short reason before resolving.",
+      "reasonLabel": "Resolution reason",
+      "submittedBy": "Submitted by {{name}}",
+      "score": "Score: {{score}}",
+      "playerNote": "Player note: {{note}}",
+      "matchId": "Match ID: {{id}}",
+      "confirmSubmitted": "Confirm submitted result",
+      "voidResult": "Void without rating"
     },
     "bookings": {
       "title": "Booking requests",

@@ -352,3 +352,12 @@ Record decisions using this template:
 - Alternatives considered: show internal rating everywhere from day one; hide all level information until earned.
 - Consequences: `025_provisional_rating_display.sql`; admin dispute queue remains M7.5+.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M7.5 admin result dispute queue
+
+- Status: accepted
+- Context: Disputed results must be reviewable by platform operators without database access (`docs/PRD.md`, `docs/FLOWS_AND_SCREENS.md`).
+- Decision: Add `list_disputed_results` and `resolve_match_result_dispute` (confirm applies rating + audit; void resolves without rating); expose `/admin/disputes` in the dashboard for platform operators only.
+- Alternatives considered: email-only ops workflow; auto-resolve after timeout.
+- Consequences: `026_result_dispute_resolution.sql`; completed matches tab remains M7.6+.
+- Owner: Founder/technical reviewer

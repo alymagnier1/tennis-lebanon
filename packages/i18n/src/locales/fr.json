@@ -26,7 +26,24 @@
       "courts": "Courts",
       "hours": "Horaires et blocages",
       "onboarding": "Inscrire un club",
+      "disputes": "Litiges de résultats",
       "signOut": "Se déconnecter"
+    },
+    "disputes": {
+      "title": "Litiges de résultats",
+      "description": "Examinez les résultats contestés. Chaque action exige un motif et est auditée.",
+      "loading": "Chargement des litiges…",
+      "empty": "Aucun résultat contesté dans la file.",
+      "loadError": "Impossible de charger les litiges.",
+      "actionError": "Impossible de résoudre ce litige.",
+      "reasonRequired": "Saisissez un motif court avant de résoudre.",
+      "reasonLabel": "Motif de résolution",
+      "submittedBy": "Soumis par {{name}}",
+      "score": "Score : {{score}}",
+      "playerNote": "Note du joueur : {{note}}",
+      "matchId": "ID du match : {{id}}",
+      "confirmSubmitted": "Confirmer le résultat soumis",
+      "voidResult": "Annuler sans classement"
     },
     "bookings": {
       "title": "Demandes de réservation",

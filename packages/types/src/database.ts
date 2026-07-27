@@ -1554,6 +1554,7 @@ export type Database = {
         }
       }
       assert_marketplace_caller: { Args: never; Returns: string }
+      assert_platform_operator: { Args: never; Returns: string }
       booking_stale_reminders: { Args: never; Returns: Json }
       cancel_booking_request: {
         Args: { p_booking_id: string }
@@ -1776,6 +1777,7 @@ export type Database = {
         Args: { p_match_id: string; p_user_id?: string }
         Returns: boolean
       }
+      is_platform_operator: { Args: { p_user_id?: string }; Returns: boolean }
       join_match: {
         Args: { p_match_id: string }
         Returns: Database["public"]["Enums"]["participant_status"]
@@ -1831,6 +1833,16 @@ export type Database = {
           zone_name_i18n: Json
           zone_slug: string
         }[]
+      }
+      list_disputed_results: {
+        Args: { p_limit?: number }
+        Returns: Database["public"]["CompositeTypes"]["disputed_result_queue_row"][]
+        SetofOptions: {
+          from: "*"
+          to: "disputed_result_queue_row"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       list_match_messages: {
         Args: { p_limit?: number; p_match_id: string }
@@ -1970,6 +1982,10 @@ export type Database = {
       request_match_booking: {
         Args: { p_court_id: string; p_match_id: string }
         Returns: string
+      }
+      resolve_match_result_dispute: {
+        Args: { p_reason: string; p_resolution: string; p_result_id: string }
+        Returns: undefined
       }
       respond_booking_alternative: {
         Args: { p_accept: boolean; p_booking_id: string }
@@ -2144,6 +2160,19 @@ export type Database = {
         availability_overlap: boolean | null
         created_at: string | null
         notes: string | null
+      }
+      disputed_result_queue_row: {
+        result_id: string | null
+        match_id: string | null
+        status: Database["public"]["Enums"]["result_status"] | null
+        score: Json | null
+        winner_user_id: string | null
+        winner_name: string | null
+        submitted_by: string | null
+        submitted_by_name: string | null
+        dispute_note: string | null
+        disputed_at: string | null
+        match_format: Database["public"]["Enums"]["match_format"] | null
       }
       match_hub_card: {
         match_id: string | null
