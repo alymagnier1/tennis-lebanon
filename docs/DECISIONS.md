@@ -343,3 +343,12 @@ Record decisions using this template:
 - Alternatives considered: free-text score field; server-side tennis rule engine in SQL.
 - Consequences: mobile `MatchResultPanel` and `packages/domain/src/results.ts`; admin dispute queue remains M7.5+.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M7.4 provisional vs earned rating display
+
+- Status: accepted
+- Context: Rating v1 requires hiding precise numbers until five confirmed results while still showing skill bands (`docs/DATABASE.md`).
+- Decision: Add `display_rating` to public player cards (null while provisional), shared domain/mobile formatting helpers, and own-profile progress (`count/threshold`) until earned.
+- Alternatives considered: show internal rating everywhere from day one; hide all level information until earned.
+- Consequences: `025_provisional_rating_display.sql`; admin dispute queue remains M7.5+.
+- Owner: Founder/technical reviewer

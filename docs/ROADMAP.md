@@ -149,6 +149,8 @@ Exit: repeated requests cannot double-apply rating; disputed results remain unra
 
 **M7.3 (done):** Custom score entry on the match hub with domain validation and localized error states.
 
+**M7.4 (done):** Provisional band + badge until five confirmed results; earned numeric rating on public cards and own profile.
+
 ## Milestone 8 — Pilot hardening
 
 Deliver:

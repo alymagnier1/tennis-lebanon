@@ -7,3 +7,4 @@ export * from "./lifecycle";
 export * from "./push-tokens";
 export * from "./notifications";
 export * from "./results";
+export * from "./rating-display";

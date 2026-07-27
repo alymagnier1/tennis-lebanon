@@ -18,6 +18,7 @@ import {
   formStyles,
 } from "../../src/components/FormUi";
 import { formatUtcInBeirut } from "../../src/lib/beirut-time";
+import { publicPlayerLevelLabel } from "../../src/lib/player-level-label";
 import { supabase } from "../../src/lib/supabase";
 import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 
@@ -95,7 +96,7 @@ export default function PlayerDetailScreen() {
             {t("onboarding.review.skill")}
           </Text>
           <Text style={formStyles.summaryValue}>
-            {t(`skillBands.${player.skill_band}`)}
+            {publicPlayerLevelLabel(player, t)}
           </Text>
           <Text style={formStyles.summaryLabel}>
             {t("discover.playIntentLabel")}

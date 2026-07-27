@@ -263,6 +263,14 @@
     "advanced": "متوسط+",
     "competitive": "متقدم"
   },
+  "rating": {
+    "provisionalBadge": "مبدئي",
+    "ownBand": "فئة المهارة",
+    "ownRatingLabel": "التصنيف",
+    "ownEarned": "تصنيفك: {{value}}",
+    "ownProvisional": "مبدئي · {{count}}/{{threshold}} نتائج مؤكدة",
+    "progressHint": "العب وأكّد خمس نتائج مباريات لفتح تصنيفك."
+  },
   "policies": {
     "developmentWarning": "مسودة للتطوير — غير معتمدة قانونيًا وغير مخصّصة للنشر العام.",
     "version": "الإصدار: {{version}}",

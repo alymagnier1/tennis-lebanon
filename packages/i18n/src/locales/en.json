@@ -263,6 +263,14 @@
     "advanced": "Upper int.",
     "competitive": "Advanced"
   },
+  "rating": {
+    "provisionalBadge": "Provisional",
+    "ownBand": "Skill band",
+    "ownRatingLabel": "Rating",
+    "ownEarned": "Your rating: {{value}}",
+    "ownProvisional": "Provisional · {{count}}/{{threshold}} confirmed results",
+    "progressHint": "Play and confirm five match results to unlock your rating."
+  },
   "policies": {
     "developmentWarning": "DEVELOPMENT DRAFT — not legally approved and not for public release.",
     "version": "Version: {{version}}",

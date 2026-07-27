@@ -2122,6 +2122,7 @@ export type Database = {
         availability_overlap: boolean | null
         intent_fit: boolean | null
         format_fit: boolean | null
+        display_rating: number | null
       }
       discover_open_match_card: {
         match_id: string | null

@@ -11,6 +11,7 @@ export type CompatiblePlayerCard = {
   prefers_doubles: boolean;
   zones: unknown;
   provisional_rating_label: string;
+  display_rating: number | null;
   completed_match_count: number;
   level_fit: boolean;
   zone_overlap: boolean;

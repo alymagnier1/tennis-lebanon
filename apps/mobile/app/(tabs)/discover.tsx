@@ -42,21 +42,11 @@ import {
 import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
+import { publicPlayerLevelLabel } from "../../src/lib/player-level-label";
 import { zoneLabelFromList, zoneNameFromJson } from "../../src/lib/zones";
 
 type DiscoverSegment = "players" | "matches";
 type MatchFormat = "singles" | "doubles";
-
-function playerLevelLabel(
-  player: CompatiblePlayerCard,
-  t: (key: string) => string,
-): string {
-  const band = t(`skillBands.${player.skill_band}`);
-  if (player.provisional_rating_label) {
-    return `${band} · ${player.provisional_rating_label}`;
-  }
-  return band;
-}
 
 function playerHint(
   player: CompatiblePlayerCard,
@@ -371,7 +361,7 @@ export default function DiscoverScreen() {
                 key={player.user_id}
                 name={player.display_name}
                 avatarPath={player.avatar_path}
-                levelLabel={playerLevelLabel(player, t)}
+                levelLabel={publicPlayerLevelLabel(player, t)}
                 locationLabel={zoneLabelFromList(
                   player.zones,
                   i18n.resolvedLanguage ?? i18n.language,

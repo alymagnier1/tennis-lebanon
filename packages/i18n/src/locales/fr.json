@@ -263,6 +263,14 @@
     "advanced": "Inter. sup.",
     "competitive": "Avancé"
   },
+  "rating": {
+    "provisionalBadge": "Provisoire",
+    "ownBand": "Niveau",
+    "ownRatingLabel": "Classement",
+    "ownEarned": "Votre classement : {{value}}",
+    "ownProvisional": "Provisoire · {{count}}/{{threshold}} résultats confirmés",
+    "progressHint": "Jouez et confirmez cinq résultats de match pour débloquer votre classement."
+  },
   "policies": {
     "developmentWarning": "PROJET DE DÉVELOPPEMENT — non approuvé juridiquement et non destiné à une diffusion publique.",
     "version": "Version : {{version}}",

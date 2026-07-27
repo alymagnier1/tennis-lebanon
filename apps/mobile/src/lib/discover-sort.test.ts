@@ -13,6 +13,7 @@ function player(overrides: Partial<CompatiblePlayerCard>): CompatiblePlayerCard 
     prefers_doubles: false,
     zones: [],
     provisional_rating_label: "Provisional",
+    display_rating: null,
     completed_match_count: 0,
     level_fit: false,
     zone_overlap: false,
