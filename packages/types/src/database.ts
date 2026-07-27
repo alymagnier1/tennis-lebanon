@@ -1900,6 +1900,16 @@ export type Database = {
           visibility: Database["public"]["Enums"]["match_visibility"]
         }[]
       }
+      list_open_user_reports: {
+        Args: { p_limit?: number }
+        Returns: Database["public"]["CompositeTypes"]["user_report_queue_row"][]
+        SetofOptions: {
+          from: "*"
+          to: "user_report_queue_row"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       list_staff_clubs: {
         Args: never
         Returns: {
@@ -2002,6 +2012,10 @@ export type Database = {
         Args: { p_reason: string; p_resolution: string; p_result_id: string }
         Returns: undefined
       }
+      resolve_user_report: {
+        Args: { p_reason: string; p_report_id: string; p_resolution: string }
+        Returns: undefined
+      }
       respond_booking_alternative: {
         Args: { p_accept: boolean; p_booking_id: string }
         Returns: undefined
@@ -2036,6 +2050,16 @@ export type Database = {
       start_in_progress_matches: { Args: never; Returns: number }
       submit_match_result: {
         Args: { p_match_id: string; p_score: Json; p_winner_user_id: string }
+        Returns: string
+      }
+      submit_user_report: {
+        Args: {
+          p_category: string
+          p_match_id?: string
+          p_message_id?: string
+          p_note?: string
+          p_reported_user_id?: string
+        }
         Returns: string
       }
       update_club_booking_settings: {
@@ -2231,6 +2255,18 @@ export type Database = {
         capacity: number | null
         soonest_time: string | null
         expires_at: string | null
+        created_at: string | null
+      }
+      user_report_queue_row: {
+        report_id: string | null
+        status: Database["public"]["Enums"]["report_status"] | null
+        category: string | null
+        note: string | null
+        reporter_id: string | null
+        reporter_name: string | null
+        reported_user_id: string | null
+        reported_user_name: string | null
+        match_id: string | null
         created_at: string | null
       }
     }

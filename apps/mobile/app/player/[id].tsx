@@ -20,7 +20,7 @@ import {
 import { formatUtcInBeirut } from "../../src/lib/beirut-time";
 import { publicPlayerLevelLabel } from "../../src/lib/player-level-label";
 import { supabase } from "../../src/lib/supabase";
-import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
+import { CREATE_MATCH_ROUTE, playerReportRoute } from "../../src/lib/routes";
 
 function sortBySoonestTime(a: MyMatchRow, b: MyMatchRow): number {
   if (!a.soonest_time && !b.soonest_time) return 0;
@@ -156,24 +156,30 @@ export default function PlayerDetailScreen() {
       />
 
       {player ? (
-        <SecondaryButton
-          label={t("discover.blockPlayer")}
-          loading={blockMutation.isPending}
-          onPress={() =>
-            Alert.alert(
-              t("discover.blockConfirmTitle"),
-              t("discover.blockConfirmBody"),
-              [
-                { text: t("common.cancel"), style: "cancel" },
-                {
-                  text: t("discover.blockPlayer"),
-                  style: "destructive",
-                  onPress: () => blockMutation.mutate(),
-                },
-              ],
-            )
-          }
-        />
+        <>
+          <SecondaryButton
+            label={t("discover.reportPlayer")}
+            onPress={() => router.push(playerReportRoute(id!))}
+          />
+          <SecondaryButton
+            label={t("discover.blockPlayer")}
+            loading={blockMutation.isPending}
+            onPress={() =>
+              Alert.alert(
+                t("discover.blockConfirmTitle"),
+                t("discover.blockConfirmBody"),
+                [
+                  { text: t("common.cancel"), style: "cancel" },
+                  {
+                    text: t("discover.blockPlayer"),
+                    style: "destructive",
+                    onPress: () => blockMutation.mutate(),
+                  },
+                ],
+              )
+            }
+          />
+        </>
       ) : null}
       <SecondaryButton label={t("common.back")} onPress={() => router.back()} />
     </Screen>

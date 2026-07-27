@@ -155,6 +155,8 @@ Exit: repeated requests cannot double-apply rating; disputed results remain unra
 
 **M7.6 (done):** Completed match history on the Matches tab via `list_my_completed_matches`.
 
+**M8.1 (done):** User report submission with rate limiting, platform admin safety queue, and audited dismiss/resolve actions.
+
 ## Milestone 8 — Pilot hardening
 
 Deliver:

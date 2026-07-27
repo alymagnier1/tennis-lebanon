@@ -27,6 +27,7 @@
       "hours": "Horaires et blocages",
       "onboarding": "Inscrire un club",
       "disputes": "Litiges de résultats",
+      "reports": "Signalements",
       "signOut": "Se déconnecter"
     },
     "disputes": {
@@ -44,6 +45,22 @@
       "matchId": "ID du match : {{id}}",
       "confirmSubmitted": "Confirmer le résultat soumis",
       "voidResult": "Annuler sans classement"
+    },
+    "reports": {
+      "title": "Signalements",
+      "description": "Examinez les signalements de joueurs et de matchs. Chaque action exige un motif et est auditée.",
+      "loading": "Chargement des signalements…",
+      "empty": "Aucun signalement ouvert dans la file.",
+      "loadError": "Impossible de charger les signalements.",
+      "actionError": "Impossible de résoudre ce signalement.",
+      "reasonRequired": "Saisissez un motif court avant de résoudre.",
+      "reasonLabel": "Motif de résolution",
+      "reportedBy": "Signalé par {{name}}",
+      "reportedUser": "À propos de {{name}}",
+      "note": "Note du signaleur : {{note}}",
+      "matchId": "ID du match : {{id}}",
+      "markResolved": "Marquer comme résolu",
+      "dismiss": "Rejeter le signalement"
     },
     "bookings": {
       "title": "Demandes de réservation",
@@ -367,7 +384,34 @@
     "blockConfirmBody": "Il n'apparaîtra plus dans vos résultats de découverte.",
     "blockSuccess": "Joueur bloqué.",
     "blockError": "Impossible de bloquer ce joueur.",
+    "reportPlayer": "Signaler un joueur",
     "playerLoadError": "Impossible de charger ce joueur."
+  },
+  "reports": {
+    "title": "Signaler un joueur",
+    "playerDescription": "Dites-nous ce qui s'est passé. Notre équipe examine les signalements sans les partager avec le joueur visé.",
+    "noteLabel": "Détails supplémentaires (facultatif)",
+    "notePlaceholder": "N'incluez que les informations pertinentes pour ce signalement.",
+    "submit": "Envoyer le signalement",
+    "submitSuccess": "Signalement envoyé. Notre équipe va l'examiner.",
+    "submitError": "Impossible d'envoyer ce signalement.",
+    "rateLimited": "Vous avez déjà signalé ce joueur aujourd'hui. Réessayez demain si nécessaire.",
+    "categories": {
+      "harassment": "Harcèlement ou abus",
+      "unsafe_conduct": "Comportement dangereux ou menaçant",
+      "spam": "Spam ou sollicitation",
+      "fraud": "Fraude ou usurpation",
+      "privacy": "Violation de la vie privée",
+      "other": "Autre préoccupation"
+    },
+    "categoryDescriptions": {
+      "harassment": "Intimidation, discours haineux, inconduite sexuelle ou harcèlement répété.",
+      "unsafe_conduct": "Menaces, harcèlement ou comportement qui semble dangereux.",
+      "spam": "Publicité non désirée, arnaques ou messages répétés hors sujet.",
+      "fraud": "Fausse identité, résultats truqués ou profil trompeur.",
+      "privacy": "Partage de coordonnées, localisation ou informations privées sans consentement.",
+      "other": "Autre problème sérieux ne correspondant pas aux catégories ci-dessus."
+    }
   },
   "matches": {
     "create": {

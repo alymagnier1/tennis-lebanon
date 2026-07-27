@@ -36,3 +36,10 @@ export function clubDetailRoute(
     },
   } as Href;
 }
+
+export function playerReportRoute(playerId: string): Href {
+  return {
+    pathname: "/player/[id]/report",
+    params: { id: playerId },
+  } as unknown as Href;
+}

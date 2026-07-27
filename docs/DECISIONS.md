@@ -370,3 +370,12 @@ Record decisions using this template:
 - Alternatives considered: fold completed rows into Active; separate profile-only history screen.
 - Consequences: `027_completed_matches_list.sql`; active list RPC unchanged.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M8.1 user report and moderation queue
+
+- Status: accepted
+- Context: MVP requires report/block flows and an admin queue with audit trail (`docs/PRD.md`, `docs/TESTING_SECURITY.md`).
+- Decision: Add `submit_user_report`, `list_open_user_reports`, and `resolve_user_report` RPCs; mobile player report screen; dashboard `/admin/reports` for platform operators. Enforce one report per reporter/target per day.
+- Alternatives considered: direct table inserts from clients; email-only reporting.
+- Consequences: `028_user_reports_queue.sql`; block flow unchanged from M2.
+- Owner: Founder/technical reviewer

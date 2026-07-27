@@ -27,6 +27,7 @@
       "hours": "Hours & blocks",
       "onboarding": "Register club",
       "disputes": "Result disputes",
+      "reports": "Safety reports",
       "signOut": "Sign out"
     },
     "disputes": {
@@ -44,6 +45,22 @@
       "matchId": "Match ID: {{id}}",
       "confirmSubmitted": "Confirm submitted result",
       "voidResult": "Void without rating"
+    },
+    "reports": {
+      "title": "Safety reports",
+      "description": "Review player and match reports. Every action requires a reason and is audited.",
+      "loading": "Loading reports…",
+      "empty": "No open reports in the queue.",
+      "loadError": "We could not load safety reports.",
+      "actionError": "We could not resolve this report.",
+      "reasonRequired": "Enter a short reason before resolving.",
+      "reasonLabel": "Resolution reason",
+      "reportedBy": "Reported by {{name}}",
+      "reportedUser": "About {{name}}",
+      "note": "Reporter note: {{note}}",
+      "matchId": "Match ID: {{id}}",
+      "markResolved": "Mark resolved",
+      "dismiss": "Dismiss report"
     },
     "bookings": {
       "title": "Booking requests",
@@ -367,7 +384,34 @@
     "blockConfirmBody": "They will no longer appear in your discovery results.",
     "blockSuccess": "Player blocked.",
     "blockError": "We could not block this player.",
+    "reportPlayer": "Report player",
     "playerLoadError": "We could not load this player."
+  },
+  "reports": {
+    "title": "Report a player",
+    "playerDescription": "Tell us what happened. Reports are reviewed by our team and are not shared with the reported player.",
+    "noteLabel": "Additional details (optional)",
+    "notePlaceholder": "Include only information relevant to this report.",
+    "submit": "Submit report",
+    "submitSuccess": "Report submitted. Our team will review it.",
+    "submitError": "We could not submit this report.",
+    "rateLimited": "You already reported this player today. Try again tomorrow if needed.",
+    "categories": {
+      "harassment": "Harassment or abuse",
+      "unsafe_conduct": "Unsafe or threatening behavior",
+      "spam": "Spam or solicitation",
+      "fraud": "Fraud or impersonation",
+      "privacy": "Privacy violation",
+      "other": "Other concern"
+    },
+    "categoryDescriptions": {
+      "harassment": "Bullying, hate speech, sexual misconduct, or repeated harassment.",
+      "unsafe_conduct": "Threats, stalking, or behavior that feels unsafe in person or online.",
+      "spam": "Unwanted advertising, scams, or repeated irrelevant messages.",
+      "fraud": "Fake identity, manipulated results, or misleading profile information.",
+      "privacy": "Sharing contact details, location, or private information without consent.",
+      "other": "Another serious concern that does not fit the categories above."
+    }
   },
   "matches": {
     "create": {

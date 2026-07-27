@@ -61,12 +61,20 @@ export function DashboardShell({
               {t("dashboard.nav.hours")}
             </Link>
             {isOperator ? (
-              <Link
-                href="/admin/disputes"
-                style={{ color: colors.danger[700], textDecoration: "none" }}
-              >
-                {t("dashboard.nav.disputes")}
-              </Link>
+              <>
+                <Link
+                  href="/admin/disputes"
+                  style={{ color: colors.danger[700], textDecoration: "none" }}
+                >
+                  {t("dashboard.nav.disputes")}
+                </Link>
+                <Link
+                  href="/admin/reports"
+                  style={{ color: colors.danger[700], textDecoration: "none" }}
+                >
+                  {t("dashboard.nav.reports")}
+                </Link>
+              </>
             ) : null}
             <Link
               href="/onboarding"
