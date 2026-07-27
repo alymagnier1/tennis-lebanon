@@ -104,7 +104,7 @@ begin
       and lm.status in ('draft', 'open', 'full', 'ready_to_book', 'booking_pending', 'confirmed', 'in_progress')
   loop
     begin
-      perform public.cancel_match(v_existing_id);
+      perform public.cancel_match(v_existing_id, 'test cleanup');
     exception
       when others then
         null;

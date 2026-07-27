@@ -79,8 +79,8 @@ export function listOnDiscoverFromVisibility(
 export const INVITE_TOKEN_HASH_ALGORITHM =
   "Server-side SHA-256 hex digest via extensions.digest; clients never persist raw tokens after share.";
 
-export const LEAVE_POLICY_COPY_KEY = "matches.leavePolicyPlaceholder";
-export const CANCEL_POLICY_COPY_KEY = "matches.cancelPolicyPlaceholder";
+export const LEAVE_POLICY_COPY_KEY = "matches.policy.leaveBeforeBooking";
+export const CANCEL_POLICY_COPY_KEY = "matches.policy.cancelBeforeBooking";
 
 export function capacityForFormat(format: "singles" | "doubles"): number {
   return format === "singles" ? 2 : 4;

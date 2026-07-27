@@ -177,6 +177,26 @@ export async function cancelMatch(
   if (error) throw error;
 }
 
+export async function withdrawFromBookedMatch(
+  client: TennisSupabaseClient,
+  matchId: string,
+  reason: string,
+): Promise<void> {
+  const { error } = await client.rpc("withdraw_from_booked_match", {
+    p_match_id: matchId,
+    p_reason: reason,
+  });
+  if (error) throw error;
+}
+
+export async function getLateCancelWindowHours(
+  client: TennisSupabaseClient,
+): Promise<number> {
+  const { data, error } = await client.rpc("late_cancel_window_hours");
+  if (error) throw error;
+  return Number(data ?? 24);
+}
+
 export async function createMatchInvite(
   client: TennisSupabaseClient,
   matchId: string,

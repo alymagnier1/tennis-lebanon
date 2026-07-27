@@ -43,3 +43,26 @@ export function playerReportRoute(playerId: string): Href {
     params: { id: playerId },
   } as unknown as Href;
 }
+
+export function matchCancelRoute(
+  matchId: string,
+  options: { status: string; bookingStartsAt?: string | null },
+): Href {
+  return {
+    pathname: "/match/[id]/cancel",
+    params: {
+      id: matchId,
+      status: options.status,
+      ...(options.bookingStartsAt
+        ? { bookingStartsAt: encodeURIComponent(options.bookingStartsAt) }
+        : {}),
+    },
+  } as unknown as Href;
+}
+
+export function matchWithdrawRoute(matchId: string): Href {
+  return {
+    pathname: "/match/[id]/withdraw",
+    params: { id: matchId },
+  } as unknown as Href;
+}

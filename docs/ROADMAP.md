@@ -157,6 +157,8 @@ Exit: repeated requests cannot double-apply rating; disputed results remain unra
 
 **M8.1 (done):** User report submission with rate limiting, platform admin safety queue, and audited dismiss/resolve actions.
 
+**M8.2 (done):** Pilot cancellation/no-show policy — 24h late-cancel window, attendance classification (`late_cancel` vs `cancelled_in_time`), creator cancel and participant withdraw RPCs, and mobile reason flows with localized policy copy.
+
 ## Milestone 8 — Pilot hardening
 
 Deliver:

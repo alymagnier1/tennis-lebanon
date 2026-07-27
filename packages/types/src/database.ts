@@ -1079,6 +1079,24 @@ export type Database = {
           },
         ]
       }
+      platform_policy_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       platform_roles: {
         Row: {
           created_at: string
@@ -1583,6 +1601,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      classify_withdrawal_attendance: {
+        Args: { p_booking_starts_at: string }
+        Returns: Database["public"]["Enums"]["attendance_status"]
+      }
       complete_onboarding: {
         Args: {
           p_birth_year: number
@@ -1782,6 +1804,7 @@ export type Database = {
         Args: { p_match_id: string }
         Returns: Database["public"]["Enums"]["participant_status"]
       }
+      late_cancel_window_hours: { Args: never; Returns: number }
       leave_match: { Args: { p_match_id: string }; Returns: undefined }
       list_active_zones: {
         Args: never
@@ -2103,6 +2126,10 @@ export type Database = {
           p_viewer_id: string
         }
         Returns: boolean
+      }
+      withdraw_from_booked_match: {
+        Args: { p_match_id: string; p_reason: string }
+        Returns: undefined
       }
       withdraw_match_time_option: {
         Args: { p_time_option_id: string }

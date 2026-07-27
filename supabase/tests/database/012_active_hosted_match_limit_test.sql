@@ -51,7 +51,7 @@ begin
       and lm.format = 'singles'::public.match_format
       and lm.status in ('open', 'full', 'ready_to_book')
   loop
-    perform public.cancel_match(v_existing_id);
+    perform public.cancel_match(v_existing_id, 'test cleanup');
   end loop;
 
   perform public.create_and_publish_match(

@@ -379,3 +379,12 @@ Record decisions using this template:
 - Alternatives considered: direct table inserts from clients; email-only reporting.
 - Consequences: `028_user_reports_queue.sql`; block flow unchanged from M2.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M8.2 pilot cancellation and no-show policy
+
+- Status: accepted
+- Context: Pilot clubs need predictable leave/cancel/withdraw rules tied to reliability (`docs/LIFECYCLE.md`).
+- Decision: Use a configurable 24-hour late-cancel window (`platform_policy_settings.late_cancel_hours`); classify withdrawals as `cancelled_in_time` or `late_cancel`; extend `leave_match` and `cancel_match`; add `withdraw_from_booked_match` for non-creator exits from confirmed matches; require reasons when cancelling after full or withdrawing from booked matches.
+- Alternatives considered: fixed no-penalty until match start; club-specific policies per venue.
+- Consequences: `029_cancellation_policy.sql`; mobile cancel/withdraw screens with localized `matches.policy.*` copy.
+- Owner: Founder/technical reviewer

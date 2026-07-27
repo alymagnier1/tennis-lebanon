@@ -11,7 +11,6 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   cancelBookingRequest,
-  cancelMatch,
   castMatchTimeVote,
   extendMatchListing,
   getMatchHub,
@@ -29,7 +28,10 @@ import {
   canRespondToBookingAlternative,
   canShowJoinAction,
   canVoteOnTimes,
-  canCreatorCancelBeforeBooking,
+  canCreatorCancelMatch,
+  canParticipantLeave,
+  canParticipantWithdraw,
+  leavePolicyMessageKey,
   formatPriceMinor,
   hasUnanimousTimeYes,
 } from "@tennis-lebanon/domain";
@@ -50,7 +52,12 @@ import { formatUtcSlotInBeirut } from "../../src/lib/beirut-time";
 import { confirmAction } from "../../src/lib/confirm-action";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitMatchHub } from "../../src/lib/navigation";
-import { matchBookRoute, matchInviteRoute } from "../../src/lib/routes";
+import {
+  matchBookRoute,
+  matchCancelRoute,
+  matchInviteRoute,
+  matchWithdrawRoute,
+} from "../../src/lib/routes";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
 
@@ -144,15 +151,6 @@ export default function MatchHubScreen() {
       exitMatchHub();
     },
     onError: () => Alert.alert(t("matches.hub.leaveError")),
-  });
-
-  const cancelMutation = useMutation({
-    mutationFn: () => cancelMatch(supabase, id!),
-    onSuccess: async () => {
-      await invalidate();
-      exitMatchHub();
-    },
-    onError: () => Alert.alert(t("matches.hub.cancelError")),
   });
 
   const voteMutation = useMutation({
@@ -249,11 +247,18 @@ export default function MatchHubScreen() {
     hub.participant_count < hub.capacity &&
     (hub.status === "open" || hub.status === "full" || hub.status === "draft");
 
+  const hasAcceptedBooking = hub?.booking?.status === "accepted";
+
   const showLeave =
-    hub?.viewer_status === "accepted" && !hub.viewer_is_creator;
+    hub?.viewer_status === "accepted" &&
+    canParticipantLeave(hub.status, hub.viewer_is_creator);
+
+  const showWithdraw =
+    hub?.viewer_status === "accepted" &&
+    canParticipantWithdraw(hub.status, hub.viewer_is_creator);
 
   const showCancel =
-    hub?.viewer_is_creator && canCreatorCancelBeforeBooking(hub.status);
+    hub?.viewer_is_creator && canCreatorCancelMatch(hub.status);
 
   function renderTimeSlot(slot: MatchHubTimeOption) {
     const isAgreed = hub?.selected_time_option_id === slot.id;
@@ -604,6 +609,13 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
+      {showWithdraw ? (
+        <DestructiveButton
+          label={t("matches.hub.withdraw")}
+          onPress={() => router.push(matchWithdrawRoute(id!))}
+        />
+      ) : null}
+
       {showLeave ? (
         <DestructiveButton
           label={t("matches.hub.leave")}
@@ -611,7 +623,10 @@ export default function MatchHubScreen() {
           onPress={() =>
             confirmAction({
               title: t("matches.hub.leave"),
-              message: t("matches.hub.leaveDescription"),
+              message: t(
+                leavePolicyMessageKey(hub!.status, hasAcceptedBooking),
+                { hours: 24 },
+              ),
               confirmLabel: t("matches.hub.leave"),
               cancelLabel: t("common.cancel"),
               onConfirm: () => leaveMutation.mutate(),
@@ -636,15 +651,13 @@ export default function MatchHubScreen() {
       {showCancel ? (
         <DestructiveButton
           label={t("matches.hub.cancel")}
-          loading={cancelMutation.isPending}
           onPress={() =>
-            confirmAction({
-              title: t("matches.hub.cancel"),
-              message: t("matches.hub.cancelDescription"),
-              confirmLabel: t("matches.hub.cancel"),
-              cancelLabel: t("common.cancel"),
-              onConfirm: () => cancelMutation.mutate(),
-            })
+            router.push(
+              matchCancelRoute(id!, {
+                status: hub!.status,
+                bookingStartsAt: hub!.booking?.starts_at ?? null,
+              }),
+            )
           }
         />
       ) : null}
