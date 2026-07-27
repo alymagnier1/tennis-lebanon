@@ -4,6 +4,7 @@ export const NOTIFICATION_KINDS = [
   "match_expired",
   "booking_pending_club",
   "booking_stale_participant",
+  "attendance_prompt",
 ] as const;
 
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];

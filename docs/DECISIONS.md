@@ -325,3 +325,21 @@ Record decisions using this template:
 - Alternatives considered: client-side rating math; attendance-only match completion.
 - Consequences: `023_match_results.sql`; admin dispute resolution and attendance notification jobs remain M7.2+.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M7.2 attendance prompt notifications
+
+- Status: accepted
+- Context: Participants need a timely nudge to record attendance and move toward result submission after a match starts (`docs/LIFECYCLE.md` `open_attendance_window`).
+- Decision: Add `schedule_attendance_prompts` to enqueue deduplicated `attendance_prompt` notifications for accepted participants with `attendance = unknown` on `in_progress` matches past booking start; wire into `run_notification_jobs` and a 15-minute `pg_cron` schedule.
+- Alternatives considered: client-only hub banners without push; repeating reminders without deduplication keys.
+- Consequences: `024_attendance_prompts.sql`; custom score entry and admin dispute queue remain M7.3+.
+- Owner: Founder/technical reviewer
+
+## 2026-07-27 — M7.3 custom score entry
+
+- Status: accepted
+- Context: M7.1 submitted a fixed placeholder score; players need to enter real set scores before confirming results.
+- Decision: Add domain-side tennis set validation (winner-perspective sets, 6-4 / 7-6 style), a match hub score editor (winner pick + 1–5 sets), and display formatted scores on the hub card.
+- Alternatives considered: free-text score field; server-side tennis rule engine in SQL.
+- Consequences: mobile `MatchResultPanel` and `packages/domain/src/results.ts`; admin dispute queue remains M7.5+.
+- Owner: Founder/technical reviewer

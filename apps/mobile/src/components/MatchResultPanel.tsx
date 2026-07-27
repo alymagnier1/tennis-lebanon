@@ -14,13 +14,22 @@ import {
   canDisputeResult,
   canRecordAttendance,
   canSubmitResult,
+  createDefaultSetDrafts,
+  createEmptySetDraft,
+  formatMatchScore,
+  MAX_MATCH_SETS,
+  MIN_MATCH_SETS,
+  parseMatchScoreDrafts,
   type MatchHubResult,
+  type SetScoreDraft,
 } from "@tennis-lebanon/domain";
 import { SectionTitle } from "./AppUi";
 import { AppText } from "./AppText";
 import { colors } from "@tennis-lebanon/ui";
 import {
+  Choice,
   DestructiveButton,
+  FormField,
   PrimaryButton,
   SecondaryButton,
   SummaryRow,
@@ -34,6 +43,80 @@ type HubParticipant = {
   status: string;
 };
 
+function MatchScoreEditor({
+  setDrafts,
+  onChange,
+  disabled,
+}: {
+  setDrafts: SetScoreDraft[];
+  onChange: (next: SetScoreDraft[]) => void;
+  disabled: boolean;
+}) {
+  const { t } = useTranslation();
+
+  const updateSet = (index: number, patch: Partial<SetScoreDraft>) => {
+    onChange(
+      setDrafts.map((draft, draftIndex) =>
+        draftIndex === index ? { ...draft, ...patch } : draft,
+      ),
+    );
+  };
+
+  return (
+    <View style={formStyles.stack}>
+      {setDrafts.map((draft, index) => (
+        <View key={`set-${index}`} style={formStyles.stack}>
+          <AppText style={{ color: colors.neutral[700], fontWeight: "600" }}>
+            {t("matches.results.setLabel", { number: index + 1 })}
+          </AppText>
+          <View style={formStyles.row}>
+            <View style={formStyles.flex}>
+              <FormField
+                label={t("matches.results.winnerGamesLabel")}
+                value={draft.winnerGames}
+                onChangeText={(value) => updateSet(index, { winnerGames: value })}
+                keyboardType="number-pad"
+                editable={!disabled}
+                maxLength={1}
+              />
+            </View>
+            <View style={formStyles.flex}>
+              <FormField
+                label={t("matches.results.loserGamesLabel")}
+                value={draft.loserGames}
+                onChangeText={(value) => updateSet(index, { loserGames: value })}
+                keyboardType="number-pad"
+                editable={!disabled}
+                maxLength={1}
+              />
+            </View>
+          </View>
+        </View>
+      ))}
+      <View style={formStyles.row}>
+        {setDrafts.length < MAX_MATCH_SETS ? (
+          <View style={formStyles.flex}>
+            <SecondaryButton
+              label={t("matches.results.addSet")}
+              disabled={disabled}
+              onPress={() => onChange([...setDrafts, createEmptySetDraft()])}
+            />
+          </View>
+        ) : null}
+        {setDrafts.length > MIN_MATCH_SETS ? (
+          <View style={formStyles.flex}>
+            <SecondaryButton
+              label={t("matches.results.removeSet")}
+              disabled={disabled}
+              onPress={() => onChange(setDrafts.slice(0, -1))}
+            />
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
 export function MatchResultPanel({
   matchId,
   hub,
@@ -46,6 +129,9 @@ export function MatchResultPanel({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedWinnerId, setSelectedWinnerId] = useState<string | null>(null);
+  const [setDrafts, setSetDrafts] = useState<SetScoreDraft[]>(() =>
+    createDefaultSetDrafts(2),
+  );
   const result = (hub.result as MatchHubResult | null) ?? null;
   const participants = (hub.participants as HubParticipant[] | undefined)?.filter(
     (participant) => participant.status === "accepted",
@@ -64,13 +150,8 @@ export function MatchResultPanel({
   });
 
   const submitMutation = useMutation({
-    mutationFn: (winnerUserId: string) =>
-      submitMatchResult(
-        supabase,
-        matchId,
-        { sets: [[6, 4], [6, 3]] },
-        winnerUserId,
-      ),
+    mutationFn: ({ winnerUserId, score }: { winnerUserId: string; score: MatchHubResult["score"] }) =>
+      submitMatchResult(supabase, matchId, score, winnerUserId),
     onSuccess: async () => {
       await invalidate();
       Alert.alert(t("matches.results.submitSuccess"));
@@ -126,6 +207,37 @@ export function MatchResultPanel({
   const winnerName =
     participants.find((participant) => participant.user_id === result?.winner_user_id)
       ?.display_name ?? null;
+  const scoreSummary = result ? formatMatchScore(result.score) : null;
+  const parsedPreview = parseMatchScoreDrafts(setDrafts);
+  const scorePreview =
+    parsedPreview.ok && selectedWinnerId
+      ? formatMatchScore(parsedPreview.score)
+      : null;
+
+  const handleSubmit = () => {
+    if (!selectedWinnerId) {
+      Alert.alert(t("matches.results.selectWinner"));
+      return;
+    }
+
+    const parsed = parseMatchScoreDrafts(setDrafts);
+    if (!parsed.ok) {
+      const setHint =
+        parsed.setIndex !== undefined
+          ? t("matches.results.scoreErrors.setHint", { number: parsed.setIndex + 1 })
+          : null;
+      Alert.alert(
+        t("matches.results.scoreErrors.title"),
+        [t(`matches.results.scoreErrors.${parsed.error}`), setHint].filter(Boolean).join(" "),
+      );
+      return;
+    }
+
+    submitMutation.mutate({
+      winnerUserId: selectedWinnerId,
+      score: parsed.score,
+    });
+  };
 
   return (
     <View style={formStyles.compactCard}>
@@ -139,6 +251,9 @@ export function MatchResultPanel({
           />
           {winnerName ? (
             <SummaryRow label={t("matches.results.winnerLabel")} value={winnerName} />
+          ) : null}
+          {scoreSummary ? (
+            <SummaryRow label={t("matches.results.scoreLabel")} value={scoreSummary} />
           ) : null}
         </>
       ) : null}
@@ -166,22 +281,35 @@ export function MatchResultPanel({
           <AppText style={{ color: colors.neutral[500] }}>
             {t("matches.results.submitPrompt")}
           </AppText>
+          <AppText style={{ color: colors.neutral[700], fontWeight: "600" }}>
+            {t("matches.results.selectWinner")}
+          </AppText>
           {participants.map((participant) => (
-            <SecondaryButton
+            <Choice
               key={participant.user_id}
-              label={t("matches.results.winnerOption", {
-                name: participant.display_name,
-              })}
+              label={participant.display_name}
+              selected={selectedWinnerId === participant.user_id}
               onPress={() => setSelectedWinnerId(participant.user_id)}
-              disabled={submitMutation.isPending}
             />
           ))}
           {selectedWinnerId ? (
-            <PrimaryButton
-              label={t("matches.results.submit")}
-              loading={submitMutation.isPending}
-              onPress={() => submitMutation.mutate(selectedWinnerId)}
-            />
+            <>
+              <MatchScoreEditor
+                setDrafts={setDrafts}
+                onChange={setSetDrafts}
+                disabled={submitMutation.isPending}
+              />
+              {scorePreview ? (
+                <AppText style={{ color: colors.neutral[500] }}>
+                  {t("matches.results.scorePreview", { score: scorePreview })}
+                </AppText>
+              ) : null}
+              <PrimaryButton
+                label={t("matches.results.submit")}
+                loading={submitMutation.isPending}
+                onPress={handleSubmit}
+              />
+            </>
           ) : null}
         </View>
       ) : null}

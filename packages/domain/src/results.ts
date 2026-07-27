@@ -18,6 +18,101 @@ export const matchScoreSchema = z.object({
 
 export type MatchScore = z.infer<typeof matchScoreSchema>;
 
+export const MIN_MATCH_SETS = 1;
+export const MAX_MATCH_SETS = 5;
+
+export type SetScoreDraft = {
+  winnerGames: string;
+  loserGames: string;
+};
+
+export type MatchScoreDraftError =
+  | "empty"
+  | "invalidNumber"
+  | "invalidSet"
+  | "setCount"
+  | "invalidScore";
+
+export function createEmptySetDraft(): SetScoreDraft {
+  return { winnerGames: "", loserGames: "" };
+}
+
+export function createDefaultSetDrafts(count = 2): SetScoreDraft[] {
+  return Array.from({ length: count }, () => createEmptySetDraft());
+}
+
+export function isValidTennisSet(winnerGames: number, loserGames: number): boolean {
+  if (!Number.isInteger(winnerGames) || !Number.isInteger(loserGames)) {
+    return false;
+  }
+  if (winnerGames < 0 || loserGames < 0 || winnerGames <= loserGames || winnerGames > 7) {
+    return false;
+  }
+  if (winnerGames === 6 && loserGames <= 4) {
+    return true;
+  }
+  if (winnerGames === 7 && (loserGames === 5 || loserGames === 6)) {
+    return true;
+  }
+  return false;
+}
+
+export function parseSetScoreDraft(
+  draft: SetScoreDraft,
+):
+  | { ok: true; score: [number, number] }
+  | { ok: false; error: Exclude<MatchScoreDraftError, "setCount" | "invalidScore"> } {
+  if (!draft.winnerGames.trim() || !draft.loserGames.trim()) {
+    return { ok: false, error: "empty" };
+  }
+
+  const winnerGames = Number(draft.winnerGames);
+  const loserGames = Number(draft.loserGames);
+  if (!Number.isInteger(winnerGames) || !Number.isInteger(loserGames)) {
+    return { ok: false, error: "invalidNumber" };
+  }
+  if (!isValidTennisSet(winnerGames, loserGames)) {
+    return { ok: false, error: "invalidSet" };
+  }
+
+  return { ok: true, score: [winnerGames, loserGames] };
+}
+
+export function parseMatchScoreDrafts(
+  drafts: SetScoreDraft[],
+):
+  | { ok: true; score: MatchScore }
+  | { ok: false; error: MatchScoreDraftError; setIndex?: number } {
+  if (drafts.length < MIN_MATCH_SETS || drafts.length > MAX_MATCH_SETS) {
+    return { ok: false, error: "setCount" };
+  }
+
+  const sets: [number, number][] = [];
+  for (let index = 0; index < drafts.length; index += 1) {
+    const draft = drafts[index];
+    if (!draft) {
+      return { ok: false, error: "invalidScore", setIndex: index };
+    }
+    const parsed = parseSetScoreDraft(draft);
+    if (!parsed.ok) {
+      return { ok: false, error: parsed.error, setIndex: index };
+    }
+    sets.push(parsed.score);
+  }
+
+  const score = { sets };
+  const validated = matchScoreSchema.safeParse(score);
+  if (!validated.success) {
+    return { ok: false, error: "invalidScore" };
+  }
+
+  return { ok: true, score: validated.data };
+}
+
+export function formatMatchScore(score: MatchScore): string {
+  return score.sets.map(([winnerGames, loserGames]) => `${winnerGames}-${loserGames}`).join(", ");
+}
+
 export type MatchHubResult = {
   result_id: string;
   status: "submitted" | "confirmed" | "disputed" | "resolved";

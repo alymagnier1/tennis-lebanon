@@ -1984,6 +1984,7 @@ export type Database = {
         Returns: undefined
       }
       run_notification_jobs: { Args: never; Returns: Json }
+      schedule_attendance_prompts: { Args: never; Returns: number }
       schedule_stale_match_reminders: { Args: never; Returns: number }
       send_match_message: {
         Args: { p_body: string; p_match_id: string }
