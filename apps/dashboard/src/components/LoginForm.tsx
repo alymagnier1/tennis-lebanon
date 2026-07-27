@@ -92,37 +92,58 @@ export function LoginForm() {
           </p>
         </div>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
+        <label
+          htmlFor="dashboard-login-email"
+          style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}
+        >
           <span>{t("dashboard.login.emailLabel")}</span>
           <input
+            id="dashboard-login-email"
             type="email"
             autoComplete="username"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "dashboard-login-error" : undefined}
             style={inputStyle}
           />
         </label>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
+        <label
+          htmlFor="dashboard-login-password"
+          style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}
+        >
           <span>{t("dashboard.login.passwordLabel")}</span>
           <input
+            id="dashboard-login-password"
             type="password"
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "dashboard-login-error" : undefined}
             style={inputStyle}
           />
         </label>
 
         {error ? (
-          <p style={{ margin: 0, color: colors.danger[500] }} role="alert">
+          <p
+            id="dashboard-login-error"
+            style={{ margin: 0, color: colors.danger[500] }}
+            role="alert"
+          >
             {error}
           </p>
         ) : null}
 
-        <button type="submit" disabled={submitting} style={buttonStyle}>
+        <button
+          type="submit"
+          disabled={submitting}
+          style={buttonStyle}
+          aria-busy={submitting}
+        >
           {submitting ? t("dashboard.login.submitting") : t("dashboard.login.submit")}
         </button>
 

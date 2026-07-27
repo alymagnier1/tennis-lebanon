@@ -159,6 +159,8 @@ Exit: repeated requests cannot double-apply rating; disputed results remain unra
 
 **M8.2 (done):** Pilot cancellation/no-show policy — 24h late-cancel window, attendance classification (`late_cancel` vs `cancelled_in_time`), creator cancel and participant withdraw RPCs, and mobile reason flows with localized policy copy.
 
+**M8.3 (done):** Performance and accessibility hardening — virtualized discover lists, composite card labels, tab/chip/toolbar screen-reader labels, pilot critical-flow registry, and dashboard login form semantics.
+
 ## Milestone 8 — Pilot hardening
 
 Deliver:

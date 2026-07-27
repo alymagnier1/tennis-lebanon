@@ -388,3 +388,12 @@ Record decisions using this template:
 - Alternatives considered: fixed no-penalty until match start; club-specific policies per venue.
 - Consequences: `029_cancellation_policy.sql`; mobile cancel/withdraw screens with localized `matches.policy.*` copy.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M8.3 performance and accessibility review
+
+- Status: accepted
+- Context: Pilot release gates require usable touch targets, screen-reader labels, dynamic type, and acceptable list performance on discovery (`docs/TESTING_SECURITY.md`).
+- Decision: Virtualize discover card lists via `Screen.virtualizedList`, add composite accessibility labels on shared cards, label tabs/chips/toolbars, export `PILOT_CRITICAL_FLOWS` for manual RTL/a11y regression, and improve dashboard login input semantics.
+- Alternatives considered: defer virtualization until post-pilot; rely on manual QA only without a flow registry.
+- Consequences: no product-rule changes; matches tab remains scroll-mapped for now due to heterogeneous row actions.
+- Owner: Founder/technical reviewer

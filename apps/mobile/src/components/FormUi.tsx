@@ -1,12 +1,14 @@
-import type { PropsWithChildren, ReactNode } from "react";
+import type { PropsWithChildren, ReactElement, ReactNode } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   TextInput,
   View,
+  type ListRenderItem,
   type TextInputProps,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,6 +23,19 @@ import { AppText } from "./AppText";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
 
+export type ScreenVirtualizedListProps = {
+  data: readonly unknown[];
+  keyExtractor: (item: unknown, index: number) => string;
+  renderItem: (info: { item: unknown; index: number }) => ReactElement | null;
+};
+
+const LIST_PERFORMANCE_PROPS = {
+  initialNumToRender: 8,
+  maxToRenderPerBatch: 10,
+  windowSize: 7,
+  removeClippedSubviews: true,
+} as const;
+
 export function Screen({
   title,
   description,
@@ -30,6 +45,7 @@ export function Screen({
   contentGrow = true,
   showTitle = true,
   fixedHeader,
+  virtualizedList,
 }: PropsWithChildren<{
   title: string;
   description?: string;
@@ -38,6 +54,7 @@ export function Screen({
   contentGrow?: boolean;
   showTitle?: boolean;
   fixedHeader?: ReactNode;
+  virtualizedList?: ScreenVirtualizedListProps;
 }>) {
   const insets = useSafeAreaInsets();
   const { horizontalPadding, titleFontSize } = useResponsiveLayout();
@@ -64,7 +81,62 @@ export function Screen({
       </>
     ) : null;
 
+  const refreshControl =
+    onRefresh ? (
+      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    ) : undefined;
+
+  const renderVirtualizedBody = (
+    paddingHorizontal: number,
+    paddingBottom: number,
+    belowFixedHeader = false,
+  ) => {
+    if (!virtualizedList) {
+      return null;
+    }
+
+    const listRenderItem: ListRenderItem<unknown> = ({ item, index }) =>
+      virtualizedList.renderItem({ item, index });
+
+    return (
+      <FlatList
+        style={styles.scroll}
+        data={virtualizedList.data}
+        keyExtractor={virtualizedList.keyExtractor}
+        renderItem={listRenderItem}
+        ListHeaderComponent={
+          <>
+            {!fixedHeader ? titleBlock : null}
+            {children}
+            {virtualizedList.data.length > 0 ? (
+              <View style={styles.listHeaderSpacer} />
+            ) : null}
+          </>
+        }
+        contentContainerStyle={[
+          styles.screen,
+          belowFixedHeader && styles.screenBelowFixedHeader,
+          !contentGrow && styles.screenCompact,
+          {
+            paddingHorizontal,
+            paddingBottom,
+          },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={refreshControl}
+        ItemSeparatorComponent={ListItemSeparator}
+        {...LIST_PERFORMANCE_PROPS}
+      />
+    );
+  };
+
   if (fixedHeader) {
+    const body = renderVirtualizedBody(
+      edgePadding,
+      Math.max(insets.bottom, spacing.lg),
+      true,
+    );
+
     return (
       <View style={styles.screenRoot}>
         <View
@@ -79,28 +151,35 @@ export function Screen({
           {titleBlock}
           {fixedHeader}
         </View>
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={[
-            styles.screen,
-            styles.screenBelowFixedHeader,
-            !contentGrow && styles.screenCompact,
-            {
-              paddingHorizontal: edgePadding,
-              paddingBottom: Math.max(insets.bottom, spacing.lg),
-            },
-          ]}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={
-            onRefresh ? (
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            ) : undefined
-          }
-        >
-          {children}
-        </ScrollView>
+        {body ?? (
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={[
+              styles.screen,
+              styles.screenBelowFixedHeader,
+              !contentGrow && styles.screenCompact,
+              {
+                paddingHorizontal: edgePadding,
+                paddingBottom: Math.max(insets.bottom, spacing.lg),
+              },
+            ]}
+            keyboardShouldPersistTaps="handled"
+            refreshControl={refreshControl}
+          >
+            {children}
+          </ScrollView>
+        )}
       </View>
     );
+  }
+
+  const body = renderVirtualizedBody(
+    edgePadding,
+    Math.max(insets.bottom, spacing.lg),
+  );
+
+  if (body) {
+    return body;
   }
 
   return (
@@ -114,16 +193,16 @@ export function Screen({
         },
       ]}
       keyboardShouldPersistTaps="handled"
-      refreshControl={
-        onRefresh ? (
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        ) : undefined
-      }
+      refreshControl={refreshControl}
     >
       {titleBlock}
       {children}
     </ScrollView>
   );
+}
+
+function ListItemSeparator() {
+  return <View style={styles.listItemSeparator} />;
 }
 
 export function PrimaryButton({
@@ -271,6 +350,7 @@ export function Choice({
   return (
     <Pressable
       accessibilityRole="checkbox"
+      accessibilityLabel={label}
       accessibilityState={{ checked: selected }}
       onPress={onPress}
       style={[
@@ -463,6 +543,12 @@ const styles = StyleSheet.create({
   },
   screenCompact: {
     flexGrow: 0,
+  },
+  listHeaderSpacer: {
+    height: spacing.md,
+  },
+  listItemSeparator: {
+    height: spacing.md,
   },
   title: {
     color: colors.neutral[900],

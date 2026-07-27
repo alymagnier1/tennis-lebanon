@@ -8,6 +8,7 @@ import {
   discoverOpenMatches,
   getActiveZones,
   type CompatiblePlayerCard,
+  type OpenMatchCard,
 } from "@tennis-lebanon/api";
 import {
   type PlayIntent,
@@ -23,12 +24,12 @@ import {
   SegmentTabs,
   SheetOption,
   ToolbarRow,
-  appStyles,
 } from "../../src/components/AppUi";
 import {
   PrimaryButton,
   Screen,
   SecondaryButton,
+  type ScreenVirtualizedListProps,
   formStyles,
 } from "../../src/components/FormUi";
 import {
@@ -240,6 +241,69 @@ export default function DiscoverScreen() {
     </View>
   );
 
+  const virtualizedList = useMemo((): ScreenVirtualizedListProps | undefined => {
+    if (segment === "players") {
+      return {
+        data: sortedPlayers,
+        keyExtractor: (player) => (player as CompatiblePlayerCard).user_id,
+        renderItem: ({ item }) => {
+          const player = item as CompatiblePlayerCard;
+          return (
+            <PlayerCard
+              name={player.display_name}
+              avatarPath={player.avatar_path}
+              levelLabel={publicPlayerLevelLabel(player, t)}
+              locationLabel={zoneLabelFromList(
+                player.zones,
+                i18n.resolvedLanguage ?? i18n.language,
+              )}
+              hint={playerHint(player, t)}
+              onPress={() =>
+                router.push({
+                  pathname: "/player/[id]",
+                  params: { id: player.user_id },
+                })
+              }
+            />
+          );
+        },
+      };
+    }
+
+    if (segment === "matches") {
+      return {
+        data: matchesQuery.data ?? [],
+        keyExtractor: (match) => (match as OpenMatchCard).match_id,
+        renderItem: ({ item }) => {
+          const match = item as OpenMatchCard;
+          return (
+            <MatchCard
+              title={`${t(`formats.${match.format}`)} · ${match.creator_display_name}`}
+              subtitle={`${t(`skillBands.${match.min_skill}`)}–${t(`skillBands.${match.max_skill}`)}`}
+              meta={`${zoneLabelFromList(match.zones, i18n.resolvedLanguage ?? i18n.language)} · ${t("discover.spotsRemaining", { count: match.capacity - match.participant_count })}`}
+              note={match.notes ?? undefined}
+              onPress={() =>
+                router.push({
+                  pathname: "/match/[id]",
+                  params: { id: match.match_id },
+                })
+              }
+            />
+          );
+        },
+      };
+    }
+
+    return undefined;
+  }, [
+    i18n.language,
+    i18n.resolvedLanguage,
+    matchesQuery.data,
+    segment,
+    sortedPlayers,
+    t,
+  ]);
+
   return (
     <>
       <Screen
@@ -247,6 +311,7 @@ export default function DiscoverScreen() {
         showTitle={false}
         refreshing={activeQuery.isFetching}
         onRefresh={() => void handleRefresh()}
+        virtualizedList={virtualizedList}
         fixedHeader={
           <>
             <SegmentTabs
@@ -353,48 +418,6 @@ export default function DiscoverScreen() {
           }
         />
       ) : null}
-
-      <View style={appStyles.cardList}>
-        {segment === "players"
-          ? sortedPlayers.map((player) => (
-              <PlayerCard
-                key={player.user_id}
-                name={player.display_name}
-                avatarPath={player.avatar_path}
-                levelLabel={publicPlayerLevelLabel(player, t)}
-                locationLabel={zoneLabelFromList(
-                  player.zones,
-                  i18n.resolvedLanguage ?? i18n.language,
-                )}
-                hint={playerHint(player, t)}
-                onPress={() =>
-                  router.push({
-                    pathname: "/player/[id]",
-                    params: { id: player.user_id },
-                  })
-                }
-              />
-            ))
-          : null}
-
-        {segment === "matches"
-          ? matchesQuery.data?.map((match) => (
-              <MatchCard
-                key={match.match_id}
-                title={`${t(`formats.${match.format}`)} · ${match.creator_display_name}`}
-                subtitle={`${t(`skillBands.${match.min_skill}`)}–${t(`skillBands.${match.max_skill}`)}`}
-                meta={`${zoneLabelFromList(match.zones, i18n.resolvedLanguage ?? i18n.language)} · ${t("discover.spotsRemaining", { count: match.capacity - match.participant_count })}`}
-                note={match.notes ?? undefined}
-                onPress={() =>
-                  router.push({
-                    pathname: "/match/[id]",
-                    params: { id: match.match_id },
-                  })
-                }
-              />
-            ))
-          : null}
-      </View>
 
       </Screen>
 

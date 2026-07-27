@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import {
   Animated,
   Image,
@@ -19,6 +19,7 @@ import {
   typography,
 } from "@tennis-lebanon/ui";
 import { initialsFromName, resolveAvatarUri } from "../lib/avatar-url";
+import { buildCardAccessibilityLabel } from "../lib/card-accessibility";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
 import { AppText } from "./AppText";
@@ -42,6 +43,7 @@ export function SegmentTabs<T extends string>({
           <Pressable
             key={option.value}
             accessibilityRole="tab"
+            accessibilityLabel={option.label}
             accessibilityState={{ selected }}
             onPress={() => onChange(option.value)}
             style={[styles.segmentTab, selected && styles.segmentTabActive]}
@@ -105,6 +107,7 @@ export function SectionTitle({
   return (
     <View style={styles.sectionTitle}>
       <AppText
+        accessibilityRole="header"
         style={[styles.sectionTitleText, { writingDirection }]}
         maxLines={2}
       >
@@ -145,6 +148,7 @@ export function ChipSelect<T extends string>({
             <Pressable
               key={option.value}
               accessibilityRole="radio"
+              accessibilityLabel={option.label}
               accessibilityState={{ selected }}
               onPress={() => onChange(option.value)}
               style={[
@@ -197,6 +201,7 @@ export function ChipMultiSelect({
             <Pressable
               key={option.value}
               accessibilityRole="checkbox"
+              accessibilityLabel={option.label}
               accessibilityState={{ checked: selected }}
               onPress={() => onToggle(option.value)}
               style={[
@@ -254,7 +259,7 @@ export function Avatar({
   );
 }
 
-export function PlayerCard({
+export const PlayerCard = memo(function PlayerCard({
   name,
   avatarPath,
   levelLabel,
@@ -272,6 +277,12 @@ export function PlayerCard({
   trailing?: ReactNode;
 }) {
   const { rowDirection, chevron, writingDirection } = useLayoutDirection();
+  const accessibilityLabel = buildCardAccessibilityLabel([
+    name,
+    levelLabel,
+    locationLabel,
+    hint,
+  ]);
 
   const content = (
     <>
@@ -321,6 +332,7 @@ export function PlayerCard({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       style={({ pressed }) => [
         styles.playerCard,
@@ -331,7 +343,7 @@ export function PlayerCard({
       {content}
     </Pressable>
   );
-}
+});
 
 export function PlayerInviteAction({
   label,
@@ -385,7 +397,7 @@ export function PlayerInviteAction({
   );
 }
 
-export function MatchCard({
+export const MatchCard = memo(function MatchCard({
   title,
   subtitle,
   meta,
@@ -401,6 +413,13 @@ export function MatchCard({
   onPress?: () => void;
 }) {
   const { rowDirection, chevron, writingDirection } = useLayoutDirection();
+  const accessibilityLabel = buildCardAccessibilityLabel([
+    title,
+    badge,
+    subtitle,
+    meta,
+    note,
+  ]);
 
   const content = (
     <>
@@ -454,6 +473,7 @@ export function MatchCard({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       style={({ pressed }) => [
         styles.matchCard,
@@ -464,7 +484,7 @@ export function MatchCard({
       {content}
     </Pressable>
   );
-}
+});
 
 export function EmptyState({
   icon,
@@ -519,6 +539,7 @@ export function ToolbarRow({
           <Pressable
             key={item.label}
             accessibilityRole="button"
+            accessibilityLabel={item.label}
             accessibilityState={{ expanded: item.open }}
             onPress={item.onPress}
             style={({ pressed }) => [
@@ -659,6 +680,7 @@ export function SheetOption({
   return (
     <Pressable
       accessibilityRole="radio"
+      accessibilityLabel={label}
       accessibilityState={{ selected }}
       onPress={onPress}
       style={[styles.sheetOption, { flexDirection: rowDirection }]}
