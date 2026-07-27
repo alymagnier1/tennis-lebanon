@@ -500,6 +500,33 @@
       "declineAlternative": "Refuser l’alternative",
       "alternativeError": "Impossible de mettre à jour cette alternative."
     },
+    "results": {
+      "title": "Résultat",
+      "statusLabel": "Statut",
+      "winnerLabel": "Vainqueur",
+      "attendancePrompt": "Avez-vous joué ce match ?",
+      "attended": "J'ai joué",
+      "noShow": "Je n'ai pas joué",
+      "attendanceError": "Impossible d'enregistrer votre présence.",
+      "submitPrompt": "Qui a gagné ? Nous utiliserons un score 6-4, 6-3 pour l'instant.",
+      "winnerOption": "{{name}} a gagné",
+      "submit": "Envoyer le résultat",
+      "submitSuccess": "Résultat envoyé. En attente de confirmation de l'adversaire.",
+      "submitError": "Impossible d'envoyer ce résultat.",
+      "confirm": "Confirmer le résultat",
+      "confirmSuccess": "Résultat confirmé.",
+      "confirmError": "Impossible de confirmer ce résultat.",
+      "dispute": "Contester le résultat",
+      "disputePrompt": "Le résultat sera examiné. Aucun changement de classement pour l'instant.",
+      "disputeSuccess": "Résultat contesté.",
+      "disputeError": "Impossible de contester ce résultat.",
+      "status": {
+        "submitted": "En attente de confirmation",
+        "confirmed": "Confirmé",
+        "disputed": "Contesté",
+        "resolved": "Résolu"
+      }
+    },
     "booking": {
       "title": "Demander un court",
       "description": "Choisissez un club et un court pour l’horaire convenu.",

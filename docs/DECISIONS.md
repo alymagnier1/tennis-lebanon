@@ -316,3 +316,12 @@ Record decisions using this template:
 - Alternatives considered: client-only status display; separate edge functions per job.
 - Consequences: `022_lifecycle_jobs.sql`; production must also schedule `process-notifications` via `pg_net` + Vault (attendance prompts remain M7).
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M7.1 result workflow and idempotent rating
+
+- Status: accepted
+- Context: North-star metric requires mutually confirmed results with server-side rating; schema existed but no RPCs or client flow.
+- Decision: Add `record_match_attendance`, `submit_match_result`, `confirm_match_result`, `dispute_match_result`, and `apply_rating_for_result` (Elo v1, K=32, singles only); extend `match_hub_card` with `result` and `viewer_attendance`; mobile hub panel for attendance and result actions.
+- Alternatives considered: client-side rating math; attendance-only match completion.
+- Consequences: `023_match_results.sql`; admin dispute resolution and attendance notification jobs remain M7.2+.
+- Owner: Founder/technical reviewer

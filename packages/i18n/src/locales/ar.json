@@ -500,6 +500,33 @@
       "declineAlternative": "رفض البديل",
       "alternativeError": "تعذر تحديث هذا البديل."
     },
+    "results": {
+      "title": "النتيجة",
+      "statusLabel": "الحالة",
+      "winnerLabel": "الفائز",
+      "attendancePrompt": "هل لعبت هذه المباراة؟",
+      "attended": "لعبت",
+      "noShow": "لم ألعب",
+      "attendanceError": "تعذر حفظ حضورك.",
+      "submitPrompt": "من فاز؟ سنستخدم نتيجة 6-4، 6-3 مؤقتاً.",
+      "winnerOption": "فاز {{name}}",
+      "submit": "إرسال النتيجة",
+      "submitSuccess": "تم إرسال النتيجة. بانتظار تأكيد الخصم.",
+      "submitError": "تعذر إرسال النتيجة.",
+      "confirm": "تأكيد النتيجة",
+      "confirmSuccess": "تم تأكيد النتيجة.",
+      "confirmError": "تعذر تأكيد النتيجة.",
+      "dispute": "الاعتراض على النتيجة",
+      "disputePrompt": "سيتم إرسال النتيجة للمراجعة. لن يتغير التصنيف بعد.",
+      "disputeSuccess": "تم الاعتراض على النتيجة.",
+      "disputeError": "تعذر الاعتراض على النتيجة.",
+      "status": {
+        "submitted": "بانتظار التأكيد",
+        "confirmed": "مؤكدة",
+        "disputed": "متنازع عليها",
+        "resolved": "محسومة"
+      }
+    },
     "booking": {
       "title": "طلب ملعب",
       "description": "اختر نادياً وملعباً للوقت المتفق عليه.",

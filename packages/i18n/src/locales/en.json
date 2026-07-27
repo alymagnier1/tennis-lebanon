@@ -500,6 +500,33 @@
       "declineAlternative": "Decline alternative",
       "alternativeError": "We could not update this alternative."
     },
+    "results": {
+      "title": "Result",
+      "statusLabel": "Status",
+      "winnerLabel": "Winner",
+      "attendancePrompt": "Did you play this match?",
+      "attended": "I played",
+      "noShow": "I did not play",
+      "attendanceError": "We could not save your attendance.",
+      "submitPrompt": "Who won? We will use a standard 6-4, 6-3 score for now.",
+      "winnerOption": "{{name}} won",
+      "submit": "Submit result",
+      "submitSuccess": "Result submitted. Waiting for your opponent to confirm.",
+      "submitError": "We could not submit this result.",
+      "confirm": "Confirm result",
+      "confirmSuccess": "Result confirmed.",
+      "confirmError": "We could not confirm this result.",
+      "dispute": "Dispute result",
+      "disputePrompt": "This will flag the result for review. No rating change will happen yet.",
+      "disputeSuccess": "Result disputed.",
+      "disputeError": "We could not dispute this result.",
+      "status": {
+        "submitted": "Awaiting confirmation",
+        "confirmed": "Confirmed",
+        "disputed": "Disputed",
+        "resolved": "Resolved"
+      }
+    },
     "booking": {
       "title": "Request a court",
       "description": "Choose a club and court for your agreed time.",

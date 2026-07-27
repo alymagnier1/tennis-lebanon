@@ -2,6 +2,7 @@ import type { CreateMatchInput } from "@tennis-lebanon/domain";
 import { toRpcProposedTimes } from "@tennis-lebanon/domain";
 import type { MatchHubBooking } from "./bookings";
 import type { TennisSupabaseClient } from "./client";
+import type { MatchHubResult } from "./results";
 
 function createMatchRpcArgs(input: CreateMatchInput) {
   return {
@@ -52,6 +53,8 @@ export type MatchHubCard = {
   is_stale_warning: boolean;
   can_extend_listing: boolean;
   booking: MatchHubBooking | null;
+  result: MatchHubResult | null;
+  viewer_attendance: string;
 };
 
 export type MyMatchRow = {

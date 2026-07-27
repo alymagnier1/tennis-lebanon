@@ -143,6 +143,8 @@ Display rules (already in `docs/DATABASE.md`): show skill **bands** and a **Prov
 
 Exit: repeated requests cannot double-apply rating; disputed results remain unrated; audit trail is complete.
 
+**M7.1 (in progress):** Attendance recording, result submit/confirm/dispute RPCs, idempotent Elo rating, match hub result panel.
+
 ## Milestone 8 — Pilot hardening
 
 Deliver:

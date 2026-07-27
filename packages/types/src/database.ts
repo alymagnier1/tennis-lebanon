@@ -1510,6 +1510,14 @@ export type Database = {
         }
         Returns: string
       }
+      apply_rating_for_result: {
+        Args: { p_result_id: string }
+        Returns: undefined
+      }
+      assert_accepted_match_participant: {
+        Args: { p_match_id: string; p_user_id?: string }
+        Returns: undefined
+      }
       assert_authenticated_caller: { Args: never; Returns: string }
       assert_club_admin: { Args: { p_club_id: string }; Returns: string }
       assert_club_staff: { Args: { p_club_id: string }; Returns: string }
@@ -1595,6 +1603,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      confirm_match_result: { Args: { p_match_id: string }; Returns: undefined }
       court_has_block: {
         Args: { p_court_id: string; p_ends_at: string; p_starts_at: string }
         Returns: boolean
@@ -1684,6 +1693,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      dispute_match_result: {
+        Args: { p_match_id: string; p_note?: string }
+        Returns: undefined
       }
       enforce_discovery_rate_limit: {
         Args: { p_surface: string; p_user_id: string }
@@ -1916,6 +1929,13 @@ export type Database = {
         Returns: undefined
       }
       publish_match: { Args: { p_match_id: string }; Returns: undefined }
+      record_match_attendance: {
+        Args: {
+          p_attendance: Database["public"]["Enums"]["attendance_status"]
+          p_match_id: string
+        }
+        Returns: undefined
+      }
       refresh_match_open_state: {
         Args: { p_match_id: string }
         Returns: undefined
@@ -1982,6 +2002,10 @@ export type Database = {
         Returns: number
       }
       start_in_progress_matches: { Args: never; Returns: number }
+      submit_match_result: {
+        Args: { p_match_id: string; p_score: Json; p_winner_user_id: string }
+        Returns: string
+      }
       update_club_booking_settings: {
         Args: {
           p_booking_mode: string
@@ -2145,6 +2169,10 @@ export type Database = {
         listing_expires_at: string | null
         is_stale_warning: boolean | null
         can_extend_listing: boolean | null
+        result: Json | null
+        viewer_attendance:
+          | Database["public"]["Enums"]["attendance_status"]
+          | null
       }
       match_invite_inbox_row: {
         invitation_id: string | null

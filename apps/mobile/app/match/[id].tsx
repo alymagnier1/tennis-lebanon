@@ -36,6 +36,7 @@ import {
 import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
 import { SectionTitle, StatusBanner } from "../../src/components/AppUi";
 import { MatchChatPanel } from "../../src/components/MatchChatPanel";
+import { MatchResultPanel } from "../../src/components/MatchResultPanel";
 import { AppText } from "../../src/components/AppText";
 import {
   DestructiveButton,
@@ -51,6 +52,7 @@ import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitMatchHub } from "../../src/lib/navigation";
 import { matchBookRoute, matchInviteRoute } from "../../src/lib/routes";
 import { supabase } from "../../src/lib/supabase";
+import { useAuth } from "../../src/providers/AuthProvider";
 
 type HubParticipant = {
   user_id: string;
@@ -104,6 +106,7 @@ export default function MatchHubScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
+  const { session } = useAuth();
   const queryClient = useQueryClient();
 
   const hubQuery = useQuery({
@@ -621,6 +624,14 @@ export default function MatchHubScreen() {
         matchId={id!}
         enabled={hub?.viewer_status === "accepted"}
       />
+
+      {hub && session?.user.id ? (
+        <MatchResultPanel
+          matchId={id!}
+          hub={hub}
+          viewerUserId={session.user.id}
+        />
+      ) : null}
 
       {showCancel ? (
         <DestructiveButton
