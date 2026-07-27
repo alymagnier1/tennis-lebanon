@@ -75,6 +75,19 @@ export type MyMatchRow = {
   can_extend_listing: boolean;
 };
 
+export type CompletedMatchRow = {
+  match_id: string;
+  format: string;
+  result_status: string;
+  score: { sets: [number, number][] };
+  winner_user_id: string | null;
+  viewer_won: boolean;
+  opponent_names: string | null;
+  played_at: string | null;
+  club_name: string | null;
+  completed_at: string;
+};
+
 export type MatchInviteInboxRow = {
   invitation_id: string;
   match_id: string;
@@ -273,6 +286,14 @@ export async function listMyMatches(
   const { data, error } = await client.rpc("list_my_matches");
   if (error) throw error;
   return (data ?? []) as MyMatchRow[];
+}
+
+export async function listMyCompletedMatches(
+  client: TennisSupabaseClient,
+): Promise<CompletedMatchRow[]> {
+  const { data, error } = await client.rpc("list_my_completed_matches");
+  if (error) throw error;
+  return (data ?? []) as CompletedMatchRow[];
 }
 
 export async function extendMatchListing(

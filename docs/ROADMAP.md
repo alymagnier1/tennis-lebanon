@@ -153,6 +153,8 @@ Exit: repeated requests cannot double-apply rating; disputed results remain unra
 
 **M7.5 (done):** Platform admin dispute queue with confirm/void resolution, audit events, and rating on confirm only.
 
+**M7.6 (done):** Completed match history on the Matches tab via `list_my_completed_matches`.
+
 ## Milestone 8 — Pilot hardening
 
 Deliver:

@@ -456,7 +456,14 @@
       "empty": "لا توجد مباريات نشطة بعد، لكن إعداد مباراة يستغرق ثوانٍ فقط.",
       "emptyTitle": "لا مباريات قادمة",
       "creator": "المنشئ",
-      "activeTab": "نشطة"
+      "activeTab": "نشطة",
+      "completedTab": "منتهية",
+      "completedLoadError": "تعذر تحميل سجل مبارياتك.",
+      "completedEmptyTitle": "لا مباريات منتهية بعد",
+      "completedEmpty": "ستظهر هنا المباريات المنتهية بنتيجة مؤكدة.",
+      "won": "فوز",
+      "lost": "خسارة",
+      "vsOpponent": "ضد {{name}}"
     },
     "lifecycle": {
       "staleBadge": "ينتهي قريباً",

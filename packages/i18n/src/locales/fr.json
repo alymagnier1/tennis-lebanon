@@ -456,7 +456,14 @@
       "empty": "Vous n'avez pas encore de match actif, mais il suffit de quelques secondes pour en créer un.",
       "emptyTitle": "Aucun match à venir",
       "creator": "Créateur",
-      "activeTab": "Actifs"
+      "activeTab": "Actifs",
+      "completedTab": "Terminés",
+      "completedLoadError": "Impossible de charger votre historique de matchs.",
+      "completedEmptyTitle": "Aucun match terminé",
+      "completedEmpty": "Les matchs terminés avec un résultat confirmé apparaîtront ici.",
+      "won": "Victoire",
+      "lost": "Défaite",
+      "vsOpponent": "vs {{name}}"
     },
     "lifecycle": {
       "staleBadge": "Expire bientôt",

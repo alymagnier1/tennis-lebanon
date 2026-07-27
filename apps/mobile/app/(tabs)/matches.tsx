@@ -20,7 +20,11 @@ import {
 
   listMyMatches,
 
+  listMyCompletedMatches,
+
 } from "@tennis-lebanon/api";
+
+import { formatMatchScore } from "@tennis-lebanon/domain";
 
 import {
 
@@ -54,7 +58,7 @@ import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 
 
 
-type MatchesSegment = "invites" | "active";
+type MatchesSegment = "invites" | "active" | "completed";
 
 
 
@@ -88,11 +92,23 @@ export default function MatchesScreen() {
 
 
 
+  const completedQuery = useQuery({
+
+    queryKey: ["my-completed-matches"],
+
+    queryFn: () => listMyCompletedMatches(supabase),
+
+  });
+
+
+
   const invalidate = async () => {
 
     await queryClient.invalidateQueries({ queryKey: ["my-match-invites"] });
 
     await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
+
+    await queryClient.invalidateQueries({ queryKey: ["my-completed-matches"] });
 
     await queryClient.invalidateQueries({ queryKey: ["match-hub"] });
 
@@ -156,13 +172,25 @@ export default function MatchesScreen() {
 
   const refreshing =
 
-    invitesQuery.isRefetching || matchesQuery.isRefetching;
+    invitesQuery.isRefetching ||
+
+    matchesQuery.isRefetching ||
+
+    completedQuery.isRefetching;
 
 
 
   const onRefresh = async () => {
 
-    await Promise.all([invitesQuery.refetch(), matchesQuery.refetch()]);
+    await Promise.all([
+
+      invitesQuery.refetch(),
+
+      matchesQuery.refetch(),
+
+      completedQuery.refetch(),
+
+    ]);
 
   };
 
@@ -188,6 +216,16 @@ export default function MatchesScreen() {
 
 
 
+  const showEmptyCompleted =
+
+    segment === "completed" &&
+
+    completedQuery.data?.length === 0 &&
+
+    !completedQuery.isLoading;
+
+
+
   return (
 
     <Screen
@@ -206,6 +244,8 @@ export default function MatchesScreen() {
           { value: "invites", label: t("matches.invite.inboxTab") },
 
           { value: "active", label: t("matches.list.activeTab") },
+
+          { value: "completed", label: t("matches.list.completedTab") },
 
         ]}
 
@@ -305,7 +345,7 @@ export default function MatchesScreen() {
 
         </>
 
-      ) : (
+      ) : segment === "active" ? (
 
         <>
 
@@ -412,6 +452,106 @@ export default function MatchesScreen() {
               </View>
 
             ))}
+
+          </View>
+
+        </>
+
+      ) : (
+
+        <>
+
+          {completedQuery.isError ? (
+
+            <Text style={formStyles.errorText}>
+
+              {t("matches.list.completedLoadError")}
+
+            </Text>
+
+          ) : null}
+
+
+
+          {showEmptyCompleted ? (
+
+            <EmptyState
+
+              title={t("matches.list.completedEmptyTitle")}
+
+              body={t("matches.list.completedEmpty")}
+
+            />
+
+          ) : null}
+
+
+
+          <View style={appStyles.cardList}>
+
+            {completedQuery.data?.map((match) => {
+
+              const scoreLabel = formatMatchScore(match.score);
+
+              const outcomeLabel = match.viewer_won
+
+                ? t("matches.list.won")
+
+                : t("matches.list.lost");
+
+              const opponentLabel = match.opponent_names
+
+                ? t("matches.list.vsOpponent", { name: match.opponent_names })
+
+                : undefined;
+
+              const playedLabel = match.played_at
+
+                ? formatUtcInBeirut(match.played_at)
+
+                : formatUtcInBeirut(match.completed_at);
+
+              const metaParts = [
+
+                playedLabel,
+
+                match.club_name,
+
+                scoreLabel,
+
+                t(`matches.results.status.${match.result_status}`),
+
+              ].filter(Boolean);
+
+              return (
+
+                <MatchCard
+
+                  key={match.match_id}
+
+                  title={`${t(`formats.${match.format}`)} · ${outcomeLabel}`}
+
+                  subtitle={opponentLabel ?? t(`matches.results.status.${match.result_status}`)}
+
+                  meta={metaParts.join(" · ")}
+
+                  onPress={() =>
+
+                    router.push({
+
+                      pathname: "/match/[id]",
+
+                      params: { id: match.match_id },
+
+                    })
+
+                  }
+
+                />
+
+              );
+
+            })}
 
           </View>
 

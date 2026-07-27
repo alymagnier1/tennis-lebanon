@@ -361,3 +361,12 @@ Record decisions using this template:
 - Alternatives considered: email-only ops workflow; auto-resolve after timeout.
 - Consequences: `026_result_dispute_resolution.sql`; completed matches tab remains M7.6+.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M7.6 completed match history
+
+- Status: accepted
+- Context: Players need to see finished matches after the north-star loop completes (`docs/FLOWS_AND_SCREENS.md`).
+- Decision: Add `list_my_completed_matches` RPC and a **Completed** segment on the mobile Matches tab showing opponent, score, club, and result status.
+- Alternatives considered: fold completed rows into Active; separate profile-only history screen.
+- Consequences: `027_completed_matches_list.sql`; active list RPC unchanged.
+- Owner: Founder/technical reviewer

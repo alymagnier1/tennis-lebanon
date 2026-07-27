@@ -12,6 +12,7 @@ import {
   joinMatch,
   listMyMatchInvites,
   listMyMatches,
+  listMyCompletedMatches,
   publishMatch,
   respondToJoinRequest,
   withdrawMatchTimeOption,
@@ -139,13 +140,17 @@ describe("matches API wrappers", () => {
     const { client, rpc } = createMockClient();
     rpc
       .mockResolvedValueOnce({ data: { match_id: "match-id" }, error: null })
-      .mockResolvedValueOnce({ data: [{ match_id: "match-id" }], error: null });
+      .mockResolvedValueOnce({ data: [{ match_id: "match-id" }], error: null })
+      .mockResolvedValueOnce({ data: [{ match_id: "completed-id" }], error: null });
 
     await expect(getMatchHub(client, "match-id")).resolves.toEqual({
       match_id: "match-id",
     });
     await expect(listMyMatches(client)).resolves.toEqual([
       { match_id: "match-id" },
+    ]);
+    await expect(listMyCompletedMatches(client)).resolves.toEqual([
+      { match_id: "completed-id" },
     ]);
   });
 

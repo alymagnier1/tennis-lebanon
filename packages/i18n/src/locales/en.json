@@ -456,7 +456,14 @@
       "empty": "You do not have any active matches yet, but it only takes seconds to set one up.",
       "emptyTitle": "No upcoming matches",
       "creator": "Creator",
-      "activeTab": "Active"
+      "activeTab": "Active",
+      "completedTab": "Completed",
+      "completedLoadError": "We could not load your match history.",
+      "completedEmptyTitle": "No completed matches yet",
+      "completedEmpty": "Finished matches with a confirmed result will appear here.",
+      "won": "Won",
+      "lost": "Lost",
+      "vsOpponent": "vs {{name}}"
     },
     "lifecycle": {
       "staleBadge": "Expiring soon",

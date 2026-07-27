@@ -1855,6 +1855,21 @@ export type Database = {
           message_id: string
         }[]
       }
+      list_my_completed_matches: {
+        Args: never
+        Returns: {
+          club_name: string
+          completed_at: string
+          format: Database["public"]["Enums"]["match_format"]
+          match_id: string
+          opponent_names: string
+          played_at: string
+          result_status: Database["public"]["Enums"]["result_status"]
+          score: Json
+          viewer_won: boolean
+          winner_user_id: string
+        }[]
+      }
       list_my_match_invites: {
         Args: never
         Returns: Database["public"]["CompositeTypes"]["match_invite_inbox_row"][]
