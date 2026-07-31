@@ -13,8 +13,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   colors,
+  elevation,
   minTouchTargetPx,
   radii,
+  semantic,
   spacing,
   typography,
 } from "@tennis-lebanon/ui";
@@ -926,9 +928,10 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.lg,
     borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
-    backgroundColor: colors.neutral[0],
+    backgroundColor: semantic.surface,
+    // Lifted rather than hairline-outlined: a 1px near-white border on white
+    // is what made every surface read as a flat box.
+    ...elevation.sm,
   },
   playerCardPressed: { opacity: 0.85 },
   playerCardBody: { flex: 1, gap: 2, minWidth: 0 },
@@ -945,10 +948,20 @@ const styles = StyleSheet.create({
     color: colors.neutral[500],
     fontSize: typography.size.sm,
   },
+  // The hint carries the shared-availability slot, which is the fact that
+  // makes someone tap. It was the smallest text on the card; it now reads as
+  // a tinted pill at body-adjacent size.
   playerCardHint: {
-    color: colors.brand[600],
-    fontSize: typography.size.xs,
+    alignSelf: "flex-start",
+    overflow: "hidden",
     marginTop: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radii.sm,
+    backgroundColor: colors.success[50],
+    color: colors.success[700],
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
   },
   inviteActionButton: {
     minWidth: 72,
@@ -957,7 +970,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: spacing.md,
     borderRadius: radii.full,
-    backgroundColor: colors.brand[500],
+    backgroundColor: semantic.interactive,
   },
   inviteActionButtonText: {
     color: colors.neutral[0],
@@ -982,9 +995,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.lg,
     borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
-    backgroundColor: colors.neutral[0],
+    backgroundColor: semantic.surface,
+    ...elevation.sm,
   },
   matchCardBody: { flex: 1, gap: spacing.xs, minWidth: 0 },
   matchCardTitle: {
@@ -992,9 +1004,15 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
+  // Bare warning-coloured text read as an error rather than a status.
   matchCardBadge: {
     alignSelf: "flex-start",
-    color: colors.warning[500],
+    overflow: "hidden",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radii.sm,
+    backgroundColor: colors.warning[100],
+    color: colors.warning[700],
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
   },
@@ -1046,7 +1064,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: colors.neutral[100],
+    borderColor: semantic.border,
   },
   toolbarItem: {
     flex: 1,
@@ -1063,7 +1081,7 @@ const styles = StyleSheet.create({
   },
   toolbarItemDivider: {
     borderRightWidth: 1,
-    borderRightColor: colors.neutral[100],
+    borderRightColor: semantic.border,
   },
   toolbarText: {
     textAlign: "center",
@@ -1117,7 +1135,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderColor: colors.neutral[100],
+    borderColor: semantic.border,
   },
   sheetFooterButton: {
     flex: 1,
@@ -1178,9 +1196,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.lg,
     borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
-    backgroundColor: colors.neutral[0],
+    backgroundColor: semantic.surface,
+    ...elevation.sm,
   },
   formSectionBody: {
     gap: spacing.md,

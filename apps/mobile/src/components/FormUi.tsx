@@ -14,8 +14,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   colors,
+  elevation,
   minTouchTargetPx,
   radii,
+  semantic,
   spacing,
   typography,
 } from "@tennis-lebanon/ui";
@@ -450,12 +452,11 @@ export const formStyles = StyleSheet.create({
     fontSize: typography.size.sm,
   },
   card: {
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
     borderRadius: radii.lg,
     padding: spacing.lg,
     gap: spacing.xs,
-    backgroundColor: colors.neutral[0],
+    backgroundColor: semantic.surface,
+    ...elevation.sm,
   },
   compactCard: {
     borderWidth: 1,
@@ -565,8 +566,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
-    backgroundColor: colors.brand[500],
+    // brand[500] gave white text only 2.4:1 and read as disabled.
+    backgroundColor: semantic.interactive,
     borderRadius: radii.full,
+    ...elevation.sm,
   },
   primaryButtonText: {
     color: colors.neutral[0],
