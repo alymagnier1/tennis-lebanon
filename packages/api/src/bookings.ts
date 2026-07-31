@@ -160,6 +160,8 @@ export type StaffClub = {
   name: string;
   slug: string;
   role: string;
+  /** False while the club is awaiting platform approval (SEC-001). */
+  is_active: boolean;
 };
 
 export type ClubBookingQueueRow = {

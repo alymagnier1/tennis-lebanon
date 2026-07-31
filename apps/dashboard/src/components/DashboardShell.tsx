@@ -65,6 +65,12 @@ export function DashboardShell({
             {isOperator ? (
               <>
                 <Link
+                  href="/admin/clubs"
+                  style={{ color: colors.danger[700], textDecoration: "none" }}
+                >
+                  {t("dashboard.nav.pendingClubs")}
+                </Link>
+                <Link
                   href="/admin/disputes"
                   style={{ color: colors.danger[700], textDecoration: "none" }}
                 >

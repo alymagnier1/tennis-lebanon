@@ -16,10 +16,15 @@ export type DisputedResultQueueRow = {
   match_format: string;
 };
 
+/**
+ * Uses the no-argument form. The `is_platform_operator(uuid)` overload accepts
+ * an arbitrary user id and is revoked from clients so callers cannot probe
+ * which accounts hold platform-admin roles.
+ */
 export async function isPlatformOperator(
   client: TennisSupabaseClient,
 ): Promise<boolean> {
-  const { data, error } = await client.rpc("is_platform_operator");
+  const { data, error } = await client.rpc("viewer_is_platform_operator");
   if (error) {
     throw error;
   }

@@ -109,13 +109,43 @@ begin
   end if;
 
   perform pg_temp.set_caller('55555555-5555-5555-5555-555555555555');
+
+  -- SEC-001: a freshly registered club is pending review and must not be
+  -- visible to players until a platform operator approves it.
+  if exists (
+    select 1
+    from public.list_clubs_directory(null) as d
+    where d.club_id = v_club_id
+  ) then
+    raise exception 'unapproved club must not appear in the player directory';
+  end if;
+
+  if not exists (
+    select 1
+    from public.list_pending_clubs() as pc
+    where pc.club_id = v_club_id
+  ) then
+    raise exception 'unapproved club should appear in the pending queue';
+  end if;
+
+  -- Seeded user 5555 also holds the platform admin role.
+  perform public.review_pilot_club(v_club_id, true, 'Pilot partner verified');
+
   if not exists (
     select 1
     from public.list_clubs_directory(null) as d
     where d.club_id = v_club_id
       and d.min_price_minor = 5500
   ) then
-    raise exception 'updated court price should appear in directory';
+    raise exception 'updated court price should appear in directory once approved';
+  end if;
+
+  if exists (
+    select 1
+    from public.list_pending_clubs() as pc
+    where pc.club_id = v_club_id
+  ) then
+    raise exception 'approved club should leave the pending queue';
   end if;
 end;
 $$;

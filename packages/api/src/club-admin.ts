@@ -1,5 +1,46 @@
 import type { TennisSupabaseClient } from "./client";
 
+export type PendingClub = {
+  club_id: string;
+  name: string;
+  slug: string;
+  zone_id: string;
+  zone_slug: string;
+  admin_user_id: string | null;
+  admin_display_name: string | null;
+  court_count: number;
+  submitted_at: string;
+};
+
+/**
+ * Platform-operator queue of clubs awaiting approval. Clubs register
+ * themselves but stay invisible to players until reviewed (SEC-001).
+ */
+export async function listPendingClubs(
+  client: TennisSupabaseClient,
+  limit = 50,
+): Promise<PendingClub[]> {
+  const { data, error } = await client.rpc("list_pending_clubs", {
+    p_limit: limit,
+  });
+  if (error) throw error;
+  return (data ?? []) as PendingClub[];
+}
+
+export async function reviewPilotClub(
+  client: TennisSupabaseClient,
+  clubId: string,
+  approve: boolean,
+  reason?: string,
+): Promise<void> {
+  const { error } = await client.rpc("review_pilot_club", {
+    p_club_id: clubId,
+    p_approve: approve,
+    p_reason: reason ?? undefined,
+  });
+  if (error) throw error;
+}
+
 export type ActiveZone = {
   zone_id: string;
   slug: string;

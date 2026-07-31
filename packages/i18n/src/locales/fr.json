@@ -28,7 +28,8 @@
       "onboarding": "Inscrire un club",
       "disputes": "Litiges de résultats",
       "reports": "Signalements",
-      "signOut": "Se déconnecter"
+      "signOut": "Se déconnecter",
+      "pendingClubs": "Validation des clubs"
     },
     "disputes": {
       "title": "Litiges de résultats",
@@ -168,6 +169,22 @@
       "pay_as_you_play": "Payer sur place",
       "cafe": "Café",
       "pro_shop": "Pro shop"
+    },
+    "pendingClubs": {
+      "title": "Validation des clubs",
+      "description": "Les clubs restent invisibles pour les joueurs jusqu'à votre validation. Vérifiez qu'il s'agit d'un vrai partenaire pilote avant d'approuver.",
+      "loading": "Chargement des clubs en attente…",
+      "loadError": "Impossible de charger les clubs en attente.",
+      "actionError": "Impossible de finaliser cette revue.",
+      "empty": "Aucun club en attente de revue.",
+      "meta": "Zone {{zone}} · {{count}} court(s)",
+      "submittedBy": "Soumis par {{name}} le {{date}}",
+      "unknownAdmin": "un compte inconnu",
+      "reasonLabel": "Motif (obligatoire pour refuser)",
+      "reasonPlaceholder": "Partenaire vérifié, ou motif du refus",
+      "approve": "Approuver le club",
+      "reject": "Refuser",
+      "reasonRequired": "Ajoutez un motif court avant de refuser un club."
     }
   },
   "health": {

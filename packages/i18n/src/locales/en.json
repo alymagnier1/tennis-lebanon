@@ -28,7 +28,8 @@
       "onboarding": "Register club",
       "disputes": "Result disputes",
       "reports": "Safety reports",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "pendingClubs": "Club approvals"
     },
     "disputes": {
       "title": "Result disputes",
@@ -168,12 +169,28 @@
       "pay_as_you_play": "Pay as you play",
       "cafe": "Cafe",
       "pro_shop": "Pro shop"
+    },
+    "pendingClubs": {
+      "title": "Club approvals",
+      "description": "Clubs stay hidden from players until you approve them. Confirm the club is a real pilot partner before approving.",
+      "loading": "Loading pending clubs…",
+      "loadError": "Could not load pending clubs.",
+      "actionError": "Could not complete that review.",
+      "empty": "No clubs are waiting for review.",
+      "meta": "Zone {{zone}} · {{count}} court(s)",
+      "submittedBy": "Submitted by {{name}} on {{date}}",
+      "unknownAdmin": "an unknown account",
+      "reasonLabel": "Reason (required to reject)",
+      "reasonPlaceholder": "Verified partner, or why this was rejected",
+      "approve": "Approve club",
+      "reject": "Reject",
+      "reasonRequired": "Add a short reason before rejecting a club."
     }
   },
   "health": {
     "title": "System health",
     "ok": "All systems operational",
-    "checking": "Checking status\u2026",
+    "checking": "Checking status…",
     "error": "Could not reach backend services"
   },
   "rtlCheck": {
@@ -205,7 +222,7 @@
     "callbackWorking": "We are securely completing your sign-in.",
     "callbackError": "This sign-in link is invalid or expired.",
     "tryAgain": "Try signing in again",
-    "restoring": "Restoring your session\u2026",
+    "restoring": "Restoring your session…",
     "sessionError": "We could not restore your session.",
     "signOut": "Sign out",
     "signOutError": "We could not sign you out. Please try again."

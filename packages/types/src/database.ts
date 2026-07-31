@@ -1536,6 +1536,10 @@ export type Database = {
         Args: { p_match_id: string; p_user_id?: string };
         Returns: undefined;
       };
+      assert_active_zones: {
+        Args: { p_zone_ids: string[] };
+        Returns: undefined;
+      };
       assert_authenticated_caller: { Args: never; Returns: string };
       assert_club_admin: { Args: { p_club_id: string }; Returns: string };
       assert_club_staff: { Args: { p_club_id: string }; Returns: string };
@@ -1800,6 +1804,10 @@ export type Database = {
         Args: { p_user_a: string; p_user_b: string };
         Returns: boolean;
       };
+      is_blocked_from_match: {
+        Args: { p_match_id: string; p_viewer_id: string };
+        Returns: boolean;
+      };
       is_club_admin: {
         Args: { p_club_id: string; p_user_id?: string };
         Returns: boolean;
@@ -1946,10 +1954,25 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      list_pending_clubs: {
+        Args: { p_limit?: number };
+        Returns: {
+          admin_display_name: string;
+          admin_user_id: string;
+          club_id: string;
+          court_count: number;
+          name: string;
+          slug: string;
+          submitted_at: string;
+          zone_id: string;
+          zone_slug: string;
+        }[];
+      };
       list_staff_clubs: {
         Args: never;
         Returns: {
           club_id: string;
+          is_active: boolean;
           name: string;
           role: string;
           slug: string;
@@ -2066,6 +2089,10 @@ export type Database = {
         Args: { p_accept: boolean; p_match_id: string; p_user_id: string };
         Returns: undefined;
       };
+      review_pilot_club: {
+        Args: { p_approve: boolean; p_club_id: string; p_reason?: string };
+        Returns: undefined;
+      };
       revoke_pending_targeted_invites: {
         Args: { p_except_invitation_id?: string; p_match_id: string };
         Returns: undefined;
@@ -2137,6 +2164,7 @@ export type Database = {
         };
         Returns: string;
       };
+      viewer_is_platform_operator: { Args: never; Returns: boolean };
       viewer_match_time_overlap: {
         Args: {
           p_match_id: string;
