@@ -18,6 +18,9 @@ export type CompatiblePlayerCard = {
   availability_overlap: boolean;
   intent_fit: boolean;
   format_fit: boolean;
+  /** Earliest hour-or-longer slot both players are free, if any. */
+  overlap_starts_at: string | null;
+  overlap_ends_at: string | null;
 };
 
 export type OpenMatchCard = {
@@ -54,7 +57,7 @@ export async function discoverCompatiblePlayers(
         : undefined,
     p_format: filters.format ?? undefined,
     p_intent: filters.intent ?? undefined,
-    p_require_availability_overlap: filters.requireAvailabilityOverlap ?? true,
+    p_require_availability_overlap: filters.requireAvailabilityOverlap ?? false,
     p_horizon_days: filters.horizonDays ?? 14,
     p_level_window: filters.levelWindow ?? 1,
     p_limit: filters.limit ?? 20,

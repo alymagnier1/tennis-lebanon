@@ -22,6 +22,8 @@ function player(
     availability_overlap: false,
     intent_fit: true,
     format_fit: true,
+    overlap_starts_at: null,
+    overlap_ends_at: null,
     ...overrides,
   };
 }

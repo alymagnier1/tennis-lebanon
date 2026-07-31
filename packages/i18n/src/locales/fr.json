@@ -402,7 +402,9 @@
     "blockSuccess": "Joueur bloqué.",
     "blockError": "Impossible de bloquer ce joueur.",
     "reportPlayer": "Signaler un joueur",
-    "playerLoadError": "Impossible de charger ce joueur."
+    "playerLoadError": "Impossible de charger ce joueur.",
+    "overlapSlotHint": "Tous deux libres {{slot}}",
+    "noOverlapHint": "Pas encore de créneau commun"
   },
   "reports": {
     "title": "Signaler un joueur",
@@ -735,6 +737,29 @@
       "4": "jeudi",
       "5": "vendredi",
       "6": "samedi"
+    },
+    "loading": "Chargement de vos disponibilités…",
+    "gridTitle": "Disponibilités hebdomadaires",
+    "gridHelp": "Touchez les créneaux où vous êtes généralement libre. Plus vous en ajoutez, plus nous pouvons vous proposer de joueurs.",
+    "presetWeekdayEvenings": "Soirs de semaine",
+    "presetWeekendMornings": "Matins du week-end",
+    "saveGrid": "Enregistrer les disponibilités",
+    "saved": "Disponibilités enregistrées.",
+    "selectedCount": "{{count}} créneau sélectionné",
+    "selectedCount_other": "{{count}} créneaux sélectionnés",
+    "blocks": {
+      "morning": "Matin",
+      "afternoon": "Après-midi",
+      "evening": "Soir"
+    },
+    "weekdaysShort": {
+      "0": "Dim",
+      "1": "Lun",
+      "2": "Mar",
+      "3": "Mer",
+      "4": "Jeu",
+      "5": "Ven",
+      "6": "Sam"
     }
   },
   "clubs": {

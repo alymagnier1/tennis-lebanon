@@ -1760,6 +1760,18 @@ export type Database = {
         Args: { p_match_id: string };
         Returns: undefined;
       };
+      first_availability_overlap: {
+        Args: {
+          p_range_end: string;
+          p_range_start: string;
+          p_user_a: string;
+          p_user_b: string;
+        };
+        Returns: {
+          ends_at: string;
+          starts_at: string;
+        }[];
+      };
       get_club_admin_detail: { Args: { p_club_id: string }; Returns: Json };
       get_club_booking_detail: {
         Args: { p_booking_id: string };
@@ -2112,6 +2124,10 @@ export type Database = {
         Args: { p_court_id: string; p_hours: Json };
         Returns: undefined;
       };
+      set_recurring_availability: {
+        Args: { p_windows: Json };
+        Returns: number;
+      };
       skill_band_rank: {
         Args: { p_band: Database["public"]["Enums"]["skill_band"] };
         Returns: number;
@@ -2247,6 +2263,8 @@ export type Database = {
         intent_fit: boolean | null;
         format_fit: boolean | null;
         display_rating: number | null;
+        overlap_starts_at: string | null;
+        overlap_ends_at: string | null;
       };
       discover_open_match_card: {
         match_id: string | null;

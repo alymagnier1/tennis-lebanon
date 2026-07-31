@@ -31,6 +31,28 @@ export async function createAvailabilityWindow(
   return data;
 }
 
+export type RecurringAvailabilityInput = {
+  weekday: number;
+  local_start: string;
+  local_end: string;
+};
+
+/**
+ * Replaces the caller's whole recurring weekly grid in one atomic call.
+ * One-off windows are left untouched. Mirrors `set_court_weekly_hours`.
+ */
+export async function setRecurringAvailability(
+  client: TennisSupabaseClient,
+  windows: RecurringAvailabilityInput[],
+): Promise<number> {
+  const { data, error } = await client.rpc("set_recurring_availability", {
+    p_windows: windows,
+  });
+
+  if (error) throw error;
+  return data ?? 0;
+}
+
 export async function deleteAvailabilityWindow(
   client: TennisSupabaseClient,
   windowId: string,

@@ -25,7 +25,11 @@ export const discoveryFiltersSchema = z.object({
   zoneIds: z.array(z.string().uuid()).optional(),
   format: matchFormatSchema.nullable().optional(),
   intent: playIntentSchema.nullable().optional(),
-  requireAvailabilityOverlap: z.boolean().default(true),
+  /**
+   * Overlap is the primary sort key, so requiring it as well emptied the feed
+   * at pilot scale. Rank by it instead and let the user opt into filtering.
+   */
+  requireAvailabilityOverlap: z.boolean().default(false),
   horizonDays: z
     .number()
     .int()

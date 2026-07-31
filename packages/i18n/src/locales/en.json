@@ -402,7 +402,9 @@
     "blockSuccess": "Player blocked.",
     "blockError": "We could not block this player.",
     "reportPlayer": "Report player",
-    "playerLoadError": "We could not load this player."
+    "playerLoadError": "We could not load this player.",
+    "overlapSlotHint": "Both free {{slot}}",
+    "noOverlapHint": "No shared time yet"
   },
   "reports": {
     "title": "Report a player",
@@ -735,6 +737,29 @@
       "4": "Thursday",
       "5": "Friday",
       "6": "Saturday"
+    },
+    "loading": "Loading your availability…",
+    "gridTitle": "Weekly availability",
+    "gridHelp": "Tap the blocks when you are usually free. The more you add, the more players we can match you with.",
+    "presetWeekdayEvenings": "Weekday evenings",
+    "presetWeekendMornings": "Weekend mornings",
+    "saveGrid": "Save availability",
+    "saved": "Availability saved.",
+    "selectedCount": "{{count}} block selected",
+    "selectedCount_other": "{{count}} blocks selected",
+    "blocks": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "weekdaysShort": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
     }
   },
   "clubs": {

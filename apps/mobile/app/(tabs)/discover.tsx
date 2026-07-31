@@ -40,6 +40,7 @@ import {
   loadDiscoverFilters,
   saveDiscoverFilters,
 } from "../../src/lib/discovery-filters";
+import { formatUtcSlotInBeirut } from "../../src/lib/beirut-time";
 import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
@@ -51,10 +52,25 @@ type MatchFormat = "singles" | "doubles";
 
 function playerHint(
   player: CompatiblePlayerCard,
-  t: (key: string) => string,
+  t: (key: string, options?: Record<string, unknown>) => string,
 ): string | undefined {
+  // Discovery no longer filters on overlap, so every card states its shared
+  // time explicitly: the concrete slot when we have one, otherwise a plain
+  // "no shared time yet" so the difference is visible rather than implied.
+  const overlapHint =
+    player.overlap_starts_at && player.overlap_ends_at
+      ? t("discover.overlapSlotHint", {
+          slot: formatUtcSlotInBeirut(
+            player.overlap_starts_at,
+            player.overlap_ends_at,
+          ),
+        })
+      : player.availability_overlap
+        ? t("discover.overlapHint")
+        : t("discover.noOverlapHint");
+
   const hints = [
-    player.availability_overlap ? t("discover.overlapHint") : null,
+    overlapHint,
     player.zone_overlap ? t("discover.zoneHint") : null,
     player.level_fit ? t("discover.levelHint") : null,
   ].filter(Boolean);
@@ -71,7 +87,8 @@ export default function DiscoverScreen() {
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [sortMode, setSortMode] = useState<DiscoverSortMode>("recommended");
-  const [requireOverlap, setRequireOverlap] = useState(true);
+  // Rank by overlap rather than filter on it; the user can opt back in.
+  const [requireOverlap, setRequireOverlap] = useState(false);
   const [levelWindow, setLevelWindow] = useState(1);
   const [widenedBanner, setWidenedBanner] = useState(false);
   const [widenedZonesBanner, setWidenedZonesBanner] = useState(false);
