@@ -133,6 +133,32 @@ export async function requestMatchBooking(
   return data as string;
 }
 
+/**
+ * Records a court the host secured directly with the club, for example over
+ * WhatsApp. Without this, clubs in external_link mode can never leave
+ * ready_to_book and the match is never counted as played.
+ */
+export async function confirmExternalCourt(
+  client: TennisSupabaseClient,
+  input: {
+    matchId: string;
+    courtId: string;
+    startsAt: string;
+    endsAt: string;
+    note?: string | null;
+  },
+): Promise<string> {
+  const { data, error } = await client.rpc("confirm_external_court", {
+    p_match_id: input.matchId,
+    p_court_id: input.courtId,
+    p_starts_at: input.startsAt,
+    p_ends_at: input.endsAt,
+    p_note: input.note ?? undefined,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
 export async function cancelBookingRequest(
   client: TennisSupabaseClient,
   bookingId: string,

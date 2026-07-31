@@ -180,6 +180,7 @@ export type Database = {
         Row: {
           acted_at: string | null;
           acted_by: string | null;
+          arranged_externally: boolean;
           club_note: string | null;
           court_id: string;
           created_at: string;
@@ -200,6 +201,7 @@ export type Database = {
         Insert: {
           acted_at?: string | null;
           acted_by?: string | null;
+          arranged_externally?: boolean;
           club_note?: string | null;
           court_id: string;
           created_at?: string;
@@ -220,6 +222,7 @@ export type Database = {
         Update: {
           acted_at?: string | null;
           acted_by?: string | null;
+          arranged_externally?: boolean;
           club_note?: string | null;
           court_id?: string;
           created_at?: string;
@@ -1637,6 +1640,16 @@ export type Database = {
       completed_match_count_for_user: {
         Args: { p_user_id: string };
         Returns: number;
+      };
+      confirm_external_court: {
+        Args: {
+          p_court_id: string;
+          p_ends_at: string;
+          p_match_id: string;
+          p_note?: string;
+          p_starts_at: string;
+        };
+        Returns: string;
       };
       confirm_match_result: {
         Args: { p_match_id: string };

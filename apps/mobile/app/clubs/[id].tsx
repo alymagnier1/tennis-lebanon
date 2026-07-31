@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { canBookClubInApp, formatPriceMinor } from "@tennis-lebanon/domain";
 import {
+  confirmExternalCourt,
   getClubDetail,
   getClubWhatsAppBookingLink,
   getMatchHub,
@@ -92,6 +93,33 @@ export default function ClubDetailScreen() {
     onError: () => Alert.alert(t("matches.booking.submitError")),
   });
 
+  // Many hosts will simply phone the club, especially where booking happens on
+  // WhatsApp. Recording that keeps the match moving instead of stranding it at
+  // ready_to_book while it is actually played.
+  const confirmExternalMutation = useMutation({
+    mutationFn: () =>
+      confirmExternalCourt(supabase, {
+        matchId: matchId!,
+        courtId: courtId!,
+        startsAt: agreedSlot!.starts_at,
+        endsAt: agreedSlot!.ends_at,
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["match-hub", matchId] });
+      await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
+      Alert.alert(t("matches.booking.externalSuccess"));
+      router.replace(matchHubRoute(matchId!));
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "";
+      Alert.alert(
+        message.includes("court_already_booked")
+          ? t("matches.booking.courtAlreadyBooked")
+          : t("matches.booking.externalError"),
+      );
+    },
+  });
+
   const club = clubQuery.data;
   const supportsInAppBooking = club
     ? canBookClubInApp(club.booking_mode)
@@ -157,7 +185,7 @@ export default function ClubDetailScreen() {
                 />
               ) : null}
 
-              {supportsInAppBooking ? (
+              {club.courts.length > 0 ? (
                 <>
                   <AppText style={formStyles.summaryLabel}>
                     {t("clubs.selectCourtForMatch")}
@@ -187,12 +215,34 @@ export default function ClubDetailScreen() {
                       );
                     })}
                   </View>
-                  <PrimaryButton
-                    label={t("clubs.requestCourt")}
+                  {supportsInAppBooking ? (
+                    <PrimaryButton
+                      label={t("clubs.requestCourt")}
+                      disabled={!courtId || !agreedSlot}
+                      loading={requestMutation.isPending}
+                      onPress={() => requestMutation.mutate()}
+                    />
+                  ) : null}
+
+                  {club.whatsapp_booking_available ? (
+                    <PrimaryButton
+                      label={t("clubs.bookWhatsApp")}
+                      loading={whatsappMutation.isPending}
+                      onPress={() => whatsappMutation.mutate()}
+                    />
+                  ) : null}
+
+                  {/* Works for either club mode: the host may have called
+                      rather than waited on the in-app queue. */}
+                  <SecondaryButton
+                    label={t("clubs.confirmExternalCourt")}
                     disabled={!courtId || !agreedSlot}
-                    loading={requestMutation.isPending}
-                    onPress={() => requestMutation.mutate()}
+                    loading={confirmExternalMutation.isPending}
+                    onPress={() => confirmExternalMutation.mutate()}
                   />
+                  <AppText style={formStyles.description}>
+                    {t("clubs.confirmExternalCourtHelp")}
+                  </AppText>
                 </>
               ) : null}
             </View>

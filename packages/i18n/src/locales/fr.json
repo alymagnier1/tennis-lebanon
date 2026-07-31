@@ -671,7 +671,10 @@
       "submitSuccess": "Demande envoyée au club.",
       "payAtClubNote": "Paiement au club. Pas de paiement in-app.",
       "whatsappTitle": "Réserver sur WhatsApp",
-      "whatsappDescription": "Ce club préfère WhatsApp. Nous ouvrirons WhatsApp avec l'heure et les détails du match préremplis."
+      "whatsappDescription": "Ce club préfère WhatsApp. Nous ouvrirons WhatsApp avec l'heure et les détails du match préremplis.",
+      "externalSuccess": "Court confirmé. Le match est fixé.",
+      "externalError": "Nous n’avons pas pu confirmer ce court.",
+      "courtAlreadyBooked": "Ce court est déjà réservé à cette heure."
     },
     "invite": {
       "title": "Invitation au match",
@@ -802,7 +805,9 @@
       "other": "Autre"
     },
     "indoor": "Intérieur",
-    "outdoor": "Extérieur"
+    "outdoor": "Extérieur",
+    "confirmExternalCourt": "J’ai déjà réservé ce court",
+    "confirmExternalCourtHelp": "À utiliser si vous avez réservé le court vous-même, par téléphone ou WhatsApp. Cela confirme le match afin que la présence et les résultats fonctionnent."
   },
   "settings": {
     "title": "Paramètres",
