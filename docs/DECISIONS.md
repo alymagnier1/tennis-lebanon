@@ -11,6 +11,24 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-07-28 — Ship the pilot in English and French only
+
+- Status: accepted
+- Context: Arabic translations are complete and guarded in CI for key parity, stale placeholders, and real Arabic script. But the app never calls `I18nManager.forceRTL`, so Arabic strings render inside a left-to-right layout: rows, alignment and directional affordances stay LTR on nearly every screen. Only two screens use the manual direction hook. Enabling native RTL is a few days of work plus a device pass, which does not fit before the pilot.
+- Decision: Offer only English and French in the language picker (`PILOT_LOCALES`). Keep the Arabic locale files, the `SUPPORTED_LOCALES` list, and every CI guard intact so the translations stay honest and nothing rots.
+- Alternatives considered: ship Arabic strings inside an LTR layout (worse than not offering it — it looks broken rather than absent); delete the Arabic locale (loses finished translation work and the CI guard); enable `forceRTL` and accept rough edges on secondary screens (still needs a device pass nobody has run).
+- Consequences: Arabic-preferring pilot users get English or French. Founder priority "Arabic RTL must work on critical flows" is explicitly deferred, not silently missed. Re-enabling is a one-line change to `PILOT_LOCALES` once `forceRTL` lands and the critical flows have been walked on a device.
+- Owner: Founder
+
+## 2026-07-28 — Park notifications with no delivery channel instead of failing them
+
+- Status: accepted
+- Context: Push registration exists only in the mobile app, so club staff working in the web dashboard have no `device_push_tokens` rows. The 4-hour booking nudge is enqueued for them, the Edge Function finds no tokens, and it called `mark_notification_failed('no_active_token')` — burning three retries and then recording a delivery failure. Retrying a push to a device that does not exist can never succeed, and it made "no club has ever been notified" indistinguishable from ordinary transient failures.
+- Decision: Add `mark_notification_unreachable`, which parks such rows immediately as `no_delivery_channel` with no retry, plus `unreachable_notification_summary` for operators. Choosing an actual out-of-band channel for club staff is a separate decision, recorded as a hard gate in `docs/STAGING_CHECKLIST.md`.
+- Alternatives considered: build transactional email (needs a provider account and secret the project does not have); WhatsApp Business sender (needs Meta verification, but matches how Lebanese clubs actually work); suppress the enqueue entirely for tokenless users (loses the backlog and the evidence).
+- Consequences: the message still does not reach club staff — this only stops the signal being lost and the metric being polluted. An ops-driven channel is viable at 5–8 clubs. The gate must be closed before real clubs depend on nudges.
+- Owner: Founder
+
 ## 2026-07-22 — Matchmaking-first MVP
 
 - Status: accepted

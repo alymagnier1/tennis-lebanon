@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { requestAccountDeletion } from "@tennis-lebanon/api";
-import { SUPPORTED_LOCALES, type SupportedLocale } from "@tennis-lebanon/i18n";
+import { PILOT_LOCALES, type PilotLocale } from "@tennis-lebanon/i18n";
 import {
   Choice,
   ErrorNotice,
@@ -14,6 +14,7 @@ import {
   SecondaryButton,
 } from "../../src/components/FormUi";
 import { env } from "../../src/lib/env";
+import { persistLocale } from "../../src/lib/i18n";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
 
@@ -53,12 +54,12 @@ export default function SettingsScreen() {
 
   return (
     <Screen title={t("settings.title")} description={t("settings.description")}>
-      {SUPPORTED_LOCALES.map((locale: SupportedLocale) => (
+      {PILOT_LOCALES.map((locale: PilotLocale) => (
         <Choice
           key={locale}
           label={t(`languages.${locale}`)}
           selected={i18n.resolvedLanguage === locale}
-          onPress={() => void i18n.changeLanguage(locale)}
+          onPress={() => void persistLocale(locale)}
         />
       ))}
       <SecondaryButton

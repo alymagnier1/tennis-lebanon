@@ -103,16 +103,29 @@ Deno.serve(async (req) => {
   let sent = 0;
   let failed = 0;
   let skipped = 0;
+  /** Recipients with no push channel at all, chiefly club staff. */
+  let unreachable = 0;
 
   for (const notification of notifications) {
     const payload = parseNotificationPayload(notification.payload);
     const tokens = notification.push_tokens ?? [];
 
-    if (!payload || tokens.length === 0) {
+    // A recipient with no push token is not a delivery failure. Retrying
+    // cannot help, and club staff work in the dashboard so they never have
+    // one. Park these separately rather than burning the retry budget and
+    // hiding the fact that no club has been reached at all.
+    if (tokens.length === 0) {
+      await supabase.rpc("mark_notification_unreachable", {
+        p_notification_id: notification.notification_id,
+      });
+      unreachable += 1;
+      continue;
+    }
+
+    if (!payload) {
       await supabase.rpc("mark_notification_failed", {
         p_notification_id: notification.notification_id,
-        p_failure_code:
-          tokens.length === 0 ? "no_active_token" : "invalid_payload",
+        p_failure_code: "invalid_payload",
       });
       failed += 1;
       continue;
@@ -145,6 +158,7 @@ Deno.serve(async (req) => {
       sent,
       failed,
       skipped,
+      unreachable,
     }),
     {
       status: 200,

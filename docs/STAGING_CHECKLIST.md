@@ -69,6 +69,45 @@ pnpm db:test               # RLS / RPC authorization matrix
 - [ ] On-call / ops owner named for booking disputes and moderation queue
 - [ ] Rollback plan documented: previous mobile build + dashboard promotion + migration revert policy
 
+## 7b. Notification delivery (hard gate)
+
+Nothing in this repository invokes the `process-notifications` Edge Function.
+`pg_cron` only runs the database-side _enqueue_ jobs, so if no external caller
+is configured, every reminder, club nudge and attendance prompt is written to
+the outbox and never sent — silently, with no error anywhere.
+
+- [ ] Named invoker for `process-notifications` recorded below, with schedule
+      and which secret it authenticates with
+- [ ] Verified on staging that **one push notification physically arrives** on a
+      real device, not merely that the function returned 200
+- [ ] `select * from public.unreachable_notification_summary();` reviewed after
+      a staging rehearsal
+
+| Setting  | Value |
+| -------- | ----- |
+| Invoker  |       |
+| Schedule |       |
+| Secret   |       |
+
+### Club staff have no push channel
+
+Push registration exists only in the mobile app, so club staff who work in the
+web dashboard have **no** `device_push_tokens` rows. The 4-hour booking nudge is
+enqueued for them and can never be delivered by push. Those rows are now parked
+as `no_delivery_channel` rather than retried and marked failed, so the backlog
+is measurable — but the message still does not arrive.
+
+Reaching club staff out of band needs a decision before pilot. The options:
+
+| Option                     | Needs                                               |
+| -------------------------- | --------------------------------------------------- |
+| Transactional email        | Provider account and API key (none in the repo yet) |
+| WhatsApp Business sender   | Meta business verification; matches how clubs work  |
+| Dashboard-only, ops-driven | A human pings clubs; only viable at 5–8 clubs       |
+
+- [ ] Channel chosen and recorded in `docs/DECISIONS.md`
+- [ ] If ops-driven: named owner and expected response time agreed with clubs
+
 ## 8. Promotion sign-off
 
 | Role              | Name | Date | Notes |
