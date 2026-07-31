@@ -1,0 +1,17 @@
+# Normalize line endings so Prettier behaves identically on Windows and CI.
+# Without this, core.autocrlf=true checks files out as CRLF while Prettier's
+# default endOfLine="lf" flags them, which is what made `pnpm format:check`
+# fail locally on files that were fine in CI (audit finding REL-01).
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

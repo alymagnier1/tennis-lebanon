@@ -35,9 +35,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Format check
-        run: pnpm format:check
-
       - name: Lint
         run: pnpm lint
 
@@ -49,6 +46,9 @@ jobs:
 
       - name: Migration file checks
         run: pnpm db:validate
+
+      - name: Format check
+        run: pnpm format:check
 
   db-migration-smoke:
     name: Supabase local migration smoke test

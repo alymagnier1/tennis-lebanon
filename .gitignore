@@ -20,6 +20,9 @@ Thumbs.db
 supabase/.branches/
 supabase/.temp/
 
+# Local backup drill artifacts
+.tmp/
+
 # Editor
 .vscode/*
 !.vscode/extensions.json

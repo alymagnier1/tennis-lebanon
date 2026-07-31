@@ -25,6 +25,8 @@
     "db:test": "supabase test db supabase/tests/database --local",
     "db:types": "supabase gen types typescript --local > packages/types/src/database.ts",
     "db:diff": "supabase db diff",
+    "verify:pilot": "node scripts/verify-pilot-gates.mjs",
+    "drill:backup": "node scripts/backup-restore-drill.mjs",
     "clean": "turbo run clean && rimraf node_modules"
   },
   "devDependencies": {
