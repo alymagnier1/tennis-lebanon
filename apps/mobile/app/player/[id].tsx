@@ -135,8 +135,7 @@ export default function PlayerDetailScreen() {
               <PrimaryButton
                 label={t("matches.invite.inviteToOpenMatch")}
                 loading={
-                  inviteMutation.isPending &&
-                  invitingMatchId === match.match_id
+                  inviteMutation.isPending && invitingMatchId === match.match_id
                 }
                 disabled={
                   inviteMutation.isPending &&
@@ -185,4 +184,3 @@ export default function PlayerDetailScreen() {
     </Screen>
   );
 }
-

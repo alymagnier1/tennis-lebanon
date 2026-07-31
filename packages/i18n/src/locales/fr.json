@@ -690,9 +690,7 @@
       "cancelAfterFull": "Le match est complet. Indiquez aux participants pourquoi vous annulez.",
       "cancelAcceptedBooking": "Cela annule la réservation acceptée et prévient tout le monde. Annuler plus de {{hours}} heures avant le début est traité comme une annulation à temps.",
       "cancelLateBooking": "Vous êtes à moins de {{hours}} heures du début réservé. Cela compte comme une annulation tardive sur votre fiabilité."
-    },
-    "leavePolicyPlaceholder": "Quitter avant la confirmation d'une réservation peut affecter votre fiabilité. La politique complète arrive dans une étape ultérieure.",
-    "cancelPolicyPlaceholder": "L'annulation d'un match ouvert informe les participants. La politique complète arrive dans une étape ultérieure."
+    }
   },
   "availability": {
     "title": "Disponibilité",
@@ -758,6 +756,7 @@
     "title": "Paramètres",
     "description": "Gérez les politiques, l’accès au compte et les demandes de suppression.",
     "policies": "Consulter les politiques",
+    "rtlLayoutCheck": "Vérification mise en page RTL",
     "requestDeletion": "Demander la suppression du compte",
     "deleteTitle": "Demander la suppression du compte ?",
     "deleteDescription": "Cette action envoie une demande de suppression et peut limiter l’accès au compte pendant son examen.",

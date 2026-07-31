@@ -690,9 +690,7 @@
       "cancelAfterFull": "The match is full. Please tell participants why you are cancelling.",
       "cancelAcceptedBooking": "This cancels the accepted court booking and notifies everyone. Cancelling more than {{hours}} hours before start is treated as an in-time cancel.",
       "cancelLateBooking": "You are within {{hours}} hours of the booked start time. This counts as a late cancel on your reliability record."
-    },
-    "leavePolicyPlaceholder": "Leaving before a booking is confirmed may affect your reliability record. Full policy details arrive in a later milestone.",
-    "cancelPolicyPlaceholder": "Cancelling an open match notifies participants. Full cancellation policy details arrive in a later milestone."
+    }
   },
   "availability": {
     "title": "Availability",
@@ -758,6 +756,7 @@
     "title": "Settings",
     "description": "Manage policies, account access, and deletion requests.",
     "policies": "View policies",
+    "rtlLayoutCheck": "RTL layout check",
     "requestDeletion": "Request account deletion",
     "deleteTitle": "Request account deletion?",
     "deleteDescription": "This submits a deletion request and may restrict account access while it is reviewed.",

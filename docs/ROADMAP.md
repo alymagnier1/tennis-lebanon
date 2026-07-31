@@ -163,6 +163,10 @@ Exit: repeated requests cannot double-apply rating; disputed results remain unra
 
 **M8.4 (done):** Pilot operations guide (`docs/PILOT_OPERATIONS.md`), seeded account reference, and five workflow rehearsal registry for partner-club sign-off.
 
+**M8.5 (done):** Arabic copy review for critical flows — CI guards for stale placeholders and Arabic script coverage, removed obsolete policy placeholder keys, and Settings link to RTL layout check.
+
+**M8.6 (done):** Staging-to-production checklist (`docs/STAGING_CHECKLIST.md`), backup/restore drill guide (`docs/BACKUP_RESTORE.md`), `pnpm verify:pilot` gate script, and `pnpm drill:backup` local rehearsal.
+
 ## Milestone 8 — Pilot hardening
 
 Deliver:
@@ -188,18 +192,18 @@ Consider payments, split deposits, **full coach marketplace** (scheduling and pa
 
 Steal selectively; keep the structured match → time → court → result engine.
 
-| Pattern | Milestone | Skip for v1 |
-| --- | --- | --- |
-| Invites inbox + multi-invite + player card CTAs | M3.5 | Chat-first match setup |
-| One hosted match per format + cancel through ready_to_book | M3.5 P0 | Unlimited orphan lobbies |
-| Stale match badges + auto-expiry job | M3.5 P1 / M6-lite | Permanent open listings |
-| Expiry reminder notifications | M6 P2 | Silent match death |
-| Last active on player cards | M3.5 (optional) | Premium paywalls for filters |
-| Favorite clubs | M5 | Community feed / leagues |
-| Rich club directory + hub “Request court” shortcut | M5 | Instant book / in-app court payment |
-| Pilot club onboarding form (dashboard) | M5 | Self-serve venue API integrations |
-| Coach list (info only) | M5 stretch | Coach booking marketplace |
-| Match chat (coordination around booking) | M6 | Chat-first venue coordination |
-| Numeric rating after earned matches | M7 | Public “AI” points from casual scores |
-| Google / phone auth | M8 if needed | Facebook as priority login |
-| Padel second sport | Post-pilot | Multi-sport sprawl during tennis pilot |
+| Pattern                                                    | Milestone         | Skip for v1                            |
+| ---------------------------------------------------------- | ----------------- | -------------------------------------- |
+| Invites inbox + multi-invite + player card CTAs            | M3.5              | Chat-first match setup                 |
+| One hosted match per format + cancel through ready_to_book | M3.5 P0           | Unlimited orphan lobbies               |
+| Stale match badges + auto-expiry job                       | M3.5 P1 / M6-lite | Permanent open listings                |
+| Expiry reminder notifications                              | M6 P2             | Silent match death                     |
+| Last active on player cards                                | M3.5 (optional)   | Premium paywalls for filters           |
+| Favorite clubs                                             | M5                | Community feed / leagues               |
+| Rich club directory + hub “Request court” shortcut         | M5                | Instant book / in-app court payment    |
+| Pilot club onboarding form (dashboard)                     | M5                | Self-serve venue API integrations      |
+| Coach list (info only)                                     | M5 stretch        | Coach booking marketplace              |
+| Match chat (coordination around booking)                   | M6                | Chat-first venue coordination          |
+| Numeric rating after earned matches                        | M7                | Public “AI” points from casual scores  |
+| Google / phone auth                                        | M8 if needed      | Facebook as priority login             |
+| Padel second sport                                         | Post-pilot        | Multi-sport sprawl during tennis pilot |

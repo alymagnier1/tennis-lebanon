@@ -103,10 +103,10 @@ briefly rendering the protected route.
 
 Do not release if any item fails:
 
-- lint, typecheck, unit, database, integration, and smoke tests pass
+- lint, typecheck, unit, database, integration, and smoke tests pass (`pnpm verify:pilot` + `pnpm db:test`)
 - no critical/high unresolved security finding
 - RLS matrix passes in staging
-- backup and restore have been rehearsed
+- backup and restore have been rehearsed (`docs/BACKUP_RESTORE.md`)
 - crash reporting and alert ownership work
 - privacy policy, terms, community rules, and deletion/support path exist
 - club booking/cancellation process is documented

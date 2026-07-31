@@ -66,6 +66,10 @@ export default function SettingsScreen() {
         onPress={() => router.push("/policies?document=privacy")}
       />
       <SecondaryButton
+        label={t("settings.rtlLayoutCheck")}
+        onPress={() => router.push("/rtl-check")}
+      />
+      <SecondaryButton
         label={t("account.contactSupport")}
         onPress={() => void Linking.openURL(`mailto:${env.SUPPORT_EMAIL}`)}
       />
