@@ -406,3 +406,30 @@ Record decisions using this template:
 - Alternatives considered: wiki-only ops notes; ad-hoc Slack runbook.
 - Consequences: placeholder zones/clubs still must be replaced before public pilot; backup/restore drill remains separate.
 - Owner: Founder/technical reviewer
+
+## 2026-07-27 — M8.5 Arabic copy review for critical flows
+
+- Status: accepted
+- Context: Milestone 8 requires full Arabic translation on critical paths, not just RTL scaffolding (`docs/ROADMAP.md`, `docs/TESTING_SECURITY.md`).
+- Decision: Add `critical-flow-keys` CI checks (stale placeholder markers, Arabic script on critical keys), remove obsolete `leavePolicyPlaceholder` keys, fix remaining untranslated availability copy, and expose `/rtl-check` from Settings for manual RTL rehearsal.
+- Alternatives considered: manual spreadsheet only; blocking release on professional translator review (deferred to pre-public pilot).
+- Consequences: dashboard Arabic copy remains out of critical-flow scope; founder should still proofread Arabic UX before go-live.
+- Owner: Founder/technical reviewer
+
+## 2026-07-27 — M8.6 staging checklist and backup drill
+
+- Status: accepted
+- Context: Milestone 8 exit requires rehearsed backup/restore and a staging-to-production promotion checklist (`docs/ROADMAP.md`, `docs/TESTING_SECURITY.md`).
+- Decision: Add `docs/STAGING_CHECKLIST.md` and `docs/BACKUP_RESTORE.md`; automate CI-equivalent gates via `pnpm verify:pilot`; add `pnpm drill:backup` for local data round-trip + `db:test` after restore.
+- Alternatives considered: wiki-only checklist; relying on Supabase dashboard docs without a repo-local drill script.
+- Consequences: hosted staging restore still requires manual Supabase project steps; drill script needs Docker + `psql` locally.
+- Owner: Founder/technical reviewer
+
+## 2026-07-29 — M8.7 match lifecycle hardening (audit reconciliation)
+
+- Status: accepted
+- Context: Cross-audit reconciliation (Cursor + Claude, July 2026) found a cancelled match could return to `confirmed` when a club alternative survived `cancel_match`, and `leave_match` could race with `request_match_booking` because only the booking path held a row lock.
+- Decision: Add `030_match_lifecycle_hardening.sql` with `assert_match_roster_full`; harden `leave_match` (`FOR UPDATE`, reject creator leave); include `alternative_proposed` in `cancel_match` booking cleanup; guard `accept_booking` and `respond_booking_alternative` accept with `match.status = 'booking_pending'`; add `withdraw_booking_alternative` for club staff; move CI format check after lint/typecheck/test so formatting cannot mask regressions.
+- Alternatives considered: roster guard only without row lock (insufficient — race remains); club-side-only sweeper for stale alternatives without an explicit withdraw RPC (leaves staff queue blocked until expiry).
+- Consequences: new stable errors `match_roster_incomplete` and `creator_should_cancel_match` for client mapping; pgTap coverage in `030_match_lifecycle_hardening_test.sql`.
+- Owner: Founder/technical reviewer
