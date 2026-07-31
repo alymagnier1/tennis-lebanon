@@ -1,4 +1,7 @@
-import type { MatchScore, MatchHubResult as DomainMatchHubResult } from "@tennis-lebanon/domain";
+import type {
+  MatchScore,
+  MatchHubResult as DomainMatchHubResult,
+} from "@tennis-lebanon/domain";
 import type { TennisSupabaseClient } from "./client";
 
 export type MatchHubResult = DomainMatchHubResult;

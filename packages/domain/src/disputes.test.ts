@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  formatDisputeScore,
-  resolveDisputeInputSchema,
-} from "./disputes";
+import { formatDisputeScore, resolveDisputeInputSchema } from "./disputes";
 
 describe("disputes", () => {
   it("validates resolve dispute input", () => {
@@ -23,6 +20,13 @@ describe("disputes", () => {
   });
 
   it("formats dispute scores", () => {
-    expect(formatDisputeScore({ sets: [[6, 4], [7, 6]] })).toBe("6-4, 7-6");
+    expect(
+      formatDisputeScore({
+        sets: [
+          [6, 4],
+          [7, 6],
+        ],
+      }),
+    ).toBe("6-4, 7-6");
   });
 });

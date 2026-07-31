@@ -15,7 +15,9 @@ export function isValidDeviceId(value: string | null | undefined): boolean {
   return Boolean(trimmed && trimmed.length >= 1 && trimmed.length <= 128);
 }
 
-export function isValidExpoPushToken(value: string | null | undefined): boolean {
+export function isValidExpoPushToken(
+  value: string | null | undefined,
+): boolean {
   const trimmed = value?.trim();
   if (!trimmed || trimmed.length < 10 || trimmed.length > 512) {
     return false;

@@ -67,7 +67,10 @@ export function Screen({
         {showTitle && title ? (
           <AppText
             accessibilityRole="header"
-            style={[styles.title, { fontSize: titleFontSize, writingDirection }]}
+            style={[
+              styles.title,
+              { fontSize: titleFontSize, writingDirection },
+            ]}
             maxLines={2}
           >
             {title}
@@ -81,10 +84,9 @@ export function Screen({
       </>
     ) : null;
 
-  const refreshControl =
-    onRefresh ? (
-      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-    ) : undefined;
+  const refreshControl = onRefresh ? (
+    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+  ) : undefined;
 
   const renderVirtualizedBody = (
     paddingHorizontal: number,
@@ -382,13 +384,7 @@ export function ErrorNotice({ children }: { children: ReactNode }) {
   );
 }
 
-export function SummaryRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+export function SummaryRow({ label, value }: { label: string; value: string }) {
   const { rowDirection, writingDirection } = useLayoutDirection();
 
   if (!value) {
@@ -403,7 +399,10 @@ export function SummaryRow({
       <AppText
         style={[
           formStyles.summaryRowValue,
-          { writingDirection, textAlign: writingDirection === "rtl" ? "left" : "right" },
+          {
+            writingDirection,
+            textAlign: writingDirection === "rtl" ? "left" : "right",
+          },
         ]}
         maxLines={2}
       >

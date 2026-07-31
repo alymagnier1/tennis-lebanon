@@ -70,7 +70,9 @@ export default function InviteAcceptScreen() {
       ) : null}
       {acceptMutation.isError ? (
         <View>
-          <Text style={formStyles.errorText}>{t("matches.invite.acceptError")}</Text>
+          <Text style={formStyles.errorText}>
+            {t("matches.invite.acceptError")}
+          </Text>
           <PrimaryButton
             label={t("common.retry")}
             onPress={() => acceptMutation.mutate()}

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useAuth } from "../providers/AuthProvider";
@@ -18,7 +19,7 @@ export function NotificationDeepLinkHandler() {
   const handledInitialRef = useRef(false);
 
   useEffect(() => {
-    if (state !== "ready") {
+    if (Platform.OS === "web" || state !== "ready") {
       return;
     }
 
@@ -38,7 +39,9 @@ export function NotificationDeepLinkHandler() {
 
     if (!handledInitialRef.current) {
       handledInitialRef.current = true;
-      void Notifications.getLastNotificationResponseAsync().then(handleResponse);
+      void Notifications.getLastNotificationResponseAsync().then(
+        handleResponse,
+      );
     }
 
     return () => subscription.remove();

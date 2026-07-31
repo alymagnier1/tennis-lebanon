@@ -24,10 +24,7 @@ import {
   widenLevelWindow,
 } from "@tennis-lebanon/domain";
 import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
-import {
-  PlayerCard,
-  PlayerInviteAction,
-} from "../../../src/components/AppUi";
+import { PlayerCard, PlayerInviteAction } from "../../../src/components/AppUi";
 import { AppText } from "../../../src/components/AppText";
 import {
   PrimaryButton,
@@ -89,9 +86,7 @@ export default function MatchInvitePlayersScreen() {
   const hub = hubQuery.data;
   const participants =
     (hub?.participants as HubParticipant[] | undefined) ?? [];
-  const matchFull = Boolean(
-    hub && hub.participant_count >= hub.capacity,
-  );
+  const matchFull = Boolean(hub && hub.participant_count >= hub.capacity);
 
   const playerFilters = useMemo(() => {
     if (!hub) return null;
@@ -108,7 +103,8 @@ export default function MatchInvitePlayersScreen() {
   const playersQuery = useQuery({
     queryKey: ["match-invite-players", id, playerFilters],
     queryFn: () => discoverCompatiblePlayers(supabase, playerFilters!),
-    enabled: Boolean(hub?.viewer_is_creator) && !matchFull && Boolean(playerFilters),
+    enabled:
+      Boolean(hub?.viewer_is_creator) && !matchFull && Boolean(playerFilters),
   });
 
   const filteredPlayers = useMemo(
@@ -145,7 +141,9 @@ export default function MatchInvitePlayersScreen() {
 
   const isDraft = hub?.status === "draft";
 
-  function playerInviteState(player: CompatiblePlayerCard): "invite" | "invited" {
+  function playerInviteState(
+    player: CompatiblePlayerCard,
+  ): "invite" | "invited" {
     if (
       invitedIds.includes(player.user_id) ||
       isAlreadyInMatch(participants, player.user_id)
@@ -235,7 +233,9 @@ export default function MatchInvitePlayersScreen() {
           { paddingTop: insets.top, paddingHorizontal: screenPadding },
         ]}
       >
-        <AppText style={formStyles.errorText}>{t("matches.hub.loadError")}</AppText>
+        <AppText style={formStyles.errorText}>
+          {t("matches.hub.loadError")}
+        </AppText>
       </View>
     );
   }
@@ -260,12 +260,7 @@ export default function MatchInvitePlayersScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
-      <View
-        style={[
-          styles.header,
-          { paddingHorizontal: screenPadding },
-        ]}
-      >
+      <View style={[styles.header, { paddingHorizontal: screenPadding }]}>
         <AppText
           accessibilityRole="header"
           style={[styles.title, { fontSize: titleFontSize, writingDirection }]}
@@ -290,7 +285,9 @@ export default function MatchInvitePlayersScreen() {
       </View>
 
       {matchFull ? (
-        <View style={[styles.matchFullBody, { paddingHorizontal: screenPadding }]}>
+        <View
+          style={[styles.matchFullBody, { paddingHorizontal: screenPadding }]}
+        >
           <AppText style={formStyles.hintText}>
             {t("matches.invite.matchFull")}
           </AppText>

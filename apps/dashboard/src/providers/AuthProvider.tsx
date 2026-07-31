@@ -33,10 +33,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const {
       data: { subscription },
-    } = client.auth.onAuthStateChange((_event: AuthChangeEvent, nextSession) => {
-      setSession(nextSession);
-      setLoading(false);
-    });
+    } = client.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, nextSession) => {
+        setSession(nextSession);
+        setLoading(false);
+      },
+    );
 
     return () => subscription.unsubscribe();
   }, []);

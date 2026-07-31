@@ -22,7 +22,9 @@ export function ReportsQueue() {
   const [rows, setRows] = useState<UserReportQueueRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reasonByReport, setReasonByReport] = useState<Record<string, string>>({});
+  const [reasonByReport, setReasonByReport] = useState<Record<string, string>>(
+    {},
+  );
   const [actingReportId, setActingReportId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -92,14 +94,20 @@ export function ReportsQueue() {
       ) : null}
 
       {loading ? (
-        <p style={{ color: colors.neutral[500] }}>{t("dashboard.reports.loading")}</p>
+        <p style={{ color: colors.neutral[500] }}>
+          {t("dashboard.reports.loading")}
+        </p>
       ) : null}
 
       {!loading && rows.length === 0 ? (
-        <p style={{ color: colors.neutral[500] }}>{t("dashboard.reports.empty")}</p>
+        <p style={{ color: colors.neutral[500] }}>
+          {t("dashboard.reports.empty")}
+        </p>
       ) : null}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: spacing.lg }}>
+      <div
+        style={{ display: "flex", flexDirection: "column", gap: spacing.lg }}
+      >
         {rows.map((row) => (
           <article
             key={row.report_id}
@@ -117,26 +125,52 @@ export function ReportsQueue() {
               <strong style={{ color: colors.neutral[900] }}>
                 {t(`reports.categories.${row.category}`)}
               </strong>
-              <p style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[500] }}>
+              <p
+                style={{
+                  margin: `${spacing.xs}px 0 0`,
+                  color: colors.neutral[500],
+                }}
+              >
                 {t("dashboard.reports.reportedBy", { name: row.reporter_name })}
                 {row.reported_user_name
                   ? ` · ${t("dashboard.reports.reportedUser", { name: row.reported_user_name })}`
                   : ""}
               </p>
               {row.note ? (
-                <p style={{ margin: `${spacing.sm}px 0 0`, color: colors.neutral[700] }}>
+                <p
+                  style={{
+                    margin: `${spacing.sm}px 0 0`,
+                    color: colors.neutral[700],
+                  }}
+                >
                   {t("dashboard.reports.note", { note: row.note })}
                 </p>
               ) : null}
               {row.match_id ? (
-                <p style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[500] }}>
+                <p
+                  style={{
+                    margin: `${spacing.xs}px 0 0`,
+                    color: colors.neutral[500],
+                  }}
+                >
                   {t("dashboard.reports.matchId", { id: row.match_id })}
                 </p>
               ) : null}
             </div>
 
-            <label style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
-              <span style={{ color: colors.neutral[700], fontSize: typography.size.sm }}>
+            <label
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: spacing.xs,
+              }}
+            >
+              <span
+                style={{
+                  color: colors.neutral[700],
+                  fontSize: typography.size.sm,
+                }}
+              >
                 {t("dashboard.reports.reasonLabel")}
               </span>
               <textarea

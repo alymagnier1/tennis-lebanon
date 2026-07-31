@@ -37,4 +37,6 @@ export const resolveUserReportInputSchema = z.object({
   reason: z.string().trim().min(3).max(500),
 });
 
-export type ResolveUserReportInput = z.infer<typeof resolveUserReportInputSchema>;
+export type ResolveUserReportInput = z.infer<
+  typeof resolveUserReportInputSchema
+>;

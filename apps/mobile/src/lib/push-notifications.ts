@@ -15,10 +15,7 @@ import { getStableDeviceId } from "./device-id";
 import { supabase } from "./supabase";
 
 export type PushRegistrationResult =
-  | "registered"
-  | "denied"
-  | "unavailable"
-  | "skipped";
+  "registered" | "denied" | "unavailable" | "skipped";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

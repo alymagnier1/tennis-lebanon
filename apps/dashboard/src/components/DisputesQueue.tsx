@@ -23,7 +23,9 @@ export function DisputesQueue() {
   const [rows, setRows] = useState<DisputedResultQueueRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reasonByResult, setReasonByResult] = useState<Record<string, string>>({});
+  const [reasonByResult, setReasonByResult] = useState<Record<string, string>>(
+    {},
+  );
   const [actingResultId, setActingResultId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,7 +67,12 @@ export function DisputesQueue() {
     setActingResultId(row.result_id);
     setError(null);
     try {
-      await resolveMatchResultDispute(client, row.result_id, resolution, reason);
+      await resolveMatchResultDispute(
+        client,
+        row.result_id,
+        resolution,
+        reason,
+      );
       setReasonByResult((current) => {
         const next = { ...current };
         delete next[row.result_id];
@@ -93,14 +100,20 @@ export function DisputesQueue() {
       ) : null}
 
       {loading ? (
-        <p style={{ color: colors.neutral[500] }}>{t("dashboard.disputes.loading")}</p>
+        <p style={{ color: colors.neutral[500] }}>
+          {t("dashboard.disputes.loading")}
+        </p>
       ) : null}
 
       {!loading && rows.length === 0 ? (
-        <p style={{ color: colors.neutral[500] }}>{t("dashboard.disputes.empty")}</p>
+        <p style={{ color: colors.neutral[500] }}>
+          {t("dashboard.disputes.empty")}
+        </p>
       ) : null}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: spacing.lg }}>
+      <div
+        style={{ display: "flex", flexDirection: "column", gap: spacing.lg }}
+      >
         {rows.map((row) => (
           <article
             key={row.result_id}
@@ -118,28 +131,61 @@ export function DisputesQueue() {
               <strong style={{ color: colors.neutral[900] }}>
                 {t(`formats.${row.match_format}`)} · {row.winner_name}
               </strong>
-              <p style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[500] }}>
+              <p
+                style={{
+                  margin: `${spacing.xs}px 0 0`,
+                  color: colors.neutral[500],
+                }}
+              >
                 {t("dashboard.disputes.submittedBy", {
                   name: row.submitted_by_name,
                 })}
               </p>
-              <p style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[500] }}>
+              <p
+                style={{
+                  margin: `${spacing.xs}px 0 0`,
+                  color: colors.neutral[500],
+                }}
+              >
                 {t("dashboard.disputes.score", {
                   score: formatDisputeScore(row.score),
                 })}
               </p>
               {row.dispute_note ? (
-                <p style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[500] }}>
-                  {t("dashboard.disputes.playerNote", { note: row.dispute_note })}
+                <p
+                  style={{
+                    margin: `${spacing.xs}px 0 0`,
+                    color: colors.neutral[500],
+                  }}
+                >
+                  {t("dashboard.disputes.playerNote", {
+                    note: row.dispute_note,
+                  })}
                 </p>
               ) : null}
-              <p style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[500] }}>
+              <p
+                style={{
+                  margin: `${spacing.xs}px 0 0`,
+                  color: colors.neutral[500],
+                }}
+              >
                 {t("dashboard.disputes.matchId", { id: row.match_id })}
               </p>
             </div>
 
-            <label style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
-              <span style={{ color: colors.neutral[700], fontSize: typography.size.sm }}>
+            <label
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: spacing.xs,
+              }}
+            >
+              <span
+                style={{
+                  color: colors.neutral[700],
+                  fontSize: typography.size.sm,
+                }}
+              >
                 {t("dashboard.disputes.reasonLabel")}
               </span>
               <textarea

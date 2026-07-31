@@ -80,9 +80,7 @@ export function formatSkillBandSelection(
 
   const contiguous = sorted.every((band, index) => {
     if (index === 0) return true;
-    return (
-      skillBandRank(band) - skillBandRank(sorted[index - 1]!) === 1
-    );
+    return skillBandRank(band) - skillBandRank(sorted[index - 1]!) === 1;
   });
 
   if (contiguous && sorted.length > 1) {

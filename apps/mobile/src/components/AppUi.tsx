@@ -114,7 +114,10 @@ export function SectionTitle({
         {title}
       </AppText>
       {subtitle ? (
-        <AppText style={[styles.sectionSubtitle, { writingDirection }]} maxLines={3}>
+        <AppText
+          style={[styles.sectionSubtitle, { writingDirection }]}
+          maxLines={3}
+        >
           {subtitle}
         </AppText>
       ) : null}
@@ -317,7 +320,8 @@ export const PlayerCard = memo(function PlayerCard({
           </AppText>
         ) : null}
       </View>
-      {trailing ?? (onPress ? <AppText style={styles.chevron}>{chevron}</AppText> : null)}
+      {trailing ??
+        (onPress ? <AppText style={styles.chevron}>{chevron}</AppText> : null)}
     </>
   );
 
@@ -504,10 +508,7 @@ export function EmptyState({
       <AppText accessibilityElementsHidden style={styles.emptyIcon}>
         {icon ?? "🎾"}
       </AppText>
-      <AppText
-        style={[styles.emptyTitle, { writingDirection }]}
-        maxLines={3}
-      >
+      <AppText style={[styles.emptyTitle, { writingDirection }]} maxLines={3}>
         {title}
       </AppText>
       <AppText style={[styles.emptyBody, { writingDirection }]} maxLines={5}>
@@ -794,10 +795,15 @@ export function StatusBanner({
           {title}
         </AppText>
       ) : null}
-      <AppText style={[styles.statusBannerBody, { writingDirection }]} maxLines={4}>
+      <AppText
+        style={[styles.statusBannerBody, { writingDirection }]}
+        maxLines={4}
+      >
         {body}
       </AppText>
-      {actions ? <View style={styles.statusBannerActions}>{actions}</View> : null}
+      {actions ? (
+        <View style={styles.statusBannerActions}>{actions}</View>
+      ) : null}
     </View>
   );
 }

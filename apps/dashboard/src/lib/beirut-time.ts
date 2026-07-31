@@ -11,10 +11,16 @@ export function formatBeirutDateTime(iso: string): string {
   }).format(new Date(iso));
 }
 
-export function formatBeirutTimeRange(startIso: string, endIso: string): string {
-  return `${formatBeirutDateTime(startIso)} – ${new Intl.DateTimeFormat("en-GB", {
-    timeZone: BEIRUT_TZ,
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(endIso))}`;
+export function formatBeirutTimeRange(
+  startIso: string,
+  endIso: string,
+): string {
+  return `${formatBeirutDateTime(startIso)} – ${new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      timeZone: BEIRUT_TZ,
+      hour: "2-digit",
+      minute: "2-digit",
+    },
+  ).format(new Date(endIso))}`;
 }

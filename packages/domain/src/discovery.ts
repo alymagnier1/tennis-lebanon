@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { playIntentSchema, type PlayIntent, type SkillBand } from "./onboarding";
+import {
+  playIntentSchema,
+  type PlayIntent,
+  type SkillBand,
+} from "./onboarding";
 
 export const SKILL_BAND_RANK: Record<SkillBand, number> = {
   beginner: 1,
@@ -79,7 +83,8 @@ export function discoveryFiltersForMatchInvite(input: {
 }): DiscoveryFiltersInput {
   return {
     format: input.format as "singles" | "doubles",
-    intent: input.intent === "either" ? undefined : (input.intent as PlayIntent),
+    intent:
+      input.intent === "either" ? undefined : (input.intent as PlayIntent),
     requireAvailabilityOverlap: true,
     levelWindow: DEFAULT_LEVEL_WINDOW,
     horizonDays: DEFAULT_DISCOVERY_HORIZON_DAYS,

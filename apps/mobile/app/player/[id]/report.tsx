@@ -73,7 +73,10 @@ export default function ReportPlayerScreen() {
         loading={submitMutation.isPending}
         onPress={() => submitMutation.mutate()}
       />
-      <SecondaryButton label={t("common.cancel")} onPress={() => router.back()} />
+      <SecondaryButton
+        label={t("common.cancel")}
+        onPress={() => router.back()}
+      />
     </Screen>
   );
 }

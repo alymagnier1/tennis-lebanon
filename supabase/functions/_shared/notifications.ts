@@ -14,7 +14,8 @@ export function parseNotificationPayload(
   const record = value as Record<string, unknown>;
   const deepLink =
     typeof record.deepLink === "string" ? record.deepLink.trim() : undefined;
-  const title = typeof record.title === "string" ? record.title.trim() : undefined;
+  const title =
+    typeof record.title === "string" ? record.title.trim() : undefined;
   const body = typeof record.body === "string" ? record.body.trim() : undefined;
 
   if (!deepLink && !title && !body) {

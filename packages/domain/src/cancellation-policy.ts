@@ -1,8 +1,6 @@
 export const LATE_CANCEL_HOURS = 24;
 
-export type WithdrawalAttendanceClass =
-  | "cancelled_in_time"
-  | "late_cancel";
+export type WithdrawalAttendanceClass = "cancelled_in_time" | "late_cancel";
 
 export function classifyWithdrawalTiming(
   bookingStartsAt: string | null | undefined,
@@ -18,7 +16,9 @@ export function classifyWithdrawalTiming(
   }
 
   const windowMs = LATE_CANCEL_HOURS * 60 * 60 * 1000;
-  return startsAtMs - now.getTime() <= windowMs ? "late_cancel" : "cancelled_in_time";
+  return startsAtMs - now.getTime() <= windowMs
+    ? "late_cancel"
+    : "cancelled_in_time";
 }
 
 export function requiresCancelReason(matchStatus: string): boolean {

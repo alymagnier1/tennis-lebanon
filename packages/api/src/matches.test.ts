@@ -141,7 +141,10 @@ describe("matches API wrappers", () => {
     rpc
       .mockResolvedValueOnce({ data: { match_id: "match-id" }, error: null })
       .mockResolvedValueOnce({ data: [{ match_id: "match-id" }], error: null })
-      .mockResolvedValueOnce({ data: [{ match_id: "completed-id" }], error: null });
+      .mockResolvedValueOnce({
+        data: [{ match_id: "completed-id" }],
+        error: null,
+      });
 
     await expect(getMatchHub(client, "match-id")).resolves.toEqual({
       match_id: "match-id",

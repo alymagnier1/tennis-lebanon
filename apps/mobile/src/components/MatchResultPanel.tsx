@@ -74,7 +74,9 @@ function MatchScoreEditor({
               <FormField
                 label={t("matches.results.winnerGamesLabel")}
                 value={draft.winnerGames}
-                onChangeText={(value) => updateSet(index, { winnerGames: value })}
+                onChangeText={(value) =>
+                  updateSet(index, { winnerGames: value })
+                }
                 keyboardType="number-pad"
                 editable={!disabled}
                 maxLength={1}
@@ -84,7 +86,9 @@ function MatchScoreEditor({
               <FormField
                 label={t("matches.results.loserGamesLabel")}
                 value={draft.loserGames}
-                onChangeText={(value) => updateSet(index, { loserGames: value })}
+                onChangeText={(value) =>
+                  updateSet(index, { loserGames: value })
+                }
                 keyboardType="number-pad"
                 editable={!disabled}
                 maxLength={1}
@@ -133,9 +137,10 @@ export function MatchResultPanel({
     createDefaultSetDrafts(2),
   );
   const result = (hub.result as MatchHubResult | null) ?? null;
-  const participants = (hub.participants as HubParticipant[] | undefined)?.filter(
-    (participant) => participant.status === "accepted",
-  ) ?? [];
+  const participants =
+    (hub.participants as HubParticipant[] | undefined)?.filter(
+      (participant) => participant.status === "accepted",
+    ) ?? [];
 
   const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey: ["match-hub", matchId] });
@@ -150,8 +155,13 @@ export function MatchResultPanel({
   });
 
   const submitMutation = useMutation({
-    mutationFn: ({ winnerUserId, score }: { winnerUserId: string; score: MatchHubResult["score"] }) =>
-      submitMatchResult(supabase, matchId, score, winnerUserId),
+    mutationFn: ({
+      winnerUserId,
+      score,
+    }: {
+      winnerUserId: string;
+      score: MatchHubResult["score"];
+    }) => submitMatchResult(supabase, matchId, score, winnerUserId),
     onSuccess: async () => {
       await invalidate();
       Alert.alert(t("matches.results.submitSuccess"));
@@ -200,13 +210,20 @@ export function MatchResultPanel({
     result,
   });
 
-  if (!showAttendance && !showSubmit && !showConfirm && !showDispute && !result) {
+  if (
+    !showAttendance &&
+    !showSubmit &&
+    !showConfirm &&
+    !showDispute &&
+    !result
+  ) {
     return null;
   }
 
   const winnerName =
-    participants.find((participant) => participant.user_id === result?.winner_user_id)
-      ?.display_name ?? null;
+    participants.find(
+      (participant) => participant.user_id === result?.winner_user_id,
+    )?.display_name ?? null;
   const scoreSummary = result ? formatMatchScore(result.score) : null;
   const parsedPreview = parseMatchScoreDrafts(setDrafts);
   const scorePreview =
@@ -224,11 +241,15 @@ export function MatchResultPanel({
     if (!parsed.ok) {
       const setHint =
         parsed.setIndex !== undefined
-          ? t("matches.results.scoreErrors.setHint", { number: parsed.setIndex + 1 })
+          ? t("matches.results.scoreErrors.setHint", {
+              number: parsed.setIndex + 1,
+            })
           : null;
       Alert.alert(
         t("matches.results.scoreErrors.title"),
-        [t(`matches.results.scoreErrors.${parsed.error}`), setHint].filter(Boolean).join(" "),
+        [t(`matches.results.scoreErrors.${parsed.error}`), setHint]
+          .filter(Boolean)
+          .join(" "),
       );
       return;
     }
@@ -250,10 +271,16 @@ export function MatchResultPanel({
             value={t(`matches.results.status.${result.status}`)}
           />
           {winnerName ? (
-            <SummaryRow label={t("matches.results.winnerLabel")} value={winnerName} />
+            <SummaryRow
+              label={t("matches.results.winnerLabel")}
+              value={winnerName}
+            />
           ) : null}
           {scoreSummary ? (
-            <SummaryRow label={t("matches.results.scoreLabel")} value={scoreSummary} />
+            <SummaryRow
+              label={t("matches.results.scoreLabel")}
+              value={scoreSummary}
+            />
           ) : null}
         </>
       ) : null}
@@ -327,14 +354,18 @@ export function MatchResultPanel({
           label={t("matches.results.dispute")}
           loading={disputeMutation.isPending}
           onPress={() =>
-            Alert.alert(t("matches.results.dispute"), t("matches.results.disputePrompt"), [
-              { text: t("common.cancel"), style: "cancel" },
-              {
-                text: t("matches.results.dispute"),
-                style: "destructive",
-                onPress: () => disputeMutation.mutate(),
-              },
-            ])
+            Alert.alert(
+              t("matches.results.dispute"),
+              t("matches.results.disputePrompt"),
+              [
+                { text: t("common.cancel"), style: "cancel" },
+                {
+                  text: t("matches.results.dispute"),
+                  style: "destructive",
+                  onPress: () => disputeMutation.mutate(),
+                },
+              ],
+            )
           }
         />
       ) : null}

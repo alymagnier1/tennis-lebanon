@@ -55,6 +55,8 @@ export async function resolveMatchResultDispute(
   }
 }
 
-export function formatDisputeScore(score: { sets: [number, number][] }): string {
+export function formatDisputeScore(score: {
+  sets: [number, number][];
+}): string {
   return formatDisputeScoreFromDomain(score);
 }

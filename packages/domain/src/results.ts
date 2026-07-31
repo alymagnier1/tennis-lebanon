@@ -27,11 +27,7 @@ export type SetScoreDraft = {
 };
 
 export type MatchScoreDraftError =
-  | "empty"
-  | "invalidNumber"
-  | "invalidSet"
-  | "setCount"
-  | "invalidScore";
+  "empty" | "invalidNumber" | "invalidSet" | "setCount" | "invalidScore";
 
 export function createEmptySetDraft(): SetScoreDraft {
   return { winnerGames: "", loserGames: "" };
@@ -41,11 +37,19 @@ export function createDefaultSetDrafts(count = 2): SetScoreDraft[] {
   return Array.from({ length: count }, () => createEmptySetDraft());
 }
 
-export function isValidTennisSet(winnerGames: number, loserGames: number): boolean {
+export function isValidTennisSet(
+  winnerGames: number,
+  loserGames: number,
+): boolean {
   if (!Number.isInteger(winnerGames) || !Number.isInteger(loserGames)) {
     return false;
   }
-  if (winnerGames < 0 || loserGames < 0 || winnerGames <= loserGames || winnerGames > 7) {
+  if (
+    winnerGames < 0 ||
+    loserGames < 0 ||
+    winnerGames <= loserGames ||
+    winnerGames > 7
+  ) {
     return false;
   }
   if (winnerGames === 6 && loserGames <= 4) {
@@ -57,11 +61,12 @@ export function isValidTennisSet(winnerGames: number, loserGames: number): boole
   return false;
 }
 
-export function parseSetScoreDraft(
-  draft: SetScoreDraft,
-):
+export function parseSetScoreDraft(draft: SetScoreDraft):
   | { ok: true; score: [number, number] }
-  | { ok: false; error: Exclude<MatchScoreDraftError, "setCount" | "invalidScore"> } {
+  | {
+      ok: false;
+      error: Exclude<MatchScoreDraftError, "setCount" | "invalidScore">;
+    } {
   if (!draft.winnerGames.trim() || !draft.loserGames.trim()) {
     return { ok: false, error: "empty" };
   }
@@ -110,7 +115,9 @@ export function parseMatchScoreDrafts(
 }
 
 export function formatMatchScore(score: MatchScore): string {
-  return score.sets.map(([winnerGames, loserGames]) => `${winnerGames}-${loserGames}`).join(", ");
+  return score.sets
+    .map(([winnerGames, loserGames]) => `${winnerGames}-${loserGames}`)
+    .join(", ");
 }
 
 export type MatchHubResult = {

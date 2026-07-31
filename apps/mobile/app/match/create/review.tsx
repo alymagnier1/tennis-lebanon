@@ -250,7 +250,9 @@ export default function CreateMatchReviewScreen() {
               />
               <SecondaryButton
                 label={t("matches.hub.cancel")}
-                onPress={() => router.replace(matchHubRoute(activeHostedMatch.match_id))}
+                onPress={() =>
+                  router.replace(matchHubRoute(activeHostedMatch.match_id))
+                }
               />
             </>
           }

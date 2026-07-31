@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { listActiveZones, registerPilotClub, type ActiveZone } from "@tennis-lebanon/api";
+import {
+  listActiveZones,
+  registerPilotClub,
+  type ActiveZone,
+} from "@tennis-lebanon/api";
 import { colors, spacing } from "@tennis-lebanon/ui";
 import { DashboardShell } from "@/components/DashboardShell";
 import {
@@ -121,7 +125,12 @@ export function OnboardingForm() {
 
         <label style={labelStackStyle}>
           <span>{t("dashboard.onboarding.zoneLabel")}</span>
-          <select value={zoneId} onChange={(e) => setZoneId(e.target.value)} required style={fieldStyle}>
+          <select
+            value={zoneId}
+            onChange={(e) => setZoneId(e.target.value)}
+            required
+            style={fieldStyle}
+          >
             {zones.map((zone) => (
               <option key={zone.zone_id} value={zone.zone_id}>
                 {zoneLabel(zone.name_i18n, zone.slug)}
@@ -132,19 +141,42 @@ export function OnboardingForm() {
 
         <label style={labelStackStyle}>
           <span>{t("dashboard.onboarding.descriptionLabel")}</span>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} style={fieldStyle} />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            style={fieldStyle}
+          />
         </label>
 
         <label style={labelStackStyle}>
           <span>{t("dashboard.onboarding.addressLabel")}</span>
-          <input value={address} onChange={(e) => setAddress(e.target.value)} style={fieldStyle} />
+          <input
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            style={fieldStyle}
+          />
         </label>
 
         <fieldset style={{ border: "none", margin: 0, padding: 0 }}>
           <legend>{t("dashboard.onboarding.amenitiesLabel")}</legend>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.sm, marginTop: spacing.sm }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: spacing.sm,
+              marginTop: spacing.sm,
+            }}
+          >
             {AMENITY_OPTIONS.map((amenity) => (
-              <label key={amenity} style={{ display: "flex", gap: spacing.xs, alignItems: "center" }}>
+              <label
+                key={amenity}
+                style={{
+                  display: "flex",
+                  gap: spacing.xs,
+                  alignItems: "center",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={amenities.includes(amenity)}
@@ -156,16 +188,27 @@ export function OnboardingForm() {
           </div>
         </fieldset>
 
-        <h2 style={{ margin: 0 }}>{t("dashboard.onboarding.firstCourtTitle")}</h2>
+        <h2 style={{ margin: 0 }}>
+          {t("dashboard.onboarding.firstCourtTitle")}
+        </h2>
 
         <label style={labelStackStyle}>
           <span>{t("dashboard.courts.nameLabel")}</span>
-          <input value={courtName} onChange={(e) => setCourtName(e.target.value)} required style={fieldStyle} />
+          <input
+            value={courtName}
+            onChange={(e) => setCourtName(e.target.value)}
+            required
+            style={fieldStyle}
+          />
         </label>
 
         <label style={labelStackStyle}>
           <span>{t("dashboard.courts.surfaceLabel")}</span>
-          <select value={surface} onChange={(e) => setSurface(e.target.value)} style={fieldStyle}>
+          <select
+            value={surface}
+            onChange={(e) => setSurface(e.target.value)}
+            style={fieldStyle}
+          >
             {SURFACE_OPTIONS.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -176,7 +219,12 @@ export function OnboardingForm() {
 
         <label style={labelStackStyle}>
           <span>{t("dashboard.courts.priceLabel")}</span>
-          <input value={priceMinor} onChange={(e) => setPriceMinor(e.target.value)} inputMode="numeric" style={fieldStyle} />
+          <input
+            value={priceMinor}
+            onChange={(e) => setPriceMinor(e.target.value)}
+            inputMode="numeric"
+            style={fieldStyle}
+          />
         </label>
 
         {error ? (

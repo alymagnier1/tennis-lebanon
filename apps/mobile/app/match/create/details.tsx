@@ -112,13 +112,7 @@ export default function CreateMatchDetailsScreen() {
       visibility: visibilityFromListOnDiscover(listOnDiscover),
       requiresCreatorApproval: requiresApproval,
     });
-  }, [
-    format,
-    intent,
-    listOnDiscover,
-    requiresApproval,
-    selectedBands,
-  ]);
+  }, [format, intent, listOnDiscover, requiresApproval, selectedBands]);
 
   function goToActiveHostedMatch() {
     if (!activeHostedMatch) return;

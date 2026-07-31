@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getClubAdminDetail, updateClubBookingSettings, updateClubProfile, type ClubAdminDetail } from "@tennis-lebanon/api";
+import {
+  getClubAdminDetail,
+  updateClubBookingSettings,
+  updateClubProfile,
+  type ClubAdminDetail,
+} from "@tennis-lebanon/api";
 import { colors } from "@tennis-lebanon/ui";
 import { DashboardShell } from "@/components/DashboardShell";
 import { useStaffClubs } from "@/hooks/useStaffClubs";
@@ -16,15 +21,21 @@ import {
 
 export function ClubSettingsForm() {
   const { t } = useTranslation();
-  const { client, clubId, activeClub, isAdmin, loading: clubsLoading } = useStaffClubs();
+  const {
+    client,
+    clubId,
+    activeClub,
+    isAdmin,
+    loading: clubsLoading,
+  } = useStaffClubs();
   const [detail, setDetail] = useState<ClubAdminDetail | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
   const [amenities, setAmenities] = useState<string[]>([]);
-  const [bookingMode, setBookingMode] = useState<"manual_request" | "external_link">(
-    "manual_request",
-  );
+  const [bookingMode, setBookingMode] = useState<
+    "manual_request" | "external_link"
+  >("manual_request");
   const [bookingPhone, setBookingPhone] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +50,9 @@ export function ClubSettingsForm() {
       setAddress(data.club.address_public ?? "");
       setAmenities(data.club.amenities ?? []);
       setBookingMode(
-        data.club.booking_mode === "external_link" ? "external_link" : "manual_request",
+        data.club.booking_mode === "external_link"
+          ? "external_link"
+          : "manual_request",
       );
       setBookingPhone(data.club.booking_phone ?? "");
     });
@@ -68,7 +81,8 @@ export function ClubSettingsForm() {
       });
       await updateClubBookingSettings(client, clubId, {
         bookingMode,
-        bookingPhone: bookingMode === "external_link" ? bookingPhone : bookingPhone || null,
+        bookingPhone:
+          bookingMode === "external_link" ? bookingPhone : bookingPhone || null,
       });
       setMessage(t("dashboard.settings.saved"));
     } catch {
@@ -89,7 +103,9 @@ export function ClubSettingsForm() {
   if (!isAdmin) {
     return (
       <DashboardShell title={t("dashboard.settings.title")}>
-        <p style={{ color: colors.neutral[700] }}>{t("dashboard.settings.adminOnly")}</p>
+        <p style={{ color: colors.neutral[700] }}>
+          {t("dashboard.settings.adminOnly")}
+        </p>
       </DashboardShell>
     );
   }
@@ -97,30 +113,51 @@ export function ClubSettingsForm() {
   return (
     <DashboardShell title={t("dashboard.settings.title")}>
       {activeClub ? (
-        <p style={{ margin: 0, color: colors.neutral[700] }}>{activeClub.name}</p>
+        <p style={{ margin: 0, color: colors.neutral[700] }}>
+          {activeClub.name}
+        </p>
       ) : null}
 
       <form onSubmit={(event) => void onSubmit(event)} style={cardStyle}>
         <label style={labelStackStyle}>
           <span>{t("dashboard.onboarding.nameLabel")}</span>
-          <input value={name} onChange={(e) => setName(e.target.value)} required style={fieldStyle} />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            style={fieldStyle}
+          />
         </label>
 
         <label style={labelStackStyle}>
           <span>{t("dashboard.onboarding.descriptionLabel")}</span>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} style={fieldStyle} />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            style={fieldStyle}
+          />
         </label>
 
         <label style={labelStackStyle}>
           <span>{t("dashboard.onboarding.addressLabel")}</span>
-          <input value={address} onChange={(e) => setAddress(e.target.value)} style={fieldStyle} />
+          <input
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            style={fieldStyle}
+          />
         </label>
 
         <fieldset style={{ border: "none", margin: 0, padding: 0 }}>
           <legend>{t("dashboard.onboarding.amenitiesLabel")}</legend>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+          <div
+            style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}
+          >
             {AMENITY_OPTIONS.map((amenity) => (
-              <label key={amenity} style={{ display: "flex", gap: 4, alignItems: "center" }}>
+              <label
+                key={amenity}
+                style={{ display: "flex", gap: 4, alignItems: "center" }}
+              >
                 <input
                   type="checkbox"
                   checked={amenities.includes(amenity)}
@@ -134,8 +171,17 @@ export function ClubSettingsForm() {
 
         <fieldset style={{ border: "none", margin: 0, padding: 0 }}>
           <legend>{t("dashboard.settings.bookingModeLabel")}</legend>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
-            <label style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              marginTop: 8,
+            }}
+          >
+            <label
+              style={{ display: "flex", gap: 8, alignItems: "flex-start" }}
+            >
               <input
                 type="radio"
                 name="bookingMode"
@@ -150,7 +196,9 @@ export function ClubSettingsForm() {
                 </span>
               </span>
             </label>
-            <label style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+            <label
+              style={{ display: "flex", gap: 8, alignItems: "flex-start" }}
+            >
               <input
                 type="radio"
                 name="bookingMode"
@@ -192,7 +240,9 @@ export function ClubSettingsForm() {
           </p>
         ) : null}
 
-        {message ? <p style={{ margin: 0, color: colors.brand[700] }}>{message}</p> : null}
+        {message ? (
+          <p style={{ margin: 0, color: colors.brand[700] }}>{message}</p>
+        ) : null}
         {error ? (
           <p style={{ margin: 0, color: colors.danger[500] }} role="alert">
             {error}

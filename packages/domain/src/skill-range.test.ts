@@ -19,15 +19,14 @@ describe("skill range selection", () => {
     expect(toggleSkillBandSelection(["intermediate"], "intermediate")).toEqual([
       "intermediate",
     ]);
-    expect(
-      toggleSkillBandSelection(["intermediate"], "advanced"),
-    ).toEqual(["intermediate", "advanced"]);
+    expect(toggleSkillBandSelection(["intermediate"], "advanced")).toEqual([
+      "intermediate",
+      "advanced",
+    ]);
   });
 
   it("derives min and max from selected bands", () => {
-    expect(
-      skillRangeFromSelection(["beginner", "advanced"]),
-    ).toEqual({
+    expect(skillRangeFromSelection(["beginner", "advanced"])).toEqual({
       minSkill: "beginner",
       maxSkill: "advanced",
     });
@@ -40,8 +39,8 @@ describe("skill range selection", () => {
   });
 
   it("formats all levels as a full span", () => {
-    expect(
-      formatSkillBandSelection(ORDERED_SKILL_BANDS, (band) => band),
-    ).toBe("beginner – competitive");
+    expect(formatSkillBandSelection(ORDERED_SKILL_BANDS, (band) => band)).toBe(
+      "beginner – competitive",
+    );
   });
 });

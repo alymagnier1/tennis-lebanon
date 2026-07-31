@@ -67,7 +67,13 @@ export const AMENITY_OPTIONS = [
   "pro_shop",
 ] as const;
 
-export const SURFACE_OPTIONS = ["hard", "clay", "grass", "carpet", "other"] as const;
+export const SURFACE_OPTIONS = [
+  "hard",
+  "clay",
+  "grass",
+  "carpet",
+  "other",
+] as const;
 
 export function slugify(value: string): string {
   return value

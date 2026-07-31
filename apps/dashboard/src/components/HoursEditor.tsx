@@ -50,7 +50,9 @@ export function HoursEditor() {
     setDetail(data);
     if (!courtId && data.courts[0]) {
       setCourtId(data.courts[0].court_id);
-      setHours(data.courts[0].hours.length ? data.courts[0].hours : defaultHours());
+      setHours(
+        data.courts[0].hours.length ? data.courts[0].hours : defaultHours(),
+      );
     }
   };
 
@@ -79,10 +81,16 @@ export function HoursEditor() {
     }
   };
 
-  const updateHour = (weekday: number, field: "opens_at" | "closes_at", value: string) => {
+  const updateHour = (
+    weekday: number,
+    field: "opens_at" | "closes_at",
+    value: string,
+  ) => {
     setHours((current) =>
       current.map((hour) =>
-        hour.weekday === weekday ? { ...hour, [field]: value.length === 5 ? `${value}:00` : value } : hour,
+        hour.weekday === weekday
+          ? { ...hour, [field]: value.length === 5 ? `${value}:00` : value }
+          : hour,
       ),
     );
   };
@@ -153,7 +161,9 @@ export function HoursEditor() {
   if (!isAdmin) {
     return (
       <DashboardShell title={t("dashboard.hours.title")}>
-        <p style={{ color: colors.neutral[700] }}>{t("dashboard.settings.adminOnly")}</p>
+        <p style={{ color: colors.neutral[700] }}>
+          {t("dashboard.settings.adminOnly")}
+        </p>
       </DashboardShell>
     );
   }
@@ -162,7 +172,11 @@ export function HoursEditor() {
     <DashboardShell title={t("dashboard.hours.title")}>
       <label style={labelStackStyle}>
         <span>{t("dashboard.hours.courtLabel")}</span>
-        <select value={courtId} onChange={(e) => onCourtChange(e.target.value)} style={fieldStyle}>
+        <select
+          value={courtId}
+          onChange={(e) => onCourtChange(e.target.value)}
+          style={fieldStyle}
+        >
           {(detail?.courts ?? []).map((court) => (
             <option key={court.court_id} value={court.court_id}>
               {court.name}
@@ -180,18 +194,29 @@ export function HoursEditor() {
             closes_at: "22:00:00",
           };
           return (
-            <div key={day.value} style={{ display: "grid", gridTemplateColumns: "60px 1fr 1fr", gap: spacing.sm }}>
+            <div
+              key={day.value}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "60px 1fr 1fr",
+                gap: spacing.sm,
+              }}
+            >
               <span>{day.label}</span>
               <input
                 type="time"
                 value={hour.opens_at.slice(0, 5)}
-                onChange={(e) => updateHour(day.value, "opens_at", e.target.value)}
+                onChange={(e) =>
+                  updateHour(day.value, "opens_at", e.target.value)
+                }
                 style={fieldStyle}
               />
               <input
                 type="time"
                 value={hour.closes_at.slice(0, 5)}
-                onChange={(e) => updateHour(day.value, "closes_at", e.target.value)}
+                onChange={(e) =>
+                  updateHour(day.value, "closes_at", e.target.value)
+                }
                 style={fieldStyle}
               />
             </div>
@@ -206,15 +231,29 @@ export function HoursEditor() {
         <h2 style={{ margin: 0 }}>{t("dashboard.hours.blockTitle")}</h2>
         <label style={labelStackStyle}>
           <span>{t("dashboard.hours.blockStartLabel")}</span>
-          <input type="datetime-local" value={blockStart} onChange={(e) => setBlockStart(e.target.value)} style={fieldStyle} />
+          <input
+            type="datetime-local"
+            value={blockStart}
+            onChange={(e) => setBlockStart(e.target.value)}
+            style={fieldStyle}
+          />
         </label>
         <label style={labelStackStyle}>
           <span>{t("dashboard.hours.blockEndLabel")}</span>
-          <input type="datetime-local" value={blockEnd} onChange={(e) => setBlockEnd(e.target.value)} style={fieldStyle} />
+          <input
+            type="datetime-local"
+            value={blockEnd}
+            onChange={(e) => setBlockEnd(e.target.value)}
+            style={fieldStyle}
+          />
         </label>
         <label style={labelStackStyle}>
           <span>{t("dashboard.hours.blockReasonLabel")}</span>
-          <input value={blockReason} onChange={(e) => setBlockReason(e.target.value)} style={fieldStyle} />
+          <input
+            value={blockReason}
+            onChange={(e) => setBlockReason(e.target.value)}
+            style={fieldStyle}
+          />
         </label>
         <button type="submit" style={secondaryButtonStyle}>
           {t("dashboard.hours.addBlock")}
@@ -224,21 +263,46 @@ export function HoursEditor() {
       <section style={cardStyle}>
         <h2 style={{ margin: 0 }}>{t("dashboard.hours.upcomingBlocks")}</h2>
         {(detail?.blocks ?? []).length === 0 ? (
-          <p style={{ margin: 0, color: colors.neutral[700] }}>{t("dashboard.hours.noBlocks")}</p>
+          <p style={{ margin: 0, color: colors.neutral[700] }}>
+            {t("dashboard.hours.noBlocks")}
+          </p>
         ) : (
-          <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: spacing.sm }}>
+          <ul
+            style={{
+              margin: 0,
+              padding: 0,
+              listStyle: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: spacing.sm,
+            }}
+          >
             {detail?.blocks.map((block) => (
-              <li key={block.block_id} style={{ display: "flex", justifyContent: "space-between", gap: spacing.md, flexWrap: "wrap" }}>
+              <li
+                key={block.block_id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: spacing.md,
+                  flexWrap: "wrap",
+                }}
+              >
                 <div>
                   <strong>{block.court_name}</strong>
                   <p style={{ margin: 0, color: colors.neutral[700] }}>
                     {formatBeirutTimeRange(block.starts_at, block.ends_at)}
                   </p>
                   {block.reason ? (
-                    <p style={{ margin: 0, color: colors.neutral[500] }}>{block.reason}</p>
+                    <p style={{ margin: 0, color: colors.neutral[500] }}>
+                      {block.reason}
+                    </p>
                   ) : null}
                 </div>
-                <button type="button" onClick={() => void removeBlock(block.block_id)} style={dangerButtonStyle}>
+                <button
+                  type="button"
+                  onClick={() => void removeBlock(block.block_id)}
+                  style={dangerButtonStyle}
+                >
                   {t("dashboard.hours.removeBlock")}
                 </button>
               </li>
@@ -247,7 +311,9 @@ export function HoursEditor() {
         )}
       </section>
 
-      {message ? <p style={{ margin: 0, color: colors.brand[700] }}>{message}</p> : null}
+      {message ? (
+        <p style={{ margin: 0, color: colors.brand[700] }}>{message}</p>
+      ) : null}
       {error ? (
         <p style={{ margin: 0, color: colors.danger[500] }} role="alert">
           {error}

@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, TextInput, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listMatchMessages, sendMatchMessage } from "@tennis-lebanon/api";
@@ -109,7 +104,9 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
         onPress={() => sendMutation.mutate(draft.trim())}
       />
       {sendMutation.isError ? (
-        <AppText style={formStyles.errorText}>{t("matches.chat.error")}</AppText>
+        <AppText style={formStyles.errorText}>
+          {t("matches.chat.error")}
+        </AppText>
       ) : null}
     </View>
   );

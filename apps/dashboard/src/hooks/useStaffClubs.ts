@@ -38,7 +38,8 @@ export function useStaffClubs() {
     };
   }, [client]);
 
-  const activeClub = clubs.find((club) => club.club_id === clubId) ?? clubs[0] ?? null;
+  const activeClub =
+    clubs.find((club) => club.club_id === clubId) ?? clubs[0] ?? null;
   const isAdmin = activeClub?.role === "admin";
 
   return {

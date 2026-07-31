@@ -35,7 +35,8 @@ export default function ProfileScreen() {
     <Screen
       title={profile?.display_name ?? t("profile.title")}
       description={
-        playerProfile && isProvisionalPlayerRating(playerProfile.rated_match_count)
+        playerProfile &&
+        isProvisionalPlayerRating(playerProfile.rated_match_count)
           ? t("rating.progressHint")
           : undefined
       }
@@ -47,7 +48,9 @@ export default function ProfileScreen() {
             <Text style={formStyles.summaryValue}>
               {t(`skillBands.${playerProfile.skill_band}`)}
             </Text>
-            <Text style={formStyles.summaryLabel}>{t("rating.ownRatingLabel")}</Text>
+            <Text style={formStyles.summaryLabel}>
+              {t("rating.ownRatingLabel")}
+            </Text>
             <Text style={formStyles.summaryValue}>
               {ratingHeadline ?? t("discover.loading")}
             </Text>

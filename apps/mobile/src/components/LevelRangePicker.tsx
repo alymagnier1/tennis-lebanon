@@ -51,10 +51,7 @@ export function LevelRangePicker({
               accessibilityState={{ checked: isSelected }}
               accessibilityLabel={band.label}
               onPress={() => onToggle(band.value)}
-              style={[
-                styles.levelChip,
-                isSelected && styles.levelChipSelected,
-              ]}
+              style={[styles.levelChip, isSelected && styles.levelChipSelected]}
             >
               {isYourLevel && yourLevelLabel ? (
                 <View style={styles.yourLevelBadge}>

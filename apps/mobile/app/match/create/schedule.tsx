@@ -122,10 +122,7 @@ export default function CreateMatchScheduleScreen() {
       </View>
 
       <PrimaryButton label={t("common.continue")} onPress={handleNext} />
-      <SecondaryButton
-        label={t("common.back")}
-        onPress={() => router.back()}
-      />
+      <SecondaryButton label={t("common.back")} onPress={() => router.back()} />
     </Screen>
   );
 }

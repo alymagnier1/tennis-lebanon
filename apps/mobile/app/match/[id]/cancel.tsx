@@ -68,7 +68,10 @@ export default function CancelMatchScreen() {
           cancelMutation.mutate();
         }}
       />
-      <SecondaryButton label={t("common.cancel")} onPress={() => router.back()} />
+      <SecondaryButton
+        label={t("common.cancel")}
+        onPress={() => router.back()}
+      />
     </Screen>
   );
 }

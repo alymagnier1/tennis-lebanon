@@ -241,7 +241,8 @@ export default function DiscoverScreen() {
     </View>
   );
 
-  const virtualizedList = useMemo((): ScreenVirtualizedListProps | undefined => {
+  const virtualizedList = useMemo(():
+    ScreenVirtualizedListProps | undefined => {
     if (segment === "players") {
       return {
         data: sortedPlayers,
@@ -347,78 +348,77 @@ export default function DiscoverScreen() {
           </>
         }
       >
-      {widenedBanner ? (
-        <Text style={formStyles.description}>
-          {t("discover.widenLevelBanner")}
-        </Text>
-      ) : null}
+        {widenedBanner ? (
+          <Text style={formStyles.description}>
+            {t("discover.widenLevelBanner")}
+          </Text>
+        ) : null}
 
-      {widenedZonesBanner ? (
-        <Text style={formStyles.description}>
-          {t("discover.widenZonesBanner")}
-        </Text>
-      ) : null}
+        {widenedZonesBanner ? (
+          <Text style={formStyles.description}>
+            {t("discover.widenZonesBanner")}
+          </Text>
+        ) : null}
 
-      {activeQuery.isLoading ? (
-        <ActivityIndicator accessibilityLabel={t("discover.loading")} />
-      ) : null}
+        {activeQuery.isLoading ? (
+          <ActivityIndicator accessibilityLabel={t("discover.loading")} />
+        ) : null}
 
-      {activeQuery.isError ? (
-        <View>
-          <Text style={formStyles.errorText}>{t("discover.error")}</Text>
-          <PrimaryButton
-            label={t("common.retry")}
-            onPress={() => void activeQuery.refetch()}
+        {activeQuery.isError ? (
+          <View>
+            <Text style={formStyles.errorText}>{t("discover.error")}</Text>
+            <PrimaryButton
+              label={t("common.retry")}
+              onPress={() => void activeQuery.refetch()}
+            />
+          </View>
+        ) : null}
+
+        {segment === "players" &&
+        sortedPlayers.length === 0 &&
+        !playersQuery.isLoading ? (
+          <EmptyState
+            title={t("discover.emptyPlayersTitle")}
+            body={t("discover.emptyPlayersBody")}
+            action={
+              <>
+                <PrimaryButton
+                  label={t("matches.create.organiseCta")}
+                  onPress={() => router.push(CREATE_MATCH_ROUTE)}
+                />
+                <SecondaryButton
+                  label={t("discover.widenLevel")}
+                  onPress={handleWidenLevel}
+                />
+                <SecondaryButton
+                  label={t("discover.widenZones")}
+                  onPress={handleWidenZones}
+                />
+              </>
+            }
           />
-        </View>
-      ) : null}
+        ) : null}
 
-      {segment === "players" &&
-      sortedPlayers.length === 0 &&
-      !playersQuery.isLoading ? (
-        <EmptyState
-          title={t("discover.emptyPlayersTitle")}
-          body={t("discover.emptyPlayersBody")}
-          action={
-            <>
-              <PrimaryButton
-                label={t("matches.create.organiseCta")}
-                onPress={() => router.push(CREATE_MATCH_ROUTE)}
-              />
-              <SecondaryButton
-                label={t("discover.widenLevel")}
-                onPress={handleWidenLevel}
-              />
-              <SecondaryButton
-                label={t("discover.widenZones")}
-                onPress={handleWidenZones}
-              />
-            </>
-          }
-        />
-      ) : null}
-
-      {segment === "matches" &&
-      matchesQuery.data?.length === 0 &&
-      !matchesQuery.isLoading ? (
-        <EmptyState
-          title={t("discover.emptyMatchesTitle")}
-          body={t("discover.emptyMatchesBody")}
-          action={
-            <>
-              <PrimaryButton
-                label={t("matches.create.organiseCta")}
-                onPress={() => router.push(CREATE_MATCH_ROUTE)}
-              />
-              <SecondaryButton
-                label={t("discover.widenZones")}
-                onPress={handleWidenZones}
-              />
-            </>
-          }
-        />
-      ) : null}
-
+        {segment === "matches" &&
+        matchesQuery.data?.length === 0 &&
+        !matchesQuery.isLoading ? (
+          <EmptyState
+            title={t("discover.emptyMatchesTitle")}
+            body={t("discover.emptyMatchesBody")}
+            action={
+              <>
+                <PrimaryButton
+                  label={t("matches.create.organiseCta")}
+                  onPress={() => router.push(CREATE_MATCH_ROUTE)}
+                />
+                <SecondaryButton
+                  label={t("discover.widenZones")}
+                  onPress={handleWidenZones}
+                />
+              </>
+            }
+          />
+        ) : null}
       </Screen>
 
       <BottomSheet
@@ -452,13 +452,17 @@ export default function DiscoverScreen() {
               i18n.resolvedLanguage ?? i18n.language,
             ),
           }))}
-          values={useWidenedZones
-            ? (zonesQuery.data ?? []).map((zone) => zone.id)
-            : selectedZoneIds}
+          values={
+            useWidenedZones
+              ? (zonesQuery.data ?? []).map((zone) => zone.id)
+              : selectedZoneIds
+          }
           onToggle={toggleZone}
         />
 
-        <Text style={formStyles.summaryLabel}>{t("discover.intentFilter")}</Text>
+        <Text style={formStyles.summaryLabel}>
+          {t("discover.intentFilter")}
+        </Text>
         {([null, "social", "competitive", "either"] as const).map((value) => (
           <SheetOption
             key={value ?? "any"}

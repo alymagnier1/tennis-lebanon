@@ -70,7 +70,9 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { error: lifecycleError } = await supabase.rpc("start_in_progress_matches");
+  const { error: lifecycleError } = await supabase.rpc(
+    "start_in_progress_matches",
+  );
   if (lifecycleError) {
     return new Response(JSON.stringify({ error: lifecycleError.message }), {
       status: 500,
@@ -109,7 +111,8 @@ Deno.serve(async (req) => {
     if (!payload || tokens.length === 0) {
       await supabase.rpc("mark_notification_failed", {
         p_notification_id: notification.notification_id,
-        p_failure_code: tokens.length === 0 ? "no_active_token" : "invalid_payload",
+        p_failure_code:
+          tokens.length === 0 ? "no_active_token" : "invalid_payload",
       });
       failed += 1;
       continue;

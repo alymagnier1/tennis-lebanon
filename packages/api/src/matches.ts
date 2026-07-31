@@ -106,7 +106,10 @@ export async function createMatchDraft(
   client: TennisSupabaseClient,
   input: CreateMatchInput,
 ): Promise<string> {
-  const { data, error } = await client.rpc("create_match_draft", createMatchRpcArgs(input));
+  const { data, error } = await client.rpc(
+    "create_match_draft",
+    createMatchRpcArgs(input),
+  );
 
   if (error) throw error;
   return data as string;
@@ -126,7 +129,10 @@ export async function createAndPublishMatch(
   client: TennisSupabaseClient,
   input: CreateMatchInput,
 ): Promise<string> {
-  const { data, error } = await client.rpc("create_and_publish_match", createMatchRpcArgs(input));
+  const { data, error } = await client.rpc(
+    "create_and_publish_match",
+    createMatchRpcArgs(input),
+  );
 
   if (error) throw error;
   return data as string;

@@ -116,7 +116,13 @@ export function BookingsQueue() {
     <DashboardShell title={t("dashboard.bookings.title")}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md }}>
         {clubs.length > 1 ? (
-          <label style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
+          <label
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: spacing.xs,
+            }}
+          >
             <span>Club</span>
             <select
               value={clubId}
@@ -131,10 +137,19 @@ export function BookingsQueue() {
             </select>
           </label>
         ) : clubs[0] ? (
-          <p style={{ margin: 0, color: colors.neutral[700] }}>{clubs[0].name}</p>
+          <p style={{ margin: 0, color: colors.neutral[700] }}>
+            {clubs[0].name}
+          </p>
         ) : null}
 
-        <label style={{ display: "flex", flexDirection: "column", gap: spacing.xs, flex: 1 }}>
+        <label
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: spacing.xs,
+            flex: 1,
+          }}
+        >
           <span>{t("dashboard.bookings.searchPlaceholder")}</span>
           <input
             type="search"
@@ -145,7 +160,9 @@ export function BookingsQueue() {
           />
         </label>
 
-        <div style={{ display: "flex", gap: spacing.sm, alignItems: "flex-end" }}>
+        <div
+          style={{ display: "flex", gap: spacing.sm, alignItems: "flex-end" }}
+        >
           <button
             type="button"
             onClick={() => setShowAll(false)}
@@ -221,7 +238,13 @@ export function BookingsQueue() {
                 {t("dashboard.bookings.scheduled")}:{" "}
                 {formatBeirutTimeRange(row.starts_at, row.ends_at)}
               </p>
-              <p style={{ margin: 0, color: colors.neutral[500], fontSize: typography.size.sm }}>
+              <p
+                style={{
+                  margin: 0,
+                  color: colors.neutral[500],
+                  fontSize: typography.size.sm,
+                }}
+              >
                 {t("dashboard.bookings.format")}: {row.match_format} ·{" "}
                 {t("dashboard.bookings.participants")}: {row.participant_count}
               </p>

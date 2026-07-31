@@ -3,10 +3,7 @@ import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  canBookClubInApp,
-  formatPriceMinor,
-} from "@tennis-lebanon/domain";
+import { canBookClubInApp, formatPriceMinor } from "@tennis-lebanon/domain";
 import {
   getClubDetail,
   getClubWhatsAppBookingLink,
@@ -33,7 +30,10 @@ import { openWhatsAppBooking } from "../../src/lib/whatsapp-booking";
 import { zoneNameFromJson } from "../../src/lib/zones";
 
 export default function ClubDetailScreen() {
-  const { id, matchId } = useLocalSearchParams<{ id: string; matchId?: string }>();
+  const { id, matchId } = useLocalSearchParams<{
+    id: string;
+    matchId?: string;
+  }>();
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [courtId, setCourtId] = useState<string | null>(null);
@@ -60,8 +60,7 @@ export default function ClubDetailScreen() {
   }, [hubQuery.data]);
 
   const favoriteMutation = useMutation({
-    mutationFn: (favorite: boolean) =>
-      setClubFavorite(supabase, id!, favorite),
+    mutationFn: (favorite: boolean) => setClubFavorite(supabase, id!, favorite),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["club-detail", id] });
       await queryClient.invalidateQueries({ queryKey: ["clubs-directory"] });
@@ -71,11 +70,7 @@ export default function ClubDetailScreen() {
 
   const whatsappMutation = useMutation({
     mutationFn: () =>
-      getClubWhatsAppBookingLink(
-        supabase,
-        id!,
-        matchId ?? undefined,
-      ),
+      getClubWhatsAppBookingLink(supabase, id!, matchId ?? undefined),
     onSuccess: async (link) => {
       try {
         await openWhatsAppBooking(link);
@@ -98,7 +93,9 @@ export default function ClubDetailScreen() {
   });
 
   const club = clubQuery.data;
-  const supportsInAppBooking = club ? canBookClubInApp(club.booking_mode) : false;
+  const supportsInAppBooking = club
+    ? canBookClubInApp(club.booking_mode)
+    : false;
 
   return (
     <Screen
@@ -128,7 +125,8 @@ export default function ClubDetailScreen() {
             <AppText style={styles.meta}>{club.address_public}</AppText>
           ) : null}
           <AppText style={styles.badge}>
-            {t(clubBookingModeLabelKey(club.booking_mode))} · {t("clubs.payAtClub")}
+            {t(clubBookingModeLabelKey(club.booking_mode))} ·{" "}
+            {t("clubs.payAtClub")}
           </AppText>
 
           {isMatchBooking ? (
@@ -139,7 +137,10 @@ export default function ClubDetailScreen() {
               {hubQuery.isLoading ? <ActivityIndicator /> : null}
               {agreedSlot ? (
                 <AppText style={styles.meta}>
-                  {formatUtcSlotInBeirut(agreedSlot.starts_at, agreedSlot.ends_at)}
+                  {formatUtcSlotInBeirut(
+                    agreedSlot.starts_at,
+                    agreedSlot.ends_at,
+                  )}
                 </AppText>
               ) : (
                 <AppText style={styles.meta}>
@@ -226,13 +227,18 @@ export default function ClubDetailScreen() {
               <SectionTitle title={t("clubs.courts")} />
               <View style={formStyles.stack}>
                 {club.courts.map((court) => {
-                  const price = formatPriceMinor(court.price_minor, court.currency);
+                  const price = formatPriceMinor(
+                    court.price_minor,
+                    court.currency,
+                  );
                   return (
                     <View key={court.court_id} style={styles.courtCard}>
                       <AppText style={styles.courtName}>{court.name}</AppText>
                       <AppText style={styles.meta}>
                         {t(`clubs.surfaces.${court.surface}`)} ·{" "}
-                        {court.is_indoor ? t("clubs.indoor") : t("clubs.outdoor")}
+                        {court.is_indoor
+                          ? t("clubs.indoor")
+                          : t("clubs.outdoor")}
                         {price ? ` · ${price}` : ""}
                       </AppText>
                     </View>
@@ -245,7 +251,9 @@ export default function ClubDetailScreen() {
           {club.amenities.length > 0 ? (
             <>
               <SectionTitle title={t("clubs.amenities")} />
-              <AppText style={styles.meta}>{club.amenities.join(" · ")}</AppText>
+              <AppText style={styles.meta}>
+                {club.amenities.join(" · ")}
+              </AppText>
             </>
           ) : null}
         </>

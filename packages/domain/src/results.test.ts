@@ -15,7 +15,12 @@ import {
 describe("results", () => {
   it("validates score shape", () => {
     expect(
-      matchScoreSchema.safeParse({ sets: [[6, 4], [6, 3]] }).success,
+      matchScoreSchema.safeParse({
+        sets: [
+          [6, 4],
+          [6, 3],
+        ],
+      }).success,
     ).toBe(true);
     expect(matchScoreSchema.safeParse({ sets: [] }).success).toBe(false);
   });
@@ -34,9 +39,21 @@ describe("results", () => {
 
     expect(parseMatchScoreDrafts(drafts)).toEqual({
       ok: true,
-      score: { sets: [[6, 4], [6, 3]] },
+      score: {
+        sets: [
+          [6, 4],
+          [6, 3],
+        ],
+      },
     });
-    expect(formatMatchScore({ sets: [[6, 4], [6, 3]] })).toBe("6-4, 6-3");
+    expect(
+      formatMatchScore({
+        sets: [
+          [6, 4],
+          [6, 3],
+        ],
+      }),
+    ).toBe("6-4, 6-3");
   });
 
   it("rejects incomplete or invalid set drafts", () => {

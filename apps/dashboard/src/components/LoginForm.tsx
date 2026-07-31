@@ -87,7 +87,12 @@ export function LoginForm() {
           >
             {t("dashboard.login.title")}
           </h1>
-          <p style={{ margin: `${spacing.sm}px 0 0`, color: colors.neutral[700] }}>
+          <p
+            style={{
+              margin: `${spacing.sm}px 0 0`,
+              color: colors.neutral[700],
+            }}
+          >
             {t("dashboard.login.description")}
           </p>
         </div>
@@ -144,10 +149,18 @@ export function LoginForm() {
           style={buttonStyle}
           aria-busy={submitting}
         >
-          {submitting ? t("dashboard.login.submitting") : t("dashboard.login.submit")}
+          {submitting
+            ? t("dashboard.login.submitting")
+            : t("dashboard.login.submit")}
         </button>
 
-        <p style={{ margin: 0, fontSize: typography.size.xs, color: colors.neutral[500] }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: typography.size.xs,
+            color: colors.neutral[500],
+          }}
+        >
           {t("dashboard.login.devHint")}
         </p>
       </form>

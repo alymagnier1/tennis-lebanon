@@ -12,6 +12,8 @@ export const resolveDisputeInputSchema = z.object({
 
 export type ResolveDisputeInput = z.infer<typeof resolveDisputeInputSchema>;
 
-export function formatDisputeScore(score: { sets: [number, number][] }): string {
+export function formatDisputeScore(score: {
+  sets: [number, number][];
+}): string {
   return score.sets.map(([a, b]) => `${a}-${b}`).join(", ");
 }

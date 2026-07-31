@@ -86,7 +86,10 @@ export function BookingDetailPanel({ bookingId }: { bookingId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookingId, client]);
 
-  const runAction = async (action: () => Promise<void>, successMessage: string) => {
+  const runAction = async (
+    action: () => Promise<void>,
+    successMessage: string,
+  ) => {
     setActing(true);
     setError(null);
     setMessage(null);
@@ -134,41 +137,74 @@ export function BookingDetailPanel({ bookingId }: { bookingId: string }) {
       </Link>
 
       <section style={cardStyle}>
-        <p style={{ margin: 0, color: colors.brand[700], fontWeight: typography.weight.semibold }}>
+        <p
+          style={{
+            margin: 0,
+            color: colors.brand[700],
+            fontWeight: typography.weight.semibold,
+          }}
+        >
           {statusLabel(detail.booking.status, t)}
         </p>
-        <p style={{ margin: `${spacing.sm}px 0 0`, color: colors.neutral[900] }}>
+        <p
+          style={{ margin: `${spacing.sm}px 0 0`, color: colors.neutral[900] }}
+        >
           {detail.club.name} · {detail.booking.court_name}
         </p>
-        <p style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[700] }}>
-          {formatBeirutTimeRange(detail.booking.starts_at, detail.booking.ends_at)}
+        <p
+          style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[700] }}
+        >
+          {formatBeirutTimeRange(
+            detail.booking.starts_at,
+            detail.booking.ends_at,
+          )}
         </p>
-        <p style={{ margin: `${spacing.sm}px 0 0`, color: colors.neutral[700] }}>
+        <p
+          style={{ margin: `${spacing.sm}px 0 0`, color: colors.neutral[700] }}
+        >
           {t("dashboard.bookings.requester")}: {detail.requester.display_name}
         </p>
-        <p style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[700] }}>
-          {t("dashboard.bookingDetail.match")}: {detail.match.format} ({detail.match.status})
+        <p
+          style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[700] }}
+        >
+          {t("dashboard.bookingDetail.match")}: {detail.match.format} (
+          {detail.match.status})
         </p>
-        <p style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[700] }}>
-          {t("dashboard.bookingDetail.payment")}: {t("dashboard.bookingDetail.payAtClub")}
+        <p
+          style={{ margin: `${spacing.xs}px 0 0`, color: colors.neutral[700] }}
+        >
+          {t("dashboard.bookingDetail.payment")}:{" "}
+          {t("dashboard.bookingDetail.payAtClub")}
         </p>
       </section>
 
       <section style={cardStyle}>
-        <h2 style={sectionTitleStyle}>{t("dashboard.bookingDetail.participants")}</h2>
-        <ul style={{ margin: 0, paddingLeft: spacing.lg, color: colors.neutral[700] }}>
-          {detail.participants.map((participant: ClubBookingDetail["participants"][number]) => (
-            <li key={participant.user_id}>
-              {participant.display_name}
-              {participant.is_creator ? " (host)" : ""}
-            </li>
-          ))}
+        <h2 style={sectionTitleStyle}>
+          {t("dashboard.bookingDetail.participants")}
+        </h2>
+        <ul
+          style={{
+            margin: 0,
+            paddingLeft: spacing.lg,
+            color: colors.neutral[700],
+          }}
+        >
+          {detail.participants.map(
+            (participant: ClubBookingDetail["participants"][number]) => (
+              <li key={participant.user_id}>
+                {participant.display_name}
+                {participant.is_creator ? " (host)" : ""}
+              </li>
+            ),
+          )}
         </ul>
       </section>
 
       {detail.booking.status === "alternative_proposed" ? (
         <section style={cardStyle}>
-          <h2 style={sectionTitleStyle}>{t("dashboard.bookingDetail.statusAlternative")}</h2>
+          <h2 style={sectionTitleStyle}>
+            {t("dashboard.bookingDetail.statusAlternative")}
+          </h2>
           <p style={{ margin: 0, color: colors.neutral[700] }}>
             {detail.booking.proposed_court_name} ·{" "}
             {detail.booking.proposed_start_at && detail.booking.proposed_end_at
@@ -179,7 +215,12 @@ export function BookingDetailPanel({ bookingId }: { bookingId: string }) {
               : ""}
           </p>
           {detail.booking.club_note ? (
-            <p style={{ margin: `${spacing.sm}px 0 0`, color: colors.neutral[500] }}>
+            <p
+              style={{
+                margin: `${spacing.sm}px 0 0`,
+                color: colors.neutral[500],
+              }}
+            >
               {detail.booking.club_note}
             </p>
           ) : null}
@@ -253,7 +294,8 @@ export function BookingDetailPanel({ bookingId }: { bookingId: string }) {
             disabled={acting}
             onClick={() =>
               void runAction(
-                () => rejectBooking(client, bookingId, rejectReason || undefined),
+                () =>
+                  rejectBooking(client, bookingId, rejectReason || undefined),
                 t("dashboard.bookingDetail.rejected"),
               )
             }

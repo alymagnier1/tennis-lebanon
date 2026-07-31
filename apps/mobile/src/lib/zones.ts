@@ -21,10 +21,7 @@ export function zoneLabelFromList(zones: unknown, locale: string): string {
     .map((zone) => {
       const entry = zone as ZoneLike;
       return (
-        entry.name_i18n?.[locale] ??
-        entry.name_i18n?.en ??
-        entry.slug ??
-        ""
+        entry.name_i18n?.[locale] ?? entry.name_i18n?.en ?? entry.slug ?? ""
       );
     })
     .filter(Boolean);

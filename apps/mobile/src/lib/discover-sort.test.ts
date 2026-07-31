@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
 import { sortCompatiblePlayers } from "./discover-sort";
 
-function player(overrides: Partial<CompatiblePlayerCard>): CompatiblePlayerCard {
+function player(
+  overrides: Partial<CompatiblePlayerCard>,
+): CompatiblePlayerCard {
   return {
     user_id: "default",
     display_name: "Player",
@@ -31,9 +33,9 @@ describe("sortCompatiblePlayers", () => {
       player({ user_id: "b", level_fit: false }),
     ];
 
-    expect(sortCompatiblePlayers(players, "recommended").map((p) => p.user_id)).toEqual(
-      ["a", "b"],
-    );
+    expect(
+      sortCompatiblePlayers(players, "recommended").map((p) => p.user_id),
+    ).toEqual(["a", "b"]);
   });
 
   it("prioritizes level fit when sorting by level", () => {
@@ -42,9 +44,8 @@ describe("sortCompatiblePlayers", () => {
       player({ user_id: "b", level_fit: true }),
     ];
 
-    expect(sortCompatiblePlayers(players, "level").map((p) => p.user_id)).toEqual([
-      "b",
-      "a",
-    ]);
+    expect(
+      sortCompatiblePlayers(players, "level").map((p) => p.user_id),
+    ).toEqual(["b", "a"]);
   });
 });

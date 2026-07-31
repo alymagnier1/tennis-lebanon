@@ -59,7 +59,10 @@ export function formatUtcInBeirut(iso: string): string {
   }).format(new Date(iso));
 }
 
-export function formatUtcSlotInBeirut(startIso: string, endIso: string): string {
+export function formatUtcSlotInBeirut(
+  startIso: string,
+  endIso: string,
+): string {
   const dateFormatter = new Intl.DateTimeFormat(undefined, {
     timeZone: BEIRUT_TIME_ZONE,
     month: "short",

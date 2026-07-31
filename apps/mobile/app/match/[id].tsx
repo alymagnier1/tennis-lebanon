@@ -173,7 +173,8 @@ export default function MatchHubScreen() {
   });
 
   const cancelBookingMutation = useMutation({
-    mutationFn: (bookingId: string) => cancelBookingRequest(supabase, bookingId),
+    mutationFn: (bookingId: string) =>
+      cancelBookingRequest(supabase, bookingId),
     onSuccess: invalidate,
     onError: () => Alert.alert(t("matches.hub.cancelBookingError")),
   });
@@ -324,9 +325,7 @@ export default function MatchHubScreen() {
   return (
     <Screen
       title={t("matches.hub.title")}
-      description={
-        hub ? t(`matches.status.${hub.status}`) : undefined
-      }
+      description={hub ? t(`matches.status.${hub.status}`) : undefined}
       refreshing={hubQuery.isRefetching}
       onRefresh={() => void hubQuery.refetch()}
       contentGrow={false}
@@ -488,10 +487,7 @@ export default function MatchHubScreen() {
             value={`${hub.participant_count}/${hub.capacity}`}
           />
           {hub.notes ? (
-            <SummaryRow
-              label={t("matches.create.notes")}
-              value={hub.notes}
-            />
+            <SummaryRow label={t("matches.create.notes")} value={hub.notes} />
           ) : null}
         </View>
       ) : null}
@@ -517,9 +513,7 @@ export default function MatchHubScreen() {
                 </AppText>
                 <AppText style={styles.participantMeta} maxLines={1}>
                   {[
-                    participant.is_creator
-                      ? t("matches.hub.hostBadge")
-                      : null,
+                    participant.is_creator ? t("matches.hub.hostBadge") : null,
                     t(`matches.participantStatus.${participant.status}`),
                   ]
                     .filter(Boolean)
@@ -564,7 +558,9 @@ export default function MatchHubScreen() {
               <AppText style={styles.participantName} maxLines={1}>
                 {request.display_name}
               </AppText>
-              <View style={[styles.requestActions, { flexDirection: rowDirection }]}>
+              <View
+                style={[styles.requestActions, { flexDirection: rowDirection }]}
+              >
                 <View style={formStyles.flex}>
                   <PrimaryButton
                     label={t("matches.hub.approve")}

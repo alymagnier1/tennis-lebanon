@@ -32,7 +32,9 @@ export function DashboardShell({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: spacing.lg }}>
-          <strong style={{ fontSize: typography.size.md, color: colors.neutral[900] }}>
+          <strong
+            style={{ fontSize: typography.size.md, color: colors.neutral[900] }}
+          >
             Tennis Lebanon
           </strong>
           <nav style={{ display: "flex", gap: spacing.md, flexWrap: "wrap" }}>

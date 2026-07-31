@@ -1,6 +1,8 @@
 import { supabase } from "./supabase";
 
-export function resolveAvatarUri(avatarPath: string | null | undefined): string | null {
+export function resolveAvatarUri(
+  avatarPath: string | null | undefined,
+): string | null {
   if (!avatarPath) return null;
   if (avatarPath.startsWith("http://") || avatarPath.startsWith("https://")) {
     return avatarPath;
