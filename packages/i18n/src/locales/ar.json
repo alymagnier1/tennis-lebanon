@@ -484,7 +484,9 @@
       "activeHostedBody": "لديك مباراة {{format}} مفتوحة بالفعل. ادعُ لاعبين أو ألغِها قبل إنشاء أخرى.",
       "continueInviting": "متابعة دعوة اللاعبين",
       "incomplete": "هذه المسودة غير مكتملة. ابدأ من جديد.",
-      "restart": "البدء من جديد"
+      "restart": "البدء من جديد",
+      "suggestedTimes": "أوقات تناسب اللاعبين بالقرب منك",
+      "suggestedTimeOption": "{{slot}} · {{count}} متاح"
     },
     "visibility": {
       "public": "عامة",
@@ -603,7 +605,15 @@
       "cancelBookingError": "تعذر إلغاء طلب الحجز.",
       "acceptAlternative": "قبول البديل",
       "declineAlternative": "رفض البديل",
-      "alternativeError": "تعذر تحديث هذا البديل."
+      "alternativeError": "تعذر تحديث هذا البديل.",
+      "reschedule": "تغيير الوقت",
+      "rescheduleTitle": "تغيير الوقت",
+      "rescheduleDescription": "اتفقوا على الوقت الجديد في المحادثة أولاً. سيتم إبلاغ كل من انضم بالتغيير.",
+      "rescheduleConfirm": "نقل هذه المباراة",
+      "rescheduleSuccess": "تم تحديث وقت المباراة.",
+      "rescheduleError": "تعذر تغيير الوقت.",
+      "rescheduleLocked": "تم طلب ملعب بالفعل. اسحب الحجز أولاً.",
+      "awaitingPlayers": "في انتظار انضمام اللاعبين"
     },
     "results": {
       "title": "النتيجة",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canManageProposedTimes,
+  canRescheduleMatch,
   canShowJoinAction,
   canVoteOnTimes,
   canCreatorCancelBeforeBooking,
@@ -80,26 +81,85 @@ describe("matches domain rules", () => {
   });
 
   it("derives time voting eligibility and agreement", () => {
+    // Voting only exists on flexible matches.
     expect(
-      canVoteOnTimes({ viewerStatus: "accepted", matchStatus: "full" }),
+      canVoteOnTimes({
+        viewerStatus: "accepted",
+        matchStatus: "full",
+        timingMode: "flexible",
+      }),
     ).toBe(true);
     expect(
-      canVoteOnTimes({ viewerStatus: "accepted", matchStatus: "open" }),
+      canVoteOnTimes({
+        viewerStatus: "accepted",
+        matchStatus: "open",
+        timingMode: "flexible",
+      }),
     ).toBe(true);
     expect(
-      canVoteOnTimes({ viewerStatus: "requested", matchStatus: "full" }),
+      canVoteOnTimes({
+        viewerStatus: "requested",
+        matchStatus: "full",
+        timingMode: "flexible",
+      }),
+    ).toBe(false);
+    expect(
+      canVoteOnTimes({
+        viewerStatus: "accepted",
+        matchStatus: "full",
+        timingMode: "fixed",
+      }),
     ).toBe(false);
 
     expect(
       canManageProposedTimes({
         viewerIsCreator: true,
         matchStatus: "ready_to_book",
+        timingMode: "flexible",
       }),
     ).toBe(true);
     expect(
       canManageProposedTimes({
         viewerIsCreator: false,
         matchStatus: "full",
+        timingMode: "flexible",
+      }),
+    ).toBe(false);
+    expect(
+      canManageProposedTimes({
+        viewerIsCreator: true,
+        matchStatus: "full",
+        timingMode: "fixed",
+      }),
+    ).toBe(false);
+
+    // The host owns the time on a fixed match, until a court is requested.
+    expect(
+      canRescheduleMatch({
+        viewerIsCreator: true,
+        matchStatus: "ready_to_book",
+        timingMode: "fixed",
+      }),
+    ).toBe(true);
+    expect(
+      canRescheduleMatch({
+        viewerIsCreator: true,
+        matchStatus: "booking_pending",
+        timingMode: "fixed",
+      }),
+    ).toBe(false);
+    expect(
+      canRescheduleMatch({
+        viewerIsCreator: false,
+        matchStatus: "open",
+        timingMode: "fixed",
+      }),
+    ).toBe(false);
+    expect(
+      canRescheduleMatch({
+        viewerIsCreator: true,
+        matchStatus: "open",
+        timingMode: "flexible",
       }),
     ).toBe(false);
 

@@ -48,6 +48,7 @@ describe("matches API wrappers", () => {
           endsAt: "2030-01-01T11:30:00.000Z",
         },
       ],
+      timingMode: "fixed",
     });
 
     expect(rpc).toHaveBeenCalledWith("create_and_publish_match", {
@@ -65,6 +66,7 @@ describe("matches API wrappers", () => {
           ends_at: "2030-01-01T11:30:00.000Z",
         },
       ],
+      p_timing_mode: "fixed",
     });
   });
 
@@ -89,6 +91,7 @@ describe("matches API wrappers", () => {
             endsAt: "2030-01-01T11:30:00.000Z",
           },
         ],
+        timingMode: "fixed",
       }),
     ).resolves.toBe("draft-id");
 

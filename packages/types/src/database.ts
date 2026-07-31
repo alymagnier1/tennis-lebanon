@@ -964,6 +964,7 @@ export type Database = {
           requires_creator_approval: boolean;
           selected_time_option_id: string | null;
           status: Database["public"]["Enums"]["match_status"];
+          timing_mode: string;
           updated_at: string;
           visibility: Database["public"]["Enums"]["match_visibility"];
         };
@@ -982,6 +983,7 @@ export type Database = {
           requires_creator_approval?: boolean;
           selected_time_option_id?: string | null;
           status?: Database["public"]["Enums"]["match_status"];
+          timing_mode?: string;
           updated_at?: string;
           visibility?: Database["public"]["Enums"]["match_visibility"];
         };
@@ -1000,6 +1002,7 @@ export type Database = {
           requires_creator_approval?: boolean;
           selected_time_option_id?: string | null;
           status?: Database["public"]["Enums"]["match_status"];
+          timing_mode?: string;
           updated_at?: string;
           visibility?: Database["public"]["Enums"]["match_visibility"];
         };
@@ -1565,6 +1568,7 @@ export type Database = {
           requires_creator_approval: boolean;
           selected_time_option_id: string | null;
           status: Database["public"]["Enums"]["match_status"];
+          timing_mode: string;
           updated_at: string;
           visibility: Database["public"]["Enums"]["match_visibility"];
         };
@@ -1651,6 +1655,7 @@ export type Database = {
           p_notes?: string;
           p_proposed_times?: Json;
           p_requires_creator_approval: boolean;
+          p_timing_mode?: string;
           p_visibility: Database["public"]["Enums"]["match_visibility"];
           p_zone_ids?: string[];
         };
@@ -1674,6 +1679,7 @@ export type Database = {
           p_notes?: string;
           p_proposed_times?: Json;
           p_requires_creator_approval: boolean;
+          p_timing_mode?: string;
           p_visibility: Database["public"]["Enums"]["match_visibility"];
           p_zone_ids?: string[];
         };
@@ -2085,6 +2091,10 @@ export type Database = {
         Args: { p_court_id: string; p_match_id: string };
         Returns: string;
       };
+      reschedule_match_time: {
+        Args: { p_ends_at: string; p_match_id: string; p_starts_at: string };
+        Returns: string;
+      };
       resolve_match_result_dispute: {
         Args: { p_reason: string; p_resolution: string; p_result_id: string };
         Returns: undefined;
@@ -2146,6 +2156,22 @@ export type Database = {
           p_reported_user_id?: string;
         };
         Returns: string;
+      };
+      suggest_match_times: {
+        Args: {
+          p_format?: Database["public"]["Enums"]["match_format"];
+          p_horizon_days?: number;
+          p_limit?: number;
+          p_max_skill?: Database["public"]["Enums"]["skill_band"];
+          p_min_skill?: Database["public"]["Enums"]["skill_band"];
+          p_slot_minutes?: number;
+          p_zone_ids?: string[];
+        };
+        Returns: {
+          candidate_count: number;
+          ends_at: string;
+          starts_at: string;
+        }[];
       };
       update_club_booking_settings: {
         Args: {
@@ -2329,6 +2355,7 @@ export type Database = {
         result: Json | null;
         viewer_attendance:
           Database["public"]["Enums"]["attendance_status"] | null;
+        timing_mode: string | null;
       };
       match_invite_inbox_row: {
         invitation_id: string | null;

@@ -484,7 +484,9 @@
       "activeHostedBody": "You already have an open {{format}} match. Invite players or cancel it before creating another.",
       "continueInviting": "Continue inviting players",
       "incomplete": "This draft is incomplete. Start again.",
-      "restart": "Start over"
+      "restart": "Start over",
+      "suggestedTimes": "Times that suit players near you",
+      "suggestedTimeOption": "{{slot}} · {{count}} free"
     },
     "visibility": {
       "public": "Public",
@@ -603,7 +605,15 @@
       "cancelBookingError": "We could not cancel this booking request.",
       "acceptAlternative": "Accept alternative",
       "declineAlternative": "Decline alternative",
-      "alternativeError": "We could not update this alternative."
+      "alternativeError": "We could not update this alternative.",
+      "reschedule": "Change the time",
+      "rescheduleTitle": "Change the time",
+      "rescheduleDescription": "Agree the new time in chat first. Everyone who joined will be told it moved.",
+      "rescheduleConfirm": "Move this match",
+      "rescheduleSuccess": "The match time was updated.",
+      "rescheduleError": "We could not change the time.",
+      "rescheduleLocked": "A court has already been requested. Withdraw the booking first.",
+      "awaitingPlayers": "Waiting for players to join"
     },
     "results": {
       "title": "Result",

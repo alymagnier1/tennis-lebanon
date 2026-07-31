@@ -77,10 +77,8 @@ begin
   perform pg_temp.set_caller('11111111-1111-1111-1111-111111111111');
   v_hub := public.get_match_hub(v_match_id);
   v_option_id := (v_hub.proposed_times->0->>'id')::uuid;
-  perform public.cast_match_time_vote(v_match_id, v_option_id, 'yes'::public.vote_value);
 
   perform pg_temp.set_caller('88888888-8888-8888-8888-888888888888');
-  perform public.cast_match_time_vote(v_match_id, v_option_id, 'yes'::public.vote_value);
 
   perform pg_temp.set_caller('11111111-1111-1111-1111-111111111111');
 

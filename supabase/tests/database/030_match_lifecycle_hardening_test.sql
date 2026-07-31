@@ -88,16 +88,14 @@ begin
   perform pg_temp.set_caller(p_creator_id);
   v_hub := public.get_match_hub(v_match_id);
   v_option_id := (v_hub.proposed_times->0->>'id')::uuid;
-  perform public.cast_match_time_vote(v_match_id, v_option_id, 'yes'::public.vote_value);
 
   perform pg_temp.set_caller(p_joiner_id);
-  perform public.cast_match_time_vote(v_match_id, v_option_id, 'yes'::public.vote_value);
 
   perform pg_temp.set_caller(p_creator_id);
   v_hub := public.get_match_hub(v_match_id);
   perform pg_temp.assert_true(
     v_hub.status = 'ready_to_book',
-    'match should be ready_to_book after unanimous vote'
+    'match should be ready_to_book once the roster is full'
   );
 
   return v_match_id;
@@ -260,9 +258,12 @@ begin
   v_hub := public.get_match_hub(v_match_id);
 
   perform pg_temp.assert_true(v_hub.status = 'open', 'leave from ready_to_book reopens match');
+  -- Under fixed timing the time is a property of the match, not something the
+  -- roster agreed to, so it survives a participant leaving and the slot is
+  -- still on offer to whoever joins next.
   perform pg_temp.assert_true(
-    v_hub.selected_time_option_id is null,
-    'agreed time cleared after leave'
+    v_hub.selected_time_option_id is not null,
+    'fixed match keeps its time after a participant leaves'
   );
   perform pg_temp.assert_true(
     v_hub.participant_count = 1,

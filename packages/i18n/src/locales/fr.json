@@ -484,7 +484,9 @@
       "activeHostedBody": "Vous avez déjà un match {{format}} ouvert. Invitez des joueurs ou annulez-le avant d'en créer un autre.",
       "continueInviting": "Continuer à inviter des joueurs",
       "incomplete": "Ce brouillon est incomplet. Recommencez.",
-      "restart": "Recommencer"
+      "restart": "Recommencer",
+      "suggestedTimes": "Créneaux qui conviennent aux joueurs proches",
+      "suggestedTimeOption": "{{slot}} · {{count}} disponibles"
     },
     "visibility": {
       "public": "Public",
@@ -603,7 +605,15 @@
       "cancelBookingError": "Impossible d’annuler cette demande.",
       "acceptAlternative": "Accepter l’alternative",
       "declineAlternative": "Refuser l’alternative",
-      "alternativeError": "Impossible de mettre à jour cette alternative."
+      "alternativeError": "Impossible de mettre à jour cette alternative.",
+      "reschedule": "Changer l’horaire",
+      "rescheduleTitle": "Changer l’horaire",
+      "rescheduleDescription": "Mettez-vous d’accord dans la discussion d’abord. Les joueurs inscrits seront prévenus du changement.",
+      "rescheduleConfirm": "Déplacer ce match",
+      "rescheduleSuccess": "L’horaire du match a été mis à jour.",
+      "rescheduleError": "Nous n’avons pas pu changer l’horaire.",
+      "rescheduleLocked": "Un court a déjà été demandé. Annulez la réservation d’abord.",
+      "awaitingPlayers": "En attente de joueurs"
     },
     "results": {
       "title": "Résultat",

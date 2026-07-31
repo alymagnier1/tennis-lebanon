@@ -18,6 +18,14 @@ export const proposedTimeSchema = z.object({
   endsAt: z.string().min(1),
 });
 
+/**
+ * `fixed` is the default: the host names one time and joining is consent to
+ * it. `flexible` keeps the older unanimous-vote flow for groups that want to
+ * negotiate a slot.
+ */
+export const timingModeSchema = z.enum(["fixed", "flexible"]);
+export type TimingMode = z.infer<typeof timingModeSchema>;
+
 export const createMatchInputSchema = z
   .object({
     format: matchFormatSchema,
@@ -29,8 +37,16 @@ export const createMatchInputSchema = z
     notes: z.string().trim().max(500).optional(),
     zoneIds: z.array(databaseUuidSchema).min(1),
     proposedTimes: z.array(proposedTimeSchema).min(1).max(3),
+    timingMode: timingModeSchema.default("fixed"),
   })
   .superRefine((value, ctx) => {
+    if (value.timingMode === "fixed" && value.proposedTimes.length !== 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A fixed match needs exactly one time",
+        path: ["proposedTimes"],
+      });
+    }
     const ranks: Record<SkillBand, number> = {
       beginner: 1,
       improving: 2,
@@ -96,10 +112,21 @@ export function canShowJoinAction(input: {
   return input.requiresCreatorApproval ? "request" : "join";
 }
 
+/** Statuses in which a fixed match's time can still be moved. */
+const RESCHEDULABLE_STATUSES = ["draft", "open", "full", "ready_to_book"];
+
+export function isFixedTimingMode(timingMode?: string | null): boolean {
+  // Matches created before the timing model shipped carry 'flexible'
+  // explicitly, so an unknown value is treated as fixed like a new match.
+  return timingMode !== "flexible";
+}
+
 export function canVoteOnTimes(input: {
   viewerStatus?: string | null;
   matchStatus: string;
+  timingMode?: string | null;
 }): boolean {
+  if (isFixedTimingMode(input.timingMode)) return false;
   return (
     input.viewerStatus === "accepted" &&
     ["open", "full", "ready_to_book"].includes(input.matchStatus)
@@ -109,10 +136,28 @@ export function canVoteOnTimes(input: {
 export function canManageProposedTimes(input: {
   viewerIsCreator: boolean;
   matchStatus: string;
+  timingMode?: string | null;
 }): boolean {
+  if (isFixedTimingMode(input.timingMode)) return false;
   return (
     input.viewerIsCreator &&
     ["open", "full", "ready_to_book"].includes(input.matchStatus)
+  );
+}
+
+/**
+ * The host can move a fixed match until a court is requested; after that the
+ * hour is committed at the club and the booking must be withdrawn first.
+ */
+export function canRescheduleMatch(input: {
+  viewerIsCreator: boolean;
+  matchStatus: string;
+  timingMode?: string | null;
+}): boolean {
+  return (
+    input.viewerIsCreator &&
+    isFixedTimingMode(input.timingMode) &&
+    RESCHEDULABLE_STATUSES.includes(input.matchStatus)
   );
 }
 

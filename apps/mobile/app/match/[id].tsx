@@ -27,7 +27,9 @@ import {
   canRequestCourt,
   canRespondToBookingAlternative,
   canShowJoinAction,
+  canRescheduleMatch,
   canVoteOnTimes,
+  isFixedTimingMode,
   canCreatorCancelMatch,
   canParticipantLeave,
   canParticipantWithdraw,
@@ -225,6 +227,7 @@ export default function MatchHubScreen() {
     return canVoteOnTimes({
       viewerStatus: hub.viewer_status,
       matchStatus: hub.status,
+      timingMode: hub.timing_mode,
     });
   }, [hub]);
 
@@ -233,6 +236,18 @@ export default function MatchHubScreen() {
     return canManageProposedTimes({
       viewerIsCreator: hub.viewer_is_creator,
       matchStatus: hub.status,
+      timingMode: hub.timing_mode,
+    });
+  }, [hub]);
+
+  // On a fixed match the host moves the time outright instead of adding
+  // options for the group to vote on.
+  const showReschedule = useMemo(() => {
+    if (!hub) return false;
+    return canRescheduleMatch({
+      viewerIsCreator: hub.viewer_is_creator,
+      matchStatus: hub.status,
+      timingMode: hub.timing_mode,
     });
   }, [hub]);
 
@@ -531,10 +546,18 @@ export default function MatchHubScreen() {
           <AppText style={styles.timeLabel}>
             {formatUtcSlotInBeirut(agreedSlot.starts_at, agreedSlot.ends_at)}
           </AppText>
+          {showReschedule ? (
+            <SecondaryButton
+              label={t("matches.hub.reschedule")}
+              onPress={() => router.push(`/match/${id}/reschedule`)}
+            />
+          ) : null}
         </View>
       ) : null}
 
-      {proposedTimes.length > 0 ? (
+      {/* A fixed match shows its single time above; the vote list would only
+          repeat it. */}
+      {!isFixedTimingMode(hub?.timing_mode) && proposedTimes.length > 0 ? (
         <View style={formStyles.stack}>
           <SectionTitle
             title={t("matches.hub.proposedTimes")}

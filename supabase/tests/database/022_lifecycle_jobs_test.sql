@@ -50,10 +50,8 @@ begin
   perform pg_temp.set_caller(p_creator_id);
   v_hub := public.get_match_hub(v_match_id);
   v_option_id := (v_hub.proposed_times->0->>'id')::uuid;
-  perform public.cast_match_time_vote(v_match_id, v_option_id, 'yes'::public.vote_value);
 
   perform pg_temp.set_caller(p_joiner_id);
-  perform public.cast_match_time_vote(v_match_id, v_option_id, 'yes'::public.vote_value);
 
   return v_match_id;
 end;

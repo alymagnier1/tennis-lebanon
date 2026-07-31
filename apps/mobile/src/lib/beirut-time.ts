@@ -51,6 +51,22 @@ export function beirutLocalToUtcIso(date: string, time: string): string {
   return new Date(asUtc - offset).toISOString();
 }
 
+/**
+ * Splits a UTC instant into the Beirut-local `YYYY-MM-DD` and `HH:MM` parts
+ * the create-match form fields expect, so a suggested slot can populate them.
+ */
+export function utcIsoToBeirutFields(iso: string): {
+  date: string;
+  time: string;
+} {
+  const parts = zonedDateParts(new Date(iso), BEIRUT_TIME_ZONE);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return {
+    date: `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`,
+    time: `${pad(parts.hour)}:${pad(parts.minute)}`,
+  };
+}
+
 export function formatUtcInBeirut(iso: string): string {
   return new Intl.DateTimeFormat(undefined, {
     timeZone: BEIRUT_TIME_ZONE,

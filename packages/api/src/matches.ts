@@ -15,7 +15,57 @@ function createMatchRpcArgs(input: CreateMatchInput) {
     p_notes: input.notes ?? undefined,
     p_zone_ids: input.zoneIds,
     p_proposed_times: toRpcProposedTimes(input.proposedTimes),
+    p_timing_mode: input.timingMode,
   };
+}
+
+export type SuggestedMatchTime = {
+  starts_at: string;
+  ends_at: string;
+  candidate_count: number;
+};
+
+/**
+ * Slots where compatible players are already free, ranked by how many.
+ * Lets the host pick an informed time instead of guessing.
+ */
+export async function suggestMatchTimes(
+  client: TennisSupabaseClient,
+  input: {
+    zoneIds?: string[];
+    format?: "singles" | "doubles" | null;
+    horizonDays?: number;
+    slotMinutes?: number;
+    limit?: number;
+  } = {},
+): Promise<SuggestedMatchTime[]> {
+  const { data, error } = await client.rpc("suggest_match_times", {
+    p_zone_ids:
+      input.zoneIds && input.zoneIds.length > 0 ? input.zoneIds : undefined,
+    p_format: input.format ?? undefined,
+    p_horizon_days: input.horizonDays ?? 14,
+    p_slot_minutes: input.slotMinutes ?? 90,
+    p_limit: input.limit ?? 3,
+  });
+
+  if (error) throw error;
+  return (data ?? []) as SuggestedMatchTime[];
+}
+
+export async function rescheduleMatchTime(
+  client: TennisSupabaseClient,
+  matchId: string,
+  startsAt: string,
+  endsAt: string,
+): Promise<string> {
+  const { data, error } = await client.rpc("reschedule_match_time", {
+    p_match_id: matchId,
+    p_starts_at: startsAt,
+    p_ends_at: endsAt,
+  });
+
+  if (error) throw error;
+  return data as string;
 }
 
 export type MatchHubTimeOption = {
@@ -39,6 +89,8 @@ export type MatchHubCard = {
   notes: string | null;
   creator_id: string;
   creator_display_name: string;
+  /** 'fixed' (host names the time) or 'flexible' (participants vote). */
+  timing_mode: string;
   participant_count: number;
   capacity: number;
   selected_time_option_id: string | null;

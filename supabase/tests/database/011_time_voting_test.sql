@@ -72,7 +72,9 @@ begin
         'starts_at', (now() + interval '4 days')::text,
         'ends_at', (now() + interval '4 days 90 minutes')::text
       )
-    )
+    ),
+    -- Voting is the subject of this file, so it opts into flexible timing.
+    'flexible'
   )
   into v_match_id;
 
