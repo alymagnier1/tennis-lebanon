@@ -546,7 +546,8 @@
     "today": "Today",
     "tomorrow": "Tomorrow",
     "playerAvailabilityManyDays": "{{blocks}} · {{count}} days",
-    "noOverlapHint": "No shared time yet"
+    "noOverlapHint": "No shared time yet",
+    "usualAvailability": "Usually {{schedule}}"
   },
   "playerProfile": {
     "aboutTitle": "About",
@@ -950,7 +951,8 @@
     "blocks": {
       "morning": "Morning",
       "afternoon": "Afternoon",
-      "evening": "Evening"
+      "evening": "Evening",
+      "allDay": "All day"
     },
     "weekdaysShort": {
       "0": "Sun",

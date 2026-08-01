@@ -57,7 +57,14 @@ export function formatDiscoverPlayerAvailabilityLabel(
   const sortedParts = sortAvailabilityDayParts(dayParts);
   if (sortedParts.length === 0) return null;
 
-  const blocks = formatAvailabilityDayPartsLabel(sortedParts, t);
+  // Three weekdays spelled out against all three blocks is the one combination
+  // that overruns the card's single line, and it describes the most available
+  // players — the ones worth surfacing. "All day" is both shorter and plainer
+  // than enumerating every block. The profile keeps the explicit breakdown.
+  const blocks =
+    sortedParts.length === DAY_PART_ORDER.length
+      ? t("availability.blocks.allDay")
+      : formatAvailabilityDayPartsLabel(sortedParts, t);
   const days = weekdayShortLabels(weekdays, t);
 
   if (days.length === 0) {
@@ -65,10 +72,10 @@ export function formatDiscoverPlayerAvailabilityLabel(
   }
 
   if (days.length <= 3) {
-    return t("discover.overlapAvailability", {
-      weekday: days.join(", "),
-      blocks,
-    });
+    // Composed here rather than through a translation key. Both halves are
+    // already translated, so the key would be pure interpolation and identical
+    // across locales, which the locale parity guard rejects.
+    return `${days.join(", ")} · ${blocks}`;
   }
 
   return t("discover.playerAvailabilityManyDays", {

@@ -512,7 +512,8 @@
     "playerAvailabilityManyDays": "{{blocks}} · {{count}} jours",
     "noOverlapHint": "Pas encore de créneau commun",
     "playerBio": "About",
-    "playStyleTags": "Play style"
+    "playStyleTags": "Play style",
+    "usualAvailability": "Habituellement {{schedule}}"
   },
   "playerProfile": {
     "aboutTitle": "À propos",
@@ -916,7 +917,8 @@
     "blocks": {
       "morning": "Matin",
       "afternoon": "Après-midi",
-      "evening": "Soir"
+      "evening": "Soir",
+      "allDay": "Toute la journée"
     },
     "weekdaysShort": {
       "0": "Dim",

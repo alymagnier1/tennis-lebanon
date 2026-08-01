@@ -512,7 +512,8 @@
     "playerAvailabilityManyDays": "{{blocks}} · {{count}} أيام",
     "noOverlapHint": "لا يوجد وقت مشترك بعد",
     "playerBio": "نبذة",
-    "playStyleTags": "أسلوب اللعب"
+    "playStyleTags": "أسلوب اللعب",
+    "usualAvailability": "عادةً {{schedule}}"
   },
   "playerProfile": {
     "aboutTitle": "نبذة",
@@ -916,7 +917,8 @@
     "blocks": {
       "morning": "صباحًا",
       "afternoon": "بعد الظهر",
-      "evening": "مساءً"
+      "evening": "مساءً",
+      "allDay": "طوال اليوم"
     },
     "weekdaysShort": {
       "0": "أحد",

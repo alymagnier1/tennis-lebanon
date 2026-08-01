@@ -47,11 +47,15 @@ function player(
 
 describe("discoverPlayerAvailabilityTag", () => {
   const now = new Date("2026-08-04T10:00:00.000Z");
-  const t = vi.fn((key: string) => {
+  const t = vi.fn((key: string, options?: Record<string, string>) => {
     if (key === "discover.today") return "Today";
     if (key === "discover.tomorrow") return "Tomorrow";
     if (key === "availability.weekdaysShort.5") return "Fri";
+    if (key === "availability.weekdaysShort.6") return "Sat";
     if (key === "availability.blocks.evening") return "Evening";
+    if (key === "discover.usualAvailability") {
+      return `Usually ${options?.schedule}`;
+    }
     return key;
   }) as unknown as TFunction;
 
@@ -65,6 +69,32 @@ describe("discoverPlayerAvailabilityTag", () => {
     expect(discoverPlayerAvailabilityTag(player(), false, t, now)).toBe(
       "Fri · Evening",
     );
+  });
+
+  // Discovery matches over the full horizon, so a player can reach the card
+  // with no shared slot inside the three-day chip window. The card must still
+  // say something rather than look like the player never plays.
+  it("falls back to the usual pattern when nothing is shared in three days", () => {
+    const distant = player({
+      near_term_overlap_slots: [],
+      availability_weekdays: [6],
+      availability_day_parts: ["evening"],
+    });
+
+    expect(discoverPlayerAvailabilityTag(distant, true, t, now)).toBe(
+      "Usually Sat · Evening",
+    );
+  });
+
+  it("shows nothing when there is neither an overlap nor a pattern", () => {
+    const empty = player({
+      near_term_slots: [],
+      near_term_overlap_slots: [],
+      availability_weekdays: [],
+      availability_day_parts: [],
+    });
+
+    expect(discoverPlayerAvailabilityTag(empty, true, t, now)).toBeNull();
   });
 });
 

@@ -42,10 +42,15 @@ describe("public availability summary labels", () => {
 
 describe("formatDiscoverPlayerAvailabilityLabel", () => {
   const t = vi.fn((key: string, options?: Record<string, string | number>) => {
+    if (key === "availability.blocks.morning") return "Morning";
     if (key === "availability.blocks.evening") return "Evening";
-    if (key === "availability.weekdaysShort.5") return "Fri";
-    if (key === "discover.overlapAvailability") {
-      return `${options?.weekday} · ${options?.blocks}`;
+    if (key === "availability.blocks.allDay") return "All day";
+    if (key === "playerProfile.availabilityPartsTwo") {
+      return `${options?.first} and ${options?.second}`;
+    }
+    if (key.startsWith("availability.weekdaysShort.")) {
+      const names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      return names[Number(key.split(".").pop())] ?? "";
     }
     if (key === "discover.playerAvailabilityManyDays") {
       return `${options?.blocks} · ${options?.count} days`;
@@ -59,9 +64,35 @@ describe("formatDiscoverPlayerAvailabilityLabel", () => {
     );
   });
 
+  it("lists up to three weekdays against their blocks", () => {
+    expect(
+      formatDiscoverPlayerAvailabilityLabel([6, 5], ["evening", "morning"], t),
+    ).toBe("Fri, Sat · Morning and Evening");
+  });
+
+  it("collapses all three blocks to a single all-day label", () => {
+    expect(
+      formatDiscoverPlayerAvailabilityLabel(
+        [5, 6, 0],
+        ["morning", "afternoon", "evening"],
+        t,
+      ),
+    ).toBe("Sun, Fri, Sat · All day");
+  });
+
+  it("collapses to a day count past three weekdays", () => {
+    expect(
+      formatDiscoverPlayerAvailabilityLabel([1, 2, 3, 4], ["evening"], t),
+    ).toBe("Evening · 4 days");
+  });
+
   it("falls back to blocks only when weekdays are missing", () => {
     expect(formatDiscoverPlayerAvailabilityLabel([], ["evening"], t)).toBe(
       "Evening",
     );
+  });
+
+  it("returns null when the player has no recurring pattern", () => {
+    expect(formatDiscoverPlayerAvailabilityLabel([5], [], t)).toBeNull();
   });
 });
