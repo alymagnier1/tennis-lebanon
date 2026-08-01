@@ -130,20 +130,25 @@ $$;
 select pass('a host can record a court they arranged themselves');
 
 -- ---------------------------------------------------------------------------
--- Only the host, and only from ready_to_book
+-- Participants only, and single-use
+--
+-- 041 widened this from creator-only: whoever holds the club membership is
+-- usually the one who rings them, and that is often not the creator. The
+-- authorization boundary is now the roster, not the host.
 -- ---------------------------------------------------------------------------
 
 do $$
 declare
   v_creator uuid := '11111111-1111-1111-1111-111111111111';
   v_joiner uuid := '22222222-2222-2222-2222-222222222222';
+  v_outsider uuid := '77777777-7777-7777-7777-777777777777';
   v_match_id uuid;
   v_message text := '';
   v_starts timestamptz := now() + interval '4 days';
 begin
   v_match_id := pg_temp.ready_match(v_creator, v_joiner, 'singles', v_starts);
 
-  perform pg_temp.set_caller(v_joiner);
+  perform pg_temp.set_caller(v_outsider);
   begin
     perform public.confirm_external_court(
       v_match_id,
@@ -158,12 +163,13 @@ begin
   end;
 
   perform pg_temp.assert_true(
-    v_message like '%Only the match creator%',
-    format('a non-host must not confirm a court, got: %s', v_message)
+    v_message like '%Only a match participant%',
+    format('someone outside the match must not confirm a court, got: %s', v_message)
   );
 
-  -- After confirming once, a second attempt must not create a duplicate.
-  perform pg_temp.set_caller(v_creator);
+  -- The joiner is not the creator, and must still be able to record a court
+  -- they booked themselves.
+  perform pg_temp.set_caller(v_joiner);
   perform public.confirm_external_court(
     v_match_id,
     'cccccccc-0001-0001-0001-000000000001',
@@ -193,7 +199,7 @@ begin
 end;
 $$;
 
-select pass('external court confirmation is host-only and single-use');
+select pass('external court confirmation is participant-only and single-use');
 
 -- ---------------------------------------------------------------------------
 -- Leaving while the club deliberates withdraws the request

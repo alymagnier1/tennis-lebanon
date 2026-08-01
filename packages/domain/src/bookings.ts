@@ -9,6 +9,28 @@ export function canRequestCourt(input: {
   return true;
 }
 
+/**
+ * Recording a court arranged directly with the club, rather than through the
+ * in-app queue.
+ *
+ * Deliberately wider than {@link canRequestCourt}. Requesting a court commits
+ * the group to a club and stays with the creator; saying "we already have one"
+ * only records what happened, and the person who booked it is usually whoever
+ * holds the membership. `booking_pending` matters most of all: a club that
+ * never replies is the common reason someone picks up the phone, and hiding
+ * this action there is what leaves the match stranded.
+ */
+export function canConfirmExternalCourt(input: {
+  viewerIsParticipant: boolean;
+  matchStatus: string;
+}): boolean {
+  if (!input.viewerIsParticipant) return false;
+  return (
+    input.matchStatus === "ready_to_book" ||
+    input.matchStatus === "booking_pending"
+  );
+}
+
 export function canRespondToBookingAlternative(input: {
   viewerIsCreator: boolean;
   bookingStatus?: string | null;

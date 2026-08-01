@@ -25,6 +25,7 @@ import {
 import {
   canCancelBookingRequest,
   canManageProposedTimes,
+  canConfirmExternalCourt,
   canRequestCourt,
   canRespondToBookingAlternative,
   canShowJoinAction,
@@ -206,6 +207,21 @@ export default function MatchHubScreen() {
     () => hub?.proposed_times ?? [],
     [hub?.proposed_times],
   );
+
+  const showRequestCourt = hub
+    ? canRequestCourt({
+        viewerIsCreator: hub.viewer_is_creator,
+        matchStatus: hub.status,
+        nextAction: hub.next_action,
+      })
+    : false;
+
+  const showConfirmExternalCourt = hub
+    ? canConfirmExternalCourt({
+        viewerIsParticipant: hub.viewer_status === "accepted",
+        matchStatus: hub.status,
+      })
+    : false;
 
   const joinAction = useMemo(() => {
     if (!hub) return "none";
@@ -391,21 +407,20 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      {hub &&
-      canRequestCourt({
-        viewerIsCreator: hub.viewer_is_creator,
-        matchStatus: hub.status,
-        nextAction: hub.next_action,
-      }) ? (
+      {showRequestCourt || showConfirmExternalCourt ? (
         <View style={styles.bookingActions}>
-          <FigmaPrimaryButton
-            label={t("matches.hub.requestCourt")}
-            onPress={() => router.push(matchBookRoute(id!))}
-          />
-          <FigmaSecondaryButton
-            label={t("matches.booking.bookedOffAppCta")}
-            onPress={() => router.push(matchBookExternalRoute(id!))}
-          />
+          {showRequestCourt ? (
+            <FigmaPrimaryButton
+              label={t("matches.hub.requestCourt")}
+              onPress={() => router.push(matchBookRoute(id!))}
+            />
+          ) : null}
+          {showConfirmExternalCourt ? (
+            <FigmaSecondaryButton
+              label={t("matches.booking.bookedOffAppCta")}
+              onPress={() => router.push(matchBookExternalRoute(id!))}
+            />
+          ) : null}
         </View>
       ) : null}
 
