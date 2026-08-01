@@ -150,6 +150,14 @@ export default function CreateMatchDetailsScreen() {
         />
       }
     >
+      {draft.targetPlayerName ? (
+        <StatusBanner
+          body={t("matches.create.forPlayerHint", {
+            name: draft.targetPlayerName,
+          })}
+        />
+      ) : null}
+
       {activeHostedMatch ? (
         <StatusBanner
           body={t("matches.create.activeHostedBody", {

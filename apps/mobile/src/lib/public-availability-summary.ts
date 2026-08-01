@@ -47,3 +47,32 @@ export function hasPublicAvailabilitySummary(
   if (!summary) return false;
   return summary.weekdays.length > 0 || summary.day_parts.length > 0;
 }
+
+/** Compact recurring schedule for discovery cards when overlap is absent. */
+export function formatDiscoverPlayerAvailabilityLabel(
+  weekdays: number[],
+  dayParts: AvailabilityDayPart[],
+  t: TFunction,
+): string | null {
+  const sortedParts = sortAvailabilityDayParts(dayParts);
+  if (sortedParts.length === 0) return null;
+
+  const blocks = formatAvailabilityDayPartsLabel(sortedParts, t);
+  const days = weekdayShortLabels(weekdays, t);
+
+  if (days.length === 0) {
+    return blocks;
+  }
+
+  if (days.length <= 3) {
+    return t("discover.overlapAvailability", {
+      weekday: days.join(", "),
+      blocks,
+    });
+  }
+
+  return t("discover.playerAvailabilityManyDays", {
+    count: days.length,
+    blocks,
+  });
+}

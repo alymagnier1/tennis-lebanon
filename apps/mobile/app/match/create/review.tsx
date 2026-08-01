@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   createMatchDraft,
+  createMatchInvite,
   getActiveZones,
   listMyMatches,
   publishMatch,
@@ -165,24 +166,34 @@ export default function CreateMatchReviewScreen() {
 
   const publishMutation = useMutation({
     mutationFn: async ({ destination, input }: PublishVariables) => {
+      const targetPlayerId = getCreateMatchDraft().targetPlayerId;
       const matchId = await createMatchDraft(supabase, input);
       if (destination === "hub") {
         await publishMatch(supabase, matchId);
+        if (targetPlayerId) {
+          await createMatchInvite(supabase, matchId, targetPlayerId);
+        }
       }
-      return matchId;
+      return { matchId, destination, targetPlayerId };
     },
-    onSuccess: (matchId, { destination }) => {
+    onSuccess: ({ matchId, destination, targetPlayerId }) => {
       if (typeof matchId !== "string" || matchId.length === 0) {
         setPublishError(t("matches.create.publishError"));
         return;
       }
 
+      const invitedTargetPlayer =
+        destination === "hub" && Boolean(targetPlayerId);
       resetCreateMatchDraft();
       router.replace(
         destination === "invite"
-          ? matchInviteRoute(matchId)
+          ? matchInviteRoute(matchId, { invitePlayerId: targetPlayerId })
           : matchHubRoute(matchId),
       );
+
+      if (invitedTargetPlayer) {
+        Alert.alert(t("matches.invite.sent"));
+      }
     },
     onError: (error) => {
       if (isActiveHostedMatchError(error)) {

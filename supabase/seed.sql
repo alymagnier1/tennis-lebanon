@@ -607,6 +607,39 @@ from (
 ) as players(player_id)
 on conflict do nothing;
 
+insert into public.availability_windows (
+  user_id, weekday, local_start, local_end, timezone, is_recurring
+)
+select
+  player_id,
+  weekday,
+  time '17:00',
+  time '22:00',
+  'Asia/Beirut',
+  true
+from (
+  values
+    ('77777777-7777-7777-7777-777777777777'::uuid),
+    ('88888888-8888-8888-8888-888888888888'::uuid),
+    ('99999999-9999-9999-9999-999999999999'::uuid),
+    ('10101010-1010-1010-1010-101010101010'::uuid),
+    ('12121212-1212-1212-1212-121212121212'::uuid),
+    ('13131313-1313-1313-1313-131313131313'::uuid),
+    ('14141414-1414-1414-1414-141414141414'::uuid)
+) as players(player_id)
+cross join (
+  values (0::smallint), (1::smallint), (2::smallint)
+) as weekdays(weekday)
+where not exists (
+  select 1
+  from public.availability_windows as aw
+  where aw.user_id = players.player_id
+    and aw.weekday = weekdays.weekday
+    and aw.local_start = time '17:00'
+    and aw.local_end = time '22:00'
+    and aw.is_recurring = true
+);
+
 insert into public.matches (
   id, creator_id, format, visibility, status, intent,
   min_skill, max_skill, requires_creator_approval

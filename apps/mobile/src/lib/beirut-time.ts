@@ -51,6 +51,24 @@ export function beirutLocalToUtcIso(date: string, time: string): string {
   return new Date(asUtc - offset).toISOString();
 }
 
+/** PostgreSQL `extract(dow)` convention: 0 = Sunday. */
+export function weekdayIndexInBeirut(iso: string): number {
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: BEIRUT_TIME_ZONE,
+    weekday: "short",
+  }).format(new Date(iso));
+  const indices: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+  return indices[weekday] ?? 0;
+}
+
 /**
  * Splits a UTC instant into the Beirut-local `YYYY-MM-DD` and `HH:MM` parts
  * the create-match form fields expect, so a suggested slot can populate them.
@@ -65,6 +83,10 @@ export function utcIsoToBeirutFields(iso: string): {
     date: `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`,
     time: `${pad(parts.hour)}:${pad(parts.minute)}`,
   };
+}
+
+export function beirutDateKey(iso: string): string {
+  return utcIsoToBeirutFields(iso).date;
 }
 
 export function formatUtcInBeirut(iso: string): string {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -68,7 +68,10 @@ function filterPlayersBySearch(
 }
 
 export default function MatchInvitePlayersScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, invitePlayerId } = useLocalSearchParams<{
+    id: string;
+    invitePlayerId?: string;
+  }>();
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
@@ -78,6 +81,7 @@ export default function MatchInvitePlayersScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [requireOverlap, setRequireOverlap] = useState(true);
   const [levelWindow, setLevelWindow] = useState(1);
+  const autoInviteStarted = useRef(false);
 
   const hubQuery = useQuery({
     queryKey: ["match-hub", id],
@@ -131,6 +135,29 @@ export default function MatchInvitePlayersScreen() {
     },
     onError: () => Alert.alert(t("matches.invite.error")),
   });
+
+  useEffect(() => {
+    if (
+      !invitePlayerId ||
+      !id ||
+      !hub?.viewer_is_creator ||
+      autoInviteStarted.current
+    ) {
+      return;
+    }
+
+    // No state to set: the row already renders as invited when the player is
+    // in the match, so pushing them into invitedIds only added a second
+    // render pass for the same result.
+    if (isAlreadyInMatch(participants, invitePlayerId)) {
+      return;
+    }
+
+    autoInviteStarted.current = true;
+    inviteMutation.mutate(invitePlayerId);
+    // Auto-invite once when arriving from create-for-player.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hub?.viewer_is_creator, id, invitePlayerId, participants]);
 
   const finishMutation = useMutation({
     mutationFn: async () => {

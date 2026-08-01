@@ -3,10 +3,18 @@ import type { Href } from "expo-router";
 export const CREATE_MATCH_ROUTE = "/match/create/details" as Href;
 export const CLUBS_ROUTE = "/clubs" as Href;
 
-export function matchInviteRoute(matchId: string): Href {
+export function matchInviteRoute(
+  matchId: string,
+  options?: { invitePlayerId?: string },
+): Href {
   return {
     pathname: "/match/[id]/invite",
-    params: { id: matchId },
+    params: {
+      id: matchId,
+      ...(options?.invitePlayerId
+        ? { invitePlayerId: options.invitePlayerId }
+        : {}),
+    },
   } as Href;
 }
 
@@ -17,9 +25,26 @@ export function matchHubRoute(matchId: string): Href {
   } as Href;
 }
 
+export function homeNextActionRoute(
+  kind: "invite" | "players" | "vote" | "booking" | "court",
+  matchId: string,
+): Href {
+  if (kind === "players") {
+    return matchInviteRoute(matchId);
+  }
+  return matchHubRoute(matchId);
+}
+
 export function matchBookRoute(matchId: string): Href {
   return {
     pathname: "/match/[id]/book",
+    params: { id: matchId },
+  } as Href;
+}
+
+export function matchBookExternalRoute(matchId: string): Href {
+  return {
+    pathname: "/match/[id]/book-external",
     params: { id: matchId },
   } as Href;
 }

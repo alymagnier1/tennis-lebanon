@@ -61,6 +61,7 @@ import { confirmAction } from "../../src/lib/confirm-action";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitMatchHub } from "../../src/lib/navigation";
 import {
+  matchBookExternalRoute,
   matchBookRoute,
   matchCancelRoute,
   matchInviteRoute,
@@ -396,10 +397,16 @@ export default function MatchHubScreen() {
         matchStatus: hub.status,
         nextAction: hub.next_action,
       }) ? (
-        <FigmaPrimaryButton
-          label={t("matches.hub.requestCourt")}
-          onPress={() => router.push(matchBookRoute(id!))}
-        />
+        <View style={styles.bookingActions}>
+          <FigmaPrimaryButton
+            label={t("matches.hub.requestCourt")}
+            onPress={() => router.push(matchBookRoute(id!))}
+          />
+          <FigmaSecondaryButton
+            label={t("matches.booking.bookedOffAppCta")}
+            onPress={() => router.push(matchBookExternalRoute(id!))}
+          />
+        </View>
       ) : null}
 
       <View
@@ -718,5 +725,8 @@ const styles = StyleSheet.create({
   },
   inlineAction: {
     flex: 1,
+  },
+  bookingActions: {
+    gap: spacing.sm,
   },
 });

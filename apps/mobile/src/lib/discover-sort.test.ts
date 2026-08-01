@@ -25,6 +25,10 @@ function player(
     overlap_starts_at: null,
     overlap_ends_at: null,
     bio: null,
+    availability_weekdays: [],
+    availability_day_parts: [],
+    near_term_slots: [],
+    near_term_overlap_slots: [],
     ...overrides,
   };
 }

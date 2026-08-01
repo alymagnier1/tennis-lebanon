@@ -12,52 +12,22 @@ import { buildMatchInviteUrl } from "../../lib/invite-link";
 import { playerFormatLabel } from "../../lib/player-format-label";
 import { formatMatchesPlayedLabel } from "../../lib/matches-played-label";
 import { publicPlayerLevelChip } from "../../lib/player-level-label";
-import {
-  availabilityDayPartsFromOverlap,
-  type AvailabilityDayPart,
-} from "../../lib/player-availability-label";
+import { discoverPlayerAvailabilityTag } from "../../lib/discover-availability-tag";
+import { beginCreateMatchForPlayer } from "../../lib/begin-create-match-for-player";
 import { CREATE_MATCH_ROUTE } from "../../lib/routes";
 import { supabase } from "../../lib/supabase";
 import { zoneLabelFromList } from "../../lib/zones";
-
-function availabilityTag(
-  player: CompatiblePlayerCard,
-  t: (key: string, options?: Record<string, unknown>) => string,
-): string | null {
-  if (!player.overlap_starts_at || !player.overlap_ends_at) {
-    return null;
-  }
-
-  const parts = availabilityDayPartsFromOverlap(
-    player.overlap_starts_at,
-    player.overlap_ends_at,
-  );
-  return formatAvailabilityDayParts(parts, t);
-}
-
-function formatAvailabilityDayParts(
-  parts: AvailabilityDayPart[],
-  t: (key: string) => string,
-): string {
-  const labels = [...new Set(parts)].map((part) =>
-    t(`availability.blocks.${part}`),
-  );
-
-  if (labels.length === 1) {
-    return labels[0]!;
-  }
-
-  return labels.join(" & ");
-}
 
 export function DiscoverPlayerCardRow({
   player,
   inviteableMatches,
   locale,
+  showOverlapAvailability,
 }: {
   player: CompatiblePlayerCard;
   inviteableMatches: MyMatchRow[];
   locale: string;
+  showOverlapAvailability: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -94,6 +64,7 @@ export function DiscoverPlayerCardRow({
       });
       return;
     }
+    beginCreateMatchForPlayer(player);
     router.push(CREATE_MATCH_ROUTE);
   };
 
@@ -116,7 +87,11 @@ export function DiscoverPlayerCardRow({
       )}
       formatTag={playerFormatLabel(player, t)}
       intentTag={t(`playIntent.${player.play_intent}`)}
-      availabilityTag={availabilityTag(player, t)}
+      availabilityTag={discoverPlayerAvailabilityTag(
+        player,
+        showOverlapAvailability,
+        t,
+      )}
       profileAccessibilityLabel={t("discover.openPlayerProfile", {
         name: player.display_name,
       })}

@@ -2,8 +2,10 @@ import type { CreateMatchInput } from "@tennis-lebanon/domain";
 import { createMatchInputSchema } from "@tennis-lebanon/domain";
 import type { SkillBand } from "@tennis-lebanon/domain";
 
-type Draft = Partial<CreateMatchInput> & {
+export type Draft = Partial<CreateMatchInput> & {
   selectedSkillBands?: SkillBand[];
+  targetPlayerId?: string;
+  targetPlayerName?: string;
 };
 
 let draft: Draft = {};

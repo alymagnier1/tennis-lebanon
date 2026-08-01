@@ -206,6 +206,7 @@ export default function DiscoverScreen() {
               player={player}
               inviteableMatches={inviteableMatches}
               locale={locale}
+              showOverlapAvailability={matchToggles.matchAvailability}
             />
           );
         },
@@ -241,6 +242,7 @@ export default function DiscoverScreen() {
     filteredPlayers,
     inviteableMatches,
     locale,
+    matchToggles.matchAvailability,
     matchesQuery.data,
     segment,
     t,

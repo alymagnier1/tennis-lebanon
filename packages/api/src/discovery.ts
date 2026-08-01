@@ -1,6 +1,11 @@
 import type { DiscoveryFiltersInput } from "@tennis-lebanon/domain";
 import type { TennisSupabaseClient } from "./client";
 
+export type NearTermAvailabilitySlot = {
+  starts_at: string;
+  ends_at: string;
+};
+
 export type CompatiblePlayerCard = {
   user_id: string;
   display_name: string;
@@ -18,11 +23,67 @@ export type CompatiblePlayerCard = {
   availability_overlap: boolean;
   intent_fit: boolean;
   format_fit: boolean;
-  /** Earliest hour-or-longer slot both players are free, if any. */
+  /** Earliest shared slot in the near-term window, if any. */
   overlap_starts_at: string | null;
   overlap_ends_at: string | null;
   bio: string | null;
+  availability_weekdays: number[];
+  availability_day_parts: Array<"morning" | "afternoon" | "evening">;
+  /** Today + next two days in Asia/Beirut. */
+  near_term_slots: NearTermAvailabilitySlot[];
+  near_term_overlap_slots: NearTermAvailabilitySlot[];
 };
+
+type DiscoverPlayerCardRow = Omit<
+  CompatiblePlayerCard,
+  | "availability_weekdays"
+  | "availability_day_parts"
+  | "near_term_slots"
+  | "near_term_overlap_slots"
+> & {
+  availability_weekdays?: number[] | null;
+  availability_day_parts?:
+    CompatiblePlayerCard["availability_day_parts"] | null;
+  near_term_slots?: NearTermAvailabilitySlot[] | null;
+  near_term_overlap_slots?: NearTermAvailabilitySlot[] | null;
+};
+
+function normalizeNearTermSlots(value: unknown): NearTermAvailabilitySlot[] {
+  let parsed = value;
+  if (typeof parsed === "string") {
+    try {
+      parsed = JSON.parse(parsed) as unknown;
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  return parsed.flatMap((slot) => {
+    if (!slot || typeof slot !== "object") return [];
+    const record = slot as Record<string, unknown>;
+    const startsAt = record.starts_at ?? record.startsAt;
+    const endsAt = record.ends_at ?? record.endsAt;
+    if (typeof startsAt !== "string" || typeof endsAt !== "string") {
+      return [];
+    }
+    return [{ starts_at: startsAt, ends_at: endsAt }];
+  });
+}
+
+function normalizeDiscoverPlayerCard(
+  row: DiscoverPlayerCardRow,
+): CompatiblePlayerCard {
+  return {
+    ...row,
+    availability_weekdays: row.availability_weekdays ?? [],
+    availability_day_parts: row.availability_day_parts ?? [],
+    near_term_slots: normalizeNearTermSlots(row.near_term_slots),
+    near_term_overlap_slots: normalizeNearTermSlots(
+      row.near_term_overlap_slots,
+    ),
+  };
+}
 
 export type OpenMatchCard = {
   match_id: string;
@@ -66,7 +127,9 @@ export async function discoverCompatiblePlayers(
   });
 
   if (error) throw error;
-  return (data ?? []) as CompatiblePlayerCard[];
+  return ((data ?? []) as DiscoverPlayerCardRow[]).map(
+    normalizeDiscoverPlayerCard,
+  );
 }
 
 export async function discoverOpenMatches(
@@ -99,5 +162,5 @@ export async function getPublicPlayerCard(
   });
 
   if (error) throw error;
-  return data as CompatiblePlayerCard;
+  return normalizeDiscoverPlayerCard(data as DiscoverPlayerCardRow);
 }

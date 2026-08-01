@@ -543,6 +543,9 @@
     "reportPlayer": "Report player",
     "playerLoadError": "We could not load this player.",
     "overlapSlotHint": "Both free {{slot}}",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "playerAvailabilityManyDays": "{{blocks}} · {{count}} days",
     "noOverlapHint": "No shared time yet"
   },
   "playerProfile": {
@@ -601,6 +604,7 @@
       "formatDescription": "Choose format and play intent.",
       "detailsTitle": "Match preferences",
       "detailsDescription": "Set level range and join rules.",
+      "forPlayerHint": "You're setting up a match for {{name}}. We'll invite them after you publish.",
       "matchTypeSection": "Match type",
       "matchTypeDescription": "Singles or doubles, and how competitive you want to play.",
       "joinSettingsSection": "Who can join",
@@ -847,7 +851,15 @@
       "whatsappDescription": "This club prefers WhatsApp. We will open WhatsApp with your match time and details prefilled.",
       "externalSuccess": "Court confirmed. The match is set.",
       "externalError": "We could not confirm this court.",
-      "courtAlreadyBooked": "That court is already booked for this time."
+      "courtAlreadyBooked": "That court is already booked for this time.",
+      "bookedOffAppCta": "Booked off-app",
+      "bookedOffAppTitle": "Confirm off-app booking",
+      "bookedOffAppDescription": "You already secured a court by phone or WhatsApp. Pick the club and court, then confirm so attendance and results still work.",
+      "bookedOffAppConfirm": "Confirm court",
+      "bookedOffAppConfirmTitle": "Confirm this court?",
+      "bookedOffAppConfirmBody": "Mark {{club}} · {{court}} for {{time}}. The match will move forward after you play.",
+      "bookedOffAppNoTime": "Agree on a time with your group before confirming a court.",
+      "bookedOffAppNoCourts": "This club has no courts listed yet. Try another club or contact support."
     },
     "invite": {
       "title": "Match invite",

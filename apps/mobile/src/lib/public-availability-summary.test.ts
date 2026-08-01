@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { TFunction } from "i18next";
 import {
   formatAvailabilityDayPartsLabel,
+  formatDiscoverPlayerAvailabilityLabel,
   sortAvailabilityDayParts,
   weekdayShortLabels,
 } from "./public-availability-summary";
@@ -36,5 +37,31 @@ describe("public availability summary labels", () => {
 
   it("maps weekday numbers to short labels", () => {
     expect(weekdayShortLabels([4, 1], t)).toEqual(["1", "4"]);
+  });
+});
+
+describe("formatDiscoverPlayerAvailabilityLabel", () => {
+  const t = vi.fn((key: string, options?: Record<string, string | number>) => {
+    if (key === "availability.blocks.evening") return "Evening";
+    if (key === "availability.weekdaysShort.5") return "Fri";
+    if (key === "discover.overlapAvailability") {
+      return `${options?.weekday} · ${options?.blocks}`;
+    }
+    if (key === "discover.playerAvailabilityManyDays") {
+      return `${options?.blocks} · ${options?.count} days`;
+    }
+    return key;
+  }) as unknown as TFunction;
+
+  it("formats a single weekday and block", () => {
+    expect(formatDiscoverPlayerAvailabilityLabel([5], ["evening"], t)).toBe(
+      "Fri · Evening",
+    );
+  });
+
+  it("falls back to blocks only when weekdays are missing", () => {
+    expect(formatDiscoverPlayerAvailabilityLabel([], ["evening"], t)).toBe(
+      "Evening",
+    );
   });
 });

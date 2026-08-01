@@ -14,6 +14,7 @@ import {
   figmaFormStyles,
 } from "../../../src/components/onboarding-ui";
 import {
+  DURATION_OPTIONS,
   addMinutes,
   dayKey,
   SlotPicker,
@@ -46,6 +47,38 @@ function defaultSlot(): SlotDraft {
   return { day: dayKey(2), startTime: "18:00", duration: 90 };
 }
 
+function nearestDuration(minutes: number): DurationMinutes {
+  return DURATION_OPTIONS.reduce((closest, option) => {
+    return Math.abs(option - minutes) < Math.abs(closest - minutes)
+      ? option
+      : closest;
+  }, DURATION_OPTIONS[0]!);
+}
+
+function slotsFromDraft(): SlotDraft[] {
+  const draft = getCreateMatchDraft();
+  if (!draft.proposedTimes?.length) {
+    return [defaultSlot()];
+  }
+
+  return draft.proposedTimes.map((slot) => {
+    const { date, time } = utcIsoToBeirutFields(slot.startsAt);
+    const durationMinutes = Math.max(
+      1,
+      Math.round(
+        (new Date(slot.endsAt).getTime() - new Date(slot.startsAt).getTime()) /
+          60_000,
+      ),
+    );
+
+    return {
+      day: date,
+      startTime: time,
+      duration: nearestDuration(durationMinutes),
+    };
+  });
+}
+
 export default function CreateMatchScheduleScreen() {
   const { t, i18n } = useTranslation();
   const draft = getCreateMatchDraft();
@@ -55,7 +88,7 @@ export default function CreateMatchScheduleScreen() {
   const [timingMode, setTimingMode] = useState<TimingMode>(
     draft.timingMode ?? "fixed",
   );
-  const [slots, setSlots] = useState<SlotDraft[]>([defaultSlot()]);
+  const [slots, setSlots] = useState<SlotDraft[]>(slotsFromDraft);
 
   const zonesQuery = useQuery({
     queryKey: ["active-zones"],

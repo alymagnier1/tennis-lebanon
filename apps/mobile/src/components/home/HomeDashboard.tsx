@@ -27,7 +27,7 @@ import {
   deriveHomeNextActions,
   sortUpcomingMatches,
 } from "../../lib/home-next-actions";
-import { matchHubRoute } from "../../lib/routes";
+import { homeNextActionRoute, matchHubRoute } from "../../lib/routes";
 import { CREATE_MATCH_ROUTE } from "../../lib/routes";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { supabase } from "../../lib/supabase";
@@ -173,7 +173,9 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
               <Pressable
                 key={action.id}
                 accessibilityRole="button"
-                onPress={() => router.push(matchHubRoute(action.matchId))}
+                onPress={() =>
+                  router.push(homeNextActionRoute(action.kind, action.matchId))
+                }
                 style={({ pressed }) => [
                   styles.actionCard,
                   pressed && styles.actionCardPressed,

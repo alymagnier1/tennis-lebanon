@@ -507,6 +507,9 @@
     "reportPlayer": "الإبلاغ عن لاعب",
     "playerLoadError": "تعذّر تحميل هذا اللاعب.",
     "overlapSlotHint": "كلاكما متفرغ {{slot}}",
+    "today": "اليوم",
+    "tomorrow": "غداً",
+    "playerAvailabilityManyDays": "{{blocks}} · {{count}} أيام",
     "noOverlapHint": "لا يوجد وقت مشترك بعد",
     "playerBio": "نبذة",
     "playStyleTags": "أسلوب اللعب"
@@ -567,6 +570,7 @@
       "formatDescription": "اختر النظام ونية اللعب.",
       "detailsTitle": "تفضيلات المباراة",
       "detailsDescription": "حدّد نطاق المستوى وقواعد الانضمام.",
+      "forPlayerHint": "أنت تنشئ مباراة لـ {{name}}. سنرسل له دعوة بعد النشر.",
       "matchTypeSection": "نوع المباراة",
       "matchTypeDescription": "فردي أو زوجي، ومدى تنافسية اللعب.",
       "joinSettingsSection": "من يمكنه الانضمام",
@@ -813,7 +817,15 @@
       "whatsappDescription": "يفضّل هذا النادي واتساب. سنفتح واتساب مع وقت المباراة والتفاصيل جاهزة.",
       "externalSuccess": "تم تأكيد الملعب. المباراة جاهزة.",
       "externalError": "تعذر تأكيد هذا الملعب.",
-      "courtAlreadyBooked": "هذا الملعب محجوز بالفعل في هذا الوقت."
+      "courtAlreadyBooked": "هذا الملعب محجوز بالفعل في هذا الوقت.",
+      "bookedOffAppCta": "حجز خارج التطبيق",
+      "bookedOffAppTitle": "تأكيد الحجز خارج التطبيق",
+      "bookedOffAppDescription": "لقد حجزت الملعب بالفعل عبر الهاتف أو واتساب. اختر النادي والملعب ثم أكّد حتى تستمر الحضور والنتائج.",
+      "bookedOffAppConfirm": "تأكيد الملعب",
+      "bookedOffAppConfirmTitle": "تأكيد هذا الملعب؟",
+      "bookedOffAppConfirmBody": "تسجيل {{club}} · {{court}} في {{time}}. ستتقدم المباراة بعد اللعب.",
+      "bookedOffAppNoTime": "اتفقوا على الوقت مع المجموعة قبل تأكيد الملعب.",
+      "bookedOffAppNoCourts": "لا توجد ملاعب مدرجة لهذا النادي بعد. جرّب ناديًا آخر أو تواصل مع الدعم."
     },
     "invite": {
       "title": "دعوة مباراة",

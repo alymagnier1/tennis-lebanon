@@ -3,15 +3,18 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
 import { Avatar } from "../AppUi";
 import { AppText } from "../AppText";
-import { Icon } from "../Icon";
+import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { skillBandColor } from "../../lib/skill-band-theme";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 
-function Tag({ label }: { label: string }) {
+function Tag({ icon, label }: { icon: IconName; label: string }) {
+  const { rowDirection } = useLayoutDirection();
+
   return (
-    <View style={styles.tag}>
+    <View style={[styles.tag, { flexDirection: rowDirection }]}>
+      <Icon name={icon} size={12} color={tennisColors.mutedForeground} />
       <AppText style={styles.tagText} maxLines={1}>
         {label}
       </AppText>
@@ -117,9 +120,11 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
         </AppText>
 
         <View style={[styles.tagRow, { flexDirection: rowDirection }]}>
-          <Tag label={`🎾 ${formatTag}`} />
-          <Tag label={`🎯 ${intentTag}`} />
-          {availabilityTag ? <Tag label={`⏰ ${availabilityTag}`} /> : null}
+          <Tag icon="court" label={formatTag} />
+          <Tag icon="playIntent" label={intentTag} />
+          {availabilityTag ? (
+            <Tag icon="clock" label={availabilityTag} />
+          ) : null}
         </View>
       </Pressable>
 
@@ -224,6 +229,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     maxWidth: "100%",
+    alignItems: "center",
+    gap: 4,
   },
   tagText: {
     fontFamily: tennisFontFamily.bodyMedium,

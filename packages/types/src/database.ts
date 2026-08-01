@@ -2321,6 +2321,10 @@ export type Database = {
         display_rating: number | null;
         overlap_starts_at: string | null;
         overlap_ends_at: string | null;
+        availability_weekdays: Json | null;
+        availability_day_parts: Json | null;
+        near_term_slots: Json | null;
+        near_term_overlap_slots: Json | null;
       };
       discover_open_match_card: {
         match_id: string | null;

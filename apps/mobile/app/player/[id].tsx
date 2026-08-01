@@ -25,6 +25,7 @@ import { AppText } from "../../src/components/AppText";
 import { formatUtcInBeirut } from "../../src/lib/beirut-time";
 import { buildMatchInviteUrl } from "../../src/lib/invite-link";
 import { supabase } from "../../src/lib/supabase";
+import { beginCreateMatchForPlayer } from "../../src/lib/begin-create-match-for-player";
 import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 import { zoneLabelFromList } from "../../src/lib/zones";
 import { PlayerAvailabilitySection } from "../../src/components/player/PlayerAvailabilitySection";
@@ -228,7 +229,11 @@ export default function PlayerDetailScreen() {
       >
         <FigmaPrimaryButton
           label={t("playerProfile.challengeCta")}
-          onPress={() => router.push(CREATE_MATCH_ROUTE)}
+          onPress={() => {
+            if (!playerQuery.data) return;
+            beginCreateMatchForPlayer(playerQuery.data);
+            router.push(CREATE_MATCH_ROUTE);
+          }}
         />
       </View>
     </View>

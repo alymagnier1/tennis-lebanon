@@ -1,4 +1,5 @@
-import { utcIsoToBeirutFields } from "./beirut-time";
+import type { TFunction } from "i18next";
+import { utcIsoToBeirutFields, weekdayIndexInBeirut } from "./beirut-time";
 
 export type AvailabilityDayPart = "morning" | "afternoon" | "evening";
 
@@ -29,4 +30,39 @@ export function availabilityDayPartsFromOverlap(
   const endPart = availabilityDayPartFromUtcIso(endsAt);
   if (startPart === endPart) return [startPart];
   return [startPart, endPart];
+}
+
+function formatOverlapBlockLabels(
+  parts: AvailabilityDayPart[],
+  t: TFunction,
+): string {
+  const labels = [...new Set(parts)].map((part) =>
+    t(`availability.blocks.${part}`),
+  );
+
+  if (labels.length === 1) {
+    return labels[0]!;
+  }
+
+  return t("playerProfile.availabilityPartsTwo", {
+    first: labels[0],
+    second: labels[1],
+  });
+}
+
+/** Shared overlap for discovery cards: "Fri · Evening". */
+export function formatOverlapAvailabilityLabel(
+  startsAt: string,
+  endsAt: string,
+  t: TFunction,
+): string {
+  const weekday = t(
+    `availability.weekdaysShort.${weekdayIndexInBeirut(startsAt)}`,
+  );
+  const blocks = formatOverlapBlockLabels(
+    availabilityDayPartsFromOverlap(startsAt, endsAt),
+    t,
+  );
+
+  return t("discover.overlapAvailability", { weekday, blocks });
 }

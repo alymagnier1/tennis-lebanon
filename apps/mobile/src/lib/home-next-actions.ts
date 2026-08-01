@@ -57,10 +57,9 @@ export function deriveHomeNextActions(
         bodyKey: "home.nextAction.courtBody",
         matchId: match.match_id,
       });
-    } else if (match.status === "open") {
-      // Not "vote on a time": a fixed match has nothing to vote on, and even a
-      // flexible one cannot reach agreement until the roster is full. What an
-      // open match needs, in either mode, is players.
+    } else if (match.status === "open" && match.is_creator) {
+      // Host-only: joining players cannot invite others. Not "vote on a time"
+      // either — an open match needs players first.
       actions.push({
         id: `players-${match.match_id}`,
         kind: "players",

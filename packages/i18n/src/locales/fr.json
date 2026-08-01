@@ -507,6 +507,9 @@
     "reportPlayer": "Signaler un joueur",
     "playerLoadError": "Impossible de charger ce joueur.",
     "overlapSlotHint": "Tous deux libres {{slot}}",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "playerAvailabilityManyDays": "{{blocks}} · {{count}} jours",
     "noOverlapHint": "Pas encore de créneau commun",
     "playerBio": "About",
     "playStyleTags": "Play style"
@@ -567,6 +570,7 @@
       "formatDescription": "Choisissez le format et l'intention de jeu.",
       "detailsTitle": "Préférences du match",
       "detailsDescription": "Définissez le niveau et les règles d'adhésion.",
+      "forPlayerHint": "Vous préparez un match pour {{name}}. Nous l'inviterons après publication.",
       "matchTypeSection": "Type de match",
       "matchTypeDescription": "Simple ou double, et niveau de compétitivité souhaité.",
       "joinSettingsSection": "Qui peut rejoindre",
@@ -813,7 +817,15 @@
       "whatsappDescription": "Ce club préfère WhatsApp. Nous ouvrirons WhatsApp avec l'heure et les détails du match préremplis.",
       "externalSuccess": "Court confirmé. Le match est fixé.",
       "externalError": "Nous n’avons pas pu confirmer ce court.",
-      "courtAlreadyBooked": "Ce court est déjà réservé à cette heure."
+      "courtAlreadyBooked": "Ce court est déjà réservé à cette heure.",
+      "bookedOffAppCta": "Réservé hors app",
+      "bookedOffAppTitle": "Confirmer une réservation hors app",
+      "bookedOffAppDescription": "Vous avez déjà réservé un court par téléphone ou WhatsApp. Choisissez le club et le court, puis confirmez pour que la présence et les résultats fonctionnent.",
+      "bookedOffAppConfirm": "Confirmer le court",
+      "bookedOffAppConfirmTitle": "Confirmer ce court ?",
+      "bookedOffAppConfirmBody": "Enregistrer {{club}} · {{court}} pour {{time}}. Le match avancera après le jeu.",
+      "bookedOffAppNoTime": "Mettez-vous d'accord sur l'heure avant de confirmer un court.",
+      "bookedOffAppNoCourts": "Ce club n'a pas encore de courts listés. Essayez un autre club ou contactez le support."
     },
     "invite": {
       "title": "Invitation au match",

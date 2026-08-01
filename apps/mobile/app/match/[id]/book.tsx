@@ -6,10 +6,17 @@ import { useQuery } from "@tanstack/react-query";
 import { getMatchHub } from "@tennis-lebanon/api";
 import { ClubsDirectoryList } from "../../../src/components/ClubsDirectoryList";
 import { AppText } from "../../../src/components/AppText";
-import { Screen, formStyles } from "../../../src/components/FormUi";
+import {
+  Screen,
+  SecondaryButton,
+  formStyles,
+} from "../../../src/components/FormUi";
 import { formatUtcSlotInBeirut } from "../../../src/lib/beirut-time";
 import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
-import { clubDetailRoute } from "../../../src/lib/routes";
+import {
+  clubDetailRoute,
+  matchBookExternalRoute,
+} from "../../../src/lib/routes";
 import { supabase } from "../../../src/lib/supabase";
 
 export default function MatchBookCourtScreen() {
@@ -69,6 +76,11 @@ export default function MatchBookCourtScreen() {
         onClubPress={(clubId) =>
           router.push(clubDetailRoute(clubId, { matchId: id! }))
         }
+      />
+
+      <SecondaryButton
+        label={t("matches.booking.bookedOffAppCta")}
+        onPress={() => router.push(matchBookExternalRoute(id!))}
       />
     </Screen>
   );

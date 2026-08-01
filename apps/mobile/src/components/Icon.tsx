@@ -21,6 +21,7 @@ const ICONS = {
   level: "stats-chart-outline",
   players: "people-outline",
   court: "tennisball-outline",
+  playIntent: "ribbon-outline",
   check: "checkmark-circle",
   warning: "alert-circle-outline",
   chat: "chatbubble-ellipses-outline",
