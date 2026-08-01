@@ -1,4 +1,9 @@
-import type { PropsWithChildren, ReactElement, ReactNode } from "react";
+import type {
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+  RefObject,
+} from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -24,6 +29,9 @@ import {
 import { AppText } from "./AppText";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
+import { mobileBrand } from "../theme/mobile-brand";
+import { tennisColors } from "../theme/tennis-tokens";
+import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 export type ScreenVirtualizedListProps = {
   data: readonly unknown[];
@@ -48,6 +56,7 @@ export function Screen({
   showTitle = true,
   fixedHeader,
   virtualizedList,
+  scrollRef,
 }: PropsWithChildren<{
   title: string;
   description?: string;
@@ -57,6 +66,7 @@ export function Screen({
   showTitle?: boolean;
   fixedHeader?: ReactNode;
   virtualizedList?: ScreenVirtualizedListProps;
+  scrollRef?: RefObject<ScrollView | null>;
 }>) {
   const insets = useSafeAreaInsets();
   const { horizontalPadding, titleFontSize } = useResponsiveLayout();
@@ -157,6 +167,7 @@ export function Screen({
         </View>
         {body ?? (
           <ScrollView
+            ref={scrollRef}
             style={styles.scroll}
             contentContainerStyle={[
               styles.screen,
@@ -188,6 +199,7 @@ export function Screen({
 
   return (
     <ScrollView
+      ref={scrollRef}
       contentContainerStyle={[
         styles.screen,
         !contentGrow && styles.screenCompact,
@@ -270,7 +282,7 @@ export function SecondaryButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={colors.brand[600]} />
+        <ActivityIndicator color={mobileBrand[600]} />
       ) : (
         <AppText style={styles.secondaryButtonText} maxLines={2}>
           {label}
@@ -516,27 +528,27 @@ export const formStyles = StyleSheet.create({
     fontWeight: typography.weight.semibold,
   },
   segmentButtonTextActive: {
-    color: colors.brand[600],
+    color: mobileBrand[600],
   },
 });
 
 const styles = StyleSheet.create({
   screenRoot: {
     flex: 1,
-    backgroundColor: colors.neutral[0],
+    backgroundColor: tennisColors.background,
   },
   scroll: {
     flex: 1,
   },
   fixedHeader: {
-    gap: spacing.lg,
-    backgroundColor: colors.neutral[0],
+    gap: spacing.sm,
+    backgroundColor: tennisColors.background,
   },
   screen: {
     flexGrow: 1,
     paddingTop: spacing.lg,
     gap: spacing.lg,
-    backgroundColor: colors.neutral[0],
+    backgroundColor: tennisColors.background,
   },
   screenBelowFixedHeader: {
     paddingTop: spacing.sm,
@@ -551,8 +563,8 @@ const styles = StyleSheet.create({
     height: spacing.md,
   },
   title: {
-    color: colors.neutral[900],
-    fontSize: typography.size["2xl"],
+    color: tennisColors.primaryDark,
+    fontFamily: tennisFontFamily.headingExtra,
     fontWeight: typography.weight.bold,
   },
   description: {
@@ -567,7 +579,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
     // brand[500] gave white text only 2.4:1 and read as disabled.
-    backgroundColor: semantic.interactive,
+    backgroundColor: tennisColors.primary,
     borderRadius: radii.full,
     ...elevation.sm,
   },
@@ -584,12 +596,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderWidth: 1,
-    borderColor: colors.brand[500],
+    borderColor: mobileBrand[500],
     borderRadius: radii.full,
     backgroundColor: colors.neutral[0],
   },
   secondaryButtonText: {
-    color: colors.brand[700],
+    color: mobileBrand[700],
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
     textAlign: "center",
@@ -647,8 +659,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral[0],
   },
   choiceSelected: {
-    borderColor: colors.brand[500],
-    backgroundColor: colors.brand[50],
+    borderColor: mobileBrand[500],
+    backgroundColor: mobileBrand[50],
   },
   choiceText: { flex: 1, gap: spacing.xs, minWidth: 0 },
   choiceLabel: {
@@ -661,7 +673,7 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
   },
   checkmark: {
-    color: colors.brand[700],
+    color: mobileBrand[700],
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
   },

@@ -6,3 +6,6 @@ pnpm-lock.yaml
 **/build/
 **/node_modules/
 supabase/migrations/*.sql
+
+# Vendored Figma Make export kept as a design reference, not app source.
+Figma designs/

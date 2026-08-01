@@ -1,7 +1,8 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Easing,
   Image,
   Modal,
   Pressable,
@@ -26,6 +27,9 @@ import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
 import { AppText } from "./AppText";
 import { Icon } from "./Icon";
+import { mobileBrand } from "../theme/mobile-brand";
+import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 export function SegmentTabs<T extends string>({
   value,
@@ -134,7 +138,7 @@ export function ChipSelect<T extends string>({
   value,
   onChange,
 }: {
-  label: string;
+  label?: string;
   options: { value: T; label: string }[];
   value: T;
   onChange: (value: T) => void;
@@ -144,9 +148,11 @@ export function ChipSelect<T extends string>({
 
   return (
     <View style={styles.chipSection}>
-      <AppText style={[styles.chipSectionLabel, { writingDirection }]}>
-        {label}
-      </AppText>
+      {label ? (
+        <AppText style={[styles.chipSectionLabel, { writingDirection }]}>
+          {label}
+        </AppText>
+      ) : null}
       <View style={styles.chipGrid}>
         {options.map((option) => {
           const selected = option.value === value;
@@ -187,7 +193,7 @@ export function ChipMultiSelect({
   values,
   onToggle,
 }: {
-  label: string;
+  label?: string;
   options: { value: string; label: string }[];
   values: string[];
   onToggle: (value: string) => void;
@@ -197,9 +203,11 @@ export function ChipMultiSelect({
 
   return (
     <View style={styles.chipSection}>
-      <AppText style={[styles.chipSectionLabel, { writingDirection }]}>
-        {label}
-      </AppText>
+      {label ? (
+        <AppText style={[styles.chipSectionLabel, { writingDirection }]}>
+          {label}
+        </AppText>
+      ) : null}
       <View style={styles.chipGrid}>
         {options.map((option) => {
           const selected = values.includes(option.value);
@@ -238,13 +246,16 @@ export function Avatar({
   name,
   avatarPath,
   size = 48,
+  borderRadius,
 }: {
   name: string;
   avatarPath?: string | null;
   size?: number;
+  borderRadius?: number;
 }) {
   const uri = resolveAvatarUri(avatarPath ?? null);
-  const dimension = { width: size, height: size, borderRadius: size / 2 };
+  const radius = borderRadius ?? size / 2;
+  const dimension = { width: size, height: size, borderRadius: radius };
 
   if (uri) {
     return (
@@ -736,23 +747,79 @@ export function FormSection({
   );
 }
 
+export function AnimatedCollapse({
+  visible,
+  children,
+}: PropsWithChildren<{ visible: boolean }>) {
+  // Lazy state rather than `useRef(...).current`, which reads a ref during
+  // render. Matches how BottomSheet in this file already holds its value.
+  const [progress] = useState(() => new Animated.Value(visible ? 1 : 0));
+  const [contentHeight, setContentHeight] = useState(0);
+
+  useEffect(() => {
+    Animated.timing(progress, {
+      toValue: visible ? 1 : 0,
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  }, [progress, visible]);
+
+  const animatedHeight = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, Math.max(contentHeight, 1)],
+  });
+
+  return (
+    <View>
+      {contentHeight === 0 ? (
+        <View
+          pointerEvents="none"
+          style={styles.collapseMeasure}
+          onLayout={(event) =>
+            setContentHeight(event.nativeEvent.layout.height)
+          }
+        >
+          {children}
+        </View>
+      ) : null}
+      <Animated.View
+        style={[
+          styles.collapseContainer,
+          { height: animatedHeight, opacity: progress },
+        ]}
+      >
+        {children}
+      </Animated.View>
+    </View>
+  );
+}
+
 export function SettingToggle({
   label,
   description,
   value,
   onValueChange,
   disabled = false,
+  variant = "default",
 }: {
   label: string;
   description?: string;
   value: boolean;
   onValueChange: (value: boolean) => void;
   disabled?: boolean;
+  variant?: "default" | "card";
 }) {
   const { rowDirection, writingDirection } = useLayoutDirection();
 
   return (
-    <View style={[styles.settingRow, { flexDirection: rowDirection }]}>
+    <View
+      style={[
+        styles.settingRow,
+        variant === "card" && styles.settingRowCard,
+        { flexDirection: rowDirection },
+      ]}
+    >
       <View style={styles.settingText}>
         <AppText
           style={[styles.settingLabel, { writingDirection }]}
@@ -777,9 +844,15 @@ export function SettingToggle({
         onValueChange={onValueChange}
         trackColor={{
           false: colors.neutral[300],
-          true: colors.brand[300],
+          true: variant === "card" ? tennisColors.primary : mobileBrand[300],
         }}
-        thumbColor={value ? colors.brand[500] : colors.neutral[0]}
+        thumbColor={
+          value
+            ? variant === "card"
+              ? tennisColors.white
+              : mobileBrand[500]
+            : colors.neutral[0]
+        }
       />
     </View>
   );
@@ -827,7 +900,7 @@ export const appStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   segmentTabs: {
     gap: spacing.sm,
-    backgroundColor: colors.neutral[50],
+    backgroundColor: tennisColors.muted,
     borderRadius: radii.full,
     padding: spacing.xs,
   },
@@ -842,7 +915,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   segmentTabActive: {
-    backgroundColor: colors.neutral[0],
+    backgroundColor: tennisColors.card,
     shadowColor: colors.neutral[900],
     shadowOpacity: 0.06,
     shadowRadius: 4,
@@ -856,7 +929,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   segmentTabTextActive: {
-    color: colors.brand[600],
+    color: tennisColors.primary,
+    fontFamily: tennisFontFamily.headingSemi,
   },
   wizardProgress: {
     flexDirection: "row",
@@ -866,10 +940,10 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 4,
     borderRadius: radii.full,
-    backgroundColor: colors.neutral[100],
+    backgroundColor: tennisColors.muted,
   },
   wizardSegmentActive: {
-    backgroundColor: colors.neutral[900],
+    backgroundColor: tennisColors.primary,
   },
   sectionTitle: { gap: spacing.xs },
   sectionTitleText: {
@@ -908,8 +982,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   chipSelected: {
-    borderColor: colors.brand[500],
-    backgroundColor: colors.brand[50],
+    borderColor: mobileBrand[500],
+    backgroundColor: mobileBrand[50],
   },
   chipText: {
     color: colors.neutral[900],
@@ -917,7 +991,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.medium,
   },
   chipTextSelected: {
-    color: colors.brand[700],
+    color: mobileBrand[700],
     fontWeight: typography.weight.semibold,
   },
   avatarImage: {
@@ -926,10 +1000,10 @@ const styles = StyleSheet.create({
   avatarFallback: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.brand[100],
+    backgroundColor: mobileBrand[100],
   },
   avatarInitials: {
-    color: colors.brand[700],
+    color: mobileBrand[700],
     fontWeight: typography.weight.bold,
   },
   playerCard: {
@@ -937,10 +1011,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.lg,
     borderRadius: radii.lg,
-    backgroundColor: semantic.surface,
-    // Lifted rather than hairline-outlined: a 1px near-white border on white
-    // is what made every surface read as a flat box.
-    ...elevation.sm,
+    backgroundColor: tennisColors.card,
+    borderWidth: 1,
+    borderColor: tennisColors.border,
   },
   playerCardPressed: { opacity: 0.85 },
   playerCardBody: { flex: 1, gap: 2, minWidth: 0 },
@@ -962,8 +1035,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     borderRadius: radii.sm,
-    backgroundColor: colors.brand[50],
-    color: colors.brand[700],
+    backgroundColor: mobileBrand[50],
+    color: mobileBrand[700],
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
   },
@@ -999,7 +1072,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: spacing.md,
     borderRadius: radii.full,
-    backgroundColor: semantic.interactive,
+    backgroundColor: tennisColors.primary,
   },
   inviteActionButtonText: {
     color: colors.neutral[0],
@@ -1024,8 +1097,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.lg,
     borderRadius: radii.lg,
-    backgroundColor: semantic.surface,
-    ...elevation.sm,
+    backgroundColor: tennisColors.card,
+    borderWidth: 1,
+    borderColor: tennisColors.border,
   },
   matchCardBody: { flex: 1, gap: spacing.xs, minWidth: 0 },
   matchCardTitle: {
@@ -1098,7 +1172,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   toolbarItemOpen: {
-    backgroundColor: colors.brand[50],
+    backgroundColor: mobileBrand[50],
   },
   toolbarItemPressed: {
     opacity: 0.85,
@@ -1114,7 +1188,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.medium,
   },
   toolbarTextActive: {
-    color: colors.brand[600],
+    color: mobileBrand[600],
     fontWeight: typography.weight.semibold,
   },
   sheetRoot: {
@@ -1189,31 +1263,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   radioSelected: {
-    borderColor: colors.brand[500],
+    borderColor: mobileBrand[500],
   },
   radioDot: {
     width: 10,
     height: 10,
     borderRadius: radii.full,
-    backgroundColor: colors.brand[500],
+    backgroundColor: mobileBrand[500],
   },
   statusBanner: {
     gap: spacing.sm,
-    padding: spacing.lg,
+    padding: spacing.md,
     borderRadius: radii.lg,
-    backgroundColor: colors.brand[50],
-    borderWidth: 1,
-    borderColor: colors.brand[100],
+    backgroundColor: tennisColors.secondary,
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
   },
   statusBannerTitle: {
-    color: colors.brand[700],
+    color: tennisColors.primaryDark,
     fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
+    fontFamily: tennisFontFamily.headingSemi,
   },
   statusBannerBody: {
-    color: colors.neutral[700],
+    color: tennisColors.mutedForeground,
     fontSize: typography.size.sm,
     lineHeight: 20,
+    fontFamily: tennisFontFamily.body,
   },
   statusBannerActions: { gap: spacing.sm, marginTop: spacing.xs },
   formSection: {
@@ -1226,11 +1301,28 @@ const styles = StyleSheet.create({
   formSectionBody: {
     gap: spacing.md,
   },
+  collapseMeasure: {
+    position: "absolute",
+    opacity: 0,
+    left: 0,
+    right: 0,
+  },
+  collapseContainer: {
+    overflow: "hidden",
+  },
   settingRow: {
     alignItems: "center",
     justifyContent: "space-between",
     gap: spacing.md,
     minHeight: minTouchTargetPx,
+  },
+  settingRowCard: {
+    padding: 14,
+    borderRadius: tennisRadii.lg,
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
+    marginBottom: 8,
   },
   settingText: {
     flex: 1,

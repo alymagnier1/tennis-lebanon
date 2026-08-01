@@ -28,6 +28,8 @@ const ICONS = {
   close: "close",
   filter: "options-outline",
   sort: "swap-vertical-outline",
+  notifications: "notifications-outline",
+  info: "information-circle-outline",
 } as const;
 
 export type IconName = keyof typeof ICONS;

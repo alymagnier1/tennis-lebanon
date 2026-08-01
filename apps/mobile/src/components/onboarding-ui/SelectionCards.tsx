@@ -1,0 +1,283 @@
+import { Pressable, StyleSheet, View } from "react-native";
+import { AppText } from "../AppText";
+import { tennisFontFamily } from "../../hooks/useTennisFonts";
+import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+
+export function PolicyToggleCard({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: selected }}
+      onPress={onPress}
+      style={[styles.card, selected ? styles.cardSelected : null]}
+    >
+      <View
+        style={[styles.checkbox, selected ? styles.checkboxSelected : null]}
+      >
+        {selected ? <AppText style={styles.check}>✓</AppText> : null}
+      </View>
+      <AppText style={styles.label}>{label}</AppText>
+    </Pressable>
+  );
+}
+
+export function SelectionCard({
+  label,
+  description,
+  selected,
+  onPress,
+  trailing,
+}: {
+  label: string;
+  description?: string;
+  selected: boolean;
+  onPress: () => void;
+  trailing?: string;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={[styles.selection, selected ? styles.selectionSelected : null]}
+    >
+      {selected ? (
+        <View style={styles.dot} />
+      ) : (
+        <View style={[styles.dot, styles.dotIdle]} />
+      )}
+      <View style={styles.selectionBody}>
+        <AppText
+          style={[
+            styles.selectionLabel,
+            selected ? styles.selectionLabelSelected : null,
+          ]}
+        >
+          {label}
+        </AppText>
+        {description ? (
+          <AppText
+            style={[
+              styles.selectionDesc,
+              selected ? styles.selectionDescSelected : null,
+            ]}
+          >
+            {description}
+          </AppText>
+        ) : null}
+      </View>
+      {trailing ? (
+        <AppText
+          style={[styles.trailing, selected ? styles.trailingSelected : null]}
+        >
+          {trailing}
+        </AppText>
+      ) : null}
+    </Pressable>
+  );
+}
+
+export function ChipButton({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={[styles.chip, selected ? styles.chipSelected : null]}
+    >
+      <AppText
+        style={[styles.chipLabel, selected ? styles.chipLabelSelected : null]}
+      >
+        {label}
+      </AppText>
+    </Pressable>
+  );
+}
+
+export function BenefitCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <View style={styles.benefit}>
+      <View style={styles.benefitIcon}>
+        <AppText style={styles.benefitIconText}>{icon}</AppText>
+      </View>
+      <View style={styles.benefitBody}>
+        <AppText style={styles.benefitTitle}>{title}</AppText>
+        <AppText style={styles.benefitDesc}>{description}</AppText>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    padding: 16,
+    borderRadius: tennisRadii.lg,
+    borderWidth: 2,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
+    marginBottom: 12,
+  },
+  cardSelected: {
+    borderColor: tennisColors.primary,
+    backgroundColor: tennisColors.secondary,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    backgroundColor: tennisColors.muted,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxSelected: {
+    backgroundColor: tennisColors.primary,
+  },
+  check: {
+    color: tennisColors.lime,
+    fontSize: 12,
+    fontFamily: tennisFontFamily.bodySemi,
+  },
+  label: {
+    flex: 1,
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 14,
+    color: tennisColors.primaryDark,
+  },
+  selection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    padding: 16,
+    borderRadius: tennisRadii.lg,
+    borderWidth: 2,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
+    marginBottom: 10,
+  },
+  selectionSelected: {
+    borderColor: tennisColors.primary,
+    backgroundColor: tennisColors.primary,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: tennisColors.lime,
+  },
+  dotIdle: {
+    backgroundColor: tennisColors.accent,
+  },
+  selectionBody: {
+    flex: 1,
+  },
+  selectionLabel: {
+    fontFamily: tennisFontFamily.heading,
+    fontSize: 16,
+    color: tennisColors.primaryDark,
+  },
+  selectionLabelSelected: {
+    color: tennisColors.white,
+  },
+  selectionDesc: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    color: tennisColors.mutedForeground,
+    marginTop: 2,
+  },
+  selectionDescSelected: {
+    color: "rgba(255,255,255,0.7)",
+  },
+  trailing: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 12,
+    color: tennisColors.mutedForeground,
+  },
+  trailingSelected: {
+    color: "rgba(255,255,255,0.6)",
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: tennisRadii.pill,
+    borderWidth: 2,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  chipSelected: {
+    borderColor: tennisColors.primary,
+    backgroundColor: tennisColors.primary,
+  },
+  chipLabel: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 13,
+    color: tennisColors.primaryDark,
+  },
+  chipLabelSelected: {
+    color: tennisColors.white,
+  },
+  benefit: {
+    flexDirection: "row",
+    gap: 14,
+    padding: 16,
+    borderRadius: tennisRadii.lg,
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
+    marginBottom: 12,
+  },
+  benefitIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: tennisRadii.md,
+    backgroundColor: tennisColors.secondary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  benefitIconText: {
+    fontSize: 20,
+  },
+  benefitBody: {
+    flex: 1,
+  },
+  benefitTitle: {
+    fontFamily: tennisFontFamily.heading,
+    fontSize: 15,
+    color: tennisColors.primaryDark,
+    marginBottom: 4,
+  },
+  benefitDesc: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    lineHeight: 20,
+    color: tennisColors.mutedForeground,
+  },
+});
