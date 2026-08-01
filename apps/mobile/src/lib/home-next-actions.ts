@@ -2,7 +2,7 @@ import type { MatchInviteInboxRow, MyMatchRow } from "@tennis-lebanon/api";
 
 export type HomeNextAction = {
   id: string;
-  kind: "invite" | "vote" | "booking" | "court";
+  kind: "invite" | "players" | "vote" | "booking" | "court";
   titleKey: string;
   bodyKey: string;
   bodyParams?: Record<string, string>;
@@ -57,7 +57,20 @@ export function deriveHomeNextActions(
         bodyKey: "home.nextAction.courtBody",
         matchId: match.match_id,
       });
-    } else if (["open", "full"].includes(match.status)) {
+    } else if (match.status === "open") {
+      // Not "vote on a time": a fixed match has nothing to vote on, and even a
+      // flexible one cannot reach agreement until the roster is full. What an
+      // open match needs, in either mode, is players.
+      actions.push({
+        id: `players-${match.match_id}`,
+        kind: "players",
+        titleKey: "home.nextAction.playersTitle",
+        bodyKey: "home.nextAction.playersBody",
+        matchId: match.match_id,
+      });
+    } else if (match.status === "full") {
+      // Only a flexible match sits at full — a fixed one goes straight to
+      // ready_to_book once it fills, because its time is already agreed.
       actions.push({
         id: `vote-${match.match_id}`,
         kind: "vote",

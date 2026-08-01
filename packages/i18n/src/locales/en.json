@@ -406,7 +406,9 @@
       "bookingTitle": "Booking in progress",
       "bookingBody": "A club is reviewing your court request.",
       "courtTitle": "Ready to book a court",
-      "courtBody": "Everyone agreed on a time. Request a court next."
+      "courtBody": "Everyone agreed on a time. Request a court next.",
+      "playersTitle": "Waiting for players",
+      "playersBody": "Invite someone or share your match so it can fill."
     },
     "upcomingTitle": "Upcoming matches",
     "upcomingEmpty": "No upcoming matches yet. Create one or join an open game.",
