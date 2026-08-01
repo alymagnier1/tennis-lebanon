@@ -713,7 +713,8 @@
       "empty": "No messages yet. Coordinate with your group here.",
       "placeholder": "Write a message",
       "send": "Send",
-      "error": "We could not send this message."
+      "error": "We could not send this message.",
+      "reconnecting": "Reconnecting… new messages may be delayed."
     },
     "hub": {
       "title": "Match hub",

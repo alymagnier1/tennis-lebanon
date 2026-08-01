@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Redirect } from "expo-router";
 
 /** Tennis preferences now live on the Profile tab. */

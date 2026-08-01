@@ -679,7 +679,8 @@
       "empty": "Pas encore de messages. Coordonnez-vous ici.",
       "placeholder": "Écrire un message",
       "send": "Envoyer",
-      "error": "Impossible d'envoyer ce message."
+      "error": "Impossible d'envoyer ce message.",
+      "reconnecting": "Reconnexion… les nouveaux messages peuvent tarder."
     },
     "hub": {
       "title": "Hub du match",

@@ -1,5 +1,12 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, TextInput, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  AppState,
+  type AppStateStatus,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listMatchMessages, sendMatchMessage } from "@tennis-lebanon/api";
@@ -7,6 +14,11 @@ import { AppText } from "./AppText";
 import { FigmaPrimaryButton } from "./onboarding-ui";
 import { PlayerProfileSection } from "./player/PlayerProfileSection";
 import { formatUtcInBeirut } from "../lib/beirut-time";
+import {
+  realtimeStatusFrom,
+  shouldRefetchAfterStatusChange,
+  type RealtimeStatus,
+} from "../lib/realtime-status";
 import { supabase } from "../lib/supabase";
 import { tennisColors } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
@@ -28,6 +40,17 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
     enabled,
   });
 
+  const [realtimeStatus, setRealtimeStatus] =
+    useState<RealtimeStatus>("connecting");
+  // The refetch decision needs the value at callback time, not at render time.
+  const statusRef = useRef<RealtimeStatus>("connecting");
+
+  const refetchMessages = useCallback(() => {
+    void queryClient.invalidateQueries({
+      queryKey: ["match-messages", matchId],
+    });
+  }, [matchId, queryClient]);
+
   useEffect(() => {
     if (!enabled) return;
 
@@ -41,18 +64,34 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
           table: "match_messages",
           filter: `match_id=eq.${matchId}`,
         },
-        () => {
-          void queryClient.invalidateQueries({
-            queryKey: ["match-messages", matchId],
-          });
-        },
+        refetchMessages,
       )
-      .subscribe();
+      .subscribe((event) => {
+        const next = realtimeStatusFrom(event);
+        const previous = statusRef.current;
+        statusRef.current = next;
+        setRealtimeStatus(next);
+
+        if (shouldRefetchAfterStatusChange(previous, next)) {
+          refetchMessages();
+        }
+      });
+
+    // Backgrounding tears down the socket without always reporting a status,
+    // so returning to the app refetches regardless of what the channel said.
+    const onAppStateChange = (nextState: AppStateStatus) => {
+      if (nextState === "active") {
+        refetchMessages();
+      }
+    };
+
+    const subscription = AppState.addEventListener("change", onAppStateChange);
 
     return () => {
+      subscription.remove();
       void supabase.removeChannel(channel);
     };
-  }, [enabled, matchId, queryClient]);
+  }, [enabled, matchId, refetchMessages]);
 
   const sendMutation = useMutation({
     mutationFn: (body: string) => sendMatchMessage(supabase, matchId, body),
@@ -75,6 +114,11 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
           color={tennisColors.primary}
           accessibilityLabel={t("discover.loading")}
         />
+      ) : null}
+      {realtimeStatus === "interrupted" ? (
+        <AppText style={styles.reconnecting} accessibilityRole="alert">
+          {t("matches.chat.reconnecting")}
+        </AppText>
       ) : null}
       <View style={styles.messages}>
         {messages.length === 0 ? (
@@ -118,6 +162,11 @@ const styles = StyleSheet.create({
   empty: {
     fontFamily: tennisFontFamily.body,
     fontSize: 13,
+    color: tennisColors.mutedForeground,
+  },
+  reconnecting: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 12,
     color: tennisColors.mutedForeground,
   },
   messageRow: {
