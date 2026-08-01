@@ -25,6 +25,7 @@ import {
   SegmentTabs,
   appStyles,
 } from "../../src/components/AppUi";
+import { TabPageHeader } from "../../src/components/TabPageHeader";
 
 import {
   PrimaryButton,
@@ -148,21 +149,24 @@ export default function MatchesScreen() {
       showTitle={false}
       refreshing={refreshing}
       onRefresh={() => void onRefresh()}
+      fixedHeader={
+        <>
+          <TabPageHeader
+            title={t("matches.list.title")}
+            description={t("matches.list.description")}
+          />
+          <SegmentTabs
+            value={segment}
+            options={[
+              { value: "invites", label: t("matches.invite.inboxTab") },
+              { value: "active", label: t("matches.list.activeTab") },
+              { value: "completed", label: t("matches.list.completedTab") },
+            ]}
+            onChange={setSegment}
+          />
+        </>
+      }
     >
-      <SegmentTabs
-        value={segment}
-
-        options={[
-          { value: "invites", label: t("matches.invite.inboxTab") },
-
-          { value: "active", label: t("matches.list.activeTab") },
-
-          { value: "completed", label: t("matches.list.completedTab") },
-        ]}
-
-        onChange={setSegment}
-      />
-
       {segment === "invites" ? (
         <>
           {invitesQuery.isError ? (

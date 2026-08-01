@@ -2,10 +2,11 @@ import { useState } from "react";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
-  PrimaryButton,
-  Screen,
-  SecondaryButton,
-} from "../../src/components/FormUi";
+  BenefitCard,
+  FigmaPrimaryButton,
+  FigmaTextButton,
+  OnboardingStepLayout,
+} from "../../src/components/onboarding-ui";
 import { syncDevicePushToken } from "../../src/lib/push-notifications";
 
 export default function NotificationPrimerScreen() {
@@ -25,19 +26,46 @@ export default function NotificationPrimerScreen() {
   };
 
   return (
-    <Screen
+    <OnboardingStepLayout
       title={t("onboarding.notifications.title")}
       description={t("onboarding.notifications.description")}
+      step={5}
+      totalSteps={6}
+      onBack={() => router.back()}
+      footer={
+        <>
+          <FigmaPrimaryButton
+            label={t("onboarding.notifications.continue")}
+            onPress={() => void enableNotifications()}
+            loading={loading}
+          />
+          <FigmaTextButton
+            label={t("onboarding.notifications.notNow")}
+            onPress={continueToReview}
+          />
+        </>
+      }
     >
-      <PrimaryButton
-        label={t("onboarding.notifications.continue")}
-        onPress={() => void enableNotifications()}
-        loading={loading}
+      <BenefitCard
+        icon="📩"
+        title={t("onboarding.notifications.benefitInvites")}
+        description={t("onboarding.notifications.benefitInvitesDesc")}
       />
-      <SecondaryButton
-        label={t("onboarding.notifications.notNow")}
-        onPress={continueToReview}
+      <BenefitCard
+        icon="🗳"
+        title={t("onboarding.notifications.benefitVotes")}
+        description={t("onboarding.notifications.benefitVotesDesc")}
       />
-    </Screen>
+      <BenefitCard
+        icon="🏟"
+        title={t("onboarding.notifications.benefitBooking")}
+        description={t("onboarding.notifications.benefitBookingDesc")}
+      />
+      <BenefitCard
+        icon="⏰"
+        title={t("onboarding.notifications.benefitReminders")}
+        description={t("onboarding.notifications.benefitRemindersDesc")}
+      />
+    </OnboardingStepLayout>
   );
 }

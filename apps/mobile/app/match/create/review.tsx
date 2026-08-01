@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -17,18 +17,26 @@ import {
   ORDERED_SKILL_BANDS,
   skillBandsInRange,
 } from "@tennis-lebanon/domain";
-import { StatusBanner, WizardProgress } from "../../../src/components/AppUi";
+import { StatusBanner } from "../../../src/components/AppUi";
 import { AppText } from "../../../src/components/AppText";
 import {
+  CreateMatchStepLayout,
+  FigmaPrimaryButton,
+  FigmaSecondaryButton,
+  figmaFormStyles,
+  onboardingInputStyle,
+} from "../../../src/components/onboarding-ui";
+import {
   ErrorNotice,
-  FormField,
-  PrimaryButton,
-  Screen,
-  SecondaryButton,
   SummaryRow,
   formStyles,
 } from "../../../src/components/FormUi";
 import { formatUtcSlotInBeirut } from "../../../src/lib/beirut-time";
+import {
+  CreateMatchSection,
+  createMatchStyles,
+} from "../../../src/lib/create-match-ui";
+import { tennisColors } from "../../../src/theme/tennis-tokens";
 import {
   buildCreateMatchInput,
   getCreateMatchDraft,
@@ -230,13 +238,30 @@ export default function CreateMatchReviewScreen() {
   }
 
   return (
-    <Screen
+    <CreateMatchStepLayout
       title={t("matches.create.reviewTitle")}
-      showTitle={false}
-      description={t("matches.create.reviewDescription")}
+      step={3}
+      totalSteps={3}
+      onBack={() => router.back()}
+      footer={
+        <>
+          {publishError ? <ErrorNotice>{publishError}</ErrorNotice> : null}
+          <AppText style={formStyles.hintText}>
+            {t("matches.create.reviewActionsHint")}
+          </AppText>
+          <FigmaPrimaryButton
+            label={t("matches.invite.invitePlayers")}
+            loading={publishMutation.isPending}
+            onPress={() => publish("invite")}
+          />
+          <FigmaSecondaryButton
+            label={t("matches.create.publish")}
+            disabled={publishMutation.isPending}
+            onPress={() => publish("hub")}
+          />
+        </>
+      }
     >
-      <WizardProgress step={3} totalSteps={3} />
-
       {activeHostedMatch ? (
         <StatusBanner
           body={t("matches.create.activeHostedBody", {
@@ -244,11 +269,11 @@ export default function CreateMatchReviewScreen() {
           })}
           actions={
             <>
-              <PrimaryButton
+              <FigmaPrimaryButton
                 label={t("matches.create.continueInviting")}
                 onPress={goToActiveHostedMatch}
               />
-              <SecondaryButton
+              <FigmaSecondaryButton
                 label={t("matches.hub.cancel")}
                 onPress={() =>
                   router.replace(matchHubRoute(activeHostedMatch.match_id))
@@ -259,60 +284,43 @@ export default function CreateMatchReviewScreen() {
         />
       ) : null}
 
-      <View style={formStyles.compactCard}>
-        <AppText style={formStyles.compactCardTitle}>
-          {t("matches.create.reviewSummary")}
-        </AppText>
-        <SummaryRow
-          label={t("matches.create.summaryType")}
-          value={matchTypeSummary}
-        />
-        <SummaryRow
-          label={t("matches.create.matchLevel")}
-          value={levelSummary}
-        />
-        <SummaryRow
-          label={t("matches.create.summaryJoin")}
-          value={joinSettingsSummary}
-        />
-        <SummaryRow
-          label={t("matches.create.summaryWhere")}
-          value={zoneLabels}
-        />
-        <SummaryRow
-          label={t("matches.create.summaryWhen")}
-          value={proposedTimeLabel}
-        />
+      <View style={figmaFormStyles.stack}>
+        <CreateMatchSection label={t("matches.create.reviewSummary")}>
+          <View style={formStyles.compactCard}>
+            <SummaryRow
+              label={t("matches.create.summaryType")}
+              value={matchTypeSummary}
+            />
+            <SummaryRow
+              label={t("matches.create.matchLevel")}
+              value={levelSummary}
+            />
+            <SummaryRow
+              label={t("matches.create.summaryJoin")}
+              value={joinSettingsSummary}
+            />
+            <SummaryRow
+              label={t("matches.create.summaryWhere")}
+              value={zoneLabels}
+            />
+            <SummaryRow
+              label={t("matches.create.summaryWhen")}
+              value={proposedTimeLabel}
+            />
+          </View>
+        </CreateMatchSection>
+
+        <CreateMatchSection label={t("matches.create.notes")}>
+          <TextInput
+            accessibilityLabel={t("matches.create.notes")}
+            multiline
+            placeholderTextColor={tennisColors.mutedForeground}
+            style={[onboardingInputStyle.input, createMatchStyles.notesInput]}
+            value={notes}
+            onChangeText={setNotes}
+          />
+        </CreateMatchSection>
       </View>
-
-      <FormField
-        label={t("matches.create.notes")}
-        value={notes}
-        onChangeText={setNotes}
-        multiline
-      />
-
-      {publishError ? <ErrorNotice>{publishError}</ErrorNotice> : null}
-
-      <AppText style={formStyles.hintText}>
-        {t("matches.create.reviewActionsHint")}
-      </AppText>
-
-      <PrimaryButton
-        label={t("matches.invite.invitePlayers")}
-        loading={publishMutation.isPending}
-        onPress={() => publish("invite")}
-      />
-      <SecondaryButton
-        label={t("matches.create.publish")}
-        loading={publishMutation.isPending}
-        onPress={() => publish("hub")}
-      />
-      <SecondaryButton
-        label={t("common.back")}
-        disabled={publishMutation.isPending}
-        onPress={() => router.back()}
-      />
-    </Screen>
+    </CreateMatchStepLayout>
   );
 }

@@ -38,3 +38,31 @@ describe("exitMatchHub", () => {
     expect(backMock).not.toHaveBeenCalled();
   });
 });
+
+describe("exitProfileScreen", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+  });
+
+  it("goes back when navigation history exists", async () => {
+    canGoBackMock.mockReturnValue(true);
+    const { exitProfileScreen } = await import("./navigation");
+
+    exitProfileScreen();
+
+    expect(backMock).toHaveBeenCalledOnce();
+    expect(replaceMock).not.toHaveBeenCalled();
+  });
+
+  it("replaces to profile tab when there is no history", async () => {
+    canGoBackMock.mockReturnValue(false);
+    const { exitProfileScreen, PROFILE_TAB_ROUTE } =
+      await import("./navigation");
+
+    exitProfileScreen();
+
+    expect(replaceMock).toHaveBeenCalledWith(PROFILE_TAB_ROUTE);
+    expect(backMock).not.toHaveBeenCalled();
+  });
+});

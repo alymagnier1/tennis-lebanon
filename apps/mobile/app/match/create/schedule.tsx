@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { getActiveZones, suggestMatchTimes } from "@tennis-lebanon/api";
-import { ChipMultiSelect, WizardProgress } from "../../../src/components/AppUi";
+import type { TimingMode } from "@tennis-lebanon/domain";
+import { AppText } from "../../../src/components/AppText";
 import {
-  PrimaryButton,
-  Screen,
-  SecondaryButton,
-  formStyles,
-} from "../../../src/components/FormUi";
+  CreateMatchStepLayout,
+  FigmaChipMulti,
+  FigmaChipRow,
+  FigmaPrimaryButton,
+  figmaFormStyles,
+} from "../../../src/components/onboarding-ui";
 import {
   addMinutes,
   dayKey,
@@ -23,11 +25,26 @@ import {
   utcIsoToBeirutFields,
 } from "../../../src/lib/beirut-time";
 import {
+  createMatchStyles,
+  CreateMatchPanel,
+  CreateMatchSection,
+} from "../../../src/lib/create-match-ui";
+import {
   getCreateMatchDraft,
   updateCreateMatchDraft,
 } from "../../../src/lib/create-match-draft";
 import { zoneNameFromJson } from "../../../src/lib/zones";
 import { supabase } from "../../../src/lib/supabase";
+
+type SlotDraft = {
+  day: string;
+  startTime: string;
+  duration: DurationMinutes;
+};
+
+function defaultSlot(): SlotDraft {
+  return { day: dayKey(2), startTime: "18:00", duration: 90 };
+}
 
 export default function CreateMatchScheduleScreen() {
   const { t, i18n } = useTranslation();
@@ -35,9 +52,10 @@ export default function CreateMatchScheduleScreen() {
   const [selectedZoneIds, setSelectedZoneIds] = useState<string[]>(
     draft.zoneIds ?? [],
   );
-  const [day, setDay] = useState(() => dayKey(2));
-  const [startTime, setStartTime] = useState("18:00");
-  const [duration, setDuration] = useState<DurationMinutes>(90);
+  const [timingMode, setTimingMode] = useState<TimingMode>(
+    draft.timingMode ?? "fixed",
+  );
+  const [slots, setSlots] = useState<SlotDraft[]>([defaultSlot()]);
 
   const zonesQuery = useQuery({
     queryKey: ["active-zones"],
@@ -62,24 +80,31 @@ export default function CreateMatchScheduleScreen() {
     }
   }, [draft.format]);
 
-  const endTime = addMinutes(startTime, duration);
+  // Trim on the transition rather than in an effect watching `slots`, which
+  // set state on every slot edit and cascaded a second render each time.
+  function selectTimingMode(next: TimingMode) {
+    setTimingMode(next);
+    if (next === "fixed") {
+      setSlots((current) => [current[0] ?? defaultSlot()]);
+    }
+  }
 
   useEffect(() => {
+    const proposedTimes = slots.map((slot) => {
+      const endTime = addMinutes(slot.startTime, slot.duration);
+      return {
+        startsAt: beirutLocalToUtcIso(slot.day, slot.startTime),
+        endsAt: beirutLocalToUtcIso(slot.day, endTime),
+      };
+    });
+
     updateCreateMatchDraft({
       zoneIds: selectedZoneIds,
-      proposedTimes: [
-        {
-          startsAt: beirutLocalToUtcIso(day, startTime),
-          endsAt: beirutLocalToUtcIso(day, endTime),
-        },
-      ],
-      // The host names one time and joining is consent to it.
-      timingMode: "fixed",
+      proposedTimes,
+      timingMode,
     });
-  }, [day, endTime, selectedZoneIds, startTime]);
+  }, [selectedZoneIds, slots, timingMode]);
 
-  // Turns the suggestion RPC into a lookup the picker can render against each
-  // slot, so the host can see where a match is actually likely to fill.
   const suggestionsQuery = useQuery({
     queryKey: ["match-time-suggestions", selectedZoneIds, draft.format],
     queryFn: () =>
@@ -87,7 +112,7 @@ export default function CreateMatchScheduleScreen() {
         zoneIds: selectedZoneIds,
         format: draft.format ?? null,
         limit: 40,
-        slotMinutes: duration,
+        slotMinutes: slots[0]?.duration ?? 90,
       }),
     enabled: selectedZoneIds.length > 0,
   });
@@ -110,6 +135,19 @@ export default function CreateMatchScheduleScreen() {
     );
   }
 
+  function updateSlot(index: number, patch: Partial<SlotDraft>) {
+    setSlots((current) =>
+      current.map((slot, slotIndex) =>
+        slotIndex === index ? { ...slot, ...patch } : slot,
+      ),
+    );
+  }
+
+  function addSlot() {
+    if (slots.length >= 3) return;
+    setSlots((current) => [...current, defaultSlot()]);
+  }
+
   function handleNext() {
     if (selectedZoneIds.length === 0) {
       Alert.alert(t("matches.create.zoneRequired"));
@@ -120,34 +158,77 @@ export default function CreateMatchScheduleScreen() {
   }
 
   return (
-    <Screen
+    <CreateMatchStepLayout
       title={t("matches.create.scheduleTitle")}
-      showTitle={false}
-      description={t("matches.create.scheduleDescription")}
+      step={2}
+      totalSteps={3}
+      onBack={() => router.back()}
+      footer={
+        <FigmaPrimaryButton label={t("common.continue")} onPress={handleNext} />
+      }
     >
-      <WizardProgress step={2} totalSteps={3} />
+      <View style={figmaFormStyles.stack}>
+        <CreateMatchPanel title={t("matches.create.summaryWhere")}>
+          <CreateMatchSection label={t("discover.zonesFilter")}>
+            <FigmaChipMulti
+              options={zoneOptions}
+              values={selectedZoneIds}
+              onToggle={toggleZone}
+            />
+          </CreateMatchSection>
+        </CreateMatchPanel>
 
-      <View style={formStyles.stack}>
-        <ChipMultiSelect
-          label={t("discover.zonesFilter")}
-          options={zoneOptions}
-          values={selectedZoneIds}
-          onToggle={toggleZone}
-        />
+        <CreateMatchPanel title={t("matches.create.summaryWhen")}>
+          <CreateMatchSection label={t("matches.create.timingModeTitle")}>
+            <FigmaChipRow
+              value={timingMode}
+              options={[
+                { value: "fixed", label: t("matches.create.timingFixed") },
+                {
+                  value: "flexible",
+                  label: t("matches.create.timingFlexible"),
+                },
+              ]}
+              onChange={selectTimingMode}
+            />
+          </CreateMatchSection>
 
-        <SlotPicker
-          selectedDay={day}
-          onSelectDay={setDay}
-          selectedTime={startTime}
-          onSelectTime={setStartTime}
-          duration={duration}
-          onSelectDuration={setDuration}
-          availability={availability}
-        />
+          {slots.map((slot, index) => {
+            const picker = (
+              <SlotPicker
+                selectedDay={slot.day}
+                onSelectDay={(day) => updateSlot(index, { day })}
+                selectedTime={slot.startTime}
+                onSelectTime={(startTime) => updateSlot(index, { startTime })}
+                duration={slot.duration}
+                onSelectDuration={(duration) => updateSlot(index, { duration })}
+                availability={availability}
+              />
+            );
+
+            if (timingMode === "flexible") {
+              return (
+                <CreateMatchSection
+                  key={`slot-${index}`}
+                  label={t("matches.create.slotLabel", { index: index + 1 })}
+                >
+                  {picker}
+                </CreateMatchSection>
+              );
+            }
+
+            return <View key={`slot-${index}`}>{picker}</View>;
+          })}
+
+          {timingMode === "flexible" && slots.length < 3 ? (
+            <Pressable accessibilityRole="button" onPress={addSlot}>
+              <AppText style={createMatchStyles.addSlot}>
+                {t("matches.create.addSlot")}
+              </AppText>
+            </Pressable>
+          ) : null}
+        </CreateMatchPanel>
       </View>
-
-      <PrimaryButton label={t("common.continue")} onPress={handleNext} />
-      <SecondaryButton label={t("common.back")} onPress={() => router.back()} />
-    </Screen>
+    </CreateMatchStepLayout>
   );
 }

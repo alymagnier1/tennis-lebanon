@@ -3,12 +3,14 @@ import { ActivityIndicator, StyleSheet, TextInput, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listMatchMessages, sendMatchMessage } from "@tennis-lebanon/api";
-import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
 import { AppText } from "./AppText";
-import { SectionTitle } from "./AppUi";
-import { PrimaryButton, formStyles } from "./FormUi";
+import { FigmaPrimaryButton } from "./onboarding-ui";
+import { PlayerProfileSection } from "./player/PlayerProfileSection";
 import { formatUtcInBeirut } from "../lib/beirut-time";
 import { supabase } from "../lib/supabase";
+import { tennisColors } from "../theme/tennis-tokens";
+import { tennisFontFamily } from "../hooks/useTennisFonts";
+import { onboardingInputStyle } from "./onboarding-ui/OnboardingStepLayout";
 
 type MatchChatPanelProps = {
   matchId: string;
@@ -67,10 +69,12 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
   const messages = [...(messagesQuery.data ?? [])].reverse();
 
   return (
-    <View style={formStyles.compactCard}>
-      <SectionTitle title={t("matches.chat.title")} />
+    <PlayerProfileSection title={t("matches.chat.title")}>
       {messagesQuery.isLoading ? (
-        <ActivityIndicator accessibilityLabel={t("discover.loading")} />
+        <ActivityIndicator
+          color={tennisColors.primary}
+          accessibilityLabel={t("discover.loading")}
+        />
       ) : null}
       <View style={styles.messages}>
         {messages.length === 0 ? (
@@ -78,7 +82,7 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
         ) : (
           messages.map((message) => (
             <View key={message.message_id} style={styles.messageRow}>
-              <AppText style={styles.author} maxLines={1}>
+              <AppText style={styles.sender} maxLines={1}>
                 {message.author_display_name}
               </AppText>
               <AppText style={styles.body}>{message.body}</AppText>
@@ -90,63 +94,52 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
         )}
       </View>
       <TextInput
+        accessibilityLabel={t("matches.chat.placeholder")}
         value={draft}
         onChangeText={setDraft}
         placeholder={t("matches.chat.placeholder")}
-        style={styles.input}
+        style={onboardingInputStyle.input}
         multiline
-        maxLength={2000}
       />
-      <PrimaryButton
+      <FigmaPrimaryButton
         label={t("matches.chat.send")}
         disabled={!draft.trim()}
         loading={sendMutation.isPending}
         onPress={() => sendMutation.mutate(draft.trim())}
       />
-      {sendMutation.isError ? (
-        <AppText style={formStyles.errorText}>
-          {t("matches.chat.error")}
-        </AppText>
-      ) : null}
-    </View>
+    </PlayerProfileSection>
   );
 }
 
 const styles = StyleSheet.create({
   messages: {
-    gap: spacing.sm,
-    maxHeight: 240,
+    gap: 12,
   },
   empty: {
-    color: colors.neutral[500],
-    fontSize: typography.size.sm,
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    color: tennisColors.mutedForeground,
   },
   messageRow: {
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
-    borderRadius: radii.md,
-    padding: spacing.sm,
-    gap: spacing.xs,
+    gap: 4,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: tennisColors.border,
   },
-  author: {
-    color: colors.neutral[900],
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
+  sender: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 13,
+    color: tennisColors.primaryDark,
   },
   body: {
-    color: colors.neutral[700],
-    fontSize: typography.size.md,
+    fontFamily: tennisFontFamily.body,
+    fontSize: 14,
+    lineHeight: 20,
+    color: tennisColors.primaryDark,
   },
   time: {
-    color: colors.neutral[500],
-    fontSize: typography.size.xs,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-    borderRadius: radii.md,
-    padding: spacing.md,
-    minHeight: 44,
-    color: colors.neutral[900],
+    fontFamily: tennisFontFamily.body,
+    fontSize: 11,
+    color: tennisColors.mutedForeground,
   },
 });

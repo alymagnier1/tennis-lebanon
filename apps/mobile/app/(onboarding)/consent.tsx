@@ -1,11 +1,11 @@
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
-  Choice,
-  PrimaryButton,
-  Screen,
-  SecondaryButton,
-} from "../../src/components/FormUi";
+  FigmaPrimaryButton,
+  FigmaSecondaryButton,
+  OnboardingStepLayout,
+  PolicyToggleCard,
+} from "../../src/components/onboarding-ui";
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
 
 export default function ConsentScreen() {
@@ -17,29 +17,39 @@ export default function ConsentScreen() {
     draft.acceptedCommunityRules;
 
   return (
-    <Screen
+    <OnboardingStepLayout
       title={t("onboarding.consent.title")}
       description={t("onboarding.consent.description")}
+      step={1}
+      totalSteps={6}
+      onBack={() => router.back()}
+      footer={
+        <FigmaPrimaryButton
+          label={t("common.continue")}
+          disabled={!complete}
+          onPress={() => router.push("/(onboarding)/identity")}
+        />
+      }
     >
-      <Choice
+      <PolicyToggleCard
         label={t("onboarding.consent.terms")}
         selected={draft.acceptedTerms}
         onPress={() => updateDraft({ acceptedTerms: !draft.acceptedTerms })}
       />
-      <SecondaryButton
+      <FigmaSecondaryButton
         label={t("onboarding.consent.readTerms")}
         onPress={() => router.push("/policies?document=terms")}
       />
-      <Choice
+      <PolicyToggleCard
         label={t("onboarding.consent.privacy")}
         selected={draft.acceptedPrivacy}
         onPress={() => updateDraft({ acceptedPrivacy: !draft.acceptedPrivacy })}
       />
-      <SecondaryButton
+      <FigmaSecondaryButton
         label={t("onboarding.consent.readPrivacy")}
         onPress={() => router.push("/policies?document=privacy")}
       />
-      <Choice
+      <PolicyToggleCard
         label={t("onboarding.consent.community")}
         selected={draft.acceptedCommunityRules}
         onPress={() =>
@@ -48,15 +58,10 @@ export default function ConsentScreen() {
           })
         }
       />
-      <SecondaryButton
+      <FigmaSecondaryButton
         label={t("onboarding.consent.readCommunity")}
         onPress={() => router.push("/policies?document=community")}
       />
-      <PrimaryButton
-        label={t("common.continue")}
-        disabled={!complete}
-        onPress={() => router.push("/(onboarding)/identity")}
-      />
-    </Screen>
+    </OnboardingStepLayout>
   );
 }

@@ -1,7 +1,9 @@
 import "../src/lib/i18n";
 import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useTennisFonts } from "../src/hooks/useTennisFonts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { initSentry } from "../src/lib/sentry";
 import { AuthProvider } from "../src/providers/AuthProvider";
@@ -19,9 +21,19 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
+  const fontsLoaded = useTennisFonts();
+
   useEffect(() => {
     void initSentry();
   }, []);
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaProvider>
@@ -38,6 +50,9 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="player/[id]" />
               <Stack.Screen name="profile/availability" />
+              <Stack.Screen name="profile/edit" />
+              <Stack.Screen name="profile/tennis-preferences" />
+              <Stack.Screen name="notifications" />
               <Stack.Screen name="match/[id]" />
               <Stack.Screen name="match/create" />
               <Stack.Screen name="clubs/index" />

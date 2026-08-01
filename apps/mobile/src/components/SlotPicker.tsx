@@ -1,20 +1,29 @@
-import { useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import {
   colors,
   minTouchTargetPx,
-  radii,
-  semantic,
   spacing,
   typography,
 } from "@tennis-lebanon/ui";
 import { AppText } from "./AppText";
 import { useLayoutDirection } from "../lib/layout-direction";
-
-/** Half-hour steps across the window a club is plausibly open. */
-const START_HOUR = 7;
-const END_HOUR = 21;
+import {
+  formatStartTime12h,
+  parseStartTime12hInput,
+  type Meridiem,
+} from "../lib/match-start-time";
+import { onboardingInputStyle } from "./onboarding-ui";
+import { figmaFormStyles } from "./onboarding-ui/figma-form-styles";
+import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 export const DURATION_OPTIONS = [60, 90, 120] as const;
 export type DurationMinutes = (typeof DURATION_OPTIONS)[number];
@@ -40,15 +49,7 @@ export function dayKey(offsetDays: number): string {
   return startOfBeirutDay(offsetDays).toISOString().slice(0, 10);
 }
 
-/** `HH:MM` in half-hour steps. */
-export function timeOptions(): string[] {
-  const out: string[] = [];
-  for (let hour = START_HOUR; hour <= END_HOUR; hour += 1) {
-    out.push(`${String(hour).padStart(2, "0")}:00`);
-    if (hour !== END_HOUR) out.push(`${String(hour).padStart(2, "0")}:30`);
-  }
-  return out;
-}
+export { timeOptions } from "../lib/match-start-time";
 
 export function addMinutes(time: string, minutes: number): string {
   const [hours = 0, mins = 0] = time.split(":").map(Number);
@@ -87,6 +88,7 @@ export function SlotPicker({
 }) {
   const { t, i18n } = useTranslation();
   const { rowDirection } = useLayoutDirection();
+  const meridiemOptions: Meridiem[] = ["AM", "PM"];
 
   const days = useMemo(() => {
     const weekday = new Intl.DateTimeFormat(i18n.resolvedLanguage ?? "en", {
@@ -104,7 +106,48 @@ export function SlotPicker({
     });
   }, [dayCount, i18n.resolvedLanguage]);
 
-  const times = useMemo(() => timeOptions(), []);
+  const [timeClockDraft, setTimeClockDraft] = useState(
+    () => formatStartTime12h(selectedTime).clock,
+  );
+  const [meridiemDraft, setMeridiemDraft] = useState<Meridiem>(
+    () => formatStartTime12h(selectedTime).meridiem,
+  );
+  const [timeInvalid, setTimeInvalid] = useState(false);
+
+  const [syncedTime, setSyncedTime] = useState(selectedTime);
+
+  // Re-seed the typed clock when the selected time changes from outside (a
+  // suggestion tap, or the parent resetting the slot). Adjusted during render
+  // rather than in an effect, which would cascade an extra pass on every edit.
+  if (selectedTime !== syncedTime) {
+    const formatted = formatStartTime12h(selectedTime);
+    setSyncedTime(selectedTime);
+    setTimeClockDraft(formatted.clock);
+    setMeridiemDraft(formatted.meridiem);
+    setTimeInvalid(false);
+  }
+
+  const freeAtSelectedTime =
+    availability?.[`${selectedDay} ${selectedTime}`] ?? 0;
+
+  const commitTime = (clock: string, meridiem: Meridiem) => {
+    const parsed = parseStartTime12hInput(clock, meridiem);
+    if (!parsed.ok) {
+      setTimeInvalid(true);
+      return;
+    }
+    setTimeInvalid(false);
+    const formatted = formatStartTime12h(parsed.time);
+    setTimeClockDraft(formatted.clock);
+    setMeridiemDraft(formatted.meridiem);
+    onSelectTime(parsed.time);
+  };
+
+  const selectMeridiem = (meridiem: Meridiem) => {
+    setMeridiemDraft(meridiem);
+    setTimeInvalid(false);
+    commitTime(timeClockDraft, meridiem);
+  };
 
   return (
     <View style={styles.root}>
@@ -123,16 +166,22 @@ export function SlotPicker({
               accessibilityState={{ selected }}
               accessibilityLabel={`${day.weekday} ${day.dayOfMonth}`}
               onPress={() => onSelectDay(day.key)}
-              style={[styles.dayChip, selected && styles.chipSelected]}
+              style={[styles.dayChip, selected && figmaFormStyles.chipSelected]}
             >
               <AppText
-                style={[styles.dayWeekday, selected && styles.textSelected]}
+                style={[
+                  styles.dayWeekday,
+                  selected && figmaFormStyles.chipTextSelected,
+                ]}
                 maxLines={1}
               >
                 {day.isToday ? t("slotPicker.today") : day.weekday}
               </AppText>
               <AppText
-                style={[styles.dayNumber, selected && styles.textSelected]}
+                style={[
+                  styles.dayNumber,
+                  selected && figmaFormStyles.chipTextSelected,
+                ]}
                 maxLines={1}
               >
                 {day.dayOfMonth}
@@ -143,45 +192,71 @@ export function SlotPicker({
       </ScrollView>
 
       <AppText style={styles.label}>{t("slotPicker.time")}</AppText>
-      <View style={styles.timeGrid}>
-        {times.map((time) => {
-          const selected = time === selectedTime;
-          const free = availability?.[`${selectedDay} ${time}`] ?? 0;
-          return (
-            <Pressable
-              key={time}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              accessibilityLabel={
-                free > 0
-                  ? t("slotPicker.timeWithPlayers", { time, count: free })
-                  : time
-              }
-              onPress={() => onSelectTime(time)}
-              style={[
-                styles.timeChip,
-                free > 0 && styles.timeChipAvailable,
-                selected && styles.chipSelected,
-              ]}
-            >
-              <AppText
-                style={[styles.timeText, selected && styles.textSelected]}
-                maxLines={1}
+      <View style={[styles.timeRow, { flexDirection: rowDirection }]}>
+        <TextInput
+          accessibilityLabel={t("slotPicker.time")}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="numbers-and-punctuation"
+          placeholder={t("slotPicker.timePlaceholder")}
+          placeholderTextColor={tennisColors.mutedForeground}
+          returnKeyType="done"
+          style={[
+            onboardingInputStyle.input,
+            styles.timeInput,
+            timeInvalid && styles.timeInputInvalid,
+          ]}
+          value={timeClockDraft}
+          onBlur={() => commitTime(timeClockDraft, meridiemDraft)}
+          onChangeText={(value) => {
+            setTimeClockDraft(value);
+            setTimeInvalid(false);
+          }}
+          onSubmitEditing={() => commitTime(timeClockDraft, meridiemDraft)}
+        />
+        <View style={[styles.meridiemRow, { flexDirection: rowDirection }]}>
+          {meridiemOptions.map((period) => {
+            const selected = period === meridiemDraft;
+            return (
+              <Pressable
+                key={period}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                accessibilityLabel={t(`slotPicker.meridiem.${period}`)}
+                onPress={() => selectMeridiem(period)}
+                style={[
+                  styles.meridiemChip,
+                  selected && figmaFormStyles.chipSelected,
+                ]}
               >
-                {time}
-              </AppText>
-              {free > 0 ? (
                 <AppText
-                  style={[styles.timeFree, selected && styles.textSelected]}
+                  style={[
+                    styles.meridiemText,
+                    selected && figmaFormStyles.chipTextSelected,
+                  ]}
                   maxLines={1}
                 >
-                  {t("slotPicker.playersFree", { count: free })}
+                  {t(`slotPicker.meridiem.${period}`)}
                 </AppText>
-              ) : null}
-            </Pressable>
-          );
-        })}
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
+      {timeInvalid ? (
+        <AppText style={styles.timeError} maxLines={2}>
+          {t("slotPicker.timeInvalid")}
+        </AppText>
+      ) : (
+        <AppText style={styles.timeHint} maxLines={2}>
+          {t("slotPicker.timeHint")}
+        </AppText>
+      )}
+      {freeAtSelectedTime > 0 && !timeInvalid ? (
+        <AppText style={styles.timeAvailability} maxLines={1}>
+          {t("slotPicker.playersFree", { count: freeAtSelectedTime })}
+        </AppText>
+      ) : null}
 
       <AppText style={styles.label}>{t("slotPicker.duration")}</AppText>
       <View style={[styles.durationRow, { flexDirection: rowDirection }]}>
@@ -194,10 +269,16 @@ export function SlotPicker({
               accessibilityState={{ selected }}
               accessibilityLabel={t("slotPicker.minutes", { count: option })}
               onPress={() => onSelectDuration(option)}
-              style={[styles.durationChip, selected && styles.chipSelected]}
+              style={[
+                styles.durationChip,
+                selected && figmaFormStyles.chipSelected,
+              ]}
             >
               <AppText
-                style={[styles.durationText, selected && styles.textSelected]}
+                style={[
+                  styles.durationText,
+                  selected && figmaFormStyles.chipTextSelected,
+                ]}
                 maxLines={1}
               >
                 {t("slotPicker.minutes", { count: option })}
@@ -211,13 +292,9 @@ export function SlotPicker({
 }
 
 const styles = StyleSheet.create({
-  root: { gap: spacing.sm },
-  label: {
-    color: semantic.textSecondary,
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-  },
-  dayRow: { gap: spacing.sm, paddingVertical: spacing.xs },
+  root: { gap: spacing.md },
+  label: figmaFormStyles.fieldLabel,
+  dayRow: { gap: 10, paddingVertical: spacing.xs },
   dayChip: {
     minWidth: 56,
     minHeight: minTouchTargetPx + 12,
@@ -225,72 +302,82 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 2,
     paddingHorizontal: spacing.md,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: semantic.border,
-    backgroundColor: semantic.surface,
+    borderRadius: tennisRadii.md,
+    borderWidth: 2,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
   },
   dayWeekday: {
-    color: semantic.textTertiary,
+    fontFamily: tennisFontFamily.body,
+    color: tennisColors.mutedForeground,
     fontSize: typography.size.xs,
   },
   dayNumber: {
-    color: semantic.textPrimary,
+    fontFamily: tennisFontFamily.headingSemi,
+    color: tennisColors.primaryDark,
     fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
   },
-  timeGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  timeInputInvalid: {
+    borderColor: colors.danger[500],
+  },
+  timeRow: {
+    alignItems: "stretch",
     gap: spacing.sm,
   },
-  timeChip: {
-    minWidth: 84,
+  timeInput: {
+    flex: 1,
+    minWidth: 0,
+  },
+  meridiemRow: {
+    gap: 10,
+  },
+  meridiemChip: {
+    minWidth: 52,
     minHeight: minTouchTargetPx,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: semantic.border,
-    backgroundColor: semantic.surface,
+    borderRadius: tennisRadii.md,
+    borderWidth: 2,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
   },
-  /** Slots where someone compatible is actually free are worth surfacing. */
-  timeChipAvailable: {
-    borderColor: colors.success[100],
-    backgroundColor: colors.success[50],
+  meridiemText: {
+    fontFamily: tennisFontFamily.headingSemi,
+    color: tennisColors.primaryDark,
+    fontSize: 13,
   },
-  timeText: {
-    color: semantic.textPrimary,
-    fontSize: typography.size.md,
-  },
-  timeFree: {
-    color: colors.success[700],
+  timeHint: {
+    fontFamily: tennisFontFamily.body,
+    color: tennisColors.mutedForeground,
     fontSize: typography.size.xs,
   },
-  durationRow: { gap: spacing.sm },
+  timeError: {
+    fontFamily: tennisFontFamily.body,
+    color: colors.danger[700],
+    fontSize: typography.size.xs,
+  },
+  timeAvailability: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    color: tennisColors.primary,
+    fontSize: typography.size.xs,
+  },
+  durationRow: { gap: 10 },
   durationChip: {
+    flex: 1,
     minHeight: minTouchTargetPx,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: spacing.lg,
-    borderRadius: radii.full,
-    borderWidth: 1,
-    borderColor: semantic.border,
-    backgroundColor: semantic.surface,
+    paddingHorizontal: spacing.sm,
+    borderRadius: tennisRadii.md,
+    borderWidth: 2,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
   },
   durationText: {
-    color: semantic.textPrimary,
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-  },
-  chipSelected: {
-    borderColor: semantic.interactive,
-    backgroundColor: colors.brand[50],
-  },
-  textSelected: {
-    color: colors.brand[700],
-    fontWeight: typography.weight.semibold,
+    fontFamily: tennisFontFamily.headingSemi,
+    color: tennisColors.primaryDark,
+    fontSize: 13,
+    textAlign: "center",
   },
 });

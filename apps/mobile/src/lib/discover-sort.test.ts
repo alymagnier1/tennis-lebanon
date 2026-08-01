@@ -24,6 +24,7 @@ function player(
     format_fit: true,
     overlap_starts_at: null,
     overlap_ends_at: null,
+    bio: null,
     ...overrides,
   };
 }

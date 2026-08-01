@@ -4,7 +4,10 @@
  */
 export const CRITICAL_FLOW_KEY_PREFIXES = [
   "common.",
+  "profileScreen",
   "tabs.",
+  "home.",
+  "notifications.",
   "welcome.",
   "auth.",
   "onboarding.",
@@ -15,6 +18,7 @@ export const CRITICAL_FLOW_KEY_PREFIXES = [
   "playIntent.",
   "rating.",
   "discover.",
+  "playerProfile.",
   "reports.",
   "matches.",
   "availability.",
@@ -40,6 +44,7 @@ export const IDENTICAL_LOCALE_ALLOWLIST = new Set([
   "languages.en",
   "languages.ar",
   "languages.fr",
+  "auth.emailPlaceholder",
 ]);
 
 const ARABIC_SCRIPT = /[\u0600-\u06FF]/;

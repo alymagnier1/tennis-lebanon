@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
@@ -23,19 +23,19 @@ import {
   type MatchHubResult,
   type SetScoreDraft,
 } from "@tennis-lebanon/domain";
-import { SectionTitle } from "./AppUi";
 import { AppText } from "./AppText";
-import { colors } from "@tennis-lebanon/ui";
+import { FormField } from "./FormUi";
+import { HubDestructiveLink, HubSummaryRow } from "./match/HubSummaryRow";
 import {
-  Choice,
-  DestructiveButton,
-  FormField,
-  PrimaryButton,
-  SecondaryButton,
-  SummaryRow,
-  formStyles,
-} from "./FormUi";
+  ChipButton,
+  FigmaPrimaryButton,
+  FigmaSecondaryButton,
+} from "./onboarding-ui";
+import { PlayerProfileSection } from "./player/PlayerProfileSection";
+import { useLayoutDirection } from "../lib/layout-direction";
 import { supabase } from "../lib/supabase";
+import { tennisColors } from "../theme/tennis-tokens";
+import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 type HubParticipant = {
   user_id: string;
@@ -63,14 +63,14 @@ function MatchScoreEditor({
   };
 
   return (
-    <View style={formStyles.stack}>
+    <View style={styles.stack}>
       {setDrafts.map((draft, index) => (
-        <View key={`set-${index}`} style={formStyles.stack}>
-          <AppText style={{ color: colors.neutral[700], fontWeight: "600" }}>
+        <View key={`set-${index}`} style={styles.stack}>
+          <AppText style={styles.setLabel}>
             {t("matches.results.setLabel", { number: index + 1 })}
           </AppText>
-          <View style={formStyles.row}>
-            <View style={formStyles.flex}>
+          <View style={styles.row}>
+            <View style={styles.flex}>
               <FormField
                 label={t("matches.results.winnerGamesLabel")}
                 value={draft.winnerGames}
@@ -82,7 +82,7 @@ function MatchScoreEditor({
                 maxLength={1}
               />
             </View>
-            <View style={formStyles.flex}>
+            <View style={styles.flex}>
               <FormField
                 label={t("matches.results.loserGamesLabel")}
                 value={draft.loserGames}
@@ -97,10 +97,10 @@ function MatchScoreEditor({
           </View>
         </View>
       ))}
-      <View style={formStyles.row}>
+      <View style={styles.row}>
         {setDrafts.length < MAX_MATCH_SETS ? (
-          <View style={formStyles.flex}>
-            <SecondaryButton
+          <View style={styles.flex}>
+            <FigmaSecondaryButton
               label={t("matches.results.addSet")}
               disabled={disabled}
               onPress={() => onChange([...setDrafts, createEmptySetDraft()])}
@@ -108,8 +108,8 @@ function MatchScoreEditor({
           </View>
         ) : null}
         {setDrafts.length > MIN_MATCH_SETS ? (
-          <View style={formStyles.flex}>
-            <SecondaryButton
+          <View style={styles.flex}>
+            <FigmaSecondaryButton
               label={t("matches.results.removeSet")}
               disabled={disabled}
               onPress={() => onChange(setDrafts.slice(0, -1))}
@@ -132,6 +132,7 @@ export function MatchResultPanel({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { rowDirection } = useLayoutDirection();
   const [selectedWinnerId, setSelectedWinnerId] = useState<string | null>(null);
   const [setDrafts, setSetDrafts] = useState<SetScoreDraft[]>(() =>
     createDefaultSetDrafts(2),
@@ -261,23 +262,21 @@ export function MatchResultPanel({
   };
 
   return (
-    <View style={formStyles.compactCard}>
-      <SectionTitle title={t("matches.results.title")} />
-
+    <PlayerProfileSection title={t("matches.results.title")}>
       {result ? (
         <>
-          <SummaryRow
+          <HubSummaryRow
             label={t("matches.results.statusLabel")}
             value={t(`matches.results.status.${result.status}`)}
           />
           {winnerName ? (
-            <SummaryRow
+            <HubSummaryRow
               label={t("matches.results.winnerLabel")}
               value={winnerName}
             />
           ) : null}
           {scoreSummary ? (
-            <SummaryRow
+            <HubSummaryRow
               label={t("matches.results.scoreLabel")}
               value={scoreSummary}
             />
@@ -286,16 +285,16 @@ export function MatchResultPanel({
       ) : null}
 
       {showAttendance ? (
-        <View style={formStyles.stack}>
-          <AppText style={{ color: colors.neutral[500] }}>
+        <View style={styles.stack}>
+          <AppText style={styles.muted}>
             {t("matches.results.attendancePrompt")}
           </AppText>
-          <PrimaryButton
+          <FigmaPrimaryButton
             label={t("matches.results.attended")}
             loading={attendanceMutation.isPending}
             onPress={() => attendanceMutation.mutate("attended")}
           />
-          <SecondaryButton
+          <FigmaSecondaryButton
             label={t("matches.results.noShow")}
             disabled={attendanceMutation.isPending}
             onPress={() => attendanceMutation.mutate("no_show")}
@@ -304,21 +303,23 @@ export function MatchResultPanel({
       ) : null}
 
       {showSubmit ? (
-        <View style={formStyles.stack}>
-          <AppText style={{ color: colors.neutral[500] }}>
+        <View style={styles.stack}>
+          <AppText style={styles.muted}>
             {t("matches.results.submitPrompt")}
           </AppText>
-          <AppText style={{ color: colors.neutral[700], fontWeight: "600" }}>
+          <AppText style={styles.subheading}>
             {t("matches.results.selectWinner")}
           </AppText>
-          {participants.map((participant) => (
-            <Choice
-              key={participant.user_id}
-              label={participant.display_name}
-              selected={selectedWinnerId === participant.user_id}
-              onPress={() => setSelectedWinnerId(participant.user_id)}
-            />
-          ))}
+          <View style={[styles.chips, { flexDirection: rowDirection }]}>
+            {participants.map((participant) => (
+              <ChipButton
+                key={participant.user_id}
+                label={participant.display_name}
+                selected={selectedWinnerId === participant.user_id}
+                onPress={() => setSelectedWinnerId(participant.user_id)}
+              />
+            ))}
+          </View>
           {selectedWinnerId ? (
             <>
               <MatchScoreEditor
@@ -327,11 +328,11 @@ export function MatchResultPanel({
                 disabled={submitMutation.isPending}
               />
               {scorePreview ? (
-                <AppText style={{ color: colors.neutral[500] }}>
+                <AppText style={styles.muted}>
                   {t("matches.results.scorePreview", { score: scorePreview })}
                 </AppText>
               ) : null}
-              <PrimaryButton
+              <FigmaPrimaryButton
                 label={t("matches.results.submit")}
                 loading={submitMutation.isPending}
                 onPress={handleSubmit}
@@ -342,7 +343,7 @@ export function MatchResultPanel({
       ) : null}
 
       {showConfirm ? (
-        <PrimaryButton
+        <FigmaPrimaryButton
           label={t("matches.results.confirm")}
           loading={confirmMutation.isPending}
           onPress={() => confirmMutation.mutate()}
@@ -350,9 +351,8 @@ export function MatchResultPanel({
       ) : null}
 
       {showDispute ? (
-        <DestructiveButton
+        <HubDestructiveLink
           label={t("matches.results.dispute")}
-          loading={disputeMutation.isPending}
           onPress={() =>
             Alert.alert(
               t("matches.results.dispute"),
@@ -369,6 +369,39 @@ export function MatchResultPanel({
           }
         />
       ) : null}
-    </View>
+    </PlayerProfileSection>
   );
 }
+
+const styles = StyleSheet.create({
+  stack: {
+    gap: 12,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  flex: {
+    flex: 1,
+  },
+  setLabel: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 13,
+    color: tennisColors.primaryDark,
+  },
+  muted: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    color: tennisColors.mutedForeground,
+    lineHeight: 20,
+  },
+  subheading: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 13,
+    color: tennisColors.primaryDark,
+  },
+  chips: {
+    flexWrap: "wrap",
+    gap: 8,
+  },
+});

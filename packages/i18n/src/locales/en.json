@@ -8,6 +8,20 @@
     "yes": "Yes",
     "no": "No"
   },
+  "profileScreenEdit": "Edit",
+  "profileScreenAboutTitle": "About me",
+  "profileScreenBioPlaceholder": "Tell players how you like to play (optional)",
+  "profileScreenMatchesStat": "Played matches",
+  "profileScreenRatingBuilding": "Building rating",
+  "profileScreenTennisPrefsTitle": "Tennis preferences",
+  "profileScreenPlayIntent": "Play intent",
+  "profileScreenMatchFormats": "Match formats",
+  "profileScreenPreferredAreasTitle": "Preferred areas",
+  "profileScreenZonesError": "Choose at least one area.",
+  "settingsScreenGeneral": "General",
+  "settingsScreenLanguage": "Language",
+  "settingsScreenSupport": "Support",
+  "settingsScreenAccount": "Account",
   "dashboard": {
     "login": {
       "title": "Club dashboard sign in",
@@ -202,20 +216,29 @@
   },
   "welcome": {
     "title": "Find your next tennis match",
-    "description": "Meet compatible players, agree on a time, and arrange a court in Lebanon.",
+    "headline1": "Find Your",
+    "headline2": "Match.",
+    "headline3": "Play Today.",
+    "description": "Connect with tennis players across Lebanon. Book courts, schedule matches, track your game.",
+    "createAccount": "Create Account",
+    "signIn": "Sign In",
+    "termsFooter": "By continuing you agree to our Terms & Privacy Policy",
     "continue": "Get started"
   },
   "auth": {
-    "signInTitle": "Sign in or create an account",
+    "signInTitle": "Welcome back",
     "signInBody": "Enter your email to receive a secure sign-in link.",
     "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
     "emailInvalid": "Enter a valid email address.",
+    "noAccount": "Don't have an account?",
     "sendLink": "Send sign-in link",
     "sendError": "We could not send the link. Please try again.",
     "cooldownError": "Please wait one minute before requesting another link.",
     "rateLimitNotice": "For your security, repeated requests may be temporarily limited.",
     "checkEmailTitle": "Check your email",
-    "checkEmailBody": "Open the sign-in link on this device to continue.",
+    "checkEmailBody": "We sent a secure sign-in link to your inbox. Open it on this device to continue.",
+    "checkEmailHint": "The link expires after a short time. You can request a new one if needed.",
     "openedLink": "I opened the link",
     "useAnotherEmail": "Use another email",
     "callbackTitle": "Signing you in",
@@ -244,6 +267,7 @@
       "name": "Display name",
       "birthYear": "Birth year",
       "adultConfirm": "I confirm that I am 18 or older",
+      "languages": "Languages you speak",
       "nameError": "Enter a display name between 2 and 50 characters.",
       "adultError": "You must be 18 or older to join this pilot.",
       "languageError": "Choose at least one language."
@@ -272,10 +296,18 @@
       "empty": "No pilot areas are available yet."
     },
     "notifications": {
-      "title": "Stay up to date",
-      "description": "Notifications can help with invitations, match updates, and safety notices.",
+      "title": "Stay in the loop",
+      "description": "Matches move fast. Notifications help you respond before a spot fills.",
       "continue": "Enable notifications",
-      "notNow": "Not now"
+      "notNow": "Not now",
+      "benefitInvites": "Match invites",
+      "benefitInvitesDesc": "Know when someone wants to play with you",
+      "benefitVotes": "Time votes",
+      "benefitVotesDesc": "Get notified when a slot is agreed",
+      "benefitBooking": "Booking updates",
+      "benefitBookingDesc": "Club accepted, rejected, or proposed a new time",
+      "benefitReminders": "Reminders",
+      "benefitRemindersDesc": "Confirm attendance before your match"
     },
     "review": {
       "title": "Review your profile",
@@ -284,6 +316,14 @@
       "zones": "Preferred areas",
       "error": "We could not save your profile. Please try again.",
       "finish": "Finish setup"
+    },
+    "complete": {
+      "title": "You're all set,",
+      "titleAccent": "{{name}}!",
+      "description": "Your profile is ready. Start discovering players and booking courts across Lebanon.",
+      "playersNearby": "Players nearby",
+      "courtsAvailable": "Courts available",
+      "cta": "Start Playing"
     }
   },
   "languages": {
@@ -298,7 +338,8 @@
   },
   "formats": {
     "singles": "Singles",
-    "doubles": "Doubles"
+    "doubles": "Doubles",
+    "both": "Both"
   },
   "skillBands": {
     "beginner": "Beginner",
@@ -347,8 +388,64 @@
   },
   "home": {
     "title": "Welcome, {{name}}",
+    "greeting": "Hi, {{name}}",
+    "subtitle": "Here is what needs your attention today.",
     "m1Description": "Your account and tennis profile are ready. Browse compatible players and open matches on Discover.",
-    "m3Description": "Create a match, join open games, and manage your active matches from here."
+    "m3Description": "Create a match, join open games, and manage your active matches from here.",
+    "stats": {
+      "matchesPlayed": "Matches played",
+      "skillBand": "Skill band",
+      "provisionalBand": "Provisional band"
+    },
+    "nextActionsTitle": "Next actions",
+    "nextAction": {
+      "inviteTitle": "Match invite waiting",
+      "inviteBody": "{{name}} invited you to a match.",
+      "voteTitle": "Vote on a time",
+      "voteBody": "Your group still needs to agree on when to play.",
+      "bookingTitle": "Booking in progress",
+      "bookingBody": "A club is reviewing your court request.",
+      "courtTitle": "Ready to book a court",
+      "courtBody": "Everyone agreed on a time. Request a court next."
+    },
+    "upcomingTitle": "Upcoming matches",
+    "upcomingEmpty": "No upcoming matches yet. Create one or join an open game.",
+    "noTimeYet": "Time not set yet",
+    "players": "players"
+  },
+  "notifications": {
+    "centerTitle": "Notifications",
+    "centerDescription": "Updates about invites, votes, bookings, and reminders.",
+    "loadError": "We could not load your notifications.",
+    "empty": "You are all caught up.",
+    "fallbackTitle": "Tennis Lebanon",
+    "fallbackBody": "Open the app for an update.",
+    "kinds": {
+      "match_invitation": {
+        "title": "Match invite",
+        "body": "Someone invited you to a match."
+      },
+      "stale_match_reminder": {
+        "title": "Match expiring soon",
+        "body": "Add a new time or extend your listing."
+      },
+      "match_expired": {
+        "title": "Match expired",
+        "body": "This match is no longer active."
+      },
+      "booking_pending_club": {
+        "title": "Booking update",
+        "body": "A club responded to your booking request."
+      },
+      "booking_stale_participant": {
+        "title": "Booking waiting",
+        "body": "Your court request is still pending."
+      },
+      "attendance_prompt": {
+        "title": "Did you play?",
+        "body": "Confirm attendance after your match."
+      }
+    }
   },
   "profile": {
     "title": "Profile",
@@ -357,7 +454,28 @@
     "adultStatus": "Adult status",
     "confirmed": "Confirmed",
     "incomplete": "Incomplete",
-    "availability": "Manage availability"
+    "availability": "Manage availability",
+    "editProfile": "Edit profile",
+    "editTitle": "Edit profile",
+    "editDescription": "Update how other players see you.",
+    "bioLabel": "Bio",
+    "bioPlaceholder": "Tell players how you like to play (optional)",
+    "saveProfile": "Save changes",
+    "saveError": "We could not save your profile.",
+    "tennisPreferences": "Tennis preferences",
+    "tennisPreferencesTitle": "Tennis preferences",
+    "tennisPreferencesDescription": "Update how you like to play. Other players use this for compatibility.",
+    "tennisPreferencesLoadError": "We could not load your tennis preferences.",
+    "playIntentSection": "Play intent",
+    "formatSection": "Match formats",
+    "savePreferences": "Save preferences",
+    "ratingExplainerTitle": "How rating works",
+    "ratingExplainerBody": "Your rating stays hidden until you complete enough rated matches. Until then, others only see your provisional skill band.",
+    "aboutMeTitle": "About me",
+    "noBioYet": "Add a short bio so other players know how you like to play.",
+    "editButton": "Edit",
+    "statMatches_one": "Match",
+    "statMatches_other": "Matches"
   },
   "discover": {
     "title": "Discover",
@@ -380,12 +498,31 @@
     "requireOverlap": "Must overlap my availability",
     "anyFormat": "Any format",
     "anyIntent": "Any intent",
+    "chipMatchLevel": "Level",
+    "chipMatchIntent": "Intent",
+    "chipMatchArea": "Area",
+    "chipMatchFormat": "Format",
+    "chipMatchAvailability": "Availability",
+    "resultsPlayers_one": "{{count}} player found",
+    "resultsPlayers_other": "{{count}} players found",
+    "resultsPlayersNear_one": "1 player found near you",
+    "resultsPlayersNear_other": "{{count}} players found near you",
+    "resultsMatches_one": "{{count}} open match found",
+    "resultsMatches_other": "{{count}} open matches found",
+    "resultsMatchesNear_one": "1 open match found nearby",
+    "resultsMatchesNear_other": "{{count}} open matches found nearby",
+    "relaxFilters": "Show everyone",
+    "matchesPlayed_one": "1 match played",
+    "matchesPlayed_other": "{{count}} matches played",
+    "openPlayerProfile": "View {{name}}'s profile",
     "loading": "Searching for matches and players…",
     "error": "We could not load discovery results.",
     "emptyPlayersTitle": "No compatible players yet",
     "emptyPlayersBody": "Try widening your level range, turning off availability overlap, or adding more areas.",
     "emptyMatchesTitle": "No open matches yet",
     "emptyMatchesBody": "Try widening your filters or create a match to start liquidity.",
+    "playerBio": "About",
+    "playStyleTags": "Play style",
     "widenLevel": "Show nearby levels",
     "widenLevelBanner": "Showing players within two skill bands.",
     "widenZones": "Search all areas",
@@ -405,6 +542,26 @@
     "playerLoadError": "We could not load this player.",
     "overlapSlotHint": "Both free {{slot}}",
     "noOverlapHint": "No shared time yet"
+  },
+  "playerProfile": {
+    "aboutTitle": "About",
+    "availabilityTitle": "Availability",
+    "recentMatchesTitle": "Recent matches",
+    "matchesPlayedStat_one": "Match",
+    "matchesPlayedStat_other": "Matches",
+    "noAvailability": "This player has not shared weekly availability yet.",
+    "noRecentMatches": "No completed matches to show yet.",
+    "formatPreference": "Prefers {{format}}",
+    "intentPreference": "Play style: {{intent}}",
+    "availabilityPartsTwo": "{{first}} and {{second}}",
+    "availabilityPartsMany": "{{first}}, and {{last}}",
+    "challengeCta": "Challenge to match",
+    "safetyTitle": "Support",
+    "safetyDescription": "Report a concern or block this player from your discovery results.",
+    "matchWin": "W",
+    "matchLoss": "L",
+    "vsOpponent": "vs {{name}}",
+    "unknownOpponent": "Opponent"
   },
   "reports": {
     "title": "Report a player",
@@ -454,6 +611,13 @@
       "requiresApprovalHint": "Review each player before they join. Only applies when listed on Discover.",
       "scheduleTitle": "When and where",
       "scheduleDescription": "Pick areas and propose one time slot.",
+      "timingModeTitle": "How should timing work?",
+      "timingFixed": "I have a fixed time",
+      "timingFixedHint": "Name one slot. Joining means agreeing to play then.",
+      "timingFlexible": "Propose up to 3 options",
+      "timingFlexibleHint": "Everyone votes until one slot has unanimous yes.",
+      "slotLabel": "Time option {{index}}",
+      "addSlot": "Add another time",
       "minSkill": "Minimum level",
       "maxSkill": "Maximum level",
       "visibility": "Visibility",
@@ -546,6 +710,12 @@
     },
     "hub": {
       "title": "Match hub",
+      "sections": {
+        "overview": "Overview",
+        "vote": "Vote",
+        "chat": "Chat",
+        "book": "Book"
+      },
       "summaryTitle": "Match details",
       "loadError": "We could not load this match.",
       "participants": "Participants",
@@ -587,6 +757,7 @@
       "draftBanner": "This match is still a draft. Invite players and publish when you are ready.",
       "continueSetup": "Continue setup",
       "hostBadge": "Host",
+      "participantRoster": "{{current}}/{{capacity}} players",
       "leaveDescription": "You will leave this match but it stays open for other players.",
       "cancelDescription": "This cancels the match for everyone. Invited players will be notified.",
       "addTimeTitle": "Add another time",
@@ -760,6 +931,8 @@
     "saved": "Availability saved.",
     "selectedCount": "{{count}} block selected",
     "selectedCount_other": "{{count}} blocks selected",
+    "oneOffCount_one": "1 window added",
+    "oneOffCount_other": "{{count}} windows added",
     "blocks": {
       "morning": "Morning",
       "afternoon": "Afternoon",
@@ -833,6 +1006,13 @@
     "playersFree": "{{count}} free",
     "playersFree_other": "{{count}} free",
     "minutes": "{{count}} min",
-    "timeWithPlayers": "{{time}}, {{count}} players free"
+    "timeWithPlayers": "{{time}}, {{count}} players free",
+    "timePlaceholder": "6:00",
+    "timeHint": "Use 30-minute steps between 7:00 AM and 9:00 PM",
+    "timeInvalid": "Enter a valid time between 7:00 AM and 9:00 PM (e.g. 6:00 PM)",
+    "meridiem": {
+      "AM": "AM",
+      "PM": "PM"
+    }
   }
 }

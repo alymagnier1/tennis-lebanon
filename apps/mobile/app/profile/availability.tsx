@@ -4,12 +4,12 @@ import {
   Alert,
   Pressable,
   StyleSheet,
-  Text,
+  TextInput,
   View,
 } from "react-native";
-import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import {
   createAvailabilityWindow,
   deleteAvailabilityWindow,
@@ -17,20 +17,30 @@ import {
   setRecurringAvailability,
   type RecurringAvailabilityInput,
 } from "@tennis-lebanon/api";
-import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
+import { SegmentTabs } from "../../src/components/AppUi";
+import { AppText } from "../../src/components/AppText";
+import { ErrorNotice } from "../../src/components/FormUi";
+import { Icon } from "../../src/components/Icon";
+import { TabSectionSplitter } from "../../src/components/TabSectionSplitter";
 import {
-  FormField,
-  PrimaryButton,
-  Screen,
-  SecondaryButton,
-  formStyles,
-} from "../../src/components/FormUi";
+  FigmaCard,
+  FigmaPrimaryButton,
+  FigmaSecondaryButton,
+  OnboardingFormField,
+  OnboardingStepLayout,
+  onboardingInputStyle,
+} from "../../src/components/onboarding-ui";
 import {
   beirutLocalToUtcIso,
   formatUtcInBeirut,
 } from "../../src/lib/beirut-time";
+import { formatAvailabilitySectionLabel } from "../../src/lib/availability-section-label";
+import { exitProfileScreen } from "../../src/lib/navigation";
+import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
+import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
+import { tennisColors, tennisRadii } from "../../src/theme/tennis-tokens";
 
 type AvailabilityMode = "recurring" | "oneOff";
 
@@ -94,19 +104,13 @@ function windowsToSelection(
   return selected;
 }
 
-const PRESETS = {
-  weekdayEvenings: [1, 2, 3, 4, 5].map((d) => cellKey(d, "evening")),
-  weekendMornings: [0, 6].map((d) => cellKey(d, "morning")),
-} as const;
-
 export default function AvailabilityScreen() {
   const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { rowDirection, writingDirection } = useLayoutDirection();
   const userId = session?.user.id;
   const [mode, setMode] = useState<AvailabilityMode>("recurring");
-  // Null until the user edits, so the grid is derived from the server instead
-  // of being synced into state by an effect.
   const [localSelection, setLocalSelection] = useState<Set<CellKey> | null>(
     null,
   );
@@ -182,83 +186,81 @@ export default function AvailabilityScreen() {
     });
   };
 
-  /** Toggles a whole preset: clears it if every cell is already selected. */
-  const applyPreset = (keys: readonly CellKey[]) => {
-    setLocalSelection((current) => {
-      const next = new Set(current ?? serverSelection);
-      const allSet = keys.every((key) => next.has(key));
-      for (const key of keys) {
-        if (allSet) {
-          next.delete(key);
-        } else {
-          next.add(key);
-        }
-      }
-      return next;
-    });
-  };
+  const sectionCount =
+    mode === "recurring" ? selected.size : oneOffWindows.length;
 
-  const selectedCount = selected.size;
+  const footer =
+    mode === "recurring" ? (
+      <FigmaPrimaryButton
+        label={t("availability.saveGrid")}
+        loading={saveGrid.isPending}
+        onPress={() => saveGrid.mutate()}
+      />
+    ) : (
+      <FigmaPrimaryButton
+        label={t("availability.addWindow")}
+        loading={addOneOff.isPending}
+        onPress={() => addOneOff.mutate()}
+      />
+    );
 
   return (
-    <Screen
+    <OnboardingStepLayout
       title={t("availability.title")}
-      description={t("availability.description")}
-      refreshing={availabilityQuery.isFetching}
-      onRefresh={() => void availabilityQuery.refetch()}
+      onBack={() => exitProfileScreen()}
+      footer={footer}
     >
       {availabilityQuery.isLoading ? (
-        <ActivityIndicator accessibilityLabel={t("availability.loading")} />
-      ) : null}
-      {availabilityQuery.isError ? (
-        <Text style={formStyles.errorText}>{t("availability.loadError")}</Text>
+        <ActivityIndicator
+          color={tennisColors.primary}
+          accessibilityLabel={t("availability.loading")}
+        />
       ) : null}
 
-      <View style={formStyles.segmentRow}>
-        <PressableSegment
-          label={t("availability.recurringTab")}
-          selected={mode === "recurring"}
-          onPress={() => setMode("recurring")}
+      {availabilityQuery.isError ? (
+        <ErrorNotice>{t("availability.loadError")}</ErrorNotice>
+      ) : null}
+
+      <SegmentTabs
+        value={mode}
+        options={[
+          { value: "recurring", label: t("availability.recurringTab") },
+          { value: "oneOff", label: t("availability.oneOffTab") },
+        ]}
+        onChange={setMode}
+      />
+
+      {!availabilityQuery.isLoading && !availabilityQuery.isError ? (
+        <TabSectionSplitter
+          label={formatAvailabilitySectionLabel(mode, sectionCount, t)}
         />
-        <PressableSegment
-          label={t("availability.oneOffTab")}
-          selected={mode === "oneOff"}
-          onPress={() => setMode("oneOff")}
-        />
-      </View>
+      ) : null}
 
       {mode === "recurring" ? (
-        <View style={formStyles.card}>
-          <Text style={formStyles.title}>{t("availability.gridTitle")}</Text>
-          <Text style={formStyles.description}>
-            {t("availability.gridHelp")}
-          </Text>
-
-          <View style={styles.presetRow}>
-            <SecondaryButton
-              label={t("availability.presetWeekdayEvenings")}
-              onPress={() => applyPreset(PRESETS.weekdayEvenings)}
-            />
-            <SecondaryButton
-              label={t("availability.presetWeekendMornings")}
-              onPress={() => applyPreset(PRESETS.weekendMornings)}
-            />
-          </View>
-
-          <View style={styles.headerRow}>
+        <FigmaCard style={styles.card}>
+          <View style={[styles.headerRow, { flexDirection: rowDirection }]}>
             <View style={styles.dayLabelCell} />
             {TIME_BLOCKS.map((block) => (
-              <Text key={block.id} style={styles.blockHeading}>
+              <AppText
+                key={block.id}
+                style={[styles.blockHeading, { writingDirection }]}
+              >
                 {t(`availability.blocks.${block.id}`)}
-              </Text>
+              </AppText>
             ))}
           </View>
 
           {WEEKDAYS.map((weekday) => (
-            <View key={weekday} style={styles.gridRow}>
-              <Text style={styles.dayLabelCell} numberOfLines={1}>
+            <View
+              key={weekday}
+              style={[styles.gridRow, { flexDirection: rowDirection }]}
+            >
+              <AppText
+                style={[styles.dayLabelCell, { writingDirection }]}
+                maxLines={1}
+              >
                 {t(`availability.weekdaysShort.${weekday}`)}
-              </Text>
+              </AppText>
               {TIME_BLOCKS.map((block) => {
                 const isSelected = selected.has(cellKey(weekday, block.id));
                 return (
@@ -270,174 +272,129 @@ export default function AvailabilityScreen() {
                     onPress={() => toggleCell(weekday, block.id)}
                     style={[styles.cell, isSelected && styles.cellSelected]}
                   >
-                    <Text
-                      style={[
-                        styles.cellText,
-                        isSelected && styles.cellTextSelected,
-                      ]}
-                    >
-                      {isSelected ? "✓" : ""}
-                    </Text>
+                    {isSelected ? (
+                      <Icon name="check" size={18} color={tennisColors.lime} />
+                    ) : null}
                   </Pressable>
                 );
               })}
             </View>
           ))}
-
-          <Text style={styles.count}>
-            {t("availability.selectedCount", { count: selectedCount })}
-          </Text>
-
-          <PrimaryButton
-            label={t("availability.saveGrid")}
-            loading={saveGrid.isPending}
-            onPress={() => saveGrid.mutate()}
-          />
-          {saveGrid.isSuccess ? (
-            <Text style={styles.saved}>{t("availability.saved")}</Text>
-          ) : null}
-        </View>
+        </FigmaCard>
       ) : (
-        <View style={formStyles.card}>
-          <Text style={formStyles.title}>{t("availability.addWindow")}</Text>
-          {oneOffWindows.map((window) => (
-            <View key={window.id} style={styles.oneOffRow}>
-              <Text style={formStyles.summaryValue}>
-                {t("availability.oneOffLabel", {
-                  start: window.starts_at
-                    ? formatUtcInBeirut(window.starts_at)
-                    : "",
-                  end: window.ends_at ? formatUtcInBeirut(window.ends_at) : "",
-                })}
-              </Text>
-              <SecondaryButton
-                label={t("availability.remove")}
-                onPress={() => removeWindow.mutate(window.id)}
-              />
-            </View>
-          ))}
+        <View style={styles.oneOffStack}>
+          {oneOffWindows.length > 0 ? (
+            <FigmaCard style={styles.card}>
+              {oneOffWindows.map((window) => (
+                <View key={window.id} style={styles.oneOffRow}>
+                  <AppText style={styles.oneOffLabel}>
+                    {t("availability.oneOffLabel", {
+                      start: window.starts_at
+                        ? formatUtcInBeirut(window.starts_at)
+                        : "",
+                      end: window.ends_at
+                        ? formatUtcInBeirut(window.ends_at)
+                        : "",
+                    })}
+                  </AppText>
+                  <FigmaSecondaryButton
+                    label={t("availability.remove")}
+                    onPress={() => removeWindow.mutate(window.id)}
+                  />
+                </View>
+              ))}
+            </FigmaCard>
+          ) : null}
 
-          <FormField
-            label={t("availability.date")}
-            value={oneOffDate}
-            onChangeText={setOneOffDate}
-            placeholder="2026-07-25"
-            autoCapitalize="none"
-          />
-          <FormField
-            label={t("availability.startTime")}
-            value={oneOffStart}
-            onChangeText={setOneOffStart}
-            placeholder="18:00"
-            autoCapitalize="none"
-          />
-          <FormField
-            label={t("availability.endTime")}
-            value={oneOffEnd}
-            onChangeText={setOneOffEnd}
-            placeholder="21:00"
-            autoCapitalize="none"
-          />
-          <PrimaryButton
-            label={t("availability.addWindow")}
-            loading={addOneOff.isPending}
-            onPress={() => addOneOff.mutate()}
-          />
+          <FigmaCard style={styles.card}>
+            <OnboardingFormField label={t("availability.date")}>
+              <TextInput
+                accessibilityLabel={t("availability.date")}
+                value={oneOffDate}
+                onChangeText={setOneOffDate}
+                placeholder="2026-07-25"
+                autoCapitalize="none"
+                style={onboardingInputStyle.input}
+              />
+            </OnboardingFormField>
+            <OnboardingFormField label={t("availability.startTime")}>
+              <TextInput
+                accessibilityLabel={t("availability.startTime")}
+                value={oneOffStart}
+                onChangeText={setOneOffStart}
+                placeholder="18:00"
+                autoCapitalize="none"
+                style={onboardingInputStyle.input}
+              />
+            </OnboardingFormField>
+            <OnboardingFormField label={t("availability.endTime")}>
+              <TextInput
+                accessibilityLabel={t("availability.endTime")}
+                value={oneOffEnd}
+                onChangeText={setOneOffEnd}
+                placeholder="21:00"
+                autoCapitalize="none"
+                style={onboardingInputStyle.input}
+              />
+            </OnboardingFormField>
+          </FigmaCard>
         </View>
       )}
-
-      <SecondaryButton label={t("common.back")} onPress={() => router.back()} />
-    </Screen>
-  );
-}
-
-function PressableSegment({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected }}
-      onPress={onPress}
-      style={[
-        formStyles.segmentButton,
-        selected && formStyles.segmentButtonActive,
-      ]}
-    >
-      <Text style={formStyles.segmentButtonText}>{label}</Text>
-    </Pressable>
+    </OnboardingStepLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  presetRow: {
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
+  card: {
+    gap: 10,
   },
   headerRow: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: spacing.xs,
-    marginBottom: spacing.xs,
+    gap: 6,
   },
   gridRow: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: spacing.xs,
-    marginBottom: spacing.xs,
+    gap: 6,
   },
   dayLabelCell: {
-    width: 44,
-    color: colors.neutral[700],
-    fontSize: typography.size.sm,
+    width: 36,
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 12,
+    color: tennisColors.mutedForeground,
   },
   blockHeading: {
     flex: 1,
     textAlign: "center",
-    color: colors.neutral[500],
-    fontSize: typography.size.xs,
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 11,
+    color: tennisColors.mutedForeground,
   },
   cell: {
     flex: 1,
-    minHeight: 44,
+    minHeight: minTouchTargetPx,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-    borderRadius: radii.md,
-    backgroundColor: colors.neutral[100],
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
+    borderRadius: tennisRadii.md,
+    backgroundColor: tennisColors.muted,
   },
   cellSelected: {
-    borderColor: colors.brand[600],
-    backgroundColor: colors.brand[600],
+    borderColor: tennisColors.primary,
+    backgroundColor: tennisColors.primary,
   },
-  cellText: {
-    fontSize: typography.size.md,
-    color: colors.neutral[500],
-  },
-  cellTextSelected: {
-    color: colors.neutral[0],
-    fontWeight: typography.weight.semibold,
-  },
-  count: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
-    color: colors.neutral[500],
-    fontSize: typography.size.sm,
-  },
-  saved: {
-    marginTop: spacing.sm,
-    color: colors.brand[700],
-    fontSize: typography.size.sm,
+  oneOffStack: {
+    gap: 12,
   },
   oneOffRow: {
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
+    gap: 10,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: tennisColors.border,
+  },
+  oneOffLabel: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 14,
+    color: tennisColors.primaryDark,
   },
 });

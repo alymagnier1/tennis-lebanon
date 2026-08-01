@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Pressable,
+  ScrollView,
   StyleSheet,
   View,
+  type LayoutChangeEvent,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -37,19 +38,24 @@ import {
   formatPriceMinor,
   hasUnanimousTimeYes,
 } from "@tennis-lebanon/domain";
-import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
-import { SectionTitle, StatusBanner } from "../../src/components/AppUi";
+import { spacing, typography } from "@tennis-lebanon/ui";
+import { StatusBanner } from "../../src/components/AppUi";
 import { MatchChatPanel } from "../../src/components/MatchChatPanel";
 import { MatchResultPanel } from "../../src/components/MatchResultPanel";
 import { AppText } from "../../src/components/AppText";
+import { ErrorNotice } from "../../src/components/FormUi";
 import {
-  DestructiveButton,
-  PrimaryButton,
-  Screen,
-  SecondaryButton,
-  SummaryRow,
-  formStyles,
-} from "../../src/components/FormUi";
+  HubDestructiveLink,
+  HubSummaryRow,
+} from "../../src/components/match/HubSummaryRow";
+import { MatchHubOverviewDetails } from "../../src/components/match/MatchHubOverviewDetails";
+import { MatchHubLayout } from "../../src/components/match/MatchHubLayout";
+import { PlayerProfileSection } from "../../src/components/player/PlayerProfileSection";
+import {
+  ChipButton,
+  FigmaPrimaryButton,
+  FigmaSecondaryButton,
+} from "../../src/components/onboarding-ui";
 import { formatUtcSlotInBeirut } from "../../src/lib/beirut-time";
 import { confirmAction } from "../../src/lib/confirm-action";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
@@ -62,6 +68,8 @@ import {
 } from "../../src/lib/routes";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
+import { tennisColors, tennisRadii } from "../../src/theme/tennis-tokens";
+import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
 type HubParticipant = {
   user_id: string;
@@ -76,47 +84,32 @@ type HubRequest = {
   status: string;
 };
 
-function VoteChip({
-  label,
-  selected,
-  onPress,
-  disabled,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected }}
-      accessibilityLabel={label}
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.voteChip,
-        selected && styles.voteChipSelected,
-        disabled && styles.voteChipDisabled,
-        pressed && !disabled && styles.voteChipPressed,
-      ]}
-    >
-      <AppText
-        style={[styles.voteChipText, selected && styles.voteChipTextSelected]}
-        maxLines={1}
-      >
-        {label}
-      </AppText>
-    </Pressable>
-  );
-}
-
 export default function MatchHubScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const scrollRef = useRef<ScrollView>(null);
+  const sectionOffsets = useRef<
+    Partial<Record<"overview" | "vote" | "chat" | "book", number>>
+  >({});
+  const [activeSection, setActiveSection] = useState<
+    "overview" | "vote" | "chat" | "book"
+  >("overview");
+
+  const sectionTabs = [
+    { value: "overview" as const, label: t("matches.hub.sections.overview") },
+    { value: "vote" as const, label: t("matches.hub.sections.vote") },
+    { value: "chat" as const, label: t("matches.hub.sections.chat") },
+    { value: "book" as const, label: t("matches.hub.sections.book") },
+  ];
+
+  function jumpToSection(section: "overview" | "vote" | "chat" | "book") {
+    setActiveSection(section);
+    const offset = sectionOffsets.current[section] ?? 0;
+    scrollRef.current?.scrollTo({ y: Math.max(offset - 8, 0), animated: true });
+  }
 
   const hubQuery = useQuery({
     queryKey: ["match-hub", id],
@@ -299,18 +292,16 @@ export default function MatchHubScreen() {
         </AppText>
         {showVoteUi ? (
           <View style={[styles.voteRow, { flexDirection: rowDirection }]}>
-            <VoteChip
+            <ChipButton
               label={t("matches.hub.voteYes")}
               selected={slot.viewer_vote === "yes"}
-              disabled={voteMutation.isPending || slot.viewer_vote === "yes"}
               onPress={() =>
                 voteMutation.mutate({ timeOptionId: slot.id, vote: "yes" })
               }
             />
-            <VoteChip
+            <ChipButton
               label={t("matches.hub.voteNo")}
               selected={slot.viewer_vote === "no"}
-              disabled={voteMutation.isPending || slot.viewer_vote === "no"}
               onPress={() =>
                 voteMutation.mutate({ timeOptionId: slot.id, vote: "no" })
               }
@@ -318,10 +309,9 @@ export default function MatchHubScreen() {
           </View>
         ) : null}
         {showManageTimes && !isAgreed ? (
-          <DestructiveButton
+          <HubDestructiveLink
             label={t("matches.hub.withdrawTime")}
             disabled={withdrawMutation.isPending}
-            loading={withdrawMutation.isPending}
             onPress={() => withdrawMutation.mutate(slot.id)}
           />
         ) : null}
@@ -329,33 +319,46 @@ export default function MatchHubScreen() {
     );
   }
 
+  const hubLayoutProps = {
+    title: t("matches.hub.title"),
+    subtitle: hub ? t(`matches.status.${hub.status}`) : undefined,
+    activeSection,
+    onSectionChange: jumpToSection,
+    onBack: exitMatchHub,
+    refreshing: hubQuery.isRefetching,
+    onRefresh: () => void hubQuery.refetch(),
+    scrollRef,
+    sectionTabs,
+  };
+
   if (hubQuery.isLoading) {
     return (
-      <Screen title={t("matches.hub.title")}>
-        <ActivityIndicator accessibilityLabel={t("discover.loading")} />
-      </Screen>
+      <MatchHubLayout {...hubLayoutProps}>
+        <ActivityIndicator
+          color={tennisColors.primary}
+          accessibilityLabel={t("discover.loading")}
+        />
+      </MatchHubLayout>
     );
   }
 
   return (
-    <Screen
-      title={t("matches.hub.title")}
-      description={hub ? t(`matches.status.${hub.status}`) : undefined}
-      refreshing={hubQuery.isRefetching}
-      onRefresh={() => void hubQuery.refetch()}
-      contentGrow={false}
-    >
+    <MatchHubLayout {...hubLayoutProps}>
       {hubQuery.isError ? (
-        <AppText style={formStyles.errorText}>
-          {t("matches.hub.loadError")}
-        </AppText>
+        <ErrorNotice>{t("matches.hub.loadError")}</ErrorNotice>
       ) : null}
+
+      <View
+        onLayout={(event) => {
+          sectionOffsets.current.overview = event.nativeEvent.layout.y;
+        }}
+      />
 
       {hub?.status === "draft" && hub.viewer_is_creator ? (
         <StatusBanner
           body={t("matches.hub.draftBanner")}
           actions={
-            <PrimaryButton
+            <FigmaPrimaryButton
               label={t("matches.hub.continueSetup")}
               onPress={() => router.push(matchInviteRoute(id!))}
             />
@@ -380,9 +383,9 @@ export default function MatchHubScreen() {
       ) : null}
 
       {hub?.can_extend_listing ? (
-        <PrimaryButton
+        <FigmaSecondaryButton
           label={t("matches.lifecycle.extendListing")}
-          loading={extendMutation.isPending}
+          disabled={extendMutation.isPending}
           onPress={() => extendMutation.mutate()}
         />
       ) : null}
@@ -393,26 +396,29 @@ export default function MatchHubScreen() {
         matchStatus: hub.status,
         nextAction: hub.next_action,
       }) ? (
-        <PrimaryButton
+        <FigmaPrimaryButton
           label={t("matches.hub.requestCourt")}
           onPress={() => router.push(matchBookRoute(id!))}
         />
       ) : null}
 
+      <View
+        onLayout={(event) => {
+          sectionOffsets.current.book = event.nativeEvent.layout.y;
+        }}
+      />
+
       {booking ? (
-        <View style={formStyles.compactCard}>
-          <AppText style={formStyles.compactCardTitle}>
-            {t("matches.hub.bookingTitle")}
-          </AppText>
-          <SummaryRow
+        <PlayerProfileSection title={t("matches.hub.bookingTitle")}>
+          <HubSummaryRow
             label={t("clubs.title")}
             value={`${booking.club_name} · ${booking.court_name}`}
           />
-          <SummaryRow
+          <HubSummaryRow
             label={t("matches.booking.confirmTime")}
             value={formatUtcSlotInBeirut(booking.starts_at, booking.ends_at)}
           />
-          <SummaryRow
+          <HubSummaryRow
             label={t("matches.hub.bookingStatus")}
             value={
               booking.status === "requested"
@@ -425,7 +431,7 @@ export default function MatchHubScreen() {
             }
           />
           {formatPriceMinor(booking.price_minor, booking.currency) ? (
-            <SummaryRow
+            <HubSummaryRow
               label={t("clubs.payAtClub")}
               value={formatPriceMinor(booking.price_minor, booking.currency)!}
             />
@@ -433,7 +439,7 @@ export default function MatchHubScreen() {
           {booking.status === "alternative_proposed" &&
           booking.proposed_start_at &&
           booking.proposed_end_at ? (
-            <SummaryRow
+            <HubSummaryRow
               label={t("matches.hub.bookingAlternative")}
               value={`${booking.proposed_court_name ?? ""} · ${formatUtcSlotInBeirut(
                 booking.proposed_start_at,
@@ -450,9 +456,8 @@ export default function MatchHubScreen() {
             viewerIsCreator: hub.viewer_is_creator,
             bookingStatus: booking.status,
           }) ? (
-            <DestructiveButton
+            <HubDestructiveLink
               label={t("matches.hub.cancelBooking")}
-              loading={cancelBookingMutation.isPending}
               onPress={() => cancelBookingMutation.mutate(booking.booking_id)}
             />
           ) : null}
@@ -462,120 +467,85 @@ export default function MatchHubScreen() {
             viewerIsCreator: hub.viewer_is_creator,
             bookingStatus: booking.status,
           }) ? (
-            <View style={formStyles.stack}>
-              <PrimaryButton
-                label={t("matches.hub.acceptAlternative")}
-                loading={alternativeMutation.isPending}
-                onPress={() =>
-                  alternativeMutation.mutate({
-                    bookingId: booking.booking_id,
-                    accept: true,
-                  })
-                }
-              />
-              <SecondaryButton
-                label={t("matches.hub.declineAlternative")}
-                disabled={alternativeMutation.isPending}
-                onPress={() =>
-                  alternativeMutation.mutate({
-                    bookingId: booking.booking_id,
-                    accept: false,
-                  })
-                }
-              />
+            <View style={styles.inlineActions}>
+              <View style={styles.inlineAction}>
+                <FigmaPrimaryButton
+                  label={t("matches.hub.acceptAlternative")}
+                  onPress={() =>
+                    alternativeMutation.mutate({
+                      bookingId: booking.booking_id,
+                      accept: true,
+                    })
+                  }
+                />
+              </View>
+              <View style={styles.inlineAction}>
+                <FigmaSecondaryButton
+                  label={t("matches.hub.declineAlternative")}
+                  disabled={alternativeMutation.isPending}
+                  onPress={() =>
+                    alternativeMutation.mutate({
+                      bookingId: booking.booking_id,
+                      accept: false,
+                    })
+                  }
+                />
+              </View>
             </View>
           ) : null}
-        </View>
+        </PlayerProfileSection>
       ) : null}
 
       {hub ? (
-        <View style={formStyles.compactCard}>
-          <AppText style={formStyles.compactCardTitle}>
-            {t("matches.hub.summaryTitle")}
-          </AppText>
-          <SummaryRow
-            label={t("discover.formatFilter")}
-            value={`${t(`formats.${hub.format}`)} · ${hub.creator_display_name}`}
-          />
-          <SummaryRow
-            label={t("matches.hub.participants")}
-            value={`${hub.participant_count}/${hub.capacity}`}
-          />
-          {hub.notes ? (
-            <SummaryRow label={t("matches.create.notes")} value={hub.notes} />
-          ) : null}
-        </View>
+        <MatchHubOverviewDetails hub={hub} participants={participants} />
       ) : null}
 
       {canInvite ? (
-        <PrimaryButton
+        <FigmaSecondaryButton
           label={t("matches.invite.invitePlayers")}
           onPress={() => router.push(matchInviteRoute(id!))}
         />
       ) : null}
 
-      {participants.length > 0 ? (
-        <View style={formStyles.compactCard}>
-          <SectionTitle title={t("matches.hub.participants")} />
-          {participants.map((participant) => (
-            <View
-              key={participant.user_id}
-              style={[styles.participantRow, { flexDirection: rowDirection }]}
-            >
-              <View style={styles.participantText}>
-                <AppText style={styles.participantName} maxLines={1}>
-                  {participant.display_name}
-                </AppText>
-                <AppText style={styles.participantMeta} maxLines={1}>
-                  {[
-                    participant.is_creator ? t("matches.hub.hostBadge") : null,
-                    t(`matches.participantStatus.${participant.status}`),
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </AppText>
-              </View>
-            </View>
-          ))}
-        </View>
-      ) : null}
+      <View
+        onLayout={(event) => {
+          sectionOffsets.current.vote = event.nativeEvent.layout.y;
+        }}
+      />
 
       {agreedSlot ? (
-        <View style={formStyles.compactCard}>
-          <SectionTitle title={t("matches.hub.agreedTime")} />
+        <PlayerProfileSection title={t("matches.hub.agreedTime")}>
           <AppText style={styles.timeLabel}>
             {formatUtcSlotInBeirut(agreedSlot.starts_at, agreedSlot.ends_at)}
           </AppText>
           {showReschedule ? (
-            <SecondaryButton
+            <FigmaSecondaryButton
               label={t("matches.hub.reschedule")}
               onPress={() => router.push(`/match/${id}/reschedule`)}
             />
           ) : null}
-        </View>
+        </PlayerProfileSection>
       ) : null}
 
-      {/* A fixed match shows its single time above; the vote list would only
-          repeat it. */}
       {!isFixedTimingMode(hub?.timing_mode) && proposedTimes.length > 0 ? (
-        <View style={formStyles.stack}>
-          <SectionTitle
-            title={t("matches.hub.proposedTimes")}
-            subtitle={showVoteUi ? t("matches.hub.votePrompt") : undefined}
-          />
+        <PlayerProfileSection title={t("matches.hub.proposedTimes")}>
+          {showVoteUi ? (
+            <AppText style={styles.timeMeta}>
+              {t("matches.hub.votePrompt")}
+            </AppText>
+          ) : null}
           {showManageTimes && proposedTimes.length < 3 ? (
-            <SecondaryButton
+            <FigmaSecondaryButton
               label={t("matches.hub.addAnotherTime")}
               onPress={() => router.push(`/match/${id}/add-time`)}
             />
           ) : null}
           {proposedTimes.map((slot) => renderTimeSlot(slot))}
-        </View>
+        </PlayerProfileSection>
       ) : null}
 
       {hub?.viewer_is_creator && pendingRequests.length > 0 ? (
-        <View style={formStyles.stack}>
-          <SectionTitle title={t("matches.hub.pendingRequests")} />
+        <PlayerProfileSection title={t("matches.hub.pendingRequests")}>
           {pendingRequests.map((request) => (
             <View key={request.user_id} style={styles.requestCard}>
               <AppText style={styles.participantName} maxLines={1}>
@@ -584,8 +554,8 @@ export default function MatchHubScreen() {
               <View
                 style={[styles.requestActions, { flexDirection: rowDirection }]}
               >
-                <View style={formStyles.flex}>
-                  <PrimaryButton
+                <View style={styles.inlineAction}>
+                  <FigmaPrimaryButton
                     label={t("matches.hub.approve")}
                     onPress={() =>
                       respondMutation.mutate({
@@ -595,8 +565,8 @@ export default function MatchHubScreen() {
                     }
                   />
                 </View>
-                <View style={formStyles.flex}>
-                  <SecondaryButton
+                <View style={styles.inlineAction}>
+                  <FigmaSecondaryButton
                     label={t("matches.hub.reject")}
                     onPress={() =>
                       respondMutation.mutate({
@@ -609,11 +579,11 @@ export default function MatchHubScreen() {
               </View>
             </View>
           ))}
-        </View>
+        </PlayerProfileSection>
       ) : null}
 
       {joinAction === "join" ? (
-        <PrimaryButton
+        <FigmaPrimaryButton
           label={t("matches.hub.join")}
           loading={joinMutation.isPending}
           onPress={() => joinMutation.mutate()}
@@ -621,7 +591,7 @@ export default function MatchHubScreen() {
       ) : null}
 
       {joinAction === "request" ? (
-        <PrimaryButton
+        <FigmaPrimaryButton
           label={t("matches.hub.requestJoin")}
           loading={joinMutation.isPending}
           onPress={() => joinMutation.mutate()}
@@ -629,16 +599,15 @@ export default function MatchHubScreen() {
       ) : null}
 
       {showWithdraw ? (
-        <DestructiveButton
+        <HubDestructiveLink
           label={t("matches.hub.withdraw")}
           onPress={() => router.push(matchWithdrawRoute(id!))}
         />
       ) : null}
 
       {showLeave ? (
-        <DestructiveButton
+        <HubDestructiveLink
           label={t("matches.hub.leave")}
-          loading={leaveMutation.isPending}
           onPress={() =>
             confirmAction({
               title: t("matches.hub.leave"),
@@ -654,6 +623,12 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
+      <View
+        onLayout={(event) => {
+          sectionOffsets.current.chat = event.nativeEvent.layout.y;
+        }}
+      />
+
       <MatchChatPanel
         matchId={id!}
         enabled={hub?.viewer_status === "accepted"}
@@ -668,7 +643,7 @@ export default function MatchHubScreen() {
       ) : null}
 
       {showCancel ? (
-        <DestructiveButton
+        <HubDestructiveLink
           label={t("matches.hub.cancel")}
           onPress={() =>
             router.push(
@@ -680,7 +655,7 @@ export default function MatchHubScreen() {
           }
         />
       ) : null}
-    </Screen>
+    </MatchHubLayout>
   );
 }
 
@@ -697,73 +672,51 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   participantName: {
-    color: colors.neutral[900],
+    fontFamily: tennisFontFamily.bodyMedium,
+    color: tennisColors.primaryDark,
     fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
   },
   participantMeta: {
-    color: colors.neutral[500],
+    fontFamily: tennisFontFamily.body,
+    color: tennisColors.mutedForeground,
     fontSize: typography.size.sm,
   },
   timeCard: {
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
-    borderRadius: radii.md,
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
+    borderRadius: tennisRadii.md,
     padding: spacing.md,
     gap: spacing.sm,
-    backgroundColor: colors.neutral[0],
+    backgroundColor: tennisColors.muted,
   },
   timeLabel: {
-    color: colors.neutral[900],
+    fontFamily: tennisFontFamily.headingSemi,
+    color: tennisColors.primaryDark,
     fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
   },
   timeMeta: {
-    color: colors.neutral[500],
+    fontFamily: tennisFontFamily.body,
+    color: tennisColors.mutedForeground,
     fontSize: typography.size.xs,
   },
   voteRow: {
+    flexWrap: "wrap",
     gap: spacing.sm,
-  },
-  voteChip: {
-    minWidth: 64,
-    minHeight: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.full,
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-    backgroundColor: colors.neutral[0],
-  },
-  voteChipSelected: {
-    borderColor: colors.brand[500],
-    backgroundColor: colors.brand[50],
-  },
-  voteChipDisabled: {
-    opacity: 0.6,
-  },
-  voteChipPressed: {
-    opacity: 0.85,
-  },
-  voteChipText: {
-    color: colors.neutral[700],
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-  },
-  voteChipTextSelected: {
-    color: colors.brand[700],
-    fontWeight: typography.weight.semibold,
   },
   requestCard: {
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
-    borderRadius: radii.md,
-    padding: spacing.md,
     gap: spacing.sm,
-    backgroundColor: colors.neutral[0],
+    paddingBottom: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: tennisColors.border,
   },
   requestActions: {
     gap: spacing.sm,
+  },
+  inlineActions: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  inlineAction: {
+    flex: 1,
   },
 });

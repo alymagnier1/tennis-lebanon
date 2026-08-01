@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -6,14 +7,20 @@ import {
   normalizeDisplayName,
   type SupportedLanguage,
 } from "@tennis-lebanon/domain";
+import { ErrorNotice } from "../../src/components/FormUi";
 import {
-  Choice,
-  ErrorNotice,
-  FormField,
-  PrimaryButton,
-  Screen,
-} from "../../src/components/FormUi";
+  ChipButton,
+  FigmaPrimaryButton,
+  OnboardingFormField,
+  OnboardingStepLayout,
+  PolicyToggleCard,
+  onboardingInputStyle,
+} from "../../src/components/onboarding-ui";
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
+import { tennisColors } from "../../src/theme/tennis-tokens";
+import { AppText } from "../../src/components/AppText";
+import { StyleSheet } from "react-native";
+import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
 const languages: SupportedLanguage[] = ["en", "ar", "fr"];
 
@@ -61,40 +68,70 @@ export default function IdentityScreen() {
   };
 
   return (
-    <Screen
+    <OnboardingStepLayout
       title={t("onboarding.identity.title")}
       description={t("onboarding.identity.description")}
+      step={2}
+      totalSteps={6}
+      onBack={() => router.back()}
+      footer={
+        <FigmaPrimaryButton label={t("common.continue")} onPress={next} />
+      }
     >
-      <FormField
-        label={t("onboarding.identity.name")}
-        value={displayName}
-        onChangeText={setDisplayName}
-        autoCapitalize="words"
-        textContentType="name"
-        maxLength={50}
-      />
-      <FormField
-        label={t("onboarding.identity.birthYear")}
-        value={birthYear}
-        onChangeText={setBirthYear}
-        keyboardType="number-pad"
-        maxLength={4}
-      />
-      <Choice
+      <OnboardingFormField label={t("onboarding.identity.name")}>
+        <TextInput
+          value={displayName}
+          onChangeText={setDisplayName}
+          autoCapitalize="words"
+          textContentType="name"
+          maxLength={50}
+          style={onboardingInputStyle.input}
+          placeholderTextColor={tennisColors.mutedForeground}
+        />
+      </OnboardingFormField>
+      <OnboardingFormField label={t("onboarding.identity.birthYear")}>
+        <TextInput
+          value={birthYear}
+          onChangeText={setBirthYear}
+          keyboardType="number-pad"
+          maxLength={4}
+          style={onboardingInputStyle.input}
+          placeholderTextColor={tennisColors.mutedForeground}
+        />
+      </OnboardingFormField>
+      <PolicyToggleCard
         label={t("onboarding.identity.adultConfirm")}
         selected={adultConfirmed}
         onPress={() => setAdultConfirmed((value) => !value)}
       />
-      {languages.map((language) => (
-        <Choice
-          key={language}
-          label={t(`languages.${language}`)}
-          selected={selectedLanguages.includes(language)}
-          onPress={() => toggleLanguage(language)}
-        />
-      ))}
+      <AppText style={styles.langLabel}>
+        {t("onboarding.identity.languages")}
+      </AppText>
+      <View style={styles.chips}>
+        {languages.map((language) => (
+          <ChipButton
+            key={language}
+            label={t(`languages.${language}`)}
+            selected={selectedLanguages.includes(language)}
+            onPress={() => toggleLanguage(language)}
+          />
+        ))}
+      </View>
       {error ? <ErrorNotice>{error}</ErrorNotice> : null}
-      <PrimaryButton label={t("common.continue")} onPress={next} />
-    </Screen>
+    </OnboardingStepLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  langLabel: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 13,
+    color: tennisColors.mutedForeground,
+    marginBottom: 8,
+  },
+  chips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 16,
+  },
+});

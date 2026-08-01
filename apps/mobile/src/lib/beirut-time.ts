@@ -75,6 +75,14 @@ export function formatUtcInBeirut(iso: string): string {
   }).format(new Date(iso));
 }
 
+export function formatShortUtcDateInBeirut(iso: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    timeZone: BEIRUT_TIME_ZONE,
+    month: "short",
+    day: "numeric",
+  }).format(new Date(iso));
+}
+
 /**
  * Short form for chips and pills: "Fri 18:00–19:30".
  *

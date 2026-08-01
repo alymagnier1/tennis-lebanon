@@ -7,24 +7,25 @@ import {
   discoverCompatiblePlayers,
   discoverOpenMatches,
   getActiveZones,
+  getOwnPlayerProfile,
+  listMyMatches,
   type CompatiblePlayerCard,
   type OpenMatchCard,
 } from "@tennis-lebanon/api";
 import {
+  DEFAULT_DISCOVER_MATCH_TOGGLES,
+  type DiscoverMatchToggles,
+  isInviteableHostedMatch,
+  playerMatchesViewerFormat,
+  resolveDiscoverFiltersFromProfile,
   type PlayIntent,
-  widenDiscoveryZoneIds,
-  widenLevelWindow,
 } from "@tennis-lebanon/domain";
-import {
-  BottomSheet,
-  ChipMultiSelect,
-  EmptyState,
-  MatchCard,
-  PlayerCard,
-  SegmentTabs,
-  SheetOption,
-  ToolbarRow,
-} from "../../src/components/AppUi";
+import { EmptyState, MatchCard, SegmentTabs } from "../../src/components/AppUi";
+import { DiscoverMatchChips } from "../../src/components/discover/DiscoverMatchChips";
+import { DiscoverHeaderShell } from "../../src/components/discover/DiscoverHeaderShell";
+import { DiscoverSectionSplitter } from "../../src/components/discover/DiscoverSectionSplitter";
+import { DiscoverPlayerCardRow } from "../../src/components/discover/DiscoverPlayerCardRow";
+import { TabPageHeader } from "../../src/components/TabPageHeader";
 import {
   PrimaryButton,
   Screen,
@@ -32,43 +33,16 @@ import {
   type ScreenVirtualizedListProps,
   formStyles,
 } from "../../src/components/FormUi";
-import {
-  type DiscoverSortMode,
-  sortCompatiblePlayers,
-} from "../../src/lib/discover-sort";
+import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 import {
   loadDiscoverFilters,
   saveDiscoverFilters,
 } from "../../src/lib/discovery-filters";
-import { formatUtcSlotCompact } from "../../src/lib/beirut-time";
-import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
-import { publicPlayerLevelChip } from "../../src/lib/player-level-label";
-import { zoneLabelFromList, zoneNameFromJson } from "../../src/lib/zones";
+import { zoneLabelFromList } from "../../src/lib/zones";
 
 type DiscoverSegment = "players" | "matches";
-type MatchFormat = "singles" | "doubles";
-
-function playerHint(
-  player: CompatiblePlayerCard,
-  t: (key: string, options?: Record<string, unknown>) => string,
-): string | undefined {
-  // The hint renders as a pill, so it carries one fact only: the shared slot.
-  // Zone and level used to be appended here, which made a 71-character
-  // run-on pill — and both are already shown, as the meta line and the level
-  // chip respectively.
-  return player.overlap_starts_at && player.overlap_ends_at
-    ? t("discover.overlapSlotHint", {
-        slot: formatUtcSlotCompact(
-          player.overlap_starts_at,
-          player.overlap_ends_at,
-        ),
-      })
-    : player.availability_overlap
-      ? t("discover.overlapHint")
-      : t("discover.noOverlapHint");
-}
 
 export default function DiscoverScreen() {
   const { t, i18n } = useTranslation();
@@ -76,19 +50,9 @@ export default function DiscoverScreen() {
   const queryClient = useQueryClient();
   const userId = session?.user.id;
   const [segment, setSegment] = useState<DiscoverSegment>("players");
-  const [formatSheetOpen, setFormatSheetOpen] = useState(false);
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
-  const [sortSheetOpen, setSortSheetOpen] = useState(false);
-  const [sortMode, setSortMode] = useState<DiscoverSortMode>("recommended");
-  // Rank by overlap rather than filter on it; the user can opt back in.
-  const [requireOverlap, setRequireOverlap] = useState(false);
-  const [levelWindow, setLevelWindow] = useState(1);
-  const [widenedBanner, setWidenedBanner] = useState(false);
-  const [widenedZonesBanner, setWidenedZonesBanner] = useState(false);
-  const [selectedZoneIds, setSelectedZoneIds] = useState<string[]>([]);
-  const [useWidenedZones, setUseWidenedZones] = useState(false);
-  const [format, setFormat] = useState<MatchFormat | null>(null);
-  const [intent, setIntent] = useState<PlayIntent | null>(null);
+  const [matchToggles, setMatchToggles] = useState<DiscoverMatchToggles>({
+    ...DEFAULT_DISCOVER_MATCH_TOGGLES,
+  });
   const [hydratedForUserId, setHydratedForUserId] = useState<string | null>(
     null,
   );
@@ -99,6 +63,12 @@ export default function DiscoverScreen() {
     queryFn: () => getActiveZones(supabase),
   });
 
+  const ownProfileQuery = useQuery({
+    queryKey: ["own-player-profile", userId],
+    queryFn: () => getOwnPlayerProfile(supabase),
+    enabled: Boolean(userId),
+  });
+
   useEffect(() => {
     if (!userId) return;
 
@@ -106,17 +76,7 @@ export default function DiscoverScreen() {
     void (async () => {
       const saved = await loadDiscoverFilters(userId);
       if (!active) return;
-
-      if (saved) {
-        if (saved.zoneIds) setSelectedZoneIds(saved.zoneIds);
-        if (saved.useWidenedZones) setUseWidenedZones(saved.useWidenedZones);
-        if (saved.requireAvailabilityOverlap !== undefined) {
-          setRequireOverlap(saved.requireAvailabilityOverlap);
-        }
-        if (saved.levelWindow !== undefined) setLevelWindow(saved.levelWindow);
-        if (saved.format !== undefined) setFormat(saved.format);
-        if (saved.intent !== undefined) setIntent(saved.intent);
-      }
+      setMatchToggles(saved);
       setHydratedForUserId(userId);
     })();
 
@@ -127,154 +87,125 @@ export default function DiscoverScreen() {
 
   useEffect(() => {
     if (!userId || !filtersHydrated) return;
-    void saveDiscoverFilters(userId, {
-      zoneIds: selectedZoneIds,
-      useWidenedZones,
-      format,
-      intent,
-      requireAvailabilityOverlap: requireOverlap,
-      levelWindow,
-    });
-  }, [
-    filtersHydrated,
-    format,
-    intent,
-    levelWindow,
-    requireOverlap,
-    selectedZoneIds,
-    useWidenedZones,
-    userId,
-  ]);
+    void saveDiscoverFilters(userId, matchToggles);
+  }, [filtersHydrated, matchToggles, userId]);
 
-  const effectiveZoneIds = useMemo(() => {
-    if (useWidenedZones && zonesQuery.data?.length) {
-      return widenDiscoveryZoneIds(zonesQuery.data.map((zone) => zone.id));
+  const resolvedFilters = useMemo(() => {
+    const profile = ownProfileQuery.data;
+    if (!profile) {
+      return null;
     }
-    if (selectedZoneIds.length > 0) return selectedZoneIds;
-    return undefined;
-  }, [selectedZoneIds, useWidenedZones, zonesQuery.data]);
 
-  const filters = useMemo(
-    () => ({
-      zoneIds: effectiveZoneIds,
-      format,
-      intent,
-      requireAvailabilityOverlap: requireOverlap,
-      levelWindow,
-      horizonDays: 14,
-      limit: 20,
-    }),
-    [effectiveZoneIds, format, intent, levelWindow, requireOverlap],
-  );
+    const { applyClientFormatMatch, ...apiFilters } =
+      resolveDiscoverFiltersFromProfile({
+        toggles: matchToggles,
+        playIntent: profile.play_intent as PlayIntent,
+        prefersSingles: profile.prefers_singles,
+        prefersDoubles: profile.prefers_doubles,
+        allZoneIds: zonesQuery.data?.map((zone) => zone.id),
+      });
+
+    return { apiFilters, applyClientFormatMatch };
+  }, [matchToggles, ownProfileQuery.data, zonesQuery.data]);
 
   const playersQuery = useQuery({
-    queryKey: ["discover-players", filters],
-    queryFn: () => discoverCompatiblePlayers(supabase, filters),
+    queryKey: ["discover-players", resolvedFilters?.apiFilters],
+    queryFn: () =>
+      discoverCompatiblePlayers(supabase, resolvedFilters?.apiFilters ?? {}),
     staleTime: 60_000,
-    enabled: segment === "players" && filtersHydrated,
+    enabled:
+      segment === "players" &&
+      filtersHydrated &&
+      Boolean(resolvedFilters) &&
+      ownProfileQuery.isSuccess,
   });
 
   const matchesQuery = useQuery({
-    queryKey: ["discover-matches", filters],
-    queryFn: () => discoverOpenMatches(supabase, filters),
+    queryKey: ["discover-matches", resolvedFilters?.apiFilters],
+    queryFn: () =>
+      discoverOpenMatches(supabase, resolvedFilters?.apiFilters ?? {}),
     staleTime: 60_000,
-    enabled: segment === "matches" && filtersHydrated,
+    enabled:
+      segment === "matches" &&
+      filtersHydrated &&
+      Boolean(resolvedFilters) &&
+      ownProfileQuery.isSuccess,
   });
 
-  const activeQuery = segment === "players" ? playersQuery : matchesQuery;
+  const filteredPlayers = useMemo(() => {
+    const players = playersQuery.data ?? [];
+    if (!resolvedFilters?.applyClientFormatMatch || !ownProfileQuery.data) {
+      return players;
+    }
 
-  const sortedPlayers = useMemo(
-    () => sortCompatiblePlayers(playersQuery.data ?? [], sortMode),
-    [playersQuery.data, sortMode],
-  );
+    return players.filter((player) =>
+      playerMatchesViewerFormat({
+        viewerPrefersSingles: ownProfileQuery.data.prefers_singles,
+        viewerPrefersDoubles: ownProfileQuery.data.prefers_doubles,
+        candidatePrefersSingles: player.prefers_singles,
+        candidatePrefersDoubles: player.prefers_doubles,
+      }),
+    );
+  }, [
+    ownProfileQuery.data,
+    playersQuery.data,
+    resolvedFilters?.applyClientFormatMatch,
+  ]);
+
+  const activeQuery = segment === "players" ? playersQuery : matchesQuery;
+  const resultsCount =
+    segment === "players"
+      ? filteredPlayers.length
+      : (matchesQuery.data?.length ?? 0);
 
   const handleRefresh = async () => {
     await queryClient.invalidateQueries({ queryKey: ["discover-players"] });
     await queryClient.invalidateQueries({ queryKey: ["discover-matches"] });
   };
 
-  const handleWidenLevel = () => {
-    setLevelWindow(widenLevelWindow(levelWindow));
-    setWidenedBanner(true);
+  const toggleMatchFilter = (key: keyof DiscoverMatchToggles) => {
+    setMatchToggles((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
   };
 
-  const handleWidenZones = () => {
-    setUseWidenedZones(true);
-    setWidenedZonesBanner(true);
+  const relaxFilters = () => {
+    setMatchToggles({
+      matchLevel: false,
+      matchIntent: false,
+      matchArea: false,
+      matchFormat: false,
+      matchAvailability: false,
+    });
   };
 
-  const toggleZone = (zoneId: string) => {
-    setUseWidenedZones(false);
-    setSelectedZoneIds((current) =>
-      current.includes(zoneId)
-        ? current.filter((id) => id !== zoneId)
-        : [...current, zoneId],
-    );
-  };
+  const inviteableMatchesQuery = useQuery({
+    queryKey: ["my-matches"],
+    queryFn: () => listMyMatches(supabase),
+    enabled: segment === "players",
+  });
 
-  const formatToolbarLabel = format
-    ? t(`formats.${format}`)
-    : t("discover.anyFormat");
-
-  const hasActiveFilters =
-    Boolean(intent) ||
-    selectedZoneIds.length > 0 ||
-    useWidenedZones ||
-    !requireOverlap;
-
-  const openFormatSheet = () => {
-    setSortSheetOpen(false);
-    setFilterSheetOpen(false);
-    setFormatSheetOpen(true);
-  };
-
-  const openSortSheet = () => {
-    setFormatSheetOpen(false);
-    setFilterSheetOpen(false);
-    setSortSheetOpen(true);
-  };
-
-  const openFilterSheet = () => {
-    setFormatSheetOpen(false);
-    setSortSheetOpen(false);
-    setFilterSheetOpen(true);
-  };
-
-  const sheetFooter = (onClose: () => void) => (
-    <View style={formStyles.row}>
-      <View style={formStyles.flex}>
-        <SecondaryButton label={t("common.cancel")} onPress={onClose} />
-      </View>
-      <View style={formStyles.flex}>
-        <PrimaryButton label={t("discover.applyFilters")} onPress={onClose} />
-      </View>
-    </View>
+  const inviteableMatches = useMemo(
+    () => (inviteableMatchesQuery.data ?? []).filter(isInviteableHostedMatch),
+    [inviteableMatchesQuery.data],
   );
+
+  const locale = i18n.resolvedLanguage ?? i18n.language;
 
   const virtualizedList = useMemo(():
     ScreenVirtualizedListProps | undefined => {
     if (segment === "players") {
       return {
-        data: sortedPlayers,
+        data: filteredPlayers,
         keyExtractor: (player) => (player as CompatiblePlayerCard).user_id,
         renderItem: ({ item }) => {
           const player = item as CompatiblePlayerCard;
           return (
-            <PlayerCard
-              name={player.display_name}
-              avatarPath={player.avatar_path}
-              levelLabel={publicPlayerLevelChip(player, t)}
-              locationLabel={zoneLabelFromList(
-                player.zones,
-                i18n.resolvedLanguage ?? i18n.language,
-              )}
-              hint={playerHint(player, t)}
-              onPress={() =>
-                router.push({
-                  pathname: "/player/[id]",
-                  params: { id: player.user_id },
-                })
-              }
+            <DiscoverPlayerCardRow
+              player={player}
+              inviteableMatches={inviteableMatches}
+              locale={locale}
             />
           );
         },
@@ -307,209 +238,102 @@ export default function DiscoverScreen() {
 
     return undefined;
   }, [
-    i18n.language,
-    i18n.resolvedLanguage,
+    filteredPlayers,
+    inviteableMatches,
+    locale,
     matchesQuery.data,
     segment,
-    sortedPlayers,
     t,
   ]);
 
   return (
-    <>
-      <Screen
-        title={t("discover.title")}
-        showTitle={false}
-        refreshing={activeQuery.isFetching}
-        onRefresh={() => void handleRefresh()}
-        virtualizedList={virtualizedList}
-        fixedHeader={
-          <>
-            <SegmentTabs
-              value={segment}
-              options={[
-                { value: "players", label: t("discover.playersTab") },
-                { value: "matches", label: t("discover.matchesTab") },
-              ]}
-              onChange={setSegment}
-            />
-            <ToolbarRow
-              items={[
-                {
-                  label: formatToolbarLabel,
-                  onPress: openFormatSheet,
-                  open: formatSheetOpen,
-                  active: Boolean(format),
-                },
-                {
-                  label: t("discover.sort"),
-                  onPress: openSortSheet,
-                  open: sortSheetOpen,
-                  active: sortMode !== "recommended",
-                },
-                {
-                  label: t("discover.filters"),
-                  onPress: openFilterSheet,
-                  open: filterSheetOpen,
-                  active: hasActiveFilters,
-                },
-              ]}
-            />
-          </>
-        }
-      >
-        {widenedBanner ? (
-          <Text style={formStyles.description}>
-            {t("discover.widenLevelBanner")}
-          </Text>
-        ) : null}
-
-        {widenedZonesBanner ? (
-          <Text style={formStyles.description}>
-            {t("discover.widenZonesBanner")}
-          </Text>
-        ) : null}
-
-        {activeQuery.isLoading ? (
-          <ActivityIndicator accessibilityLabel={t("discover.loading")} />
-        ) : null}
-
-        {activeQuery.isError ? (
-          <View>
-            <Text style={formStyles.errorText}>{t("discover.error")}</Text>
-            <PrimaryButton
-              label={t("common.retry")}
-              onPress={() => void activeQuery.refetch()}
-            />
-          </View>
-        ) : null}
-
-        {segment === "players" &&
-        sortedPlayers.length === 0 &&
-        !playersQuery.isLoading ? (
-          <EmptyState
-            title={t("discover.emptyPlayersTitle")}
-            body={t("discover.emptyPlayersBody")}
-            action={
-              <>
-                <PrimaryButton
-                  label={t("matches.create.organiseCta")}
-                  onPress={() => router.push(CREATE_MATCH_ROUTE)}
-                />
-                <SecondaryButton
-                  label={t("discover.widenLevel")}
-                  onPress={handleWidenLevel}
-                />
-                <SecondaryButton
-                  label={t("discover.widenZones")}
-                  onPress={handleWidenZones}
-                />
-              </>
-            }
+    <Screen
+      title={t("discover.title")}
+      showTitle={false}
+      refreshing={activeQuery.isFetching}
+      onRefresh={() => void handleRefresh()}
+      virtualizedList={virtualizedList}
+      fixedHeader={
+        <DiscoverHeaderShell>
+          <TabPageHeader title={t("discover.title")} />
+          <SegmentTabs
+            value={segment}
+            options={[
+              { value: "players", label: t("discover.playersTab") },
+              { value: "matches", label: t("discover.matchesTab") },
+            ]}
+            onChange={setSegment}
           />
-        ) : null}
-
-        {segment === "matches" &&
-        matchesQuery.data?.length === 0 &&
-        !matchesQuery.isLoading ? (
-          <EmptyState
-            title={t("discover.emptyMatchesTitle")}
-            body={t("discover.emptyMatchesBody")}
-            action={
-              <>
-                <PrimaryButton
-                  label={t("matches.create.organiseCta")}
-                  onPress={() => router.push(CREATE_MATCH_ROUTE)}
-                />
-                <SecondaryButton
-                  label={t("discover.widenZones")}
-                  onPress={handleWidenZones}
-                />
-              </>
-            }
+          <DiscoverMatchChips
+            toggles={matchToggles}
+            onToggle={toggleMatchFilter}
           />
-        ) : null}
-      </Screen>
+        </DiscoverHeaderShell>
+      }
+    >
+      {!activeQuery.isLoading &&
+      !activeQuery.isError &&
+      !ownProfileQuery.isLoading ? (
+        <DiscoverSectionSplitter segment={segment} count={resultsCount} />
+      ) : null}
 
-      <BottomSheet
-        visible={formatSheetOpen}
-        title={t("discover.formatFilter")}
-        onClose={() => setFormatSheetOpen(false)}
-        footer={sheetFooter(() => setFormatSheetOpen(false))}
-      >
-        {([null, "singles", "doubles"] as const).map((value) => (
-          <SheetOption
-            key={value ?? "any"}
-            label={value ? t(`formats.${value}`) : t("discover.anyFormat")}
-            selected={format === value}
-            onPress={() => setFormat(value)}
+      {activeQuery.isLoading || ownProfileQuery.isLoading ? (
+        <ActivityIndicator accessibilityLabel={t("discover.loading")} />
+      ) : null}
+
+      {activeQuery.isError || ownProfileQuery.isError ? (
+        <View>
+          <Text style={formStyles.errorText}>{t("discover.error")}</Text>
+          <PrimaryButton
+            label={t("common.retry")}
+            onPress={() => void activeQuery.refetch()}
           />
-        ))}
-      </BottomSheet>
+        </View>
+      ) : null}
 
-      <BottomSheet
-        visible={filterSheetOpen}
-        title={t("discover.filterBy")}
-        onClose={() => setFilterSheetOpen(false)}
-        footer={sheetFooter(() => setFilterSheetOpen(false))}
-      >
-        <ChipMultiSelect
-          label={t("discover.zonesFilter")}
-          options={(zonesQuery.data ?? []).map((zone) => ({
-            value: zone.id,
-            label: zoneNameFromJson(
-              zone.name_i18n,
-              i18n.resolvedLanguage ?? i18n.language,
-            ),
-          }))}
-          values={
-            useWidenedZones
-              ? (zonesQuery.data ?? []).map((zone) => zone.id)
-              : selectedZoneIds
+      {segment === "players" &&
+      filteredPlayers.length === 0 &&
+      !playersQuery.isLoading &&
+      !ownProfileQuery.isLoading ? (
+        <EmptyState
+          title={t("discover.emptyPlayersTitle")}
+          body={t("discover.emptyPlayersBody")}
+          action={
+            <>
+              <PrimaryButton
+                label={t("matches.create.organiseCta")}
+                onPress={() => router.push(CREATE_MATCH_ROUTE)}
+              />
+              <SecondaryButton
+                label={t("discover.relaxFilters")}
+                onPress={relaxFilters}
+              />
+            </>
           }
-          onToggle={toggleZone}
         />
+      ) : null}
 
-        <Text style={formStyles.summaryLabel}>
-          {t("discover.intentFilter")}
-        </Text>
-        {([null, "social", "competitive", "either"] as const).map((value) => (
-          <SheetOption
-            key={value ?? "any"}
-            label={value ? t(`playIntent.${value}`) : t("discover.anyIntent")}
-            selected={intent === value}
-            onPress={() => setIntent(value)}
-          />
-        ))}
-
-        <SheetOption
-          label={t("discover.requireOverlap")}
-          selected={requireOverlap}
-          onPress={() => setRequireOverlap((value) => !value)}
+      {segment === "matches" &&
+      matchesQuery.data?.length === 0 &&
+      !matchesQuery.isLoading &&
+      !ownProfileQuery.isLoading ? (
+        <EmptyState
+          title={t("discover.emptyMatchesTitle")}
+          body={t("discover.emptyMatchesBody")}
+          action={
+            <>
+              <PrimaryButton
+                label={t("matches.create.organiseCta")}
+                onPress={() => router.push(CREATE_MATCH_ROUTE)}
+              />
+              <SecondaryButton
+                label={t("discover.relaxFilters")}
+                onPress={relaxFilters}
+              />
+            </>
+          }
         />
-      </BottomSheet>
-
-      <BottomSheet
-        visible={sortSheetOpen}
-        title={t("discover.sortBy")}
-        onClose={() => setSortSheetOpen(false)}
-        footer={sheetFooter(() => setSortSheetOpen(false))}
-      >
-        {(
-          [
-            { value: "recommended", label: t("discover.sortRecommended") },
-            { value: "level", label: t("discover.sortLevel") },
-            { value: "zone", label: t("discover.sortZone") },
-          ] as const
-        ).map((option) => (
-          <SheetOption
-            key={option.value}
-            label={option.label}
-            selected={sortMode === option.value}
-            onPress={() => setSortMode(option.value)}
-          />
-        ))}
-      </BottomSheet>
-    </>
+      ) : null}
+    </Screen>
   );
 }

@@ -8,6 +8,20 @@
     "yes": "نعم",
     "no": "لا"
   },
+  "profileScreenEdit": "تعديل",
+  "profileScreenAboutTitle": "نبذة عني",
+  "profileScreenBioPlaceholder": "أخبر اللاعبين عن أسلوب لعبك (اختياري)",
+  "profileScreenMatchesStat": "مباريات لُعبت",
+  "profileScreenRatingBuilding": "بناء التصنيف",
+  "profileScreenTennisPrefsTitle": "تفضيلات التنس",
+  "profileScreenPlayIntent": "نية اللعب",
+  "profileScreenMatchFormats": "صيغ المباراة",
+  "profileScreenPreferredAreasTitle": "المناطق المفضلة",
+  "profileScreenZonesError": "اختر منطقة واحدة على الأقل.",
+  "settingsScreenGeneral": "عام",
+  "settingsScreenLanguage": "اللغة",
+  "settingsScreenSupport": "الدعم",
+  "settingsScreenAccount": "الحساب",
   "dashboard": {
     "login": {
       "title": "تسجيل دخول لوحة النادي",
@@ -203,7 +217,13 @@
   "welcome": {
     "title": "اعثر على مباراتك المقبلة",
     "description": "تعرّف إلى لاعبين مناسبين، واتفقوا على موعد، ورتّبوا حجز ملعب في لبنان.",
-    "continue": "ابدأ الآن"
+    "continue": "ابدأ الآن",
+    "headline1": "اعثر على",
+    "headline2": "مباراتك.",
+    "headline3": "والعب اليوم.",
+    "createAccount": "إنشاء حساب",
+    "signIn": "تسجيل الدخول",
+    "termsFooter": "بالمتابعة، فإنك توافق على الشروط وسياسة الخصوصية"
   },
   "auth": {
     "signInTitle": "تسجيل الدخول أو إنشاء حساب",
@@ -225,7 +245,10 @@
     "restoring": "جارٍ استعادة جلستك…",
     "sessionError": "تعذّرت استعادة جلستك.",
     "signOut": "تسجيل الخروج",
-    "signOutError": "تعذّر تسجيل خروجك. حاول مرة أخرى."
+    "signOutError": "تعذّر تسجيل خروجك. حاول مرة أخرى.",
+    "emailPlaceholder": "you@example.com",
+    "noAccount": "ليس لديك حساب؟",
+    "checkEmailHint": "تنتهي صلاحية الوصلة بعد وقت قصير. يمكنك طلب وصلة جديدة عند الحاجة."
   },
   "onboarding": {
     "consent": {
@@ -246,7 +269,8 @@
       "adultConfirm": "أؤكد أن عمري 18 عامًا أو أكثر",
       "nameError": "أدخل اسم عرض يتراوح بين حرفين و50 حرفًا.",
       "adultError": "يجب أن يكون عمرك 18 عامًا أو أكثر للانضمام إلى هذه التجربة.",
-      "languageError": "اختر لغة واحدة على الأقل."
+      "languageError": "اختر لغة واحدة على الأقل.",
+      "languages": "اللغات التي تتحدثها"
     },
     "tennis": {
       "title": "ملفك في التنس",
@@ -275,7 +299,15 @@
       "title": "ابقَ على اطلاع",
       "description": "تساعدك الإشعارات على متابعة الدعوات وتحديثات المباريات وتنبيهات السلامة.",
       "continue": "تفعيل الإشعارات",
-      "notNow": "ليس الآن"
+      "notNow": "ليس الآن",
+      "benefitInvites": "دعوات المباريات",
+      "benefitInvitesDesc": "اعرف عندما يريد أحد اللعب معك",
+      "benefitVotes": "تصويت الوقت",
+      "benefitVotesDesc": "تلقَّ إشعارًا عند الاتفاق على موعد",
+      "benefitBooking": "تحديثات الحجز",
+      "benefitBookingDesc": "قبول النادي أو الرفض أو اقتراح وقت بديل",
+      "benefitReminders": "تذكيرات",
+      "benefitRemindersDesc": "أكّد حضورك قبل مباراتك"
     },
     "review": {
       "title": "راجع ملفك",
@@ -284,6 +316,14 @@
       "zones": "المناطق المفضّلة",
       "error": "تعذّر حفظ ملفك. حاول مرة أخرى.",
       "finish": "إكمال الإعداد"
+    },
+    "complete": {
+      "title": "أصبح كل شيء جاهزًا،",
+      "titleAccent": "يا {{name}}!",
+      "description": "ملفك جاهز. ابدأ باستكشاف اللاعبين وحجز الملاعب في لبنان.",
+      "playersNearby": "لاعبون قريبون",
+      "courtsAvailable": "ملاعب متاحة",
+      "cta": "ابدأ اللعب"
     }
   },
   "languages": {
@@ -298,7 +338,8 @@
   },
   "formats": {
     "singles": "فردي",
-    "doubles": "زوجي"
+    "doubles": "زوجي",
+    "both": "كلاهما"
   },
   "skillBands": {
     "beginner": "مبتدئ",
@@ -348,7 +389,29 @@
   "home": {
     "title": "مرحبًا، {{name}}",
     "m1Description": "أصبح حسابك وملفك في التنس جاهزين. تصفّح اللاعبين المتوافقين والمباريات المفتوحة من استكشاف.",
-    "m3Description": "أنشئ مباراة، انضم إلى مباريات مفتوحة، وأدر مبارياتك النشطة من هنا."
+    "m3Description": "أنشئ مباراة، انضم إلى مباريات مفتوحة، وأدر مبارياتك النشطة من هنا.",
+    "greeting": "مرحبًا، {{name}}",
+    "subtitle": "إليك ما يحتاج انتباهك اليوم.",
+    "stats": {
+      "matchesPlayed": "مباريات لُعبت",
+      "skillBand": "فئة المهارة",
+      "provisionalBand": "فئة مبدئية"
+    },
+    "nextActionsTitle": "الإجراءات التالية",
+    "nextAction": {
+      "inviteTitle": "دعوة مباراة بانتظارك",
+      "inviteBody": "دعاك {{name}} إلى مباراة.",
+      "voteTitle": "صوّت على وقت",
+      "voteBody": "لا يزال عليكم الاتفاق على موعد اللعب.",
+      "bookingTitle": "حجز قيد المعالجة",
+      "bookingBody": "يراجع أحد الأندية طلب حجز الملعب.",
+      "courtTitle": "جاهز لحجز ملعب",
+      "courtBody": "اتُفق على وقت. اطلب حجز ملعب بعد ذلك."
+    },
+    "upcomingTitle": "المباريات القادمة",
+    "upcomingEmpty": "لا توجد مباريات قادمة بعد. أنشئ واحدة أو انضم إلى مباراة مفتوحة.",
+    "noTimeYet": "لم يُحدَّد وقت بعد",
+    "players": "لاعبون"
   },
   "profile": {
     "title": "الملف الشخصي",
@@ -357,7 +420,28 @@
     "adultStatus": "حالة البلوغ",
     "confirmed": "مؤكدة",
     "incomplete": "غير مكتملة",
-    "availability": "إدارة التوفر"
+    "availability": "إدارة التوفر",
+    "editProfile": "تعديل الملف",
+    "editTitle": "تعديل الملف",
+    "editDescription": "حدّث ما يراه اللاعبون الآخرون عنك.",
+    "bioLabel": "نبذة",
+    "bioPlaceholder": "أخبر اللاعبين عن أسلوب لعبك (اختياري)",
+    "saveProfile": "حفظ التغييرات",
+    "saveError": "تعذّر حفظ ملفك.",
+    "tennisPreferences": "تفضيلات التنس",
+    "tennisPreferencesTitle": "تفضيلات التنس",
+    "tennisPreferencesDescription": "حدّث أسلوب لعبك. يستخدم اللاعبون الآخرون هذه المعلومات لمعرفة مدى التوافق.",
+    "tennisPreferencesLoadError": "تعذّر تحميل تفضيلات التنس.",
+    "playIntentSection": "نية اللعب",
+    "formatSection": "صيغ المباراة",
+    "savePreferences": "حفظ التفضيلات",
+    "ratingExplainerTitle": "كيف يعمل التصنيف",
+    "ratingExplainerBody": "يبقى تصنيفك مخفيًا حتى تكمل عددًا كافيًا من المباريات المؤهّلة. حتى ذلك الحين، يرى الآخرون فقط فئة مهارتك المبدئية.",
+    "aboutMeTitle": "نبذة عني",
+    "noBioYet": "أضف نبذة قصيرة ليعرف اللاعبون كيف تحب اللعب.",
+    "editButton": "تعديل",
+    "statMatches_one": "مباراة",
+    "statMatches_other": "مباريات"
   },
   "discover": {
     "title": "استكشاف",
@@ -380,6 +464,23 @@
     "requireOverlap": "يجب أن يتداخل مع توفري",
     "anyFormat": "أي صيغة",
     "anyIntent": "أي نية لعب",
+    "chipMatchLevel": "المستوى",
+    "chipMatchIntent": "النية",
+    "chipMatchArea": "المنطقة",
+    "chipMatchFormat": "الصيغة",
+    "chipMatchAvailability": "التوفر",
+    "resultsPlayers_one": "تم العثور على لاعب واحد",
+    "resultsPlayers_other": "تم العثور على {{count}} لاعب",
+    "resultsPlayersNear_one": "تم العثور على لاعب واحد بالقرب منك",
+    "resultsPlayersNear_other": "تم العثور على {{count}} لاعب بالقرب منك",
+    "resultsMatches_one": "تم العثور على مباراة مفتوحة واحدة",
+    "resultsMatches_other": "تم العثور على {{count}} مباراة مفتوحة",
+    "resultsMatchesNear_one": "تم العثور على مباراة مفتوحة واحدة قريبة",
+    "resultsMatchesNear_other": "تم العثور على {{count}} مباراة مفتوحة قريبة",
+    "relaxFilters": "عرض الجميع",
+    "matchesPlayed_one": "مباراة واحدة لُعبت",
+    "matchesPlayed_other": "{{count}} مباراة لُعبت",
+    "openPlayerProfile": "عرض ملف {{name}}",
     "loading": "جارٍ البحث عن اللاعبين والمباريات…",
     "error": "تعذّر تحميل نتائج الاستكشاف.",
     "emptyPlayersTitle": "لا يوجد لاعبون متوافقون بعد",
@@ -404,7 +505,29 @@
     "reportPlayer": "الإبلاغ عن لاعب",
     "playerLoadError": "تعذّر تحميل هذا اللاعب.",
     "overlapSlotHint": "كلاكما متفرغ {{slot}}",
-    "noOverlapHint": "لا يوجد وقت مشترك بعد"
+    "noOverlapHint": "لا يوجد وقت مشترك بعد",
+    "playerBio": "نبذة",
+    "playStyleTags": "أسلوب اللعب"
+  },
+  "playerProfile": {
+    "aboutTitle": "نبذة",
+    "availabilityTitle": "التوفر",
+    "recentMatchesTitle": "المباريات الأخيرة",
+    "matchesPlayedStat_one": "مباراة",
+    "matchesPlayedStat_other": "مباريات",
+    "noAvailability": "لم يشارك هذا اللاعب توفره الأسبوعي بعد.",
+    "noRecentMatches": "لا توجد مباريات مكتملة لعرضها بعد.",
+    "formatPreference": "يفضّل {{format}}",
+    "intentPreference": "أسلوب اللعب: {{intent}}",
+    "availabilityPartsTwo": "{{first}} و{{second}}",
+    "availabilityPartsMany": "{{first}} و{{last}}",
+    "challengeCta": "تحدّ إلى مباراة",
+    "safetyTitle": "الدعم",
+    "safetyDescription": "أبلغ عن مشكلة أو احظر هذا اللاعب من نتائج الاكتشاف.",
+    "matchWin": "ف",
+    "matchLoss": "خ",
+    "vsOpponent": "ضد {{name}}",
+    "unknownOpponent": "خصم"
   },
   "reports": {
     "title": "الإبلاغ عن لاعب",
@@ -486,7 +609,14 @@
       "incomplete": "هذه المسودة غير مكتملة. ابدأ من جديد.",
       "restart": "البدء من جديد",
       "suggestedTimes": "أوقات تناسب اللاعبين بالقرب منك",
-      "suggestedTimeOption": "{{slot}} · {{count}} متاح"
+      "suggestedTimeOption": "{{slot}} · {{count}} متاح",
+      "timingModeTitle": "كيف تريد تحديد الوقت؟",
+      "timingFixed": "لدي وقت محدد",
+      "timingFixedHint": "حدّد موعدًا واحدًا. الانضمام يعني الموافقة على اللعب فيه.",
+      "timingFlexible": "اقترح حتى 3 خيارات",
+      "timingFlexibleHint": "يصوّت الجميع حتى يحصل خيار واحد على موافقة بالإجماع.",
+      "slotLabel": "خيار الوقت {{index}}",
+      "addSlot": "إضافة وقت آخر"
     },
     "visibility": {
       "public": "عامة",
@@ -587,6 +717,7 @@
       "draftBanner": "المباراة ما زالت مسودة. ادعُ اللاعبين وانشر عندما تكون جاهزًا.",
       "continueSetup": "متابعة الإعداد",
       "hostBadge": "المضيف",
+      "participantRoster": "{{current}}/{{capacity}} لاعبين",
       "leaveDescription": "ستغادر المباراة لكنها تبقى مفتوحة للاعبين الآخرين.",
       "cancelDescription": "سيؤدي هذا إلى إلغاء المباراة للجميع وإشعار المدعوين.",
       "addTimeTitle": "إضافة وقت آخر",
@@ -613,7 +744,13 @@
       "rescheduleSuccess": "تم تحديث وقت المباراة.",
       "rescheduleError": "تعذر تغيير الوقت.",
       "rescheduleLocked": "تم طلب ملعب بالفعل. اسحب الحجز أولاً.",
-      "awaitingPlayers": "في انتظار انضمام اللاعبين"
+      "awaitingPlayers": "في انتظار انضمام اللاعبين",
+      "sections": {
+        "overview": "نظرة عامة",
+        "vote": "تصويت",
+        "chat": "محادثة",
+        "book": "حجز"
+      }
     },
     "results": {
       "title": "النتيجة",
@@ -760,6 +897,8 @@
     "saved": "تم حفظ التوفر.",
     "selectedCount": "تم اختيار {{count}} فترة",
     "selectedCount_other": "تم اختيار {{count}} فترات",
+    "oneOffCount_one": "نافذة واحدة مضافة",
+    "oneOffCount_other": "{{count}} نوافذ مضافة",
     "blocks": {
       "morning": "صباحًا",
       "afternoon": "بعد الظهر",
@@ -833,6 +972,47 @@
     "playersFree": "{{count}} متاح",
     "playersFree_other": "{{count}} متاحون",
     "minutes": "{{count}} دقيقة",
-    "timeWithPlayers": "{{time}}، {{count}} لاعبين متاحين"
+    "timeWithPlayers": "{{time}}، {{count}} لاعبين متاحين",
+    "timePlaceholder": "6:00",
+    "timeHint": "استخدم خطوات 30 دقيقة بين 7:00 صباحًا و9:00 مساءً",
+    "timeInvalid": "أدخل وقتًا صالحًا بين 7:00 صباحًا و9:00 مساءً (مثل 6:00 مساءً)",
+    "meridiem": {
+      "AM": "ص",
+      "PM": "م"
+    }
+  },
+  "notifications": {
+    "centerTitle": "الإشعارات",
+    "centerDescription": "تحديثات عن الدعوات والتصويت والحجوزات والتذكيرات.",
+    "loadError": "تعذّر تحميل إشعاراتك.",
+    "empty": "لا توجد إشعارات جديدة.",
+    "fallbackTitle": "تنس لبنان",
+    "fallbackBody": "افتح التطبيق للاطلاع على التحديث.",
+    "kinds": {
+      "match_invitation": {
+        "title": "دعوة مباراة",
+        "body": "دعاك أحد إلى مباراة."
+      },
+      "stale_match_reminder": {
+        "title": "المباراة تنتهي قريبًا",
+        "body": "أضف وقتًا جديدًا أو مدّد الإعلان."
+      },
+      "match_expired": {
+        "title": "انتهت المباراة",
+        "body": "لم تعد هذه المباراة نشطة."
+      },
+      "booking_pending_club": {
+        "title": "تحديث الحجز",
+        "body": "ردّ نادٍ على طلب حجزك."
+      },
+      "booking_stale_participant": {
+        "title": "حجز بانتظار الرد",
+        "body": "طلب حجز الملعب لا يزال قيد الانتظار."
+      },
+      "attendance_prompt": {
+        "title": "هل لعبت؟",
+        "body": "أكّد حضورك بعد مباراتك."
+      }
+    }
   }
 }

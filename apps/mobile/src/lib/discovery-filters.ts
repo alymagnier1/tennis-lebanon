@@ -1,14 +1,12 @@
 import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import type { PlayIntent } from "@tennis-lebanon/domain";
+import {
+  DEFAULT_DISCOVER_MATCH_TOGGLES,
+  type DiscoverMatchToggles,
+} from "@tennis-lebanon/domain";
 
 export type PersistedDiscoverFilters = {
-  zoneIds?: string[];
-  useWidenedZones?: boolean;
-  format?: "singles" | "doubles" | null;
-  intent?: PlayIntent | null;
-  requireAvailabilityOverlap?: boolean;
-  levelWindow?: number;
+  matchToggles?: Partial<DiscoverMatchToggles>;
 };
 
 function storageKey(userId: string): string {
@@ -31,19 +29,29 @@ async function writeValue(key: string, value: string): Promise<void> {
 
 export async function loadDiscoverFilters(
   userId: string,
-): Promise<PersistedDiscoverFilters | null> {
+): Promise<DiscoverMatchToggles> {
   const raw = await readValue(storageKey(userId));
-  if (!raw) return null;
+  if (!raw) return { ...DEFAULT_DISCOVER_MATCH_TOGGLES };
+
   try {
-    return JSON.parse(raw) as PersistedDiscoverFilters;
+    const parsed = JSON.parse(raw) as PersistedDiscoverFilters;
+    return {
+      ...DEFAULT_DISCOVER_MATCH_TOGGLES,
+      ...parsed.matchToggles,
+    };
   } catch {
-    return null;
+    return { ...DEFAULT_DISCOVER_MATCH_TOGGLES };
   }
 }
 
 export async function saveDiscoverFilters(
   userId: string,
-  filters: PersistedDiscoverFilters,
+  toggles: DiscoverMatchToggles,
 ): Promise<void> {
-  await writeValue(storageKey(userId), JSON.stringify(filters));
+  await writeValue(
+    storageKey(userId),
+    JSON.stringify({
+      matchToggles: toggles,
+    } satisfies PersistedDiscoverFilters),
+  );
 }

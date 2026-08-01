@@ -4,6 +4,7 @@ import {
   Alert,
   FlatList,
   RefreshControl,
+  Share,
   StyleSheet,
   TextInput,
   View,
@@ -32,6 +33,7 @@ import {
   formStyles,
 } from "../../../src/components/FormUi";
 import { matchHubRoute } from "../../../src/lib/routes";
+import { buildMatchInviteUrl } from "../../../src/lib/invite-link";
 import { useLayoutDirection } from "../../../src/lib/layout-direction";
 import { useResponsiveLayout } from "../../../src/lib/responsive";
 import { supabase } from "../../../src/lib/supabase";
@@ -115,12 +117,17 @@ export default function MatchInvitePlayersScreen() {
   const inviteMutation = useMutation({
     mutationFn: (playerId: string) =>
       createMatchInvite(supabase, id!, playerId),
-    onSuccess: async (_token, playerId) => {
+    onSuccess: async (token, playerId) => {
       setInvitedIds((current) =>
         current.includes(playerId) ? current : [...current, playerId],
       );
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
       Alert.alert(t("matches.invite.sent"));
+      await Share.share({
+        message: t("matches.invite.shareMessage", {
+          url: buildMatchInviteUrl(token),
+        }),
+      });
     },
     onError: () => Alert.alert(t("matches.invite.error")),
   });

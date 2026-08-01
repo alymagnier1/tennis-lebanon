@@ -1,15 +1,12 @@
 import { ScrollView, Pressable, StyleSheet, View } from "react-native";
-import {
-  colors,
-  minTouchTargetPx,
-  radii,
-  spacing,
-  typography,
-} from "@tennis-lebanon/ui";
+import { minTouchTargetPx, spacing } from "@tennis-lebanon/ui";
 import type { SkillBand } from "@tennis-lebanon/domain";
 import { isSkillBandSelected } from "@tennis-lebanon/domain";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { AppText } from "./AppText";
+import { figmaFormStyles } from "./onboarding-ui/figma-form-styles";
+import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 export function LevelRangePicker({
   label,
@@ -31,7 +28,7 @@ export function LevelRangePicker({
   return (
     <View style={styles.levelSection}>
       {label ? (
-        <AppText style={[styles.levelSectionLabel, { writingDirection }]}>
+        <AppText style={[figmaFormStyles.fieldLabel, { writingDirection }]}>
           {label}
         </AppText>
       ) : null}
@@ -39,6 +36,7 @@ export function LevelRangePicker({
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.levelRow}
+        style={styles.levelScroll}
       >
         {bands.map((band) => {
           const isSelected = isSkillBandSelected(band.value, selected);
@@ -51,7 +49,10 @@ export function LevelRangePicker({
               accessibilityState={{ checked: isSelected }}
               accessibilityLabel={band.label}
               onPress={() => onToggle(band.value)}
-              style={[styles.levelChip, isSelected && styles.levelChipSelected]}
+              style={[
+                styles.levelChip,
+                isSelected && figmaFormStyles.chipSelected,
+              ]}
             >
               {isYourLevel && yourLevelLabel ? (
                 <View style={styles.yourLevelBadge}>
@@ -63,7 +64,7 @@ export function LevelRangePicker({
               <AppText
                 style={[
                   styles.levelChipText,
-                  isSelected && styles.levelChipTextSelected,
+                  isSelected && figmaFormStyles.chipTextSelected,
                   { writingDirection },
                 ]}
                 maxLines={1}
@@ -80,54 +81,45 @@ export function LevelRangePicker({
 
 const styles = StyleSheet.create({
   levelSection: {
-    gap: spacing.sm,
+    overflow: "visible",
   },
-  levelSectionLabel: {
-    color: colors.neutral[900],
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
+  levelScroll: {
+    overflow: "visible",
   },
   levelRow: {
-    gap: spacing.xs,
-    paddingVertical: 2,
+    gap: 10,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xs,
     paddingRight: spacing.sm,
   },
   levelChip: {
     minHeight: minTouchTargetPx,
     justifyContent: "center",
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-    borderRadius: radii.md,
-    backgroundColor: colors.neutral[0],
-  },
-  levelChipSelected: {
-    borderColor: colors.brand[500],
-    backgroundColor: colors.brand[50],
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 2,
+    borderColor: tennisColors.border,
+    borderRadius: tennisRadii.md,
+    backgroundColor: tennisColors.card,
   },
   levelChipText: {
-    color: colors.neutral[900],
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
+    fontFamily: tennisFontFamily.headingSemi,
+    fontSize: 13,
+    color: tennisColors.primaryDark,
     textAlign: "center",
-  },
-  levelChipTextSelected: {
-    color: colors.brand[700],
-    fontWeight: typography.weight.semibold,
   },
   yourLevelBadge: {
     position: "absolute",
-    top: -8,
+    top: -11,
     alignSelf: "center",
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 1,
-    borderRadius: radii.full,
-    backgroundColor: colors.neutral[900],
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: tennisRadii.pill,
+    backgroundColor: tennisColors.primaryDark,
   },
   yourLevelBadgeText: {
-    color: colors.neutral[0],
-    fontSize: typography.size.xs,
-    fontWeight: typography.weight.semibold,
+    fontFamily: tennisFontFamily.bodySemi,
+    color: tennisColors.white,
+    fontSize: 10,
   },
 });

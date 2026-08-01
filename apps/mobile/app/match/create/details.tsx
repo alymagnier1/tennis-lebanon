@@ -16,23 +16,26 @@ import {
   type SkillBand,
 } from "@tennis-lebanon/domain";
 import {
-  ChipSelect,
-  FormSection,
+  AnimatedCollapse,
   SettingToggle,
   StatusBanner,
-  WizardProgress,
 } from "../../../src/components/AppUi";
 import { LevelRangePicker } from "../../../src/components/LevelRangePicker";
 import {
-  PrimaryButton,
-  Screen,
-  SecondaryButton,
-  formStyles,
-} from "../../../src/components/FormUi";
+  CreateMatchStepLayout,
+  FigmaChipRow,
+  FigmaPrimaryButton,
+  FigmaSecondaryButton,
+  figmaFormStyles,
+} from "../../../src/components/onboarding-ui";
 import {
   getCreateMatchDraft,
   updateCreateMatchDraft,
 } from "../../../src/lib/create-match-draft";
+import {
+  CreateMatchPanel,
+  CreateMatchSection,
+} from "../../../src/lib/create-match-ui";
 import { matchInviteRoute } from "../../../src/lib/routes";
 import { useAuth } from "../../../src/providers/AuthProvider";
 import { supabase } from "../../../src/lib/supabase";
@@ -134,13 +137,19 @@ export default function CreateMatchDetailsScreen() {
   }
 
   return (
-    <Screen
+    <CreateMatchStepLayout
       title={t("matches.create.title")}
-      showTitle={false}
-      description={t("matches.create.wizardStep1Description")}
+      step={1}
+      totalSteps={3}
+      onBack={() => router.back()}
+      footer={
+        <FigmaPrimaryButton
+          label={t("common.continue")}
+          disabled={Boolean(activeHostedMatch)}
+          onPress={handleNext}
+        />
+      }
     >
-      <WizardProgress step={1} totalSteps={3} />
-
       {activeHostedMatch ? (
         <StatusBanner
           body={t("matches.create.activeHostedBody", {
@@ -148,11 +157,11 @@ export default function CreateMatchDetailsScreen() {
           })}
           actions={
             <>
-              <PrimaryButton
+              <FigmaPrimaryButton
                 label={t("matches.create.continueInviting")}
                 onPress={goToActiveHostedMatch}
               />
-              <SecondaryButton
+              <FigmaSecondaryButton
                 label={t("matches.hub.cancel")}
                 onPress={() =>
                   router.push({
@@ -166,34 +175,34 @@ export default function CreateMatchDetailsScreen() {
         />
       ) : null}
 
-      <View style={formStyles.stack}>
-        <FormSection
-          title={t("matches.create.matchTypeSection")}
-          subtitle={t("matches.create.matchTypeDescription")}
-        >
-          <ChipSelect
-            label={t("discover.formatFilter")}
-            value={format}
-            options={(["singles", "doubles"] as const).map((value) => ({
-              value,
-              label: t(`formats.${value}`),
-            }))}
-            onChange={setFormat}
-          />
-          <ChipSelect
-            label={t("discover.intentFilter")}
-            value={intent}
-            options={(["social", "competitive", "either"] as const).map(
-              (value) => ({
+      <View style={figmaFormStyles.stack}>
+        <CreateMatchPanel title={t("matches.create.matchTypeSection")}>
+          <CreateMatchSection label={t("discover.formatFilter")}>
+            <FigmaChipRow
+              value={format}
+              options={(["singles", "doubles"] as const).map((value) => ({
                 value,
-                label: t(`playIntent.${value}`),
-              }),
-            )}
-            onChange={setIntent}
-          />
-        </FormSection>
+                label: t(`formats.${value}`),
+              }))}
+              onChange={setFormat}
+            />
+          </CreateMatchSection>
 
-        <FormSection title={t("matches.create.matchLevel")}>
+          <CreateMatchSection label={t("discover.intentFilter")}>
+            <FigmaChipRow
+              value={intent}
+              options={(["social", "competitive", "either"] as const).map(
+                (value) => ({
+                  value,
+                  label: t(`playIntent.${value}`),
+                }),
+              )}
+              onChange={setIntent}
+            />
+          </CreateMatchSection>
+        </CreateMatchPanel>
+
+        <CreateMatchPanel title={t("matches.create.matchLevel")}>
           <LevelRangePicker
             bands={levelOptions}
             selected={selectedBands}
@@ -205,15 +214,12 @@ export default function CreateMatchDetailsScreen() {
             yourLevel={skillBandQuery.data}
             yourLevelLabel={t("matches.create.yourLevel")}
           />
-        </FormSection>
+        </CreateMatchPanel>
 
-        <FormSection
-          title={t("matches.create.joinSettingsSection")}
-          subtitle={t("matches.create.joinSettingsDescription")}
-        >
+        <CreateMatchPanel title={t("matches.create.joinSettingsSection")}>
           <SettingToggle
+            variant="card"
             label={t("matches.create.listOnDiscover")}
-            description={t("matches.create.listOnDiscoverHint")}
             value={listOnDiscover}
             onValueChange={(value) => {
               setListOnDiscover(value);
@@ -222,21 +228,16 @@ export default function CreateMatchDetailsScreen() {
               }
             }}
           />
-          <SettingToggle
-            label={t("matches.create.requiresApprovalShort")}
-            description={t("matches.create.requiresApprovalHint")}
-            value={requiresApproval}
-            onValueChange={setRequiresApproval}
-            disabled={!listOnDiscover}
-          />
-        </FormSection>
+          <AnimatedCollapse visible={listOnDiscover}>
+            <SettingToggle
+              variant="card"
+              label={t("matches.create.requiresApprovalShort")}
+              value={requiresApproval}
+              onValueChange={setRequiresApproval}
+            />
+          </AnimatedCollapse>
+        </CreateMatchPanel>
       </View>
-
-      <PrimaryButton
-        label={t("common.continue")}
-        disabled={Boolean(activeHostedMatch)}
-        onPress={handleNext}
-      />
-    </Screen>
+    </CreateMatchStepLayout>
   );
 }

@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { getActiveZones } from "@tennis-lebanon/api";
 import type { Json } from "@tennis-lebanon/types";
+import { ErrorNotice } from "../../src/components/FormUi";
 import {
-  Choice,
-  ErrorNotice,
-  PrimaryButton,
-  Screen,
-  SecondaryButton,
-} from "../../src/components/FormUi";
+  FigmaPrimaryButton,
+  FigmaSecondaryButton,
+  OnboardingStepLayout,
+  SelectionCard,
+} from "../../src/components/onboarding-ui";
 import { supabase } from "../../src/lib/supabase";
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
 
@@ -40,15 +40,25 @@ export default function ZonesScreen() {
   };
 
   return (
-    <Screen
+    <OnboardingStepLayout
       title={t("onboarding.zones.title")}
       description={t("onboarding.zones.description")}
+      step={4}
+      totalSteps={6}
+      onBack={() => router.back()}
+      footer={
+        <FigmaPrimaryButton
+          label={t("common.continue")}
+          disabled={draft.zoneIds.length === 0}
+          onPress={() => router.push("/(onboarding)/notifications")}
+        />
+      }
     >
       {query.isLoading ? <ActivityIndicator /> : null}
       {query.isError ? (
         <>
           <ErrorNotice>{t("onboarding.zones.loadError")}</ErrorNotice>
-          <SecondaryButton
+          <FigmaSecondaryButton
             label={t("common.retry")}
             onPress={() => void query.refetch()}
           />
@@ -58,18 +68,13 @@ export default function ZonesScreen() {
         <ErrorNotice>{t("onboarding.zones.empty")}</ErrorNotice>
       ) : null}
       {query.data?.map((zone) => (
-        <Choice
+        <SelectionCard
           key={zone.id}
           label={zoneName(zone.name_i18n, i18n.resolvedLanguage ?? "en")}
           selected={draft.zoneIds.includes(zone.id)}
           onPress={() => toggle(zone.id)}
         />
       ))}
-      <PrimaryButton
-        label={t("common.continue")}
-        disabled={draft.zoneIds.length === 0}
-        onPress={() => router.push("/(onboarding)/notifications")}
-      />
-    </Screen>
+    </OnboardingStepLayout>
   );
 }
