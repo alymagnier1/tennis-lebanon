@@ -824,5 +824,15 @@
     "suspendedBody": "هذا الحساب موقوف. تواصل مع الدعم عبر القناة الرسمية لطلب المراجعة.",
     "deletionPendingBody": "طلب حذف حسابك قيد المعالجة، وقد تم تقييد الوصول إليه.",
     "contactSupport": "التواصل مع الدعم"
+  },
+  "slotPicker": {
+    "day": "اليوم",
+    "time": "وقت البدء",
+    "duration": "المدة",
+    "today": "اليوم",
+    "playersFree": "{{count}} متاح",
+    "playersFree_other": "{{count}} متاحون",
+    "minutes": "{{count}} دقيقة",
+    "timeWithPlayers": "{{time}}، {{count}} لاعبين متاحين"
   }
 }

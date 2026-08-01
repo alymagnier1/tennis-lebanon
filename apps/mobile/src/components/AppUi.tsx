@@ -25,6 +25,7 @@ import { buildCardAccessibilityLabel } from "../lib/card-accessibility";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
 import { AppText } from "./AppText";
+import { Icon } from "./Icon";
 
 export function SegmentTabs<T extends string>({
   value,
@@ -281,7 +282,7 @@ export const PlayerCard = memo(function PlayerCard({
   onPress?: () => void;
   trailing?: ReactNode;
 }) {
-  const { rowDirection, chevron, writingDirection } = useLayoutDirection();
+  const { rowDirection, writingDirection } = useLayoutDirection();
   const accessibilityLabel = buildCardAccessibilityLabel([
     name,
     levelLabel,
@@ -289,29 +290,38 @@ export const PlayerCard = memo(function PlayerCard({
     hint,
   ]);
 
+  // One identity line, one meta line, and the shared-time pill as the hero.
+  // Four stacked rows of shrinking text made the reader work out the answer
+  // to "should I play with this person" instead of being shown it.
   const content = (
     <>
-      <Avatar name={name} avatarPath={avatarPath} size={52} />
+      <Avatar name={name} avatarPath={avatarPath} size={56} />
       <View style={styles.playerCardBody}>
-        <AppText
-          style={[styles.playerCardName, { writingDirection }]}
-          maxLines={1}
+        <View
+          style={[styles.playerCardHeader, { flexDirection: rowDirection }]}
         >
-          {name}
-        </AppText>
-        <AppText
-          style={[styles.playerCardMeta, { writingDirection }]}
-          maxLines={1}
-        >
-          {levelLabel}
-        </AppText>
-        {locationLabel ? (
           <AppText
-            style={[styles.playerCardLocation, { writingDirection }]}
-            maxLines={2}
+            style={[styles.playerCardName, { writingDirection }]}
+            maxLines={1}
           >
-            {locationLabel}
+            {name}
           </AppText>
+          <AppText style={styles.playerCardLevel} maxLines={1}>
+            {levelLabel}
+          </AppText>
+        </View>
+        {locationLabel ? (
+          <View
+            style={[styles.playerCardMetaRow, { flexDirection: rowDirection }]}
+          >
+            <Icon name="place" size={typography.size.sm} />
+            <AppText
+              style={[styles.playerCardMeta, { writingDirection }]}
+              maxLines={1}
+            >
+              {locationLabel}
+            </AppText>
+          </View>
         ) : null}
         {hint ? (
           <AppText
@@ -322,8 +332,7 @@ export const PlayerCard = memo(function PlayerCard({
           </AppText>
         ) : null}
       </View>
-      {trailing ??
-        (onPress ? <AppText style={styles.chevron}>{chevron}</AppText> : null)}
+      {trailing ?? (onPress ? <Icon name="chevron" size={20} /> : null)}
     </>
   );
 
@@ -418,7 +427,7 @@ export const MatchCard = memo(function MatchCard({
   badge?: string;
   onPress?: () => void;
 }) {
-  const { rowDirection, chevron, writingDirection } = useLayoutDirection();
+  const { rowDirection, writingDirection } = useLayoutDirection();
   const accessibilityLabel = buildCardAccessibilityLabel([
     title,
     badge,
@@ -464,7 +473,7 @@ export const MatchCard = memo(function MatchCard({
           </AppText>
         ) : null}
       </View>
-      {onPress ? <AppText style={styles.chevron}>{chevron}</AppText> : null}
+      {onPress ? <Icon name="chevron" size={20} /> : null}
     </>
   );
 
@@ -935,17 +944,37 @@ const styles = StyleSheet.create({
   },
   playerCardPressed: { opacity: 0.85 },
   playerCardBody: { flex: 1, gap: 2, minWidth: 0 },
+  playerCardHeader: {
+    alignItems: "center",
+    gap: spacing.sm,
+    minWidth: 0,
+  },
   playerCardName: {
-    color: colors.neutral[900],
+    flexShrink: 1,
+    color: semantic.textPrimary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
   },
-  playerCardMeta: {
-    color: colors.neutral[700],
-    fontSize: typography.size.sm,
+  /** Level reads faster as a chip than as a word in a sentence. */
+  playerCardLevel: {
+    flexShrink: 0,
+    overflow: "hidden",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radii.sm,
+    backgroundColor: colors.brand[50],
+    color: colors.brand[700],
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
   },
-  playerCardLocation: {
-    color: colors.neutral[500],
+  playerCardMetaRow: {
+    alignItems: "center",
+    gap: spacing.xs,
+    minWidth: 0,
+  },
+  playerCardMeta: {
+    flexShrink: 1,
+    color: semantic.textTertiary,
     fontSize: typography.size.sm,
   },
   // The hint carries the shared-availability slot, which is the fact that
@@ -1029,11 +1058,6 @@ const styles = StyleSheet.create({
     color: colors.neutral[700],
     fontSize: typography.size.sm,
     marginTop: spacing.xs,
-  },
-  chevron: {
-    color: colors.neutral[300],
-    fontSize: typography.size.xl,
-    fontWeight: typography.weight.regular,
   },
   emptyState: {
     alignItems: "center",

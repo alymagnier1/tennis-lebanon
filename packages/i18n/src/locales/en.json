@@ -824,5 +824,15 @@
     "suspendedBody": "This account is suspended. Contact support from the official support channel for a review.",
     "deletionPendingBody": "Your deletion request is pending and account access is restricted.",
     "contactSupport": "Contact support"
+  },
+  "slotPicker": {
+    "day": "Day",
+    "time": "Start time",
+    "duration": "How long",
+    "today": "Today",
+    "playersFree": "{{count}} free",
+    "playersFree_other": "{{count}} free",
+    "minutes": "{{count}} min",
+    "timeWithPlayers": "{{time}}, {{count}} players free"
   }
 }

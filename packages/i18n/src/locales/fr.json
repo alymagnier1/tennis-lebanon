@@ -824,5 +824,15 @@
     "suspendedBody": "Ce compte est suspendu. Contactez l’assistance via le canal officiel pour demander un examen.",
     "deletionPendingBody": "Votre demande de suppression est en attente et l’accès au compte est limité.",
     "contactSupport": "Contacter l’assistance"
+  },
+  "slotPicker": {
+    "day": "Jour",
+    "time": "Heure de début",
+    "duration": "Durée",
+    "today": "Aujourd’hui",
+    "playersFree": "{{count}} dispo",
+    "playersFree_other": "{{count}} dispos",
+    "minutes": "{{count}} min",
+    "timeWithPlayers": "{{time}}, {{count}} joueurs disponibles"
   }
 }
