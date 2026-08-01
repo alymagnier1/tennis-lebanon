@@ -18,6 +18,23 @@ export const DEFAULT_DISCOVERY_HORIZON_DAYS = 14;
 export const MAX_DISCOVERY_HORIZON_DAYS = 28;
 export const DEFAULT_LEVEL_WINDOW = 1;
 export const WIDENED_LEVEL_WINDOW = 2;
+export const MAX_LEVEL_WINDOW = 4;
+
+export type DiscoverMatchToggles = {
+  matchLevel: boolean;
+  matchIntent: boolean;
+  matchArea: boolean;
+  matchFormat: boolean;
+  matchAvailability: boolean;
+};
+
+export const DEFAULT_DISCOVER_MATCH_TOGGLES: DiscoverMatchToggles = {
+  matchLevel: true,
+  matchIntent: false,
+  matchArea: true,
+  matchFormat: false,
+  matchAvailability: false,
+};
 
 export const matchFormatSchema = z.enum(["singles", "doubles"]);
 
@@ -79,6 +96,62 @@ export function widenLevelWindow(currentWindow: number): number {
 
 export function widenDiscoveryZoneIds(allZoneIds: string[]): string[] {
   return [...allZoneIds];
+}
+
+export function playerMatchesViewerFormat(input: {
+  viewerPrefersSingles: boolean;
+  viewerPrefersDoubles: boolean;
+  candidatePrefersSingles: boolean;
+  candidatePrefersDoubles: boolean;
+}): boolean {
+  return (
+    (input.viewerPrefersSingles && input.candidatePrefersSingles) ||
+    (input.viewerPrefersDoubles && input.candidatePrefersDoubles)
+  );
+}
+
+export function resolveDiscoverFormatFilter(input: {
+  matchFormat: boolean;
+  prefersSingles: boolean;
+  prefersDoubles: boolean;
+}): "singles" | "doubles" | "both" | null {
+  if (!input.matchFormat) return null;
+  if (input.prefersSingles && !input.prefersDoubles) return "singles";
+  if (input.prefersDoubles && !input.prefersSingles) return "doubles";
+  return "both";
+}
+
+export function resolveDiscoverFiltersFromProfile(input: {
+  toggles: DiscoverMatchToggles;
+  playIntent: PlayIntent;
+  prefersSingles: boolean;
+  prefersDoubles: boolean;
+  allZoneIds?: string[];
+}): DiscoveryFiltersInput & { applyClientFormatMatch: boolean } {
+  const formatFilter = resolveDiscoverFormatFilter({
+    matchFormat: input.toggles.matchFormat,
+    prefersSingles: input.prefersSingles,
+    prefersDoubles: input.prefersDoubles,
+  });
+
+  return {
+    zoneIds:
+      input.toggles.matchArea || !input.allZoneIds?.length
+        ? undefined
+        : input.allZoneIds,
+    format: formatFilter === "both" ? null : formatFilter,
+    intent:
+      input.toggles.matchIntent && input.playIntent !== "either"
+        ? input.playIntent
+        : null,
+    requireAvailabilityOverlap: input.toggles.matchAvailability,
+    levelWindow: input.toggles.matchLevel
+      ? DEFAULT_LEVEL_WINDOW
+      : MAX_LEVEL_WINDOW,
+    horizonDays: DEFAULT_DISCOVERY_HORIZON_DAYS,
+    limit: 20,
+    applyClientFormatMatch: formatFilter === "both",
+  };
 }
 
 export function discoveryFiltersForMatchInvite(input: {

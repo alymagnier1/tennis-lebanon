@@ -86,8 +86,13 @@ export function visibilityFromListOnDiscover(
   return listOnDiscover ? "public" : "invite_only";
 }
 
+/**
+ * Accepts a plain string because RPC payloads type `visibility` as text.
+ * Only "public" is listed, so an unrecognised value correctly reads as not
+ * listed rather than forcing a cast at every call site.
+ */
 export function listOnDiscoverFromVisibility(
-  visibility: MatchVisibility | undefined,
+  visibility: string | null | undefined,
 ): boolean {
   return visibility === "public";
 }

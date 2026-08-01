@@ -21,6 +21,7 @@ export type CompatiblePlayerCard = {
   /** Earliest hour-or-longer slot both players are free, if any. */
   overlap_starts_at: string | null;
   overlap_ends_at: string | null;
+  bio: string | null;
 };
 
 export type OpenMatchCard = {

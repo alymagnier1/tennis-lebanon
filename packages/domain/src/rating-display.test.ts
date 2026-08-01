@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   formatOwnRatingHeadline,
+  formatOwnRatingStatValue,
   formatPublicPlayerLevelLabel,
   isProvisionalPlayerRating,
   PROVISIONAL_RATING_MATCH_THRESHOLD,
@@ -55,5 +56,15 @@ describe("rating-display", () => {
           `Provisional ${count}/${threshold}`,
       }),
     ).toBe("Rating 1312");
+  });
+
+  it("formats compact own rating stat values", () => {
+    expect(
+      formatOwnRatingStatValue({ ratedMatchCount: 0, internalRating: 1200 }),
+    ).toEqual({ value: "0/5", isProvisional: true });
+
+    expect(
+      formatOwnRatingStatValue({ ratedMatchCount: 6, internalRating: 1312 }),
+    ).toEqual({ value: "1312", isProvisional: false });
   });
 });

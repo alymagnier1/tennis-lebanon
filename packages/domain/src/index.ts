@@ -1,4 +1,5 @@
 export * from "./onboarding";
+export * from "./profile";
 export * from "./discovery";
 export * from "./matches";
 export * from "./skill-range";

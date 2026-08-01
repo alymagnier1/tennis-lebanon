@@ -1821,6 +1821,10 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      get_public_player_availability_summary: {
+        Args: { p_user_id: string };
+        Returns: Json;
+      };
       has_availability_overlap: {
         Args: {
           p_range_end: string;
@@ -1943,6 +1947,15 @@ export type Database = {
           score: Json;
           viewer_won: boolean;
           winner_user_id: string;
+        }[];
+      };
+      list_public_player_recent_matches: {
+        Args: { p_limit?: number; p_user_id: string };
+        Returns: {
+          opponent_names: string;
+          played_at: string;
+          player_won: boolean;
+          score: Json;
         }[];
       };
       list_my_match_invites: {
@@ -2145,6 +2158,10 @@ export type Database = {
       };
       set_court_weekly_hours: {
         Args: { p_court_id: string; p_hours: Json };
+        Returns: undefined;
+      };
+      set_player_preferred_zones: {
+        Args: { p_zone_ids: string[] };
         Returns: undefined;
       };
       set_recurring_availability: {
