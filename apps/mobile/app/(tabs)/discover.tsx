@@ -40,11 +40,11 @@ import {
   loadDiscoverFilters,
   saveDiscoverFilters,
 } from "../../src/lib/discovery-filters";
-import { formatUtcSlotInBeirut } from "../../src/lib/beirut-time";
+import { formatUtcSlotCompact } from "../../src/lib/beirut-time";
 import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
-import { publicPlayerLevelLabel } from "../../src/lib/player-level-label";
+import { publicPlayerLevelChip } from "../../src/lib/player-level-label";
 import { zoneLabelFromList, zoneNameFromJson } from "../../src/lib/zones";
 
 type DiscoverSegment = "players" | "matches";
@@ -54,27 +54,20 @@ function playerHint(
   player: CompatiblePlayerCard,
   t: (key: string, options?: Record<string, unknown>) => string,
 ): string | undefined {
-  // Discovery no longer filters on overlap, so every card states its shared
-  // time explicitly: the concrete slot when we have one, otherwise a plain
-  // "no shared time yet" so the difference is visible rather than implied.
-  const overlapHint =
-    player.overlap_starts_at && player.overlap_ends_at
-      ? t("discover.overlapSlotHint", {
-          slot: formatUtcSlotInBeirut(
-            player.overlap_starts_at,
-            player.overlap_ends_at,
-          ),
-        })
-      : player.availability_overlap
-        ? t("discover.overlapHint")
-        : t("discover.noOverlapHint");
-
-  const hints = [
-    overlapHint,
-    player.zone_overlap ? t("discover.zoneHint") : null,
-    player.level_fit ? t("discover.levelHint") : null,
-  ].filter(Boolean);
-  return hints.length > 0 ? hints.join(" · ") : undefined;
+  // The hint renders as a pill, so it carries one fact only: the shared slot.
+  // Zone and level used to be appended here, which made a 71-character
+  // run-on pill — and both are already shown, as the meta line and the level
+  // chip respectively.
+  return player.overlap_starts_at && player.overlap_ends_at
+    ? t("discover.overlapSlotHint", {
+        slot: formatUtcSlotCompact(
+          player.overlap_starts_at,
+          player.overlap_ends_at,
+        ),
+      })
+    : player.availability_overlap
+      ? t("discover.overlapHint")
+      : t("discover.noOverlapHint");
 }
 
 export default function DiscoverScreen() {
@@ -270,7 +263,7 @@ export default function DiscoverScreen() {
             <PlayerCard
               name={player.display_name}
               avatarPath={player.avatar_path}
-              levelLabel={publicPlayerLevelLabel(player, t)}
+              levelLabel={publicPlayerLevelChip(player, t)}
               locationLabel={zoneLabelFromList(
                 player.zones,
                 i18n.resolvedLanguage ?? i18n.language,

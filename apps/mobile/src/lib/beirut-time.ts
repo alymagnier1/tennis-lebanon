@@ -75,6 +75,30 @@ export function formatUtcInBeirut(iso: string): string {
   }).format(new Date(iso));
 }
 
+/**
+ * Short form for chips and pills: "Fri 18:00–19:30".
+ *
+ * The long form renders as "Aug 8, 9:00 AM–12:00 PM", which wrapped the
+ * availability pill onto two lines at 375px. For a slot inside the two-week
+ * discovery horizon the weekday is also more useful than the date.
+ */
+export function formatUtcSlotCompact(startIso: string, endIso: string): string {
+  const weekday = new Intl.DateTimeFormat(undefined, {
+    timeZone: BEIRUT_TIME_ZONE,
+    weekday: "short",
+  });
+  const time = new Intl.DateTimeFormat(undefined, {
+    timeZone: BEIRUT_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  const start = new Date(startIso);
+  const end = new Date(endIso);
+  return `${weekday.format(start)} ${time.format(start)}–${time.format(end)}`;
+}
+
 export function formatUtcSlotInBeirut(
   startIso: string,
   endIso: string,
