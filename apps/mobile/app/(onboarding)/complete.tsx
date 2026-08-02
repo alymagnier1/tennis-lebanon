@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../../src/components/AppText";
+import { Icon } from "../../src/components/Icon";
 import {
   CourtGridOverlay,
   FigmaPrimaryButton,
@@ -27,7 +28,7 @@ export default function OnboardingCompleteScreen() {
       <CourtGridOverlay />
       <View style={styles.content}>
         <View style={styles.icon}>
-          <AppText style={styles.iconText}>🎾</AppText>
+          <Icon name="court" size={44} color={tennisColors.primary} />
         </View>
         <AppText style={styles.title}>{t("onboarding.complete.title")}</AppText>
         <AppText style={styles.titleAccent}>
@@ -81,9 +82,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 24,
-  },
-  iconText: {
-    fontSize: 44,
   },
   title: {
     fontFamily: tennisFontFamily.headingExtra,

@@ -47,22 +47,22 @@ export default function NotificationPrimerScreen() {
       }
     >
       <BenefitCard
-        icon="📩"
+        icon="chat"
         title={t("onboarding.notifications.benefitInvites")}
         description={t("onboarding.notifications.benefitInvitesDesc")}
       />
       <BenefitCard
-        icon="🗳"
+        icon="check"
         title={t("onboarding.notifications.benefitVotes")}
         description={t("onboarding.notifications.benefitVotesDesc")}
       />
       <BenefitCard
-        icon="🏟"
+        icon="court"
         title={t("onboarding.notifications.benefitBooking")}
         description={t("onboarding.notifications.benefitBookingDesc")}
       />
       <BenefitCard
-        icon="⏰"
+        icon="clock"
         title={t("onboarding.notifications.benefitReminders")}
         description={t("onboarding.notifications.benefitRemindersDesc")}
       />

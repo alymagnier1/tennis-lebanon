@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { AppText } from "../AppText";
+import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 
@@ -119,14 +120,14 @@ export function BenefitCard({
   title,
   description,
 }: {
-  icon: string;
+  icon: IconName;
   title: string;
   description: string;
 }) {
   return (
     <View style={styles.benefit}>
       <View style={styles.benefitIcon}>
-        <AppText style={styles.benefitIconText}>{icon}</AppText>
+        <Icon name={icon} size={20} color={tennisColors.primary} />
       </View>
       <View style={styles.benefitBody}>
         <AppText style={styles.benefitTitle}>{title}</AppText>

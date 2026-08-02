@@ -5,6 +5,7 @@ import type {
 } from "@tennis-lebanon/api";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
+import { Icon, type IconName } from "../Icon";
 import { PlayerProfileSection } from "./PlayerProfileSection";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
@@ -15,6 +16,24 @@ import {
   weekdayShortLabels,
 } from "../../lib/public-availability-summary";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+
+/**
+ * Icon plus text rather than an emoji prefix: emoji render differently on every
+ * platform, do not follow the text colour, and get read aloud by screen readers
+ * as their own name before the line they decorate.
+ */
+function DetailLine({ icon, text }: { icon: IconName; text: string }) {
+  const { rowDirection, writingDirection } = useLayoutDirection();
+
+  return (
+    <View style={[styles.detailRow, { flexDirection: rowDirection }]}>
+      <Icon name={icon} size={14} color={tennisColors.mutedForeground} />
+      <AppText style={[styles.detailLine, { writingDirection }]}>
+        {text}
+      </AppText>
+    </View>
+  );
+}
 
 export function PlayerAvailabilitySection({
   player,
@@ -45,17 +64,15 @@ export function PlayerAvailabilitySection({
           ))}
         </View>
       ) : null}
-      {dayPartsLabel ? (
-        <AppText style={[styles.detailLine, { writingDirection }]}>
-          {`⏰ ${dayPartsLabel}`}
-        </AppText>
-      ) : null}
-      <AppText style={[styles.detailLine, { writingDirection }]}>
-        {`🎾 ${t("playerProfile.formatPreference", { format: formatLabel })}`}
-      </AppText>
-      <AppText style={[styles.detailLine, { writingDirection }]}>
-        {`🎯 ${t("playerProfile.intentPreference", { intent: intentLabel })}`}
-      </AppText>
+      {dayPartsLabel ? <DetailLine icon="clock" text={dayPartsLabel} /> : null}
+      <DetailLine
+        icon="court"
+        text={t("playerProfile.formatPreference", { format: formatLabel })}
+      />
+      <DetailLine
+        icon="playIntent"
+        text={t("playerProfile.intentPreference", { intent: intentLabel })}
+      />
       {!hasSummary ? (
         <AppText style={[styles.emptyHint, { writingDirection }]}>
           {t("playerProfile.noAvailability")}
@@ -81,7 +98,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: tennisColors.primary,
   },
+  detailRow: {
+    alignItems: "center",
+    gap: 6,
+  },
   detailLine: {
+    flexShrink: 1,
     fontFamily: tennisFontFamily.body,
     fontSize: 13,
     color: tennisColors.mutedForeground,

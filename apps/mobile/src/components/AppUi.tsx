@@ -28,7 +28,7 @@ import { buildCardAccessibilityLabel } from "../lib/card-accessibility";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
 import { AppText } from "./AppText";
-import { Icon } from "./Icon";
+import { Icon, type IconName } from "./Icon";
 import { mobileBrand } from "../theme/mobile-brand";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
@@ -529,7 +529,7 @@ export function EmptyState({
   body,
   action,
 }: {
-  icon?: string;
+  icon?: IconName;
   title: string;
   body: string;
   action?: ReactNode;
@@ -538,9 +538,9 @@ export function EmptyState({
 
   return (
     <View style={styles.emptyState}>
-      <AppText accessibilityElementsHidden style={styles.emptyIcon}>
-        {icon ?? "🎾"}
-      </AppText>
+      <View accessibilityElementsHidden style={styles.emptyIcon}>
+        <Icon name={icon ?? "court"} size={56} color={colors.neutral[300]} />
+      </View>
       <AppText style={[styles.emptyTitle, { writingDirection }]} maxLines={3}>
         {title}
       </AppText>
@@ -1153,7 +1153,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
-  emptyIcon: { fontSize: 56 },
+  emptyIcon: { alignItems: "center", justifyContent: "center" },
   emptyTitle: {
     color: colors.neutral[900],
     fontSize: typography.size.lg,
