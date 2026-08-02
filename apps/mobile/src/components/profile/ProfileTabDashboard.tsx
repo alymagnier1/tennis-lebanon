@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  clearOwnAvatar,
   getOwnPlayerProfile,
   listMyCompletedMatches,
 } from "@tennis-lebanon/api";
@@ -94,16 +95,20 @@ export function ProfileTabDashboard() {
       : t("rating.ownRatingLabel")
     : t("rating.ownRatingLabel");
 
+  async function refreshAvatarViews() {
+    await Promise.all([
+      refreshProfile(),
+      queryClient.invalidateQueries({ queryKey: ["own-player-profile"] }),
+      queryClient.invalidateQueries({ queryKey: ["avatar-url"] }),
+      queryClient.invalidateQueries({ queryKey: ["discover-players"] }),
+    ]);
+  }
+
   const avatarMutation = useMutation({
     mutationFn: pickAndUploadOwnAvatar,
     onSuccess: async (result) => {
       if (result.status === "success") {
-        await Promise.all([
-          refreshProfile(),
-          queryClient.invalidateQueries({ queryKey: ["own-player-profile"] }),
-          queryClient.invalidateQueries({ queryKey: ["avatar-url"] }),
-          queryClient.invalidateQueries({ queryKey: ["discover-players"] }),
-        ]);
+        await refreshAvatarViews();
         return;
       }
 
@@ -115,6 +120,36 @@ export function ProfileTabDashboard() {
       Alert.alert(t("profile.avatarUploadError"));
     },
   });
+
+  const removeAvatarMutation = useMutation({
+    mutationFn: () => clearOwnAvatar(supabase),
+    onSuccess: refreshAvatarViews,
+    onError: () => {
+      Alert.alert(t("profile.avatarRemoveError"));
+    },
+  });
+
+  // With a photo already set, going straight to the picker would leave no way
+  // back to the initials placeholder.
+  function handleAvatarPress() {
+    if (!profile?.avatar_path) {
+      avatarMutation.mutate();
+      return;
+    }
+
+    Alert.alert(t("profile.avatarEditLabel"), undefined, [
+      {
+        text: t("profile.avatarChange"),
+        onPress: () => avatarMutation.mutate(),
+      },
+      {
+        text: t("profile.avatarRemove"),
+        style: "destructive",
+        onPress: () => removeAvatarMutation.mutate(),
+      },
+      { text: t("common.cancel"), style: "cancel" },
+    ]);
+  }
 
   return (
     <View style={styles.root}>
@@ -136,8 +171,10 @@ export function ProfileTabDashboard() {
           ratingLabel={ratingLabel}
           editLabel={profileScreenEditLabel(t)}
           avatarEditLabel={t("profile.avatarEditLabel")}
-          avatarUploading={avatarMutation.isPending}
-          onAvatarPress={() => avatarMutation.mutate()}
+          avatarUploading={
+            avatarMutation.isPending || removeAvatarMutation.isPending
+          }
+          onAvatarPress={handleAvatarPress}
           onEdit={() => router.push("/profile/edit")}
           onRatingInfo={() => setShowRatingExplainer(true)}
         />

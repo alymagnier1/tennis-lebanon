@@ -3,7 +3,7 @@
 begin;
 
 create extension if not exists pgtap;
-select plan(5);
+select plan(6);
 
 create or replace function pg_temp.assert_true(
   p_condition boolean,
@@ -128,6 +128,41 @@ end;
 $$;
 
 select ok(true, 'replacing an avatar succeeds and reports the path it replaced');
+
+-- ---------------------------------------------------------------------------
+-- Clearing: a null path is "remove my photo", not a malformed one.
+-- ---------------------------------------------------------------------------
+
+do $$
+declare
+  v_user_a uuid := '11111111-1111-1111-1111-111111111111';
+  v_current text := v_user_a::text || '/avatar-2.jpg';
+  v_replaced text;
+begin
+  perform pg_temp.set_caller(v_user_a);
+
+  v_replaced := public.set_own_avatar(null);
+
+  perform pg_temp.assert_true(
+    v_replaced = v_current,
+    format('clearing should report the removed path, got: %s', coalesce(v_replaced, 'null'))
+  );
+
+  perform pg_temp.assert_true(
+    (select avatar_path from public.profiles where id = v_user_a) is null,
+    'clearing should leave the profile with no avatar'
+  );
+
+  -- Clearing again is a no-op rather than an error, so a double tap or a retry
+  -- after a failed object delete cannot wedge the player.
+  perform pg_temp.assert_true(
+    public.set_own_avatar(null) is null,
+    'clearing an already-empty avatar should report nothing to remove'
+  );
+end;
+$$;
+
+select ok(true, 'a null path clears the avatar and reports what to delete');
 
 -- ---------------------------------------------------------------------------
 -- Other players must be able to read the object, or every discover card and

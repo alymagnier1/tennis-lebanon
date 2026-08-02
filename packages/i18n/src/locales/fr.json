@@ -450,7 +450,10 @@
     "skillBandTitle": "Niveau",
     "skillBandProvisionalHint": "Vous pouvez ajuster votre niveau tant que votre classement est provisoire. Après cinq matchs classés, vos résultats fixent le niveau.",
     "skillBandLockedHint": "Votre niveau est désormais basé sur vos matchs classés et ne peut plus être modifié manuellement.",
-    "skillBandUpdateError": "Impossible de mettre à jour votre niveau."
+    "skillBandUpdateError": "Impossible de mettre à jour votre niveau.",
+    "avatarChange": "Changer la photo",
+    "avatarRemove": "Supprimer la photo",
+    "avatarRemoveError": "Impossible de supprimer votre photo. Veuillez réessayer."
   },
   "discover": {
     "title": "Découvrir",
@@ -872,7 +875,8 @@
       "accept": "Accepter l'invitation",
       "decline": "Refuser",
       "pendingCount": "{{count}} joueur(s) à inviter",
-      "autoSendOnPublish": "Ils recevront une invitation dans l'app à la publication."
+      "autoSendOnPublish": "Ils recevront une invitation dans l'app à la publication.",
+      "rateLimited": "Vous avez envoyé beaucoup d’invitations aujourd’hui. Réessayez demain."
     },
     "policy": {
       "leaveBeforeBooking": "Vous pouvez quitter librement tant qu'aucun court n'est réservé. Les changements tardifs répétés peuvent affecter votre fiabilité.",

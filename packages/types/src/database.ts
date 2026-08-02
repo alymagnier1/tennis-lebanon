@@ -1759,6 +1759,10 @@ export type Database = {
         Args: { p_surface: string; p_user_id: string };
         Returns: undefined;
       };
+      enforce_invite_rate_limit: {
+        Args: { p_user_id: string };
+        Returns: undefined;
+      };
       enqueue_notification: {
         Args: {
           p_deduplication_key: string;
@@ -2176,7 +2180,7 @@ export type Database = {
         Args: { p_court_id: string; p_hours: Json };
         Returns: undefined;
       };
-      set_own_avatar: { Args: { p_avatar_path: string }; Returns: string };
+      set_own_avatar: { Args: { p_avatar_path?: string }; Returns: string };
       set_own_skill_band: {
         Args: { p_skill_band: Database["public"]["Enums"]["skill_band"] };
         Returns: undefined;

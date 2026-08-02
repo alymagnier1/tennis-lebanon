@@ -133,7 +133,14 @@ export default function MatchInvitePlayersScreen() {
         }),
       });
     },
-    onError: () => Alert.alert(t("matches.invite.error")),
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "";
+      Alert.alert(
+        message.includes("invite_rate_limited")
+          ? t("matches.invite.rateLimited")
+          : t("matches.invite.error"),
+      );
+    },
   });
 
   useEffect(() => {

@@ -203,20 +203,41 @@ export async function updatePreferredZones(
 
 const AVATAR_BUCKET = "avatars";
 
-/** Returns the path this replaced, if any, for the caller to clean up. */
+/**
+ * Points the profile at an uploaded object, or clears it when given null.
+ * Returns the path this replaced, if any, for the caller to clean up.
+ */
 export async function setOwnAvatar(
   client: TennisSupabaseClient,
-  avatarPath: string,
+  avatarPath: string | null,
 ): Promise<string | null> {
-  const { data, error } = await client.rpc("set_own_avatar", {
-    p_avatar_path: avatarPath,
-  });
+  // Omitted rather than passed as null: the RPC defaults the argument, and
+  // that is what makes "clear my photo" expressible without casting away the
+  // generated non-null parameter type.
+  const { data, error } = await client.rpc(
+    "set_own_avatar",
+    avatarPath === null ? {} : { p_avatar_path: avatarPath },
+  );
 
   if (error) {
     throw error;
   }
 
   return data ?? null;
+}
+
+/** Removes the stored object too, so clearing a photo does not leave it behind. */
+export async function clearOwnAvatar(
+  client: TennisSupabaseClient,
+): Promise<void> {
+  const replacedPath = await setOwnAvatar(client, null);
+
+  if (replacedPath) {
+    await client.storage
+      .from(AVATAR_BUCKET)
+      .remove([replacedPath])
+      .catch(() => undefined);
+  }
 }
 
 /**
