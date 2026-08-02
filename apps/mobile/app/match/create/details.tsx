@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { listMyMatches } from "@tennis-lebanon/api";
+import { skillBandsForPlayer } from "../../../src/lib/prefill-create-match-for-player";
 import {
   findActiveHostedMatch,
   listOnDiscoverFromVisibility,
@@ -42,7 +43,14 @@ import { supabase } from "../../../src/lib/supabase";
 
 type MatchFormat = "singles" | "doubles";
 
-function initialSelectedBands(draft: ReturnType<typeof getCreateMatchDraft>) {
+/**
+ * Bands the draft already carries, or null when the host has not chosen yet.
+ * Null defers to {@link defaultSelectedBands}, which needs the host's own band
+ * and therefore cannot be resolved at first render.
+ */
+function draftSelectedBands(
+  draft: ReturnType<typeof getCreateMatchDraft>,
+): SkillBand[] | null {
   if (draft.selectedSkillBands?.length) {
     return draft.selectedSkillBands;
   }
@@ -51,7 +59,22 @@ function initialSelectedBands(draft: ReturnType<typeof getCreateMatchDraft>) {
     return skillBandsInRange(draft.minSkill, draft.maxSkill);
   }
 
-  return skillBandsInRange("improving", "intermediate");
+  return null;
+}
+
+/**
+ * A host who accepts the default should get a match they can play in.
+ *
+ * This used to be a hardcoded improving–intermediate, so an advanced host
+ * published a listing nobody at their own level could find — discovery filters
+ * on level overlap, and the host is auto-joined regardless, so nothing surfaced
+ * the mismatch. Falls back to the old pair only while the band is still loading
+ * or the player has none.
+ */
+function defaultSelectedBands(myBand: SkillBand | null | undefined) {
+  return myBand
+    ? skillBandsForPlayer(myBand)
+    : skillBandsInRange("improving", "intermediate");
 }
 
 export default function CreateMatchDetailsScreen() {
@@ -60,8 +83,8 @@ export default function CreateMatchDetailsScreen() {
   const draft = getCreateMatchDraft();
   const [format, setFormat] = useState<MatchFormat>(draft.format ?? "singles");
   const [intent, setIntent] = useState<PlayIntent>(draft.intent ?? "either");
-  const [selectedBands, setSelectedBands] = useState<SkillBand[]>(() =>
-    initialSelectedBands(draft),
+  const [selectedBands, setSelectedBands] = useState<SkillBand[] | null>(() =>
+    draftSelectedBands(draft),
   );
   const [listOnDiscover, setListOnDiscover] = useState(() =>
     listOnDiscoverFromVisibility(draft.visibility),
@@ -104,18 +127,25 @@ export default function CreateMatchDetailsScreen() {
     [t],
   );
 
+  // Derived rather than seeded in an effect: the host's band arrives async, and
+  // setting state from an effect cascades a second render on every load.
+  const effectiveBands = useMemo(
+    () => selectedBands ?? defaultSelectedBands(skillBandQuery.data),
+    [selectedBands, skillBandQuery.data],
+  );
+
   useEffect(() => {
-    const { minSkill, maxSkill } = skillRangeFromSelection(selectedBands);
+    const { minSkill, maxSkill } = skillRangeFromSelection(effectiveBands);
     updateCreateMatchDraft({
       format,
       intent,
       minSkill,
       maxSkill,
-      selectedSkillBands: selectedBands,
+      selectedSkillBands: effectiveBands,
       visibility: visibilityFromListOnDiscover(listOnDiscover),
       requiresCreatorApproval: requiresApproval,
     });
-  }, [format, intent, listOnDiscover, requiresApproval, selectedBands]);
+  }, [format, intent, listOnDiscover, requiresApproval, effectiveBands]);
 
   function goToActiveHostedMatch() {
     if (!activeHostedMatch) return;
@@ -213,11 +243,9 @@ export default function CreateMatchDetailsScreen() {
         <CreateMatchPanel title={t("matches.create.matchLevel")}>
           <LevelRangePicker
             bands={levelOptions}
-            selected={selectedBands}
+            selected={effectiveBands}
             onToggle={(band) =>
-              setSelectedBands((current) =>
-                toggleSkillBandSelection(current, band),
-              )
+              setSelectedBands(toggleSkillBandSelection(effectiveBands, band))
             }
             yourLevel={skillBandQuery.data}
             yourLevelLabel={t("matches.create.yourLevel")}
