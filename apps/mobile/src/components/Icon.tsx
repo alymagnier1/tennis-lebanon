@@ -31,6 +31,7 @@ const ICONS = {
   sort: "swap-vertical-outline",
   notifications: "notifications-outline",
   info: "information-circle-outline",
+  camera: "camera-outline",
 } as const;
 
 export type IconName = keyof typeof ICONS;
