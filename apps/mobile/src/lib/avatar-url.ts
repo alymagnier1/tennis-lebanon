@@ -1,15 +1,23 @@
 import { supabase } from "./supabase";
+import { AVATAR_SIGNED_URL_TTL_SECONDS } from "./avatar-constants";
 
-export function resolveAvatarUri(
+export async function resolveAvatarUri(
   avatarPath: string | null | undefined,
-): string | null {
+): Promise<string | null> {
   if (!avatarPath) return null;
   if (avatarPath.startsWith("http://") || avatarPath.startsWith("https://")) {
     return avatarPath;
   }
 
-  const { data } = supabase.storage.from("avatars").getPublicUrl(avatarPath);
-  return data.publicUrl || null;
+  const { data, error } = await supabase.storage
+    .from("avatars")
+    .createSignedUrl(avatarPath, AVATAR_SIGNED_URL_TTL_SECONDS);
+
+  if (error || !data?.signedUrl) {
+    return null;
+  }
+
+  return data.signedUrl;
 }
 
 export function initialsFromName(name: string): string {

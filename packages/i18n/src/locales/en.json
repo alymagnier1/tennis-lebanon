@@ -477,7 +477,14 @@
     "noBioYet": "Add a short bio so other players know how you like to play.",
     "editButton": "Edit",
     "statMatches_one": "Match",
-    "statMatches_other": "Matches"
+    "statMatches_other": "Matches",
+    "avatarEditLabel": "Change profile photo",
+    "avatarUploadError": "We could not update your profile photo. Try again.",
+    "avatarPermissionDenied": "Photo access is required to choose a profile picture.",
+    "skillBandTitle": "Skill level",
+    "skillBandProvisionalHint": "You can adjust your level while your rating is still provisional. After five rated matches, your match results set it.",
+    "skillBandLockedHint": "Your skill level is now based on rated match results and can no longer be edited manually.",
+    "skillBandUpdateError": "We could not update your skill level."
   },
   "discover": {
     "title": "Discover",

@@ -3,6 +3,7 @@ import {
   databaseUuidSchema,
   normalizeDisplayName,
   playIntentSchema,
+  skillBandSchema,
   supportedLanguageSchema,
 } from "./onboarding";
 
@@ -48,3 +49,9 @@ export const updatePreferredZonesSchema = z.object({
 export type UpdatePreferredZonesInput = z.infer<
   typeof updatePreferredZonesSchema
 >;
+
+export const setOwnSkillBandSchema = z.object({
+  skillBand: skillBandSchema,
+});
+
+export type SetOwnSkillBandInput = z.infer<typeof setOwnSkillBandSchema>;

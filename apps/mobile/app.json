@@ -22,7 +22,13 @@
       "expo-router",
       "expo-status-bar",
       "expo-secure-store",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Tennis Lebanon to access your photos so you can set a profile picture."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

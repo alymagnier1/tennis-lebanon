@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Switch,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -21,7 +22,8 @@ import {
   spacing,
   typography,
 } from "@tennis-lebanon/ui";
-import { initialsFromName, resolveAvatarUri } from "../lib/avatar-url";
+import { initialsFromName } from "../lib/avatar-url";
+import { useAvatarUrl } from "../lib/use-avatar-url";
 import { buildCardAccessibilityLabel } from "../lib/card-accessibility";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
@@ -253,9 +255,18 @@ export function Avatar({
   size?: number;
   borderRadius?: number;
 }) {
-  const uri = resolveAvatarUri(avatarPath ?? null);
+  const avatarQuery = useAvatarUrl(avatarPath ?? null);
+  const uri = avatarQuery.data;
   const radius = borderRadius ?? size / 2;
   const dimension = { width: size, height: size, borderRadius: radius };
+
+  if (avatarPath && avatarQuery.isLoading) {
+    return (
+      <View style={[styles.avatarFallback, dimension, styles.avatarLoading]}>
+        <ActivityIndicator size="small" color={tennisColors.primary} />
+      </View>
+    );
+  }
 
   if (uri) {
     return (
@@ -1001,6 +1012,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: mobileBrand[100],
+  },
+  avatarLoading: {
+    backgroundColor: colors.neutral[100],
   },
   avatarInitials: {
     color: mobileBrand[700],

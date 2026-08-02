@@ -443,7 +443,14 @@
     "noBioYet": "Ajoutez une courte bio pour que les autres joueurs sachent comment vous aimez jouer.",
     "editButton": "Modifier",
     "statMatches_one": "Match",
-    "statMatches_other": "Matchs"
+    "statMatches_other": "Matchs",
+    "avatarEditLabel": "Changer la photo de profil",
+    "avatarUploadError": "Impossible de mettre à jour votre photo. Réessayez.",
+    "avatarPermissionDenied": "L'accès aux photos est nécessaire pour choisir une image de profil.",
+    "skillBandTitle": "Niveau",
+    "skillBandProvisionalHint": "Vous pouvez ajuster votre niveau tant que votre classement est provisoire. Après cinq matchs classés, vos résultats fixent le niveau.",
+    "skillBandLockedHint": "Votre niveau est désormais basé sur vos matchs classés et ne peut plus être modifié manuellement.",
+    "skillBandUpdateError": "Impossible de mettre à jour votre niveau."
   },
   "discover": {
     "title": "Découvrir",

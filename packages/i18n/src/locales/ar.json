@@ -443,7 +443,14 @@
     "noBioYet": "أضف نبذة قصيرة ليعرف اللاعبون كيف تحب اللعب.",
     "editButton": "تعديل",
     "statMatches_one": "مباراة",
-    "statMatches_other": "مباريات"
+    "statMatches_other": "مباريات",
+    "avatarEditLabel": "تغيير صورة الملف الشخصي",
+    "avatarUploadError": "تعذّر تحديث صورتك. حاول مرة أخرى.",
+    "avatarPermissionDenied": "يلزم الوصول إلى الصور لاختيار صورة ملف شخصي.",
+    "skillBandTitle": "مستوى المهارة",
+    "skillBandProvisionalHint": "يمكنك تعديل مستواك بينما يبقى تقييمك مؤقتًا. بعد خمس مباريات مقيّمة، تحدّد نتائج المباريات مستواك.",
+    "skillBandLockedHint": "أصبح مستواك يعتمد على نتائج المباريات المقيّمة ولا يمكن تعديله يدويًا بعد الآن.",
+    "skillBandUpdateError": "تعذّر تحديث مستوى المهارة."
   },
   "discover": {
     "title": "استكشاف",

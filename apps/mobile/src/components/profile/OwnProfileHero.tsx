@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../AppUi";
@@ -22,6 +22,9 @@ export function OwnProfileHero({
   ratingValue,
   ratingLabel,
   editLabel,
+  avatarEditLabel,
+  avatarUploading = false,
+  onAvatarPress,
   onEdit,
   onRatingInfo,
 }: {
@@ -34,6 +37,9 @@ export function OwnProfileHero({
   ratingValue: string;
   ratingLabel: string;
   editLabel: string;
+  avatarEditLabel: string;
+  avatarUploading?: boolean;
+  onAvatarPress?: () => void;
   onEdit: () => void;
   onRatingInfo: () => void;
 }) {
@@ -48,14 +54,29 @@ export function OwnProfileHero({
       <CourtGridOverlay />
       <View style={styles.heroContent}>
         <View style={[styles.identityRow, { flexDirection: rowDirection }]}>
-          <View style={styles.avatarWrap}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={avatarEditLabel}
+            disabled={avatarUploading || !onAvatarPress}
+            onPress={onAvatarPress}
+            style={styles.avatarWrap}
+          >
             <Avatar
               name={name}
               avatarPath={avatarPath}
               size={AVATAR_SIZE}
               borderRadius={tennisRadii.hero}
             />
-          </View>
+            {avatarUploading ? (
+              <View style={styles.avatarOverlay}>
+                <ActivityIndicator color={tennisColors.white} />
+              </View>
+            ) : onAvatarPress ? (
+              <View style={styles.avatarBadge}>
+                <Icon name="camera" size={12} color={tennisColors.white} />
+              </View>
+            ) : null}
+          </Pressable>
 
           <View style={styles.identityBody}>
             <AppText style={[styles.name, { writingDirection }]} maxLines={2}>
@@ -142,6 +163,24 @@ const styles = StyleSheet.create({
     borderColor: tennisColors.heroBorder,
     overflow: "hidden",
     flexShrink: 0,
+    position: "relative",
+  },
+  avatarOverlay: {
+    ...StyleSheet.absoluteFill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+  avatarBadge: {
+    position: "absolute",
+    right: 4,
+    bottom: 4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.55)",
   },
   identityBody: {
     flex: 1,

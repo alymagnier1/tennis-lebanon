@@ -118,7 +118,10 @@ enabled = true
 file_size_limit = "50MiB"
 
 # Uncomment to configure local storage buckets
-# [storage.buckets.images]
+[storage.buckets.avatars]
+public = false
+file_size_limit = "512KiB"
+allowed_mime_types = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
 # public = false
 # file_size_limit = "50MiB"
 # allowed_mime_types = ["image/png", "image/jpeg"]

@@ -1,9 +1,16 @@
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getOwnPlayerProfile,
   listMyCompletedMatches,
@@ -18,8 +25,10 @@ import { ProfileBioEditor } from "./ProfileBioEditor";
 import { ProfileMenuRow } from "./ProfileMenuRow";
 import { ProfilePreferredAreasSection } from "./ProfilePreferredAreasSection";
 import { ProfileSettingsFab } from "./ProfileSettingsFab";
+import { ProfileSkillBandSection } from "./ProfileSkillBandSection";
 import { ProfileTennisPreferencesSection } from "./ProfileTennisPreferencesSection";
 import { useAuth } from "../../providers/AuthProvider";
+import { pickAndUploadOwnAvatar } from "../../lib/pick-own-avatar";
 import {
   profileScreenAboutTitle,
   profileScreenEditLabel,
@@ -45,7 +54,8 @@ async function fetchOwnZones() {
 
 export function ProfileTabDashboard() {
   const { t, i18n } = useTranslation();
-  const { profile, session } = useAuth();
+  const { profile, session, refreshProfile } = useAuth();
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const [showRatingExplainer, setShowRatingExplainer] = useState(false);
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -84,6 +94,28 @@ export function ProfileTabDashboard() {
       : t("rating.ownRatingLabel")
     : t("rating.ownRatingLabel");
 
+  const avatarMutation = useMutation({
+    mutationFn: pickAndUploadOwnAvatar,
+    onSuccess: async (result) => {
+      if (result.status === "success") {
+        await Promise.all([
+          refreshProfile(),
+          queryClient.invalidateQueries({ queryKey: ["own-player-profile"] }),
+          queryClient.invalidateQueries({ queryKey: ["avatar-url"] }),
+          queryClient.invalidateQueries({ queryKey: ["discover-players"] }),
+        ]);
+        return;
+      }
+
+      if (result.status === "permission_denied") {
+        Alert.alert(t("profile.avatarPermissionDenied"));
+      }
+    },
+    onError: () => {
+      Alert.alert(t("profile.avatarUploadError"));
+    },
+  });
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -103,6 +135,9 @@ export function ProfileTabDashboard() {
           ratingValue={ratingValue}
           ratingLabel={ratingLabel}
           editLabel={profileScreenEditLabel(t)}
+          avatarEditLabel={t("profile.avatarEditLabel")}
+          avatarUploading={avatarMutation.isPending}
+          onAvatarPress={() => avatarMutation.mutate()}
           onEdit={() => router.push("/profile/edit")}
           onRatingInfo={() => setShowRatingExplainer(true)}
         />
@@ -119,6 +154,10 @@ export function ProfileTabDashboard() {
           </PlayerProfileSection>
 
           <ProfilePreferredAreasSection />
+
+          {playerProfile ? (
+            <ProfileSkillBandSection playerProfile={playerProfile} />
+          ) : null}
 
           {playerProfile ? (
             <ProfileTennisPreferencesSection playerProfile={playerProfile} />

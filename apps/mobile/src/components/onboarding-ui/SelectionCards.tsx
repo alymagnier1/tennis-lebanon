@@ -89,15 +89,19 @@ export function ChipButton({
   label,
   selected,
   onPress,
+  disabled = false,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
+  /** Announces the chip as unavailable rather than leaving it a button that does nothing. */
+  disabled?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ selected }}
+      accessibilityState={{ selected, disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={[styles.chip, selected ? styles.chipSelected : null]}
     >

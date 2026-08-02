@@ -1,4 +1,5 @@
 import type {
+  SetOwnSkillBandInput,
   UpdatePreferredZonesInput,
   UpdateTennisPreferencesInput,
 } from "@tennis-lebanon/domain";
@@ -193,6 +194,91 @@ export async function updatePreferredZones(
 ): Promise<void> {
   const { error } = await client.rpc("set_player_preferred_zones", {
     p_zone_ids: input.zoneIds,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+const AVATAR_BUCKET = "avatars";
+
+/** Returns the path this replaced, if any, for the caller to clean up. */
+export async function setOwnAvatar(
+  client: TennisSupabaseClient,
+  avatarPath: string,
+): Promise<string | null> {
+  const { data, error } = await client.rpc("set_own_avatar", {
+    p_avatar_path: avatarPath,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? null;
+}
+
+/**
+ * Uploads already-decoded image bytes and points the profile at them.
+ *
+ * Takes bytes rather than a URI on purpose: this package is shared by the Expo
+ * app and the Next.js dashboard and compiles without the DOM lib, so reading a
+ * local file belongs to whichever platform knows how. The bucket enforces the
+ * size cap and MIME allowlist, and set_own_avatar re-checks the path server
+ * side, so nothing here is load-bearing for authorization.
+ */
+export async function uploadOwnAvatar(
+  client: TennisSupabaseClient,
+  imageBytes: ArrayBuffer,
+  contentType = "image/jpeg",
+): Promise<string> {
+  const {
+    data: { user },
+    error: userError,
+  } = await client.auth.getUser();
+
+  if (userError) {
+    throw userError;
+  }
+  if (!user) {
+    throw new Error("Authentication required");
+  }
+
+  const storagePath = `${user.id}/${Date.now()}.jpg`;
+
+  const { error: uploadError } = await client.storage
+    .from(AVATAR_BUCKET)
+    .upload(storagePath, imageBytes, {
+      contentType,
+      upsert: false,
+    });
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const replacedPath = await setOwnAvatar(client, storagePath);
+
+  // The profile already points at the new object, so a failure to tidy up the
+  // old one is not worth failing the upload over. Storage RLS confines this to
+  // the caller's own folder, and the path came from the server, not the client.
+  if (replacedPath) {
+    await client.storage
+      .from(AVATAR_BUCKET)
+      .remove([replacedPath])
+      .catch(() => undefined);
+  }
+
+  return storagePath;
+}
+
+export async function setOwnSkillBand(
+  client: TennisSupabaseClient,
+  skillBand: SetOwnSkillBandInput["skillBand"],
+): Promise<void> {
+  const { error } = await client.rpc("set_own_skill_band", {
+    p_skill_band: skillBand,
   });
 
   if (error) {
