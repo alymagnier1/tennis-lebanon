@@ -76,7 +76,8 @@ begin
         'starts_at', (now() + interval '4 days')::text,
         'ends_at', (now() + interval '4 days 90 minutes')::text
       )
-    )
+    ),
+    p_preferred_club_ids => array['bbbbbbbb-0001-0001-0001-000000000001']::uuid[]
   );
 
   perform pg_temp.set_caller(v_participant);

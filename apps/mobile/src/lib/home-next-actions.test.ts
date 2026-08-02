@@ -20,6 +20,8 @@ function match(overrides: Partial<MyMatchRow> = {}): MyMatchRow {
     listing_expires_at: null,
     is_stale_warning: false,
     can_extend_listing: false,
+    has_court: false,
+    court_starts_at: null,
     ...overrides,
   };
 }
@@ -67,6 +69,25 @@ describe("deriveHomeNextActions", () => {
     expect(actions).toHaveLength(1);
     expect(actions[0]?.kind).toBe("players");
     expect(actions[0]?.matchId).toBe("host-open");
+  });
+
+  // Court-first: the ask is still "find players", but an empty seat now costs
+  // a court that is already held, so the copy has to say so.
+  it("tells a court-first host the court is already secured", () => {
+    const withCourt = deriveHomeNextActions(
+      [],
+      [match({ status: "open", is_creator: true, has_court: true })],
+    );
+    const withoutCourt = deriveHomeNextActions(
+      [],
+      [match({ status: "open", is_creator: true, has_court: false })],
+    );
+
+    expect(withCourt[0]?.kind).toBe("players");
+    expect(withCourt[0]?.titleKey).toBe(
+      "home.nextAction.playersCourtSecuredTitle",
+    );
+    expect(withoutCourt[0]?.titleKey).toBe("home.nextAction.playersTitle");
   });
 
   it("shows vote on time for a full flexible match", () => {

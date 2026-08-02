@@ -408,7 +408,9 @@
       "courtTitle": "Ready to book a court",
       "courtBody": "Everyone agreed on a time. Request a court next.",
       "playersTitle": "Waiting for players",
-      "playersBody": "Invite someone or share your match so it can fill."
+      "playersBody": "Invite someone or share your match so it can fill.",
+      "playersCourtSecuredTitle": "Court booked, players missing",
+      "playersCourtSecuredBody": "Your court is held. Invite someone before the hour comes round."
     },
     "upcomingTitle": "Upcoming matches",
     "upcomingEmpty": "No upcoming matches yet. Create one or join an open game.",
@@ -542,6 +544,7 @@
     "toggleOverlap": "Include players without overlap",
     "createMatchSoon": "Create a match (coming in Milestone 3)",
     "spotsRemaining": "{{count}} spots left",
+    "courtSecuredBadge": "Court secured",
     "overlapHint": "Times overlap this week",
     "zoneHint": "Plays in your areas",
     "levelHint": "Similar level",
@@ -642,6 +645,11 @@
       "requiresApprovalOn": "Join requests need your approval",
       "notes": "Notes (optional)",
       "zoneRequired": "Select at least one area.",
+      "preferredClubsTitle": "Preferred clubs",
+      "preferredClubsRequiredHelp": "Choose up to 3 clubs you would be happy to play at. Players see these before they join. No court is booked yet.",
+      "preferredClubsOptionalHelp": "Choose up to 3 clubs you would be happy to play at. No court is booked yet.",
+      "preferredClubsPickZoneFirst": "Choose an area first to see its clubs.",
+      "clubRequired": "Choose at least one club so players know where they would play.",
       "reviewTitle": "Review and publish",
       "reviewDescription": "Check the details, then invite players or publish.",
       "reviewActionsHint": "Invite players first. Publish when you are ready for the match to go live.",
@@ -702,6 +710,7 @@
       "empty": "You do not have any active matches yet, but it only takes seconds to set one up.",
       "emptyTitle": "No upcoming matches",
       "creator": "Creator",
+      "courtSecuredBadge": "Court secured",
       "activeTab": "Active",
       "completedTab": "Completed",
       "completedLoadError": "We could not load your match history.",
@@ -735,6 +744,7 @@
         "book": "Book"
       },
       "summaryTitle": "Match details",
+      "preferredClubsNote": "The host named these clubs when creating the match.",
       "loadError": "We could not load this match.",
       "participants": "Participants",
       "proposedTimes": "Proposed times",
@@ -802,7 +812,8 @@
       "rescheduleSuccess": "The match time was updated.",
       "rescheduleError": "We could not change the time.",
       "rescheduleLocked": "A court has already been requested. Withdraw the booking first.",
-      "awaitingPlayers": "Waiting for players to join"
+      "awaitingPlayers": "Waiting for players to join",
+      "awaitingPlayersCourtSecured": "The court is booked and held. This match just needs players."
     },
     "results": {
       "title": "Result",
@@ -865,6 +876,7 @@
       "externalError": "We could not confirm this court.",
       "courtAlreadyBooked": "That court is already booked for this time.",
       "bookedOffAppCta": "Booked off-app",
+      "offPreferredListWarning": "This club was not on the list agreed when players joined. Everyone will be told where the court is.",
       "bookedOffAppTitle": "Confirm off-app booking",
       "bookedOffAppDescription": "You already secured a court by phone or WhatsApp. Pick the club and court, then confirm so attendance and results still work.",
       "bookedOffAppConfirm": "Confirm court",

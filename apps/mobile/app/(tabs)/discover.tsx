@@ -41,6 +41,7 @@ import {
 import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
 import { zoneLabelFromList } from "../../src/lib/zones";
+import { clubLabelFromList } from "../../src/lib/match-clubs";
 
 type DiscoverSegment = "players" | "matches";
 
@@ -219,11 +220,25 @@ export default function DiscoverScreen() {
         keyExtractor: (match) => (match as OpenMatchCard).match_id,
         renderItem: ({ item }) => {
           const match = item as OpenMatchCard;
+          // A booked court beats the shortlist, which beats the zone: deciding
+          // whether to drive needs the venue, and the card has room for one.
+          const whereLabel =
+            match.court_club_name ||
+            clubLabelFromList(match.preferred_clubs) ||
+            zoneLabelFromList(
+              match.zones,
+              i18n.resolvedLanguage ?? i18n.language,
+            );
           return (
             <MatchCard
               title={`${t(`formats.${match.format}`)} · ${match.creator_display_name}`}
               subtitle={`${t(`skillBands.${match.min_skill}`)}–${t(`skillBands.${match.max_skill}`)}`}
-              meta={`${zoneLabelFromList(match.zones, i18n.resolvedLanguage ?? i18n.language)} · ${t("discover.spotsRemaining", { count: match.capacity - match.participant_count })}`}
+              meta={`${whereLabel} · ${t("discover.spotsRemaining", { count: match.capacity - match.participant_count })}`}
+              badge={
+                match.court_secured
+                  ? t("discover.courtSecuredBadge")
+                  : undefined
+              }
               note={match.notes ?? undefined}
               onPress={() =>
                 router.push({

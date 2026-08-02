@@ -30,6 +30,7 @@ describe("matches domain rules", () => {
       maxSkill: "intermediate",
       requiresCreatorApproval: false,
       zoneIds: ["11111111-1111-1111-1111-111111111111"],
+      preferredClubIds: ["22222222-2222-2222-2222-222222222222"],
       proposedTimes: [
         {
           startsAt: "2030-01-01T10:00:00.000Z",
@@ -39,6 +40,73 @@ describe("matches domain rules", () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  describe("preferred clubs", () => {
+    const base = {
+      format: "singles",
+      intent: "social",
+      minSkill: "improving",
+      maxSkill: "intermediate",
+      requiresCreatorApproval: false,
+      zoneIds: ["11111111-1111-1111-1111-111111111111"],
+      proposedTimes: [
+        {
+          startsAt: "2030-01-01T10:00:00.000Z",
+          endsAt: "2030-01-01T11:30:00.000Z",
+        },
+      ],
+    };
+
+    // A public listing that names only an area leaves a joiner deciding
+    // whether to drive without knowing where.
+    it("requires at least one club on a public match", () => {
+      const result = createMatchInputSchema.safeParse({
+        ...base,
+        visibility: "public",
+        preferredClubIds: [],
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.path).toEqual(["preferredClubIds"]);
+    });
+
+    it("lets private and invite-only matches fall back to zones", () => {
+      for (const visibility of ["private", "invite_only"]) {
+        expect(
+          createMatchInputSchema.safeParse({
+            ...base,
+            visibility,
+            preferredClubIds: [],
+          }).success,
+        ).toBe(true);
+      }
+    });
+
+    it("caps the shortlist at three", () => {
+      const result = createMatchInputSchema.safeParse({
+        ...base,
+        visibility: "public",
+        preferredClubIds: [
+          "22222222-2222-2222-2222-222222222221",
+          "22222222-2222-2222-2222-222222222222",
+          "22222222-2222-2222-2222-222222222223",
+          "22222222-2222-2222-2222-222222222224",
+        ],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it("defaults to an empty shortlist so private matches need not pass one", () => {
+      const result = createMatchInputSchema.safeParse({
+        ...base,
+        visibility: "private",
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data?.preferredClubIds).toEqual([]);
+    });
   });
 
   it("rejects invalid skill ranges and past times", () => {

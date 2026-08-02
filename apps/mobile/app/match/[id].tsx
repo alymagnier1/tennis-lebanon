@@ -219,7 +219,11 @@ export default function MatchHubScreen() {
   const showConfirmExternalCourt = hub
     ? canConfirmExternalCourt({
         viewerIsParticipant: hub.viewer_status === "accepted",
+        viewerIsCreator: hub.viewer_is_creator,
         matchStatus: hub.status,
+        timingMode: hub.timing_mode,
+        hasAgreedTime: Boolean(hub.selected_time_option_id),
+        hasAcceptedBooking: hub.booking?.status === "accepted",
       })
     : false;
 
@@ -258,6 +262,7 @@ export default function MatchHubScreen() {
       viewerIsCreator: hub.viewer_is_creator,
       matchStatus: hub.status,
       timingMode: hub.timing_mode,
+      hasAcceptedBooking: hub.booking?.status === "accepted",
     });
   }, [hub]);
 
@@ -389,6 +394,16 @@ export default function MatchHubScreen() {
 
       {hub?.next_action === "awaiting_club" ? (
         <StatusBanner body={t("matches.hub.awaitingClub")} />
+      ) : null}
+
+      {hub?.next_action === "awaiting_players" ? (
+        <StatusBanner
+          body={
+            hasAcceptedBooking
+              ? t("matches.hub.awaitingPlayersCourtSecured")
+              : t("matches.hub.awaitingPlayers")
+          }
+        />
       ) : null}
 
       {hub?.next_action === "pay_at_club" ? (

@@ -24,11 +24,21 @@ export function CreateMatchPanel({
 
 export function CreateMatchSection({
   label,
+  description,
   children,
-}: PropsWithChildren<{ label: string; showDivider?: boolean }>) {
+}: PropsWithChildren<{
+  label: string;
+  description?: string;
+  showDivider?: boolean;
+}>) {
   return (
     <View>
       <AppText style={figmaFormStyles.fieldLabel}>{label}</AppText>
+      {description ? (
+        <AppText style={createMatchPanelStyles.sectionDescription}>
+          {description}
+        </AppText>
+      ) : null}
       {children}
     </View>
   );
@@ -52,6 +62,13 @@ const createMatchPanelStyles = StyleSheet.create({
   },
   panelBody: {
     gap: 20,
+  },
+  sectionDescription: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    lineHeight: 18,
+    color: tennisColors.mutedForeground,
+    marginBottom: 10,
   },
 });
 

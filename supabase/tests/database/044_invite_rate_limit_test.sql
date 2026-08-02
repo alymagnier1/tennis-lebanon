@@ -60,7 +60,8 @@ begin
         'ends_at', (v_starts + interval '90 minutes')::text
       )
     ),
-    'fixed'
+    'fixed',
+    p_preferred_club_ids => array['bbbbbbbb-0001-0001-0001-000000000001']::uuid[]
   );
 
   -- Link invites carry no target, so they can be issued repeatedly without

@@ -20,6 +20,7 @@ import {
 } from "@tennis-lebanon/domain";
 import { StatusBanner } from "../../../src/components/AppUi";
 import { AppText } from "../../../src/components/AppText";
+import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
 import {
   CreateMatchStepLayout,
   FigmaPrimaryButton,
@@ -70,6 +71,8 @@ function publishValidationMessage(
       return t("matches.create.incomplete");
     case "time_in_past":
       return t("matches.create.reviewTimeInPast");
+    case "club_required":
+      return t("matches.create.clubRequired");
     default:
       return t("matches.create.reviewValidationError");
   }
@@ -113,6 +116,19 @@ export default function CreateMatchReviewScreen() {
       .filter(Boolean)
       .join(", ");
   }, [draft.zoneIds, i18n.language, i18n.resolvedLanguage, zonesQuery.data]);
+
+  const clubsQuery = useClubsDirectory(draft.zoneIds);
+
+  const clubLabels = useMemo(() => {
+    if (!draft.preferredClubIds?.length || !clubsQuery.data) return "";
+    return draft.preferredClubIds
+      .map(
+        (clubId) =>
+          clubsQuery.data.find((club) => club.club_id === clubId)?.name ?? "",
+      )
+      .filter(Boolean)
+      .join(", ");
+  }, [clubsQuery.data, draft.preferredClubIds]);
 
   const levelSummary = useMemo(() => {
     const selected =
@@ -314,6 +330,12 @@ export default function CreateMatchReviewScreen() {
               label={t("matches.create.summaryWhere")}
               value={zoneLabels}
             />
+            {clubLabels ? (
+              <SummaryRow
+                label={t("matches.create.preferredClubsTitle")}
+                value={clubLabels}
+              />
+            ) : null}
             <SummaryRow
               label={t("matches.create.summaryWhen")}
               value={proposedTimeLabel}

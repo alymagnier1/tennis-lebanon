@@ -93,7 +93,7 @@ Keep the platform admin surface visually distinct and guarded by a separate role
 1. Player opens Discover.
 2. App applies saved zone, level, and availability preferences.
 3. Player opens an eligible match.
-4. App shows compatibility, proposed times, participants, and join behavior.
+4. App shows compatibility, proposed times, participants, the host's preferred clubs, and join behavior. The clubs appear before the join so the player is agreeing to a venue, not only to a zone.
 5. Player joins or requests approval.
 6. Creator approves if required.
 7. Participant votes on proposed times.
@@ -103,8 +103,10 @@ Failure states: full match, withdrawn time, blocked user, creator rejection, exp
 
 ### Flow B — Create a match and request a court
 
+A host who already holds a court may run this in reverse — publish, secure the court from the hub while the match is still open, then recruit against it. The match stays `open` and joinable, carries a "court secured" badge in Discover, and reaches `confirmed` when the last player joins. Fixed timing only; see `docs/LIFECYCLE.md`.
+
 1. Creator chooses singles/doubles and social/competitive.
-2. Adds visibility, level range, zones, and proposed times.
+2. Adds visibility, level range, zones, 1–3 preferred clubs, and proposed times. The clubs step sits on the schedule screen under the zones, since the club list is drawn from the zones just picked. Public matches must name at least one club; private and invite-only may fall back to zones.
 3. Publishes and invites players.
 4. Match fills; all participants agree on one time.
 5. Creator chooses a club/court and sees indicative price plus “confirmation required.”

@@ -9,8 +9,14 @@ Store authoritative status on `matches` and `bookings`. Validate transitions in 
 ```text
 draft → open → full → ready_to_book → booking_pending → confirmed → in_progress → completed
 
+Court-first: draft → open (court secured) → … → confirmed on the last join
+
 Side exits: cancelled | expired | disputed
 ```
+
+**`confirmed` means a full roster _and_ an accepted court**, not an accepted court alone. A host may secure a court while the match is still recruiting; the match keeps its roster-driven status (`open`/`full`) and reaches `confirmed` when the last player joins. `refresh_match_open_state` owns that promotion and is the only writer of `confirmed` on the external-court path.
+
+Court-first is fixed-timing only, creator-only, and requires an agreed time — a court needs an hour, and a flexible match has none until its vote resolves. The in-app club queue (`request_match_booking`) remains roster-first.
 
 `match_status.disputed` is reserved for explicit platform-admin action on the match itself. A disputed **result** does not change match status: the match stays `completed` with `result_status = disputed` until ops or admin resolves it (see E7).
 
@@ -29,6 +35,7 @@ Side exits: cancelled | expired | disputed
 | `confirmed`         | `in_progress`     | Scheduled start reached                                | Scheduled job      |
 | `in_progress`       | `completed`       | Result confirmed or admin resolution                   | System / admin     |
 | `*` (pre-confirmed) | `cancelled`       | Creator cancel or policy-based mass cancel             | Creator / system   |
+| `open` / `full`     | `confirmed`       | Last player joins a match that already holds a court   | System on join RPC |
 | `open` / `full`     | `expired`         | Expiry rules below                                     | Scheduled job      |
 | `*`                 | `disputed`        | Platform admin flags match for ops review              | Platform admin     |
 
@@ -36,7 +43,7 @@ Invalid transitions must fail in RPC with a stable error code.
 
 ## Expiry rules (`→ expired`)
 
-Applies only while `status in ('open', 'full')` and no accepted booking exists.
+Applies while `status in ('open', 'full', 'ready_to_book')`. A **pending** club request suppresses expiry entirely — the club is still deliberating and `booking_stale_reminders` is chasing it. An **accepted** court makes the court's own hour the deadline: the match expires once `bookings.ends_at` is more than the grace window in the past, whatever the listing window says. Otherwise:
 
 A match **expires** when **any** condition is true:
 
@@ -110,12 +117,13 @@ Revisit auto-reject post-pilot based on club response metrics.
 
 ## Scheduled jobs
 
-| Job                         | Frequency    | Action                                       |
-| --------------------------- | ------------ | -------------------------------------------- |
-| `expire_stale_matches`      | Hourly       | Apply expiry rules                           |
-| `start_in_progress_matches` | Every 5 min  | `confirmed → in_progress`                    |
-| `booking_stale_reminders`   | Hourly       | Club nudge / participant stale notice        |
-| `open_attendance_window`    | Every 15 min | After start, trigger attendance prompts (M7) |
+| Job                            | Frequency    | Action                                                          |
+| ------------------------------ | ------------ | --------------------------------------------------------------- |
+| `expire_stale_matches`         | Hourly       | Apply expiry rules                                              |
+| `start_in_progress_matches`    | Every 5 min  | `confirmed → in_progress`                                       |
+| `booking_stale_reminders`      | Hourly       | Club nudge / participant stale notice                           |
+| `court_first_roster_reminders` | Hourly       | Warn the host 24h out that a booked court still has empty spots |
+| `open_attendance_window`       | Every 15 min | After start, trigger attendance prompts (M7)                    |
 
 Implement as Supabase Edge Function cron or `pg_cron` where available. Same worker infrastructure as notification outbox (M6).
 

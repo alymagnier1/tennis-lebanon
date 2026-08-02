@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -13,14 +14,30 @@ type ClubsDirectoryListProps = {
   clubsQuery: UseQueryResult<ClubDirectoryRow[], Error>;
   matchId?: string;
   onClubPress?: (clubId: string) => void;
+  /** Omit for a navigation list; pass to render the rows as checkboxes. */
+  selectedClubIds?: string[];
+  /** Clubs to float to the top, keeping their relative order below. */
+  priorityClubIds?: string[];
 };
 
 export function ClubsDirectoryList({
   clubsQuery,
   matchId,
   onClubPress,
+  selectedClubIds,
+  priorityClubIds,
 }: ClubsDirectoryListProps) {
   const { t } = useTranslation();
+
+  const clubs = useMemo(() => {
+    const rows = clubsQuery.data ?? [];
+    if (!priorityClubIds?.length) return rows;
+    return [...rows].sort((left, right) => {
+      const leftRank = priorityClubIds.includes(left.club_id) ? 0 : 1;
+      const rightRank = priorityClubIds.includes(right.club_id) ? 0 : 1;
+      return leftRank - rightRank;
+    });
+  }, [clubsQuery.data, priorityClubIds]);
 
   const handlePress = (clubId: string) => {
     if (onClubPress) {
@@ -46,7 +63,7 @@ export function ClubsDirectoryList({
     );
   }
 
-  if ((clubsQuery.data?.length ?? 0) === 0) {
+  if (clubs.length === 0) {
     return (
       <EmptyState
         title={t("clubs.empty")}
@@ -57,11 +74,14 @@ export function ClubsDirectoryList({
 
   return (
     <View style={formStyles.stack}>
-      {clubsQuery.data?.map((club) => (
+      {clubs.map((club) => (
         <ClubDirectoryCard
           key={club.club_id}
           club={club}
           onPress={() => handlePress(club.club_id)}
+          selected={
+            selectedClubIds ? selectedClubIds.includes(club.club_id) : undefined
+          }
         />
       ))}
     </View>

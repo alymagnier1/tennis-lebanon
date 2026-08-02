@@ -21,4 +21,10 @@ export const createMatchStyles = StyleSheet.create({
     minHeight: 96,
     textAlignVertical: "top",
   },
+  hint: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    lineHeight: 18,
+    color: tennisColors.mutedForeground,
+  },
 });

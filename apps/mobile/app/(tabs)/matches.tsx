@@ -256,9 +256,13 @@ export default function MatchesScreen() {
                   subtitle={`${t(`matches.participantStatus.${match.participant_status}`)}${match.is_creator ? ` · ${t("matches.list.creator")}` : ""}`}
 
                   badge={
-                    match.is_stale_warning
-                      ? t("matches.lifecycle.staleBadge")
-                      : undefined
+                    // A match holding a court is not meaningfully expiring, so
+                    // the court wins the single badge slot.
+                    match.has_court
+                      ? t("matches.list.courtSecuredBadge")
+                      : match.is_stale_warning
+                        ? t("matches.lifecycle.staleBadge")
+                        : undefined
                   }
 
                   meta={

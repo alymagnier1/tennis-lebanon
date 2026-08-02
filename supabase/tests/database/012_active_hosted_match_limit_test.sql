@@ -68,7 +68,8 @@ begin
         'starts_at', (now() + interval '3 days')::text,
         'ends_at', (now() + interval '3 days 90 minutes')::text
       )
-    )
+    ),
+    p_preferred_club_ids => array['bbbbbbbb-0001-0001-0001-000000000001']::uuid[]
   );
 
   perform pg_temp.assert_raises(
@@ -86,7 +87,8 @@ begin
           'starts_at', (now() + interval '4 days')::text,
           'ends_at', (now() + interval '4 days 90 minutes')::text
         )
-      )
+      ),
+      p_preferred_club_ids => array['bbbbbbbb-0001-0001-0001-000000000001']::uuid[]
     )$sql$,
     'P0001',
     'second singles hosted match is blocked'

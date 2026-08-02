@@ -60,11 +60,18 @@ export function deriveHomeNextActions(
     } else if (match.status === "open" && match.is_creator) {
       // Host-only: joining players cannot invite others. Not "vote on a time"
       // either — an open match needs players first.
+      //
+      // A court-first match is the same ask with more urgency: the court is
+      // already held, so an empty seat costs something.
       actions.push({
         id: `players-${match.match_id}`,
         kind: "players",
-        titleKey: "home.nextAction.playersTitle",
-        bodyKey: "home.nextAction.playersBody",
+        titleKey: match.has_court
+          ? "home.nextAction.playersCourtSecuredTitle"
+          : "home.nextAction.playersTitle",
+        bodyKey: match.has_court
+          ? "home.nextAction.playersCourtSecuredBody"
+          : "home.nextAction.playersBody",
         matchId: match.match_id,
       });
     } else if (match.status === "full") {

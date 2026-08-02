@@ -1,5 +1,6 @@
 import type { DiscoveryFiltersInput } from "@tennis-lebanon/domain";
 import type { TennisSupabaseClient } from "./client";
+import type { MatchPreferredClub } from "./matches";
 
 export type NearTermAvailabilitySlot = {
   starts_at: string;
@@ -95,6 +96,7 @@ export type OpenMatchCard = {
   min_skill: string;
   max_skill: string;
   zones: unknown;
+  preferred_clubs: MatchPreferredClub[];
   proposed_times: unknown;
   participant_count: number;
   capacity: number;
@@ -105,6 +107,9 @@ export type OpenMatchCard = {
   zone_overlap: boolean;
   availability_overlap: boolean;
   created_at: string;
+  /** The host secured a court before filling the roster. */
+  court_secured: boolean;
+  court_club_name: string | null;
 };
 
 export async function discoverCompatiblePlayers(

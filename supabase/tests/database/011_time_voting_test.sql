@@ -74,7 +74,8 @@ begin
       )
     ),
     -- Voting is the subject of this file, so it opts into flexible timing.
-    'flexible'
+    'flexible',
+    p_preferred_club_ids => array['bbbbbbbb-0001-0001-0001-000000000001']::uuid[]
   )
   into v_match_id;
 

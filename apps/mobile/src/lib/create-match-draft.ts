@@ -41,8 +41,12 @@ export function buildCreateMatchInput(
 
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
-    if (issue?.path.join(".") === "proposedTimes") {
+    const path = issue?.path.join(".");
+    if (path === "proposedTimes") {
       return { success: false, error: "time_in_past" };
+    }
+    if (path === "preferredClubIds") {
+      return { success: false, error: "club_required" };
     }
     return { success: false, error: "invalid" };
   }
@@ -62,6 +66,12 @@ export function isCreateMatchDraftReady(
     value.requiresCreatorApproval !== undefined &&
     value.zoneIds &&
     value.zoneIds.length > 0 &&
+    // Public matches must name a venue; a joiner deciding whether to drive
+    // cannot do it on a zone alone. Absent is treated as empty rather than
+    // rejected outright, because prefilled drafts (the invite-a-player flow)
+    // never set it and the schema defaults it to [].
+    (value.visibility !== "public" ||
+      (value.preferredClubIds?.length ?? 0) > 0) &&
     value.proposedTimes &&
     value.proposedTimes.length > 0,
   );

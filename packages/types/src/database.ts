@@ -756,6 +756,36 @@ export type Database = {
           },
         ];
       };
+      match_preferred_clubs: {
+        Row: {
+          club_id: string;
+          match_id: string;
+        };
+        Insert: {
+          club_id: string;
+          match_id: string;
+        };
+        Update: {
+          club_id?: string;
+          match_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "match_preferred_clubs_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "match_preferred_clubs_match_id_fkey";
+            columns: ["match_id"];
+            isOneToOne: false;
+            referencedRelation: "matches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       match_results: {
         Row: {
           confirmed_at: string | null;
@@ -1659,6 +1689,7 @@ export type Database = {
         Args: { p_match_id: string };
         Returns: undefined;
       };
+      court_first_roster_reminders: { Args: never; Returns: number };
       court_has_block: {
         Args: { p_court_id: string; p_ends_at: string; p_starts_at: string };
         Returns: boolean;
@@ -1670,6 +1701,7 @@ export type Database = {
           p_max_skill: Database["public"]["Enums"]["skill_band"];
           p_min_skill: Database["public"]["Enums"]["skill_band"];
           p_notes?: string;
+          p_preferred_club_ids?: string[];
           p_proposed_times?: Json;
           p_requires_creator_approval: boolean;
           p_timing_mode?: string;
@@ -1694,6 +1726,7 @@ export type Database = {
           p_max_skill: Database["public"]["Enums"]["skill_band"];
           p_min_skill: Database["public"]["Enums"]["skill_band"];
           p_notes?: string;
+          p_preferred_club_ids?: string[];
           p_proposed_times?: Json;
           p_requires_creator_approval: boolean;
           p_timing_mode?: string;
@@ -1976,7 +2009,9 @@ export type Database = {
         Returns: {
           can_extend_listing: boolean;
           capacity: number;
+          court_starts_at: string;
           format: Database["public"]["Enums"]["match_format"];
+          has_court: boolean;
           intent: Database["public"]["Enums"]["play_intent"];
           is_creator: boolean;
           is_stale_warning: boolean;
@@ -2050,6 +2085,36 @@ export type Database = {
         Args: { p_notification_id: string };
         Returns: undefined;
       };
+      match_accepted_booking: {
+        Args: { p_match_id: string };
+        Returns: {
+          acted_at: string | null;
+          acted_by: string | null;
+          arranged_externally: boolean;
+          club_note: string | null;
+          court_id: string;
+          created_at: string;
+          currency: string | null;
+          ends_at: string;
+          id: string;
+          match_id: string;
+          payment_method: string;
+          price_minor: number | null;
+          proposed_court_id: string | null;
+          proposed_end_at: string | null;
+          proposed_start_at: string | null;
+          requested_by: string;
+          starts_at: string;
+          status: Database["public"]["Enums"]["booking_status"];
+          updated_at: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "bookings";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       match_active_time_option_count: {
         Args: { p_match_id: string };
         Returns: number;
@@ -2061,6 +2126,10 @@ export type Database = {
       match_capacity_for_format: {
         Args: { p_format: Database["public"]["Enums"]["match_format"] };
         Returns: number;
+      };
+      match_has_accepted_court: {
+        Args: { p_match_id: string };
+        Returns: boolean;
       };
       match_has_active_booking: {
         Args: { p_match_id: string };
@@ -2381,6 +2450,9 @@ export type Database = {
         availability_overlap: boolean | null;
         created_at: string | null;
         notes: string | null;
+        preferred_clubs: Json | null;
+        court_secured: boolean | null;
+        court_club_name: string | null;
       };
       disputed_result_queue_row: {
         result_id: string | null;
@@ -2425,6 +2497,7 @@ export type Database = {
         viewer_attendance:
           Database["public"]["Enums"]["attendance_status"] | null;
         timing_mode: string | null;
+        preferred_clubs: Json | null;
       };
       match_invite_inbox_row: {
         invitation_id: string | null;

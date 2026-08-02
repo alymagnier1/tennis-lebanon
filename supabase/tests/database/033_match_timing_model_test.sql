@@ -80,7 +80,8 @@ begin
         'ends_at', (p_starts + interval '90 minutes')::text
       )
     ),
-    'fixed'
+    'fixed',
+    p_preferred_club_ids => array['bbbbbbbb-0001-0001-0001-000000000001']::uuid[]
   );
 end;
 $$;

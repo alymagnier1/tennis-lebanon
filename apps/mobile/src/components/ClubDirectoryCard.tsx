@@ -6,23 +6,36 @@ import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
 import type { Json } from "@tennis-lebanon/types";
 import { AppText } from "./AppText";
 import { clubBookingModeLabelKey } from "../lib/club-booking-label";
+import { mobileBrand } from "../theme/mobile-brand";
 import { zoneNameFromJson } from "../lib/zones";
 
 type ClubDirectoryCardProps = {
   club: ClubDirectoryRow;
   onPress: () => void;
+  /** Omit for a plain navigation card; pass to render it as a checkbox. */
+  selected?: boolean;
 };
 
-export function ClubDirectoryCard({ club, onPress }: ClubDirectoryCardProps) {
+export function ClubDirectoryCard({
+  club,
+  onPress,
+  selected,
+}: ClubDirectoryCardProps) {
   const { t, i18n } = useTranslation();
   const price = formatPriceMinor(club.min_price_minor, club.currency);
+  const selectable = selected !== undefined;
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={selectable ? "checkbox" : "button"}
       accessibilityLabel={club.name}
+      accessibilityState={selectable ? { checked: selected } : undefined}
       onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+      style={({ pressed }) => [
+        styles.card,
+        selected && styles.cardSelected,
+        pressed && styles.cardPressed,
+      ]}
     >
       <AppText style={styles.name} maxLines={1}>
         {club.name}
@@ -52,6 +65,10 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.xs,
     backgroundColor: colors.neutral[0],
+  },
+  cardSelected: {
+    borderColor: mobileBrand[500],
+    backgroundColor: mobileBrand[50],
   },
   cardPressed: { opacity: 0.85 },
   name: {

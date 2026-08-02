@@ -18,6 +18,7 @@ import {
   formStyles,
 } from "../../../src/components/FormUi";
 import { formatUtcSlotInBeirut } from "../../../src/lib/beirut-time";
+import { clubIdsFromList } from "../../../src/lib/match-clubs";
 import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
 import { matchHubRoute } from "../../../src/lib/routes";
 import { supabase } from "../../../src/lib/supabase";
@@ -59,6 +60,19 @@ export default function MatchBookExternalScreen() {
   const selectedCourt = useMemo(
     () => clubQuery.data?.courts.find((court) => court.court_id === courtId),
     [clubQuery.data?.courts, courtId],
+  );
+
+  const preferredClubIds = useMemo(
+    () => clubIdsFromList(hubQuery.data?.preferred_clubs),
+    [hubQuery.data?.preferred_clubs],
+  );
+
+  // Matches created before this existed have no shortlist, and nothing is off
+  // it. Warn only when the group actually agreed to a set of clubs.
+  const offPreferredList = Boolean(
+    preferredClubIds.length > 0 &&
+    selectedClubId &&
+    !preferredClubIds.includes(selectedClubId),
   );
 
   const confirmMutation = useMutation({
@@ -146,7 +160,14 @@ export default function MatchBookExternalScreen() {
       <ClubsDirectoryList
         clubsQuery={clubsQuery}
         onClubPress={handleSelectClub}
+        priorityClubIds={preferredClubIds}
       />
+
+      {offPreferredList ? (
+        <AppText style={formStyles.errorText}>
+          {t("matches.booking.offPreferredListWarning")}
+        </AppText>
+      ) : null}
 
       {selectedClubId ? (
         <View style={formStyles.compactCard}>

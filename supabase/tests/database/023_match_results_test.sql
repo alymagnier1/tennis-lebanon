@@ -46,7 +46,8 @@ begin
         'starts_at', v_start::text,
         'ends_at', (v_start + interval '90 minutes')::text
       )
-    )
+    ),
+    p_preferred_club_ids => array['bbbbbbbb-0001-0001-0001-000000000001']::uuid[]
   )
   into v_match_id;
 

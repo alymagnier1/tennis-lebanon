@@ -42,6 +42,7 @@ describe("matches API wrappers", () => {
       maxSkill: "intermediate",
       requiresCreatorApproval: false,
       zoneIds: ["aaaaaaaa-0001-0001-0001-000000000001"],
+      preferredClubIds: ["bbbbbbbb-0001-0001-0001-000000000001"],
       proposedTimes: [
         {
           startsAt: "2030-01-01T10:00:00.000Z",
@@ -67,6 +68,7 @@ describe("matches API wrappers", () => {
         },
       ],
       p_timing_mode: "fixed",
+      p_preferred_club_ids: ["bbbbbbbb-0001-0001-0001-000000000001"],
     });
   });
 
@@ -85,6 +87,7 @@ describe("matches API wrappers", () => {
         maxSkill: "intermediate",
         requiresCreatorApproval: false,
         zoneIds: ["aaaaaaaa-0001-0001-0001-000000000001"],
+        preferredClubIds: [],
         proposedTimes: [
           {
             startsAt: "2030-01-01T10:00:00.000Z",

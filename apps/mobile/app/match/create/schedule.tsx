@@ -35,7 +35,11 @@ import {
   updateCreateMatchDraft,
 } from "../../../src/lib/create-match-draft";
 import { zoneNameFromJson } from "../../../src/lib/zones";
+import { ClubsDirectoryList } from "../../../src/components/ClubsDirectoryList";
+import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
 import { supabase } from "../../../src/lib/supabase";
+
+const MAX_PREFERRED_CLUBS = 3;
 
 type SlotDraft = {
   day: string;
@@ -89,11 +93,28 @@ export default function CreateMatchScheduleScreen() {
     draft.timingMode ?? "fixed",
   );
   const [slots, setSlots] = useState<SlotDraft[]>(slotsFromDraft);
+  const [selectedClubIds, setSelectedClubIds] = useState<string[]>(
+    draft.preferredClubIds ?? [],
+  );
+  const clubsRequired = draft.visibility === "public";
 
   const zonesQuery = useQuery({
     queryKey: ["active-zones"],
     queryFn: () => getActiveZones(supabase),
   });
+
+  const clubsQuery = useClubsDirectory(selectedZoneIds);
+
+  // Narrowing the areas can strand a club that is no longer on offer. Derived
+  // during render rather than pruned in an effect, so the raw pick survives a
+  // transient empty directory and nothing cascades a second render.
+  const effectiveClubIds = useMemo(() => {
+    const available = clubsQuery.data;
+    if (!available) return selectedClubIds;
+    return selectedClubIds.filter((id) =>
+      available.some((club) => club.club_id === id),
+    );
+  }, [clubsQuery.data, selectedClubIds]);
 
   const zoneOptions = useMemo(
     () =>
@@ -133,10 +154,11 @@ export default function CreateMatchScheduleScreen() {
 
     updateCreateMatchDraft({
       zoneIds: selectedZoneIds,
+      preferredClubIds: effectiveClubIds,
       proposedTimes,
       timingMode,
     });
-  }, [selectedZoneIds, slots, timingMode]);
+  }, [effectiveClubIds, selectedZoneIds, slots, timingMode]);
 
   const suggestionsQuery = useQuery({
     queryKey: ["match-time-suggestions", selectedZoneIds, draft.format],
@@ -168,6 +190,18 @@ export default function CreateMatchScheduleScreen() {
     );
   }
 
+  function toggleClub(clubId: string) {
+    const alreadyPicked = effectiveClubIds.includes(clubId);
+    if (!alreadyPicked && effectiveClubIds.length >= MAX_PREFERRED_CLUBS) {
+      return;
+    }
+    setSelectedClubIds((current) =>
+      current.includes(clubId)
+        ? current.filter((id) => id !== clubId)
+        : [...current, clubId],
+    );
+  }
+
   function updateSlot(index: number, patch: Partial<SlotDraft>) {
     setSlots((current) =>
       current.map((slot, slotIndex) =>
@@ -184,6 +218,11 @@ export default function CreateMatchScheduleScreen() {
   function handleNext() {
     if (selectedZoneIds.length === 0) {
       Alert.alert(t("matches.create.zoneRequired"));
+      return;
+    }
+
+    if (clubsRequired && effectiveClubIds.length === 0) {
+      Alert.alert(t("matches.create.clubRequired"));
       return;
     }
 
@@ -208,6 +247,27 @@ export default function CreateMatchScheduleScreen() {
               values={selectedZoneIds}
               onToggle={toggleZone}
             />
+          </CreateMatchSection>
+
+          <CreateMatchSection
+            label={t("matches.create.preferredClubsTitle")}
+            description={
+              clubsRequired
+                ? t("matches.create.preferredClubsRequiredHelp")
+                : t("matches.create.preferredClubsOptionalHelp")
+            }
+          >
+            {selectedZoneIds.length === 0 ? (
+              <AppText style={createMatchStyles.hint}>
+                {t("matches.create.preferredClubsPickZoneFirst")}
+              </AppText>
+            ) : (
+              <ClubsDirectoryList
+                clubsQuery={clubsQuery}
+                onClubPress={toggleClub}
+                selectedClubIds={effectiveClubIds}
+              />
+            )}
           </CreateMatchSection>
         </CreateMatchPanel>
 

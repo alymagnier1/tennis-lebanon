@@ -36,10 +36,22 @@ export const createMatchInputSchema = z
     requiresCreatorApproval: z.boolean().default(false),
     notes: z.string().trim().max(500).optional(),
     zoneIds: z.array(databaseUuidSchema).min(1),
+    preferredClubIds: z.array(databaseUuidSchema).max(3).default([]),
     proposedTimes: z.array(proposedTimeSchema).min(1).max(3),
     timingMode: timingModeSchema.default("fixed"),
   })
   .superRefine((value, ctx) => {
+    // A public listing that names only a zone leaves a joiner deciding whether
+    // to drive without knowing where. Private and invite-only matches are among
+    // people who already know, so they may fall back to zones.
+    if (value.visibility === "public" && value.preferredClubIds.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A public match needs at least one preferred club",
+        path: ["preferredClubIds"],
+      });
+    }
+
     if (value.timingMode === "fixed" && value.proposedTimes.length !== 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -151,14 +163,20 @@ export function canManageProposedTimes(input: {
 }
 
 /**
- * The host can move a fixed match until a court is requested; after that the
- * hour is committed at the club and the booking must be withdrawn first.
+ * The host can move a fixed match until a court is secured; after that the hour
+ * is committed at the club and the booking must be withdrawn first.
+ *
+ * Court-first is why the booking is checked directly rather than inferred from
+ * the status: a match can now hold an accepted court while still `open`, so the
+ * status alone no longer proves the hour is free to move.
  */
 export function canRescheduleMatch(input: {
   viewerIsCreator: boolean;
   matchStatus: string;
   timingMode?: string | null;
+  hasAcceptedBooking?: boolean;
 }): boolean {
+  if (input.hasAcceptedBooking) return false;
   return (
     input.viewerIsCreator &&
     isFixedTimingMode(input.timingMode) &&

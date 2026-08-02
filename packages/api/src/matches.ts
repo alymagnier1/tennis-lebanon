@@ -16,8 +16,19 @@ function createMatchRpcArgs(input: CreateMatchInput) {
     p_zone_ids: input.zoneIds,
     p_proposed_times: toRpcProposedTimes(input.proposedTimes),
     p_timing_mode: input.timingMode,
+    p_preferred_club_ids: input.preferredClubIds,
   };
 }
+
+/**
+ * A club the host named at creation as an acceptable venue. Shown to joiners
+ * before they commit; not a constraint on where the court is finally booked.
+ */
+export type MatchPreferredClub = {
+  club_id: string;
+  name: string;
+  booking_mode: string;
+};
 
 export type SuggestedMatchTime = {
   starts_at: string;
@@ -95,6 +106,7 @@ export type MatchHubCard = {
   capacity: number;
   selected_time_option_id: string | null;
   zones: unknown;
+  preferred_clubs: MatchPreferredClub[];
   proposed_times: MatchHubTimeOption[];
   participants: unknown;
   pending_requests: unknown;
@@ -125,6 +137,9 @@ export type MyMatchRow = {
   listing_expires_at: string | null;
   is_stale_warning: boolean;
   can_extend_listing: boolean;
+  /** A court is secured. True before the roster fills on a court-first match. */
+  has_court: boolean;
+  court_starts_at: string | null;
 };
 
 export type CompletedMatchRow = {

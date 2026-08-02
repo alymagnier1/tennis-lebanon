@@ -9,6 +9,7 @@ import {
   matchHubLevelSummary,
 } from "../../lib/match-hub-summaries";
 import { zoneLabelFromList } from "../../lib/zones";
+import { clubLabelFromList } from "../../lib/match-clubs";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
@@ -30,6 +31,7 @@ export function MatchHubOverviewDetails({
   const { rowDirection, writingDirection } = useLayoutDirection();
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const zoneLabels = zoneLabelFromList(hub.zones, locale);
+  const clubLabels = clubLabelFromList(hub.preferred_clubs);
 
   return (
     <View style={styles.root}>
@@ -105,6 +107,15 @@ export function MatchHubOverviewDetails({
       {zoneLabels ? (
         <SplitSection label={t("discover.zonesFilter")}>
           <HubDetailValue value={zoneLabels} />
+        </SplitSection>
+      ) : null}
+
+      {clubLabels ? (
+        <SplitSection label={t("matches.create.preferredClubsTitle")}>
+          <HubDetailValue value={clubLabels} />
+          <AppText style={[styles.clubsNote, { writingDirection }]}>
+            {t("matches.hub.preferredClubsNote")}
+          </AppText>
         </SplitSection>
       ) : null}
 
@@ -201,5 +212,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: tennisColors.primaryDark,
+  },
+  clubsNote: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 12,
+    lineHeight: 17,
+    color: tennisColors.mutedForeground,
+    marginTop: 4,
   },
 });

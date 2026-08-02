@@ -28,12 +28,19 @@ describe("bookings domain", () => {
   });
 
   describe("canConfirmExternalCourt", () => {
+    const rosterFirst = {
+      viewerIsParticipant: true,
+      viewerIsCreator: false,
+      timingMode: "fixed",
+      hasAgreedTime: true,
+    };
+
     // The state that strands matches: the club never replied, so somebody rang
     // them directly. Requesting a court is hidden here, and this must not be.
     it("is available while a club request is still pending", () => {
       expect(
         canConfirmExternalCourt({
-          viewerIsParticipant: true,
+          ...rosterFirst,
           matchStatus: "booking_pending",
         }),
       ).toBe(true);
@@ -42,7 +49,7 @@ describe("bookings domain", () => {
     it("is available before any request has gone out", () => {
       expect(
         canConfirmExternalCourt({
-          viewerIsParticipant: true,
+          ...rosterFirst,
           matchStatus: "ready_to_book",
         }),
       ).toBe(true);
@@ -53,24 +60,85 @@ describe("bookings domain", () => {
     it("is available to any accepted participant, not just the creator", () => {
       expect(
         canConfirmExternalCourt({
-          viewerIsParticipant: true,
+          ...rosterFirst,
           matchStatus: "ready_to_book",
         }),
       ).toBe(true);
       expect(
         canConfirmExternalCourt({
+          ...rosterFirst,
           viewerIsParticipant: false,
           matchStatus: "ready_to_book",
         }),
       ).toBe(false);
     });
 
-    it("is hidden once the match is confirmed or still filling", () => {
-      for (const matchStatus of ["open", "full", "confirmed", "completed"]) {
-        expect(
-          canConfirmExternalCourt({ viewerIsParticipant: true, matchStatus }),
-        ).toBe(false);
+    it("is hidden once the match is confirmed or already played", () => {
+      for (const matchStatus of ["confirmed", "in_progress", "completed"]) {
+        expect(canConfirmExternalCourt({ ...rosterFirst, matchStatus })).toBe(
+          false,
+        );
       }
+    });
+
+    describe("court-first", () => {
+      const courtFirst = {
+        viewerIsParticipant: true,
+        viewerIsCreator: true,
+        timingMode: "fixed",
+        hasAgreedTime: true,
+      };
+
+      // The whole point: the host secures the court, then recruits against it.
+      it("lets the host secure a court while the match is still recruiting", () => {
+        for (const matchStatus of ["open", "full"]) {
+          expect(canConfirmExternalCourt({ ...courtFirst, matchStatus })).toBe(
+            true,
+          );
+        }
+      });
+
+      // Committing a venue before the group exists is the host's call.
+      it("stays creator-only before the roster fills", () => {
+        expect(
+          canConfirmExternalCourt({
+            ...courtFirst,
+            viewerIsCreator: false,
+            matchStatus: "open",
+          }),
+        ).toBe(false);
+      });
+
+      // Recording a second court only produces "an active booking already
+      // exists"; before court-first the status check covered this on its own.
+      it("is hidden once a court is already secured", () => {
+        expect(
+          canConfirmExternalCourt({
+            ...courtFirst,
+            matchStatus: "open",
+            hasAcceptedBooking: true,
+          }),
+        ).toBe(false);
+      });
+
+      // A court needs an hour, and a flexible match has none until the vote
+      // resolves; booking against an unvoted time bypasses the vote.
+      it("requires fixed timing and an agreed time", () => {
+        expect(
+          canConfirmExternalCourt({
+            ...courtFirst,
+            timingMode: "flexible",
+            matchStatus: "open",
+          }),
+        ).toBe(false);
+        expect(
+          canConfirmExternalCourt({
+            ...courtFirst,
+            hasAgreedTime: false,
+            matchStatus: "open",
+          }),
+        ).toBe(false);
+      });
     });
 
     // Requesting a club court is a different permission and stays narrower.
