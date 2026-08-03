@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canManageProposedTimes,
+  canReportMatchPlayed,
   canRescheduleMatch,
   canShowJoinAction,
   canVoteOnTimes,
@@ -40,6 +41,56 @@ describe("matches domain rules", () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  describe("canReportMatchPlayed", () => {
+    const stranded = {
+      viewerIsParticipant: true,
+      matchStatus: "ready_to_book",
+      hasAcceptedBooking: false,
+      hasUpcomingTime: false,
+    };
+
+    // The hour went by with no court recorded. Left alone this expires as
+    // though the match never happened.
+    it("asks about a match whose hour passed with no court", () => {
+      expect(canReportMatchPlayed(stranded)).toBe(true);
+      expect(
+        canReportMatchPlayed({ ...stranded, matchStatus: "booking_pending" }),
+      ).toBe(true);
+    });
+
+    it("stays quiet while the hour is still ahead", () => {
+      expect(canReportMatchPlayed({ ...stranded, hasUpcomingTime: true })).toBe(
+        false,
+      );
+    });
+
+    // A court means the ordinary confirmed flow already has it.
+    it("stays quiet once a court exists", () => {
+      expect(
+        canReportMatchPlayed({ ...stranded, hasAcceptedBooking: true }),
+      ).toBe(false);
+    });
+
+    it("does not ask people who were not in the match", () => {
+      expect(
+        canReportMatchPlayed({ ...stranded, viewerIsParticipant: false }),
+      ).toBe(false);
+    });
+
+    it("does not ask about matches that never had a roster or already moved on", () => {
+      for (const matchStatus of [
+        "open",
+        "full",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "expired",
+      ]) {
+        expect(canReportMatchPlayed({ ...stranded, matchStatus })).toBe(false);
+      }
+    });
   });
 
   describe("preferred clubs", () => {

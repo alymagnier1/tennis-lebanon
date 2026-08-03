@@ -407,6 +407,8 @@
       "bookingBody": "A club is reviewing your court request.",
       "courtTitle": "Ready to book a court",
       "courtBody": "Everyone agreed on a time. Request a court next.",
+      "playedTitle": "Did you play?",
+      "playedBody": "This match never got a court in the app. Tell us if it happened.",
       "playersTitle": "Waiting for players",
       "playersBody": "Invite someone or share your match so it can fill.",
       "playersCourtSecuredTitle": "Court booked, players missing",
@@ -726,6 +728,14 @@
       "extendListing": "Still looking?",
       "extendSuccess": "Match listing extended for another week.",
       "extendError": "We could not extend this match."
+    },
+    "played": {
+      "prompt": "This match never got a court in the app. Did you play? Answering keeps the result and your rating.",
+      "yes": "Yes, we played",
+      "no": "No, it did not happen",
+      "recordedPlayed": "Marked as played. Confirm attendance and add the result.",
+      "recordedNotPlayed": "Match closed.",
+      "error": "We could not record that. Try again."
     },
     "chat": {
       "title": "Match chat",

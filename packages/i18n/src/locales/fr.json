@@ -407,6 +407,8 @@
       "bookingBody": "A club is reviewing your court request.",
       "courtTitle": "Ready to book a court",
       "courtBody": "Everyone agreed on a time. Request a court next.",
+      "playedTitle": "Avez-vous joué ?",
+      "playedBody": "Aucun court n'a été enregistré pour ce match. Dites-nous s'il a eu lieu.",
       "playersTitle": "En attente de joueurs",
       "playersBody": "Invitez quelquun ou partagez votre match pour le remplir.",
       "playersCourtSecuredTitle": "Court réservé, joueurs manquants",
@@ -692,6 +694,14 @@
       "extendListing": "Toujours partant ?",
       "extendSuccess": "Annonce prolongée d'une semaine.",
       "extendError": "Impossible de prolonger ce match."
+    },
+    "played": {
+      "prompt": "Aucun court n'a été enregistré pour ce match. Avez-vous joué ? Répondre préserve le résultat et votre classement.",
+      "yes": "Oui, nous avons joué",
+      "no": "Non, cela n'a pas eu lieu",
+      "recordedPlayed": "Marqué comme joué. Confirmez votre présence et ajoutez le résultat.",
+      "recordedNotPlayed": "Match clôturé.",
+      "error": "Nous n'avons pas pu enregistrer cela. Réessayez."
     },
     "chat": {
       "title": "Chat du match",

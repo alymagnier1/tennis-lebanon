@@ -184,6 +184,30 @@ export function canRescheduleMatch(input: {
   );
 }
 
+/**
+ * The match had its people and its hour, the court was sorted out somewhere
+ * else, and nobody recorded it. Left alone it expires silently, so the app
+ * asks before that happens.
+ *
+ * `hasUpcomingTime` is how a passed hour is detected without a new field:
+ * `get_match_hub` and `list_my_matches` both drop slots that have already
+ * ended, so a `ready_to_book` match with none left is one whose time has gone.
+ */
+export function canReportMatchPlayed(input: {
+  viewerIsParticipant: boolean;
+  matchStatus: string;
+  hasAcceptedBooking: boolean;
+  hasUpcomingTime: boolean;
+}): boolean {
+  if (!input.viewerIsParticipant) return false;
+  if (input.hasAcceptedBooking) return false;
+  if (input.hasUpcomingTime) return false;
+  return (
+    input.matchStatus === "ready_to_book" ||
+    input.matchStatus === "booking_pending"
+  );
+}
+
 export function hasUnanimousTimeYes(input: {
   yesCount: number;
   requiredCount: number;

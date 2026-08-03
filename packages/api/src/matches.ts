@@ -238,6 +238,22 @@ export async function leaveMatch(
   if (error) throw error;
 }
 
+/**
+ * Answers the prompt raised when a match's hour passed with no court recorded.
+ * `true` sends it to the attendance and result flow; `false` closes it.
+ */
+export async function reportMatchPlayed(
+  client: TennisSupabaseClient,
+  matchId: string,
+  played: boolean,
+): Promise<void> {
+  const { error } = await client.rpc("report_match_played", {
+    p_match_id: matchId,
+    p_played: played,
+  });
+  if (error) throw error;
+}
+
 export async function cancelMatch(
   client: TennisSupabaseClient,
   matchId: string,

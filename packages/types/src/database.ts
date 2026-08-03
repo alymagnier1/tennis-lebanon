@@ -2123,6 +2123,10 @@ export type Database = {
         Args: { p_match_id: string };
         Returns: boolean;
       };
+      match_awaiting_played_answer: {
+        Args: { p_match_id: string };
+        Returns: boolean;
+      };
       match_capacity_for_format: {
         Args: { p_format: Database["public"]["Enums"]["match_format"] };
         Returns: number;
@@ -2151,6 +2155,7 @@ export type Database = {
         Args: { p_match_id: string };
         Returns: number;
       };
+      match_played_prompts: { Args: never; Returns: number };
       match_should_expire: { Args: { p_match_id: string }; Returns: boolean };
       normalize_booking_phone: { Args: { p_phone: string }; Returns: string };
       propose_booking_alternative: {
@@ -2199,6 +2204,10 @@ export type Database = {
       };
       reject_booking: {
         Args: { p_booking_id: string; p_reason?: string };
+        Returns: undefined;
+      };
+      report_match_played: {
+        Args: { p_match_id: string; p_played: boolean };
         Returns: undefined;
       };
       request_account_deletion: { Args: never; Returns: undefined };

@@ -18,6 +18,7 @@ import {
   joinMatch,
   leaveMatch,
   respondBookingAlternative,
+  reportMatchPlayed,
   respondToJoinRequest,
   withdrawMatchTimeOption,
   type MatchHubTimeOption,
@@ -30,6 +31,7 @@ import {
   canRespondToBookingAlternative,
   canShowJoinAction,
   canRescheduleMatch,
+  canReportMatchPlayed,
   canVoteOnTimes,
   isFixedTimingMode,
   canCreatorCancelMatch,
@@ -197,6 +199,19 @@ export default function MatchHubScreen() {
     onError: () => Alert.alert(t("matches.lifecycle.extendError")),
   });
 
+  const playedMutation = useMutation({
+    mutationFn: (played: boolean) => reportMatchPlayed(supabase, id!, played),
+    onSuccess: async (_data, played) => {
+      await invalidate();
+      Alert.alert(
+        played
+          ? t("matches.played.recordedPlayed")
+          : t("matches.played.recordedNotPlayed"),
+      );
+    },
+    onError: () => Alert.alert(t("matches.played.error")),
+  });
+
   const hub = hubQuery.data;
   const booking = hub?.booking ?? null;
   const participants =
@@ -224,6 +239,15 @@ export default function MatchHubScreen() {
         timingMode: hub.timing_mode,
         hasAgreedTime: Boolean(hub.selected_time_option_id),
         hasAcceptedBooking: hub.booking?.status === "accepted",
+      })
+    : false;
+
+  const showPlayedPrompt = hub
+    ? canReportMatchPlayed({
+        viewerIsParticipant: hub.viewer_status === "accepted",
+        matchStatus: hub.status,
+        hasAcceptedBooking: hub.booking?.status === "accepted",
+        hasUpcomingTime: proposedTimes.length > 0,
       })
     : false;
 
@@ -394,6 +418,26 @@ export default function MatchHubScreen() {
 
       {hub?.next_action === "awaiting_club" ? (
         <StatusBanner body={t("matches.hub.awaitingClub")} />
+      ) : null}
+
+      {showPlayedPrompt ? (
+        <StatusBanner
+          body={t("matches.played.prompt")}
+          actions={
+            <View style={styles.bookingActions}>
+              <FigmaPrimaryButton
+                label={t("matches.played.yes")}
+                disabled={playedMutation.isPending}
+                onPress={() => playedMutation.mutate(true)}
+              />
+              <FigmaSecondaryButton
+                label={t("matches.played.no")}
+                disabled={playedMutation.isPending}
+                onPress={() => playedMutation.mutate(false)}
+              />
+            </View>
+          }
+        />
       ) : null}
 
       {hub?.next_action === "awaiting_players" ? (

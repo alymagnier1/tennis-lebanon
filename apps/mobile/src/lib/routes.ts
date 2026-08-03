@@ -26,12 +26,13 @@ export function matchHubRoute(matchId: string): Href {
 }
 
 export function homeNextActionRoute(
-  kind: "invite" | "players" | "vote" | "booking" | "court",
+  kind: "invite" | "players" | "vote" | "booking" | "court" | "played",
   matchId: string,
 ): Href {
   if (kind === "players") {
     return matchInviteRoute(matchId);
   }
+  // "played" lands on the hub too: the yes/no prompt lives in its banner.
   return matchHubRoute(matchId);
 }
 

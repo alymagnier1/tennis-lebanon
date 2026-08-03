@@ -1,8 +1,9 @@
 import type { MatchInviteInboxRow, MyMatchRow } from "@tennis-lebanon/api";
+import { canReportMatchPlayed } from "@tennis-lebanon/domain";
 
 export type HomeNextAction = {
   id: string;
-  kind: "invite" | "players" | "vote" | "booking" | "court";
+  kind: "invite" | "players" | "vote" | "booking" | "court" | "played";
   titleKey: string;
   bodyKey: string;
   bodyParams?: Record<string, string>;
@@ -41,7 +42,25 @@ export function deriveHomeNextActions(
       continue;
     }
 
-    if (match.status === "booking_pending") {
+    // The hour went by with no court recorded. Asking outranks every other
+    // prompt here: the alternative is the match expiring as though it never
+    // happened, and only the players know whether it did.
+    if (
+      canReportMatchPlayed({
+        viewerIsParticipant: match.participant_status === "accepted",
+        matchStatus: match.status,
+        hasAcceptedBooking: match.has_court,
+        hasUpcomingTime: Boolean(match.soonest_time),
+      })
+    ) {
+      actions.push({
+        id: `played-${match.match_id}`,
+        kind: "played",
+        titleKey: "home.nextAction.playedTitle",
+        bodyKey: "home.nextAction.playedBody",
+        matchId: match.match_id,
+      });
+    } else if (match.status === "booking_pending") {
       actions.push({
         id: `booking-${match.match_id}`,
         kind: "booking",
