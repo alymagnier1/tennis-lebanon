@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-03 — v1 ships player-side only; every club is a WhatsApp club
+
+- Status: accepted
+- Context: `CLAUDE.md` lists "club dashboard" and "booking request and manual club approval" in the MVP, but the in-app queue cannot work yet: there is no delivery channel to club staff, so a request lands in a dashboard nobody is told about (see the 2026-07-28 entry and the gate in `docs/STAGING_CHECKLIST.md`). Meanwhile the off-app path has become the most developed one in the codebase — any participant may record a court, before or after the roster fills, at whatever hour the club actually gave. Lebanese clubs book over WhatsApp regardless.
+- Decision: v1 is the player side alone. Every pilot club is `booking_mode = 'external_link'`, surfaced as a WhatsApp link on the club card, and the player records the booking afterwards with `confirm_external_court`. Recruiting clubs onto a dashboard is deferred until the player side is proven. This defers two items `CLAUDE.md` lists under MVP; that document has not been amended, so it and this entry currently disagree.
+- Alternatives considered: ship the club dashboard alongside (blocked on a staff notification channel that does not exist, and asks a pilot club to watch a queue before the app has any players in it); keep both modes live and let clubs choose (the in-app mode looks functional to a player while silently going nowhere, which is worse than not offering it).
+- Consequences: no club-side verification — a court record is one player's word, which is acceptable while `payment_method` is always `pay_at_club` and a result still needs mutual confirmation. The app cannot see a walk-in the club booked by phone, so the overlap constraint only protects against two app matches claiming one court. Clubs get no demand visibility, which is a sales problem rather than a technical one. `request_match_booking`, `accept_booking` and the alternative-proposal flow stay in place as dead-for-now code rather than being deleted. **"No club-side app" means no club-staff role, not no dashboard**: result disputes, safety reports and club approvals remain platform-ops surfaces and stay in scope.
+- Owner: Founder
+
 ## 2026-08-02 — Court-first booking: `confirmed` means roster and court, not court alone
 
 - Status: accepted
