@@ -27,28 +27,47 @@ function zonedDateParts(date: Date, timeZone: string) {
     year: Number(lookup.year),
     month: Number(lookup.month),
     day: Number(lookup.day),
-    hour: Number(lookup.hour),
+    // `hour12: false` renders the midnight hour as 24 rather than 0 on the h24
+    // cycle, so an instant just after midnight in Beirut came back as "24:30".
+    // The day part is already correct, so this only has to wrap the hour.
+    hour: Number(lookup.hour) % 24,
     minute: Number(lookup.minute),
   };
 }
 
+/**
+ * Turns a Beirut wall-clock date and time into the UTC instant it names.
+ *
+ * Take the wall clock as if it were UTC, ask what that instant reads as in
+ * Beirut, and the gap between the two is the zone offset to subtract.
+ *
+ * The earlier version built its comparison from the *requested* hour rather
+ * than the rendered one, which made the gap identically zero and reduced the
+ * whole function to `Date.UTC(...)` -- every Beirut wall clock was stored as
+ * though it were UTC, so matches created through the wizard landed two or three
+ * hours late depending on the season.
+ */
 export function beirutLocalToUtcIso(date: string, time: string): string {
   const [year, month, day] = date.split("-").map(Number);
   const { hours, minutes } = parseTimeParts(time);
-  const utcGuess = new Date(
-    Date.UTC(year ?? 0, (month ?? 1) - 1, day ?? 1, hours, minutes, 0),
-  );
-  const parts = zonedDateParts(utcGuess, BEIRUT_TIME_ZONE);
-  const asUtc = Date.UTC(
-    parts.year,
-    parts.month - 1,
-    parts.day,
+  const utcGuess = Date.UTC(
+    year ?? 0,
+    (month ?? 1) - 1,
+    day ?? 1,
     hours,
     minutes,
     0,
   );
-  const offset = asUtc - utcGuess.getTime();
-  return new Date(asUtc - offset).toISOString();
+  const parts = zonedDateParts(new Date(utcGuess), BEIRUT_TIME_ZONE);
+  const rendered = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    0,
+  );
+  return new Date(utcGuess - (rendered - utcGuess)).toISOString();
 }
 
 /** PostgreSQL `extract(dow)` convention: 0 = Sunday. */
