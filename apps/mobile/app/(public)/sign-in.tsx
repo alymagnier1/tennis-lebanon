@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { signInSchema, type SignInInput } from "@tennis-lebanon/domain";
+import { AppText } from "../../src/components/AppText";
 import { ErrorNotice } from "../../src/components/FormUi";
 import {
   FigmaPrimaryButton,
+  FigmaSecondaryButton,
   FigmaTextButton,
   OnboardingFormField,
   OnboardingStepLayout,
@@ -19,16 +21,17 @@ import {
 } from "../../src/lib/auth-cooldown";
 import { getAuthRedirectUrl } from "../../src/lib/auth-redirect";
 import { supabase } from "../../src/lib/supabase";
-import { AppText } from "../../src/components/AppText";
+import { useAuth } from "../../src/providers/AuthProvider";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import { tennisColors } from "../../src/theme/tennis-tokens";
-import { StyleSheet } from "react-native";
 
 export default function SignInScreen() {
   const { t } = useTranslation();
+  const { session, state, signOut } = useAuth();
   const [submitError, setSubmitError] = useState<"send" | "cooldown" | null>(
     null,
   );
+  const [signOutError, setSignOutError] = useState(false);
   const {
     control,
     handleSubmit,
@@ -37,6 +40,10 @@ export default function SignInScreen() {
     resolver: zodResolver(signInSchema),
     defaultValues: { email: "" },
   });
+
+  if (state === "ready") {
+    return <Redirect href="/(tabs)" />;
+  }
 
   const submit = handleSubmit(async ({ email }) => {
     setSubmitError(null);
@@ -59,6 +66,44 @@ export default function SignInScreen() {
     }
     router.replace("/(auth)/check-email");
   });
+
+  const switchAccount = async () => {
+    setSignOutError(false);
+    try {
+      await signOut();
+    } catch {
+      setSignOutError(true);
+    }
+  };
+
+  if (state === "needsOnboarding" && session) {
+    const email = session.user.email ?? "";
+
+    return (
+      <OnboardingStepLayout
+        title={t("auth.alreadySignedInTitle")}
+        description={t("auth.alreadySignedInBody", { email })}
+        onBack={() => router.replace("/(onboarding)/consent")}
+        scroll={false}
+        footer={
+          <>
+            <FigmaPrimaryButton
+              label={t("auth.continueOnboarding")}
+              onPress={() => router.replace("/(onboarding)/consent")}
+            />
+            <FigmaSecondaryButton
+              label={t("auth.useAnotherEmail")}
+              onPress={() => void switchAccount()}
+            />
+          </>
+        }
+      >
+        {signOutError ? (
+          <ErrorNotice>{t("auth.signOutError")}</ErrorNotice>
+        ) : null}
+      </OnboardingStepLayout>
+    );
+  }
 
   return (
     <OnboardingStepLayout

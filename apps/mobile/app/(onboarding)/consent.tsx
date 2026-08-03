@@ -6,15 +6,24 @@ import {
   OnboardingStepLayout,
   PolicyToggleCard,
 } from "../../src/components/onboarding-ui";
+import { useAuth } from "../../src/providers/AuthProvider";
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
 
 export default function ConsentScreen() {
   const { t } = useTranslation();
+  const { signOut } = useAuth();
   const { draft, updateDraft } = useOnboarding();
   const complete =
     draft.acceptedTerms &&
     draft.acceptedPrivacy &&
     draft.acceptedCommunityRules;
+
+  const leaveOnboarding = () => {
+    void (async () => {
+      await signOut().catch(() => undefined);
+      router.replace("/(public)/welcome");
+    })();
+  };
 
   return (
     <OnboardingStepLayout
@@ -22,7 +31,7 @@ export default function ConsentScreen() {
       description={t("onboarding.consent.description")}
       step={1}
       totalSteps={6}
-      onBack={() => router.back()}
+      onBack={leaveOnboarding}
       footer={
         <FigmaPrimaryButton
           label={t("common.continue")}

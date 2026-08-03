@@ -241,6 +241,9 @@
     "checkEmailHint": "The link expires after a short time. You can request a new one if needed.",
     "openedLink": "I opened the link",
     "useAnotherEmail": "Use another email",
+    "alreadySignedInTitle": "You are already signed in",
+    "alreadySignedInBody": "Continue setup for {{email}}, or sign out to use a different email.",
+    "continueOnboarding": "Continue setup",
     "callbackTitle": "Signing you in",
     "callbackWorking": "We are securely completing your sign-in.",
     "callbackError": "This sign-in link is invalid or expired.",
@@ -1007,7 +1010,12 @@
   "clubs": {
     "title": "Clubs",
     "directoryTitle": "Find a club",
-    "directoryDescription": "Browse pilot clubs and request a court for your match.",
+    "directoryDescription": "Browse clubs and request a court for your match.",
+    "searchPlaceholder": "Search clubs or zones...",
+    "resultCount": "{{count}} clubs in Lebanon",
+    "surfaceAll": "All",
+    "viewDetails": "View club",
+    "pricePerHour": "/hr",
     "loadError": "We could not load clubs.",
     "empty": "No clubs in these areas yet.",
     "detailTitle": "Club details",
@@ -1040,13 +1048,14 @@
   },
   "settings": {
     "title": "Settings",
-    "description": "Manage policies, account access, and deletion requests.",
+    "description": "Manage your account and preferences.",
     "policies": "View policies",
     "rtlLayoutCheck": "RTL layout check",
     "requestDeletion": "Request account deletion",
     "deleteTitle": "Request account deletion?",
     "deleteDescription": "This submits a deletion request and may restrict account access while it is reviewed.",
-    "deleteError": "We could not submit your deletion request. Please try again."
+    "deleteError": "We could not submit your deletion request. Please try again.",
+    "versionFooter": "Tennis Lebanon v{{version}} · Made in Lebanon 🇱🇧"
   },
   "account": {
     "unavailableTitle": "Account unavailable",

@@ -238,6 +238,9 @@
     "checkEmailBody": "افتح وصلة تسجيل الدخول على هذا الجهاز للمتابعة.",
     "openedLink": "فتحت الوصلة",
     "useAnotherEmail": "استخدام بريد إلكتروني آخر",
+    "alreadySignedInTitle": "أنت مسجّل الدخول بالفعل",
+    "alreadySignedInBody": "أكمل الإعداد لـ {{email}}، أو سجّل الخروج لاستخدام بريد آخر.",
+    "continueOnboarding": "متابعة الإعداد",
     "callbackTitle": "جارٍ تسجيل دخولك",
     "callbackWorking": "نعمل على إكمال تسجيل دخولك بأمان.",
     "callbackError": "وصلة تسجيل الدخول غير صالحة أو منتهية الصلاحية.",
@@ -973,7 +976,12 @@
   "clubs": {
     "title": "الأندية",
     "directoryTitle": "ابحث عن نادٍ",
-    "directoryDescription": "تصفح أندية التجربة واطلب ملعباً لمباراتك.",
+    "directoryDescription": "تصفح الأندية واطلب ملعباً لمباراتك.",
+    "searchPlaceholder": "ابحث عن أندية أو مناطق...",
+    "resultCount": "{{count}} نادٍ في لبنان",
+    "surfaceAll": "الكل",
+    "viewDetails": "عرض النادي",
+    "pricePerHour": "/ساعة",
     "loadError": "تعذر تحميل الأندية.",
     "empty": "لا توجد أندية في هذه المناطق بعد.",
     "detailTitle": "تفاصيل النادي",
@@ -1006,13 +1014,14 @@
   },
   "settings": {
     "title": "الإعدادات",
-    "description": "أدر السياسات والوصول إلى الحساب وطلبات الحذف.",
+    "description": "أدر حسابك وتفضيلاتك.",
     "policies": "عرض السياسات",
     "rtlLayoutCheck": "فحص تخطيط RTL",
     "requestDeletion": "طلب حذف الحساب",
     "deleteTitle": "هل تريد طلب حذف الحساب؟",
     "deleteDescription": "سيؤدي ذلك إلى إرسال طلب حذف، وقد يُقيّد الوصول إلى الحساب أثناء مراجعته.",
-    "deleteError": "تعذّر إرسال طلب الحذف. حاول مرة أخرى."
+    "deleteError": "تعذّر إرسال طلب الحذف. حاول مرة أخرى.",
+    "versionFooter": "Tennis Lebanon v{{version}} · صُنع في لبنان 🇱🇧"
   },
   "account": {
     "unavailableTitle": "الحساب غير متاح",

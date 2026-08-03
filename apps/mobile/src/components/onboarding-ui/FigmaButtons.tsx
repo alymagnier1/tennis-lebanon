@@ -115,16 +115,26 @@ export function FigmaTextButton({
   );
 }
 
-export function FigmaBackButton({ onPress }: { onPress: () => void }) {
+export function FigmaBackButton({
+  onPress,
+  onDark = false,
+}: {
+  onPress: () => void;
+  onDark?: boolean;
+}) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Back"
       onPress={onPress}
-      style={styles.backBtn}
+      style={[styles.backBtn, onDark ? styles.backBtnDark : null]}
       hitSlop={8}
     >
-      <AppText style={styles.backChevron}>‹</AppText>
+      <AppText
+        style={[styles.backChevron, onDark ? styles.backChevronDark : null]}
+      >
+        ‹
+      </AppText>
     </Pressable>
   );
 }
@@ -200,21 +210,27 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.4)",
   },
   backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: tennisRadii.md,
+    width: 36,
+    height: 36,
+    borderRadius: tennisRadii.sm,
     backgroundColor: tennisColors.card,
     borderWidth: 1.5,
     borderColor: tennisColors.border,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
+  },
+  backBtnDark: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderWidth: 0,
   },
   backChevron: {
     fontSize: 24,
     lineHeight: 28,
     color: tennisColors.primaryDark,
     marginTop: -2,
+  },
+  backChevronDark: {
+    color: tennisColors.white,
   },
   card: {
     backgroundColor: tennisColors.card,

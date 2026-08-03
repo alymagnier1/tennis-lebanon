@@ -1,13 +1,18 @@
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import type { ClubDirectoryRow } from "@tennis-lebanon/api";
-import { formatPriceMinor } from "@tennis-lebanon/domain";
-import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
+import {
+  formatPriceMinor,
+  isWhatsAppBookingClub,
+} from "@tennis-lebanon/domain";
 import type { Json } from "@tennis-lebanon/types";
 import { AppText } from "./AppText";
+import { Icon } from "./Icon";
 import { clubBookingModeLabelKey } from "../lib/club-booking-label";
-import { mobileBrand } from "../theme/mobile-brand";
+import { useLayoutDirection } from "../lib/layout-direction";
 import { zoneNameFromJson } from "../lib/zones";
+import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 type ClubDirectoryCardProps = {
   club: ClubDirectoryRow;
@@ -16,14 +21,42 @@ type ClubDirectoryCardProps = {
   selected?: boolean;
 };
 
+type BookingBadgeStyle = {
+  color: string;
+  backgroundColor: string;
+};
+
+function bookingBadgeStyle(bookingMode: string): BookingBadgeStyle {
+  if (isWhatsAppBookingClub(bookingMode)) {
+    return { color: "#128C7E", backgroundColor: "#E3F0EE" };
+  }
+
+  return { color: tennisColors.accent, backgroundColor: "#FEF0E7" };
+}
+
+function MetaChip({ children }: { children: string }) {
+  return (
+    <View style={styles.metaChip}>
+      <AppText style={styles.metaChipText}>{children}</AppText>
+    </View>
+  );
+}
+
 export function ClubDirectoryCard({
   club,
   onPress,
   selected,
 }: ClubDirectoryCardProps) {
   const { t, i18n } = useTranslation();
+  const { rowDirection, writingDirection } = useLayoutDirection();
   const price = formatPriceMinor(club.min_price_minor, club.currency);
   const selectable = selected !== undefined;
+  const zone = zoneNameFromJson(
+    club.zone_name_i18n as Json,
+    i18n.resolvedLanguage ?? i18n.language,
+  );
+  const bookingBadge = bookingBadgeStyle(club.booking_mode);
+  const amenities = club.amenities.slice(0, 3);
 
   return (
     <Pressable
@@ -37,52 +70,226 @@ export function ClubDirectoryCard({
         pressed && styles.cardPressed,
       ]}
     >
-      <AppText style={styles.name} maxLines={1}>
-        {club.name}
-        {club.is_favorite ? ` · ${t("clubs.favorite")}` : ""}
-      </AppText>
-      <AppText style={styles.meta} maxLines={2}>
-        {zoneNameFromJson(
-          club.zone_name_i18n as Json,
-          i18n.resolvedLanguage ?? i18n.language,
-        )}
-        {" · "}
-        {t("clubs.courtCount", { count: club.court_count })}
-        {price ? ` · ${t("clubs.from", { price })}` : ""}
-      </AppText>
-      <AppText style={styles.badge} maxLines={1}>
-        {t(clubBookingModeLabelKey(club.booking_mode))} · {t("clubs.payAtClub")}
-      </AppText>
+      <View style={styles.hero}>
+        <View style={styles.heroOverlay} />
+        <View style={styles.heroPattern}>
+          <Icon name="place" size={48} color={tennisColors.border} />
+        </View>
+
+        {club.is_favorite ? (
+          <View style={styles.favoriteBadge}>
+            <AppText style={styles.favoriteBadgeText}>
+              {t("clubs.favorite")}
+            </AppText>
+          </View>
+        ) : null}
+
+        <View
+          style={[
+            styles.bookingBadge,
+            { backgroundColor: bookingBadge.backgroundColor },
+          ]}
+        >
+          <AppText
+            style={[styles.bookingBadgeText, { color: bookingBadge.color }]}
+          >
+            {t(clubBookingModeLabelKey(club.booking_mode))}
+          </AppText>
+        </View>
+      </View>
+
+      <View style={styles.body}>
+        <View style={[styles.titleRow, { flexDirection: rowDirection }]}>
+          <View style={styles.titleBlock}>
+            <AppText style={[styles.name, { writingDirection }]} maxLines={2}>
+              {club.name}
+            </AppText>
+            <AppText style={[styles.zone, { writingDirection }]} maxLines={1}>
+              {zone}
+            </AppText>
+          </View>
+          {price ? (
+            <View style={styles.priceBlock}>
+              <AppText style={styles.price}>{price}</AppText>
+              <AppText style={styles.priceHint}>
+                {t("clubs.pricePerHour")}
+              </AppText>
+            </View>
+          ) : null}
+        </View>
+
+        <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
+          <MetaChip>
+            {t("clubs.courtCount", { count: club.court_count })}
+          </MetaChip>
+          <MetaChip>{t("clubs.payAtClub")}</MetaChip>
+        </View>
+
+        {amenities.length > 0 ? (
+          <View style={[styles.tagRow, { flexDirection: rowDirection }]}>
+            {amenities.map((tag) => (
+              <View key={tag} style={styles.tag}>
+                <AppText style={styles.tagText} maxLines={1}>
+                  {tag}
+                </AppText>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        <View style={styles.cta}>
+          <AppText style={styles.ctaLabel}>{t("clubs.viewDetails")}</AppText>
+        </View>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
-    borderRadius: radii.md,
-    padding: spacing.md,
-    gap: spacing.xs,
-    backgroundColor: colors.neutral[0],
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
+    borderRadius: 18,
+    overflow: "hidden",
+    backgroundColor: tennisColors.card,
   },
   cardSelected: {
-    borderColor: mobileBrand[500],
-    backgroundColor: mobileBrand[50],
+    borderColor: tennisColors.primary,
+    backgroundColor: tennisColors.secondary,
   },
-  cardPressed: { opacity: 0.85 },
+  cardPressed: {
+    opacity: 0.92,
+  },
+  hero: {
+    height: 160,
+    backgroundColor: tennisColors.muted,
+    position: "relative",
+    overflow: "hidden",
+  },
+  heroOverlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 80,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    zIndex: 2,
+  },
+  heroPattern: {
+    ...StyleSheet.absoluteFill,
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0.35,
+  },
+  favoriteBadge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    zIndex: 3,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: tennisRadii.pill,
+    backgroundColor: tennisColors.lime,
+  },
+  favoriteBadgeText: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 11,
+    color: tennisColors.limeText,
+  },
+  bookingBadge: {
+    position: "absolute",
+    right: 12,
+    bottom: 12,
+    zIndex: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: tennisRadii.pill,
+  },
+  bookingBadgeText: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 11,
+  },
+  body: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  titleRow: {
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  titleBlock: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
   name: {
-    color: colors.neutral[900],
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
+    fontFamily: tennisFontFamily.headingExtra,
+    fontSize: 17,
+    color: tennisColors.primaryDark,
+    letterSpacing: -0.3,
   },
-  meta: {
-    color: colors.neutral[500],
-    fontSize: typography.size.sm,
+  zone: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 12,
+    color: tennisColors.mutedForeground,
   },
-  badge: {
-    color: colors.brand[700],
-    fontSize: typography.size.xs,
-    fontWeight: typography.weight.medium,
+  priceBlock: {
+    alignItems: "flex-end",
+    flexShrink: 0,
+  },
+  price: {
+    fontFamily: tennisFontFamily.headingExtra,
+    fontSize: 18,
+    color: tennisColors.primary,
+    letterSpacing: -0.3,
+  },
+  priceHint: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 11,
+    color: tennisColors.mutedForeground,
+  },
+  metaRow: {
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  metaChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: tennisColors.muted,
+  },
+  metaChipText: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 11,
+    color: tennisColors.mutedForeground,
+  },
+  tagRow: {
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  tag: {
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: tennisRadii.pill,
+    backgroundColor: tennisColors.secondary,
+    maxWidth: "100%",
+  },
+  tagText: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 11,
+    color: tennisColors.primary,
+  },
+  cta: {
+    paddingVertical: 12,
+    borderRadius: tennisRadii.md,
+    backgroundColor: tennisColors.primary,
+    alignItems: "center",
+  },
+  ctaLabel: {
+    fontFamily: tennisFontFamily.heading,
+    fontSize: 14,
+    color: tennisColors.white,
   },
 });

@@ -238,6 +238,9 @@
     "checkEmailBody": "Ouvrez le lien de connexion sur cet appareil pour continuer.",
     "openedLink": "J’ai ouvert le lien",
     "useAnotherEmail": "Utiliser une autre adresse",
+    "alreadySignedInTitle": "Vous êtes déjà connecté",
+    "alreadySignedInBody": "Continuez la configuration pour {{email}}, ou déconnectez-vous pour utiliser une autre adresse.",
+    "continueOnboarding": "Continuer la configuration",
     "callbackTitle": "Connexion en cours",
     "callbackWorking": "Nous finalisons votre connexion de manière sécurisée.",
     "callbackError": "Ce lien de connexion est invalide ou expiré.",
@@ -973,7 +976,12 @@
   "clubs": {
     "title": "Clubs",
     "directoryTitle": "Trouver un club",
-    "directoryDescription": "Parcourez les clubs pilotes et demandez un court pour votre match.",
+    "directoryDescription": "Parcourez les clubs et demandez un court pour votre match.",
+    "searchPlaceholder": "Rechercher des clubs ou des zones...",
+    "resultCount": "{{count}} clubs au Liban",
+    "surfaceAll": "Tous",
+    "viewDetails": "Voir le club",
+    "pricePerHour": "/h",
     "loadError": "Impossible de charger les clubs.",
     "empty": "Aucun club dans ces zones pour le moment.",
     "detailTitle": "Détails du club",
@@ -1006,13 +1014,14 @@
   },
   "settings": {
     "title": "Paramètres",
-    "description": "Gérez les politiques, l’accès au compte et les demandes de suppression.",
+    "description": "Gérez votre compte et vos préférences.",
     "policies": "Consulter les politiques",
     "rtlLayoutCheck": "Vérification mise en page RTL",
     "requestDeletion": "Demander la suppression du compte",
     "deleteTitle": "Demander la suppression du compte ?",
     "deleteDescription": "Cette action envoie une demande de suppression et peut limiter l’accès au compte pendant son examen.",
-    "deleteError": "Impossible d’envoyer votre demande de suppression. Veuillez réessayer."
+    "deleteError": "Impossible d’envoyer votre demande de suppression. Veuillez réessayer.",
+    "versionFooter": "Tennis Lebanon v{{version}} · Fabriqué au Liban 🇱🇧"
   },
   "account": {
     "unavailableTitle": "Compte indisponible",

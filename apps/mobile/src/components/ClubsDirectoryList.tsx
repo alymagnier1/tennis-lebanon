@@ -12,6 +12,7 @@ import { clubDetailRoute } from "../lib/routes";
 
 type ClubsDirectoryListProps = {
   clubsQuery: UseQueryResult<ClubDirectoryRow[], Error>;
+  clubs?: ClubDirectoryRow[];
   matchId?: string;
   onClubPress?: (clubId: string) => void;
   /** Omit for a navigation list; pass to render the rows as checkboxes. */
@@ -22,6 +23,7 @@ type ClubsDirectoryListProps = {
 
 export function ClubsDirectoryList({
   clubsQuery,
+  clubs: clubsOverride,
   matchId,
   onClubPress,
   selectedClubIds,
@@ -30,14 +32,14 @@ export function ClubsDirectoryList({
   const { t } = useTranslation();
 
   const clubs = useMemo(() => {
-    const rows = clubsQuery.data ?? [];
+    const rows = clubsOverride ?? clubsQuery.data ?? [];
     if (!priorityClubIds?.length) return rows;
     return [...rows].sort((left, right) => {
       const leftRank = priorityClubIds.includes(left.club_id) ? 0 : 1;
       const rightRank = priorityClubIds.includes(right.club_id) ? 0 : 1;
       return leftRank - rightRank;
     });
-  }, [clubsQuery.data, priorityClubIds]);
+  }, [clubsOverride, clubsQuery.data, priorityClubIds]);
 
   const handlePress = (clubId: string) => {
     if (onClubPress) {
@@ -47,7 +49,7 @@ export function ClubsDirectoryList({
     router.push(clubDetailRoute(clubId, matchId ? { matchId } : undefined));
   };
 
-  if (clubsQuery.isLoading) {
+  if (clubsQuery.isLoading && !clubsOverride) {
     return <ActivityIndicator accessibilityLabel={t("discover.loading")} />;
   }
 

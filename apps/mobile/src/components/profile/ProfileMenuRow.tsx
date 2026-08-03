@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { Icon } from "../Icon";
 import { useLayoutDirection } from "../../lib/layout-direction";
@@ -10,15 +9,22 @@ import { tennisFontFamily } from "../../hooks/useTennisFonts";
 export function ProfileMenuRow({
   icon,
   label,
+  value,
   onPress,
   showDivider = true,
+  showChevron = true,
+  tone = "default",
 }: {
   icon: ReactNode;
   label: string;
+  value?: string | null;
   onPress: () => void;
   showDivider?: boolean;
+  showChevron?: boolean;
+  tone?: "default" | "danger";
 }) {
   const { rowDirection, writingDirection } = useLayoutDirection();
+  const isDanger = tone === "danger";
 
   return (
     <Pressable
@@ -32,9 +38,34 @@ export function ProfileMenuRow({
         showDivider && styles.rowDivider,
       ]}
     >
-      <View style={styles.iconSlot}>{icon}</View>
-      <AppText style={[styles.label, { writingDirection }]}>{label}</AppText>
-      <Icon name="chevron" size={14} color={tennisColors.mutedForeground} />
+      <View
+        style={[styles.iconCircle, isDanger ? styles.iconCircleDanger : null]}
+      >
+        {icon}
+      </View>
+      <View style={styles.labelBlock}>
+        <AppText
+          style={[
+            styles.label,
+            isDanger ? styles.labelDanger : null,
+            { writingDirection },
+          ]}
+        >
+          {label}
+        </AppText>
+        {value ? (
+          <AppText style={[styles.value, { writingDirection }]}>
+            {value}
+          </AppText>
+        ) : null}
+      </View>
+      {showChevron ? (
+        <Icon
+          name="chevron"
+          size={14}
+          color={isDanger ? tennisColors.accent : tennisColors.mutedForeground}
+        />
+      ) : null}
     </Pressable>
   );
 }
@@ -43,24 +74,43 @@ const styles = StyleSheet.create({
   row: {
     alignItems: "center",
     gap: 14,
-    paddingVertical: 15,
+    paddingVertical: 14,
     paddingHorizontal: 16,
   },
   rowPressed: {
     opacity: 0.85,
   },
   rowDivider: {
-    borderBottomWidth: 1,
-    borderBottomColor: tennisColors.border,
+    borderTopWidth: 1,
+    borderTopColor: tennisColors.border,
   },
-  iconSlot: {
-    width: 24,
+  iconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    backgroundColor: tennisColors.secondary,
     alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  iconCircleDanger: {
+    backgroundColor: "#FEF0E7",
+  },
+  labelBlock: {
+    flex: 1,
+    gap: 1,
   },
   label: {
-    flex: 1,
     fontFamily: tennisFontFamily.body,
     fontSize: 14,
     color: tennisColors.primaryDark,
+  },
+  labelDanger: {
+    color: tennisColors.accent,
+  },
+  value: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 12,
+    color: tennisColors.mutedForeground,
   },
 });

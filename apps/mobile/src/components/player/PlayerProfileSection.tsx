@@ -7,14 +7,27 @@ import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 
 export function PlayerProfileSection({
   title,
+  variant = "card",
   children,
-}: PropsWithChildren<{ title: string }>) {
+}: PropsWithChildren<{
+  title: string;
+  variant?: "card" | "grouped";
+}>) {
   const { writingDirection } = useLayoutDirection();
 
   return (
     <View style={styles.card}>
-      <AppText style={[styles.title, { writingDirection }]}>{title}</AppText>
-      {children}
+      <AppText
+        style={[
+          variant === "grouped" ? styles.groupedTitle : styles.title,
+          { writingDirection },
+        ]}
+      >
+        {title}
+      </AppText>
+      <View style={variant === "grouped" ? styles.groupedBody : styles.body}>
+        {children}
+      </View>
     </View>
   );
 }
@@ -22,16 +35,37 @@ export function PlayerProfileSection({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.xl,
+    borderRadius: 18,
     borderWidth: 1.5,
     borderColor: tennisColors.border,
-    padding: 16,
-    gap: 12,
+    overflow: "hidden",
   },
   title: {
     fontFamily: tennisFontFamily.headingSemi,
     fontSize: 15,
     color: tennisColors.primaryDark,
     letterSpacing: -0.2,
+    paddingHorizontal: 16,
+    paddingTop: 18,
+    paddingBottom: 14,
+  },
+  groupedTitle: {
+    fontFamily: tennisFontFamily.headingSemi,
+    fontSize: 12,
+    color: tennisColors.mutedForeground,
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 10,
+  },
+  body: {
+    paddingHorizontal: 16,
+    paddingBottom: 18,
+    gap: 12,
+  },
+  groupedBody: {
+    borderTopWidth: 1,
+    borderTopColor: tennisColors.border,
   },
 });

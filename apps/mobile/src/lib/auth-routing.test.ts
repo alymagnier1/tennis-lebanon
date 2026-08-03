@@ -1,5 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { authRouteForState } from "./auth-routing";
+import { authRouteForState, publicRouteRedirect } from "./auth-routing";
+
+describe("publicRouteRedirect", () => {
+  it("keeps sign-in reachable while onboarding is incomplete", () => {
+    expect(publicRouteRedirect("needsOnboarding", "sign-in")).toBeNull();
+    expect(publicRouteRedirect("needsOnboarding", "welcome")).toBe(
+      "/(onboarding)/consent",
+    );
+  });
+
+  it("still redirects completed sessions away from public routes", () => {
+    expect(publicRouteRedirect("ready", "sign-in")).toBe("/(tabs)");
+  });
+});
 
 describe("authRouteForState", () => {
   it("maps resolved states to canonical routes", () => {

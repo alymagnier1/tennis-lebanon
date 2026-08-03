@@ -22,6 +22,7 @@ export {
   BenefitCard,
 } from "./SelectionCards";
 export { CourtGridOverlay } from "./CourtPattern";
+export { FigmaSubpageHero } from "./FigmaSubpageHero";
 export { figmaFormStyles } from "./figma-form-styles";
 export { FigmaChipRow, FigmaChipMulti } from "./FigmaChipGroup";
 export { CreateMatchStepLayout } from "./CreateMatchStepLayout";

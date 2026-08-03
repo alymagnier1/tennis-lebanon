@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import * as Linking from "expo-linking";
+import Constants from "expo-constants";
 import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -11,7 +12,7 @@ import { ErrorNotice } from "../../src/components/FormUi";
 import { Icon } from "../../src/components/Icon";
 import {
   ChipButton,
-  OnboardingStepLayout,
+  FigmaSubpageHero,
 } from "../../src/components/onboarding-ui";
 import { PlayerProfileSection } from "../../src/components/player/PlayerProfileSection";
 import { ProfileMenuRow } from "../../src/components/profile/ProfileMenuRow";
@@ -35,6 +36,9 @@ export default function SettingsScreen() {
   const { refreshProfile, signOut } = useAuth();
   const { rowDirection } = useLayoutDirection();
   const [signOutError, setSignOutError] = useState(false);
+
+  const appVersion =
+    Constants.expoConfig?.version ?? Constants.nativeAppVersion ?? "1.0.0";
 
   const deletion = useMutation({
     mutationFn: () => requestAccountDeletion(supabase),
@@ -66,35 +70,40 @@ export default function SettingsScreen() {
   };
 
   return (
-    <OnboardingStepLayout
-      title={t("settings.title")}
-      onBack={() => goBackOrReplace(PROFILE_TAB_ROUTE)}
-      footer={
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("settings.requestDeletion")}
-          disabled={deletion.isPending}
-          onPress={confirmDeletion}
-          style={({ pressed }) => [
-            styles.deleteButton,
-            pressed && styles.deleteButtonPressed,
-            deletion.isPending && styles.deleteButtonDisabled,
-          ]}
-        >
-          <AppText style={styles.deleteLabel}>
-            {t("settings.requestDeletion")}
-          </AppText>
-        </Pressable>
-      }
-    >
-      <View style={styles.sections}>
-        <PlayerProfileSection title={settingsScreenGeneralTitle(t)}>
-          <View style={styles.rowsBleed}>
+    <View style={styles.root}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <FigmaSubpageHero
+          title={t("settings.title")}
+          description={t("settings.description")}
+          onBack={() => goBackOrReplace(PROFILE_TAB_ROUTE)}
+        />
+
+        <View style={styles.body}>
+          <PlayerProfileSection title={settingsScreenLanguageTitle(t)}>
+            <View style={[styles.chips, { flexDirection: rowDirection }]}>
+              {PILOT_LOCALES.map((locale: PilotLocale) => (
+                <ChipButton
+                  key={locale}
+                  label={t(`languages.${locale}`)}
+                  selected={i18n.resolvedLanguage === locale}
+                  onPress={() => void persistLocale(locale)}
+                />
+              ))}
+            </View>
+          </PlayerProfileSection>
+
+          <PlayerProfileSection
+            title={settingsScreenGeneralTitle(t)}
+            variant="grouped"
+          >
             <ProfileMenuRow
               icon={
                 <Icon
                   name="notifications"
-                  size={20}
+                  size={16}
                   color={tennisColors.primary}
                 />
               }
@@ -102,31 +111,19 @@ export default function SettingsScreen() {
               onPress={() => router.push("/notifications")}
               showDivider={false}
             />
-          </View>
-        </PlayerProfileSection>
+          </PlayerProfileSection>
 
-        <PlayerProfileSection title={settingsScreenLanguageTitle(t)}>
-          <View style={[styles.chips, { flexDirection: rowDirection }]}>
-            {PILOT_LOCALES.map((locale: PilotLocale) => (
-              <ChipButton
-                key={locale}
-                label={t(`languages.${locale}`)}
-                selected={i18n.resolvedLanguage === locale}
-                onPress={() => void persistLocale(locale)}
-              />
-            ))}
-          </View>
-        </PlayerProfileSection>
-
-        <PlayerProfileSection title={settingsScreenSupportTitle(t)}>
-          <View style={styles.rowsBleed}>
+          <PlayerProfileSection
+            title={settingsScreenSupportTitle(t)}
+            variant="grouped"
+          >
             <ProfileMenuRow
-              icon={<Icon name="info" size={20} color={tennisColors.primary} />}
+              icon={<Icon name="info" size={16} color={tennisColors.primary} />}
               label={t("settings.policies")}
               onPress={() => router.push("/policies?document=privacy")}
             />
             <ProfileMenuRow
-              icon={<Icon name="chat" size={20} color={tennisColors.primary} />}
+              icon={<Icon name="chat" size={16} color={tennisColors.primary} />}
               label={t("account.contactSupport")}
               onPress={() =>
                 void Linking.openURL(`mailto:${env.SUPPORT_EMAIL}`)
@@ -134,45 +131,71 @@ export default function SettingsScreen() {
             />
             <ProfileMenuRow
               icon={
-                <Icon name="filter" size={20} color={tennisColors.primary} />
+                <Icon name="filter" size={16} color={tennisColors.primary} />
               }
               label={t("settings.rtlLayoutCheck")}
               onPress={() => router.push("/rtl-check")}
               showDivider={false}
             />
-          </View>
-        </PlayerProfileSection>
+          </PlayerProfileSection>
 
-        <PlayerProfileSection title={settingsScreenAccountTitle(t)}>
-          <View style={styles.rowsBleed}>
+          <PlayerProfileSection
+            title={settingsScreenAccountTitle(t)}
+            variant="grouped"
+          >
             <ProfileMenuRow
-              icon={
-                <Icon name="close" size={20} color={tennisColors.primary} />
-              }
+              icon={<Icon name="close" size={16} color={tennisColors.accent} />}
               label={t("auth.signOut")}
               onPress={() => void logout()}
               showDivider={false}
+              tone="danger"
             />
-          </View>
-        </PlayerProfileSection>
-      </View>
+          </PlayerProfileSection>
 
-      {signOutError ? (
-        <ErrorNotice>{t("auth.signOutError")}</ErrorNotice>
-      ) : null}
-      {deletion.isError ? (
-        <ErrorNotice>{t("settings.deleteError")}</ErrorNotice>
-      ) : null}
-    </OnboardingStepLayout>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("settings.requestDeletion")}
+            disabled={deletion.isPending}
+            onPress={confirmDeletion}
+            style={({ pressed }) => [
+              styles.deleteButton,
+              pressed && styles.deleteButtonPressed,
+              deletion.isPending && styles.deleteButtonDisabled,
+            ]}
+          >
+            <AppText style={styles.deleteLabel}>
+              {t("settings.requestDeletion")}
+            </AppText>
+          </Pressable>
+
+          {signOutError ? (
+            <ErrorNotice>{t("auth.signOutError")}</ErrorNotice>
+          ) : null}
+          {deletion.isError ? (
+            <ErrorNotice>{t("settings.deleteError")}</ErrorNotice>
+          ) : null}
+
+          <AppText style={styles.version}>
+            {t("settings.versionFooter", { version: appVersion })}
+          </AppText>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sections: {
-    gap: 16,
+  root: {
+    flex: 1,
+    backgroundColor: tennisColors.background,
   },
-  rowsBleed: {
-    marginHorizontal: -16,
+  scrollContent: {
+    paddingBottom: 48,
+  },
+  body: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    gap: 16,
   },
   chips: {
     flexWrap: "wrap",
@@ -180,7 +203,7 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     alignItems: "center",
-    paddingVertical: 14,
+    paddingVertical: 8,
   },
   deleteButtonPressed: {
     opacity: 0.85,
@@ -190,7 +213,15 @@ const styles = StyleSheet.create({
   },
   deleteLabel: {
     fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 15,
+    fontSize: 14,
     color: tennisColors.danger,
+    letterSpacing: -0.1,
+  },
+  version: {
+    textAlign: "center",
+    fontFamily: tennisFontFamily.body,
+    fontSize: 11,
+    color: tennisColors.mutedForeground,
+    marginTop: 4,
   },
 });

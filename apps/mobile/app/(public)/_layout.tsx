@@ -1,10 +1,12 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Stack, useSegments } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
-import { authRouteForState } from "../../src/lib/auth-routing";
+import { publicRouteRedirect } from "../../src/lib/auth-routing";
 import { useAuth } from "../../src/providers/AuthProvider";
 
 export default function PublicLayout() {
   const { state } = useAuth();
+  const segments = useSegments();
+  const routeName = segments.at(-1);
 
   if (state === "loading") {
     return (
@@ -13,9 +15,9 @@ export default function PublicLayout() {
       </View>
     );
   }
-  if (state !== "anonymous" && state !== "error") {
-    const destination = authRouteForState(state);
-    if (destination) return <Redirect href={destination} />;
-  }
+
+  const destination = publicRouteRedirect(state, routeName);
+  if (destination) return <Redirect href={destination} />;
+
   return <Stack screenOptions={{ headerShown: false }} />;
 }
