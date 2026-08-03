@@ -849,6 +849,12 @@
       "bookedOffAppConfirmTitle": "Confirmer ce court ?",
       "bookedOffAppConfirmBody": "Enregistrer {{club}} · {{court}} pour {{time}}. Le match avancera après le jeu.",
       "bookedOffAppNoTime": "Mettez-vous d'accord sur l'heure avant de confirmer un court.",
+      "bookedOffAppConfirmMovedBody": "Enregistrer {{club}} · {{court}} pour {{time}}. Ce n'est pas l'heure convenue par votre groupe, chacun sera donc informé du changement.",
+      "courtTimeLabel": "Quand est le court ?",
+      "courtTimeHelp": "Indiquez l'heure que le club vous a réellement donnée. Si elle diffère de l'heure convenue, le match suit.",
+      "timeDiffersFromAgreed": "Votre groupe avait convenu {{agreed}}. Enregistrer ceci déplacera le match et préviendra tout le monde.",
+      "courtTimeInPast": "Cette heure est déjà passée. Choisissez une heure future.",
+      "courtBlocked": "Ce court n'est pas disponible à cette heure.",
       "bookedOffAppNoCourts": "Ce club n'a pas encore de courts listés. Essayez un autre club ou contactez le support."
     },
     "invite": {

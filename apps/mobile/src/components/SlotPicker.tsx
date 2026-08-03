@@ -28,6 +28,18 @@ import { tennisFontFamily } from "../hooks/useTennisFonts";
 export const DURATION_OPTIONS = [60, 90, 120] as const;
 export type DurationMinutes = (typeof DURATION_OPTIONS)[number];
 
+/**
+ * Snaps a real duration onto the pickable options. A court booked for an
+ * awkward length still has to land on one of the three chips.
+ */
+export function nearestDuration(minutes: number): DurationMinutes {
+  return DURATION_OPTIONS.reduce((closest, option) => {
+    return Math.abs(option - minutes) < Math.abs(closest - minutes)
+      ? option
+      : closest;
+  }, DURATION_OPTIONS[0]!);
+}
+
 export type SlotAvailability = Record<string, number>;
 
 function startOfBeirutDay(offsetDays: number): Date {

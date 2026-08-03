@@ -14,9 +14,9 @@ import {
   figmaFormStyles,
 } from "../../../src/components/onboarding-ui";
 import {
-  DURATION_OPTIONS,
   addMinutes,
   dayKey,
+  nearestDuration,
   SlotPicker,
   type DurationMinutes,
   type SlotAvailability,
@@ -49,14 +49,6 @@ type SlotDraft = {
 
 function defaultSlot(): SlotDraft {
   return { day: dayKey(2), startTime: "18:00", duration: 90 };
-}
-
-function nearestDuration(minutes: number): DurationMinutes {
-  return DURATION_OPTIONS.reduce((closest, option) => {
-    return Math.abs(option - minutes) < Math.abs(closest - minutes)
-      ? option
-      : closest;
-  }, DURATION_OPTIONS[0]!);
 }
 
 function slotsFromDraft(): SlotDraft[] {

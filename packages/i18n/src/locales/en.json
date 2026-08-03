@@ -883,6 +883,12 @@
       "bookedOffAppConfirmTitle": "Confirm this court?",
       "bookedOffAppConfirmBody": "Mark {{club}} · {{court}} for {{time}}. The match will move forward after you play.",
       "bookedOffAppNoTime": "Agree on a time with your group before confirming a court.",
+      "bookedOffAppConfirmMovedBody": "Mark {{club}} · {{court}} for {{time}}. This is not the time your group agreed, so everyone will be told the match has moved.",
+      "courtTimeLabel": "When is the court?",
+      "courtTimeHelp": "Set the hour the club actually gave you. If it differs from the agreed time, the match moves with it.",
+      "timeDiffersFromAgreed": "Your group agreed {{agreed}}. Recording this will move the match and notify everyone.",
+      "courtTimeInPast": "That time has already passed. Pick a court time in the future.",
+      "courtBlocked": "That court is unavailable at this time.",
       "bookedOffAppNoCourts": "This club has no courts listed yet. Try another club or contact support."
     },
     "invite": {
