@@ -126,6 +126,14 @@ export async function registerPilotClub(
     longitude?: number | null;
     amenities?: string[];
     courts: RegisterCourtInput[];
+    bookingMode?: "manual_request" | "external_link";
+    /** Required when bookingMode is external_link. */
+    bookingPhone?: string | null;
+    /**
+     * Entering a club on its behalf rather than registering your own: skips the
+     * approval queue and creates no membership. Platform operators only.
+     */
+    asOperator?: boolean;
   },
 ): Promise<string> {
   const { data, error } = await client.rpc("register_pilot_club", {
@@ -137,6 +145,9 @@ export async function registerPilotClub(
     p_latitude: input.latitude ?? undefined,
     p_longitude: input.longitude ?? undefined,
     p_amenities: input.amenities ?? [],
+    p_booking_mode: input.bookingMode ?? undefined,
+    p_booking_phone: input.bookingPhone ?? undefined,
+    p_as_operator: input.asOperator ?? undefined,
     p_courts: input.courts.map((court) => ({
       name: court.name,
       surface: court.surface ?? "hard",

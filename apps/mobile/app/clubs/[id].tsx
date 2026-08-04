@@ -215,20 +215,16 @@ export default function ClubDetailScreen() {
                       );
                     })}
                   </View>
+                  {/* WhatsApp already leads above the court list, before the
+                      court matters: you message the club to ask, and pick the
+                      court they gave you afterwards. Repeating it here put the
+                      same button on screen twice. */}
                   {supportsInAppBooking ? (
                     <PrimaryButton
                       label={t("clubs.requestCourt")}
                       disabled={!courtId || !agreedSlot}
                       loading={requestMutation.isPending}
                       onPress={() => requestMutation.mutate()}
-                    />
-                  ) : null}
-
-                  {club.whatsapp_booking_available ? (
-                    <PrimaryButton
-                      label={t("clubs.bookWhatsApp")}
-                      loading={whatsappMutation.isPending}
-                      onPress={() => whatsappMutation.mutate()}
                     />
                   ) : null}
 

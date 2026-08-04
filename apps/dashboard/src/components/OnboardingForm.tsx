@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
+  isPlatformOperator,
   listActiveZones,
   registerPilotClub,
   type ActiveZone,
@@ -38,6 +39,14 @@ export function OnboardingForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  // v1 has no club-side app, so ops enter the clubs and every one of them takes
+  // bookings over WhatsApp. A club registering itself still gets the in-app
+  // queue, so the mode is a field rather than a constant.
+  const [isOperator, setIsOperator] = useState(false);
+  const [bookingMode, setBookingMode] = useState<
+    "manual_request" | "external_link"
+  >("external_link");
+  const [bookingPhone, setBookingPhone] = useState("");
 
   useEffect(() => {
     void listActiveZones(getSupabaseBrowserClient()).then((data) => {
@@ -46,6 +55,12 @@ export function OnboardingForm() {
         setZoneId(data[0].zone_id);
       }
     });
+  }, []);
+
+  useEffect(() => {
+    void isPlatformOperator(getSupabaseBrowserClient())
+      .then(setIsOperator)
+      .catch(() => setIsOperator(false));
   }, []);
 
   const toggleAmenity = (amenity: string) => {
@@ -78,6 +93,11 @@ export function OnboardingForm() {
             slot_minutes: 90,
           },
         ],
+        bookingMode,
+        bookingPhone: bookingMode === "external_link" ? bookingPhone : null,
+        // Entering a club on its behalf: no membership, no approval queue.
+        // A club registering itself keeps the original self-service path.
+        asOperator: isOperator,
       });
       router.replace(`/settings?club=${clubId}`);
     } catch {
@@ -187,6 +207,53 @@ export function OnboardingForm() {
             ))}
           </div>
         </fieldset>
+
+        <label style={labelStackStyle}>
+          <span>{t("dashboard.settings.bookingModeLabel")}</span>
+          <select
+            value={bookingMode}
+            onChange={(e) =>
+              setBookingMode(
+                e.target.value as "manual_request" | "external_link",
+              )
+            }
+            style={fieldStyle}
+          >
+            <option value="external_link">
+              {t("dashboard.settings.bookingModeWhatsApp")}
+            </option>
+            <option value="manual_request">
+              {t("dashboard.settings.bookingModeInApp")}
+            </option>
+          </select>
+          <span style={{ color: colors.neutral[700], fontSize: 13 }}>
+            {bookingMode === "external_link"
+              ? t("dashboard.settings.bookingModeWhatsAppHint")
+              : t("dashboard.settings.bookingModeInAppHint")}
+          </span>
+        </label>
+
+        {bookingMode === "external_link" ? (
+          <label style={labelStackStyle}>
+            <span>{t("dashboard.settings.whatsappPhoneLabel")}</span>
+            <input
+              value={bookingPhone}
+              onChange={(e) => setBookingPhone(e.target.value)}
+              placeholder={t("dashboard.settings.whatsappPhonePlaceholder")}
+              required
+              style={fieldStyle}
+            />
+            <span style={{ color: colors.neutral[700], fontSize: 13 }}>
+              {t("dashboard.settings.whatsappPhoneHint")}
+            </span>
+          </label>
+        ) : null}
+
+        {isOperator ? (
+          <p style={{ margin: 0, color: colors.neutral[700], fontSize: 13 }}>
+            {t("dashboard.onboarding.operatorNotice")}
+          </p>
+        ) : null}
 
         <h2 style={{ margin: 0 }}>
           {t("dashboard.onboarding.firstCourtTitle")}

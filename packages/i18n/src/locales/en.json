@@ -127,6 +127,7 @@
       "addressLabel": "Public address",
       "amenitiesLabel": "Amenities",
       "firstCourtTitle": "First court",
+      "operatorNotice": "You are adding this club on its behalf: it goes live immediately and no club account is created. You can correct the details later from Club settings.",
       "submit": "Create club",
       "error": "We could not register this club. Check the details and try again."
     },

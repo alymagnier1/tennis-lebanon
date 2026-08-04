@@ -2192,6 +2192,9 @@ export type Database = {
         Args: {
           p_address_public?: string;
           p_amenities?: string[];
+          p_as_operator?: boolean;
+          p_booking_mode?: string;
+          p_booking_phone?: string;
           p_courts?: Json;
           p_description?: string;
           p_latitude?: number;
