@@ -100,8 +100,17 @@ export function OnboardingForm() {
         asOperator: isOperator,
       });
       router.replace(`/settings?club=${clubId}`);
-    } catch {
-      setError(t("dashboard.onboarding.error"));
+    } catch (caught) {
+      // Every rejection here is specific and actionable -- "You already
+      // administer a club", "Platform operator access required", a duplicate
+      // slug. Swallowing them all into one sentence left no way to tell which,
+      // and this is an ops screen, so the reason is more use than the manners.
+      const detail = caught instanceof Error ? caught.message.trim() : "";
+      setError(
+        detail
+          ? t("dashboard.onboarding.errorDetail", { detail })
+          : t("dashboard.onboarding.error"),
+      );
     } finally {
       setSubmitting(false);
     }

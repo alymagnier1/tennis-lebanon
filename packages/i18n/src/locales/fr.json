@@ -129,7 +129,8 @@
       "firstCourtTitle": "Premier court",
       "operatorNotice": "Vous ajoutez ce club en son nom : il est publié immédiatement et aucun compte club n'est créé. Vous pourrez corriger les détails plus tard dans les paramètres du club.",
       "submit": "Créer le club",
-      "error": "Impossible d'inscrire ce club."
+      "error": "Impossible d'inscrire ce club.",
+      "errorDetail": "Impossible d'inscrire ce club : {{detail}}"
     },
     "settings": {
       "title": "Paramètres du club",
