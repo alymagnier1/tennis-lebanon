@@ -19,10 +19,18 @@ import {
   primaryButtonStyle,
   secondaryButtonStyle,
 } from "@/lib/form-styles";
+import { ClubSwitcher } from "./ClubSwitcher";
 
 export function CourtsEditor() {
   const { t } = useTranslation();
-  const { client, clubId, isAdmin, loading: clubsLoading } = useStaffClubs();
+  const {
+    client,
+    clubs,
+    clubId,
+    setClubId,
+    isAdmin,
+    loading: clubsLoading,
+  } = useStaffClubs();
   const [detail, setDetail] = useState<ClubAdminDetail | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -112,6 +120,8 @@ export function CourtsEditor() {
 
   return (
     <DashboardShell title={t("dashboard.courts.title")}>
+      <ClubSwitcher clubs={clubs} clubId={clubId} onChange={setClubId} />
+
       <ul
         style={{
           listStyle: "none",

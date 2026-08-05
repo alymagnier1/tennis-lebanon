@@ -132,6 +132,10 @@
       "error": "Impossible d'inscrire ce club.",
       "errorDetail": "Impossible d'inscrire ce club : {{detail}}"
     },
+    "clubSwitcher": {
+      "label": "Club",
+      "pendingOption": "{{name}} (en attente d'approbation)"
+    },
     "settings": {
       "title": "Paramètres du club",
       "save": "Enregistrer",

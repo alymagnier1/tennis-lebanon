@@ -40,7 +40,12 @@ export function useStaffClubs() {
 
   const activeClub =
     clubs.find((club) => club.club_id === clubId) ?? clubs[0] ?? null;
-  const isAdmin = activeClub?.role === "admin";
+  // "May administer this club", not "holds the admin membership". A platform
+  // operator holds no membership at all -- list_staff_clubs reports them as
+  // `operator` -- but assert_club_admin admits them, so a client check for the
+  // literal role locked them out of screens the database was happy to serve.
+  const isAdmin =
+    activeClub?.role === "admin" || activeClub?.role === "operator";
 
   return {
     client,

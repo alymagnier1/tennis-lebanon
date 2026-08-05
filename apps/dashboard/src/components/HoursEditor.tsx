@@ -23,6 +23,7 @@ import {
   primaryButtonStyle,
   secondaryButtonStyle,
 } from "@/lib/form-styles";
+import { ClubSwitcher } from "./ClubSwitcher";
 
 function defaultHours(): CourtHour[] {
   return WEEKDAYS.map((day) => ({
@@ -34,7 +35,14 @@ function defaultHours(): CourtHour[] {
 
 export function HoursEditor() {
   const { t } = useTranslation();
-  const { client, clubId, isAdmin, loading: clubsLoading } = useStaffClubs();
+  const {
+    client,
+    clubs,
+    clubId,
+    setClubId,
+    isAdmin,
+    loading: clubsLoading,
+  } = useStaffClubs();
   const [detail, setDetail] = useState<ClubAdminDetail | null>(null);
   const [courtId, setCourtId] = useState("");
   const [hours, setHours] = useState<CourtHour[]>(defaultHours());
@@ -170,6 +178,8 @@ export function HoursEditor() {
 
   return (
     <DashboardShell title={t("dashboard.hours.title")}>
+      <ClubSwitcher clubs={clubs} clubId={clubId} onChange={setClubId} />
+
       <label style={labelStackStyle}>
         <span>{t("dashboard.hours.courtLabel")}</span>
         <select

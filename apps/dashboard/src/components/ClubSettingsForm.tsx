@@ -18,12 +18,15 @@ import {
   labelStackStyle,
   primaryButtonStyle,
 } from "@/lib/form-styles";
+import { ClubSwitcher } from "./ClubSwitcher";
 
 export function ClubSettingsForm() {
   const { t } = useTranslation();
   const {
     client,
+    clubs,
     clubId,
+    setClubId,
     activeClub,
     isAdmin,
     loading: clubsLoading,
@@ -112,6 +115,8 @@ export function ClubSettingsForm() {
 
   return (
     <DashboardShell title={t("dashboard.settings.title")}>
+      <ClubSwitcher clubs={clubs} clubId={clubId} onChange={setClubId} />
+
       {activeClub ? (
         <p style={{ margin: 0, color: colors.neutral[700] }}>
           {activeClub.name}

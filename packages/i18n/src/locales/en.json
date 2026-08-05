@@ -132,6 +132,10 @@
       "error": "We could not register this club. Check the details and try again.",
       "errorDetail": "We could not register this club: {{detail}}"
     },
+    "clubSwitcher": {
+      "label": "Club",
+      "pendingOption": "{{name}} (awaiting approval)"
+    },
     "settings": {
       "title": "Club settings",
       "save": "Save changes",

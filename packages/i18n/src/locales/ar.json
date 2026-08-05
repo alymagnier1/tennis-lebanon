@@ -132,6 +132,10 @@
       "error": "تعذر تسجيل هذا النادي.",
       "errorDetail": "تعذر تسجيل هذا النادي: {{detail}}"
     },
+    "clubSwitcher": {
+      "label": "النادي",
+      "pendingOption": "{{name}} (بانتظار الموافقة)"
+    },
     "settings": {
       "title": "إعدادات النادي",
       "save": "حفظ التغييرات",
