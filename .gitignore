@@ -34,3 +34,8 @@ web-build/
 
 # Sentry
 .sentryclirc
+
+# Local design reference: Figma Make export and screen captures. Kept out of
+# history because it is ~28 MB of PNGs plus a second Vite app with its own
+# lockfile, none of which the monorepo builds from.
+Figma designs/
