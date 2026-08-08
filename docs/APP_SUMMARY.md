@@ -14,12 +14,12 @@ It is **matchmaking-first**, not a club management suite or a social network.
 
 ## Who it’s for
 
-| Audience | Need |
-|----------|------|
-| **Players** | Find someone at the right level, time, and area; coordinate without endless WhatsApp |
-| **Friend groups** | One place to propose times, vote, and request a court |
-| **Club staff** | Extra court bookings without replacing their existing ops |
-| **Platform operators** | Safe pilot in one geography with audit and moderation |
+| Audience               | Need                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| **Players**            | Find someone at the right level, time, and area; coordinate without endless WhatsApp |
+| **Friend groups**      | One place to propose times, vote, and request a court                                |
+| **Club staff**         | Extra court bookings without replacing their existing ops                            |
+| **Platform operators** | Safe pilot in one geography with audit and moderation                                |
 
 **Launch:** One dense Lebanese corridor, ~5–8 partner clubs, ~300 verified adult players. Geography is modeled as **zones** (areas), not street addresses.
 
@@ -55,21 +55,21 @@ Payments are **not** in the app in v1 — players pay at the club.
 
 ### Main tabs
 
-| Tab | Purpose |
-|-----|---------|
-| **Home** | Next action, upcoming match, quick paths |
-| **Discover** | Open matches + compatible players |
-| **+ (centre)** | Create a match |
-| **Matches** | Invites inbox + active matches |
-| **Profile** | Bio, skill, settings that feed matchmaking |
+| Tab            | Purpose                                    |
+| -------------- | ------------------------------------------ |
+| **Home**       | Next action, upcoming match, quick paths   |
+| **Discover**   | Open matches + compatible players          |
+| **+ (centre)** | Create a match                             |
+| **Matches**    | Invites inbox + active matches             |
+| **Profile**    | Bio, skill, settings that feed matchmaking |
 
 ### Profile settings that shape every match
 
-| Setting | What it controls |
-|---------|------------------|
-| **Where I play** | Preferred areas + favourite clubs (pre-fill create flow) |
+| Setting            | What it controls                                          |
+| ------------------ | --------------------------------------------------------- |
+| **Where I play**   | Preferred areas + favourite clubs (pre-fill create flow)  |
 | **Match defaults** | Format, intent, level range, Discover / approval defaults |
-| **Availability** | Weekly windows and one-off slots for discovery overlap |
+| **Availability**   | Weekly windows and one-off slots for discovery overlap    |
 
 ### Create match (today)
 
@@ -130,12 +130,12 @@ In-app payments, coaches, lessons, tournaments/leagues, social feed, equipment m
 
 ## Technology (summary)
 
-| Layer | Choice |
-|-------|--------|
-| Mobile | React Native, Expo, Expo Router, TypeScript |
-| Dashboard | Next.js (App Router) |
-| Backend | Supabase (Auth, Postgres, RLS, Storage, Realtime) |
-| Monorepo | pnpm workspaces, shared domain rules and Zod schemas |
+| Layer     | Choice                                               |
+| --------- | ---------------------------------------------------- |
+| Mobile    | React Native, Expo, Expo Router, TypeScript          |
+| Dashboard | Next.js (App Router)                                 |
+| Backend   | Supabase (Auth, Postgres, RLS, Storage, Realtime)    |
+| Monorepo  | pnpm workspaces, shared domain rules and Zod schemas |
 
 Authorization is enforced in the **database** (Row Level Security), not only in the UI.
 
@@ -155,16 +155,16 @@ Create-flow design reference: [`FIGMA_CREATE_MATCH_FLOW.md`](FIGMA_CREATE_MATCH_
 
 ## Further reading
 
-| Document | Use when you need… |
-|----------|-------------------|
-| [`PRD.md`](PRD.md) | Rules, epics, acceptance criteria |
-| [`FLOWS_AND_SCREENS.md`](FLOWS_AND_SCREENS.md) | Screen inventory and critical flows |
-| [`DISCOVERY.md`](DISCOVERY.md) | How players and matches are ranked and filtered |
-| [`LIFECYCLE.md`](LIFECYCLE.md) | Match and booking state transitions |
-| [`DATABASE.md`](DATABASE.md) | Tables, RLS, migrations |
-| [`ROADMAP.md`](ROADMAP.md) | Build order and milestones |
-| [`DECISIONS.md`](DECISIONS.md) | Dated product/engineering decisions |
+| Document                                       | Use when you need…                              |
+| ---------------------------------------------- | ----------------------------------------------- |
+| [`PRD.md`](PRD.md)                             | Rules, epics, acceptance criteria               |
+| [`FLOWS_AND_SCREENS.md`](FLOWS_AND_SCREENS.md) | Screen inventory and critical flows             |
+| [`DISCOVERY.md`](DISCOVERY.md)                 | How players and matches are ranked and filtered |
+| [`LIFECYCLE.md`](LIFECYCLE.md)                 | Match and booking state transitions             |
+| [`DATABASE.md`](DATABASE.md)                   | Tables, RLS, migrations                         |
+| [`ROADMAP.md`](ROADMAP.md)                     | Build order and milestones                      |
+| [`DECISIONS.md`](DECISIONS.md)                 | Dated product/engineering decisions             |
 
 ---
 
-*Last aligned with the mobile create flow and profile settings (Where I play, Match defaults) as implemented in the codebase.*
+_Last aligned with the mobile create flow and profile settings (Where I play, Match defaults) as implemented in the codebase._

@@ -59,6 +59,7 @@ import {
 } from "../../src/components/onboarding-ui";
 import { formatUtcSlotInBeirut } from "../../src/lib/beirut-time";
 import { confirmAction } from "../../src/lib/confirm-action";
+import { confirmCancelHostedMatch } from "../../src/lib/confirm-cancel-hosted-match";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitMatchHub } from "../../src/lib/navigation";
 import {
@@ -68,7 +69,6 @@ import {
 import {
   matchBookExternalRoute,
   matchBookRoute,
-  matchCancelRoute,
   matchInviteRoute,
   matchWithdrawRoute,
 } from "../../src/lib/routes";
@@ -648,11 +648,19 @@ export default function MatchHubScreen() {
         <HubDestructiveLink
           label={t("matches.hub.cancel")}
           onPress={() =>
-            router.push(
-              matchCancelRoute(id!, {
+            confirmCancelHostedMatch(
+              {
+                matchId: id!,
                 status: hub!.status,
+                participantCount: hub!.participant_count,
                 bookingStartsAt: hub!.booking?.starts_at ?? null,
-              }),
+              },
+              t,
+              () => {
+                queryClient.invalidateQueries({ queryKey: ["my-matches"] });
+                queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
+                exitMatchHub();
+              },
             )
           }
         />
