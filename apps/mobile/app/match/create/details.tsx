@@ -1,26 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { listMyMatches } from "@tennis-lebanon/api";
-import { skillBandsForPlayer } from "../../../src/lib/prefill-create-match-for-player";
+import { skillBandsForPlayer } from "@tennis-lebanon/domain";
 import {
   findActiveHostedMatch,
-  listOnDiscoverFromVisibility,
   ORDERED_SKILL_BANDS,
   skillBandsInRange,
   skillRangeFromSelection,
   toggleSkillBandSelection,
-  visibilityFromListOnDiscover,
   type PlayIntent,
   type SkillBand,
 } from "@tennis-lebanon/domain";
-import {
-  AnimatedCollapse,
-  SettingToggle,
-  StatusBanner,
-} from "../../../src/components/AppUi";
+import { StatusBanner } from "../../../src/components/AppUi";
 import { LevelRangePicker } from "../../../src/components/LevelRangePicker";
 import {
   CreateMatchStepLayout,
@@ -37,7 +31,10 @@ import {
   CreateMatchPanel,
   CreateMatchSection,
 } from "../../../src/lib/create-match-ui";
-import { matchInviteRoute } from "../../../src/lib/routes";
+import {
+  activeHostedContinueRoute,
+} from "../../../src/lib/create-match-guard";
+import { confirmCancelHostedMatch } from "../../../src/lib/confirm-cancel-hosted-match";
 import { useAuth } from "../../../src/providers/AuthProvider";
 import { supabase } from "../../../src/lib/supabase";
 
@@ -86,13 +83,6 @@ export default function CreateMatchDetailsScreen() {
   const [selectedBands, setSelectedBands] = useState<SkillBand[] | null>(() =>
     draftSelectedBands(draft),
   );
-  const [listOnDiscover, setListOnDiscover] = useState(() =>
-    listOnDiscoverFromVisibility(draft.visibility),
-  );
-  const [requiresApproval, setRequiresApproval] = useState(
-    draft.requiresCreatorApproval ?? false,
-  );
-
   const skillBandQuery = useQuery({
     queryKey: ["my-skill-band", session?.user.id],
     queryFn: async () => {
@@ -142,45 +132,34 @@ export default function CreateMatchDetailsScreen() {
       minSkill,
       maxSkill,
       selectedSkillBands: effectiveBands,
-      visibility: visibilityFromListOnDiscover(listOnDiscover),
-      requiresCreatorApproval: requiresApproval,
     });
-  }, [format, intent, listOnDiscover, requiresApproval, effectiveBands]);
+  }, [format, intent, effectiveBands]);
 
   function goToActiveHostedMatch() {
     if (!activeHostedMatch) return;
-    router.replace(matchInviteRoute(activeHostedMatch.match_id));
+    router.replace(
+      activeHostedContinueRoute({
+        matchId: activeHostedMatch.match_id,
+        format: activeHostedMatch.format as "singles" | "doubles",
+        status: activeHostedMatch.status,
+      }),
+    );
   }
 
-  function handleNext() {
-    if (activeHostedMatch) {
-      Alert.alert(
-        t("matches.create.activeHostedTitle"),
-        t("matches.create.activeHostedBody", {
-          format: t(`formats.${format}`),
-        }),
-      );
-      return;
-    }
-
-    router.push("/match/create/schedule");
+  function handleDone() {
+    router.back();
   }
 
   return (
     <CreateMatchStepLayout
-      title={t("matches.create.title")}
-      step={1}
-      totalSteps={3}
+      title={t("matches.create.overridesTitle")}
+      description={t("matches.create.overridesDescription")}
       onBack={() => router.back()}
       footer={
-        <FigmaPrimaryButton
-          label={t("common.continue")}
-          disabled={Boolean(activeHostedMatch)}
-          onPress={handleNext}
-        />
+        <FigmaPrimaryButton label={t("matches.create.overridesDone")} onPress={handleDone} />
       }
     >
-      {draft.targetPlayerName ? (
+      {draft.inviteForPlayer && draft.targetPlayerName ? (
         <StatusBanner
           body={t("matches.create.forPlayerHint", {
             name: draft.targetPlayerName,
@@ -202,10 +181,16 @@ export default function CreateMatchDetailsScreen() {
               <FigmaSecondaryButton
                 label={t("matches.hub.cancel")}
                 onPress={() =>
-                  router.push({
-                    pathname: "/match/[id]",
-                    params: { id: activeHostedMatch.match_id },
-                  })
+                  confirmCancelHostedMatch(
+                    {
+                      matchId: activeHostedMatch.match_id,
+                      status: activeHostedMatch.status,
+                      participantCount: activeHostedMatch.participant_count,
+                      bookingStartsAt: activeHostedMatch.court_starts_at,
+                    },
+                    t,
+                    () => myMatchesQuery.refetch(),
+                  )
                 }
               />
             </>
@@ -250,28 +235,6 @@ export default function CreateMatchDetailsScreen() {
             yourLevel={skillBandQuery.data}
             yourLevelLabel={t("matches.create.yourLevel")}
           />
-        </CreateMatchPanel>
-
-        <CreateMatchPanel title={t("matches.create.joinSettingsSection")}>
-          <SettingToggle
-            variant="card"
-            label={t("matches.create.listOnDiscover")}
-            value={listOnDiscover}
-            onValueChange={(value) => {
-              setListOnDiscover(value);
-              if (!value) {
-                setRequiresApproval(false);
-              }
-            }}
-          />
-          <AnimatedCollapse visible={listOnDiscover}>
-            <SettingToggle
-              variant="card"
-              label={t("matches.create.requiresApprovalShort")}
-              value={requiresApproval}
-              onValueChange={setRequiresApproval}
-            />
-          </AnimatedCollapse>
         </CreateMatchPanel>
       </View>
     </CreateMatchStepLayout>

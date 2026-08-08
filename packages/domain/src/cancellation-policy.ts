@@ -78,7 +78,16 @@ export function leavePolicyMessageKey(
 export function cancelPolicyMessageKey(
   matchStatus: string,
   bookingStartsAt: string | null | undefined,
+  participantCount?: number,
 ): string {
+  if (
+    participantCount !== undefined &&
+    participantCount <= 1 &&
+    !["booking_pending", "confirmed"].includes(matchStatus)
+  ) {
+    return "matches.policy.cancelNoParticipants";
+  }
+
   if (["booking_pending", "confirmed"].includes(matchStatus)) {
     return classifyWithdrawalTiming(bookingStartsAt) === "late_cancel"
       ? "matches.policy.cancelLateBooking"

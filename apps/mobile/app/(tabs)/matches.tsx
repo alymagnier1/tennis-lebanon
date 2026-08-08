@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Alert, Text, View } from "react-native";
+import { Alert, View } from "react-native";
 
 import { router } from "expo-router";
 
@@ -21,6 +21,7 @@ import { formatMatchScore } from "@tennis-lebanon/domain";
 
 import {
   EmptyState,
+  ListSkeleton,
   MatchCard,
   SegmentTabs,
   appStyles,
@@ -30,20 +31,30 @@ import { TabPageHeader } from "../../src/components/TabPageHeader";
 import {
   PrimaryButton,
   Screen,
+  ScreenError,
   SecondaryButton,
   formStyles,
 } from "../../src/components/FormUi";
 
 import { formatUtcInBeirut } from "../../src/lib/beirut-time";
+import {
+  buildMatchCardHeadline,
+  matchCardOpponentLabel,
+  resolveMatchCardOpponent,
+} from "../../src/lib/match-card-headline";
+import { opponentAvatarColor } from "../../src/lib/match-card-status";
 
 import { supabase } from "../../src/lib/supabase";
 
-import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
+import { startNewMatchCreate } from "../../src/lib/create-match-guard";
+import { useAuth } from "../../src/providers/AuthProvider";
 
 type MatchesSegment = "invites" | "active" | "completed";
 
 export default function MatchesScreen() {
   const { t } = useTranslation();
+  const { profile } = useAuth();
+  const viewerName = profile?.display_name ?? "";
 
   const queryClient = useQueryClient();
 
@@ -143,6 +154,22 @@ export default function MatchesScreen() {
     completedQuery.data?.length === 0 &&
     !completedQuery.isLoading;
 
+  const segmentLoading =
+    (segment === "invites" && invitesQuery.isLoading) ||
+    (segment === "active" && matchesQuery.isLoading) ||
+    (segment === "completed" && completedQuery.isLoading);
+
+  const segmentError =
+    (segment === "invites" && invitesQuery.isError) ||
+    (segment === "active" && matchesQuery.isError) ||
+    (segment === "completed" && completedQuery.isError);
+
+  const retrySegment = () => {
+    if (segment === "invites") void invitesQuery.refetch();
+    if (segment === "active") void matchesQuery.refetch();
+    if (segment === "completed") void completedQuery.refetch();
+  };
+
   return (
     <Screen
       title={t("matches.list.title")}
@@ -167,14 +194,22 @@ export default function MatchesScreen() {
         </>
       }
     >
+      {segmentLoading ? <ListSkeleton rows={4} /> : null}
+
+      {segmentError ? (
+        <ScreenError
+          message={
+            segment === "invites"
+              ? t("matches.invite.inboxLoadError")
+              : t("matches.list.loadError")
+          }
+          retryLabel={t("common.retry")}
+          onRetry={retrySegment}
+        />
+      ) : null}
+
       {segment === "invites" ? (
         <>
-          {invitesQuery.isError ? (
-            <Text style={formStyles.errorText}>
-              {t("matches.invite.inboxLoadError")}
-            </Text>
-          ) : null}
-
           {showEmptyInvites ? (
             <EmptyState
               title={t("matches.invite.inboxEmptyTitle")}
@@ -185,52 +220,66 @@ export default function MatchesScreen() {
                 <PrimaryButton
                   label={t("matches.create.organiseCta")}
 
-                  onPress={() => router.push(CREATE_MATCH_ROUTE)}
+                  onPress={() => startNewMatchCreate()}
                 />
               }
             />
           ) : null}
 
           <View style={appStyles.cardList}>
-            {invitesQuery.data?.map((invite) => (
-              <View key={invite.invitation_id} style={formStyles.card}>
-                <MatchCard
-                  title={`${t(`formats.${invite.format}`)} · ${invite.inviter_display_name}`}
+            {!segmentLoading && !segmentError
+              ? invitesQuery.data?.map((invite) => (
+                  <View key={invite.invitation_id} style={formStyles.stack}>
+                    <MatchCard
+                      status={invite.match_status}
+                      statusLabel={t(`matches.status.${invite.match_status}`)}
+                      dateTimeLabel={
+                        invite.soonest_time
+                          ? formatUtcInBeirut(invite.soonest_time)
+                          : undefined
+                      }
+                      headline={buildMatchCardHeadline(t, {
+                        opponentNames: invite.inviter_display_name,
+                        status: invite.match_status,
+                        participantCount: invite.participant_count,
+                        capacity: invite.capacity,
+                      })}
+                      viewerName={viewerName}
+                      viewerAvatarPath={profile?.avatar_path}
+                      opponentName={invite.inviter_display_name}
+                      opponentAvatarColor={opponentAvatarColor(
+                        invite.inviter_display_name,
+                      )}
+                      formatChip={t(`formats.${invite.format}`)}
+                      locationChip={`${invite.participant_count}/${invite.capacity}`}
+                    />
 
-                  subtitle={t("matches.invite.fromCreator", {
-                    name: invite.creator_display_name,
-                  })}
+                    <PrimaryButton
+                      label={t("matches.invite.accept")}
 
-                  meta={`${invite.participant_count}/${invite.capacity} · ${t(`matches.status.${invite.match_status}`)}${invite.soonest_time ? ` · ${formatUtcInBeirut(invite.soonest_time)}` : ""}`}
-                />
+                      loading={acceptMutation.isPending}
 
-                <PrimaryButton
-                  label={t("matches.invite.accept")}
+                      onPress={() =>
+                        acceptMutation.mutate(invite.invitation_id)
+                      }
+                    />
 
-                  loading={acceptMutation.isPending}
+                    <SecondaryButton
+                      label={t("matches.invite.decline")}
 
-                  onPress={() => acceptMutation.mutate(invite.invitation_id)}
-                />
+                      disabled={declineMutation.isPending}
 
-                <SecondaryButton
-                  label={t("matches.invite.decline")}
-
-                  disabled={declineMutation.isPending}
-
-                  onPress={() => declineMutation.mutate(invite.invitation_id)}
-                />
-              </View>
-            ))}
+                      onPress={() =>
+                        declineMutation.mutate(invite.invitation_id)
+                      }
+                    />
+                  </View>
+                ))
+              : null}
           </View>
         </>
       ) : segment === "active" ? (
         <>
-          {matchesQuery.isError ? (
-            <Text style={formStyles.errorText}>
-              {t("matches.list.loadError")}
-            </Text>
-          ) : null}
-
           {showEmptyActive ? (
             <EmptyState
               title={t("matches.list.emptyTitle")}
@@ -241,68 +290,85 @@ export default function MatchesScreen() {
                 <PrimaryButton
                   label={t("matches.create.organiseCta")}
 
-                  onPress={() => router.push(CREATE_MATCH_ROUTE)}
+                  onPress={() => startNewMatchCreate()}
                 />
               }
             />
           ) : null}
 
           <View style={appStyles.cardList}>
-            {matchesQuery.data?.map((match) => (
-              <View key={match.match_id} style={formStyles.stack}>
-                <MatchCard
-                  title={`${t(`formats.${match.format}`)} · ${t(`matches.status.${match.status}`)}`}
-
-                  subtitle={`${t(`matches.participantStatus.${match.participant_status}`)}${match.is_creator ? ` · ${t("matches.list.creator")}` : ""}`}
-
-                  badge={
-                    // A match holding a court is not meaningfully expiring, so
-                    // the court wins the single badge slot.
-                    match.has_court
+            {!segmentLoading && !segmentError
+              ? matchesQuery.data?.map((match) => {
+                  const headlineInput = {
+                    opponentNames: match.opponent_names,
+                    status: match.status,
+                    participantCount: match.participant_count,
+                    capacity: match.capacity,
+                  };
+                  const opponent = resolveMatchCardOpponent(t, headlineInput);
+                  const locationChip =
+                    match.club_name ??
+                    (match.has_court
                       ? t("matches.list.courtSecuredBadge")
-                      : match.is_stale_warning
-                        ? t("matches.lifecycle.staleBadge")
-                        : undefined
-                  }
+                      : undefined);
 
-                  meta={
-                    match.soonest_time
-                      ? formatUtcInBeirut(match.soonest_time)
-                      : undefined
-                  }
+                  return (
+                  <View key={match.match_id} style={formStyles.stack}>
+                    <MatchCard
+                      accentBorder
+                      status={match.status}
+                      statusLabel={t(`matches.status.${match.status}`)}
+                      dateTimeLabel={
+                        match.soonest_time
+                          ? formatUtcInBeirut(match.soonest_time)
+                          : undefined
+                      }
+                      headline={buildMatchCardHeadline(t, headlineInput)}
+                      viewerName={viewerName}
+                      viewerAvatarPath={profile?.avatar_path}
+                      opponentName={opponent}
+                      opponentAvatarColor={
+                        opponent ? opponentAvatarColor(opponent) : undefined
+                      }
+                      formatChip={t(`formats.${match.format}`)}
+                      locationChip={locationChip}
+                      badges={
+                        match.is_stale_warning
+                          ? [
+                              {
+                                label: t("matches.lifecycle.staleBadge"),
+                                tone: "attention" as const,
+                              },
+                            ]
+                          : undefined
+                      }
+                      note={match.notes ?? undefined}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/match/[id]",
 
-                  note={match.notes ?? undefined}
+                          params: { id: match.match_id },
+                        })
+                      }
+                    />
 
-                  onPress={() =>
-                    router.push({
-                      pathname: "/match/[id]",
+                    {match.can_extend_listing ? (
+                      <SecondaryButton
+                        label={t("matches.lifecycle.extendListing")}
 
-                      params: { id: match.match_id },
-                    })
-                  }
-                />
+                        loading={extendMutation.isPending}
 
-                {match.can_extend_listing ? (
-                  <SecondaryButton
-                    label={t("matches.lifecycle.extendListing")}
-
-                    loading={extendMutation.isPending}
-
-                    onPress={() => extendMutation.mutate(match.match_id)}
-                  />
-                ) : null}
-              </View>
-            ))}
+                        onPress={() => extendMutation.mutate(match.match_id)}
+                      />
+                    ) : null}
+                  </View>
+                  );
+                })
+              : null}
           </View>
         </>
       ) : (
         <>
-          {completedQuery.isError ? (
-            <Text style={formStyles.errorText}>
-              {t("matches.list.completedLoadError")}
-            </Text>
-          ) : null}
-
           {showEmptyCompleted ? (
             <EmptyState
               title={t("matches.list.completedEmptyTitle")}
@@ -312,54 +378,81 @@ export default function MatchesScreen() {
           ) : null}
 
           <View style={appStyles.cardList}>
-            {completedQuery.data?.map((match) => {
-              const scoreLabel = formatMatchScore(match.score);
+            {!segmentLoading && !segmentError
+              ? completedQuery.data?.map((match) => {
+                  const scoreLabel = formatMatchScore(match.score);
 
-              const outcomeLabel = match.viewer_won
-                ? t("matches.list.won")
-                : t("matches.list.lost");
+                  const outcomeLabel = match.viewer_won
+                    ? t("matches.list.won")
+                    : t("matches.list.lost");
 
-              const opponentLabel = match.opponent_names
-                ? t("matches.list.vsOpponent", { name: match.opponent_names })
-                : undefined;
+                  const opponentLabel = match.opponent_names
+                    ? t("matches.list.vsOpponent", {
+                        name: match.opponent_names,
+                      })
+                    : undefined;
 
-              const playedLabel = match.played_at
-                ? formatUtcInBeirut(match.played_at)
-                : formatUtcInBeirut(match.completed_at);
+                  const playedLabel = match.played_at
+                    ? formatUtcInBeirut(match.played_at)
+                    : formatUtcInBeirut(match.completed_at);
 
-              const metaParts = [
-                playedLabel,
+                  const opponent = matchCardOpponentLabel(match.opponent_names);
+                  const headlineInput = {
+                    opponentNames: match.opponent_names,
+                    status: "completed",
+                    participantCount: opponent ? 2 : 1,
+                    capacity: 2,
+                  };
+                  const resolvedOpponent = resolveMatchCardOpponent(
+                    t,
+                    headlineInput,
+                  );
 
-                match.club_name,
+                  return (
+                    <MatchCard
+                      key={match.match_id}
+                      accentBorder
+                      status="completed"
+                      statusLabel={outcomeLabel}
+                      dateTimeLabel={playedLabel}
+                      headline={
+                        resolvedOpponent
+                          ? buildMatchCardHeadline(t, headlineInput)
+                          : opponentLabel ??
+                            t(`matches.results.status.${match.result_status}`)
+                      }
+                      viewerName={viewerName}
+                      viewerAvatarPath={profile?.avatar_path}
+                      opponentName={resolvedOpponent}
+                      opponentAvatarColor={
+                        resolvedOpponent
+                          ? opponentAvatarColor(resolvedOpponent)
+                          : undefined
+                      }
+                      formatChip={t(`formats.${match.format}`)}
+                      locationChip={match.club_name ?? undefined}
+                      scoreBanner={
+                        scoreLabel
+                          ? {
+                              won: match.viewer_won,
+                              score: scoreLabel,
+                              title: match.viewer_won
+                                ? t("matches.list.won")
+                                : t("matches.list.lost"),
+                            }
+                          : undefined
+                      }
+                      onPress={() =>
+                        router.push({
+                          pathname: "/match/[id]",
 
-                scoreLabel,
-
-                t(`matches.results.status.${match.result_status}`),
-              ].filter(Boolean);
-
-              return (
-                <MatchCard
-                  key={match.match_id}
-
-                  title={`${t(`formats.${match.format}`)} · ${outcomeLabel}`}
-
-                  subtitle={
-                    opponentLabel ??
-                    t(`matches.results.status.${match.result_status}`)
-                  }
-
-                  meta={metaParts.join(" · ")}
-
-                  onPress={() =>
-                    router.push({
-                      pathname: "/match/[id]",
-
-                      params: { id: match.match_id },
-                    })
-                  }
-                />
-              );
-            })}
+                          params: { id: match.match_id },
+                        })
+                      }
+                    />
+                  );
+                })
+              : null}
           </View>
         </>
       )}

@@ -6,15 +6,13 @@ export const SUPPORTED_LOCALES = ["en", "ar", "fr"] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 /**
- * Locales offered in the UI. Arabic translations are complete and stay under
- * CI key-parity guards, but the app never calls `I18nManager.forceRTL`, so
- * Arabic would render inside a left-to-right layout. Shipping that is worse
- * than shipping English and French, so it is withheld until native RTL lands.
- * See docs/DECISIONS.md.
+ * Locales offered in the language picker. Arabic is included now that native
+ * RTL is wired through `syncNativeLayoutDirection` on the mobile app.
  */
 export const PILOT_LOCALES = [
   "en",
   "fr",
+  "ar",
 ] as const satisfies readonly SupportedLocale[];
 export type PilotLocale = (typeof PILOT_LOCALES)[number];
 
@@ -23,6 +21,9 @@ export function isPilotLocale(value: string): value is PilotLocale {
 }
 
 export const DEFAULT_LOCALE: SupportedLocale = "en";
+
+/** Changes when locale JSON changes — imported by mobile to refresh Metro bundles. */
+export const LOCALE_BUNDLE_ID = "2026-08-08-skill-band-carousel";
 
 const RTL_LOCALES: ReadonlySet<SupportedLocale> = new Set(["ar"]);
 

@@ -6,16 +6,63 @@ import { AppText } from "../AppText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { skillBandColor } from "../../lib/skill-band-theme";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { skillBandColor, skillBandFill } from "../../lib/skill-band-theme";
+import {
+  tennisBrand,
+  tennisColors,
+  tennisRadii,
+  tennisSemantic,
+} from "../../theme/tennis-tokens";
 
-function Tag({ icon, label }: { icon: IconName; label: string }) {
+type DiscoverTagVariant = "format" | "intent" | "availability" | "clubs";
+
+const TAG_THEMES: Record<
+  DiscoverTagVariant,
+  { fill: string; text: string; icon: string }
+> = {
+  format: {
+    fill: tennisSemantic.info.fill,
+    text: tennisSemantic.info.text,
+    icon: tennisColors.primary,
+  },
+  intent: {
+    fill: tennisSemantic.attention.fill,
+    text: tennisSemantic.attention.text,
+    icon: tennisColors.accent,
+  },
+  availability: {
+    fill: tennisSemantic.positive.fill,
+    text: tennisSemantic.positive.text,
+    icon: tennisSemantic.positive.text,
+  },
+  clubs: {
+    fill: tennisBrand.whatsappFill,
+    text: tennisBrand.whatsapp,
+    icon: tennisBrand.whatsapp,
+  },
+};
+
+function Tag({
+  icon,
+  label,
+  variant,
+}: {
+  icon: IconName;
+  label: string;
+  variant: DiscoverTagVariant;
+}) {
   const { rowDirection } = useLayoutDirection();
+  const theme = TAG_THEMES[variant];
 
   return (
-    <View style={[styles.tag, { flexDirection: rowDirection }]}>
-      <Icon name={icon} size={12} color={tennisColors.mutedForeground} />
-      <AppText style={styles.tagText} maxLines={1}>
+    <View
+      style={[
+        styles.tag,
+        { flexDirection: rowDirection, backgroundColor: theme.fill },
+      ]}
+    >
+      <Icon name={icon} size={12} color={theme.icon} />
+      <AppText style={[styles.tagText, { color: theme.text }]} maxLines={1}>
         {label}
       </AppText>
     </View>
@@ -31,6 +78,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   formatTag,
   intentTag,
   availabilityTag,
+  clubsTag,
   profileAccessibilityLabel,
   primaryLabel,
   primaryLoading = false,
@@ -45,6 +93,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   formatTag: string;
   intentTag: string;
   availabilityTag: string | null;
+  clubsTag?: string | null;
   profileAccessibilityLabel: string;
   primaryLabel: string;
   primaryLoading?: boolean;
@@ -53,6 +102,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
 }) {
   const { rowDirection, writingDirection } = useLayoutDirection();
   const bandColor = skillBandColor(player.skill_band);
+  const bandFill = skillBandFill(player.skill_band);
 
   return (
     <View style={styles.card}>
@@ -101,12 +151,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
                   </View>
                 ) : null}
               </View>
-              <View
-                style={[
-                  styles.levelBadge,
-                  { backgroundColor: `${bandColor}20` },
-                ]}
-              >
+              <View style={[styles.levelBadge, { backgroundColor: bandFill }]}>
                 <AppText style={[styles.levelBadgeText, { color: bandColor }]}>
                   {levelBadgeLabel}
                 </AppText>
@@ -120,10 +165,13 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
         </AppText>
 
         <View style={[styles.tagRow, { flexDirection: rowDirection }]}>
-          <Tag icon="court" label={formatTag} />
-          <Tag icon="playIntent" label={intentTag} />
+          <Tag icon="court" label={formatTag} variant="format" />
+          <Tag icon="playIntent" label={intentTag} variant="intent" />
           {availabilityTag ? (
-            <Tag icon="clock" label={availabilityTag} />
+            <Tag icon="clock" label={availabilityTag} variant="availability" />
+          ) : null}
+          {clubsTag ? (
+            <Tag icon="clubs" label={clubsTag} variant="clubs" />
           ) : null}
         </View>
       </Pressable>
@@ -224,7 +272,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   tag: {
-    backgroundColor: tennisColors.muted,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -235,7 +282,6 @@ const styles = StyleSheet.create({
   tagText: {
     fontFamily: tennisFontFamily.bodyMedium,
     fontSize: 11,
-    color: tennisColors.mutedForeground,
   },
   primaryButton: {
     minHeight: 44,

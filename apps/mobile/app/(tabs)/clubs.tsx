@@ -51,7 +51,7 @@ export default function ClubsTabScreen() {
 
         <View style={styles.listSection}>
           {clubsQuery.isLoading ? (
-            <ActivityIndicator accessibilityLabel={t("discover.loading")} />
+            <ActivityIndicator accessibilityLabel={t("common.loading")} />
           ) : (
             <>
               <AppText style={styles.resultCount}>

@@ -14,6 +14,7 @@ import { formatMatchesPlayedLabel } from "../../lib/matches-played-label";
 import { publicPlayerLevelChip } from "../../lib/player-level-label";
 import { discoverPlayerAvailabilityTag } from "../../lib/discover-availability-tag";
 import { beginCreateMatchForPlayer } from "../../lib/begin-create-match-for-player";
+import { clubLabelFromList } from "../../lib/match-clubs";
 import { CREATE_MATCH_ROUTE } from "../../lib/routes";
 import { supabase } from "../../lib/supabase";
 import { zoneLabelFromList } from "../../lib/zones";
@@ -92,6 +93,7 @@ export function DiscoverPlayerCardRow({
         showOverlapAvailability,
         t,
       )}
+      clubsTag={clubLabelFromList(player.favorite_clubs) || null}
       profileAccessibilityLabel={t("discover.openPlayerProfile", {
         name: player.display_name,
       })}

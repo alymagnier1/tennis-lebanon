@@ -37,25 +37,14 @@ export default function OnboardingCompleteScreen() {
         <AppText style={styles.description}>
           {t("onboarding.complete.description")}
         </AppText>
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <AppText style={styles.statValue}>847</AppText>
-            <AppText style={styles.statLabel}>
-              {t("onboarding.complete.playersNearby")}
-            </AppText>
-          </View>
-          <View style={styles.statCard}>
-            <AppText style={styles.statValue}>23</AppText>
-            <AppText style={styles.statLabel}>
-              {t("onboarding.complete.courtsAvailable")}
-            </AppText>
-          </View>
-        </View>
       </View>
       <FigmaPrimaryButton
         label={t("onboarding.complete.cta")}
         lime
-        onPress={() => router.replace("/")}
+        // Favourite clubs are what pre-fill the create-match screen, and no
+        // onboarding step can collect them: the club RPCs require a completed
+        // profile. This is the first moment they can be saved.
+        onPress={() => router.replace("/profile/where-i-play?firstRun=1")}
         style={styles.cta}
       />
     </View>

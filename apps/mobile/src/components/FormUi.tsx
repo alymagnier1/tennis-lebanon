@@ -30,7 +30,8 @@ import { AppText } from "./AppText";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
 import { mobileBrand } from "../theme/mobile-brand";
-import { tennisColors } from "../theme/tennis-tokens";
+import { tennisColors, tennisTypography } from "../theme/tennis-tokens";
+import { tennisTextStyles } from "../theme/tennis-text-styles";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 export type ScreenVirtualizedListProps = {
@@ -75,7 +76,7 @@ export function Screen({
 
   const titleBlock =
     (showTitle && title) || description ? (
-      <>
+      <View style={tennisTextStyles.titleSubtitleBlock}>
         {showTitle && title ? (
           <AppText
             accessibilityRole="header"
@@ -89,11 +90,13 @@ export function Screen({
           </AppText>
         ) : null}
         {description ? (
-          <AppText style={[styles.description, { writingDirection }]}>
+          <AppText
+            style={[tennisTextStyles.pageSubtitle, { writingDirection }]}
+          >
             {description}
           </AppText>
         ) : null}
-      </>
+      </View>
     ) : null;
 
   const refreshControl = onRefresh ? (
@@ -398,6 +401,33 @@ export function ErrorNotice({ children }: { children: ReactNode }) {
   );
 }
 
+export function ScreenError({
+  message,
+  onRetry,
+  retryLabel,
+}: {
+  message: string;
+  onRetry?: () => void;
+  retryLabel: string;
+}) {
+  return (
+    <View style={styles.screenError}>
+      <AppText accessibilityRole="alert" style={styles.errorNotice}>
+        {message}
+      </AppText>
+      {onRetry ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onRetry}
+          style={styles.screenErrorRetry}
+        >
+          <AppText style={styles.screenErrorRetryLabel}>{retryLabel}</AppText>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
 export function SummaryRow({ label, value }: { label: string; value: string }) {
   const { rowDirection, writingDirection } = useLayoutDirection();
 
@@ -456,8 +486,10 @@ export const formStyles = StyleSheet.create({
     fontWeight: typography.weight.semibold,
   },
   hintText: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: tennisTypography.fieldHint.fontSize,
+    lineHeight: tennisTypography.fieldHint.lineHeight,
     color: colors.neutral[700],
-    fontSize: typography.size.sm,
   },
   errorText: {
     color: colors.danger[700],
@@ -567,11 +599,6 @@ const styles = StyleSheet.create({
     fontFamily: tennisFontFamily.headingExtra,
     fontWeight: typography.weight.bold,
   },
-  description: {
-    color: colors.neutral[700],
-    fontSize: typography.size.md,
-    lineHeight: 24,
-  },
   primaryButton: {
     minHeight: 52,
     alignItems: "center",
@@ -647,6 +674,20 @@ const styles = StyleSheet.create({
     color: colors.danger[700],
     backgroundColor: colors.danger[100],
     borderRadius: radii.md,
+  },
+  screenError: {
+    gap: spacing.sm,
+    padding: spacing.md,
+  },
+  screenErrorRetry: {
+    alignSelf: "flex-start",
+    minHeight: minTouchTargetPx,
+    justifyContent: "center",
+  },
+  screenErrorRetryLabel: {
+    color: colors.brand[700],
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
   },
   choice: {
     minHeight: minTouchTargetPx,

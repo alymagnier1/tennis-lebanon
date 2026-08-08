@@ -6,6 +6,8 @@ export type Draft = Partial<CreateMatchInput> & {
   selectedSkillBands?: SkillBand[];
   targetPlayerId?: string;
   targetPlayerName?: string;
+  /** Set only when the host started create from a player card, not the tab + button. */
+  inviteForPlayer?: boolean;
 };
 
 let draft: Draft = {};

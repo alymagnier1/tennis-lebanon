@@ -50,7 +50,7 @@ export default function MatchBookCourtScreen() {
       description={t("matches.booking.browseClubsDescription")}
     >
       {hubQuery.isLoading ? (
-        <ActivityIndicator accessibilityLabel={t("discover.loading")} />
+        <ActivityIndicator accessibilityLabel={t("common.loading")} />
       ) : null}
 
       {agreedSlot ? (

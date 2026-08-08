@@ -29,6 +29,7 @@ function player(
     availability_day_parts: [],
     near_term_slots: [],
     near_term_overlap_slots: [],
+    favorite_clubs: [],
     ...overrides,
   };
 }

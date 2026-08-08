@@ -1206,7 +1206,13 @@ export type Database = {
         Row: {
           bio: string | null;
           created_at: string;
+          default_match_format: Database["public"]["Enums"]["match_format"] | null;
+          default_match_visibility: Database["public"]["Enums"]["match_visibility"];
+          default_min_skill: Database["public"]["Enums"]["skill_band"] | null;
+          default_max_skill: Database["public"]["Enums"]["skill_band"] | null;
+          default_requires_creator_approval: boolean;
           internal_rating: number;
+          match_defaults_set_at: string | null;
           play_intent: Database["public"]["Enums"]["play_intent"];
           prefers_doubles: boolean;
           prefers_singles: boolean;
@@ -1218,7 +1224,15 @@ export type Database = {
         Insert: {
           bio?: string | null;
           created_at?: string;
+          default_match_format?:
+            | Database["public"]["Enums"]["match_format"]
+            | null;
+          default_match_visibility?: Database["public"]["Enums"]["match_visibility"];
+          default_min_skill?: Database["public"]["Enums"]["skill_band"] | null;
+          default_max_skill?: Database["public"]["Enums"]["skill_band"] | null;
+          default_requires_creator_approval?: boolean;
           internal_rating?: number;
+          match_defaults_set_at?: string | null;
           play_intent?: Database["public"]["Enums"]["play_intent"];
           prefers_doubles?: boolean;
           prefers_singles?: boolean;
@@ -1230,7 +1244,15 @@ export type Database = {
         Update: {
           bio?: string | null;
           created_at?: string;
+          default_match_format?:
+            | Database["public"]["Enums"]["match_format"]
+            | null;
+          default_match_visibility?: Database["public"]["Enums"]["match_visibility"];
+          default_min_skill?: Database["public"]["Enums"]["skill_band"] | null;
+          default_max_skill?: Database["public"]["Enums"]["skill_band"] | null;
+          default_requires_creator_approval?: boolean;
           internal_rating?: number;
+          match_defaults_set_at?: string | null;
           play_intent?: Database["public"]["Enums"]["play_intent"];
           prefers_doubles?: boolean;
           prefers_singles?: boolean;
@@ -2010,6 +2032,8 @@ export type Database = {
           can_extend_listing: boolean;
           capacity: number;
           court_starts_at: string;
+          opponent_names: string | null;
+          club_name: string | null;
           format: Database["public"]["Enums"]["match_format"];
           has_court: boolean;
           intent: Database["public"]["Enums"]["play_intent"];
@@ -2441,6 +2465,7 @@ export type Database = {
         availability_day_parts: Json | null;
         near_term_slots: Json | null;
         near_term_overlap_slots: Json | null;
+        favorite_clubs: Json | null;
       };
       discover_open_match_card: {
         match_id: string | null;

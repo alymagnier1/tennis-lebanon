@@ -1,0 +1,25 @@
+section,color,title,body,route
+ENTRY,gray,Tab bar +,Centre tab opens create flow. Clears draft; hydrates from profile.,—
+ENTRY,gray,Discover → Create match,From player card. Prefills player zones time format intent.,Discover
+ENTRY,gray,Organise a match,Empty state on Discover or Matches tab.,Discover / Matches
+ENTRY,gray,Challenge to match,Player profile footer CTA. Same prefill as Discover card.,/player/[id]
+FLOW,blue,00 Loading,Hydrates profile + areas. Spinner only.,/match/create
+FLOW,red,00 Load error,Profile/zones failed. Retry button.,/match/create
+FLOW,blue,01 First intro (once),Shows profile default chips. Continue → schedule. Skip if already acknowledged.,/match/create/first-defaults
+FLOW,green,02 When and where — DEFAULT,Main screen: 3 default cards + when + where + Discover toggles + notes.,/match/create/schedule
+FLOW,green,02 Summary cards,Side-by-side: Format · Intent · Level. Tap → overrides.
+FLOW,green,02 When panel,Day time duration. More options → fixed/flexible up to 3 slots.
+FLOW,green,02 Where collapsed,Area + favourite club summaries. Change for this match links.
+FLOW,green,02 Where expanded,Club picker max 3. Area chips. Link to Profile Where I play.
+FLOW,green,02 Who can join,List on Discover toggle. Approve requests if listed.
+FLOW,orange,02 Invite banner,Setting up match for {name}. Challenge flow only.,schedule
+FLOW,red,02 Active match block,Already hosting open match. Continue inviting or cancel.,schedule
+FLOW,blue,02b Overrides,Format intent level only. Done → schedule. No save button.,/match/create/details
+POST,violet,Match hub,After Publish match. Coordinate vote book court.,/match/[id]
+POST,violet,Invite players,After Invite players CTA. Draft match invite flow.,/match/[id]/invite
+PROFILE,yellow,Profile: Where I play,Areas chips + favourite clubs. Auto-save.,/profile/where-i-play
+PROFILE,yellow,Profile: Match defaults,Intent format level Discover approval. Auto-save.,/profile/match-defaults
+EDGE,red,Alert: zone required,Publish blocked until ≥1 area selected.,schedule
+EDGE,red,Alert: club required,Public match needs ≥1 preferred club.,schedule
+EDGE,red,Error: time in past,Inline footer error. Pick later slot.,schedule
+EDGE,red,Alert: active hosted,Cannot publish second open match same format.,schedule

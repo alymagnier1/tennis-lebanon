@@ -29,6 +29,7 @@ import { beginCreateMatchForPlayer } from "../../src/lib/begin-create-match-for-
 import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 import { zoneLabelFromList } from "../../src/lib/zones";
 import { PlayerAvailabilitySection } from "../../src/components/player/PlayerAvailabilitySection";
+import { PlayerFavoriteClubsLine } from "../../src/components/player/PlayerFavoriteClubsLine";
 import { PlayerProfileHero } from "../../src/components/player/PlayerProfileHero";
 import { PlayerProfileSection } from "../../src/components/player/PlayerProfileSection";
 import { PlayerProfileSafetySection } from "../../src/components/player/PlayerProfileSafetySection";
@@ -149,6 +150,8 @@ export default function PlayerDetailScreen() {
 
   const name = player.display_name;
   const locationLabel = zoneLabelFromList(player.zones, locale);
+  const hasAboutContent =
+    Boolean(player.bio) || player.favorite_clubs.length > 0;
 
   return (
     <View style={styles.root}>
@@ -167,11 +170,14 @@ export default function PlayerDetailScreen() {
         />
 
         <View style={styles.body}>
-          {player.bio ? (
+          {hasAboutContent ? (
             <PlayerProfileSection title={t("playerProfile.aboutTitle")}>
-              <AppText style={[styles.bio, { writingDirection }]}>
-                {player.bio}
-              </AppText>
+              {player.bio ? (
+                <AppText style={[styles.bio, { writingDirection }]}>
+                  {player.bio}
+                </AppText>
+              ) : null}
+              <PlayerFavoriteClubsLine player={player} />
             </PlayerProfileSection>
           ) : null}
 

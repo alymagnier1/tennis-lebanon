@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
     paddingHorizontal: 16,
     paddingTop: 18,
-    paddingBottom: 14,
+    paddingBottom: 0,
   },
   groupedTitle: {
     fontFamily: tennisFontFamily.headingSemi,
@@ -61,8 +61,9 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: 16,
+    paddingTop: 6,
     paddingBottom: 18,
-    gap: 12,
+    gap: 10,
   },
   groupedBody: {
     borderTopWidth: 1,

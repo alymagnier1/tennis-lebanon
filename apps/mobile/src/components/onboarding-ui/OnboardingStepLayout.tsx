@@ -12,6 +12,7 @@ import { AppText } from "../AppText";
 import { FigmaBackButton } from "./FigmaButtons";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 
 export function OnboardingStepLayout({
   title,
@@ -40,12 +41,14 @@ export function OnboardingStepLayout({
         <WizardProgress step={step} totalSteps={totalSteps} />
       ) : null}
       <View style={styles.header}>
-        <AppText accessibilityRole="header" style={styles.title}>
-          {title}
-        </AppText>
-        {description ? (
-          <AppText style={styles.description}>{description}</AppText>
-        ) : null}
+        <View style={tennisTextStyles.titleSubtitleBlock}>
+          <AppText accessibilityRole="header" style={styles.title}>
+            {title}
+          </AppText>
+          {description ? (
+            <AppText style={tennisTextStyles.pageSubtitle}>{description}</AppText>
+          ) : null}
+        </View>
       </View>
       {children}
     </>
@@ -82,7 +85,7 @@ export function OnboardingFormField({
 }: PropsWithChildren<{ label: string; error?: string }>) {
   return (
     <View style={styles.field}>
-      <AppText style={styles.fieldLabel}>{label}</AppText>
+      <AppText style={tennisTextStyles.fieldLabel}>{label}</AppText>
       {children}
       {error ? <AppText style={styles.fieldError}>{error}</AppText> : null}
     </View>
@@ -115,7 +118,7 @@ const styles = StyleSheet.create({
   },
   header: {
     marginTop: 24,
-    marginBottom: 28,
+    marginBottom: 24,
   },
   title: {
     fontFamily: tennisFontFamily.headingExtra,
@@ -123,13 +126,6 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     color: tennisColors.primaryDark,
     letterSpacing: -0.6,
-    marginBottom: 8,
-  },
-  description: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 22,
-    color: tennisColors.mutedForeground,
   },
   footer: {
     paddingHorizontal: tennisSpacing.screenX,
@@ -138,12 +134,6 @@ const styles = StyleSheet.create({
   },
   field: {
     marginBottom: 18,
-  },
-  fieldLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-    marginBottom: 8,
   },
   fieldError: {
     fontFamily: tennisFontFamily.body,

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -20,8 +20,16 @@ import {
   resolveDiscoverFiltersFromProfile,
   type PlayIntent,
 } from "@tennis-lebanon/domain";
-import { EmptyState, MatchCard, SegmentTabs } from "../../src/components/AppUi";
-import { DiscoverMatchChips } from "../../src/components/discover/DiscoverMatchChips";
+import {
+  EmptyState,
+  ListSkeleton,
+  MatchCard,
+  SegmentTabs,
+} from "../../src/components/AppUi";
+import {
+  clearDiscoverMatchToggles,
+  DiscoverMatchChips,
+} from "../../src/components/discover/DiscoverMatchChips";
 import { DiscoverHeaderShell } from "../../src/components/discover/DiscoverHeaderShell";
 import { DiscoverSectionSplitter } from "../../src/components/discover/DiscoverSectionSplitter";
 import { DiscoverPlayerCardRow } from "../../src/components/discover/DiscoverPlayerCardRow";
@@ -33,7 +41,8 @@ import {
   type ScreenVirtualizedListProps,
   formStyles,
 } from "../../src/components/FormUi";
-import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
+import { buildMatchListBadges } from "../../src/lib/match-status-tone";
+import { startNewMatchCreate } from "../../src/lib/create-match-guard";
 import {
   loadDiscoverFilters,
   saveDiscoverFilters,
@@ -42,6 +51,7 @@ import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
 import { zoneLabelFromList } from "../../src/lib/zones";
 import { clubLabelFromList } from "../../src/lib/match-clubs";
+import { opponentAvatarColor } from "../../src/lib/match-card-status";
 
 type DiscoverSegment = "players" | "matches";
 
@@ -231,14 +241,14 @@ export default function DiscoverScreen() {
             );
           return (
             <MatchCard
-              title={`${t(`formats.${match.format}`)} · ${match.creator_display_name}`}
-              subtitle={`${t(`skillBands.${match.min_skill}`)}–${t(`skillBands.${match.max_skill}`)}`}
-              meta={`${whereLabel} · ${t("discover.spotsRemaining", { count: match.capacity - match.participant_count })}`}
-              badge={
-                match.court_secured
-                  ? t("discover.courtSecuredBadge")
-                  : undefined
-              }
+              status={match.status}
+              statusLabel={t(`matches.status.${match.status}`)}
+              headline={match.creator_display_name}
+              opponentName={match.creator_display_name}
+              opponentAvatarPath={match.creator_avatar_path}
+              opponentAvatarColor={opponentAvatarColor(match.creator_display_name)}
+              formatChip={t(`formats.${match.format}`)}
+              locationChip={whereLabel}
               note={match.notes ?? undefined}
               onPress={() =>
                 router.push({
@@ -284,6 +294,7 @@ export default function DiscoverScreen() {
           <DiscoverMatchChips
             toggles={matchToggles}
             onToggle={toggleMatchFilter}
+            onClearAll={() => setMatchToggles(clearDiscoverMatchToggles())}
           />
         </DiscoverHeaderShell>
       }
@@ -295,7 +306,7 @@ export default function DiscoverScreen() {
       ) : null}
 
       {activeQuery.isLoading || ownProfileQuery.isLoading ? (
-        <ActivityIndicator accessibilityLabel={t("discover.loading")} />
+        <ListSkeleton rows={4} />
       ) : null}
 
       {activeQuery.isError || ownProfileQuery.isError ? (
@@ -319,7 +330,7 @@ export default function DiscoverScreen() {
             <>
               <PrimaryButton
                 label={t("matches.create.organiseCta")}
-                onPress={() => router.push(CREATE_MATCH_ROUTE)}
+                onPress={() => startNewMatchCreate()}
               />
               <SecondaryButton
                 label={t("discover.relaxFilters")}
@@ -341,7 +352,7 @@ export default function DiscoverScreen() {
             <>
               <PrimaryButton
                 label={t("matches.create.organiseCta")}
-                onPress={() => router.push(CREATE_MATCH_ROUTE)}
+                onPress={() => startNewMatchCreate()}
               />
               <SecondaryButton
                 label={t("discover.relaxFilters")}

@@ -1,0 +1,11 @@
+appId: com.tennislebanon.dev
+name: M5 request court booking
+---
+- launchApp
+- tapOn: "Matches"
+- tapOn:
+    text: "Request court"
+    optional: true
+- assertVisible:
+    text: "Book"
+    optional: true

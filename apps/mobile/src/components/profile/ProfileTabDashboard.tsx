@@ -24,10 +24,8 @@ import { FigmaPrimaryButton } from "../onboarding-ui";
 import { OwnProfileHero } from "./OwnProfileHero";
 import { ProfileBioEditor } from "./ProfileBioEditor";
 import { ProfileMenuRow } from "./ProfileMenuRow";
-import { ProfilePreferredAreasSection } from "./ProfilePreferredAreasSection";
 import { ProfileSettingsFab } from "./ProfileSettingsFab";
 import { ProfileSkillBandSection } from "./ProfileSkillBandSection";
-import { ProfileTennisPreferencesSection } from "./ProfileTennisPreferencesSection";
 import { useAuth } from "../../providers/AuthProvider";
 import { pickAndUploadOwnAvatar } from "../../lib/pick-own-avatar";
 import {
@@ -38,6 +36,7 @@ import {
   profileScreenRatingStatValue,
 } from "../../lib/profile-screen-copy";
 import { supabase } from "../../lib/supabase";
+import { CLUBS_ROUTE } from "../../lib/routes";
 import { zoneLabelFromList } from "../../lib/zones";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
@@ -190,17 +189,32 @@ export function ProfileTabDashboard() {
             ) : null}
           </PlayerProfileSection>
 
-          <ProfilePreferredAreasSection />
-
           {playerProfile ? (
             <ProfileSkillBandSection playerProfile={playerProfile} />
           ) : null}
 
-          {playerProfile ? (
-            <ProfileTennisPreferencesSection playerProfile={playerProfile} />
-          ) : null}
-
           <View style={styles.menuCard}>
+            <ProfileMenuRow
+              icon={
+                <Icon name="place" size={20} color={tennisColors.primary} />
+              }
+              label={t("profile.whereIPlay.menu")}
+              onPress={() => router.push("/profile/where-i-play")}
+            />
+            <ProfileMenuRow
+              icon={
+                <Icon name="playIntent" size={20} color={tennisColors.primary} />
+              }
+              label={t("profile.matchDefaults.menu")}
+              onPress={() => router.push("/profile/match-defaults")}
+            />
+            <ProfileMenuRow
+              icon={
+                <Icon name="clubs" size={20} color={tennisColors.primary} />
+              }
+              label={t("home.liquidityClubs")}
+              onPress={() => router.push(CLUBS_ROUTE)}
+            />
             <ProfileMenuRow
               icon={
                 <Icon name="clock" size={20} color={tennisColors.primary} />

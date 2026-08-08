@@ -6,7 +6,6 @@ export default function CreateMatchLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="details" />
       <Stack.Screen name="schedule" />
-      <Stack.Screen name="review" />
     </Stack>
   );
 }

@@ -129,14 +129,16 @@ export default function SettingsScreen() {
                 void Linking.openURL(`mailto:${env.SUPPORT_EMAIL}`)
               }
             />
-            <ProfileMenuRow
-              icon={
-                <Icon name="filter" size={16} color={tennisColors.primary} />
-              }
-              label={t("settings.rtlLayoutCheck")}
-              onPress={() => router.push("/rtl-check")}
-              showDivider={false}
-            />
+            {__DEV__ ? (
+              <ProfileMenuRow
+                icon={
+                  <Icon name="filter" size={16} color={tennisColors.primary} />
+                }
+                label={t("settings.rtlLayoutCheck")}
+                onPress={() => router.push("/rtl-check")}
+                showDivider={false}
+              />
+            ) : null}
           </PlayerProfileSection>
 
           <PlayerProfileSection

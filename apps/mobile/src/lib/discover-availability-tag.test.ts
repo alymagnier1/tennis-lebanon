@@ -41,6 +41,7 @@ function player(
         ends_at: "2026-08-04T17:00:00.000Z",
       },
     ],
+    favorite_clubs: [],
     ...overrides,
   };
 }

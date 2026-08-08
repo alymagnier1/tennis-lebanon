@@ -5,34 +5,30 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addMatchTimeOption } from "@tennis-lebanon/api";
 import {
-  FormField,
-  PrimaryButton,
-  Screen,
-} from "../../../src/components/FormUi";
+  addMinutes,
+  dayKey,
+  SlotPicker,
+  type DurationMinutes,
+} from "../../../src/components/SlotPicker";
+import { PrimaryButton, Screen } from "../../../src/components/FormUi";
 import { beirutLocalToUtcIso } from "../../../src/lib/beirut-time";
 import { supabase } from "../../../src/lib/supabase";
-
-function defaultDate(): string {
-  const date = new Date();
-  date.setDate(date.getDate() + 3);
-  return date.toISOString().slice(0, 10);
-}
 
 export default function AddMatchTimeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [date, setDate] = useState(defaultDate());
+  const [day, setDay] = useState(dayKey(3));
   const [startTime, setStartTime] = useState("18:00");
-  const [endTime, setEndTime] = useState("19:30");
+  const [duration, setDuration] = useState<DurationMinutes>(90);
 
   const addMutation = useMutation({
     mutationFn: () =>
       addMatchTimeOption(
         supabase,
         id!,
-        beirutLocalToUtcIso(date, startTime),
-        beirutLocalToUtcIso(date, endTime),
+        beirutLocalToUtcIso(day, startTime),
+        beirutLocalToUtcIso(day, addMinutes(startTime, duration)),
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
@@ -47,20 +43,13 @@ export default function AddMatchTimeScreen() {
       title={t("matches.hub.addTimeTitle")}
       description={t("matches.hub.addTimeDescription")}
     >
-      <FormField
-        label={t("availability.date")}
-        value={date}
-        onChangeText={setDate}
-      />
-      <FormField
-        label={t("availability.startTime")}
-        value={startTime}
-        onChangeText={setStartTime}
-      />
-      <FormField
-        label={t("availability.endTime")}
-        value={endTime}
-        onChangeText={setEndTime}
+      <SlotPicker
+        selectedDay={day}
+        onSelectDay={setDay}
+        selectedTime={startTime}
+        onSelectTime={setStartTime}
+        duration={duration}
+        onSelectDuration={setDuration}
       />
 
       <PrimaryButton

@@ -7,5 +7,8 @@ import { prefillCreateMatchDraftForPlayer } from "./prefill-create-match-for-pla
 
 export function beginCreateMatchForPlayer(player: CompatiblePlayerCard): void {
   resetCreateMatchDraft();
-  updateCreateMatchDraft(prefillCreateMatchDraftForPlayer(player));
+  updateCreateMatchDraft({
+    ...prefillCreateMatchDraftForPlayer(player),
+    inviteForPlayer: true,
+  });
 }

@@ -2,7 +2,6 @@ import { z } from "zod";
 import {
   databaseUuidSchema,
   normalizeDisplayName,
-  playIntentSchema,
   skillBandSchema,
   supportedLanguageSchema,
 } from "./onboarding";
@@ -18,25 +17,8 @@ export const updateOwnProfileSchema = z.object({
 
 export type UpdateOwnProfileInput = z.infer<typeof updateOwnProfileSchema>;
 
-export const updateTennisPreferencesSchema = z
-  .object({
-    playIntent: playIntentSchema,
-    prefersSingles: z.boolean(),
-    prefersDoubles: z.boolean(),
-  })
-  .superRefine((value, context) => {
-    if (!value.prefersSingles && !value.prefersDoubles) {
-      context.addIssue({
-        code: "custom",
-        path: ["prefersSingles"],
-        message: "Choose at least one match format.",
-      });
-    }
-  });
-
-export type UpdateTennisPreferencesInput = z.infer<
-  typeof updateTennisPreferencesSchema
->;
+// Tennis preferences are edited through updateMatchHostDefaultsSchema, which
+// covers the same fields plus the level range and listing defaults.
 
 export const updatePreferredZonesSchema = z.object({
   zoneIds: z

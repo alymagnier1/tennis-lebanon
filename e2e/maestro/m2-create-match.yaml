@@ -1,0 +1,9 @@
+appId: com.tennislebanon.dev
+name: M2 create match from tab FAB
+---
+- launchApp
+- tapOn:
+    id: "tab-create-match"
+- assertVisible: "Match details"
+- tapOn: "Continue"
+- assertVisible: "Schedule"

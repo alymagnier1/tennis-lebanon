@@ -22,6 +22,8 @@ function match(overrides: Partial<MyMatchRow> = {}): MyMatchRow {
     can_extend_listing: false,
     has_court: false,
     court_starts_at: null,
+    opponent_names: null,
+    club_name: null,
     ...overrides,
   };
 }

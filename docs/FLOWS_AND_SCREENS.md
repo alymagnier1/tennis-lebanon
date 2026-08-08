@@ -35,10 +35,9 @@ Primary tabs after onboarding:
 
 ### Match creation and coordination
 
-- Create match: format and intent
-- Create match: level, visibility, join approval
-- Create match: areas and proposed times
-- Create match: review and publish
+- Create match: time, clubs, optional notes, publish (single screen)
+- Create match: per-match overrides (format, level, visibility)
+- Profile: match defaults editor
 - Invite player / share link
 - Matches tab: **Invites** inbox (accept/decline) and **Active** list
 - Match hub
@@ -60,6 +59,8 @@ Primary tabs after onboarding:
 - Notifications center
 - Availability editor
 - Profile editor
+- Match defaults (format, intent, level range, Discover, approval)
+- Where I play (areas and favourite clubs; shown once after onboarding, then in Profile)
 - Language, privacy, and notification settings
 - Support and account deletion request
 

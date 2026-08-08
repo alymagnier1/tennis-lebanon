@@ -41,6 +41,29 @@ export function weekdayShortLabels(weekdays: number[], t: TFunction): string[] {
     .map((weekday) => t(`availability.weekdaysShort.${weekday}`));
 }
 
+/** Per-weekday blocks for profile chips; falls back when RPC omits `by_weekday`. */
+export function publicAvailabilityByWeekday(
+  summary: PublicPlayerAvailabilitySummary | undefined,
+): Array<{ weekday: number; day_parts: AvailabilityDayPart[] }> {
+  if (!summary) return [];
+
+  if (summary.by_weekday.length > 0) {
+    return [...summary.by_weekday]
+      .sort((a, b) => a.weekday - b.weekday)
+      .map((entry) => ({
+        weekday: entry.weekday,
+        day_parts: sortAvailabilityDayParts(entry.day_parts),
+      }));
+  }
+
+  return [...summary.weekdays]
+    .sort((a, b) => a - b)
+    .map((weekday) => ({
+      weekday,
+      day_parts: sortAvailabilityDayParts(summary.day_parts),
+    }));
+}
+
 export function hasPublicAvailabilitySummary(
   summary: PublicPlayerAvailabilitySummary | undefined,
 ): boolean {

@@ -11,7 +11,7 @@ import { Icon } from "./Icon";
 import { clubBookingModeLabelKey } from "../lib/club-booking-label";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { zoneNameFromJson } from "../lib/zones";
-import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import { tennisBrand, tennisColors, tennisRadii } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 type ClubDirectoryCardProps = {
@@ -28,7 +28,10 @@ type BookingBadgeStyle = {
 
 function bookingBadgeStyle(bookingMode: string): BookingBadgeStyle {
   if (isWhatsAppBookingClub(bookingMode)) {
-    return { color: "#128C7E", backgroundColor: "#E3F0EE" };
+    return {
+      color: tennisBrand.whatsapp,
+      backgroundColor: tennisBrand.whatsappFill,
+    };
   }
 
   return { color: tennisColors.accent, backgroundColor: "#FEF0E7" };

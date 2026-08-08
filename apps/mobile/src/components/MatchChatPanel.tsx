@@ -3,6 +3,9 @@ import {
   ActivityIndicator,
   AppState,
   type AppStateStatus,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
   StyleSheet,
   TextInput,
   View,
@@ -11,26 +14,31 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listMatchMessages, sendMatchMessage } from "@tennis-lebanon/api";
 import { AppText } from "./AppText";
-import { FigmaPrimaryButton } from "./onboarding-ui";
-import { PlayerProfileSection } from "./player/PlayerProfileSection";
 import { formatUtcInBeirut } from "../lib/beirut-time";
+import { useLayoutDirection } from "../lib/layout-direction";
 import {
   realtimeStatusFrom,
   shouldRefetchAfterStatusChange,
   type RealtimeStatus,
 } from "../lib/realtime-status";
 import { supabase } from "../lib/supabase";
-import { tennisColors } from "../theme/tennis-tokens";
+import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 import { onboardingInputStyle } from "./onboarding-ui/OnboardingStepLayout";
 
 type MatchChatPanelProps = {
   matchId: string;
   enabled: boolean;
+  viewerUserId?: string;
 };
 
-export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
+export function MatchChatPanel({
+  matchId,
+  enabled,
+  viewerUserId,
+}: MatchChatPanelProps) {
   const { t } = useTranslation();
+  const { writingDirection } = useLayoutDirection();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
 
@@ -42,7 +50,6 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
 
   const [realtimeStatus, setRealtimeStatus] =
     useState<RealtimeStatus>("connecting");
-  // The refetch decision needs the value at callback time, not at render time.
   const statusRef = useRef<RealtimeStatus>("connecting");
 
   const refetchMessages = useCallback(() => {
@@ -77,8 +84,6 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
         }
       });
 
-    // Backgrounding tears down the socket without always reporting a status,
-    // so returning to the app refetches regardless of what the channel said.
     const onAppStateChange = (nextState: AppStateStatus) => {
       if (nextState === "active") {
         refetchMessages();
@@ -108,56 +113,118 @@ export function MatchChatPanel({ matchId, enabled }: MatchChatPanelProps) {
   const messages = [...(messagesQuery.data ?? [])].reverse();
 
   return (
-    <PlayerProfileSection title={t("matches.chat.title")}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.root}
+    >
+      <AppText style={styles.title}>{t("matches.chat.title")}</AppText>
+
       {messagesQuery.isLoading ? (
         <ActivityIndicator
           color={tennisColors.primary}
-          accessibilityLabel={t("discover.loading")}
+          accessibilityLabel={t("common.loading")}
         />
       ) : null}
+
       {realtimeStatus === "interrupted" ? (
         <AppText style={styles.reconnecting} accessibilityRole="alert">
           {t("matches.chat.reconnecting")}
         </AppText>
       ) : null}
+
       <View style={styles.messages}>
         {messages.length === 0 ? (
           <AppText style={styles.empty}>{t("matches.chat.empty")}</AppText>
         ) : (
-          messages.map((message) => (
-            <View key={message.message_id} style={styles.messageRow}>
-              <AppText style={styles.sender} maxLines={1}>
-                {message.author_display_name}
-              </AppText>
-              <AppText style={styles.body}>{message.body}</AppText>
-              <AppText style={styles.time}>
-                {formatUtcInBeirut(message.created_at)}
-              </AppText>
-            </View>
-          ))
+          messages.map((message) => {
+            const isOwn = viewerUserId === message.author_id;
+            return (
+              <View
+                key={message.message_id}
+                style={[
+                  styles.bubbleRow,
+                  isOwn ? styles.bubbleRowOwn : styles.bubbleRowOther,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.bubble,
+                    isOwn ? styles.bubbleOwn : styles.bubbleOther,
+                  ]}
+                >
+                  {!isOwn ? (
+                    <AppText style={styles.sender} maxLines={1}>
+                      {message.author_display_name}
+                    </AppText>
+                  ) : null}
+                  <AppText
+                    style={[
+                      styles.body,
+                      { writingDirection },
+                      isOwn ? styles.bodyOwn : styles.bodyOther,
+                    ]}
+                  >
+                    {message.body}
+                  </AppText>
+                  <AppText
+                    style={[
+                      styles.time,
+                      isOwn ? styles.timeOwn : styles.timeOther,
+                    ]}
+                  >
+                    {formatUtcInBeirut(message.created_at)}
+                  </AppText>
+                </View>
+              </View>
+            );
+          })
         )}
       </View>
-      <TextInput
-        accessibilityLabel={t("matches.chat.placeholder")}
-        value={draft}
-        onChangeText={setDraft}
-        placeholder={t("matches.chat.placeholder")}
-        style={onboardingInputStyle.input}
-        multiline
-      />
-      <FigmaPrimaryButton
-        label={t("matches.chat.send")}
-        disabled={!draft.trim()}
-        loading={sendMutation.isPending}
-        onPress={() => sendMutation.mutate(draft.trim())}
-      />
-    </PlayerProfileSection>
+
+      <View style={styles.composer}>
+        <TextInput
+          accessibilityLabel={t("matches.chat.placeholder")}
+          value={draft}
+          onChangeText={setDraft}
+          placeholder={t("matches.chat.placeholder")}
+          style={[onboardingInputStyle.input, styles.input]}
+          multiline
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("matches.chat.send")}
+          disabled={!draft.trim() || sendMutation.isPending}
+          onPress={() => sendMutation.mutate(draft.trim())}
+          style={({ pressed }) => [
+            styles.sendButton,
+            (!draft.trim() || sendMutation.isPending) && styles.sendDisabled,
+            pressed && draft.trim() ? styles.sendPressed : null,
+          ]}
+        >
+          {sendMutation.isPending ? (
+            <ActivityIndicator color={tennisColors.white} size="small" />
+          ) : (
+            <AppText style={styles.sendLabel}>{t("matches.chat.send")}</AppText>
+          )}
+        </Pressable>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  messages: {
+  root: {
     gap: 12,
+    paddingBottom: 8,
+  },
+  title: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 15,
+    color: tennisColors.primaryDark,
+  },
+  messages: {
+    gap: 8,
+    minHeight: 80,
   },
   empty: {
     fontFamily: tennisFontFamily.body,
@@ -169,26 +236,88 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: tennisColors.mutedForeground,
   },
-  messageRow: {
+  bubbleRow: {
+    width: "100%",
+  },
+  bubbleRowOwn: {
+    alignItems: "flex-end",
+  },
+  bubbleRowOther: {
+    alignItems: "flex-start",
+  },
+  bubble: {
+    maxWidth: "85%",
+    borderRadius: tennisRadii.lg,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     gap: 4,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: tennisColors.border,
+  },
+  bubbleOwn: {
+    backgroundColor: tennisColors.primary,
+    borderBottomRightRadius: 4,
+  },
+  bubbleOther: {
+    backgroundColor: tennisColors.muted,
+    borderBottomLeftRadius: 4,
   },
   sender: {
     fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
+    fontSize: 11,
+    color: tennisColors.mutedForeground,
   },
   body: {
     fontFamily: tennisFontFamily.body,
     fontSize: 14,
     lineHeight: 20,
+  },
+  bodyOwn: {
+    color: tennisColors.white,
+  },
+  bodyOther: {
     color: tennisColors.primaryDark,
   },
   time: {
     fontFamily: tennisFontFamily.body,
-    fontSize: 11,
+    fontSize: 10,
+    alignSelf: "flex-end",
+  },
+  timeOwn: {
+    color: tennisColors.white,
+    opacity: 0.85,
+  },
+  timeOther: {
     color: tennisColors.mutedForeground,
+  },
+  composer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: tennisColors.border,
+    paddingTop: 10,
+  },
+  input: {
+    flex: 1,
+    maxHeight: 100,
+  },
+  sendButton: {
+    minHeight: 44,
+    minWidth: 64,
+    borderRadius: tennisRadii.md,
+    backgroundColor: tennisColors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  sendDisabled: {
+    opacity: 0.5,
+  },
+  sendPressed: {
+    opacity: 0.9,
+  },
+  sendLabel: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 14,
+    color: tennisColors.white,
   },
 });

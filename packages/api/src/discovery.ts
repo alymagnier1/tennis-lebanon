@@ -2,6 +2,8 @@ import type { DiscoveryFiltersInput } from "@tennis-lebanon/domain";
 import type { TennisSupabaseClient } from "./client";
 import type { MatchPreferredClub } from "./matches";
 
+export type PlayerFavoriteClub = Pick<MatchPreferredClub, "club_id" | "name">;
+
 export type NearTermAvailabilitySlot = {
   starts_at: string;
   ends_at: string;
@@ -33,6 +35,7 @@ export type CompatiblePlayerCard = {
   /** Today + next two days in Asia/Beirut. */
   near_term_slots: NearTermAvailabilitySlot[];
   near_term_overlap_slots: NearTermAvailabilitySlot[];
+  favorite_clubs: PlayerFavoriteClub[];
 };
 
 type DiscoverPlayerCardRow = Omit<
@@ -41,12 +44,14 @@ type DiscoverPlayerCardRow = Omit<
   | "availability_day_parts"
   | "near_term_slots"
   | "near_term_overlap_slots"
+  | "favorite_clubs"
 > & {
   availability_weekdays?: number[] | null;
   availability_day_parts?:
     CompatiblePlayerCard["availability_day_parts"] | null;
   near_term_slots?: NearTermAvailabilitySlot[] | null;
   near_term_overlap_slots?: NearTermAvailabilitySlot[] | null;
+  favorite_clubs?: PlayerFavoriteClub[] | null;
 };
 
 function normalizeNearTermSlots(value: unknown): NearTermAvailabilitySlot[] {
@@ -72,6 +77,18 @@ function normalizeNearTermSlots(value: unknown): NearTermAvailabilitySlot[] {
   });
 }
 
+function normalizeFavoriteClubs(value: unknown): PlayerFavoriteClub[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((club) => {
+    if (!club || typeof club !== "object") return [];
+    const record = club as Record<string, unknown>;
+    const clubId = record.club_id;
+    const name = record.name;
+    if (typeof clubId !== "string" || typeof name !== "string") return [];
+    return [{ club_id: clubId, name }];
+  });
+}
+
 function normalizeDiscoverPlayerCard(
   row: DiscoverPlayerCardRow,
 ): CompatiblePlayerCard {
@@ -83,6 +100,7 @@ function normalizeDiscoverPlayerCard(
     near_term_overlap_slots: normalizeNearTermSlots(
       row.near_term_overlap_slots,
     ),
+    favorite_clubs: normalizeFavoriteClubs(row.favorite_clubs),
   };
 }
 

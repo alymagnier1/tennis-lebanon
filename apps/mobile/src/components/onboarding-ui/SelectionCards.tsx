@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, type ViewStyle } from "react-native";
 import { AppText } from "../AppText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { tennisColors, tennisRadii, tennisTypography } from "../../theme/tennis-tokens";
 
 export function PolicyToggleCard({
   label,
@@ -91,12 +91,16 @@ export function ChipButton({
   selected,
   onPress,
   disabled = false,
+  compact = false,
+  style,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
   /** Announces the chip as unavailable rather than leaving it a button that does nothing. */
   disabled?: boolean;
+  compact?: boolean;
+  style?: ViewStyle;
 }) {
   return (
     <Pressable
@@ -104,10 +108,20 @@ export function ChipButton({
       accessibilityState={{ selected, disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={[styles.chip, selected ? styles.chipSelected : null]}
+      style={[
+        styles.chip,
+        compact && styles.chipCompact,
+        selected ? styles.chipSelected : null,
+        style,
+      ]}
     >
       <AppText
-        style={[styles.chipLabel, selected ? styles.chipLabelSelected : null]}
+        style={[
+          styles.chipLabel,
+          compact && styles.chipLabelCompact,
+          selected ? styles.chipLabelSelected : null,
+        ]}
+        maxLines={1}
       >
         {label}
       </AppText>
@@ -212,9 +226,10 @@ const styles = StyleSheet.create({
   },
   selectionDesc: {
     fontFamily: tennisFontFamily.body,
-    fontSize: 13,
+    fontSize: tennisTypography.sectionSubtitle.fontSize,
+    lineHeight: tennisTypography.sectionSubtitle.lineHeight,
     color: tennisColors.mutedForeground,
-    marginTop: 2,
+    marginTop: 1,
   },
   selectionDescSelected: {
     color: "rgba(255,255,255,0.7)",
@@ -241,10 +256,24 @@ const styles = StyleSheet.create({
     borderColor: tennisColors.primary,
     backgroundColor: tennisColors.primary,
   },
+  chipCompact: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginRight: 0,
+    marginBottom: 0,
+    borderWidth: 1.5,
+    minHeight: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   chipLabel: {
     fontFamily: tennisFontFamily.bodyMedium,
     fontSize: 13,
     color: tennisColors.primaryDark,
+  },
+  chipLabelCompact: {
+    fontSize: 11,
+    lineHeight: 14,
   },
   chipLabelSelected: {
     color: tennisColors.white,
@@ -277,12 +306,12 @@ const styles = StyleSheet.create({
     fontFamily: tennisFontFamily.heading,
     fontSize: 15,
     color: tennisColors.primaryDark,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   benefitDesc: {
     fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: tennisTypography.sectionSubtitle.fontSize,
+    lineHeight: tennisTypography.sectionSubtitle.lineHeight,
     color: tennisColors.mutedForeground,
   },
 });

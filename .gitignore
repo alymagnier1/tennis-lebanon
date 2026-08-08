@@ -39,3 +39,7 @@ web-build/
 # history because it is ~28 MB of PNGs plus a second Vite app with its own
 # lockfile, none of which the monorepo builds from.
 Figma designs/
+Figma-Design-2/
+
+# Agent scratch: plan files written by editor tooling, same category as .vscode.
+.cursor/

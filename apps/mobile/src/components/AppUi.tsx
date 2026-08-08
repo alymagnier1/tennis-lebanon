@@ -29,8 +29,16 @@ import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
 import { AppText } from "./AppText";
 import { Icon, type IconName } from "./Icon";
+import { SemanticBadge } from "./SemanticBadge";
+import type { MatchListBadge } from "../lib/match-status-tone";
 import { mobileBrand } from "../theme/mobile-brand";
-import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisRadii,
+  type SemanticTone,
+  tennisSemantic,
+} from "../theme/tennis-tokens";
+import { tennisTextStyles } from "../theme/tennis-text-styles";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 export function SegmentTabs<T extends string>({
@@ -114,7 +122,7 @@ export function SectionTitle({
   const { writingDirection } = useLayoutDirection();
 
   return (
-    <View style={styles.sectionTitle}>
+    <View style={tennisTextStyles.titleSubtitleBlock}>
       <AppText
         accessibilityRole="header"
         style={[styles.sectionTitleText, { writingDirection }]}
@@ -124,7 +132,7 @@ export function SectionTitle({
       </AppText>
       {subtitle ? (
         <AppText
-          style={[styles.sectionSubtitle, { writingDirection }]}
+          style={[tennisTextStyles.sectionSubtitle, { writingDirection }]}
           maxLines={3}
         >
           {subtitle}
@@ -434,94 +442,18 @@ export function PlayerInviteAction({
   );
 }
 
-export const MatchCard = memo(function MatchCard({
-  title,
-  subtitle,
-  meta,
-  note,
-  badge,
-  onPress,
-}: {
-  title: string;
-  subtitle: string;
-  meta?: string;
-  note?: string;
-  badge?: string;
-  onPress?: () => void;
-}) {
-  const { rowDirection, writingDirection } = useLayoutDirection();
-  const accessibilityLabel = buildCardAccessibilityLabel([
-    title,
-    badge,
-    subtitle,
-    meta,
-    note,
-  ]);
+export { FigmaMatchCard as MatchCard } from "./match/FigmaMatchCard";
+export type { MatchCardProps } from "./match/FigmaMatchCard";
 
-  const content = (
-    <>
-      <View style={styles.matchCardBody}>
-        <AppText
-          style={[styles.matchCardTitle, { writingDirection }]}
-          maxLines={1}
-        >
-          {title}
-        </AppText>
-        {badge ? (
-          <AppText style={styles.matchCardBadge} maxLines={1}>
-            {badge}
-          </AppText>
-        ) : null}
-        <AppText
-          style={[styles.matchCardSubtitle, { writingDirection }]}
-          maxLines={2}
-        >
-          {subtitle}
-        </AppText>
-        {meta ? (
-          <AppText
-            style={[styles.matchCardMeta, { writingDirection }]}
-            maxLines={2}
-          >
-            {meta}
-          </AppText>
-        ) : null}
-        {note ? (
-          <AppText
-            style={[styles.matchCardNote, { writingDirection }]}
-            maxLines={2}
-          >
-            {note}
-          </AppText>
-        ) : null}
-      </View>
-      {onPress ? <Icon name="chevron" size={20} /> : null}
-    </>
-  );
-
-  if (!onPress) {
-    return (
-      <View style={[styles.matchCard, { flexDirection: rowDirection }]}>
-        {content}
-      </View>
-    );
-  }
-
+export function ListSkeleton({ rows = 3 }: { rows?: number }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.matchCard,
-        { flexDirection: rowDirection },
-        pressed && styles.playerCardPressed,
-      ]}
-    >
-      {content}
-    </Pressable>
+    <View style={styles.skeletonList}>
+      {Array.from({ length: rows }, (_, index) => (
+        <View key={index} style={styles.skeletonCard} />
+      ))}
+    </View>
   );
-});
+}
 
 export function EmptyState({
   icon,
@@ -873,25 +805,39 @@ export function StatusBanner({
   title,
   body,
   actions,
+  tone = "info",
 }: {
   title?: string;
   body: string;
   actions?: ReactNode;
+  tone?: SemanticTone;
 }) {
   const { writingDirection } = useLayoutDirection();
+  const palette = tennisSemantic[tone];
 
   return (
-    <View style={styles.statusBanner}>
+    <View
+      style={[
+        styles.statusBanner,
+        { backgroundColor: palette.fill, borderColor: palette.border },
+      ]}
+    >
       {title ? (
         <AppText
-          style={[styles.statusBannerTitle, { writingDirection }]}
+          style={[
+            styles.statusBannerTitle,
+            { color: palette.text, writingDirection },
+          ]}
           maxLines={2}
         >
           {title}
         </AppText>
       ) : null}
       <AppText
-        style={[styles.statusBannerBody, { writingDirection }]}
+        style={[
+          styles.statusBannerBody,
+          { color: palette.text, writingDirection },
+        ]}
         maxLines={4}
       >
         {body}
@@ -956,16 +902,10 @@ const styles = StyleSheet.create({
   wizardSegmentActive: {
     backgroundColor: tennisColors.primary,
   },
-  sectionTitle: { gap: spacing.xs },
   sectionTitleText: {
     color: colors.neutral[900],
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
-  },
-  sectionSubtitle: {
-    color: colors.neutral[700],
-    fontSize: typography.size.sm,
-    lineHeight: 20,
   },
   chipSection: { gap: spacing.sm },
   chipSectionLabel: {
@@ -1116,6 +1056,10 @@ const styles = StyleSheet.create({
     borderColor: tennisColors.border,
   },
   matchCardBody: { flex: 1, gap: spacing.xs, minWidth: 0 },
+  matchCardBadgeRow: {
+    flexWrap: "wrap",
+    gap: spacing.xs,
+  },
   matchCardTitle: {
     color: colors.neutral[500],
     fontSize: typography.size.sm,
@@ -1170,6 +1114,14 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: spacing.md,
     gap: spacing.sm,
+  },
+  skeletonList: {
+    gap: spacing.md,
+  },
+  skeletonCard: {
+    height: 88,
+    borderRadius: radii.lg,
+    backgroundColor: tennisColors.muted,
   },
   toolbar: {
     flexDirection: "row",
@@ -1294,15 +1246,14 @@ const styles = StyleSheet.create({
     borderColor: tennisColors.border,
   },
   statusBannerTitle: {
-    color: tennisColors.primaryDark,
     fontSize: typography.size.md,
     fontFamily: tennisFontFamily.headingSemi,
   },
   statusBannerBody: {
-    color: tennisColors.mutedForeground,
     fontSize: typography.size.sm,
     lineHeight: 20,
     fontFamily: tennisFontFamily.body,
+    opacity: 0.92,
   },
   statusBannerActions: { gap: spacing.sm, marginTop: spacing.xs },
   formSection: {

@@ -5,13 +5,20 @@ import { initReactI18next } from "react-i18next";
 import {
   DEFAULT_LOCALE,
   isPilotLocale,
+  isSupportedLocale,
+  LOCALE_BUNDLE_ID,
   resources,
   type PilotLocale,
+  type SupportedLocale,
 } from "@tennis-lebanon/i18n";
+import { syncNativeLayoutDirection } from "./layout-rtl";
 
 const LOCALE_STORAGE_KEY = "tennis-lebanon.locale";
 
 const i18next = createInstance();
+
+// Tie mobile bundle to locale JSON so Metro reloads workspace i18n edits.
+void LOCALE_BUNDLE_ID;
 
 i18next.use(initReactI18next).init({
   resources,
@@ -38,6 +45,7 @@ async function readStoredLocale(): Promise<string | null> {
  */
 export async function persistLocale(locale: PilotLocale): Promise<void> {
   await i18next.changeLanguage(locale);
+  await syncNativeLayoutDirection(locale);
   try {
     if (Platform.OS === "web") {
       globalThis.localStorage?.setItem(LOCALE_STORAGE_KEY, locale);
@@ -58,6 +66,10 @@ export const localeReady: Promise<void> = (async () => {
   const stored = await readStoredLocale();
   if (stored && isPilotLocale(stored) && stored !== i18next.language) {
     await i18next.changeLanguage(stored);
+  }
+  const active = i18next.language;
+  if (isSupportedLocale(active)) {
+    await syncNativeLayoutDirection(active);
   }
 })();
 

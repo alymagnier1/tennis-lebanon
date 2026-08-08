@@ -5,19 +5,18 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { rescheduleMatchTime } from "@tennis-lebanon/api";
 import {
-  FormField,
+  addMinutes,
+  dayKey,
+  SlotPicker,
+  type DurationMinutes,
+} from "../../../src/components/SlotPicker";
+import {
   PrimaryButton,
   Screen,
   SecondaryButton,
 } from "../../../src/components/FormUi";
 import { beirutLocalToUtcIso } from "../../../src/lib/beirut-time";
 import { supabase } from "../../../src/lib/supabase";
-
-function defaultDate(): string {
-  const date = new Date();
-  date.setDate(date.getDate() + 3);
-  return date.toISOString().slice(0, 10);
-}
 
 /**
  * Fixed matches agree their time up front, so renegotiation happens in chat
@@ -27,17 +26,17 @@ export default function RescheduleMatchScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [date, setDate] = useState(defaultDate());
+  const [day, setDay] = useState(dayKey(3));
   const [startTime, setStartTime] = useState("18:00");
-  const [endTime, setEndTime] = useState("19:30");
+  const [duration, setDuration] = useState<DurationMinutes>(90);
 
   const rescheduleMutation = useMutation({
     mutationFn: () =>
       rescheduleMatchTime(
         supabase,
         id!,
-        beirutLocalToUtcIso(date, startTime),
-        beirutLocalToUtcIso(date, endTime),
+        beirutLocalToUtcIso(day, startTime),
+        beirutLocalToUtcIso(day, addMinutes(startTime, duration)),
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
@@ -59,20 +58,13 @@ export default function RescheduleMatchScreen() {
       title={t("matches.hub.rescheduleTitle")}
       description={t("matches.hub.rescheduleDescription")}
     >
-      <FormField
-        label={t("availability.date")}
-        value={date}
-        onChangeText={setDate}
-      />
-      <FormField
-        label={t("availability.startTime")}
-        value={startTime}
-        onChangeText={setStartTime}
-      />
-      <FormField
-        label={t("availability.endTime")}
-        value={endTime}
-        onChangeText={setEndTime}
+      <SlotPicker
+        selectedDay={day}
+        onSelectDay={setDay}
+        selectedTime={startTime}
+        onSelectTime={setStartTime}
+        duration={duration}
+        onSelectDuration={setDuration}
       />
 
       <PrimaryButton
@@ -80,7 +72,10 @@ export default function RescheduleMatchScreen() {
         loading={rescheduleMutation.isPending}
         onPress={() => rescheduleMutation.mutate()}
       />
-      <SecondaryButton label={t("common.back")} onPress={() => router.back()} />
+      <SecondaryButton
+        label={t("common.cancel")}
+        onPress={() => router.back()}
+      />
     </Screen>
   );
 }

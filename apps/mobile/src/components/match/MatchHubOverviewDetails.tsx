@@ -1,9 +1,11 @@
 import { StyleSheet, View } from "react-native";
 import type { MatchHubCard } from "@tennis-lebanon/api";
 import { useTranslation } from "react-i18next";
-import { SplitSection } from "../TabSectionSplitter";
 import { AppText } from "../AppText";
+import { Avatar } from "../AppUi";
+import { SemanticBadge } from "../SemanticBadge";
 import { useLayoutDirection } from "../../lib/layout-direction";
+import { toneForMatchStatus } from "../../lib/match-status-tone";
 import {
   matchHubJoinSummary,
   matchHubLevelSummary,
@@ -18,6 +20,7 @@ type HubParticipant = {
   display_name: string;
   status: string;
   is_creator?: boolean;
+  avatar_path?: string | null;
 };
 
 export function MatchHubOverviewDetails({
@@ -33,31 +36,59 @@ export function MatchHubOverviewDetails({
   const zoneLabels = zoneLabelFromList(hub.zones, locale);
   const clubLabels = clubLabelFromList(hub.preferred_clubs);
 
+  const detailChips = [
+    t(`formats.${hub.format}`),
+    t(`playIntent.${hub.intent}`),
+    matchHubLevelSummary(hub, t),
+    matchHubJoinSummary(hub, t),
+    zoneLabels,
+    clubLabels,
+  ].filter(Boolean);
+
   return (
     <View style={styles.root}>
-      <View style={styles.statusPill}>
-        <AppText style={styles.statusPillText} maxLines={1}>
-          {t(`matches.status.${hub.status}`)} ·{" "}
-          {t("matches.hub.participantRoster", {
+      <View style={[styles.badgeRow, { flexDirection: rowDirection }]}>
+        <SemanticBadge
+          label={t(`matches.status.${hub.status}`)}
+          tone={toneForMatchStatus(hub.status)}
+        />
+        <SemanticBadge
+          label={t("matches.hub.participantRoster", {
             current: hub.participant_count,
             capacity: hub.capacity,
           })}
-        </AppText>
+          tone="neutral"
+        />
       </View>
 
+      {detailChips.length > 0 ? (
+        <View style={[styles.chipRow, { flexDirection: rowDirection }]}>
+          {detailChips.map((chip) => (
+            <View key={chip} style={styles.detailChip}>
+              <AppText style={styles.detailChipText} maxLines={2}>
+                {chip}
+              </AppText>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
       {participants.length > 0 ? (
-        <SplitSection label={t("matches.hub.participants")} showDivider={false}>
+        <View style={styles.participantBlock}>
+          <AppText style={styles.sectionLabel}>
+            {t("matches.hub.participants")}
+          </AppText>
           <View style={styles.participantList}>
             {participants.map((participant) => (
               <View
                 key={participant.user_id}
                 style={[styles.participantRow, { flexDirection: rowDirection }]}
               >
-                <View style={styles.participantAvatar}>
-                  <AppText style={styles.participantInitials} maxLines={1}>
-                    {participant.display_name.slice(0, 2).toUpperCase()}
-                  </AppText>
-                </View>
+                <Avatar
+                  name={participant.display_name}
+                  avatarPath={participant.avatar_path}
+                  size={40}
+                />
                 <View style={styles.participantText}>
                   <AppText
                     style={[styles.participantName, { writingDirection }]}
@@ -82,82 +113,59 @@ export function MatchHubOverviewDetails({
               </View>
             ))}
           </View>
-        </SplitSection>
-      ) : null}
-
-      <SplitSection
-        label={t("discover.formatFilter")}
-        showDivider={participants.length > 0}
-      >
-        <HubDetailValue value={t(`formats.${hub.format}`)} />
-      </SplitSection>
-
-      <SplitSection label={t("discover.intentFilter")}>
-        <HubDetailValue value={t(`playIntent.${hub.intent}`)} />
-      </SplitSection>
-
-      <SplitSection label={t("matches.create.matchLevel")}>
-        <HubDetailValue value={matchHubLevelSummary(hub, t)} />
-      </SplitSection>
-
-      <SplitSection label={t("matches.create.joinSettingsSection")}>
-        <HubDetailValue value={matchHubJoinSummary(hub, t)} />
-      </SplitSection>
-
-      {zoneLabels ? (
-        <SplitSection label={t("discover.zonesFilter")}>
-          <HubDetailValue value={zoneLabels} />
-        </SplitSection>
-      ) : null}
-
-      {clubLabels ? (
-        <SplitSection label={t("matches.create.preferredClubsTitle")}>
-          <HubDetailValue value={clubLabels} />
-          <AppText style={[styles.clubsNote, { writingDirection }]}>
-            {t("matches.hub.preferredClubsNote")}
-          </AppText>
-        </SplitSection>
+        </View>
       ) : null}
 
       {hub.notes ? (
-        <SplitSection label={t("matches.create.notes")}>
+        <View style={styles.notesBlock}>
+          <AppText style={styles.sectionLabel}>
+            {t("matches.create.notes")}
+          </AppText>
           <AppText style={[styles.notes, { writingDirection }]}>
             {hub.notes}
           </AppText>
-        </SplitSection>
+        </View>
       ) : null}
-    </View>
-  );
-}
-
-function HubDetailValue({ value }: { value: string }) {
-  const { writingDirection } = useLayoutDirection();
-
-  return (
-    <View style={styles.valueCard}>
-      <AppText style={[styles.valueText, { writingDirection }]} maxLines={4}>
-        {value}
-      </AppText>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
-    gap: 4,
+    gap: 14,
   },
-  statusPill: {
-    alignSelf: "flex-start",
+  badgeRow: {
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  chipRow: {
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  detailChip: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderRadius: tennisRadii.pill,
-    backgroundColor: tennisColors.secondary,
-    marginBottom: 4,
+    backgroundColor: tennisColors.muted,
+    borderWidth: 1,
+    borderColor: tennisColors.border,
+    maxWidth: "100%",
   },
-  statusPillText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 12,
+  detailChipText: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 13,
     color: tennisColors.primaryDark,
+  },
+  sectionLabel: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 13,
+    color: tennisColors.mutedForeground,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+    marginBottom: 8,
+  },
+  participantBlock: {
+    gap: 4,
   },
   participantList: {
     gap: 10,
@@ -194,30 +202,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: tennisColors.mutedForeground,
   },
-  valueCard: {
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.card,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  valueText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
+  notesBlock: {
+    gap: 4,
   },
   notes: {
     fontFamily: tennisFontFamily.body,
     fontSize: 14,
     lineHeight: 20,
     color: tennisColors.primaryDark,
-  },
-  clubsNote: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    lineHeight: 17,
-    color: tennisColors.mutedForeground,
-    marginTop: 4,
   },
 });

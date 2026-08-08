@@ -1,43 +1,19 @@
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
 import type { ProposedTimeInput } from "@tennis-lebanon/domain";
 import {
-  DEFAULT_LEVEL_WINDOW,
-  ORDERED_SKILL_BANDS,
   playIntentSchema,
-  skillBandRank,
+  preferredFormatForPlayer,
   skillBandSchema,
+  skillBandsForPlayer,
   skillRangeFromSelection,
   visibilityFromListOnDiscover,
   type PlayIntent,
-  type SkillBand,
 } from "@tennis-lebanon/domain";
 import type { Draft } from "./create-match-draft";
 
 type PlayerZone = {
   id?: string;
 };
-
-export function preferredFormatForPlayer(
-  player: Pick<CompatiblePlayerCard, "prefers_singles" | "prefers_doubles">,
-): "singles" | "doubles" {
-  if (player.prefers_singles && !player.prefers_doubles) {
-    return "singles";
-  }
-  if (player.prefers_doubles && !player.prefers_singles) {
-    return "doubles";
-  }
-  return "singles";
-}
-
-export function skillBandsForPlayer(
-  band: SkillBand,
-  levelWindow = DEFAULT_LEVEL_WINDOW,
-): SkillBand[] {
-  const targetRank = skillBandRank(band);
-  return ORDERED_SKILL_BANDS.filter((candidate) => {
-    return Math.abs(skillBandRank(candidate) - targetRank) <= levelWindow;
-  });
-}
 
 export function zoneIdsFromPlayerZones(zones: unknown): string[] {
   if (!Array.isArray(zones)) {

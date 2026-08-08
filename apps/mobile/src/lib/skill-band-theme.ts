@@ -1,12 +1,5 @@
 import { SKILL_BAND_RANK, type SkillBand } from "@tennis-lebanon/domain";
-
-export const SKILL_BAND_COLORS: Record<SkillBand, string> = {
-  beginner: "#16a34a",
-  improving: "#2563eb",
-  intermediate: "#6366f1",
-  advanced: "#9333ea",
-  competitive: "#dc2626",
-};
+import { tennisColors, tennisSkillBands } from "../theme/tennis-tokens";
 
 export function skillBandProgress(skillBand: string): number {
   const rank = SKILL_BAND_RANK[skillBand as SkillBand];
@@ -16,6 +9,16 @@ export function skillBandProgress(skillBand: string): number {
 
 export function skillBandColor(skillBand: string): string {
   return (
-    SKILL_BAND_COLORS[skillBand as SkillBand] ?? SKILL_BAND_COLORS.intermediate
+    tennisSkillBands[skillBand]?.text ??
+    tennisSkillBands.intermediate?.text ??
+    tennisColors.primary
+  );
+}
+
+export function skillBandFill(skillBand: string): string {
+  return (
+    tennisSkillBands[skillBand]?.fill ??
+    tennisSkillBands.intermediate?.fill ??
+    "#C8E63B"
   );
 }

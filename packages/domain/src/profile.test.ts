@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  updatePreferredZonesSchema,
-  updateTennisPreferencesSchema,
-} from "./profile";
+import { updatePreferredZonesSchema } from "./profile";
 
 describe("updatePreferredZonesSchema", () => {
   it("accepts one or more unique zone ids", () => {
@@ -34,27 +31,5 @@ describe("updatePreferredZonesSchema", () => {
     if (result.success) {
       expect(result.data.zoneIds).toEqual([zoneId]);
     }
-  });
-});
-
-describe("updateTennisPreferencesSchema", () => {
-  it("accepts valid intent and format preferences", () => {
-    const result = updateTennisPreferencesSchema.safeParse({
-      playIntent: "social",
-      prefersSingles: true,
-      prefersDoubles: false,
-    });
-
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects when neither singles nor doubles is selected", () => {
-    const result = updateTennisPreferencesSchema.safeParse({
-      playIntent: "either",
-      prefersSingles: false,
-      prefersDoubles: false,
-    });
-
-    expect(result.success).toBe(false);
   });
 });

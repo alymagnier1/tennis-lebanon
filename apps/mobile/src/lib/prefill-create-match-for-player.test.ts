@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
 import {
-  overlapProposedTimeForPlayer,
-  prefillCreateMatchDraftForPlayer,
   preferredFormatForPlayer,
   skillBandsForPlayer,
+} from "@tennis-lebanon/domain";
+import {
+  overlapProposedTimeForPlayer,
+  prefillCreateMatchDraftForPlayer,
   zoneIdsFromPlayerZones,
 } from "./prefill-create-match-for-player";
 
@@ -40,6 +42,7 @@ function samplePlayer(
         ends_at: "2026-08-02T16:30:00.000Z",
       },
     ],
+    favorite_clubs: [],
     ...overrides,
   };
 }

@@ -29,6 +29,7 @@ import { PlayerCard, PlayerInviteAction } from "../../../src/components/AppUi";
 import { AppText } from "../../../src/components/AppText";
 import {
   PrimaryButton,
+  ScreenError,
   SecondaryButton,
   formStyles,
 } from "../../../src/components/FormUi";
@@ -223,7 +224,7 @@ export default function MatchInvitePlayersScreen() {
     if (playersQuery.isLoading) {
       return (
         <ActivityIndicator
-          accessibilityLabel={t("discover.loading")}
+          accessibilityLabel={t("common.loading")}
           style={styles.listLoader}
         />
       );
@@ -274,9 +275,15 @@ export default function MatchInvitePlayersScreen() {
           { paddingTop: insets.top, paddingHorizontal: screenPadding },
         ]}
       >
-        <AppText style={formStyles.errorText}>
-          {t("matches.hub.loadError")}
-        </AppText>
+        <SecondaryButton
+          label={t("common.back")}
+          onPress={() => router.back()}
+        />
+        <ScreenError
+          message={t("matches.hub.loadError")}
+          retryLabel={t("common.retry")}
+          onRetry={() => void hubQuery.refetch()}
+        />
       </View>
     );
   }
@@ -290,7 +297,7 @@ export default function MatchInvitePlayersScreen() {
           { paddingTop: insets.top, paddingHorizontal: screenPadding },
         ]}
       >
-        <ActivityIndicator accessibilityLabel={t("discover.loading")} />
+        <ActivityIndicator accessibilityLabel={t("common.loading")} />
       </View>
     );
   }

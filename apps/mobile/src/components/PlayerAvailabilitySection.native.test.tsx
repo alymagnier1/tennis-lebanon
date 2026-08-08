@@ -40,12 +40,17 @@ function player(): CompatiblePlayerCard {
     availability_day_parts: [],
     near_term_slots: [],
     near_term_overlap_slots: [],
+    favorite_clubs: [],
   };
 }
 
 const summary: PublicPlayerAvailabilitySummary = {
   weekdays: [5, 6],
   day_parts: ["morning", "evening"],
+  by_weekday: [
+    { weekday: 5, day_parts: ["evening"] },
+    { weekday: 6, day_parts: ["morning", "evening"] },
+  ],
 };
 
 describe("player profile availability lines", () => {
@@ -58,6 +63,8 @@ describe("player profile availability lines", () => {
     // section got past its own empty state.
     expect(view.getByText("Fri")).toBeTruthy();
     expect(view.getByText("Sat")).toBeTruthy();
+    expect(view.getByText("Evening")).toBeTruthy();
+    expect(view.getByText("Morning and Evening")).toBeTruthy();
   });
 
   it("uses icons rather than emoji", async () => {

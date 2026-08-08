@@ -133,7 +133,7 @@ export default function ClubDetailScreen() {
       onRefresh={() => void clubQuery.refetch()}
     >
       {clubQuery.isLoading ? (
-        <ActivityIndicator accessibilityLabel={t("discover.loading")} />
+        <ActivityIndicator accessibilityLabel={t("common.loading")} />
       ) : null}
 
       {clubQuery.isError ? (

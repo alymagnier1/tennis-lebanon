@@ -1,29 +1,40 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { listMyMatches, type MyMatchRow } from "@tennis-lebanon/api";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "./AppText";
 import { Icon, type IconName } from "./Icon";
-import { tennisColors } from "../theme/tennis-tokens";
+import { openCreateMatchFlow } from "../lib/create-match-guard";
+import {
+  TAB_BAR_BOTTOM_PADDING_MIN,
+  TAB_BAR_ICON_WELL_HEIGHT,
+  TAB_BAR_LABEL_GAP,
+  TAB_BAR_LABEL_HEIGHT,
+  TAB_BAR_TOP_PADDING,
+} from "../lib/tab-bar-metrics";
+import { supabase } from "../lib/supabase";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
+import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 
 const TAB_ICONS: Record<string, IconName> = {
   index: "home",
   discover: "discover",
   matches: "matches",
-  clubs: "clubs",
   profile: "profile",
 };
 
+const HIDDEN_TAB_ROUTES = new Set(["create", "settings", "clubs"]);
+
+const TAB_ICON_SIZE = 26;
+const FAB_SIZE = 60;
+const FAB_RADIUS = 20;
+const FAB_LIFT = 30;
+const FAB_ICON_SIZE = 28;
+
 type TabRoute = { key: string; name: string };
 
-/**
- * Typed structurally rather than against `BottomTabBarProps`.
- *
- * expo-router bundles its own copy of react-navigation, so declaring
- * `@react-navigation/bottom-tabs` as a direct dependency puts a second copy in
- * the tree whose types no longer match what `Tabs` actually passes — and two
- * navigation packages is a runtime hazard, not just a typing one. This
- * describes only the slice the tab bar uses.
- */
 export type TennisTabBarProps = {
   state: { index: number; routes: TabRoute[] };
   descriptors: Record<
@@ -45,87 +56,202 @@ export function TennisTabBar({
   descriptors,
   navigation,
 }: TennisTabBarProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+  const [openingCreate, setOpeningCreate] = useState(false);
+  useQuery({
+    queryKey: ["my-matches"],
+    queryFn: () => listMyMatches(supabase),
+  });
+
+  async function handleCreatePress() {
+    if (openingCreate) return;
+    setOpeningCreate(true);
+
+    let matches: MyMatchRow[] | undefined;
+    try {
+      matches = await queryClient.fetchQuery({
+        queryKey: ["my-matches"],
+        queryFn: () => listMyMatches(supabase),
+      });
+    } catch {
+      // The duplicate-listing check is a convenience; the database still
+      // rejects a second active listing on publish. Falling back to whatever
+      // is cached keeps the button from doing nothing at all, which is how a
+      // failed fetch used to surface.
+      matches = queryClient.getQueryData<MyMatchRow[]>(["my-matches"]);
+    } finally {
+      setOpeningCreate(false);
+    }
+
+    openCreateMatchFlow(matches, t);
+  }
+
+  const visibleRoutes = state.routes.filter(
+    (route) => !HIDDEN_TAB_ROUTES.has(route.name),
+  );
+
+  const leftRoutes = visibleRoutes.filter((route) =>
+    ["index", "discover"].includes(route.name),
+  );
+  const rightRoutes = visibleRoutes.filter((route) =>
+    ["matches", "profile"].includes(route.name),
+  );
+
+  function renderTab(route: TabRoute) {
+    const routeIndex = state.routes.findIndex(
+      (entry) => entry.key === route.key,
+    );
+    const { options } = descriptors[route.key]!;
+    const label =
+      typeof options.tabBarLabel === "string"
+        ? options.tabBarLabel
+        : typeof options.title === "string"
+          ? options.title
+          : route.name;
+    const isFocused = state.index === routeIndex;
+    const iconName = TAB_ICONS[route.name] ?? "home";
+    const iconColor = isFocused
+      ? tennisColors.primary
+      : tennisColors.mutedForeground;
+
+    return (
+      <Pressable
+        key={route.key}
+        accessibilityRole="button"
+        accessibilityState={isFocused ? { selected: true } : {}}
+        accessibilityLabel={label}
+        onPress={() => {
+          const event = navigation.emit({
+            type: "tabPress",
+            target: route.key,
+            canPreventDefault: true,
+          });
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        }}
+        style={styles.tab}
+      >
+        <View
+          style={[styles.iconWell, isFocused && styles.iconWellActive]}
+        >
+          <Icon name={iconName} size={TAB_ICON_SIZE} color={iconColor} />
+        </View>
+        <AppText
+          style={[styles.label, isFocused && styles.labelActive]}
+          maxLines={1}
+        >
+          {label}
+        </AppText>
+      </Pressable>
+    );
+  }
 
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
-      {state.routes.map((route: TabRoute, index: number) => {
-        if (route.name === "create" || route.name === "settings") {
-          return null;
-        }
+    <View
+      style={[
+        styles.bar,
+        { paddingBottom: Math.max(insets.bottom, TAB_BAR_BOTTOM_PADDING_MIN) },
+      ]}
+    >
+      <View style={styles.barRow}>
+        {leftRoutes.map(renderTab)}
 
-        const { options } = descriptors[route.key]!;
-        const label =
-          typeof options.tabBarLabel === "string"
-            ? options.tabBarLabel
-            : typeof options.title === "string"
-              ? options.title
-              : route.name;
-        const isFocused = state.index === index;
-        const iconName = TAB_ICONS[route.name] ?? "home";
-
-        return (
+        <View style={styles.fabSlot}>
           <Pressable
-            key={route.key}
             accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={label}
-            onPress={() => {
-              const event = navigation.emit({
-                type: "tabPress",
-                target: route.key,
-                canPreventDefault: true,
-              });
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
-              }
-            }}
-            style={styles.tab}
+            accessibilityLabel={t("matches.create.cta")}
+            testID="tab-create-match"
+            onPress={() => void handleCreatePress()}
+            style={({ pressed }) => [
+              styles.fab,
+              pressed && styles.fabPressed,
+            ]}
           >
-            <Icon
-              name={iconName}
-              size={22}
-              color={
-                isFocused ? tennisColors.primary : tennisColors.mutedForeground
-              }
-            />
-            <AppText
-              style={[styles.label, isFocused && styles.labelActive]}
-              maxLines={1}
-            >
-              {label}
-            </AppText>
+            {openingCreate ? (
+              <ActivityIndicator color={tennisColors.white} />
+            ) : (
+              <Icon name="add" size={FAB_ICON_SIZE} color={tennisColors.white} />
+            )}
           </Pressable>
-        );
-      })}
+        </View>
+
+        {rightRoutes.map(renderTab)}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   bar: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-around",
-    backgroundColor: tennisColors.card,
+    backgroundColor: tennisColors.background,
     borderTopWidth: 1,
     borderTopColor: tennisColors.border,
-    paddingTop: 8,
+    paddingTop: TAB_BAR_TOP_PADDING,
+    minHeight: 88,
+    shadowColor: tennisColors.primaryDark,
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 12,
+    overflow: "visible",
+  },
+  barRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    overflow: "visible",
   },
   tab: {
     flex: 1,
     alignItems: "center",
+    gap: TAB_BAR_LABEL_GAP,
+    paddingTop: 0,
+  },
+  iconWell: {
+    width: 48,
+    height: TAB_BAR_ICON_WELL_HEIGHT,
+    borderRadius: tennisRadii.md,
+    alignItems: "center",
     justifyContent: "center",
-    gap: 2,
-    minHeight: 48,
+  },
+  iconWellActive: {
+    backgroundColor: tennisColors.secondary,
   },
   label: {
     fontSize: 11,
+    lineHeight: TAB_BAR_LABEL_HEIGHT,
     fontFamily: tennisFontFamily.body,
     color: tennisColors.mutedForeground,
   },
   labelActive: {
     color: tennisColors.primary,
     fontFamily: tennisFontFamily.bodySemi,
+  },
+  fabSlot: {
+    flex: 1,
+    alignItems: "center",
+    overflow: "visible",
+  },
+  fab: {
+    width: FAB_SIZE,
+    height: FAB_SIZE,
+    marginTop: -FAB_LIFT,
+    borderRadius: FAB_RADIUS,
+    borderWidth: 3,
+    borderColor: tennisColors.background,
+    backgroundColor: tennisColors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: tennisColors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  fabPressed: {
+    opacity: 0.92,
+    transform: [{ scale: 0.97 }],
   },
 });

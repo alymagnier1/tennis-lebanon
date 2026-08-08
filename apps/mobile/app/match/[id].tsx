@@ -1,11 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import {
   ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
   View,
-  type LayoutChangeEvent,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -18,7 +17,6 @@ import {
   joinMatch,
   leaveMatch,
   respondBookingAlternative,
-  reportMatchPlayed,
   respondToJoinRequest,
   withdrawMatchTimeOption,
   type MatchHubTimeOption,
@@ -31,7 +29,6 @@ import {
   canRespondToBookingAlternative,
   canShowJoinAction,
   canRescheduleMatch,
-  canReportMatchPlayed,
   canVoteOnTimes,
   isFixedTimingMode,
   canCreatorCancelMatch,
@@ -51,6 +48,7 @@ import {
   HubDestructiveLink,
   HubSummaryRow,
 } from "../../src/components/match/HubSummaryRow";
+import { MatchHubActionBar } from "../../src/components/match/MatchHubActionBar";
 import { MatchHubOverviewDetails } from "../../src/components/match/MatchHubOverviewDetails";
 import { MatchHubLayout } from "../../src/components/match/MatchHubLayout";
 import { PlayerProfileSection } from "../../src/components/player/PlayerProfileSection";
@@ -63,6 +61,10 @@ import { formatUtcSlotInBeirut } from "../../src/lib/beirut-time";
 import { confirmAction } from "../../src/lib/confirm-action";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitMatchHub } from "../../src/lib/navigation";
+import {
+  resolveHubPrimaryAction,
+  type HubPrimaryActionKind,
+} from "../../src/lib/hub-action-bar";
 import {
   matchBookExternalRoute,
   matchBookRoute,
@@ -94,26 +96,6 @@ export default function MatchHubScreen() {
   const { rowDirection, writingDirection } = useLayoutDirection();
   const { session } = useAuth();
   const queryClient = useQueryClient();
-  const scrollRef = useRef<ScrollView>(null);
-  const sectionOffsets = useRef<
-    Partial<Record<"overview" | "vote" | "chat" | "book", number>>
-  >({});
-  const [activeSection, setActiveSection] = useState<
-    "overview" | "vote" | "chat" | "book"
-  >("overview");
-
-  const sectionTabs = [
-    { value: "overview" as const, label: t("matches.hub.sections.overview") },
-    { value: "vote" as const, label: t("matches.hub.sections.vote") },
-    { value: "chat" as const, label: t("matches.hub.sections.chat") },
-    { value: "book" as const, label: t("matches.hub.sections.book") },
-  ];
-
-  function jumpToSection(section: "overview" | "vote" | "chat" | "book") {
-    setActiveSection(section);
-    const offset = sectionOffsets.current[section] ?? 0;
-    scrollRef.current?.scrollTo({ y: Math.max(offset - 8, 0), animated: true });
-  }
 
   const hubQuery = useQuery({
     queryKey: ["match-hub", id],
@@ -199,19 +181,6 @@ export default function MatchHubScreen() {
     onError: () => Alert.alert(t("matches.lifecycle.extendError")),
   });
 
-  const playedMutation = useMutation({
-    mutationFn: (played: boolean) => reportMatchPlayed(supabase, id!, played),
-    onSuccess: async (_data, played) => {
-      await invalidate();
-      Alert.alert(
-        played
-          ? t("matches.played.recordedPlayed")
-          : t("matches.played.recordedNotPlayed"),
-      );
-    },
-    onError: () => Alert.alert(t("matches.played.error")),
-  });
-
   const hub = hubQuery.data;
   const booking = hub?.booking ?? null;
   const participants =
@@ -242,16 +211,7 @@ export default function MatchHubScreen() {
       })
     : false;
 
-  const showPlayedPrompt = hub
-    ? canReportMatchPlayed({
-        viewerIsParticipant: hub.viewer_status === "accepted",
-        matchStatus: hub.status,
-        hasAcceptedBooking: hub.booking?.status === "accepted",
-        hasUpcomingTime: proposedTimes.length > 0,
-      })
-    : false;
-
-  const joinAction = useMemo(() => {
+  const viewerJoinAction = useMemo(() => {
     if (!hub) return "none";
     return canShowJoinAction({
       viewerStatus: hub.viewer_status,
@@ -315,6 +275,69 @@ export default function MatchHubScreen() {
   const showCancel =
     hub?.viewer_is_creator && canCreatorCancelMatch(hub.status);
 
+  const primaryActionKind = useMemo((): HubPrimaryActionKind => {
+    if (!hub) return "none";
+    return resolveHubPrimaryAction({
+      nextAction: hub.next_action,
+      joinAction: viewerJoinAction,
+      showRequestCourt,
+      showConfirmExternalCourt,
+      isDraftCreator: hub.status === "draft" && hub.viewer_is_creator,
+    });
+  }, [hub, viewerJoinAction, showConfirmExternalCourt, showRequestCourt]);
+
+  function handlePrimaryAction() {
+    switch (primaryActionKind) {
+      case "join":
+      case "request_join":
+        joinMutation.mutate();
+        break;
+      case "invite":
+      case "continue_setup":
+        router.push(matchInviteRoute(id!));
+        break;
+      case "request_court":
+        router.push(matchBookRoute(id!));
+        break;
+      case "confirm_external_court":
+        router.push(matchBookExternalRoute(id!));
+        break;
+      default:
+        break;
+    }
+  }
+
+  const secondaryBannerBody = useMemo(() => {
+    if (!hub) return null;
+    const messages: string[] = [];
+    if (hub.next_action === "time_agreed") {
+      messages.push(t("matches.hub.timeAgreed"));
+    }
+    if (hub.next_action === "awaiting_club") {
+      messages.push(t("matches.hub.awaitingClub"));
+    }
+    if (hub.next_action === "pay_at_club") {
+      messages.push(t("matches.hub.payAtClub"));
+    }
+    if (hub.is_stale_warning) {
+      messages.push(t("matches.lifecycle.staleWarning"));
+    }
+    return messages.length > 0 ? messages.join("\n") : null;
+  }, [hub, t]);
+
+  const primaryBannerBody = useMemo(() => {
+    if (!hub) return null;
+    if (hub.status === "draft" && hub.viewer_is_creator) {
+      return t("matches.hub.draftBanner");
+    }
+    if (hub.next_action === "awaiting_players") {
+      return hasAcceptedBooking
+        ? t("matches.hub.awaitingPlayersCourtSecured")
+        : t("matches.hub.awaitingPlayers");
+    }
+    return null;
+  }, [hasAcceptedBooking, hub, t]);
+
   function renderTimeSlot(slot: MatchHubTimeOption) {
     const isAgreed = hub?.selected_time_option_id === slot.id;
     const unanimous = hasUnanimousTimeYes({
@@ -368,13 +391,17 @@ export default function MatchHubScreen() {
   const hubLayoutProps = {
     title: t("matches.hub.title"),
     subtitle: hub ? t(`matches.status.${hub.status}`) : undefined,
-    activeSection,
-    onSectionChange: jumpToSection,
     onBack: exitMatchHub,
     refreshing: hubQuery.isRefetching,
     onRefresh: () => void hubQuery.refetch(),
-    scrollRef,
-    sectionTabs,
+    footer:
+      hub && primaryActionKind !== "none" ? (
+        <MatchHubActionBar
+          actionKind={primaryActionKind}
+          loading={joinMutation.isPending}
+          onPress={handlePrimaryAction}
+        />
+      ) : null,
   };
 
   if (hubQuery.isLoading) {
@@ -382,7 +409,7 @@ export default function MatchHubScreen() {
       <MatchHubLayout {...hubLayoutProps}>
         <ActivityIndicator
           color={tennisColors.primary}
-          accessibilityLabel={t("discover.loading")}
+          accessibilityLabel={t("common.loading")}
         />
       </MatchHubLayout>
     );
@@ -394,68 +421,12 @@ export default function MatchHubScreen() {
         <ErrorNotice>{t("matches.hub.loadError")}</ErrorNotice>
       ) : null}
 
-      <View
-        onLayout={(event) => {
-          sectionOffsets.current.overview = event.nativeEvent.layout.y;
-        }}
-      />
-
-      {hub?.status === "draft" && hub.viewer_is_creator ? (
-        <StatusBanner
-          body={t("matches.hub.draftBanner")}
-          actions={
-            <FigmaPrimaryButton
-              label={t("matches.hub.continueSetup")}
-              onPress={() => router.push(matchInviteRoute(id!))}
-            />
-          }
-        />
+      {primaryBannerBody ? (
+        <StatusBanner body={primaryBannerBody} tone="actionable" />
       ) : null}
 
-      {hub?.next_action === "time_agreed" ? (
-        <StatusBanner body={t("matches.hub.timeAgreed")} />
-      ) : null}
-
-      {hub?.next_action === "awaiting_club" ? (
-        <StatusBanner body={t("matches.hub.awaitingClub")} />
-      ) : null}
-
-      {showPlayedPrompt ? (
-        <StatusBanner
-          body={t("matches.played.prompt")}
-          actions={
-            <View style={styles.bookingActions}>
-              <FigmaPrimaryButton
-                label={t("matches.played.yes")}
-                disabled={playedMutation.isPending}
-                onPress={() => playedMutation.mutate(true)}
-              />
-              <FigmaSecondaryButton
-                label={t("matches.played.no")}
-                disabled={playedMutation.isPending}
-                onPress={() => playedMutation.mutate(false)}
-              />
-            </View>
-          }
-        />
-      ) : null}
-
-      {hub?.next_action === "awaiting_players" ? (
-        <StatusBanner
-          body={
-            hasAcceptedBooking
-              ? t("matches.hub.awaitingPlayersCourtSecured")
-              : t("matches.hub.awaitingPlayers")
-          }
-        />
-      ) : null}
-
-      {hub?.next_action === "pay_at_club" ? (
-        <StatusBanner body={t("matches.hub.payAtClub")} />
-      ) : null}
-
-      {hub?.is_stale_warning ? (
-        <StatusBanner body={t("matches.lifecycle.staleWarning")} />
+      {secondaryBannerBody ? (
+        <StatusBanner body={secondaryBannerBody} tone="info" />
       ) : null}
 
       {hub?.can_extend_listing ? (
@@ -465,29 +436,6 @@ export default function MatchHubScreen() {
           onPress={() => extendMutation.mutate()}
         />
       ) : null}
-
-      {showRequestCourt || showConfirmExternalCourt ? (
-        <View style={styles.bookingActions}>
-          {showRequestCourt ? (
-            <FigmaPrimaryButton
-              label={t("matches.hub.requestCourt")}
-              onPress={() => router.push(matchBookRoute(id!))}
-            />
-          ) : null}
-          {showConfirmExternalCourt ? (
-            <FigmaSecondaryButton
-              label={t("matches.booking.bookedOffAppCta")}
-              onPress={() => router.push(matchBookExternalRoute(id!))}
-            />
-          ) : null}
-        </View>
-      ) : null}
-
-      <View
-        onLayout={(event) => {
-          sectionOffsets.current.book = event.nativeEvent.layout.y;
-        }}
-      />
 
       {booking ? (
         <PlayerProfileSection title={t("matches.hub.bookingTitle")}>
@@ -588,26 +536,6 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      <View
-        onLayout={(event) => {
-          sectionOffsets.current.vote = event.nativeEvent.layout.y;
-        }}
-      />
-
-      {agreedSlot ? (
-        <PlayerProfileSection title={t("matches.hub.agreedTime")}>
-          <AppText style={styles.timeLabel}>
-            {formatUtcSlotInBeirut(agreedSlot.starts_at, agreedSlot.ends_at)}
-          </AppText>
-          {showReschedule ? (
-            <FigmaSecondaryButton
-              label={t("matches.hub.reschedule")}
-              onPress={() => router.push(`/match/${id}/reschedule`)}
-            />
-          ) : null}
-        </PlayerProfileSection>
-      ) : null}
-
       {!isFixedTimingMode(hub?.timing_mode) && proposedTimes.length > 0 ? (
         <PlayerProfileSection title={t("matches.hub.proposedTimes")}>
           {showVoteUi ? (
@@ -663,20 +591,18 @@ export default function MatchHubScreen() {
         </PlayerProfileSection>
       ) : null}
 
-      {joinAction === "join" ? (
-        <FigmaPrimaryButton
-          label={t("matches.hub.join")}
-          loading={joinMutation.isPending}
-          onPress={() => joinMutation.mutate()}
-        />
-      ) : null}
-
-      {joinAction === "request" ? (
-        <FigmaPrimaryButton
-          label={t("matches.hub.requestJoin")}
-          loading={joinMutation.isPending}
-          onPress={() => joinMutation.mutate()}
-        />
+      {agreedSlot ? (
+        <PlayerProfileSection title={t("matches.hub.agreedTime")}>
+          <AppText style={styles.timeLabel}>
+            {formatUtcSlotInBeirut(agreedSlot.starts_at, agreedSlot.ends_at)}
+          </AppText>
+          {showReschedule ? (
+            <FigmaSecondaryButton
+              label={t("matches.hub.reschedule")}
+              onPress={() => router.push(`/match/${id}/reschedule`)}
+            />
+          ) : null}
+        </PlayerProfileSection>
       ) : null}
 
       {showWithdraw ? (
@@ -704,15 +630,10 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      <View
-        onLayout={(event) => {
-          sectionOffsets.current.chat = event.nativeEvent.layout.y;
-        }}
-      />
-
       <MatchChatPanel
         matchId={id!}
         enabled={hub?.viewer_status === "accepted"}
+        viewerUserId={session?.user.id}
       />
 
       {hub && session?.user.id ? (

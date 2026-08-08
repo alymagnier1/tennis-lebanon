@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -19,27 +18,34 @@ import {
 import { isProvisionalPlayerRating } from "@tennis-lebanon/domain";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
-import { MatchCard } from "../AppUi";
-import { FigmaPrimaryButton } from "../onboarding-ui";
-import { Icon } from "../Icon";
+import { ListSkeleton, MatchCard } from "../AppUi";
+import { HomeNextActionCard } from "./HomeNextActionCard";
+import { Icon, type IconName } from "../Icon";
 import { formatUtcInBeirut } from "../../lib/beirut-time";
+import {
+  buildMatchCardHeadline,
+  resolveMatchCardOpponent,
+} from "../../lib/match-card-headline";
+import { opponentAvatarColor } from "../../lib/match-card-status";
 import {
   deriveHomeNextActions,
   sortUpcomingMatches,
 } from "../../lib/home-next-actions";
-import { homeNextActionRoute, matchHubRoute } from "../../lib/routes";
-import { CREATE_MATCH_ROUTE } from "../../lib/routes";
+import { CLUBS_ROUTE, matchHubRoute } from "../../lib/routes";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../providers/AuthProvider";
 import {
   tennisColors,
   tennisRadii,
   tennisSpacing,
 } from "../../theme/tennis-tokens";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 export function HomeDashboard({ displayName }: { displayName: string }) {
   const { t } = useTranslation();
+  const { profile } = useAuth();
   const insets = useSafeAreaInsets();
   const { rowDirection, writingDirection } = useLayoutDirection();
 
@@ -64,11 +70,17 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
     queryFn: () => listUserNotifications(supabase, 20),
   });
 
-  const isLoading =
+  const bodyLoading =
     invitesQuery.isLoading ||
     matchesQuery.isLoading ||
     completedQuery.isLoading ||
     profileQuery.isLoading;
+
+  const bodyError =
+    invitesQuery.isError ||
+    matchesQuery.isError ||
+    completedQuery.isError ||
+    profileQuery.isError;
 
   const unreadCount =
     notificationsQuery.data?.filter((item) => !item.read_at).length ?? 0;
@@ -94,14 +106,6 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
     matchesQuery.isRefetching ||
     completedQuery.isRefetching;
 
-  if (isLoading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator color={tennisColors.lime} />
-      </View>
-    );
-  }
-
   return (
     <ScrollView
       style={styles.screen}
@@ -115,11 +119,13 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
     >
       <View style={[styles.hero, { paddingTop: insets.top + 16 }]}>
         <View style={[styles.heroTop, { flexDirection: rowDirection }]}>
-          <View style={styles.heroText}>
+          <View style={[styles.heroText, tennisTextStyles.titleSubtitleBlock]}>
             <AppText style={[styles.greeting, { writingDirection }]}>
               {t("home.greeting", { name: displayName })}
             </AppText>
-            <AppText style={[styles.heroSubtitle, { writingDirection }]}>
+            <AppText
+              style={[tennisTextStyles.pageSubtitleOnDark, { writingDirection }]}
+            >
               {t("home.subtitle")}
             </AppText>
           </View>
@@ -164,66 +170,146 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
       </View>
 
       <View style={styles.body}>
-        {nextActions.length > 0 ? (
+        {bodyError ? (
+          <View style={styles.errorCard}>
+            <AppText style={styles.errorText}>{t("home.loadError")}</AppText>
+            <Pressable
+              accessibilityRole="button"
+              onPress={refresh}
+              style={styles.retryButton}
+            >
+              <AppText style={styles.retryLabel}>{t("common.retry")}</AppText>
+            </Pressable>
+          </View>
+        ) : null}
+
+        {bodyLoading ? <ListSkeleton rows={3} /> : null}
+
+        {!bodyLoading && !bodyError && nextActions.length > 0 ? (
           <View style={styles.section}>
             <AppText style={styles.sectionTitle}>
               {t("home.nextActionsTitle")}
             </AppText>
             {nextActions.map((action) => (
-              <Pressable
-                key={action.id}
-                accessibilityRole="button"
-                onPress={() =>
-                  router.push(homeNextActionRoute(action.kind, action.matchId))
-                }
-                style={({ pressed }) => [
-                  styles.actionCard,
-                  pressed && styles.actionCardPressed,
-                ]}
-              >
-                <AppText style={styles.actionTitle}>
-                  {t(action.titleKey)}
-                </AppText>
-                <AppText style={styles.actionBody}>
-                  {t(action.bodyKey, action.bodyParams)}
-                </AppText>
-              </Pressable>
+              <HomeNextActionCard key={action.id} action={action} />
             ))}
           </View>
         ) : null}
 
-        <View style={styles.section}>
-          <AppText style={styles.sectionTitle}>
-            {t("home.upcomingTitle")}
-          </AppText>
-          {upcomingMatches.length === 0 ? (
-            <AppText style={styles.emptyText}>
-              {t("home.upcomingEmpty")}
+        {!bodyLoading && !bodyError ? (
+          <View style={styles.section}>
+            <AppText style={styles.sectionTitle}>
+              {t("home.quickActionsTitle")}
             </AppText>
-          ) : (
-            upcomingMatches.map((match) => (
-              <MatchCard
-                key={match.match_id}
-                title={`${t(`formats.${match.format}`)} · ${t(`matches.status.${match.status}`)}`}
-                subtitle={
-                  match.soonest_time
-                    ? formatUtcInBeirut(match.soonest_time)
-                    : t("home.noTimeYet")
-                }
-                meta={`${match.participant_count}/${match.capacity} ${t("home.players")}`}
-                badge={match.is_creator ? t("matches.list.creator") : undefined}
-                onPress={() => router.push(matchHubRoute(match.match_id))}
+            <View
+              style={[styles.quickActionsGrid, { flexDirection: rowDirection }]}
+            >
+              <QuickActionTile
+                label={t("home.quickActionFindPlayers")}
+                icon="discover"
+                backgroundColor="#7C3AED"
+                onPress={() => router.push("/(tabs)/discover")}
               />
-            ))
-          )}
-        </View>
+              <QuickActionTile
+                label={t("home.quickActionBookCourt")}
+                icon="clubs"
+                backgroundColor="#2563EB"
+                onPress={() => router.push(CLUBS_ROUTE)}
+              />
+            </View>
+          </View>
+        ) : null}
 
-        <FigmaPrimaryButton
-          label={t("matches.create.cta")}
-          onPress={() => router.push(CREATE_MATCH_ROUTE)}
-        />
+        {!bodyLoading && !bodyError ? (
+          <View style={styles.section}>
+            <AppText style={styles.sectionTitle}>
+              {t("home.upcomingTitle")}
+            </AppText>
+            {upcomingMatches.length === 0 ? (
+              <AppText style={styles.emptyText}>
+                {t("home.upcomingEmpty")}
+              </AppText>
+            ) : (
+              upcomingMatches.map((match) => {
+                const headlineInput = {
+                  opponentNames: match.opponent_names,
+                  status: match.status,
+                  participantCount: match.participant_count,
+                  capacity: match.capacity,
+                };
+                const opponent = resolveMatchCardOpponent(t, headlineInput);
+                const locationChip =
+                  match.club_name ??
+                  (match.has_court
+                    ? t("matches.list.courtSecuredBadge")
+                    : undefined);
+
+                return (
+                <MatchCard
+                  key={match.match_id}
+                  status={match.status}
+                  statusLabel={t(`matches.status.${match.status}`)}
+                  dateTimeLabel={
+                    match.soonest_time
+                      ? formatUtcInBeirut(match.soonest_time)
+                      : undefined
+                  }
+                  headline={buildMatchCardHeadline(t, headlineInput)}
+                  viewerName={displayName}
+                  viewerAvatarPath={profile?.avatar_path}
+                  opponentName={opponent}
+                  opponentAvatarColor={
+                    opponent ? opponentAvatarColor(opponent) : undefined
+                  }
+                  formatChip={t(`formats.${match.format}`)}
+                  locationChip={locationChip}
+                  badges={
+                    match.is_stale_warning
+                      ? [
+                          {
+                            label: t("matches.lifecycle.staleBadge"),
+                            tone: "attention" as const,
+                          },
+                        ]
+                      : undefined
+                  }
+                  onPress={() => router.push(matchHubRoute(match.match_id))}
+                />
+                );
+              })
+            )}
+          </View>
+        ) : null}
       </View>
     </ScrollView>
+  );
+}
+
+function QuickActionTile({
+  label,
+  icon,
+  backgroundColor,
+  onPress,
+}: {
+  label: string;
+  icon: IconName;
+  backgroundColor: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.quickActionTile,
+        { backgroundColor },
+        pressed && { opacity: 0.92 },
+      ]}
+    >
+      <Icon name={icon} size={24} color={tennisColors.white} />
+      <AppText style={styles.quickActionLabel}>{label}</AppText>
+    </Pressable>
   );
 }
 
@@ -234,12 +320,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-  },
-  loading: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: tennisColors.background,
   },
   hero: {
     backgroundColor: tennisColors.primary,
@@ -256,17 +336,11 @@ const styles = StyleSheet.create({
   },
   heroText: {
     flex: 1,
-    gap: 4,
   },
   greeting: {
     fontFamily: tennisFontFamily.headingExtra,
     fontSize: 28,
     color: tennisColors.white,
-  },
-  heroSubtitle: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 15,
-    color: "rgba(255,255,255,0.85)",
   },
   bellButton: {
     width: 44,
@@ -328,39 +402,60 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: tennisColors.primaryDark,
   },
-  actionCard: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.lg,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: tennisColors.border,
-    gap: 4,
-  },
-  actionCardPressed: {
-    opacity: 0.9,
-  },
-  actionTitle: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 16,
-    color: tennisColors.primaryDark,
-  },
-  actionBody: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.mutedForeground,
-  },
   emptyText: {
     fontFamily: tennisFontFamily.body,
     fontSize: 14,
     color: tennisColors.mutedForeground,
   },
-  refreshHint: {
-    marginTop: 8,
+  loadingBody: {
+    paddingVertical: 32,
+    alignItems: "center",
   },
-  refreshLink: {
-    textAlign: "center",
-    color: tennisColors.primary,
+  errorCard: {
+    gap: 12,
+    padding: 16,
+    borderRadius: tennisRadii.lg,
+    borderWidth: 1,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
+  },
+  errorText: {
     fontFamily: tennisFontFamily.body,
     fontSize: 14,
+    color: tennisColors.primaryDark,
+  },
+  retryButton: {
+    alignSelf: "flex-start",
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  retryLabel: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 15,
+    color: tennisColors.primary,
+  },
+  quickActionsGrid: {
+    gap: 10,
+  },
+  quickActionTile: {
+    flex: 1,
+    minHeight: 88,
+    borderRadius: tennisRadii.xl,
+    paddingHorizontal: 14,
+    paddingVertical: 16,
+    gap: 10,
+    justifyContent: "flex-end",
+    shadowColor: "#0D1117",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  quickActionLabel: {
+    fontFamily: tennisFontFamily.heading,
+    fontSize: 14,
+    color: tennisColors.white,
+    letterSpacing: -0.2,
   },
 });

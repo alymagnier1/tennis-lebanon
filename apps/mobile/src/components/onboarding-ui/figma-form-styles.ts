@@ -4,6 +4,7 @@ import {
   tennisColors,
   tennisRadii,
   tennisSpacing,
+  tennisTypography,
 } from "../../theme/tennis-tokens";
 
 /** Figma create-match / form field tokens (CreateTab + shared-ui). */
@@ -13,9 +14,10 @@ export const figmaFormStyles = StyleSheet.create({
   },
   fieldLabel: {
     fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
+    fontSize: tennisTypography.fieldLabel.fontSize,
+    lineHeight: tennisTypography.fieldLabel.lineHeight,
     color: tennisColors.mutedForeground,
-    marginBottom: 8,
+    marginBottom: tennisTypography.labelBodyGap,
   },
   chipRow: {
     flexDirection: "row",

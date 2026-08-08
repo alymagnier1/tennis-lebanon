@@ -3,6 +3,7 @@ import type { TFunction } from "i18next";
 import {
   formatAvailabilityDayPartsLabel,
   formatDiscoverPlayerAvailabilityLabel,
+  publicAvailabilityByWeekday,
   sortAvailabilityDayParts,
   weekdayShortLabels,
 } from "./public-availability-summary";
@@ -37,6 +38,35 @@ describe("public availability summary labels", () => {
 
   it("maps weekday numbers to short labels", () => {
     expect(weekdayShortLabels([4, 1], t)).toEqual(["1", "4"]);
+  });
+
+  it("returns per-weekday blocks from by_weekday", () => {
+    expect(
+      publicAvailabilityByWeekday({
+        weekdays: [2, 4],
+        day_parts: ["morning", "evening"],
+        by_weekday: [
+          { weekday: 4, day_parts: ["morning"] },
+          { weekday: 2, day_parts: ["evening"] },
+        ],
+      }),
+    ).toEqual([
+      { weekday: 2, day_parts: ["evening"] },
+      { weekday: 4, day_parts: ["morning"] },
+    ]);
+  });
+
+  it("falls back to shared day parts when by_weekday is empty", () => {
+    expect(
+      publicAvailabilityByWeekday({
+        weekdays: [5, 6],
+        day_parts: ["morning", "evening"],
+        by_weekday: [],
+      }),
+    ).toEqual([
+      { weekday: 5, day_parts: ["morning", "evening"] },
+      { weekday: 6, day_parts: ["morning", "evening"] },
+    ]);
   });
 });
 

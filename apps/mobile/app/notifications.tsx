@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,7 +10,10 @@ import {
 } from "@tennis-lebanon/api";
 import { isNotificationKind } from "@tennis-lebanon/domain";
 import { AppText } from "../src/components/AppText";
-import { Screen } from "../src/components/FormUi";
+import { Icon } from "../src/components/Icon";
+import { ListSkeleton } from "../src/components/AppUi";
+import { Screen, ScreenError } from "../src/components/FormUi";
+import { formatUtcInBeirut } from "../src/lib/beirut-time";
 import { resolveNotificationHref } from "../src/lib/notification-deep-link";
 import { supabase } from "../src/lib/supabase";
 import { tennisColors, tennisRadii } from "../src/theme/tennis-tokens";
@@ -37,6 +40,15 @@ function notificationCopy(
   return { title, body };
 }
 
+function notificationIcon(
+  kind: string,
+): "notifications" | "calendar" | "place" | "info" {
+  if (kind.includes("invite")) return "notifications";
+  if (kind.includes("vote") || kind.includes("time")) return "calendar";
+  if (kind.includes("booking") || kind.includes("court")) return "place";
+  return "info";
+}
+
 export default function NotificationsScreen() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -54,6 +66,16 @@ export default function NotificationsScreen() {
     },
   });
 
+  const markAllRead = useCallback(async () => {
+    const unread = (notificationsQuery.data ?? []).filter(
+      (row) => !row.read_at,
+    );
+    await Promise.all(
+      unread.map((row) => markNotificationRead(supabase, row.id)),
+    );
+    await queryClient.invalidateQueries({ queryKey: ["user-notifications"] });
+  }, [notificationsQuery.data, queryClient]);
+
   const openNotification = useCallback(
     async (row: UserNotificationRow) => {
       if (!row.read_at) {
@@ -68,27 +90,49 @@ export default function NotificationsScreen() {
     [markReadMutation],
   );
 
+  const rows = notificationsQuery.data ?? [];
+  const hasUnread = rows.some((row) => !row.read_at);
+
   return (
     <Screen
       title={t("notifications.centerTitle")}
       description={t("notifications.centerDescription")}
       refreshing={notificationsQuery.isRefetching}
       onRefresh={() => void notificationsQuery.refetch()}
+      fixedHeader={
+        hasUnread ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => void markAllRead()}
+            style={styles.markAll}
+          >
+            <AppText style={styles.markAllLabel}>
+              {t("notifications.markAllRead")}
+            </AppText>
+          </Pressable>
+        ) : null
+      }
     >
-      {notificationsQuery.isLoading ? (
-        <ActivityIndicator color={tennisColors.primary} />
-      ) : null}
+      {notificationsQuery.isLoading ? <ListSkeleton rows={5} /> : null}
 
       {notificationsQuery.isError ? (
-        <AppText style={styles.error}>{t("notifications.loadError")}</AppText>
-      ) : (notificationsQuery.data ?? []).length === 0 &&
-        !notificationsQuery.isLoading ? (
+        <ScreenError
+          message={t("notifications.loadError")}
+          retryLabel={t("common.retry")}
+          onRetry={() => void notificationsQuery.refetch()}
+        />
+      ) : null}
+
+      {!notificationsQuery.isLoading &&
+      !notificationsQuery.isError &&
+      rows.length === 0 ? (
         <AppText style={styles.empty}>{t("notifications.empty")}</AppText>
       ) : null}
 
       <View style={styles.list}>
-        {(notificationsQuery.data ?? []).map((row) => {
+        {rows.map((row) => {
           const copy = notificationCopy(row, t);
+          const timestamp = formatUtcInBeirut(row.sent_at ?? row.created_at);
           return (
             <Pressable
               key={row.id}
@@ -100,8 +144,18 @@ export default function NotificationsScreen() {
                 pressed && styles.rowPressed,
               ]}
             >
-              <AppText style={styles.rowTitle}>{copy.title}</AppText>
-              <AppText style={styles.rowBody}>{copy.body}</AppText>
+              <View style={styles.iconWrap}>
+                <Icon
+                  name={notificationIcon(row.kind)}
+                  size={18}
+                  color={tennisColors.primary}
+                />
+              </View>
+              <View style={styles.rowContent}>
+                <AppText style={styles.rowTitle}>{copy.title}</AppText>
+                <AppText style={styles.rowBody}>{copy.body}</AppText>
+                <AppText style={styles.rowTime}>{timestamp}</AppText>
+              </View>
               {!row.read_at ? <View style={styles.unreadDot} /> : null}
             </Pressable>
           );
@@ -112,6 +166,17 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
+  markAll: {
+    alignSelf: "flex-start",
+    minHeight: 36,
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  markAllLabel: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 13,
+    color: tennisColors.primary,
+  },
   list: {
     gap: 10,
   },
@@ -121,13 +186,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: tennisColors.border,
     padding: 14,
-    gap: 4,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
   },
   rowUnread: {
     borderColor: tennisColors.primary,
+    backgroundColor: tennisColors.secondary,
   },
   rowPressed: {
     opacity: 0.92,
+  },
+  iconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: tennisColors.muted,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rowContent: {
+    flex: 1,
+    gap: 4,
   },
   rowTitle: {
     fontFamily: tennisFontFamily.bodySemi,
@@ -136,26 +216,27 @@ const styles = StyleSheet.create({
   },
   rowBody: {
     fontFamily: tennisFontFamily.body,
-    fontSize: 14,
+    fontSize: 13,
+    color: tennisColors.mutedForeground,
+    lineHeight: 18,
+  },
+  rowTime: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 11,
     color: tennisColors.mutedForeground,
   },
   unreadDot: {
-    position: "absolute",
-    top: 12,
-    right: 12,
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: tennisColors.accent,
+    backgroundColor: tennisColors.lime,
+    marginTop: 6,
   },
   empty: {
     fontFamily: tennisFontFamily.body,
     fontSize: 14,
     color: tennisColors.mutedForeground,
-  },
-  error: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.danger,
+    textAlign: "center",
+    paddingVertical: 24,
   },
 });

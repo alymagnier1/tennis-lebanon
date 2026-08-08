@@ -2,6 +2,7 @@ export * from "./onboarding";
 export * from "./profile";
 export * from "./discovery";
 export * from "./matches";
+export * from "./match-host-defaults";
 export * from "./skill-range";
 export * from "./bookings";
 export * from "./lifecycle";

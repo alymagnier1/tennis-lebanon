@@ -44,6 +44,9 @@ describe("cancellation policy", () => {
         new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
       ),
     ).toBe("matches.policy.cancelLateBooking");
+    expect(cancelPolicyMessageKey("open", null, 1)).toBe(
+      "matches.policy.cancelNoParticipants",
+    );
     expect(LATE_CANCEL_HOURS).toBe(24);
   });
 });

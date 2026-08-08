@@ -1,36 +1,30 @@
 import type { PropsWithChildren, RefObject } from "react";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SegmentTabs } from "../AppUi";
 import { AppText } from "../AppText";
 import { FigmaBackButton } from "../onboarding-ui";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
-
-type HubSection = "overview" | "vote" | "chat" | "book";
 
 export function MatchHubLayout({
   title,
   subtitle,
-  activeSection,
-  onSectionChange,
   onBack,
   refreshing = false,
   onRefresh,
   scrollRef,
-  sectionTabs,
+  footer,
   children,
 }: PropsWithChildren<{
   title: string;
   subtitle?: string;
-  activeSection: HubSection;
-  onSectionChange: (section: HubSection) => void;
   onBack: () => void;
   refreshing?: boolean;
   onRefresh?: () => void;
   scrollRef?: RefObject<ScrollView | null>;
-  sectionTabs: { value: HubSection; label: string }[];
+  footer?: React.ReactNode;
 }>) {
   const insets = useSafeAreaInsets();
   const { writingDirection } = useLayoutDirection();
@@ -45,7 +39,7 @@ export function MatchHubLayout({
         ]}
       >
         <FigmaBackButton onPress={onBack} />
-        <View style={styles.titleBlock}>
+        <View style={tennisTextStyles.titleSubtitleBlock}>
           <AppText
             accessibilityRole="header"
             style={[styles.title, { writingDirection }]}
@@ -55,18 +49,13 @@ export function MatchHubLayout({
           </AppText>
           {subtitle ? (
             <AppText
-              style={[styles.subtitle, { writingDirection }]}
+              style={[tennisTextStyles.pageSubtitle, { writingDirection }]}
               maxLines={2}
             >
               {subtitle}
             </AppText>
           ) : null}
         </View>
-        <SegmentTabs
-          value={activeSection}
-          options={sectionTabs}
-          onChange={onSectionChange}
-        />
       </View>
 
       <ScrollView
@@ -76,7 +65,7 @@ export function MatchHubLayout({
           styles.content,
           {
             paddingHorizontal: tennisSpacing.screenX,
-            paddingBottom: insets.bottom + 24,
+            paddingBottom: footer ? 120 : insets.bottom + 24,
           },
         ]}
         keyboardShouldPersistTaps="handled"
@@ -89,6 +78,8 @@ export function MatchHubLayout({
       >
         {children}
       </ScrollView>
+
+      {footer}
     </View>
   );
 }
@@ -103,21 +94,12 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: tennisColors.background,
   },
-  titleBlock: {
-    gap: 4,
-  },
   title: {
     fontFamily: tennisFontFamily.headingExtra,
     fontSize: 28,
     lineHeight: 32,
     color: tennisColors.primaryDark,
     letterSpacing: -0.6,
-  },
-  subtitle: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 20,
-    color: tennisColors.mutedForeground,
   },
   scroll: {
     flex: 1,

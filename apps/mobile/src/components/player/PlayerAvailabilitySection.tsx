@@ -13,9 +13,9 @@ import { playerFormatLabel } from "../../lib/player-format-label";
 import {
   formatAvailabilityDayPartsLabel,
   hasPublicAvailabilitySummary,
-  weekdayShortLabels,
+  publicAvailabilityByWeekday,
 } from "../../lib/public-availability-summary";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { tennisColors } from "../../theme/tennis-tokens";
 
 /**
  * Icon plus text rather than an emoji prefix: emoji render differently on every
@@ -44,27 +44,35 @@ export function PlayerAvailabilitySection({
 }) {
   const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
-  const weekdayLabels = weekdayShortLabels(summary?.weekdays ?? [], t);
-  const dayPartsLabel = formatAvailabilityDayPartsLabel(
-    summary?.day_parts ?? [],
-    t,
-  );
+  const weekdayEntries = publicAvailabilityByWeekday(summary);
   const formatLabel = playerFormatLabel(player, t);
   const intentLabel = t(`playIntent.${player.play_intent}`);
   const hasSummary = hasPublicAvailabilitySummary(summary);
 
   return (
     <PlayerProfileSection title={t("playerProfile.availabilityTitle")}>
-      {hasSummary && weekdayLabels.length > 0 ? (
+      {hasSummary && weekdayEntries.length > 0 ? (
         <View style={[styles.weekdayRow, { flexDirection: rowDirection }]}>
-          {weekdayLabels.map((label) => (
-            <View key={label} style={styles.weekdayChip}>
-              <AppText style={styles.weekdayChipText}>{label}</AppText>
-            </View>
-          ))}
+          {weekdayEntries.map((entry) => {
+            const dayLabel = t(`availability.weekdaysShort.${entry.weekday}`);
+            const partsLabel = formatAvailabilityDayPartsLabel(
+              entry.day_parts,
+              t,
+            );
+
+            return (
+              <View key={entry.weekday} style={styles.weekdayChip}>
+                <AppText style={styles.weekdayChipText}>{dayLabel}</AppText>
+                {partsLabel ? (
+                  <AppText style={styles.weekdayPartsText} maxLines={2}>
+                    {partsLabel}
+                  </AppText>
+                ) : null}
+              </View>
+            );
+          })}
         </View>
       ) : null}
-      {dayPartsLabel ? <DetailLine icon="clock" text={dayPartsLabel} /> : null}
       <DetailLine
         icon="court"
         text={t("playerProfile.formatPreference", { format: formatLabel })}
@@ -90,13 +98,23 @@ const styles = StyleSheet.create({
   weekdayChip: {
     backgroundColor: tennisColors.secondary,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignItems: "center",
+    gap: 2,
+    maxWidth: 120,
   },
   weekdayChipText: {
     fontFamily: tennisFontFamily.bodySemi,
     fontSize: 12,
     color: tennisColors.primary,
+  },
+  weekdayPartsText: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 10,
+    color: tennisColors.mutedForeground,
+    textAlign: "center",
+    lineHeight: 14,
   },
   detailRow: {
     alignItems: "center",

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { OwnPlayerProfile } from "@tennis-lebanon/api";
@@ -10,13 +10,29 @@ import {
   setOwnSkillBandSchema,
   type SkillBand,
 } from "@tennis-lebanon/domain";
+import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
+import { Icon } from "../Icon";
 import { ChipButton } from "../onboarding-ui";
 import { PlayerProfileSection } from "../player/PlayerProfileSection";
 import { supabase } from "../../lib/supabase";
-import { tennisColors } from "../../theme/tennis-tokens";
+import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
+
+const VISIBLE_CHIP_COUNT = 3;
+
+function clampStartIndex(index: number, bandIndex: number): number {
+  const maxStart = Math.max(0, ORDERED_SKILL_BANDS.length - VISIBLE_CHIP_COUNT);
+  let next = Math.max(0, Math.min(index, maxStart));
+  if (bandIndex < next) {
+    next = bandIndex;
+  } else if (bandIndex > next + VISIBLE_CHIP_COUNT - 1) {
+    next = bandIndex - VISIBLE_CHIP_COUNT + 1;
+  }
+  return Math.max(0, Math.min(next, maxStart));
+}
 
 export function ProfileSkillBandSection({
   playerProfile,
@@ -34,11 +50,34 @@ export function ProfileSkillBandSection({
     playerProfile.skill_band as SkillBand,
   );
   const [syncedProfile, setSyncedProfile] = useState(playerProfile);
+  const [startIndex, setStartIndex] = useState(() =>
+    clampStartIndex(0, ORDERED_SKILL_BANDS.indexOf(skillBand)),
+  );
 
   if (playerProfile !== syncedProfile) {
     setSyncedProfile(playerProfile);
     setSkillBand(playerProfile.skill_band as SkillBand);
   }
+
+  const bandIndex = ORDERED_SKILL_BANDS.indexOf(skillBand);
+  const maxStartIndex = Math.max(
+    0,
+    ORDERED_SKILL_BANDS.length - VISIBLE_CHIP_COUNT,
+  );
+
+  // Derived rather than synced through an effect: the selected band has to stay
+  // inside the visible window, and doing that with setState in an effect
+  // cascades a second render every time the band changes.
+  const effectiveStart = clampStartIndex(startIndex, bandIndex);
+
+  const visibleBands = useMemo(
+    () =>
+      ORDERED_SKILL_BANDS.slice(
+        effectiveStart,
+        effectiveStart + VISIBLE_CHIP_COUNT,
+      ),
+    [effectiveStart],
+  );
 
   const saveMutation = useMutation({
     mutationFn: async (nextBand: SkillBand) => {
@@ -59,16 +98,13 @@ export function ProfileSkillBandSection({
     },
     onError: () => {
       setError(true);
-      // The chip was selected optimistically. Nothing invalidates on failure,
-      // so without this the UI keeps showing a band the server never accepted
-      // until the profile happens to refetch.
       setSkillBand(playerProfile.skill_band as SkillBand);
     },
   });
 
   return (
     <PlayerProfileSection title={t("profile.skillBandTitle")}>
-      <AppText style={styles.hint}>
+      <AppText style={tennisTextStyles.fieldHint}>
         {provisional
           ? t("profile.skillBandProvisionalHint")
           : t("profile.skillBandLockedHint")}
@@ -76,26 +112,76 @@ export function ProfileSkillBandSection({
 
       <View
         style={[
-          styles.chips,
-          !provisional ? styles.chipsLocked : null,
+          styles.carousel,
+          !provisional ? styles.carouselLocked : null,
           { flexDirection: rowDirection },
         ]}
       >
-        {ORDERED_SKILL_BANDS.map((band) => (
-          <ChipButton
-            key={band}
-            label={t(`skillBands.${band}`)}
-            selected={skillBand === band}
-            disabled={!provisional}
-            onPress={() => {
-              if (band === skillBand || saveMutation.isPending) {
-                return;
-              }
-              setSkillBand(band);
-              saveMutation.mutate(band);
-            }}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("profile.skillBandScrollPrevious")}
+          disabled={effectiveStart === 0}
+          onPress={() => setStartIndex(Math.max(0, effectiveStart - 1))}
+          style={({ pressed }) => [
+            styles.arrow,
+            effectiveStart === 0 && styles.arrowDisabled,
+            pressed && effectiveStart > 0 && styles.arrowPressed,
+          ]}
+        >
+          <Icon
+            name="chevronBack"
+            size={18}
+            color={
+              effectiveStart === 0
+                ? tennisColors.mutedForeground
+                : tennisColors.primary
+            }
           />
-        ))}
+        </Pressable>
+
+        <View style={[styles.chipRow, { flexDirection: rowDirection }]}>
+          {visibleBands.map((band) => (
+            <ChipButton
+              key={band}
+              compact
+              label={t(`skillBandsShort.${band}`)}
+              selected={skillBand === band}
+              disabled={!provisional}
+              style={styles.chipCell}
+              onPress={() => {
+                if (band === skillBand || saveMutation.isPending) {
+                  return;
+                }
+                setSkillBand(band);
+                saveMutation.mutate(band);
+              }}
+            />
+          ))}
+        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("profile.skillBandScrollNext")}
+          disabled={effectiveStart >= maxStartIndex}
+          onPress={() =>
+            setStartIndex(Math.min(maxStartIndex, effectiveStart + 1))
+          }
+          style={({ pressed }) => [
+            styles.arrow,
+            effectiveStart >= maxStartIndex && styles.arrowDisabled,
+            pressed && effectiveStart < maxStartIndex && styles.arrowPressed,
+          ]}
+        >
+          <Icon
+            name="chevron"
+            size={18}
+            color={
+              effectiveStart >= maxStartIndex
+                ? tennisColors.mutedForeground
+                : tennisColors.primary
+            }
+          />
+        </Pressable>
       </View>
 
       {error ? (
@@ -108,18 +194,35 @@ export function ProfileSkillBandSection({
 }
 
 const styles = StyleSheet.create({
-  hint: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 20,
-    color: tennisColors.mutedForeground,
+  carousel: {
+    alignItems: "center",
+    gap: 6,
   },
-  chips: {
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chipsLocked: {
+  carouselLocked: {
     opacity: 0.55,
+  },
+  arrow: {
+    width: minTouchTargetPx,
+    height: minTouchTargetPx,
+    borderRadius: tennisRadii.md,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: tennisColors.muted,
+  },
+  arrowDisabled: {
+    opacity: 0.45,
+  },
+  arrowPressed: {
+    opacity: 0.85,
+  },
+  chipRow: {
+    flex: 1,
+    gap: 6,
+    minWidth: 0,
+  },
+  chipCell: {
+    flex: 1,
+    minWidth: 0,
   },
   error: {
     fontFamily: tennisFontFamily.body,

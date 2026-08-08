@@ -7,7 +7,7 @@ The initial migration is `supabase/migrations/001_initial_schema.sql`. It establ
 ### Identity and preferences
 
 - `profiles`: public-safe identity attached one-to-one to `auth.users`
-- `player_profiles`: tennis preferences and internal rating state
+- `player_profiles`: tennis preferences, internal rating state, and match-host defaults (`default_match_visibility`, `default_requires_creator_approval`, optional `default_min_skill` / `default_max_skill`, optional `default_match_format`, `match_defaults_set_at`)
 - `zones`: configurable geographic discovery units (see minimum shape in `docs/ARCHITECTURE.md`)
 - `player_zones`: preferred play areas
 - `availability_windows`: one-off or recurring availability

@@ -36,6 +36,12 @@ export default function TabsLayout() {
         headerTintColor: tennisColors.primaryDark,
         tabBarActiveTintColor: tennisColors.primary,
         tabBarInactiveTintColor: tennisColors.mutedForeground,
+        tabBarStyle: {
+          overflow: "visible",
+          backgroundColor: "transparent",
+          borderTopWidth: 0,
+          elevation: 0,
+        },
       }}
     >
       <Tabs.Screen
@@ -69,8 +75,9 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="clubs"
         options={{
+          href: null,
           title: t("tabs.clubs"),
-          headerTitle: t("tabs.clubs"),
+          headerShown: false,
         }}
       />
       <Tabs.Screen

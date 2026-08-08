@@ -1,9 +1,27 @@
 import type {
   SetOwnSkillBandInput,
+  UpdateMatchHostDefaultsInput,
   UpdatePreferredZonesInput,
-  UpdateTennisPreferencesInput,
+} from "@tennis-lebanon/domain";
+import {
+  updateInputToDbPatch,
+  updateMatchHostDefaultsSchema,
 } from "@tennis-lebanon/domain";
 import type { TennisSupabaseClient } from "./client";
+
+const PLAYER_PROFILE_BASE_SELECT =
+  "skill_band, play_intent, prefers_singles, prefers_doubles, internal_rating, rated_match_count, bio";
+
+const PLAYER_PROFILE_EXTENDED_SELECT = `${PLAYER_PROFILE_BASE_SELECT}, default_match_visibility, default_requires_creator_approval, default_min_skill, default_max_skill, default_match_format, match_defaults_set_at`;
+
+const MATCH_HOST_DEFAULTS_FALLBACK = {
+  default_match_visibility: "public",
+  default_requires_creator_approval: false,
+  default_min_skill: null,
+  default_max_skill: null,
+  default_match_format: null,
+  match_defaults_set_at: null,
+} as const;
 
 export type OwnPlayerProfile = {
   skill_band: string;
@@ -15,6 +33,35 @@ export type OwnPlayerProfile = {
   bio: string | null;
   display_name: string;
   languages: string[];
+  default_match_visibility: string;
+  default_requires_creator_approval: boolean;
+  default_min_skill: string | null;
+  default_max_skill: string | null;
+  default_match_format: string | null;
+  match_defaults_set_at: string | null;
+  /** False when migration 053 columns are not on the connected database yet. */
+  match_host_defaults_available: boolean;
+};
+
+function isMissingMatchHostDefaultsColumnsError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const message = "message" in error ? String(error.message) : "";
+  const code = "code" in error ? String(error.code) : "";
+  return (
+    code === "42703" ||
+    message.includes("default_match_visibility") ||
+    message.includes("match_defaults_set_at")
+  );
+}
+
+type PlayerProfileBaseRow = {
+  skill_band: string;
+  play_intent: string;
+  prefers_singles: boolean;
+  prefers_doubles: boolean;
+  internal_rating: number;
+  rated_match_count: number;
+  bio: string | null;
 };
 
 export async function getOwnPlayerProfile(
@@ -29,24 +76,42 @@ export async function getOwnPlayerProfile(
     throw profileError;
   }
 
-  const { data, error } = await client
+  const extended = await client
     .from("player_profiles")
-    .select(
-      "skill_band, play_intent, prefers_singles, prefers_doubles, internal_rating, rated_match_count, bio",
-    )
+    .select(PLAYER_PROFILE_EXTENDED_SELECT)
     .maybeSingle();
 
-  if (error) {
-    throw error;
+  if (!extended.error && extended.data && profile) {
+    return {
+      ...extended.data,
+      display_name: profile.display_name ?? "",
+      languages: profile.languages ?? [],
+      match_host_defaults_available: true,
+    };
   }
-  if (!data || !profile) {
+
+  if (extended.error && !isMissingMatchHostDefaultsColumnsError(extended.error)) {
+    throw extended.error;
+  }
+
+  const base = await client
+    .from("player_profiles")
+    .select(PLAYER_PROFILE_BASE_SELECT)
+    .maybeSingle();
+
+  if (base.error) {
+    throw base.error;
+  }
+  if (!base.data || !profile) {
     throw new Error("Player profile not found");
   }
 
   return {
-    ...data,
+    ...(base.data as PlayerProfileBaseRow),
+    ...MATCH_HOST_DEFAULTS_FALLBACK,
     display_name: profile.display_name ?? "",
     languages: profile.languages ?? [],
+    match_host_defaults_available: false,
   };
 }
 
@@ -92,9 +157,18 @@ export async function updateOwnProfile(
   }
 }
 
+export type PublicPlayerAvailabilityDayPart =
+  "morning" | "afternoon" | "evening";
+
+export type PublicPlayerAvailabilityWeekdaySummary = {
+  weekday: number;
+  day_parts: PublicPlayerAvailabilityDayPart[];
+};
+
 export type PublicPlayerAvailabilitySummary = {
   weekdays: number[];
-  day_parts: Array<"morning" | "afternoon" | "evening">;
+  day_parts: PublicPlayerAvailabilityDayPart[];
+  by_weekday: PublicPlayerAvailabilityWeekdaySummary[];
 };
 
 export type PublicPlayerRecentMatch = {
@@ -115,14 +189,20 @@ export async function getPublicPlayerAvailabilitySummary(
 
   if (error) throw error;
 
-  const summary = (data ?? { weekdays: [], day_parts: [] }) as {
+  const summary = (data ?? {
+    weekdays: [],
+    day_parts: [],
+    by_weekday: [],
+  }) as {
     weekdays?: number[];
     day_parts?: PublicPlayerAvailabilitySummary["day_parts"];
+    by_weekday?: PublicPlayerAvailabilityWeekdaySummary[];
   };
 
   return {
     weekdays: summary.weekdays ?? [],
     day_parts: summary.day_parts ?? [],
+    by_weekday: summary.by_weekday ?? [],
   };
 }
 
@@ -143,10 +223,12 @@ export async function listPublicPlayerRecentMatches(
   return (data ?? []) as PublicPlayerRecentMatch[];
 }
 
-export async function updateTennisPreferences(
+export async function updateMatchHostDefaults(
   client: TennisSupabaseClient,
-  input: UpdateTennisPreferencesInput,
+  input: UpdateMatchHostDefaultsInput,
 ): Promise<void> {
+  const parsed = updateMatchHostDefaultsSchema.parse(input);
+
   const {
     data: { user },
     error: userError,
@@ -159,14 +241,42 @@ export async function updateTennisPreferences(
     throw new Error("Authentication required");
   }
 
+  const patch = updateInputToDbPatch(parsed);
+  const now = new Date().toISOString();
+
+  const existing = await client
+    .from("player_profiles")
+    .select("match_defaults_set_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing.error && !isMissingMatchHostDefaultsColumnsError(existing.error)) {
+    throw existing.error;
+  }
+
   const { error } = await client
     .from("player_profiles")
     .update({
-      play_intent: input.playIntent,
-      prefers_singles: input.prefersSingles,
-      prefers_doubles: input.prefersDoubles,
+      ...patch,
+      match_defaults_set_at: existing.data?.match_defaults_set_at ?? now,
     })
     .eq("user_id", user.id);
+
+  if (error && isMissingMatchHostDefaultsColumnsError(error)) {
+    const { error: legacyError } = await client
+      .from("player_profiles")
+      .update({
+        play_intent: patch.play_intent,
+        prefers_singles: patch.prefers_singles,
+        prefers_doubles: patch.prefers_doubles,
+      })
+      .eq("user_id", user.id);
+
+    if (legacyError) {
+      throw legacyError;
+    }
+    return;
+  }
 
   if (error) {
     throw error;

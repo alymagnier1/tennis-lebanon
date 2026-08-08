@@ -50,7 +50,7 @@ export function ClubsDirectoryList({
   };
 
   if (clubsQuery.isLoading && !clubsOverride) {
-    return <ActivityIndicator accessibilityLabel={t("discover.loading")} />;
+    return <ActivityIndicator accessibilityLabel={t("common.loading")} />;
   }
 
   if (clubsQuery.isError) {

@@ -140,6 +140,8 @@ export type MyMatchRow = {
   /** A court is secured. True before the roster fills on a court-first match. */
   has_court: boolean;
   court_starts_at: string | null;
+  opponent_names: string | null;
+  club_name: string | null;
 };
 
 export type CompletedMatchRow = {

@@ -1,7 +1,7 @@
 import type { Href } from "expo-router";
 
-export const CREATE_MATCH_ROUTE = "/match/create/details" as Href;
-export const CLUBS_ROUTE = "/clubs" as Href;
+export const CREATE_MATCH_ROUTE = "/match/create" as Href;
+export const CLUBS_ROUTE = "/(tabs)/clubs" as Href;
 
 export function matchInviteRoute(
   matchId: string,

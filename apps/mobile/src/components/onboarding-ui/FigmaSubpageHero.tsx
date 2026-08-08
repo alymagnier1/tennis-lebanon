@@ -7,6 +7,7 @@ import { FigmaBackButton } from "./FigmaButtons";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors } from "../../theme/tennis-tokens";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 
 export function FigmaSubpageHero({
   title,
@@ -28,21 +29,25 @@ export function FigmaSubpageHero({
       <CourtGridOverlay />
       <View style={styles.content}>
         {onBack ? <FigmaBackButton onPress={onBack} onDark /> : null}
-        <AppText
-          accessibilityRole="header"
-          style={[
-            styles.title,
-            !onBack && styles.titleWithoutBack,
-            { writingDirection },
-          ]}
-        >
-          {title}
-        </AppText>
-        {description ? (
-          <AppText style={[styles.description, { writingDirection }]}>
-            {description}
+        <View style={tennisTextStyles.titleSubtitleBlock}>
+          <AppText
+            accessibilityRole="header"
+            style={[
+              styles.title,
+              !onBack && styles.titleWithoutBack,
+              { writingDirection },
+            ]}
+          >
+            {title}
           </AppText>
-        ) : null}
+          {description ? (
+            <AppText
+              style={[tennisTextStyles.sectionSubtitleOnDark, { writingDirection }]}
+            >
+              {description}
+            </AppText>
+          ) : null}
+        </View>
         {children}
       </View>
     </View>
@@ -68,16 +73,9 @@ const styles = StyleSheet.create({
     color: tennisColors.white,
     letterSpacing: -0.6,
     marginTop: 16,
+    marginBottom: 0,
   },
   titleWithoutBack: {
     marginTop: 0,
-  },
-  description: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 20,
-    color: "rgba(255,255,255,0.65)",
-    marginTop: 6,
-    marginBottom: 16,
   },
 });

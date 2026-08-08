@@ -11,6 +11,42 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-08 — Hosting defaults come from the profile; no first-create sheet
+
+- Status: accepted
+- Context: The 2026-08-06 decision below put a first-create sheet in front of hosting. As built it collected nothing — read-only chips plus a device-local acknowledgement — while the Discover and approval toggles it was meant to own stayed on the schedule screen for every create. It cost a tap and saved none. Separately, preferred clubs never pre-filled for anyone: `seedFavoriteClubIds` reads only favourite clubs, and nothing in onboarding ever set a favourite, so with Discover on (the default) the club picker stayed open on every create.
+- Decision: Remove the first-create sheet and its local flag. Hosting defaults are edited in Profile → Match defaults; anything can be overridden per match from the schedule summary bar. Favourite clubs are collected once on a first-run pass through Profile → Where I play, reached from the onboarding completion screen; hosts who skip it have the clubs from their first published match saved as favourites, so the second create pre-fills.
+- Alternatives considered: restore the toggles to the first-create sheet and persist them (keeps an extra screen for no gain now that Match defaults exists); collect favourite clubs as a real onboarding step (`list_clubs_directory` and `set_club_favorite` both go through `assert_discovery_caller_eligible`, which rejects callers whose `onboarding_completed_at` is null, and the onboarding layout redirects anyone already complete — so no step inside onboarding can list or save clubs); auto-select nearby clubs when favourites are empty (migration 045 makes the host's club list authoritative and visible to joiners before they commit, so filling it with clubs the host never chose misrepresents them).
+- Consequences: `match_defaults_set_at` is no longer a gate. The column and its write in `updateMatchHostDefaults` stay as a record of whether a host has ever customised defaults; `ownPlayerProfileHasMatchDefaults` is removed. `apps/mobile/app/match/create/first-defaults.tsx` and `apps/mobile/src/lib/match-defaults-local.ts` are deleted.
+- Owner: Founder
+
+## 2026-08-06 — Match-host defaults and simplified create flow
+
+- Status: accepted
+- Context: Repeat hosts re-entered format, intent, level, and Discover toggles on every create despite onboarding and profile already capturing most preferences.
+- Decision: Store match-host defaults on `player_profiles` (visibility, approval, optional level range and default format). Onboarding keeps skill, intent, format, and zones. First create prompts only for Discover and join approval once (`match_defaults_set_at`). Later creates hydrate the draft from profile and open a single schedule screen (time, clubs, summary, publish). Profile → Match defaults edits all hosting defaults. Per-match overrides remain on a separate screen without updating saved defaults.
+- Alternatives considered: collect Discover in onboarding (deferred liquidity choice away from first value moment); keep three-step create wizard (extra taps for repeat hosts).
+- Consequences: `053_match_host_defaults.sql`. `CREATE_MATCH_ROUTE` is `/match/create` orchestrator. Invite-from-player flow skips first-defaults and keeps invite-only visibility.
+- Owner: Founder
+
+## 2026-08-06 — Mobile forest-green brand and semantic status tones
+
+- Status: accepted
+- Context: `packages/ui` keeps a blue brand ramp for the club dashboard while the mobile app reskinned to Figma forest green (`#0F5132` / `#C8E63B`). Status badges previously used a single amber slot, so opposite facts (court secured vs expiring) competed.
+- Decision: Mobile uses scoped tokens in `apps/mobile/src/theme/tennis-tokens.ts` including `tennisSemantic` tones (neutral, info, positive, attention, critical, actionable) with mandatory glyphs. Dashboard tokens stay unchanged. Attendance/reliability tones must not appear on public player profiles.
+- Alternatives considered: rebrand dashboard and shared `packages/ui` in the same pass (too wide for UI polish milestone); per-status hardcoded colours (does not scale when status axes disagree).
+- Consequences: mobile and dashboard look related but not identical until a deliberate shared rebrand. Skill bands use a separate ordinal ramp from semantic tones.
+- Owner: Founder
+
+## 2026-08-06 — Arabic RTL enabled in pilot locales
+
+- Status: accepted
+- Context: Arabic translations were complete but withheld from `PILOT_LOCALES` because `I18nManager.forceRTL` was not wired (see 2026-08-03 entry below).
+- Decision: Mobile calls `syncNativeLayoutDirection` on locale load/switch (`apps/mobile/src/lib/layout-rtl.ts`) and re-adds `ar` to `PILOT_LOCALES`. Secondary screens may still need a device pass; critical flows were the gate for re-enabling.
+- Alternatives considered: keep Arabic hidden (blocks Lebanese pilot users); ship Arabic LTR (worse UX than English).
+- Consequences: switching to Arabic triggers an app reload on native platforms when direction flips. Layout direction hook coverage on older screens should improve over time.
+- Owner: Founder
+
 ## 2026-08-03 — v1 ships player-side only; every club is a WhatsApp club
 
 - Status: accepted

@@ -210,7 +210,7 @@ export default function MatchBookExternalScreen() {
       description={t("matches.booking.bookedOffAppDescription")}
     >
       {hubQuery.isLoading ? (
-        <ActivityIndicator accessibilityLabel={t("discover.loading")} />
+        <ActivityIndicator accessibilityLabel={t("common.loading")} />
       ) : null}
 
       <AppText style={formStyles.summaryLabel}>
@@ -258,7 +258,7 @@ export default function MatchBookExternalScreen() {
       {selectedClubId ? (
         <View style={formStyles.compactCard}>
           <AppText style={formStyles.compactCardTitle}>
-            {clubQuery.data?.name ?? t("discover.loading")}
+            {clubQuery.data?.name ?? t("common.loading")}
           </AppText>
 
           {clubQuery.isLoading ? <ActivityIndicator /> : null}

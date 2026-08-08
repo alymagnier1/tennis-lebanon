@@ -1,0 +1,13 @@
+appId: com.tennislebanon.dev
+name: M4 vote on proposed time
+---
+- launchApp
+- tapOn: "Matches"
+- tapOn:
+    text: "Active"
+- tapOn:
+    text: "Vote"
+    optional: true
+- assertVisible:
+    text: "Proposed times"
+    optional: true

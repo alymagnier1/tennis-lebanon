@@ -1,0 +1,10 @@
+appId: com.tennislebanon.dev
+name: M3 join open match from discover
+---
+- launchApp
+- tapOn: "Discover"
+- tapOn: "Open matches"
+- tapOn:
+    text: "View match"
+    index: 0
+- assertVisible: "Match hub"

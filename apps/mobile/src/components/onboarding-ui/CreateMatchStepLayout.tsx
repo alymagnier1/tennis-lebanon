@@ -12,11 +12,13 @@ import { AppText } from "../AppText";
 import { FigmaBackButton } from "./FigmaButtons";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { tennisColors } from "../../theme/tennis-tokens";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 
 const CREATE_MATCH_SCREEN_X = 20;
 
 export function CreateMatchStepLayout({
   title,
+  description,
   step,
   totalSteps,
   onBack,
@@ -24,8 +26,9 @@ export function CreateMatchStepLayout({
   footer,
 }: PropsWithChildren<{
   title: string;
-  step: number;
-  totalSteps: number;
+  description?: string;
+  step?: number;
+  totalSteps?: number;
   onBack?: () => void;
   footer?: ReactNode;
 }>) {
@@ -48,12 +51,21 @@ export function CreateMatchStepLayout({
         showsVerticalScrollIndicator={false}
       >
         {onBack ? <FigmaBackButton onPress={onBack} /> : null}
-        <View style={styles.wizardWrap}>
-          <WizardProgress step={step} totalSteps={totalSteps} />
+        {step !== undefined && totalSteps !== undefined ? (
+          <View style={styles.wizardWrap}>
+            <WizardProgress step={step} totalSteps={totalSteps} />
+          </View>
+        ) : null}
+        <View style={styles.header}>
+          <View style={tennisTextStyles.titleSubtitleBlock}>
+            <AppText accessibilityRole="header" style={styles.title}>
+              {title}
+            </AppText>
+            {description ? (
+              <AppText style={tennisTextStyles.pageSubtitle}>{description}</AppText>
+            ) : null}
+          </View>
         </View>
-        <AppText accessibilityRole="header" style={styles.title}>
-          {title}
-        </AppText>
         {children}
       </ScrollView>
       {footer ? <View style={styles.footer}>{footer}</View> : null}
@@ -75,14 +87,16 @@ const styles = StyleSheet.create({
   wizardWrap: {
     marginTop: 16,
   },
+  header: {
+    marginTop: 24,
+    marginBottom: 20,
+  },
   title: {
     fontFamily: tennisFontFamily.headingExtra,
     fontSize: 24,
     lineHeight: 28,
     color: tennisColors.primaryDark,
     letterSpacing: -0.5,
-    marginTop: 24,
-    marginBottom: 28,
   },
   footer: {
     paddingHorizontal: CREATE_MATCH_SCREEN_X,

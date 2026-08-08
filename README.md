@@ -6,6 +6,8 @@ This folder is the source of truth for a lean Lebanon-first tennis matchmaking a
 
 Help a player move from **“I want to play”** to a **confirmed opponent, time, and court** in one reliable flow.
 
+**App summary (one page):** [`docs/APP_SUMMARY.md`](docs/APP_SUMMARY.md)
+
 The MVP is matchmaking-first. Clubs can accept booking requests through a lightweight web dashboard. Payments, tournaments, coaches, video analysis, a social feed, and other sports are intentionally deferred.
 
 ## Recommended stack
@@ -26,8 +28,9 @@ Do not pin framework versions until project initialization. Use mutually compati
 
 ## Read in this order
 
-1. `CLAUDE.md` — permanent instructions for Claude Code
-2. `docs/PRD.md` — scope, rules, stories, and acceptance criteria
+1. `docs/APP_SUMMARY.md` — what the app is, who it’s for, core journey (start here for overview)
+2. `CLAUDE.md` — permanent instructions for Claude Code
+3. `docs/PRD.md` — scope, rules, stories, and acceptance criteria
 3. `docs/FLOWS_AND_SCREENS.md` — navigation and user journeys
 4. `docs/ARCHITECTURE.md` — repository and system design
 5. `docs/DATABASE.md` — data model and access rules
