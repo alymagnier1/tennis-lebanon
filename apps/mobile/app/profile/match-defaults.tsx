@@ -103,14 +103,16 @@ export default function MatchDefaultsScreen() {
   const [listOnDiscover, setListOnDiscover] = useState(true);
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [formatError, setFormatError] = useState(false);
-  const [syncedProfile, setSyncedProfile] = useState(profile);
+  const [defaultsHydrated, setDefaultsHydrated] = useState(false);
   const pendingSaveRef = useRef<Parameters<
     typeof updateMatchHostDefaults
   >[1] | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  if (profile && profile !== syncedProfile) {
-    setSyncedProfile(profile);
+  // Adjusting state during render rather than in an effect: React sanctions
+  // this for prop/query-derived state, and the effect version paints the
+  // placeholder defaults for one frame before correcting them.
+  if (profile && !defaultsHydrated) {
     const seeded = stateFromProfile(profile, resolved);
     setPlayIntent(seeded.playIntent);
     setPrefersSingles(seeded.prefersSingles);
@@ -119,6 +121,7 @@ export default function MatchDefaultsScreen() {
     setSelectedBands(seeded.selectedBands);
     setListOnDiscover(seeded.listOnDiscover);
     setRequiresApproval(seeded.requiresApproval);
+    setDefaultsHydrated(true);
   }
 
   const levelOptions = useMemo(
@@ -204,7 +207,7 @@ export default function MatchDefaultsScreen() {
   function persist(state: DefaultsState) {
     // Nothing to save until the profile has seeded the controls; saving the
     // placeholder state would overwrite real defaults with the initial guess.
-    if (syncedProfile === undefined) {
+    if (!defaultsHydrated) {
       return;
     }
     const input = buildSaveInput(state);

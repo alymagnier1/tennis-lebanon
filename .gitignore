@@ -6,6 +6,7 @@ build/
 .expo/
 .expo-shared/
 .expo-smoke/
+.expo-export-test/
 .turbo/
 coverage/
 *.log

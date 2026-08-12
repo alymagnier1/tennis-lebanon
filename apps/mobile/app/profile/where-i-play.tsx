@@ -46,9 +46,7 @@ export default function WhereIPlayScreen() {
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const [selectedZoneIds, setSelectedZoneIds] = useState<string[]>([]);
   const [zoneError, setZoneError] = useState(false);
-  const [syncedZones, setSyncedZones] = useState<string[] | undefined>(
-    undefined,
-  );
+  const [zonesHydrated, setZonesHydrated] = useState(false);
   const [pendingClubId, setPendingClubId] = useState<string | null>(null);
 
   const zonesQuery = useQuery({
@@ -61,9 +59,12 @@ export default function WhereIPlayScreen() {
     queryFn: () => listOwnPreferredZoneIds(supabase),
   });
 
-  if (ownZonesQuery.data && ownZonesQuery.data !== syncedZones) {
-    setSyncedZones(ownZonesQuery.data);
+  // Adjusting state during render rather than in an effect: React sanctions
+  // this for query-derived state, and the effect version renders an empty
+  // selection for one frame before the saved zones appear.
+  if (!zonesHydrated && ownZonesQuery.isSuccess) {
     setSelectedZoneIds(ownZonesQuery.data);
+    setZonesHydrated(true);
   }
 
   const clubsQuery = useClubsDirectory(

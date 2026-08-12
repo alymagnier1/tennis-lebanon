@@ -905,7 +905,12 @@
       "rescheduleError": "We could not change the time.",
       "rescheduleLocked": "A court has already been requested. Withdraw the booking first.",
       "awaitingPlayers": "Waiting for players to join",
-      "awaitingPlayersCourtSecured": "The court is booked and held. This match just needs players."
+      "awaitingPlayersCourtSecured": "The court is booked and held. This match just needs players.",
+      "courtHeroTitle": "Your court",
+      "agreedTimeBookHint": "Book a court for this slot.",
+      "agreedTimeVenueHint": "Preferred",
+      "expandMatchDetails": "Show match details",
+      "collapseMatchDetails": "Hide match details"
     },
     "results": {
       "title": "Result",
@@ -970,7 +975,7 @@
       "bookedOffAppCta": "Booked off-app",
       "offPreferredListWarning": "This club was not on the list agreed when players joined. Everyone will be told where the court is.",
       "bookedOffAppTitle": "Confirm off-app booking",
-      "bookedOffAppDescription": "You already secured a court by phone or WhatsApp. Pick the club and court, then confirm so attendance and results still work.",
+      "bookedOffAppDescription": "You already secured a court by phone or WhatsApp. Pick the club and confirm the time so attendance and results still work.",
       "bookedOffAppConfirm": "Confirm court",
       "bookedOffAppConfirmTitle": "Confirm this court?",
       "bookedOffAppConfirmBody": "Mark {{club}} · {{court}} for {{time}}. The match will move forward after you play.",
@@ -1095,6 +1100,7 @@
     "resultCount": "{{count}} clubs in Lebanon",
     "surfaceAll": "All",
     "viewDetails": "View club",
+    "selected": "Selected for this booking",
     "pricePerHour": "/hr",
     "loadError": "We could not load clubs.",
     "empty": "No clubs in these areas yet.",

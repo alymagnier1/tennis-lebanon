@@ -19,6 +19,8 @@ type ClubDirectoryCardProps = {
   onPress: () => void;
   /** Omit for a plain navigation card; pass to render it as a checkbox. */
   selected?: boolean;
+  /** Shorter hero and denser body for pickers and booking flows. */
+  compact?: boolean;
 };
 
 type BookingBadgeStyle = {
@@ -49,6 +51,7 @@ export function ClubDirectoryCard({
   club,
   onPress,
   selected,
+  compact = false,
 }: ClubDirectoryCardProps) {
   const { t, i18n } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
@@ -59,7 +62,7 @@ export function ClubDirectoryCard({
     i18n.resolvedLanguage ?? i18n.language,
   );
   const bookingBadge = bookingBadgeStyle(club.booking_mode);
-  const amenities = club.amenities.slice(0, 3);
+  const amenities = compact ? [] : club.amenities.slice(0, 3);
 
   return (
     <Pressable
@@ -69,15 +72,31 @@ export function ClubDirectoryCard({
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
+        compact && styles.cardCompact,
         selected && styles.cardSelected,
         pressed && styles.cardPressed,
       ]}
     >
-      <View style={styles.hero}>
+      <View style={[styles.hero, compact && styles.heroCompact]}>
         <View style={styles.heroOverlay} />
         <View style={styles.heroPattern}>
-          <Icon name="place" size={48} color={tennisColors.border} />
+          <Icon
+            name="place"
+            size={compact ? 32 : 48}
+            color={tennisColors.border}
+          />
         </View>
+
+        {selectable ? (
+          <View
+            style={[
+              styles.selectMark,
+              selected && styles.selectMarkSelected,
+            ]}
+          >
+            {selected ? <AppText style={styles.selectCheck}>✓</AppText> : null}
+          </View>
+        ) : null}
 
         {club.is_favorite ? (
           <View style={styles.favoriteBadge}>
@@ -101,32 +120,57 @@ export function ClubDirectoryCard({
         </View>
       </View>
 
-      <View style={styles.body}>
+      <View style={[styles.body, compact && styles.bodyCompact]}>
         <View style={[styles.titleRow, { flexDirection: rowDirection }]}>
           <View style={styles.titleBlock}>
-            <AppText style={[styles.name, { writingDirection }]} maxLines={2}>
+            <AppText
+              style={[
+                styles.name,
+                compact && styles.nameCompact,
+                { writingDirection },
+              ]}
+              maxLines={2}
+            >
               {club.name}
             </AppText>
-            <AppText style={[styles.zone, { writingDirection }]} maxLines={1}>
+            <AppText
+              style={[styles.zone, { writingDirection }]}
+              maxLines={1}
+            >
               {zone}
             </AppText>
           </View>
           {price ? (
             <View style={styles.priceBlock}>
-              <AppText style={styles.price}>{price}</AppText>
-              <AppText style={styles.priceHint}>
-                {t("clubs.pricePerHour")}
+              <AppText style={[styles.price, compact && styles.priceCompact]}>
+                {price}
               </AppText>
+              {!compact ? (
+                <AppText style={styles.priceHint}>
+                  {t("clubs.pricePerHour")}
+                </AppText>
+              ) : null}
             </View>
           ) : null}
         </View>
 
-        <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
-          <MetaChip>
-            {t("clubs.courtCount", { count: club.court_count })}
-          </MetaChip>
-          <MetaChip>{t("clubs.payAtClub")}</MetaChip>
-        </View>
+        {!compact ? (
+          <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
+            <MetaChip>
+              {t("clubs.courtCount", { count: club.court_count })}
+            </MetaChip>
+            <MetaChip>{t("clubs.payAtClub")}</MetaChip>
+          </View>
+        ) : (
+          <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
+            <MetaChip>
+              {t("clubs.courtCount", { count: club.court_count })}
+            </MetaChip>
+            <MetaChip>
+              {t(clubBookingModeLabelKey(club.booking_mode))}
+            </MetaChip>
+          </View>
+        )}
 
         {amenities.length > 0 ? (
           <View style={[styles.tagRow, { flexDirection: rowDirection }]}>
@@ -140,9 +184,13 @@ export function ClubDirectoryCard({
           </View>
         ) : null}
 
-        <View style={styles.cta}>
-          <AppText style={styles.ctaLabel}>{t("clubs.viewDetails")}</AppText>
-        </View>
+        {!selectable ? (
+          <View style={styles.cta}>
+            <AppText style={styles.ctaLabel}>{t("clubs.viewDetails")}</AppText>
+          </View>
+        ) : selected ? (
+          <AppText style={styles.selectedHint}>{t("clubs.selected")}</AppText>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -150,15 +198,23 @@ export function ClubDirectoryCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: tennisColors.border,
     borderRadius: 18,
     overflow: "hidden",
     backgroundColor: tennisColors.card,
   },
+  cardCompact: {
+    borderRadius: tennisRadii.lg,
+  },
   cardSelected: {
     borderColor: tennisColors.primary,
     backgroundColor: tennisColors.secondary,
+    shadowColor: tennisColors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 2,
   },
   cardPressed: {
     opacity: 0.92,
@@ -168,6 +224,9 @@ const styles = StyleSheet.create({
     backgroundColor: tennisColors.muted,
     position: "relative",
     overflow: "hidden",
+  },
+  heroCompact: {
+    height: 72,
   },
   heroOverlay: {
     position: "absolute",
@@ -183,6 +242,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     opacity: 0.35,
+  },
+  selectMark: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 4,
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: tennisColors.white,
+    backgroundColor: "rgba(255,255,255,0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  selectMarkSelected: {
+    backgroundColor: tennisColors.primary,
+    borderColor: tennisColors.primary,
+  },
+  selectCheck: {
+    color: tennisColors.lime,
+    fontSize: 13,
+    fontFamily: tennisFontFamily.bodySemi,
+    lineHeight: 16,
   },
   favoriteBadge: {
     position: "absolute",
@@ -217,6 +300,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     gap: 12,
   },
+  bodyCompact: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+  },
   titleRow: {
     alignItems: "flex-start",
     justifyContent: "space-between",
@@ -233,6 +321,10 @@ const styles = StyleSheet.create({
     color: tennisColors.primaryDark,
     letterSpacing: -0.3,
   },
+  nameCompact: {
+    fontSize: 15,
+    lineHeight: 20,
+  },
   zone: {
     fontFamily: tennisFontFamily.body,
     fontSize: 12,
@@ -247,6 +339,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: tennisColors.primary,
     letterSpacing: -0.3,
+  },
+  priceCompact: {
+    fontSize: 15,
+    lineHeight: 18,
   },
   priceHint: {
     fontFamily: tennisFontFamily.body,
@@ -294,5 +390,11 @@ const styles = StyleSheet.create({
     fontFamily: tennisFontFamily.heading,
     fontSize: 14,
     color: tennisColors.white,
+  },
+  selectedHint: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 12,
+    color: tennisColors.primary,
+    textAlign: "center",
   },
 });

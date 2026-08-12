@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Alert, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,15 +8,15 @@ import {
   getClubDetail,
   getMatchHub,
 } from "@tennis-lebanon/api";
-import { formatPriceMinor } from "@tennis-lebanon/domain";
 import { ClubsDirectoryList } from "../../../src/components/ClubsDirectoryList";
+import { StatusBanner } from "../../../src/components/AppUi";
 import { AppText } from "../../../src/components/AppText";
+import { Screen } from "../../../src/components/FormUi";
 import {
-  Choice,
-  PrimaryButton,
-  Screen,
-  formStyles,
-} from "../../../src/components/FormUi";
+  FigmaBackButton,
+  FigmaPrimaryButton,
+  figmaFormStyles,
+} from "../../../src/components/onboarding-ui";
 import {
   addMinutes,
   dayKey,
@@ -29,10 +29,15 @@ import {
   formatUtcSlotInBeirut,
   utcIsoToBeirutFields,
 } from "../../../src/lib/beirut-time";
+import { CreateMatchPanel } from "../../../src/lib/create-match-ui";
 import { clubIdsFromList } from "../../../src/lib/match-clubs";
 import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
 import { matchHubRoute } from "../../../src/lib/routes";
+import { confirmAction, notify } from "../../../src/lib/confirm-action";
 import { supabase } from "../../../src/lib/supabase";
+import { useToast } from "../../../src/providers/ToastProvider";
+import { tennisColors } from "../../../src/theme/tennis-tokens";
+import { tennisFontFamily } from "../../../src/hooks/useTennisFonts";
 
 type SlotDraft = {
   day: string;
@@ -66,8 +71,8 @@ export default function MatchBookExternalScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
-  const [courtId, setCourtId] = useState<string | null>(null);
   const [slot, setSlot] = useState<SlotDraft | null>(null);
 
   const hubQuery = useQuery({
@@ -89,6 +94,15 @@ export default function MatchBookExternalScreen() {
     enabled: Boolean(selectedClubId),
   });
 
+  // Off-app booking is club-level for the host; the first listed court is a
+  // stable placeholder so the RPC can record the booking without a second step.
+  // Derived rather than synced through an effect: nothing else ever chooses a
+  // court, so an effect only bought a second render per club change.
+  const courtId =
+    selectedClubId && clubQuery.data
+      ? (clubQuery.data.courts[0]?.court_id ?? null)
+      : null;
+
   const agreedSlot = useMemo(() => {
     const selected = hubQuery.data?.selected_time_option_id;
     if (!selected) return null;
@@ -107,16 +121,12 @@ export default function MatchBookExternalScreen() {
     [hubQuery.data?.preferred_clubs],
   );
 
-  // Matches created before this existed have no shortlist, and nothing is off
-  // it. Warn only when the group actually agreed to a set of clubs.
   const offPreferredList = Boolean(
     preferredClubIds.length > 0 &&
-    selectedClubId &&
-    !preferredClubIds.includes(selectedClubId),
+      selectedClubId &&
+      !preferredClubIds.includes(selectedClubId),
   );
 
-  // Derived rather than seeded in an effect: the agreed slot arrives async, and
-  // setting state from an effect cascades a second render on every load.
   const effectiveSlot = useMemo(
     () => slot ?? slotFromAgreed(agreedSlot),
     [slot, agreedSlot],
@@ -131,13 +141,13 @@ export default function MatchBookExternalScreen() {
     addMinutes(effectiveSlot.startTime, effectiveSlot.duration),
   );
 
-  // Compared as instants rather than strings: the agreed slot comes back from
-  // Postgres in a different shape than beirutLocalToUtcIso produces.
   const timeChanged = agreedSlot
     ? new Date(startsAt).getTime() !==
         new Date(agreedSlot.starts_at).getTime() ||
       new Date(endsAt).getTime() !== new Date(agreedSlot.ends_at).getTime()
     : false;
+
+  const selectedClubHasCourts = Boolean(clubQuery.data?.courts.length);
 
   const confirmMutation = useMutation({
     mutationFn: () =>
@@ -150,12 +160,12 @@ export default function MatchBookExternalScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
       await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
-      Alert.alert(t("matches.booking.externalSuccess"));
+      showToast(t("matches.booking.externalSuccess"));
       router.replace(matchHubRoute(id!));
     },
     onError: (error: unknown) => {
       const message = error instanceof Error ? error.message : "";
-      Alert.alert(
+      notify(
         message.includes("court_already_booked")
           ? t("matches.booking.courtAlreadyBooked")
           : message.includes("Invalid court time")
@@ -167,18 +177,11 @@ export default function MatchBookExternalScreen() {
     },
   });
 
-  function handleSelectClub(clubId: string) {
-    setSelectedClubId(clubId);
-    setCourtId(null);
-  }
-
   function handleConfirm() {
     if (!clubQuery.data || !selectedCourt) {
       return;
     }
 
-    // A moved hour is the thing the rest of the group has to be told about, so
-    // say it here rather than letting the host find out from the notice.
     const body = timeChanged
       ? t("matches.booking.bookedOffAppConfirmMovedBody", {
           club: clubQuery.data.name,
@@ -191,121 +194,118 @@ export default function MatchBookExternalScreen() {
           time: formatUtcSlotInBeirut(startsAt, endsAt),
         });
 
-    Alert.alert(t("matches.booking.bookedOffAppConfirmTitle"), body, [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("matches.booking.bookedOffAppConfirm"),
-        onPress: () => confirmMutation.mutate(),
-      },
-    ]);
+    confirmAction({
+      title: t("matches.booking.bookedOffAppConfirmTitle"),
+      message: body,
+      confirmLabel: t("matches.booking.bookedOffAppConfirm"),
+      cancelLabel: t("common.cancel"),
+      onConfirm: () => confirmMutation.mutate(),
+    });
   }
 
   const canConfirm = Boolean(
-    selectedClubId && courtId && !confirmMutation.isPending,
+    selectedClubId &&
+      courtId &&
+      selectedClubHasCourts &&
+      !confirmMutation.isPending,
   );
 
   return (
-    <Screen
-      title={t("matches.booking.bookedOffAppTitle")}
-      description={t("matches.booking.bookedOffAppDescription")}
-    >
+    <Screen title={t("matches.booking.bookedOffAppTitle")} showTitle={false}>
+      <FigmaBackButton onPress={() => router.back()} />
+      <AppText accessibilityRole="header" style={screenStyles.title}>
+        {t("matches.booking.bookedOffAppTitle")}
+      </AppText>
+      <AppText style={screenStyles.description}>
+        {t("matches.booking.bookedOffAppDescription")}
+      </AppText>
+
       {hubQuery.isLoading ? (
         <ActivityIndicator accessibilityLabel={t("common.loading")} />
       ) : null}
 
-      <AppText style={formStyles.summaryLabel}>
-        {t("matches.booking.courtTimeLabel")}
-      </AppText>
-      <AppText style={formStyles.description}>
-        {t("matches.booking.courtTimeHelp")}
-      </AppText>
-
-      <SlotPicker
-        selectedDay={effectiveSlot.day}
-        onSelectDay={(day) => setSlot({ ...effectiveSlot, day })}
-        selectedTime={effectiveSlot.startTime}
-        onSelectTime={(startTime) => setSlot({ ...effectiveSlot, startTime })}
-        duration={effectiveSlot.duration}
-        onSelectDuration={(duration) => setSlot({ ...effectiveSlot, duration })}
-      />
-
-      {agreedSlot && timeChanged ? (
-        <AppText style={formStyles.errorText}>
-          {t("matches.booking.timeDiffersFromAgreed", {
-            agreed: formatUtcSlotInBeirut(
-              agreedSlot.starts_at,
-              agreedSlot.ends_at,
-            ),
-          })}
-        </AppText>
-      ) : null}
-
-      <AppText style={formStyles.summaryLabel}>
-        {t("matches.booking.selectClub")}
-      </AppText>
-      <ClubsDirectoryList
-        clubsQuery={clubsQuery}
-        onClubPress={handleSelectClub}
-        priorityClubIds={preferredClubIds}
-      />
-
-      {offPreferredList ? (
-        <AppText style={formStyles.errorText}>
-          {t("matches.booking.offPreferredListWarning")}
-        </AppText>
-      ) : null}
-
-      {selectedClubId ? (
-        <View style={formStyles.compactCard}>
-          <AppText style={formStyles.compactCardTitle}>
-            {clubQuery.data?.name ?? t("common.loading")}
+      <View style={figmaFormStyles.stack}>
+        <CreateMatchPanel title={t("matches.booking.courtTimeLabel")}>
+          <AppText style={screenStyles.panelHelp}>
+            {t("matches.booking.courtTimeHelp")}
           </AppText>
-
-          {clubQuery.isLoading ? <ActivityIndicator /> : null}
-
-          {clubQuery.data && clubQuery.data.courts.length > 0 ? (
-            <View style={formStyles.stack}>
-              <AppText style={formStyles.summaryLabel}>
-                {t("matches.booking.selectCourt")}
-              </AppText>
-              {clubQuery.data.courts.map((court) => {
-                const price = formatPriceMinor(
-                  court.price_minor,
-                  court.currency,
-                );
-                return (
-                  <Choice
-                    key={court.court_id}
-                    label={court.name}
-                    description={[
-                      t(`clubs.surfaces.${court.surface}`),
-                      court.is_indoor ? t("clubs.indoor") : t("clubs.outdoor"),
-                      price,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                    selected={courtId === court.court_id}
-                    onPress={() => setCourtId(court.court_id)}
-                  />
-                );
+          <SlotPicker
+            selectedDay={effectiveSlot.day}
+            onSelectDay={(day) => setSlot({ ...effectiveSlot, day })}
+            selectedTime={effectiveSlot.startTime}
+            onSelectTime={(startTime) =>
+              setSlot({ ...effectiveSlot, startTime })
+            }
+            duration={effectiveSlot.duration}
+            onSelectDuration={(duration) =>
+              setSlot({ ...effectiveSlot, duration })
+            }
+          />
+          {agreedSlot && timeChanged ? (
+            <StatusBanner
+              body={t("matches.booking.timeDiffersFromAgreed", {
+                agreed: formatUtcSlotInBeirut(
+                  agreedSlot.starts_at,
+                  agreedSlot.ends_at,
+                ),
               })}
-            </View>
+            />
+          ) : null}
+        </CreateMatchPanel>
+
+        <CreateMatchPanel title={t("matches.booking.selectClub")}>
+          {offPreferredList ? (
+            <StatusBanner
+              body={t("matches.booking.offPreferredListWarning")}
+            />
           ) : null}
 
-          {clubQuery.data && clubQuery.data.courts.length === 0 ? (
-            <AppText style={formStyles.description}>
-              {t("matches.booking.bookedOffAppNoCourts")}
-            </AppText>
-          ) : null}
-        </View>
-      ) : null}
+          <ClubsDirectoryList
+            clubsQuery={clubsQuery}
+            compact
+            onClubPress={setSelectedClubId}
+            selectedClubIds={selectedClubId ? [selectedClubId] : []}
+            priorityClubIds={preferredClubIds}
+          />
 
-      <PrimaryButton
-        label={t("matches.booking.bookedOffAppConfirm")}
-        disabled={!canConfirm}
-        loading={confirmMutation.isPending}
-        onPress={handleConfirm}
-      />
+          {selectedClubId && clubQuery.isSuccess && !selectedClubHasCourts ? (
+            <StatusBanner body={t("matches.booking.bookedOffAppNoCourts")} />
+          ) : null}
+        </CreateMatchPanel>
+
+        <FigmaPrimaryButton
+          label={t("matches.booking.bookedOffAppConfirm")}
+          disabled={!canConfirm}
+          loading={confirmMutation.isPending}
+          onPress={handleConfirm}
+        />
+      </View>
     </Screen>
   );
 }
+
+const screenStyles = {
+  title: {
+    fontFamily: tennisFontFamily.headingExtra,
+    fontSize: 24,
+    lineHeight: 28,
+    color: tennisColors.primaryDark,
+    letterSpacing: -0.5,
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  description: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 14,
+    lineHeight: 20,
+    color: tennisColors.mutedForeground,
+    marginBottom: 20,
+  },
+  panelHelp: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    lineHeight: 18,
+    color: tennisColors.mutedForeground,
+    marginBottom: 4,
+  },
+};

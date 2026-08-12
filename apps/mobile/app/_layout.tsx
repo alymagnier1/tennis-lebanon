@@ -1,10 +1,14 @@
 import "../src/lib/i18n";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, AppState, View } from "react-native";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useTennisFonts } from "../src/hooks/useTennisFonts";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  focusManager,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { initSentry } from "../src/lib/sentry";
 import { AuthProvider } from "../src/providers/AuthProvider";
 import { OnboardingProvider } from "../src/providers/OnboardingProvider";
@@ -13,6 +17,7 @@ import { NotificationDeepLinkHandler } from "../src/components/NotificationDeepL
 import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
 import { ToastProvider } from "../src/providers/ToastProvider";
 import { ConfirmDialogProvider } from "../src/providers/ConfirmDialogProvider";
+import { tennisColors } from "../src/theme/tennis-tokens";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,6 +26,17 @@ const queryClient = new QueryClient({
       staleTime: 30_000,
     },
   },
+});
+
+// React Query refetches on window focus by default, but that signal is a
+// browser one: on native nothing ever reports focus, so a query that went stale
+// while the app sat in the background stayed stale after returning to it. This
+// is the half of "I had to restart the app" that realtime does not cover.
+focusManager.setEventListener((handleFocus) => {
+  const subscription = AppState.addEventListener("change", (state) => {
+    handleFocus(state === "active");
+  });
+  return () => subscription.remove();
 });
 
 export default function RootLayout() {
@@ -32,8 +48,15 @@ export default function RootLayout() {
 
   if (!fontsLoaded) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator />
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: tennisColors.background,
+        }}
+      >
+        <ActivityIndicator color={tennisColors.primary} />
       </View>
     );
   }

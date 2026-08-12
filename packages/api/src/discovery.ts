@@ -104,6 +104,63 @@ function normalizeDiscoverPlayerCard(
   };
 }
 
+export type OpenMatchProposedTime = {
+  id?: string;
+  starts_at: string;
+  ends_at: string;
+};
+
+function coerceIsoTimestamp(value: unknown): string | null {
+  if (typeof value === "string" && value.length > 0) return value;
+  if (value instanceof Date) return value.toISOString();
+  return null;
+}
+
+export function normalizeOpenMatchProposedTimes(
+  value: unknown,
+): OpenMatchProposedTime[] {
+  let parsed = value;
+  if (typeof parsed === "string") {
+    try {
+      parsed = JSON.parse(parsed) as unknown;
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  return parsed.flatMap((slot) => {
+    if (!slot || typeof slot !== "object") return [];
+    const record = slot as Record<string, unknown>;
+    const startsAt = coerceIsoTimestamp(record.starts_at ?? record.startsAt);
+    const endsAt = coerceIsoTimestamp(record.ends_at ?? record.endsAt);
+    if (!startsAt || !endsAt) {
+      return [];
+    }
+    const id = record.id;
+    return [
+      {
+        id: typeof id === "string" ? id : undefined,
+        starts_at: startsAt,
+        ends_at: endsAt,
+      },
+    ];
+  });
+}
+
+/** Earliest non-withdrawn proposed slot returned by discover. */
+export function openMatchSoonestSlot(
+  proposedTimes: OpenMatchProposedTime[],
+): OpenMatchProposedTime | null {
+  let best: OpenMatchProposedTime | null = null;
+  for (const slot of proposedTimes) {
+    if (!best || slot.starts_at < best.starts_at) {
+      best = slot;
+    }
+  }
+  return best;
+}
+
 export type OpenMatchCard = {
   match_id: string;
   format: string;
@@ -115,7 +172,7 @@ export type OpenMatchCard = {
   max_skill: string;
   zones: unknown;
   preferred_clubs: MatchPreferredClub[];
-  proposed_times: unknown;
+  proposed_times: OpenMatchProposedTime[];
   participant_count: number;
   capacity: number;
   creator_display_name: string;
@@ -129,6 +186,17 @@ export type OpenMatchCard = {
   court_secured: boolean;
   court_club_name: string | null;
 };
+
+type DiscoverOpenMatchCardRow = Omit<OpenMatchCard, "proposed_times"> & {
+  proposed_times?: unknown;
+};
+
+function normalizeOpenMatchCard(row: DiscoverOpenMatchCardRow): OpenMatchCard {
+  return {
+    ...row,
+    proposed_times: normalizeOpenMatchProposedTimes(row.proposed_times),
+  };
+}
 
 export async function discoverCompatiblePlayers(
   client: TennisSupabaseClient,
@@ -173,7 +241,7 @@ export async function discoverOpenMatches(
   });
 
   if (error) throw error;
-  return (data ?? []) as OpenMatchCard[];
+  return ((data ?? []) as DiscoverOpenMatchCardRow[]).map(normalizeOpenMatchCard);
 }
 
 export async function getPublicPlayerCard(

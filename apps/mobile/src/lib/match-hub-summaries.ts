@@ -44,3 +44,17 @@ export function matchHubJoinSummary(
 
   return parts.join(" · ");
 }
+
+export function matchHubMetaLine(
+  hub: Pick<
+    MatchHubCard,
+    "format" | "intent" | "min_skill" | "max_skill"
+  >,
+  t: Translate,
+): string {
+  return [
+    t(`formats.${hub.format}`),
+    t(`playIntent.${hub.intent}`),
+    matchHubLevelSummary(hub, t),
+  ].join(" · ");
+}

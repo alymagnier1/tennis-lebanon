@@ -124,6 +124,25 @@ export function formatShortUtcDateInBeirut(iso: string): string {
   }).format(new Date(iso));
 }
 
+/** Compact list label: weekday, day-of-month, and start time in Beirut. */
+export function formatCompactUtcInBeirut(iso: string): string {
+  const date = new Date(iso);
+  const weekday = new Intl.DateTimeFormat(undefined, {
+    timeZone: BEIRUT_TIME_ZONE,
+    weekday: "short",
+  }).format(date);
+  const day = new Intl.DateTimeFormat(undefined, {
+    timeZone: BEIRUT_TIME_ZONE,
+    day: "numeric",
+  }).format(date);
+  const time = new Intl.DateTimeFormat(undefined, {
+    timeZone: BEIRUT_TIME_ZONE,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+  return `${weekday} ${day}, ${time}`;
+}
+
 export function formatUtcSlotInBeirut(
   startIso: string,
   endIso: string,

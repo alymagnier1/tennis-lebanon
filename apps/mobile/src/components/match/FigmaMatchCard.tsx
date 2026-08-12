@@ -21,6 +21,10 @@ export type MatchCardProps = {
   opponentName?: string;
   opponentAvatarPath?: string | null;
   opponentAvatarColor?: string;
+  /** Discover-style card: host avatar on the trailing edge without a leading spacer. */
+  hostName?: string;
+  hostAvatarPath?: string | null;
+  hostAvatarColor?: string;
   formatChip?: string;
   locationChip?: string;
   badges?: MatchListBadge[];
@@ -102,6 +106,9 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
   opponentName,
   opponentAvatarPath,
   opponentAvatarColor = "#7C3AED",
+  hostName,
+  hostAvatarPath,
+  hostAvatarColor = "#7C3AED",
   formatChip,
   locationChip,
   badges,
@@ -113,7 +120,12 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
 }: MatchCardProps) {
   const { rowDirection, writingDirection } = useLayoutDirection();
   const statusVisual = matchCardStatusVisual(status);
-  const showPlayerRow = Boolean(viewerName) || Boolean(opponentName);
+  const showHostTrailing =
+    Boolean(hostName) && !viewerName && !opponentName;
+  const showLeadingViewer = Boolean(viewerName);
+  const showTrailingOpponent = Boolean(opponentName);
+  const showPlayerRow =
+    showLeadingViewer || showTrailingOpponent || showHostTrailing;
 
   const accessibilityLabel = buildCardAccessibilityLabel([
     statusLabel,
@@ -189,12 +201,15 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
               <View
                 style={[styles.statusDot, { backgroundColor: statusVisual.dot }]}
               />
-              <AppText style={styles.dateText} maxLines={1}>
+              <AppText
+                style={[styles.dateText, { writingDirection }]}
+                maxLines={1}
+              >
                 {dateTimeLabel}
               </AppText>
             </View>
           ) : (
-            <View />
+            <View style={styles.topRowSpacer} />
           )}
           <View
             style={[
@@ -212,25 +227,37 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
         </View>
 
         {showPlayerRow ? (
-          <View style={[styles.playerRow, { flexDirection: rowDirection }]}>
-            {viewerName ? (
+          <View
+            style={[
+              styles.playerRow,
+              showHostTrailing && styles.playerRowHost,
+              { flexDirection: rowDirection },
+            ]}
+          >
+            {showLeadingViewer ? (
               <MatchCardAvatar
-                name={viewerName}
+                name={viewerName!}
                 avatarPath={viewerAvatarPath}
                 backgroundColor={tennisColors.primary}
                 textColor={tennisColors.lime}
               />
-            ) : (
+            ) : showHostTrailing ? null : (
               <View style={styles.avatarSpacer} />
             )}
             {centerContent}
-            {opponentName ? (
+            {showTrailingOpponent ? (
               <MatchCardAvatar
-                name={opponentName}
+                name={opponentName!}
                 avatarPath={opponentAvatarPath}
                 backgroundColor={opponentAvatarColor}
               />
-            ) : viewerName ? (
+            ) : showHostTrailing ? (
+              <MatchCardAvatar
+                name={hostName!}
+                avatarPath={hostAvatarPath}
+                backgroundColor={hostAvatarColor}
+              />
+            ) : showLeadingViewer ? (
               <PlaceholderOpponentAvatar />
             ) : (
               <View style={styles.avatarSpacer} />
@@ -244,6 +271,18 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
             >
               {headline}
             </AppText>
+            {dateTimeLabel ? (
+              <AppText
+                style={[
+                  styles.dateTimeLine,
+                  styles.dateTimeStandalone,
+                  { writingDirection },
+                ]}
+                maxLines={1}
+              >
+                {dateTimeLabel}
+              </AppText>
+            ) : null}
             {badges && badges.length > 0 ? (
               <View style={[styles.badgeRow, { flexDirection: rowDirection }]}>
                 {badges.map((entry) => (
@@ -359,6 +398,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 8,
   },
+  topRowSpacer: {
+    flex: 1,
+  },
   dateRow: {
     alignItems: "center",
     gap: 6,
@@ -369,26 +411,41 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
+    flexShrink: 0,
   },
   dateText: {
     flex: 1,
-    fontFamily: tennisFontFamily.body,
+    fontFamily: tennisFontFamily.bodyMedium,
     fontSize: 12,
-    color: "#64748B",
+    lineHeight: 16,
+    color: tennisColors.mutedForeground,
+  },
+  dateTimeLine: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 13,
+    lineHeight: 18,
+    color: tennisColors.mutedForeground,
+  },
+  dateTimeStandalone: {
+    textAlign: "center",
+  },
+  playerRow: {
+    alignItems: "center",
+    gap: 12,
+  },
+  playerRowHost: {
+    alignItems: "flex-start",
   },
   statusPill: {
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: tennisRadii.pill,
     maxWidth: "48%",
+    flexShrink: 0,
   },
   statusPillText: {
     fontFamily: tennisFontFamily.bodySemi,
     fontSize: 11,
-  },
-  playerRow: {
-    alignItems: "center",
-    gap: 12,
   },
   centerColumn: {
     flex: 1,

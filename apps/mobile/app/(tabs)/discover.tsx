@@ -52,6 +52,7 @@ import { supabase } from "../../src/lib/supabase";
 import { zoneLabelFromList } from "../../src/lib/zones";
 import { clubLabelFromList } from "../../src/lib/match-clubs";
 import { opponentAvatarColor } from "../../src/lib/match-card-status";
+import { openMatchCardDateTimeLabel } from "../../src/lib/open-match-card-time";
 
 type DiscoverSegment = "players" | "matches";
 
@@ -239,14 +240,16 @@ export default function DiscoverScreen() {
               match.zones,
               i18n.resolvedLanguage ?? i18n.language,
             );
+          const dateTimeLabel = openMatchCardDateTimeLabel(match);
           return (
             <MatchCard
               status={match.status}
               statusLabel={t(`matches.status.${match.status}`)}
+              dateTimeLabel={dateTimeLabel}
               headline={match.creator_display_name}
-              opponentName={match.creator_display_name}
-              opponentAvatarPath={match.creator_avatar_path}
-              opponentAvatarColor={opponentAvatarColor(match.creator_display_name)}
+              hostName={match.creator_display_name}
+              hostAvatarPath={match.creator_avatar_path}
+              hostAvatarColor={opponentAvatarColor(match.creator_display_name)}
               formatChip={t(`formats.${match.format}`)}
               locationChip={whereLabel}
               note={match.notes ?? undefined}

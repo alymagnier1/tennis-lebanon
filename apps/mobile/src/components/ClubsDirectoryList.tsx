@@ -19,6 +19,8 @@ type ClubsDirectoryListProps = {
   selectedClubIds?: string[];
   /** Clubs to float to the top, keeping their relative order below. */
   priorityClubIds?: string[];
+  /** Denser cards for booking and preference pickers. */
+  compact?: boolean;
 };
 
 export function ClubsDirectoryList({
@@ -28,6 +30,7 @@ export function ClubsDirectoryList({
   onClubPress,
   selectedClubIds,
   priorityClubIds,
+  compact = false,
 }: ClubsDirectoryListProps) {
   const { t } = useTranslation();
 
@@ -80,6 +83,7 @@ export function ClubsDirectoryList({
         <ClubDirectoryCard
           key={club.club_id}
           club={club}
+          compact={compact}
           onPress={() => handlePress(club.club_id)}
           selected={
             selectedClubIds ? selectedClubIds.includes(club.club_id) : undefined

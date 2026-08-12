@@ -12,8 +12,15 @@ export default function TabsLayout() {
 
   if (state === "loading") {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator />
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: tennisColors.background,
+        }}
+      >
+        <ActivityIndicator color={tennisColors.primary} />
       </View>
     );
   }
@@ -21,8 +28,15 @@ export default function TabsLayout() {
     const destination = authRouteForState(state);
     if (destination) return <Redirect href={destination} />;
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator />
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: tennisColors.background,
+        }}
+      >
+        <ActivityIndicator color={tennisColors.primary} />
       </View>
     );
   }

@@ -49,13 +49,16 @@ export function ProfileSkillBandSection({
   const [skillBand, setSkillBand] = useState(
     playerProfile.skill_band as SkillBand,
   );
-  const [syncedProfile, setSyncedProfile] = useState(playerProfile);
   const [startIndex, setStartIndex] = useState(() =>
     clampStartIndex(0, ORDERED_SKILL_BANDS.indexOf(skillBand)),
   );
 
-  if (playerProfile !== syncedProfile) {
-    setSyncedProfile(playerProfile);
+  // Adjusting state during render rather than in an effect: React sanctions
+  // this for prop-derived state, and the effect version renders once with the
+  // stale band before correcting itself.
+  const [syncedBand, setSyncedBand] = useState(playerProfile.skill_band);
+  if (playerProfile.skill_band !== syncedBand) {
+    setSyncedBand(playerProfile.skill_band);
     setSkillBand(playerProfile.skill_band as SkillBand);
   }
 

@@ -17,6 +17,11 @@ import { AppText } from "./AppText";
 import { formatUtcInBeirut } from "../lib/beirut-time";
 import { useLayoutDirection } from "../lib/layout-direction";
 import {
+  matchChatChannelName,
+  MATCH_CHAT_POLL_MS,
+  removeMatchChatChannels,
+} from "../lib/match-chat-realtime";
+import {
   realtimeStatusFrom,
   shouldRefetchAfterStatusChange,
   type RealtimeStatus,
@@ -58,45 +63,93 @@ export function MatchChatPanel({
     });
   }, [matchId, queryClient]);
 
+  // Synced in its own effect rather than during render, which React forbids for
+  // refs. The ref exists so the subscription effect below does not tear the
+  // channel down and rebuild it whenever this callback changes identity.
+  const refetchMessagesRef = useRef(refetchMessages);
+  useEffect(() => {
+    refetchMessagesRef.current = refetchMessages;
+  }, [refetchMessages]);
+
   useEffect(() => {
     if (!enabled) return;
 
-    const channel = supabase
-      .channel(`match-chat:${matchId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "match_messages",
-          filter: `match_id=eq.${matchId}`,
-        },
-        refetchMessages,
-      )
-      .subscribe((event) => {
-        const next = realtimeStatusFrom(event);
-        const previous = statusRef.current;
-        statusRef.current = next;
-        setRealtimeStatus(next);
+    let cancelled = false;
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-        if (shouldRefetchAfterStatusChange(previous, next)) {
-          refetchMessages();
+    const refetch = () => refetchMessagesRef.current();
+
+    const startPolling = () => {
+      if (pollTimer) return;
+      pollTimer = setInterval(refetch, MATCH_CHAT_POLL_MS);
+      setRealtimeStatus("interrupted");
+    };
+
+    const connect = async () => {
+      try {
+        await removeMatchChatChannels(supabase, matchId);
+        if (cancelled) return;
+
+        const nextChannel = supabase
+          .channel(matchChatChannelName(matchId))
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "match_messages",
+              filter: `match_id=eq.${matchId}`,
+            },
+            refetch,
+          );
+
+        if (cancelled) {
+          await supabase.removeChannel(nextChannel);
+          return;
         }
-      });
+
+        channel = nextChannel;
+        channel.subscribe((event) => {
+          const next = realtimeStatusFrom(event);
+          const previous = statusRef.current;
+          statusRef.current = next;
+          setRealtimeStatus(next);
+
+          if (shouldRefetchAfterStatusChange(previous, next)) {
+            refetch();
+          }
+        });
+      } catch {
+        if (!cancelled) {
+          startPolling();
+        }
+      }
+    };
+
+    void connect();
 
     const onAppStateChange = (nextState: AppStateStatus) => {
       if (nextState === "active") {
-        refetchMessages();
+        refetch();
       }
     };
 
     const subscription = AppState.addEventListener("change", onAppStateChange);
 
     return () => {
+      cancelled = true;
       subscription.remove();
-      void supabase.removeChannel(channel);
+      if (pollTimer) {
+        clearInterval(pollTimer);
+      }
+      if (channel) {
+        void supabase.removeChannel(channel);
+      } else {
+        void removeMatchChatChannels(supabase, matchId);
+      }
     };
-  }, [enabled, matchId, refetchMessages]);
+  }, [enabled, matchId]);
 
   const sendMutation = useMutation({
     mutationFn: (body: string) => sendMatchMessage(supabase, matchId, body),
