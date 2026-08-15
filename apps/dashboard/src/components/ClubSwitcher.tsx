@@ -35,7 +35,9 @@ export function ClubSwitcher({
           <option key={club.club_id} value={club.club_id}>
             {club.is_active
               ? club.name
-              : t("dashboard.clubSwitcher.pendingOption", { name: club.name })}
+              : t("dashboard.clubSwitcher.inactiveOption", {
+                  name: club.name,
+                })}
           </option>
         ))}
       </select>

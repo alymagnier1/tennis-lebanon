@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -6,6 +6,7 @@ import {
   confirmMatchResult,
   disputeMatchResult,
   recordMatchAttendance,
+  resubmitMatchResult,
   submitMatchResult,
   type MatchHubCard,
 } from "@tennis-lebanon/api";
@@ -13,6 +14,7 @@ import {
   canConfirmResult,
   canDisputeResult,
   canRecordAttendance,
+  canResubmitResult,
   canSubmitResult,
   createDefaultSetDrafts,
   createEmptySetDraft,
@@ -43,13 +45,23 @@ type HubParticipant = {
   status: string;
 };
 
+/**
+ * Side A always contains the viewer, which keeps the editor honest: your games
+ * are the left column and stay the left column. It also reduces the doubles
+ * question from "pair everyone up" to "who played with you?", which is one tap
+ * and cannot produce an invalid pairing.
+ */
 function MatchScoreEditor({
   setDrafts,
   onChange,
+  sideALabel,
+  sideBLabel,
   disabled,
 }: {
   setDrafts: SetScoreDraft[];
   onChange: (next: SetScoreDraft[]) => void;
+  sideALabel: string;
+  sideBLabel: string;
   disabled: boolean;
 }) {
   const { t } = useTranslation();
@@ -72,10 +84,12 @@ function MatchScoreEditor({
           <View style={styles.row}>
             <View style={styles.flex}>
               <FormField
-                label={t("matches.results.winnerGamesLabel")}
-                value={draft.winnerGames}
+                label={t("matches.results.gamesForLabel", {
+                  name: sideALabel,
+                })}
+                value={draft.sideAGames}
                 onChangeText={(value) =>
-                  updateSet(index, { winnerGames: value })
+                  updateSet(index, { sideAGames: value })
                 }
                 keyboardType="number-pad"
                 editable={!disabled}
@@ -84,10 +98,12 @@ function MatchScoreEditor({
             </View>
             <View style={styles.flex}>
               <FormField
-                label={t("matches.results.loserGamesLabel")}
-                value={draft.loserGames}
+                label={t("matches.results.gamesForLabel", {
+                  name: sideBLabel,
+                })}
+                value={draft.sideBGames}
                 onChangeText={(value) =>
-                  updateSet(index, { loserGames: value })
+                  updateSet(index, { sideBGames: value })
                 }
                 keyboardType="number-pad"
                 editable={!disabled}
@@ -133,19 +149,33 @@ export function MatchResultPanel({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { rowDirection } = useLayoutDirection();
-  const [selectedWinnerId, setSelectedWinnerId] = useState<string | null>(null);
+  const [partnerId, setPartnerId] = useState<string | null>(null);
+  const [disputeNote, setDisputeNote] = useState("");
+  const [isCorrecting, setIsCorrecting] = useState(false);
   const [setDrafts, setSetDrafts] = useState<SetScoreDraft[]>(() =>
     createDefaultSetDrafts(2),
   );
   const result = (hub.result as MatchHubResult | null) ?? null;
-  const participants =
-    (hub.participants as HubParticipant[] | undefined)?.filter(
-      (participant) => participant.status === "accepted",
-    ) ?? [];
+  const participants = useMemo(
+    () =>
+      (hub.participants as HubParticipant[] | undefined)?.filter(
+        (participant) => participant.status === "accepted",
+      ) ?? [],
+    [hub.participants],
+  );
+
+  const isDoubles = hub.format === "doubles";
+  const others = participants.filter(
+    (participant) => participant.user_id !== viewerUserId,
+  );
+  const nameFor = (userId: string) =>
+    participants.find((participant) => participant.user_id === userId)
+      ?.display_name ?? "";
 
   const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey: ["match-hub", matchId] });
     await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
+    await queryClient.invalidateQueries({ queryKey: ["my-completed-matches"] });
   };
 
   const attendanceMutation = useMutation({
@@ -157,17 +187,33 @@ export function MatchResultPanel({
 
   const submitMutation = useMutation({
     mutationFn: ({
-      winnerUserId,
       score,
+      sideAUserIds,
     }: {
-      winnerUserId: string;
       score: MatchHubResult["score"];
-    }) => submitMatchResult(supabase, matchId, score, winnerUserId),
+      sideAUserIds: string[];
+    }) => submitMatchResult(supabase, matchId, score, sideAUserIds),
     onSuccess: async () => {
       await invalidate();
       Alert.alert(t("matches.results.submitSuccess"));
     },
     onError: () => Alert.alert(t("matches.results.submitError")),
+  });
+
+  const resubmitMutation = useMutation({
+    mutationFn: ({
+      score,
+      sideAUserIds,
+    }: {
+      score: MatchHubResult["score"];
+      sideAUserIds: string[];
+    }) => resubmitMatchResult(supabase, matchId, score, sideAUserIds),
+    onSuccess: async () => {
+      setIsCorrecting(false);
+      await invalidate();
+      Alert.alert(t("matches.results.resubmitSuccess"));
+    },
+    onError: () => Alert.alert(t("matches.results.resubmitError")),
   });
 
   const confirmMutation = useMutation({
@@ -180,10 +226,11 @@ export function MatchResultPanel({
   });
 
   const disputeMutation = useMutation({
-    mutationFn: () => disputeMatchResult(supabase, matchId),
+    mutationFn: () =>
+      disputeMatchResult(supabase, matchId, disputeNote.trim() || undefined),
     onSuccess: async () => {
+      setDisputeNote("");
       await invalidate();
-      Alert.alert(t("matches.results.disputeSuccess"));
     },
     onError: () => Alert.alert(t("matches.results.disputeError")),
   });
@@ -210,31 +257,75 @@ export function MatchResultPanel({
     viewerUserId,
     result,
   });
+  const showResubmit = canResubmitResult({
+    viewerStatus: hub.viewer_status,
+    viewerUserId,
+    result,
+  });
 
   if (
     !showAttendance &&
     !showSubmit &&
     !showConfirm &&
     !showDispute &&
+    !showResubmit &&
     !result
   ) {
     return null;
   }
 
-  const winnerName =
-    participants.find(
-      (participant) => participant.user_id === result?.winner_user_id,
-    )?.display_name ?? null;
-  const scoreSummary = result ? formatMatchScore(result.score) : null;
+  // Side A is the viewer plus, in doubles, whoever they say played with them.
+  const sideAUserIds = isDoubles
+    ? partnerId
+      ? [viewerUserId, partnerId]
+      : null
+    : [viewerUserId];
+  const sideALabel = t("matches.results.yourSide");
+  const sideBLabel = isDoubles
+    ? t("matches.results.theirSide")
+    : (others[0]?.display_name ?? t("matches.results.theirSide"));
+
   const parsedPreview = parseMatchScoreDrafts(setDrafts);
-  const scorePreview =
-    parsedPreview.ok && selectedWinnerId
-      ? formatMatchScore(parsedPreview.score)
+  // Three phrasings rather than one interpolated name: side A is always the
+  // viewer, and "{{name}} wins" with name = "You" reads as "You wins".
+  const previewWinnerLabel =
+    parsedPreview.ok && sideAUserIds
+      ? parsedPreview.winningSide === 1
+        ? t("matches.results.derivedWinnerYou")
+        : isDoubles
+          ? t("matches.results.derivedWinnerThem")
+          : t("matches.results.derivedWinner", { name: sideBLabel })
       : null;
 
-  const handleSubmit = () => {
-    if (!selectedWinnerId) {
-      Alert.alert(t("matches.results.selectWinner"));
+  const scoreSummary = result
+    ? formatMatchScore(result.score, result.viewer_side)
+    : null;
+  const resultWinnerLabel = result
+    ? nameFor(
+        result.winning_side === 1
+          ? (result.side_a_user_ids[0] ?? "")
+          : (participants.find(
+              (participant) =>
+                !result.side_a_user_ids.includes(participant.user_id),
+            )?.user_id ?? ""),
+      )
+    : null;
+  const attribution = result
+    ? result.submitted_by === viewerUserId
+      ? t("matches.results.reportedByYou")
+      : t("matches.results.reportedBy", {
+          name: result.submitted_by_name || nameFor(result.submitted_by) || "—",
+        })
+    : null;
+
+  const buildScore = (
+    onValid: (score: MatchHubResult["score"], sideA: string[]) => void,
+  ) => {
+    if (!sideAUserIds) {
+      Alert.alert(
+        t("matches.results.sidesTitle"),
+        t("matches.results.sidesHint"),
+      );
       return;
     }
 
@@ -255,11 +346,48 @@ export function MatchResultPanel({
       return;
     }
 
-    submitMutation.mutate({
-      winnerUserId: selectedWinnerId,
-      score: parsed.score,
-    });
+    onValid(parsed.score, sideAUserIds);
   };
+
+  const partnerPicker =
+    isDoubles && others.length > 0 ? (
+      <View style={styles.stack}>
+        <AppText style={styles.subheading}>
+          {t("matches.results.sidesTitle")}
+        </AppText>
+        <AppText style={styles.muted}>{t("matches.results.sidesHint")}</AppText>
+        <View style={[styles.chips, { flexDirection: rowDirection }]}>
+          {others.map((participant) => (
+            <ChipButton
+              key={participant.user_id}
+              label={participant.display_name}
+              selected={partnerId === participant.user_id}
+              onPress={() => setPartnerId(participant.user_id)}
+            />
+          ))}
+        </View>
+      </View>
+    ) : null;
+
+  const scoreEditor = (
+    <>
+      {partnerPicker}
+      {sideAUserIds ? (
+        <>
+          <MatchScoreEditor
+            setDrafts={setDrafts}
+            onChange={setSetDrafts}
+            sideALabel={sideALabel}
+            sideBLabel={sideBLabel}
+            disabled={submitMutation.isPending || resubmitMutation.isPending}
+          />
+          {previewWinnerLabel ? (
+            <AppText style={styles.muted}>{previewWinnerLabel}</AppText>
+          ) : null}
+        </>
+      ) : null}
+    </>
+  );
 
   return (
     <PlayerProfileSection title={t("matches.results.title")}>
@@ -269,10 +397,10 @@ export function MatchResultPanel({
             label={t("matches.results.statusLabel")}
             value={t(`matches.results.status.${result.status}`)}
           />
-          {winnerName ? (
+          {resultWinnerLabel ? (
             <HubSummaryRow
               label={t("matches.results.winnerLabel")}
-              value={winnerName}
+              value={resultWinnerLabel}
             />
           ) : null}
           {scoreSummary ? (
@@ -280,6 +408,17 @@ export function MatchResultPanel({
               label={t("matches.results.scoreLabel")}
               value={scoreSummary}
             />
+          ) : null}
+          {/* The founder's call: an unconfirmed score is shown, always
+              attributed, so the other player can see the claim and correct it
+              rather than discovering it later in their history. */}
+          {attribution ? (
+            <AppText style={styles.muted}>{attribution}</AppText>
+          ) : null}
+          {result.status === "unverified" ? (
+            <AppText style={styles.muted}>
+              {t("matches.results.unverifiedHint")}
+            </AppText>
           ) : null}
         </>
       ) : null}
@@ -307,67 +446,82 @@ export function MatchResultPanel({
           <AppText style={styles.muted}>
             {t("matches.results.submitPrompt")}
           </AppText>
-          <AppText style={styles.subheading}>
-            {t("matches.results.selectWinner")}
+          <AppText style={styles.muted}>
+            {t("matches.results.optionalScoreHint")}
           </AppText>
-          <View style={[styles.chips, { flexDirection: rowDirection }]}>
-            {participants.map((participant) => (
-              <ChipButton
-                key={participant.user_id}
-                label={participant.display_name}
-                selected={selectedWinnerId === participant.user_id}
-                onPress={() => setSelectedWinnerId(participant.user_id)}
-              />
-            ))}
-          </View>
-          {selectedWinnerId ? (
-            <>
-              <MatchScoreEditor
-                setDrafts={setDrafts}
-                onChange={setSetDrafts}
-                disabled={submitMutation.isPending}
-              />
-              {scorePreview ? (
-                <AppText style={styles.muted}>
-                  {t("matches.results.scorePreview", { score: scorePreview })}
-                </AppText>
-              ) : null}
-              <FigmaPrimaryButton
-                label={t("matches.results.submit")}
-                loading={submitMutation.isPending}
-                onPress={handleSubmit}
-              />
-            </>
+          {scoreEditor}
+          {sideAUserIds ? (
+            <FigmaPrimaryButton
+              label={t("matches.results.submit")}
+              loading={submitMutation.isPending}
+              onPress={() =>
+                buildScore((score, sideA) =>
+                  submitMutation.mutate({ score, sideAUserIds: sideA }),
+                )
+              }
+            />
           ) : null}
         </View>
       ) : null}
 
       {showConfirm ? (
-        <FigmaPrimaryButton
-          label={t("matches.results.confirm")}
-          loading={confirmMutation.isPending}
-          onPress={() => confirmMutation.mutate()}
-        />
+        <View style={styles.stack}>
+          <AppText style={styles.muted}>
+            {t("matches.results.awaitingYou")}
+          </AppText>
+          <FigmaPrimaryButton
+            label={t("matches.results.confirm")}
+            loading={confirmMutation.isPending}
+            onPress={() => confirmMutation.mutate()}
+          />
+        </View>
       ) : null}
 
       {showDispute ? (
-        <HubDestructiveLink
-          label={t("matches.results.dispute")}
-          onPress={() =>
-            Alert.alert(
-              t("matches.results.dispute"),
-              t("matches.results.disputePrompt"),
-              [
-                { text: t("common.cancel"), style: "cancel" },
-                {
-                  text: t("matches.results.dispute"),
-                  style: "destructive",
-                  onPress: () => disputeMutation.mutate(),
-                },
-              ],
-            )
-          }
-        />
+        <View style={styles.stack}>
+          {/* dispute_match_result has always accepted a note and the UI never
+              sent one, so operators only ever saw that somebody objected. */}
+          <FormField
+            label={t("matches.results.disputeNoteLabel")}
+            value={disputeNote}
+            onChangeText={setDisputeNote}
+            editable={!disputeMutation.isPending}
+            maxLength={200}
+          />
+          <HubDestructiveLink
+            label={t("matches.results.thatsWrong")}
+            onPress={() => disputeMutation.mutate()}
+          />
+        </View>
+      ) : null}
+
+      {showResubmit ? (
+        <View style={styles.stack}>
+          <AppText style={styles.muted}>
+            {t("matches.results.resubmitPrompt")}
+          </AppText>
+          {isCorrecting ? (
+            <>
+              {scoreEditor}
+              {sideAUserIds ? (
+                <FigmaPrimaryButton
+                  label={t("matches.results.resubmit")}
+                  loading={resubmitMutation.isPending}
+                  onPress={() =>
+                    buildScore((score, sideA) =>
+                      resubmitMutation.mutate({ score, sideAUserIds: sideA }),
+                    )
+                  }
+                />
+              ) : null}
+            </>
+          ) : (
+            <FigmaPrimaryButton
+              label={t("matches.results.resubmit")}
+              onPress={() => setIsCorrecting(true)}
+            />
+          )}
+        </View>
       ) : null}
     </PlayerProfileSection>
   );

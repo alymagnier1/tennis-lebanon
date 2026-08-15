@@ -42,7 +42,10 @@ export function FigmaSubpageHero({
           </AppText>
           {description ? (
             <AppText
-              style={[tennisTextStyles.sectionSubtitleOnDark, { writingDirection }]}
+              style={[
+                tennisTextStyles.sectionSubtitleOnDark,
+                { writingDirection },
+              ]}
             >
               {description}
             </AppText>

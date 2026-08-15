@@ -37,8 +37,8 @@ const TAG_THEMES: Record<
   },
   clubs: {
     fill: tennisBrand.whatsappFill,
-    text: tennisBrand.whatsapp,
-    icon: tennisBrand.whatsapp,
+    text: tennisBrand.whatsappText,
+    icon: tennisBrand.whatsappText,
   },
 };
 
@@ -47,7 +47,7 @@ function Tag({
   label,
   variant,
 }: {
-  icon: IconName;
+  icon?: IconName;
   label: string;
   variant: DiscoverTagVariant;
 }) {
@@ -61,7 +61,7 @@ function Tag({
         { flexDirection: rowDirection, backgroundColor: theme.fill },
       ]}
     >
-      <Icon name={icon} size={12} color={theme.icon} />
+      {icon ? <Icon name={icon} size={12} color={theme.icon} /> : null}
       <AppText style={[styles.tagText, { color: theme.text }]} maxLines={1}>
         {label}
       </AppText>
@@ -77,7 +77,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   matchesPlayedLabel,
   formatTag,
   intentTag,
-  availabilityTag,
+  availabilityTags,
   clubsTag,
   profileAccessibilityLabel,
   primaryLabel,
@@ -90,9 +90,9 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   locationLabel: string;
   levelBadgeLabel: string;
   matchesPlayedLabel: string;
-  formatTag: string;
+  formatTag?: string | null;
   intentTag: string;
-  availabilityTag: string | null;
+  availabilityTags: string[];
   clubsTag?: string | null;
   profileAccessibilityLabel: string;
   primaryLabel: string;
@@ -165,11 +165,18 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
         </AppText>
 
         <View style={[styles.tagRow, { flexDirection: rowDirection }]}>
-          <Tag icon="court" label={formatTag} variant="format" />
-          <Tag icon="playIntent" label={intentTag} variant="intent" />
-          {availabilityTag ? (
-            <Tag icon="clock" label={availabilityTag} variant="availability" />
+          {formatTag ? (
+            <Tag icon="court" label={formatTag} variant="format" />
           ) : null}
+          <Tag icon="playIntent" label={intentTag} variant="intent" />
+          {availabilityTags.map((label, index) => (
+            <Tag
+              key={`${label}-${index}`}
+              icon={index === 0 ? "clock" : undefined}
+              label={label}
+              variant="availability"
+            />
+          ))}
           {clubsTag ? (
             <Tag icon="clubs" label={clubsTag} variant="clubs" />
           ) : null}

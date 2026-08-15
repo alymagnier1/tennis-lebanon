@@ -5,7 +5,9 @@ import {
 } from "@tennis-lebanon/api";
 import { formatCompactUtcInBeirut } from "./beirut-time";
 
-export function openMatchCardDateTimeLabel(match: OpenMatchCard): string | undefined {
+export function openMatchCardDateTimeLabel(
+  match: OpenMatchCard,
+): string | undefined {
   const primary = openMatchSoonestSlot(match.proposed_times);
   if (primary) {
     return formatCompactUtcInBeirut(primary.starts_at);

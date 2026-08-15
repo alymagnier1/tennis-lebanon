@@ -13,6 +13,7 @@ export function resolveHubPrimaryAction(input: {
   showRequestCourt: boolean;
   showConfirmExternalCourt: boolean;
   isDraftCreator: boolean;
+  viewerIsCreator?: boolean;
 }): HubPrimaryActionKind {
   if (input.isDraftCreator) {
     return "continue_setup";
@@ -24,6 +25,11 @@ export function resolveHubPrimaryAction(input: {
 
   if (input.joinAction === "request") {
     return "request_join";
+  }
+
+  // Booking and invite are host-only; joiners wait.
+  if (input.viewerIsCreator === false) {
+    return "none";
   }
 
   if (input.showRequestCourt) {

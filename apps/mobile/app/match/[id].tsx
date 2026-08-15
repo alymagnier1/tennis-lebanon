@@ -1,11 +1,5 @@
-import { useMemo } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +10,7 @@ import {
   getMatchHub,
   joinMatch,
   leaveMatch,
+  releaseExternalCourt,
   respondBookingAlternative,
   respondToJoinRequest,
   withdrawMatchTimeOption,
@@ -25,7 +20,6 @@ import {
   canCancelBookingRequest,
   canManageProposedTimes,
   canConfirmExternalCourt,
-  canRequestCourt,
   canRespondToBookingAlternative,
   canShowJoinAction,
   canRescheduleMatch,
@@ -40,9 +34,10 @@ import {
 } from "@tennis-lebanon/domain";
 import { spacing, typography } from "@tennis-lebanon/ui";
 import { StatusBanner } from "../../src/components/AppUi";
-import { MatchChatPanel } from "../../src/components/MatchChatPanel";
+import { MatchChatEntry } from "../../src/components/MatchChatEntry";
 import { MatchResultPanel } from "../../src/components/MatchResultPanel";
 import { AppText } from "../../src/components/AppText";
+import { SemanticBadge } from "../../src/components/SemanticBadge";
 import { ErrorNotice } from "../../src/components/FormUi";
 import {
   HubDestructiveLink,
@@ -51,7 +46,8 @@ import {
 import { MatchHubActionBar } from "../../src/components/match/MatchHubActionBar";
 import { MatchHubOverviewDetails } from "../../src/components/match/MatchHubOverviewDetails";
 import { MatchHubConfirmedHero } from "../../src/components/match/MatchHubConfirmedHero";
-import { MatchHubAgreedTimeHero } from "../../src/components/match/MatchHubAgreedTimeHero";
+import { MatchHubReadyHero } from "../../src/components/match/MatchHubReadyHero";
+import { MatchHubPreferredClubs } from "../../src/components/match/MatchHubPreferredClubs";
 import { MatchHubPendingBookingSection } from "../../src/components/match/MatchHubPendingBookingSection";
 import { MatchHubParticipants } from "../../src/components/match/MatchHubParticipants";
 import { MatchHubMatchDetails } from "../../src/components/match/MatchHubMatchDetails";
@@ -67,23 +63,30 @@ import { confirmAction } from "../../src/lib/confirm-action";
 import { confirmCancelHostedMatch } from "../../src/lib/confirm-cancel-hosted-match";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitMatchHub } from "../../src/lib/navigation";
-import { clubLabelFromList } from "../../src/lib/match-clubs";
+import { resolveHubAgreedStartsAt } from "../../src/lib/hub-agreed-time";
+import { toneForMatchStatus } from "../../src/lib/match-status-tone";
+import { useToast } from "../../src/providers/ToastProvider";
 import {
+  canConfirmCourtOnHub,
   isHubCourtLocked,
+  isHubVsHeroStage,
+  isMatchHubChatAvailable,
+  isMatchHubChatLocked,
   shouldShowAgreedTimeSection,
   shouldShowDiscoveryOverview,
   shouldShowPayAtClubBanner,
   shouldShowTimeAgreedBanner,
   shouldUsePolishedHubLayout,
 } from "../../src/lib/match-hub-layout";
-import { zoneLabelFromList } from "../../src/lib/zones";
 import {
+  hubPrimaryActionLabelKey,
   resolveHubPrimaryAction,
   type HubPrimaryActionKind,
 } from "../../src/lib/hub-action-bar";
 import {
   matchBookExternalRoute,
   matchBookRoute,
+  matchChatRoute,
   matchInviteRoute,
   matchWithdrawRoute,
 } from "../../src/lib/routes";
@@ -93,11 +96,22 @@ import { useAuth } from "../../src/providers/AuthProvider";
 import { tennisColors, tennisRadii } from "../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
+/** Court-first matches hold a court before they fill, so `confirmed` is not the
+ * only state a booking can be released from. Anything from `in_progress` on has
+ * either happened or not, which is attendance's business rather than booking's. */
+const RELEASABLE_MATCH_STATUSES = new Set([
+  "open",
+  "full",
+  "ready_to_book",
+  "confirmed",
+]);
+
 type HubParticipant = {
   user_id: string;
   display_name: string;
   status: string;
   is_creator?: boolean;
+  avatar_path?: string | null;
 };
 
 type HubRequest = {
@@ -108,10 +122,11 @@ type HubRequest = {
 
 export default function MatchHubScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
   const hubQuery = useQuery({
     queryKey: ["match-hub", id],
@@ -188,6 +203,15 @@ export default function MatchHubScreen() {
     onError: () => Alert.alert(t("matches.hub.cancelBookingError")),
   });
 
+  const releaseCourtMutation = useMutation({
+    mutationFn: () => releaseExternalCourt(supabase, id!),
+    onSuccess: () => {
+      invalidate();
+      showToast(t("matches.hub.courtReleased"));
+    },
+    onError: () => Alert.alert(t("matches.hub.courtReleaseError")),
+  });
+
   const alternativeMutation = useMutation({
     mutationFn: ({
       bookingId,
@@ -220,23 +244,22 @@ export default function MatchHubScreen() {
     [hub?.proposed_times],
   );
 
-  const showRequestCourt = hub
-    ? canRequestCourt({
-        viewerIsCreator: hub.viewer_is_creator,
-        matchStatus: hub.status,
-        nextAction: hub.next_action,
-      })
-    : false;
+  // v1 clubs are WhatsApp: preferred-club Contact + Booked off-app replace the
+  // in-app Request court CTA (queue has no staff delivery channel yet).
+  const showRequestCourt = false;
 
   const showConfirmExternalCourt = hub
-    ? canConfirmExternalCourt({
-        viewerIsParticipant: hub.viewer_status === "accepted",
-        viewerIsCreator: hub.viewer_is_creator,
-        matchStatus: hub.status,
-        timingMode: hub.timing_mode,
-        hasAgreedTime: Boolean(hub.selected_time_option_id),
-        hasAcceptedBooking: hub.booking?.status === "accepted",
-      })
+    ? canConfirmCourtOnHub(
+        canConfirmExternalCourt({
+          viewerIsParticipant: hub.viewer_status === "accepted",
+          viewerIsCreator: hub.viewer_is_creator,
+          matchStatus: hub.status,
+          timingMode: hub.timing_mode,
+          hasAgreedTime: Boolean(hub.selected_time_option_id),
+          hasAcceptedBooking: hub.booking?.status === "accepted",
+        }),
+        hub.status,
+      )
     : false;
 
   const viewerJoinAction = useMemo(() => {
@@ -285,6 +308,11 @@ export default function MatchHubScreen() {
     );
   }, [hub, proposedTimes]);
 
+  const agreedStartsAt = useMemo(() => {
+    if (!hub) return null;
+    return resolveHubAgreedStartsAt(hub, proposedTimes);
+  }, [hub, proposedTimes]);
+
   const canInvite =
     hub?.viewer_is_creator &&
     hub.participant_count < hub.capacity &&
@@ -292,17 +320,15 @@ export default function MatchHubScreen() {
 
   const hasAcceptedBooking = hub?.booking?.status === "accepted";
   const courtLocked = isHubCourtLocked(booking);
-  const polishedLayout = hub ? shouldUsePolishedHubLayout(hub, booking) : false;
-
-  const venueHint = useMemo(() => {
-    if (!hub) return undefined;
-    const locale = i18n.resolvedLanguage ?? i18n.language;
-    return (
-      clubLabelFromList(hub.preferred_clubs) ||
-      zoneLabelFromList(hub.zones, locale) ||
-      undefined
-    );
-  }, [hub, i18n]);
+  const heroStartsAt =
+    courtLocked && booking?.starts_at ? booking.starts_at : agreedStartsAt;
+  const hasAgreedTime = Boolean(heroStartsAt);
+  const vsHeroStage = hub
+    ? isHubVsHeroStage(hub, booking, hasAgreedTime)
+    : false;
+  const polishedLayout = hub
+    ? shouldUsePolishedHubLayout(hub, booking, hasAgreedTime)
+    : false;
 
   const showLeave =
     hub?.viewer_status === "accepted" &&
@@ -315,6 +341,17 @@ export default function MatchHubScreen() {
   const showCancel =
     hub?.viewer_is_creator && canCreatorCancelMatch(hub.status);
 
+  // Gated on match status rather than comparing the slot to the clock: reading
+  // the clock during render is impure, and the lifecycle already moves a started
+  // match to in_progress. `release_external_court` still enforces the exact
+  // `starts_at > now()` rule, and rejects a club-accepted booking -- which the
+  // hub payload cannot see, since it carries no `arranged_externally`.
+  const showReleaseCourt = Boolean(
+    hub?.viewer_is_creator &&
+    booking?.status === "accepted" &&
+    RELEASABLE_MATCH_STATUSES.has(hub.status),
+  );
+
   const primaryActionKind = useMemo((): HubPrimaryActionKind => {
     if (!hub) return "none";
     return resolveHubPrimaryAction({
@@ -323,6 +360,7 @@ export default function MatchHubScreen() {
       showRequestCourt,
       showConfirmExternalCourt,
       isDraftCreator: hub.status === "draft" && hub.viewer_is_creator,
+      viewerIsCreator: hub.viewer_is_creator,
     });
   }, [hub, viewerJoinAction, showConfirmExternalCourt, showRequestCourt]);
 
@@ -350,7 +388,9 @@ export default function MatchHubScreen() {
   const secondaryBannerBody = useMemo(() => {
     if (!hub) return null;
     const messages: string[] = [];
-    if (shouldShowTimeAgreedBanner(hub.next_action, hub, booking)) {
+    if (
+      shouldShowTimeAgreedBanner(hub.next_action, hub, booking, hasAgreedTime)
+    ) {
       messages.push(t("matches.hub.timeAgreed"));
     }
     if (hub.next_action === "awaiting_club") {
@@ -363,20 +403,21 @@ export default function MatchHubScreen() {
       messages.push(t("matches.lifecycle.staleWarning"));
     }
     return messages.length > 0 ? messages.join("\n") : null;
-  }, [booking, hub, t]);
+  }, [booking, hasAgreedTime, hub, t]);
 
   const primaryBannerBody = useMemo(() => {
     if (!hub) return null;
     if (hub.status === "draft" && hub.viewer_is_creator) {
       return t("matches.hub.draftBanner");
     }
-    if (hub.next_action === "awaiting_players") {
+    // Vs-hero already shows open slots; skip the duplicate awaiting banner.
+    if (hub.next_action === "awaiting_players" && !vsHeroStage) {
       return hasAcceptedBooking
         ? t("matches.hub.awaitingPlayersCourtSecured")
         : t("matches.hub.awaitingPlayers");
     }
     return null;
-  }, [hasAcceptedBooking, hub, t]);
+  }, [hasAcceptedBooking, hub, t, vsHeroStage]);
 
   function renderTimeSlot(slot: MatchHubTimeOption) {
     const isAgreed = hub?.selected_time_option_id === slot.id;
@@ -428,18 +469,78 @@ export default function MatchHubScreen() {
     );
   }
 
+  function handleReleaseCourt() {
+    confirmAction({
+      title: t("matches.hub.courtFellThrough"),
+      message: t("matches.hub.courtFellThroughPrompt"),
+      confirmLabel: t("matches.hub.courtFellThroughConfirm"),
+      cancelLabel: t("common.cancel"),
+      onConfirm: () => releaseCourtMutation.mutate(),
+    });
+  }
+
+  function handleCancelMatch() {
+    if (!hub) return;
+    confirmCancelHostedMatch(
+      {
+        matchId: id!,
+        status: hub.status,
+        participantCount: hub.participant_count,
+        bookingStartsAt: hub.booking?.starts_at ?? null,
+      },
+      t,
+      () => {
+        queryClient.invalidateQueries({ queryKey: ["my-matches"] });
+        queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
+        exitMatchHub();
+      },
+    );
+  }
+
+  const actionsInReadyHero = Boolean(heroStartsAt && vsHeroStage);
+  const chatAvailable = hub ? isMatchHubChatAvailable(hub) : false;
+  const chatLocked = hub ? isMatchHubChatLocked(hub) : false;
+
+  const hasPreferredClubs =
+    Array.isArray(hub?.preferred_clubs) && hub.preferred_clubs.length > 0;
+
+  // The preferred-clubs section owns booking, so the hero does not repeat it as
+  // a primary button -- unless there are no clubs to own it, in which case the
+  // hero is the only route to the confirm screen.
+  const heroPrimaryKind: HubPrimaryActionKind =
+    primaryActionKind === "confirm_external_court" && hasPreferredClubs
+      ? "none"
+      : primaryActionKind;
+  const primaryActionLabelKey = hubPrimaryActionLabelKey(heroPrimaryKind);
+
+  const [pullRefreshing, setPullRefreshing] = useState(false);
+
   const hubLayoutProps = {
     title: t("matches.hub.title"),
-    subtitle: hub ? t(`matches.status.${hub.status}`) : undefined,
+    statusSlot: hub ? (
+      <SemanticBadge
+        label={t(`matches.status.${hub.status}`)}
+        tone={toneForMatchStatus(hub.status)}
+      />
+    ) : undefined,
     onBack: exitMatchHub,
-    refreshing: hubQuery.isRefetching,
-    onRefresh: () => void hubQuery.refetch(),
+    // Only user pull-to-refresh — background invalidate after confirm was
+    // flashing RefreshControl and reading as a full-screen flicker.
+    refreshing: pullRefreshing,
+    onRefresh: () => {
+      setPullRefreshing(true);
+      void hubQuery.refetch().finally(() => setPullRefreshing(false));
+    },
     footer:
-      hub && primaryActionKind !== "none" ? (
+      !actionsInReadyHero &&
+      hub &&
+      (primaryActionKind !== "none" || showCancel) ? (
         <MatchHubActionBar
           actionKind={primaryActionKind}
           loading={joinMutation.isPending}
           onPress={handlePrimaryAction}
+          cancelLabel={showCancel ? t("matches.hub.cancel") : undefined}
+          onCancel={showCancel ? handleCancelMatch : undefined}
         />
       ) : null,
   };
@@ -477,21 +578,43 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      {booking && courtLocked ? (
-        <MatchHubConfirmedHero
-          booking={booking}
-          showReschedule={showReschedule}
-          onReschedule={() => router.push(`/match/${id}/reschedule`)}
+      {heroStartsAt && vsHeroStage && hub ? (
+        <MatchHubReadyHero
+          hub={hub}
+          participants={participants}
+          startsAt={heroStartsAt}
+          onReschedule={
+            showReschedule
+              ? () => router.push(`/match/${id}/reschedule`)
+              : undefined
+          }
+          primaryLabel={
+            primaryActionLabelKey ? t(primaryActionLabelKey) : undefined
+          }
+          primaryLoading={joinMutation.isPending}
+          onPrimary={
+            heroPrimaryKind !== "none" ? handlePrimaryAction : undefined
+          }
         />
       ) : null}
 
-      {agreedSlot && !courtLocked && polishedLayout ? (
-        <MatchHubAgreedTimeHero
-          startsAt={agreedSlot.starts_at}
-          endsAt={agreedSlot.ends_at}
-          venueHint={venueHint}
-          showReschedule={showReschedule}
-          onReschedule={() => router.push(`/match/${id}/reschedule`)}
+      {vsHeroStage && hasPreferredClubs ? (
+        <MatchHubPreferredClubs
+          clubs={hub!.preferred_clubs}
+          matchId={id!}
+          isHost={hub!.viewer_is_creator}
+          canConfirmCourt={showConfirmExternalCourt}
+          agreedSlot={agreedSlot ?? null}
+          booking={courtLocked ? booking : null}
+          releasing={releaseCourtMutation.isPending}
+          onRelease={showReleaseCourt ? handleReleaseCourt : undefined}
+        />
+      ) : courtLocked && booking ? (
+        <MatchHubConfirmedHero
+          booking={booking}
+          matchId={id!}
+          releasing={releaseCourtMutation.isPending}
+          onRelease={showReleaseCourt ? handleReleaseCourt : undefined}
         />
       ) : null}
 
@@ -499,7 +622,9 @@ export default function MatchHubScreen() {
         <MatchHubPendingBookingSection
           booking={booking}
           hub={hub!}
-          onCancelBooking={() => cancelBookingMutation.mutate(booking.booking_id)}
+          onCancelBooking={() =>
+            cancelBookingMutation.mutate(booking.booking_id)
+          }
           onAcceptAlternative={() =>
             alternativeMutation.mutate({
               bookingId: booking.booking_id,
@@ -604,15 +729,15 @@ export default function MatchHubScreen() {
         </PlayerProfileSection>
       ) : null}
 
-      {hub && shouldShowDiscoveryOverview(hub, booking) ? (
+      {hub && shouldShowDiscoveryOverview(hub, booking, hasAgreedTime) ? (
         <MatchHubOverviewDetails hub={hub} />
       ) : null}
 
-      {participants.length > 0 ? (
+      {participants.length > 0 && !vsHeroStage ? (
         <MatchHubParticipants participants={participants} />
       ) : null}
 
-      {canInvite ? (
+      {canInvite && !actionsInReadyHero ? (
         <FigmaSecondaryButton
           label={t("matches.invite.invitePlayers")}
           onPress={() => router.push(matchInviteRoute(id!))}
@@ -688,13 +813,16 @@ export default function MatchHubScreen() {
         </PlayerProfileSection>
       ) : null}
 
-      <MatchChatPanel
-        matchId={id!}
-        enabled={hub?.viewer_status === "accepted"}
-        viewerUserId={session?.user.id}
-      />
+      {courtLocked && hub && !vsHeroStage ? (
+        <MatchHubMatchDetails hub={hub} />
+      ) : null}
 
-      {polishedLayout && hub ? <MatchHubMatchDetails hub={hub} /> : null}
+      <MatchChatEntry
+        matchId={id!}
+        enabled={chatAvailable}
+        locked={chatLocked}
+        onPress={() => router.push(matchChatRoute(id!))}
+      />
 
       {showWithdraw ? (
         <HubDestructiveLink
@@ -729,25 +857,15 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      {showCancel ? (
+      {/*
+        Cancelling used to sit beside the primary action in the ready hero, at
+        equal weight. In the other stages the footer action bar still carries
+        it, so this covers the hero stage only.
+      */}
+      {showCancel && actionsInReadyHero ? (
         <HubDestructiveLink
           label={t("matches.hub.cancel")}
-          onPress={() =>
-            confirmCancelHostedMatch(
-              {
-                matchId: id!,
-                status: hub!.status,
-                participantCount: hub!.participant_count,
-                bookingStartsAt: hub!.booking?.starts_at ?? null,
-              },
-              t,
-              () => {
-                queryClient.invalidateQueries({ queryKey: ["my-matches"] });
-                queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
-                exitMatchHub();
-              },
-            )
-          }
+          onPress={handleCancelMatch}
         />
       ) : null}
     </MatchHubLayout>

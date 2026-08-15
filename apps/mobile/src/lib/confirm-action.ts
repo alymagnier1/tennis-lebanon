@@ -41,7 +41,9 @@ type ConfirmPresenters = {
 
 let presenters: ConfirmPresenters | null = null;
 
-export function registerConfirmPresenters(next: ConfirmPresenters | null): void {
+export function registerConfirmPresenters(
+  next: ConfirmPresenters | null,
+): void {
   presenters = next;
 }
 
@@ -74,7 +76,13 @@ export function chooseAction(options: ChooseActionOptions): void {
 
   if (Platform.OS === "web") {
     if (typeof window === "undefined") return;
-    if (window.confirm(options.message ? `${options.title}\n\n${options.message}` : options.title)) {
+    if (
+      window.confirm(
+        options.message
+          ? `${options.title}\n\n${options.message}`
+          : options.title,
+      )
+    ) {
       options.onConfirm();
     } else {
       options.onCancel?.();
@@ -89,7 +97,9 @@ export function chooseAction(options: ChooseActionOptions): void {
 }
 
 /** Cancel match with optional reason field — requires ConfirmDialogProvider. */
-export function presentCancelMatchDialog(options: CancelMatchDialogOptions): void {
+export function presentCancelMatchDialog(
+  options: CancelMatchDialogOptions,
+): void {
   if (presenters?.cancelMatchDialog) {
     presenters.cancelMatchDialog(options);
     return;
@@ -99,7 +109,9 @@ export function presentCancelMatchDialog(options: CancelMatchDialogOptions): voi
     if (typeof window === "undefined") return;
     if (
       !window.confirm(
-        options.message ? `${options.title}\n\n${options.message}` : options.title,
+        options.message
+          ? `${options.title}\n\n${options.message}`
+          : options.title,
       )
     ) {
       options.onDismiss?.();

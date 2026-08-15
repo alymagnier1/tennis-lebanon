@@ -25,11 +25,13 @@ describe("confirmCancelHostedMatch", () => {
   });
 
   it("opens the cancel dialog with reason field options", async () => {
-    const { confirmCancelHostedMatch } = await import(
-      "./confirm-cancel-hosted-match"
-    );
+    const { confirmCancelHostedMatch } =
+      await import("./confirm-cancel-hosted-match");
 
-    confirmCancelHostedMatch({ matchId: "m1", status: "open", participantCount: 1 }, t);
+    confirmCancelHostedMatch(
+      { matchId: "m1", status: "open", participantCount: 1 },
+      t,
+    );
 
     expect(presentCancelMatchDialogMock).toHaveBeenCalledOnce();
     const options = presentCancelMatchDialogMock.mock.calls[0]?.[0] as {
@@ -48,9 +50,8 @@ describe("confirmCancelHostedMatch", () => {
   });
 
   it("requires a reason for full matches", async () => {
-    const { confirmCancelHostedMatch } = await import(
-      "./confirm-cancel-hosted-match"
-    );
+    const { confirmCancelHostedMatch } =
+      await import("./confirm-cancel-hosted-match");
 
     confirmCancelHostedMatch(
       { matchId: "m2", status: "full", participantCount: 2 },

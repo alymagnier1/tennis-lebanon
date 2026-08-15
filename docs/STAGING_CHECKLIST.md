@@ -71,23 +71,63 @@ pnpm db:test               # RLS / RPC authorization matrix
 
 ## 7b. Notification delivery (hard gate)
 
-Nothing in this repository invokes the `process-notifications` Edge Function.
-`pg_cron` only runs the database-side _enqueue_ jobs, so if no external caller
-is configured, every reminder, club nudge and attendance prompt is written to
-the outbox and never sent — silently, with no error anywhere.
+Migration `060_process_notifications_invoker.sql` adds the caller that was
+missing: `public.invoke_process_notifications()` posts to the Edge Function and
+`pg_cron` runs it every five minutes. Before that migration nothing invoked it
+at all, so every reminder, club nudge and attendance prompt was written to the
+outbox and left there — silently, with no error anywhere.
 
-- [ ] Named invoker for `process-notifications` recorded below, with schedule
+The job is inert until both Vault secrets exist. Create them **per
+environment** (they differ between staging and production), then confirm the
+first run:
+
+```sql
+select vault.create_secret(
+  'https://<project-ref>.supabase.co/functions/v1/process-notifications',
+  'process_notifications_url',
+  'Edge Function endpoint invoked by tennis_process_notifications'
+);
+select vault.create_secret(
+  '<service-role-key>',
+  'process_notifications_token',
+  'Service role key used to authenticate the notification sender'
+);
+
+-- Non-null request id means it fired; null means the secrets are still missing.
+select public.invoke_process_notifications();
+select * from net._http_response order by created desc limit 5;
+```
+
+- [x] Named invoker for `process-notifications` recorded below, with schedule
       and which secret it authenticates with
+- [ ] Both Vault secrets created in the target environment, and
+      `select public.invoke_process_notifications();` returned a request id
+- [ ] `select * from cron.job where jobname = 'tennis_process_notifications';`
+      shows the job active in the target environment
 - [ ] Verified on staging that **one push notification physically arrives** on a
       real device, not merely that the function returned 200
 - [ ] `select * from public.unreachable_notification_summary();` reviewed after
       a staging rehearsal
 
-| Setting  | Value |
-| -------- | ----- |
-| Invoker  |       |
-| Schedule |       |
-| Secret   |       |
+| Setting  | Value                                                                         |
+| -------- | ----------------------------------------------------------------------------- |
+| Invoker  | `pg_cron` job `tennis_process_notifications` → `invoke_process_notifications` |
+| Schedule | `*/5 * * * *`                                                                 |
+| Secret   | Vault: `process_notifications_url`, `process_notifications_token`             |
+
+### The mobile app needs an Expo project id
+
+Push registration calls `Notifications.getExpoPushTokenAsync({ projectId })`.
+With no project id the call is never made, so **no device registers a token at
+all** and every notification is parked as `no_delivery_channel` — the invoker
+above will run correctly and still deliver nothing. `apps/mobile/app.config.ts`
+reads it from `EAS_PROJECT_ID`; `eas init` writes it into `app.json` instead.
+A build missing it now reports to Sentry once per session rather than failing
+silently.
+
+- [ ] `EAS_PROJECT_ID` set for the build (or present in `app.json`)
+- [ ] `select count(*) from public.device_push_tokens where is_active;` is
+      non-zero on staging after a real device signs in
 
 ### Club staff have no push channel
 

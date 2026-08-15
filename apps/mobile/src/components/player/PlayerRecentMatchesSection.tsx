@@ -9,10 +9,12 @@ import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 
-function formatScore(score: unknown): string | null {
+// Read from the profiled player's side, not side A's, so their games come
+// first on their own profile.
+function formatScore(score: unknown, playerSide: 1 | 2): string | null {
   const parsed = matchScoreSchema.safeParse(score);
   if (!parsed.success) return null;
-  return formatMatchScore(parsed.data);
+  return formatMatchScore(parsed.data, playerSide);
 }
 
 export function PlayerRecentMatchesSection({
@@ -34,7 +36,7 @@ export function PlayerRecentMatchesSection({
           const resultLabel = match.player_won
             ? t("playerProfile.matchWin")
             : t("playerProfile.matchLoss");
-          const scoreLabel = formatScore(match.score);
+          const scoreLabel = formatScore(match.score, match.player_side ?? 1);
           const dateLabel = match.played_at
             ? formatShortUtcDateInBeirut(match.played_at)
             : null;

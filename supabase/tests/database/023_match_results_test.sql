@@ -128,10 +128,13 @@ begin
   where pp.user_id = v_joiner;
 
   perform pg_temp.set_caller(v_creator);
+  -- 064 replaced the winner parameter with the sides: the server reads the
+  -- score and decides who won. Side A is the creator here, so a 6-4 6-3 in
+  -- side A's favour still makes the creator the winner this test expects.
   v_result_id := public.submit_match_result(
     v_match_id,
     jsonb_build_object('sets', jsonb_build_array(jsonb_build_array(6, 4), jsonb_build_array(6, 3))),
-    v_creator
+    array[v_creator]::uuid[]
   );
 
   perform pg_temp.set_caller(v_joiner);
@@ -183,7 +186,7 @@ begin
   perform public.submit_match_result(
     v_match_id,
     jsonb_build_object('sets', jsonb_build_array(jsonb_build_array(7, 5))),
-    v_creator
+    array[v_creator]::uuid[]
   );
 
   perform pg_temp.set_caller(v_joiner);

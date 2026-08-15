@@ -50,7 +50,7 @@ const initialDraft: OnboardingDraft = {
   skillBand: null,
   playIntent: "either",
   prefersSingles: true,
-  prefersDoubles: false,
+  prefersDoubles: true,
   zoneIds: [],
 };
 

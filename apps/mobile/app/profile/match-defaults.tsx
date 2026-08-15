@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -21,7 +21,11 @@ import { AnimatedCollapse, SettingToggle } from "../../src/components/AppUi";
 import { AppText } from "../../src/components/AppText";
 import { ErrorNotice } from "../../src/components/FormUi";
 import { LevelRangePicker } from "../../src/components/LevelRangePicker";
-import { ChipButton, figmaFormStyles, OnboardingStepLayout } from "../../src/components/onboarding-ui";
+import {
+  ChipButton,
+  figmaFormStyles,
+  OnboardingStepLayout,
+} from "../../src/components/onboarding-ui";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { CreateMatchPanel } from "../../src/lib/create-match-ui";
 import { supabase } from "../../src/lib/supabase";
@@ -39,8 +43,6 @@ const SAVE_DEBOUNCE_MS = 600;
 
 type DefaultsState = {
   playIntent: PlayIntent;
-  prefersSingles: boolean;
-  prefersDoubles: boolean;
   defaultFormat: "singles" | "doubles";
   selectedBands: SkillBand[];
   listOnDiscover: boolean;
@@ -59,11 +61,11 @@ function stateFromProfile(
   profile: Awaited<ReturnType<typeof getOwnPlayerProfile>>,
   resolved: ReturnType<typeof resolveMatchHostDefaults> | null,
 ): DefaultsState {
-  const parsedFormat = matchFormatSchema.safeParse(profile.default_match_format);
+  const parsedFormat = matchFormatSchema.safeParse(
+    profile.default_match_format,
+  );
   return {
     playIntent: profile.play_intent as PlayIntent,
-    prefersSingles: profile.prefers_singles,
-    prefersDoubles: profile.prefers_doubles,
     defaultFormat: parsedFormat.success
       ? parsedFormat.data
       : (resolved?.format ?? "singles"),
@@ -94,19 +96,16 @@ export default function MatchDefaultsScreen() {
   );
 
   const [playIntent, setPlayIntent] = useState<PlayIntent>("either");
-  const [prefersSingles, setPrefersSingles] = useState(true);
-  const [prefersDoubles, setPrefersDoubles] = useState(false);
   const [defaultFormat, setDefaultFormat] = useState<"singles" | "doubles">(
     "singles",
   );
   const [selectedBands, setSelectedBands] = useState<SkillBand[]>([]);
   const [listOnDiscover, setListOnDiscover] = useState(true);
   const [requiresApproval, setRequiresApproval] = useState(false);
-  const [formatError, setFormatError] = useState(false);
   const [defaultsHydrated, setDefaultsHydrated] = useState(false);
-  const pendingSaveRef = useRef<Parameters<
-    typeof updateMatchHostDefaults
-  >[1] | null>(null);
+  const pendingSaveRef = useRef<
+    Parameters<typeof updateMatchHostDefaults>[1] | null
+  >(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Adjusting state during render rather than in an effect: React sanctions
@@ -115,8 +114,6 @@ export default function MatchDefaultsScreen() {
   if (profile && !defaultsHydrated) {
     const seeded = stateFromProfile(profile, resolved);
     setPlayIntent(seeded.playIntent);
-    setPrefersSingles(seeded.prefersSingles);
-    setPrefersDoubles(seeded.prefersDoubles);
     setDefaultFormat(seeded.defaultFormat);
     setSelectedBands(seeded.selectedBands);
     setListOnDiscover(seeded.listOnDiscover);
@@ -145,31 +142,21 @@ export default function MatchDefaultsScreen() {
   });
 
   function buildSaveInput(state: DefaultsState) {
-    if (!state.prefersSingles && !state.prefersDoubles) {
-      setFormatError(true);
-      return null;
-    }
     if (state.selectedBands.length === 0) {
       return null;
     }
 
-    setFormatError(false);
     const { minSkill, maxSkill } = skillRangeFromSelection(state.selectedBands);
 
     return {
       playIntent: state.playIntent,
-      prefersSingles: state.prefersSingles,
-      prefersDoubles: state.prefersDoubles,
       listOnDiscover: state.listOnDiscover,
       defaultRequiresCreatorApproval: state.listOnDiscover
         ? state.requiresApproval
         : false,
       defaultMinSkill: minSkill,
       defaultMaxSkill: maxSkill,
-      defaultMatchFormat:
-        state.prefersSingles && state.prefersDoubles
-          ? state.defaultFormat
-          : undefined,
+      defaultMatchFormat: state.defaultFormat,
     };
   }
 
@@ -225,8 +212,6 @@ export default function MatchDefaultsScreen() {
   function updateState(patch: Partial<DefaultsState>) {
     const next: DefaultsState = {
       playIntent,
-      prefersSingles,
-      prefersDoubles,
       defaultFormat,
       selectedBands,
       listOnDiscover,
@@ -234,16 +219,16 @@ export default function MatchDefaultsScreen() {
       ...patch,
     };
     if (patch.playIntent !== undefined) setPlayIntent(patch.playIntent);
-    if (patch.prefersSingles !== undefined) setPrefersSingles(patch.prefersSingles);
-    if (patch.prefersDoubles !== undefined) setPrefersDoubles(patch.prefersDoubles);
-    if (patch.defaultFormat !== undefined) setDefaultFormat(patch.defaultFormat);
-    if (patch.selectedBands !== undefined) setSelectedBands(patch.selectedBands);
-    if (patch.listOnDiscover !== undefined) setListOnDiscover(patch.listOnDiscover);
-    if (patch.requiresApproval !== undefined) setRequiresApproval(patch.requiresApproval);
+    if (patch.defaultFormat !== undefined)
+      setDefaultFormat(patch.defaultFormat);
+    if (patch.selectedBands !== undefined)
+      setSelectedBands(patch.selectedBands);
+    if (patch.listOnDiscover !== undefined)
+      setListOnDiscover(patch.listOnDiscover);
+    if (patch.requiresApproval !== undefined)
+      setRequiresApproval(patch.requiresApproval);
     persist(next);
   }
-
-  const bothFormats = prefersSingles && prefersDoubles;
 
   return (
     <OnboardingStepLayout
@@ -266,7 +251,9 @@ export default function MatchDefaultsScreen() {
         ) : null}
 
         <View style={figmaFormStyles.stack}>
-          <CreateMatchPanel title={t("profile.matchDefaults.playIntentSection")}>
+          <CreateMatchPanel
+            title={t("profile.matchDefaults.playIntentSection")}
+          >
             <View style={styles.chips}>
               {intents.map((intent) => (
                 <ChipButton
@@ -279,46 +266,22 @@ export default function MatchDefaultsScreen() {
             </View>
           </CreateMatchPanel>
 
-          <CreateMatchPanel title={t("profile.matchDefaults.formatSection")}>
+          <CreateMatchPanel
+            title={t("profile.matchDefaults.defaultFormatSection")}
+          >
             <View style={styles.chips}>
               <ChipButton
                 label={t("formats.singles")}
-                selected={prefersSingles}
-                onPress={() =>
-                  updateState({ prefersSingles: !prefersSingles })
-                }
+                selected={defaultFormat === "singles"}
+                onPress={() => updateState({ defaultFormat: "singles" })}
               />
               <ChipButton
                 label={t("formats.doubles")}
-                selected={prefersDoubles}
-                onPress={() =>
-                  updateState({ prefersDoubles: !prefersDoubles })
-                }
+                selected={defaultFormat === "doubles"}
+                onPress={() => updateState({ defaultFormat: "doubles" })}
               />
             </View>
-            {formatError ? (
-              <ErrorNotice>{t("onboarding.tennis.formatError")}</ErrorNotice>
-            ) : null}
           </CreateMatchPanel>
-
-          {bothFormats ? (
-            <CreateMatchPanel
-              title={t("profile.matchDefaults.defaultFormatSection")}
-            >
-              <View style={styles.chips}>
-                <ChipButton
-                  label={t("formats.singles")}
-                  selected={defaultFormat === "singles"}
-                  onPress={() => updateState({ defaultFormat: "singles" })}
-                />
-                <ChipButton
-                  label={t("formats.doubles")}
-                  selected={defaultFormat === "doubles"}
-                  onPress={() => updateState({ defaultFormat: "doubles" })}
-                />
-              </View>
-            </CreateMatchPanel>
-          ) : null}
 
           <CreateMatchPanel title={t("profile.matchDefaults.levelSection")}>
             <LevelRangePicker
@@ -351,7 +314,9 @@ export default function MatchDefaultsScreen() {
                 variant="card"
                 label={t("matches.create.requiresApprovalShort")}
                 value={requiresApproval}
-                onValueChange={(value) => updateState({ requiresApproval: value })}
+                onValueChange={(value) =>
+                  updateState({ requiresApproval: value })
+                }
               />
             </AnimatedCollapse>
           </CreateMatchPanel>

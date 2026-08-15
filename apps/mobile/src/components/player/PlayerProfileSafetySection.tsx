@@ -48,7 +48,7 @@ export function PlayerProfileSafetySection({
         />
         <FigmaSecondaryButton
           label={t("discover.blockPlayer")}
-          disabled={blockLoading}
+          loading={blockLoading}
           onPress={confirmBlock}
         />
       </View>

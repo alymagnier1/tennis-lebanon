@@ -66,3 +66,58 @@ describe("exitProfileScreen", () => {
     expect(backMock).not.toHaveBeenCalled();
   });
 });
+
+describe("exitPlayerProfile", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+  });
+
+  it("goes back when navigation history exists", async () => {
+    canGoBackMock.mockReturnValue(true);
+    const { exitPlayerProfile } = await import("./navigation");
+
+    exitPlayerProfile();
+
+    expect(backMock).toHaveBeenCalledOnce();
+    expect(replaceMock).not.toHaveBeenCalled();
+  });
+
+  it("replaces to discover when there is no history", async () => {
+    canGoBackMock.mockReturnValue(false);
+    const { exitPlayerProfile, DISCOVER_TAB_ROUTE } =
+      await import("./navigation");
+
+    exitPlayerProfile();
+
+    expect(replaceMock).toHaveBeenCalledWith(DISCOVER_TAB_ROUTE);
+    expect(backMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("exitClubDetail", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+  });
+
+  it("goes back when navigation history exists", async () => {
+    canGoBackMock.mockReturnValue(true);
+    const { exitClubDetail } = await import("./navigation");
+
+    exitClubDetail();
+
+    expect(backMock).toHaveBeenCalledOnce();
+    expect(replaceMock).not.toHaveBeenCalled();
+  });
+
+  it("replaces to clubs tab when there is no history", async () => {
+    canGoBackMock.mockReturnValue(false);
+    const { exitClubDetail, CLUBS_TAB_ROUTE } = await import("./navigation");
+
+    exitClubDetail();
+
+    expect(replaceMock).toHaveBeenCalledWith(CLUBS_TAB_ROUTE);
+    expect(backMock).not.toHaveBeenCalled();
+  });
+});

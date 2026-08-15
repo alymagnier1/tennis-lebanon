@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -203,7 +209,9 @@ export default function WhereIPlayScreen() {
           >
             {favoriteCount > 0 ? (
               <AppText style={styles.summary}>
-                {t("profile.whereIPlay.favoriteCount", { count: favoriteCount })}
+                {t("profile.whereIPlay.favoriteCount", {
+                  count: favoriteCount,
+                })}
               </AppText>
             ) : null}
 

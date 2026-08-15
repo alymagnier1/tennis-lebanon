@@ -28,45 +28,49 @@ describe("bookings domain", () => {
   });
 
   describe("canConfirmExternalCourt", () => {
-    const rosterFirst = {
+    const host = {
       viewerIsParticipant: true,
-      viewerIsCreator: false,
+      viewerIsCreator: true,
       timingMode: "fixed",
       hasAgreedTime: true,
     };
 
-    // The state that strands matches: the club never replied, so somebody rang
-    // them directly. Requesting a court is hidden here, and this must not be.
-    it("is available while a club request is still pending", () => {
+    it("is available to the host while a club request is still pending", () => {
       expect(
         canConfirmExternalCourt({
-          ...rosterFirst,
+          ...host,
           matchStatus: "booking_pending",
         }),
       ).toBe(true);
     });
 
-    it("is available before any request has gone out", () => {
+    it("is available to the host before any request has gone out", () => {
       expect(
         canConfirmExternalCourt({
-          ...rosterFirst,
+          ...host,
           matchStatus: "ready_to_book",
         }),
       ).toBe(true);
     });
 
-    // Whoever holds the club membership does the booking, and that is often
-    // not the creator.
-    it("is available to any accepted participant, not just the creator", () => {
+    it("stays host-only — joiners cannot book or confirm a court", () => {
       expect(
         canConfirmExternalCourt({
-          ...rosterFirst,
+          ...host,
+          viewerIsCreator: false,
           matchStatus: "ready_to_book",
         }),
-      ).toBe(true);
+      ).toBe(false);
       expect(
         canConfirmExternalCourt({
-          ...rosterFirst,
+          ...host,
+          viewerIsCreator: false,
+          matchStatus: "booking_pending",
+        }),
+      ).toBe(false);
+      expect(
+        canConfirmExternalCourt({
+          ...host,
           viewerIsParticipant: false,
           matchStatus: "ready_to_book",
         }),
@@ -75,9 +79,7 @@ describe("bookings domain", () => {
 
     it("is hidden once the match is confirmed or already played", () => {
       for (const matchStatus of ["confirmed", "in_progress", "completed"]) {
-        expect(canConfirmExternalCourt({ ...rosterFirst, matchStatus })).toBe(
-          false,
-        );
+        expect(canConfirmExternalCourt({ ...host, matchStatus })).toBe(false);
       }
     });
 
@@ -89,7 +91,6 @@ describe("bookings domain", () => {
         hasAgreedTime: true,
       };
 
-      // The whole point: the host secures the court, then recruits against it.
       it("lets the host secure a court while the match is still recruiting", () => {
         for (const matchStatus of ["open", "full"]) {
           expect(canConfirmExternalCourt({ ...courtFirst, matchStatus })).toBe(
@@ -98,7 +99,6 @@ describe("bookings domain", () => {
         }
       });
 
-      // Committing a venue before the group exists is the host's call.
       it("stays creator-only before the roster fills", () => {
         expect(
           canConfirmExternalCourt({
@@ -109,8 +109,6 @@ describe("bookings domain", () => {
         ).toBe(false);
       });
 
-      // Recording a second court only produces "an active booking already
-      // exists"; before court-first the status check covered this on its own.
       it("is hidden once a court is already secured", () => {
         expect(
           canConfirmExternalCourt({
@@ -121,8 +119,6 @@ describe("bookings domain", () => {
         ).toBe(false);
       });
 
-      // A court needs an hour, and a flexible match has none until the vote
-      // resolves; booking against an unvoted time bypasses the vote.
       it("requires fixed timing and an agreed time", () => {
         expect(
           canConfirmExternalCourt({
@@ -141,8 +137,7 @@ describe("bookings domain", () => {
       });
     });
 
-    // Requesting a club court is a different permission and stays narrower.
-    it("is wider than canRequestCourt, which stays creator-only", () => {
+    it("aligns with canRequestCourt on creator-only booking", () => {
       expect(
         canRequestCourt({
           viewerIsCreator: false,

@@ -24,7 +24,6 @@ export type DiscoverMatchToggles = {
   matchLevel: boolean;
   matchIntent: boolean;
   matchArea: boolean;
-  matchFormat: boolean;
   matchAvailability: boolean;
 };
 
@@ -32,7 +31,6 @@ export const DEFAULT_DISCOVER_MATCH_TOGGLES: DiscoverMatchToggles = {
   matchLevel: true,
   matchIntent: false,
   matchArea: true,
-  matchFormat: false,
   matchAvailability: false,
 };
 
@@ -98,48 +96,18 @@ export function widenDiscoveryZoneIds(allZoneIds: string[]): string[] {
   return [...allZoneIds];
 }
 
-export function playerMatchesViewerFormat(input: {
-  viewerPrefersSingles: boolean;
-  viewerPrefersDoubles: boolean;
-  candidatePrefersSingles: boolean;
-  candidatePrefersDoubles: boolean;
-}): boolean {
-  return (
-    (input.viewerPrefersSingles && input.candidatePrefersSingles) ||
-    (input.viewerPrefersDoubles && input.candidatePrefersDoubles)
-  );
-}
-
-export function resolveDiscoverFormatFilter(input: {
-  matchFormat: boolean;
-  prefersSingles: boolean;
-  prefersDoubles: boolean;
-}): "singles" | "doubles" | "both" | null {
-  if (!input.matchFormat) return null;
-  if (input.prefersSingles && !input.prefersDoubles) return "singles";
-  if (input.prefersDoubles && !input.prefersSingles) return "doubles";
-  return "both";
-}
-
 export function resolveDiscoverFiltersFromProfile(input: {
   toggles: DiscoverMatchToggles;
   playIntent: PlayIntent;
-  prefersSingles: boolean;
-  prefersDoubles: boolean;
   allZoneIds?: string[];
-}): DiscoveryFiltersInput & { applyClientFormatMatch: boolean } {
-  const formatFilter = resolveDiscoverFormatFilter({
-    matchFormat: input.toggles.matchFormat,
-    prefersSingles: input.prefersSingles,
-    prefersDoubles: input.prefersDoubles,
-  });
-
+}): DiscoveryFiltersInput {
   return {
     zoneIds:
       input.toggles.matchArea || !input.allZoneIds?.length
         ? undefined
         : input.allZoneIds,
-    format: formatFilter === "both" ? null : formatFilter,
+    // Format is a per-match choice, not a discovery identity filter.
+    format: null,
     intent:
       input.toggles.matchIntent && input.playIntent !== "either"
         ? input.playIntent
@@ -150,7 +118,6 @@ export function resolveDiscoverFiltersFromProfile(input: {
       : MAX_LEVEL_WINDOW,
     horizonDays: DEFAULT_DISCOVERY_HORIZON_DAYS,
     limit: 20,
-    applyClientFormatMatch: formatFilter === "both",
   };
 }
 

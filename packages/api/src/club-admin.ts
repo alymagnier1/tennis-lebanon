@@ -41,6 +41,37 @@ export async function reviewPilotClub(
   if (error) throw error;
 }
 
+/**
+ * Soft-deletes a club: hides it from every player-facing read (RLS,
+ * discovery, booking creation all gate on is_active) without deleting the
+ * row, its courts, or its booking history. Platform operators only, and
+ * refused while the club has an open booking. Reversible with
+ * {@link reactivateClub}.
+ */
+export async function deactivateClub(
+  client: TennisSupabaseClient,
+  clubId: string,
+  reason?: string,
+): Promise<void> {
+  const { error } = await client.rpc("deactivate_club", {
+    p_club_id: clubId,
+    p_reason: reason ?? undefined,
+  });
+  if (error) throw error;
+}
+
+export async function reactivateClub(
+  client: TennisSupabaseClient,
+  clubId: string,
+  reason?: string,
+): Promise<void> {
+  const { error } = await client.rpc("reactivate_club", {
+    p_club_id: clubId,
+    p_reason: reason ?? undefined,
+  });
+  if (error) throw error;
+}
+
 export type ActiveZone = {
   zone_id: string;
   slug: string;

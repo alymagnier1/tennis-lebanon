@@ -31,9 +31,7 @@ import {
   CreateMatchPanel,
   CreateMatchSection,
 } from "../../../src/lib/create-match-ui";
-import {
-  activeHostedContinueRoute,
-} from "../../../src/lib/create-match-guard";
+import { activeHostedContinueRoute } from "../../../src/lib/create-match-guard";
 import { confirmCancelHostedMatch } from "../../../src/lib/confirm-cancel-hosted-match";
 import { useAuth } from "../../../src/providers/AuthProvider";
 import { supabase } from "../../../src/lib/supabase";
@@ -156,7 +154,10 @@ export default function CreateMatchDetailsScreen() {
       description={t("matches.create.overridesDescription")}
       onBack={() => router.back()}
       footer={
-        <FigmaPrimaryButton label={t("matches.create.overridesDone")} onPress={handleDone} />
+        <FigmaPrimaryButton
+          label={t("matches.create.overridesDone")}
+          onPress={handleDone}
+        />
       }
     >
       {draft.inviteForPlayer && draft.targetPlayerName ? (

@@ -10,10 +10,20 @@ export const ATTENDANCE_SELF_REPORT_STATUSES = [
 export type AttendanceSelfReportStatus =
   (typeof ATTENDANCE_SELF_REPORT_STATUSES)[number];
 
+/**
+ * Sets are stored side-relative: `[sideAGames, sideBGames]`, where side A is
+ * named on the result itself.
+ *
+ * They used to be winner-relative, which sounds equivalent and is not: it made
+ * a set the declared winner had lost unrepresentable, so an ordinary
+ * 6-4, 4-6, 6-3 could not be recorded at all. It also meant the winner had to
+ * be supplied alongside the score rather than read out of it.
+ */
 export const matchScoreSchema = z.object({
   sets: z
     .array(z.tuple([z.number().int().min(0), z.number().int().min(0)]))
-    .min(1),
+    .min(1)
+    .max(5),
 });
 
 export type MatchScore = z.infer<typeof matchScoreSchema>;
@@ -21,72 +31,115 @@ export type MatchScore = z.infer<typeof matchScoreSchema>;
 export const MIN_MATCH_SETS = 1;
 export const MAX_MATCH_SETS = 5;
 
+/** 1 = side A, 2 = side B. */
+export type MatchSide = 1 | 2;
+
 export type SetScoreDraft = {
-  winnerGames: string;
-  loserGames: string;
+  sideAGames: string;
+  sideBGames: string;
 };
 
 export type MatchScoreDraftError =
-  "empty" | "invalidNumber" | "invalidSet" | "setCount" | "invalidScore";
+  | "empty"
+  | "invalidNumber"
+  | "invalidSet"
+  | "setCount"
+  | "invalidScore"
+  | "noWinner";
 
 export function createEmptySetDraft(): SetScoreDraft {
-  return { winnerGames: "", loserGames: "" };
+  return { sideAGames: "", sideBGames: "" };
 }
 
 export function createDefaultSetDrafts(count = 2): SetScoreDraft[] {
   return Array.from({ length: count }, () => createEmptySetDraft());
 }
 
+/**
+ * Whether this is a legal tennis set, regardless of which side won it.
+ *
+ * Mirrors `public.is_valid_tennis_set`. The server is the authority; this
+ * exists so the score editor can object before a round trip.
+ */
 export function isValidTennisSet(
-  winnerGames: number,
-  loserGames: number,
+  sideAGames: number,
+  sideBGames: number,
 ): boolean {
-  if (!Number.isInteger(winnerGames) || !Number.isInteger(loserGames)) {
+  if (!Number.isInteger(sideAGames) || !Number.isInteger(sideBGames)) {
     return false;
   }
-  if (
-    winnerGames < 0 ||
-    loserGames < 0 ||
-    winnerGames <= loserGames ||
-    winnerGames > 7
-  ) {
+  if (sideAGames < 0 || sideBGames < 0) {
     return false;
   }
-  if (winnerGames === 6 && loserGames <= 4) {
+
+  const high = Math.max(sideAGames, sideBGames);
+  const low = Math.min(sideAGames, sideBGames);
+
+  if (high === 6 && low <= 4) {
     return true;
   }
-  if (winnerGames === 7 && (loserGames === 5 || loserGames === 6)) {
-    return true;
-  }
-  return false;
+  return high === 7 && (low === 5 || low === 6);
 }
 
 export function parseSetScoreDraft(draft: SetScoreDraft):
   | { ok: true; score: [number, number] }
   | {
       ok: false;
-      error: Exclude<MatchScoreDraftError, "setCount" | "invalidScore">;
+      error: Exclude<
+        MatchScoreDraftError,
+        "setCount" | "invalidScore" | "noWinner"
+      >;
     } {
-  if (!draft.winnerGames.trim() || !draft.loserGames.trim()) {
+  if (!draft.sideAGames.trim() || !draft.sideBGames.trim()) {
     return { ok: false, error: "empty" };
   }
 
-  const winnerGames = Number(draft.winnerGames);
-  const loserGames = Number(draft.loserGames);
-  if (!Number.isInteger(winnerGames) || !Number.isInteger(loserGames)) {
+  const sideAGames = Number(draft.sideAGames);
+  const sideBGames = Number(draft.sideBGames);
+  if (!Number.isInteger(sideAGames) || !Number.isInteger(sideBGames)) {
     return { ok: false, error: "invalidNumber" };
   }
-  if (!isValidTennisSet(winnerGames, loserGames)) {
+  if (!isValidTennisSet(sideAGames, sideBGames)) {
     return { ok: false, error: "invalidSet" };
   }
 
-  return { ok: true, score: [winnerGames, loserGames] };
+  return { ok: true, score: [sideAGames, sideBGames] };
+}
+
+/** Sets won by each side. Mirrors `public.validate_match_score`. */
+export function tallySets(score: MatchScore): { sideA: number; sideB: number } {
+  let sideA = 0;
+  let sideB = 0;
+
+  for (const [a, b] of score.sets) {
+    if (a > b) {
+      sideA += 1;
+    } else {
+      sideB += 1;
+    }
+  }
+
+  return { sideA, sideB };
+}
+
+/**
+ * Who won, read out of the score. Null when the sets are level, which this app
+ * does not record — retirements and walkovers are an operations rule.
+ *
+ * Mirrors `public.derive_score_winner_side`.
+ */
+export function deriveWinningSide(score: MatchScore): MatchSide | null {
+  const { sideA, sideB } = tallySets(score);
+  if (sideA === sideB) {
+    return null;
+  }
+  return sideA > sideB ? 1 : 2;
 }
 
 export function parseMatchScoreDrafts(
   drafts: SetScoreDraft[],
 ):
-  | { ok: true; score: MatchScore }
+  | { ok: true; score: MatchScore; winningSide: MatchSide }
   | { ok: false; error: MatchScoreDraftError; setIndex?: number } {
   if (drafts.length < MIN_MATCH_SETS || drafts.length > MAX_MATCH_SETS) {
     return { ok: false, error: "setCount" };
@@ -105,30 +158,77 @@ export function parseMatchScoreDrafts(
     sets.push(parsed.score);
   }
 
-  const score = { sets };
-  const validated = matchScoreSchema.safeParse(score);
+  const validated = matchScoreSchema.safeParse({ sets });
   if (!validated.success) {
     return { ok: false, error: "invalidScore" };
   }
 
-  return { ok: true, score: validated.data };
+  const winningSide = deriveWinningSide(validated.data);
+  if (winningSide === null) {
+    return { ok: false, error: "noWinner" };
+  }
+
+  return { ok: true, score: validated.data, winningSide };
 }
 
-export function formatMatchScore(score: MatchScore): string {
+/**
+ * Renders "6-4, 4-6, 6-3" from `viewerSide`'s point of view, so a player always
+ * reads their own games first. Defaults to side A when the viewer is unknown.
+ */
+export function formatMatchScore(
+  score: MatchScore,
+  viewerSide: MatchSide = 1,
+): string {
   return score.sets
-    .map(([winnerGames, loserGames]) => `${winnerGames}-${loserGames}`)
+    .map(([sideAGames, sideBGames]) =>
+      viewerSide === 1
+        ? `${sideAGames}-${sideBGames}`
+        : `${sideBGames}-${sideAGames}`,
+    )
     .join(", ");
 }
 
+export const RESULT_STATUSES = [
+  "submitted",
+  "confirmed",
+  "disputed",
+  "resolved",
+  "unverified",
+] as const;
+
+export type ResultStatus = (typeof RESULT_STATUSES)[number];
+
 export type MatchHubResult = {
   result_id: string;
-  status: "submitted" | "confirmed" | "disputed" | "resolved";
+  status: ResultStatus;
   submitted_by: string;
+  submitted_by_name?: string | null;
   score: MatchScore;
+  side_a_user_ids: string[];
+  winning_side: MatchSide;
   winner_user_id: string;
+  viewer_side: MatchSide;
+  viewer_won: boolean;
+  revision: number;
   confirmed_by?: string | null;
+  disputed_by?: string | null;
   dispute_note?: string | null;
 };
+
+/** 1 if the player is on side A of this result, 2 otherwise. */
+export function sideForUser(
+  result: Pick<MatchHubResult, "side_a_user_ids">,
+  userId: string,
+): MatchSide {
+  return result.side_a_user_ids.includes(userId) ? 1 : 2;
+}
+
+/**
+ * Attendance and score entry are both live on `completed` now, not only
+ * `in_progress`: attendance is what completes the match, so by the time a score
+ * is added the match has usually already completed.
+ */
+const OUTCOME_STATUSES = new Set(["in_progress", "completed"]);
 
 export function canRecordAttendance(input: {
   matchStatus: string;
@@ -136,7 +236,7 @@ export function canRecordAttendance(input: {
   viewerAttendance: string;
 }): boolean {
   return (
-    input.matchStatus === "in_progress" &&
+    OUTCOME_STATUSES.has(input.matchStatus) &&
     input.viewerStatus === "accepted" &&
     input.viewerAttendance === "unknown"
   );
@@ -148,7 +248,7 @@ export function canSubmitResult(input: {
   hasResult: boolean;
 }): boolean {
   return (
-    input.matchStatus === "in_progress" &&
+    OUTCOME_STATUSES.has(input.matchStatus) &&
     input.viewerStatus === "accepted" &&
     !input.hasResult
   );
@@ -160,21 +260,50 @@ export function canConfirmResult(input: {
   viewerUserId: string;
   result: MatchHubResult | null;
 }): boolean {
+  const { result } = input;
+  if (
+    !result ||
+    !OUTCOME_STATUSES.has(input.matchStatus) ||
+    input.viewerStatus !== "accepted" ||
+    result.status !== "submitted" ||
+    result.submitted_by === input.viewerUserId
+  ) {
+    return false;
+  }
+
+  // In doubles this is the rule that stops the submitter's own partner
+  // rubber-stamping their team's claim. In singles it is already implied by the
+  // submitter check above.
   return (
-    input.matchStatus === "in_progress" &&
-    input.viewerStatus === "accepted" &&
-    input.result?.status === "submitted" &&
-    input.result.submitted_by !== input.viewerUserId
+    sideForUser(result, input.viewerUserId) !==
+    sideForUser(result, result.submitted_by)
   );
 }
 
-export function canDisputeResult(input: {
-  matchStatus: string;
+/**
+ * Identical preconditions to confirming — both are the opposing side answering
+ * a submitted result. Kept as its own name because the call sites read better,
+ * and because only one of the two leads anywhere else.
+ */
+export const canDisputeResult = canConfirmResult;
+
+/**
+ * Disagreeing hands the pen back, once. Only the player who objected may
+ * replace the score, and only before it has already been reopened.
+ */
+export function canResubmitResult(input: {
   viewerStatus: string | null;
   viewerUserId: string;
   result: MatchHubResult | null;
 }): boolean {
-  return canConfirmResult(input);
+  const { result } = input;
+  return Boolean(
+    result &&
+    input.viewerStatus === "accepted" &&
+    result.status === "disputed" &&
+    result.revision === 1 &&
+    result.disputed_by === input.viewerUserId,
+  );
 }
 
 export function computeEloDelta(input: {

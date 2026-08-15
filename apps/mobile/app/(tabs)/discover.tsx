@@ -16,7 +16,6 @@ import {
   DEFAULT_DISCOVER_MATCH_TOGGLES,
   type DiscoverMatchToggles,
   isInviteableHostedMatch,
-  playerMatchesViewerFormat,
   resolveDiscoverFiltersFromProfile,
   type PlayIntent,
 } from "@tennis-lebanon/domain";
@@ -26,10 +25,7 @@ import {
   MatchCard,
   SegmentTabs,
 } from "../../src/components/AppUi";
-import {
-  clearDiscoverMatchToggles,
-  DiscoverMatchChips,
-} from "../../src/components/discover/DiscoverMatchChips";
+import { DiscoverMatchChips } from "../../src/components/discover/DiscoverMatchChips";
 import { DiscoverHeaderShell } from "../../src/components/discover/DiscoverHeaderShell";
 import { DiscoverSectionSplitter } from "../../src/components/discover/DiscoverSectionSplitter";
 import { DiscoverPlayerCardRow } from "../../src/components/discover/DiscoverPlayerCardRow";
@@ -108,22 +104,16 @@ export default function DiscoverScreen() {
       return null;
     }
 
-    const { applyClientFormatMatch, ...apiFilters } =
-      resolveDiscoverFiltersFromProfile({
-        toggles: matchToggles,
-        playIntent: profile.play_intent as PlayIntent,
-        prefersSingles: profile.prefers_singles,
-        prefersDoubles: profile.prefers_doubles,
-        allZoneIds: zonesQuery.data?.map((zone) => zone.id),
-      });
-
-    return { apiFilters, applyClientFormatMatch };
+    return resolveDiscoverFiltersFromProfile({
+      toggles: matchToggles,
+      playIntent: profile.play_intent as PlayIntent,
+      allZoneIds: zonesQuery.data?.map((zone) => zone.id),
+    });
   }, [matchToggles, ownProfileQuery.data, zonesQuery.data]);
 
   const playersQuery = useQuery({
-    queryKey: ["discover-players", resolvedFilters?.apiFilters],
-    queryFn: () =>
-      discoverCompatiblePlayers(supabase, resolvedFilters?.apiFilters ?? {}),
+    queryKey: ["discover-players", resolvedFilters],
+    queryFn: () => discoverCompatiblePlayers(supabase, resolvedFilters ?? {}),
     staleTime: 60_000,
     enabled:
       segment === "players" &&
@@ -133,9 +123,8 @@ export default function DiscoverScreen() {
   });
 
   const matchesQuery = useQuery({
-    queryKey: ["discover-matches", resolvedFilters?.apiFilters],
-    queryFn: () =>
-      discoverOpenMatches(supabase, resolvedFilters?.apiFilters ?? {}),
+    queryKey: ["discover-matches", resolvedFilters],
+    queryFn: () => discoverOpenMatches(supabase, resolvedFilters ?? {}),
     staleTime: 60_000,
     enabled:
       segment === "matches" &&
@@ -144,25 +133,7 @@ export default function DiscoverScreen() {
       ownProfileQuery.isSuccess,
   });
 
-  const filteredPlayers = useMemo(() => {
-    const players = playersQuery.data ?? [];
-    if (!resolvedFilters?.applyClientFormatMatch || !ownProfileQuery.data) {
-      return players;
-    }
-
-    return players.filter((player) =>
-      playerMatchesViewerFormat({
-        viewerPrefersSingles: ownProfileQuery.data.prefers_singles,
-        viewerPrefersDoubles: ownProfileQuery.data.prefers_doubles,
-        candidatePrefersSingles: player.prefers_singles,
-        candidatePrefersDoubles: player.prefers_doubles,
-      }),
-    );
-  }, [
-    ownProfileQuery.data,
-    playersQuery.data,
-    resolvedFilters?.applyClientFormatMatch,
-  ]);
+  const filteredPlayers = playersQuery.data ?? [];
 
   const activeQuery = segment === "players" ? playersQuery : matchesQuery;
   const resultsCount =
@@ -187,7 +158,6 @@ export default function DiscoverScreen() {
       matchLevel: false,
       matchIntent: false,
       matchArea: false,
-      matchFormat: false,
       matchAvailability: false,
     });
   };
@@ -297,7 +267,6 @@ export default function DiscoverScreen() {
           <DiscoverMatchChips
             toggles={matchToggles}
             onToggle={toggleMatchFilter}
-            onClearAll={() => setMatchToggles(clearDiscoverMatchToggles())}
           />
         </DiscoverHeaderShell>
       }

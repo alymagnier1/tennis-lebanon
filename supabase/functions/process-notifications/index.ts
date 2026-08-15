@@ -11,6 +11,8 @@ type DueNotification = {
   payload: Record<string, unknown>;
   push_tokens: string[];
   attempt_count: number;
+  /** Recipient's UI language. Absent until migration 061 is applied. */
+  locale?: string | null;
 };
 
 type ExpoTicket = {
@@ -135,6 +137,7 @@ Deno.serve(async (req) => {
       kind: notification.kind,
       payload,
       tokens,
+      locale: notification.locale,
     });
 
     const delivered = await sendExpoPush(messages);

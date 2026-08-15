@@ -17,7 +17,7 @@ Launch in one dense Lebanese area with 5–8 partner clubs and approximately 300
 
 ### North-star metric
 
-**Completed matches per week.** A completed match has an accepted booking, required participants, and a mutually confirmed result (or admin resolution).
+**Completed matches per week.** A completed match has the required participants and their confirmation that it was played. A score is optional and does not gate completion; a confirmed score (or admin resolution) also completes a match, and an accepted booking is not required. See the 2026-08-15 decision in `docs/DECISIONS.md`.
 
 ### Pilot guardrails
 

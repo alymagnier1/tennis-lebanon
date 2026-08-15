@@ -131,11 +131,10 @@ $$;
 select pass('a host can record a court they arranged themselves');
 
 -- ---------------------------------------------------------------------------
--- Participants only, and single-use
+-- Creator-only, and single-use
 --
--- 041 widened this from creator-only: whoever holds the club membership is
--- usually the one who rings them, and that is often not the creator. The
--- authorization boundary is now the roster, not the host.
+-- 041 briefly widened this to any accepted participant; 058 restored host-only
+-- for Contact and Booked off-app.
 -- ---------------------------------------------------------------------------
 
 do $$
@@ -164,13 +163,32 @@ begin
   end;
 
   perform pg_temp.assert_true(
-    v_message like '%Only a match participant%',
+    v_message like '%Only the creator%',
     format('someone outside the match must not confirm a court, got: %s', v_message)
   );
 
-  -- The joiner is not the creator, and must still be able to record a court
-  -- they booked themselves.
+  -- Joiners cannot record a court either.
+  v_message := '';
   perform pg_temp.set_caller(v_joiner);
+  begin
+    perform public.confirm_external_court(
+      v_match_id,
+      'cccccccc-0001-0001-0001-000000000001',
+      v_starts,
+      v_starts + interval '90 minutes',
+      null
+    );
+  exception
+    when others then
+      v_message := sqlerrm;
+  end;
+
+  perform pg_temp.assert_true(
+    v_message like '%Only the creator%',
+    format('a joiner must not confirm a court, got: %s', v_message)
+  );
+
+  perform pg_temp.set_caller(v_creator);
   perform public.confirm_external_court(
     v_match_id,
     'cccccccc-0001-0001-0001-000000000001',
@@ -200,7 +218,7 @@ begin
 end;
 $$;
 
-select pass('external court confirmation is participant-only and single-use');
+select pass('external court confirmation is creator-only and single-use');
 
 -- ---------------------------------------------------------------------------
 -- Leaving while the club deliberates withdraws the request

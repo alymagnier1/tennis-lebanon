@@ -29,7 +29,7 @@ import { beginCreateMatchForPlayer } from "../../src/lib/begin-create-match-for-
 import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 import { zoneLabelFromList } from "../../src/lib/zones";
 import { PlayerAvailabilitySection } from "../../src/components/player/PlayerAvailabilitySection";
-import { PlayerFavoriteClubsLine } from "../../src/components/player/PlayerFavoriteClubsLine";
+import { PlayerPreferredClubsSection } from "../../src/components/player/PlayerPreferredClubsSection";
 import { PlayerProfileHero } from "../../src/components/player/PlayerProfileHero";
 import { PlayerProfileSection } from "../../src/components/player/PlayerProfileSection";
 import { PlayerProfileSafetySection } from "../../src/components/player/PlayerProfileSafetySection";
@@ -38,9 +38,14 @@ import {
   FigmaPrimaryButton,
   FigmaSecondaryButton,
 } from "../../src/components/onboarding-ui";
-import { tennisColors, tennisSpacing } from "../../src/theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisRadii,
+  tennisSpacing,
+} from "../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
+import { exitPlayerProfile } from "../../src/lib/navigation";
 
 function sortBySoonestTime(a: MyMatchRow, b: MyMatchRow): number {
   if (!a.soonest_time && !b.soonest_time) return 0;
@@ -94,7 +99,7 @@ export default function PlayerDetailScreen() {
       await queryClient.invalidateQueries({ queryKey: ["discover-players"] });
       await queryClient.invalidateQueries({ queryKey: ["discover-matches"] });
       Alert.alert(t("discover.blockSuccess"));
-      router.back();
+      exitPlayerProfile();
     },
     onError: () => {
       Alert.alert(t("discover.blockError"));
@@ -142,7 +147,7 @@ export default function PlayerDetailScreen() {
         </AppText>
         <FigmaSecondaryButton
           label={t("common.back")}
-          onPress={() => router.back()}
+          onPress={exitPlayerProfile}
         />
       </View>
     );
@@ -150,15 +155,15 @@ export default function PlayerDetailScreen() {
 
   const name = player.display_name;
   const locationLabel = zoneLabelFromList(player.zones, locale);
-  const hasAboutContent =
-    Boolean(player.bio) || player.favorite_clubs.length > 0;
+  const aboutBio = player.bio?.trim() ?? "";
+  const hasAboutContent = aboutBio.length > 0;
 
   return (
     <View style={styles.root}>
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 120 },
+          { paddingBottom: insets.bottom + 112 },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -166,18 +171,15 @@ export default function PlayerDetailScreen() {
           player={player}
           name={name}
           locationLabel={locationLabel}
-          onBack={() => router.back()}
+          onBack={exitPlayerProfile}
         />
 
         <View style={styles.body}>
           {hasAboutContent ? (
             <PlayerProfileSection title={t("playerProfile.aboutTitle")}>
-              {player.bio ? (
-                <AppText style={[styles.bio, { writingDirection }]}>
-                  {player.bio}
-                </AppText>
-              ) : null}
-              <PlayerFavoriteClubsLine player={player} />
+              <AppText style={[styles.bio, { writingDirection }]}>
+                {aboutBio}
+              </AppText>
             </PlayerProfileSection>
           ) : null}
 
@@ -186,22 +188,30 @@ export default function PlayerDetailScreen() {
             summary={availabilityQuery.data}
           />
 
-          <PlayerRecentMatchesSection matches={recentMatchesQuery.data ?? []} />
+          <PlayerPreferredClubsSection player={player} />
 
           {inviteableMatches.length > 0 ? (
             <PlayerProfileSection title={t("matches.invite.pickMatch")}>
+              <AppText style={[styles.inviteHint, { writingDirection }]}>
+                {t("matches.invite.pickMatchHint")}
+              </AppText>
               {inviteableMatches.map((match) => (
                 <View key={match.match_id} style={styles.inviteCard}>
-                  <AppText style={styles.inviteTitle}>
-                    {t(`formats.${match.format}`)} ·{" "}
-                    {t(`matches.status.${match.status}`)}
-                  </AppText>
-                  <AppText style={styles.inviteMeta}>
-                    {match.soonest_time
-                      ? formatUtcInBeirut(match.soonest_time)
-                      : t("matches.invite.noTimeYet")}
-                  </AppText>
-                  <FigmaPrimaryButton
+                  <View style={styles.inviteCopy}>
+                    <AppText
+                      style={[styles.inviteTitle, { writingDirection }]}
+                      maxLines={2}
+                    >
+                      {t(`formats.${match.format}`)} ·{" "}
+                      {t(`matches.status.${match.status}`)}
+                    </AppText>
+                    <AppText style={[styles.inviteMeta, { writingDirection }]}>
+                      {match.soonest_time
+                        ? formatUtcInBeirut(match.soonest_time)
+                        : t("matches.invite.noTimeYet")}
+                    </AppText>
+                  </View>
+                  <FigmaSecondaryButton
                     label={t("matches.invite.inviteToOpenMatch")}
                     loading={
                       inviteMutation.isPending &&
@@ -219,6 +229,8 @@ export default function PlayerDetailScreen() {
             </PlayerProfileSection>
           ) : null}
 
+          <PlayerRecentMatchesSection matches={recentMatchesQuery.data ?? []} />
+
           <PlayerProfileSafetySection
             playerId={id!}
             blockLoading={blockMutation.isPending}
@@ -230,7 +242,10 @@ export default function PlayerDetailScreen() {
       <View
         style={[
           styles.footer,
-          { paddingBottom: insets.bottom + 12, paddingHorizontal: 20 },
+          {
+            paddingBottom: insets.bottom + 12,
+            paddingHorizontal: tennisSpacing.screenX,
+          },
         ]}
       >
         <FigmaPrimaryButton
@@ -272,27 +287,44 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   body: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    gap: 16,
+    paddingHorizontal: tennisSpacing.screenX,
+    paddingTop: 16,
+    gap: 12,
   },
   bio: {
     fontFamily: tennisFontFamily.body,
     fontSize: 14,
     lineHeight: 22,
+    color: tennisColors.primaryDark,
+  },
+  inviteHint: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    lineHeight: 18,
     color: tennisColors.mutedForeground,
+    marginBottom: 2,
   },
   inviteCard: {
-    gap: 8,
+    gap: 10,
+    padding: 12,
+    borderRadius: tennisRadii.md,
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.background,
+  },
+  inviteCopy: {
+    gap: 4,
   },
   inviteTitle: {
     fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
+    fontSize: 14,
+    lineHeight: 18,
     color: tennisColors.primaryDark,
   },
   inviteMeta: {
     fontFamily: tennisFontFamily.body,
     fontSize: 12,
+    lineHeight: 16,
     color: tennisColors.mutedForeground,
   },
   footer: {

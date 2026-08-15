@@ -41,16 +41,10 @@ export function MatchHubParticipants({
               size={40}
             />
             <View style={styles.text}>
-              <AppText
-                style={[styles.name, { writingDirection }]}
-                maxLines={1}
-              >
+              <AppText style={[styles.name, { writingDirection }]} maxLines={1}>
                 {participant.display_name}
               </AppText>
-              <AppText
-                style={[styles.meta, { writingDirection }]}
-                maxLines={1}
-              >
+              <AppText style={[styles.meta, { writingDirection }]} maxLines={1}>
                 {[
                   participant.is_creator ? t("matches.hub.hostBadge") : null,
                   t(`matches.participantStatus.${participant.status}`),

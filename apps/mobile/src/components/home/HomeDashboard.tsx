@@ -124,7 +124,10 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
               {t("home.greeting", { name: displayName })}
             </AppText>
             <AppText
-              style={[tennisTextStyles.pageSubtitleOnDark, { writingDirection }]}
+              style={[
+                tennisTextStyles.pageSubtitleOnDark,
+                { writingDirection },
+              ]}
             >
               {t("home.subtitle")}
             </AppText>
@@ -245,36 +248,36 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
                     : undefined);
 
                 return (
-                <MatchCard
-                  key={match.match_id}
-                  status={match.status}
-                  statusLabel={t(`matches.status.${match.status}`)}
-                  dateTimeLabel={
-                    match.soonest_time
-                      ? formatUtcInBeirut(match.soonest_time)
-                      : undefined
-                  }
-                  headline={buildMatchCardHeadline(t, headlineInput)}
-                  viewerName={displayName}
-                  viewerAvatarPath={profile?.avatar_path}
-                  opponentName={opponent}
-                  opponentAvatarColor={
-                    opponent ? opponentAvatarColor(opponent) : undefined
-                  }
-                  formatChip={t(`formats.${match.format}`)}
-                  locationChip={locationChip}
-                  badges={
-                    match.is_stale_warning
-                      ? [
-                          {
-                            label: t("matches.lifecycle.staleBadge"),
-                            tone: "attention" as const,
-                          },
-                        ]
-                      : undefined
-                  }
-                  onPress={() => router.push(matchHubRoute(match.match_id))}
-                />
+                  <MatchCard
+                    key={match.match_id}
+                    status={match.status}
+                    statusLabel={t(`matches.status.${match.status}`)}
+                    dateTimeLabel={
+                      match.soonest_time
+                        ? formatUtcInBeirut(match.soonest_time)
+                        : undefined
+                    }
+                    headline={buildMatchCardHeadline(t, headlineInput)}
+                    viewerName={displayName}
+                    viewerAvatarPath={profile?.avatar_path}
+                    opponentName={opponent}
+                    opponentAvatarColor={
+                      opponent ? opponentAvatarColor(opponent) : undefined
+                    }
+                    formatChip={t(`formats.${match.format}`)}
+                    locationChip={locationChip}
+                    badges={
+                      match.is_stale_warning
+                        ? [
+                            {
+                              label: t("matches.lifecycle.staleBadge"),
+                              tone: "attention" as const,
+                            },
+                          ]
+                        : undefined
+                    }
+                    onPress={() => router.push(matchHubRoute(match.match_id))}
+                  />
                 );
               })
             )}

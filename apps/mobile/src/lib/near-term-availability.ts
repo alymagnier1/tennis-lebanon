@@ -13,6 +13,16 @@ const DAY_PART_ORDER: AvailabilityDayPart[] = [
   "evening",
 ];
 
+const WEEKDAY_SHORT_TO_INDEX: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+};
+
 function mergeDayParts(
   left: AvailabilityDayPart[],
   right: AvailabilityDayPart[],
@@ -51,6 +61,15 @@ function addBeirutDays(dateKey: string, days: number): string {
   return beirutDateKey(next.toISOString());
 }
 
+export function weekdayIndexFromBeirutDateKey(dateKey: string): number {
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Beirut",
+    weekday: "short",
+  }).format(new Date(`${dateKey}T12:00:00Z`));
+
+  return WEEKDAY_SHORT_TO_INDEX[weekday] ?? 0;
+}
+
 function formatNearTermDayLabel(
   dateKey: string,
   now: Date,
@@ -66,21 +85,9 @@ function formatNearTermDayLabel(
     return t("discover.tomorrow");
   }
 
-  const weekday = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Beirut",
-    weekday: "short",
-  }).format(new Date(`${dateKey}T12:00:00Z`));
-  const indices: Record<string, number> = {
-    Sun: 0,
-    Mon: 1,
-    Tue: 2,
-    Wed: 3,
-    Thu: 4,
-    Fri: 5,
-    Sat: 6,
-  };
-
-  return t(`availability.weekdaysShort.${indices[weekday] ?? 0}`);
+  return t(
+    `availability.weekdaysShort.${weekdayIndexFromBeirutDateKey(dateKey)}`,
+  );
 }
 
 function groupSlotsByDay(
@@ -124,4 +131,14 @@ export function formatNearTermAvailabilitySlots(
   );
 
   return labels.join(", ");
+}
+
+/** One compact weekday chip per near-term day (no day-part text). */
+export function formatNearTermAvailabilityDayChips(
+  slots: NearTermAvailabilitySlot[],
+  t: TFunction,
+): string[] {
+  return groupSlotsByDay(slots).map(({ dateKey }) =>
+    t(`availability.weekdaysCompact.${weekdayIndexFromBeirutDateKey(dateKey)}`),
+  );
 }

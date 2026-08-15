@@ -159,6 +159,22 @@ export async function confirmExternalCourt(
   return data as string;
 }
 
+/**
+ * Undoes a court the host recorded himself. Refuses a booking the club accepted
+ * through its own queue -- that lifecycle belongs to accept/reject.
+ */
+export async function releaseExternalCourt(
+  client: TennisSupabaseClient,
+  matchId: string,
+  reason?: string | null,
+): Promise<void> {
+  const { error } = await client.rpc("release_external_court", {
+    p_match_id: matchId,
+    p_reason: reason ?? undefined,
+  });
+  if (error) throw error;
+}
+
 export async function cancelBookingRequest(
   client: TennisSupabaseClient,
   bookingId: string,

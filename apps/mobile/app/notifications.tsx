@@ -8,37 +8,16 @@ import {
   markNotificationRead,
   type UserNotificationRow,
 } from "@tennis-lebanon/api";
-import { isNotificationKind } from "@tennis-lebanon/domain";
 import { AppText } from "../src/components/AppText";
 import { Icon } from "../src/components/Icon";
 import { ListSkeleton } from "../src/components/AppUi";
 import { Screen, ScreenError } from "../src/components/FormUi";
 import { formatUtcInBeirut } from "../src/lib/beirut-time";
+import { resolveNotificationCopy } from "../src/lib/notification-copy";
 import { resolveNotificationHref } from "../src/lib/notification-deep-link";
 import { supabase } from "../src/lib/supabase";
 import { tennisColors, tennisRadii } from "../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../src/hooks/useTennisFonts";
-
-function notificationCopy(
-  row: UserNotificationRow,
-  t: (key: string) => string,
-): { title: string; body: string } {
-  const payload = row.payload ?? {};
-  const title =
-    typeof payload.title === "string"
-      ? payload.title
-      : isNotificationKind(row.kind)
-        ? t(`notifications.kinds.${row.kind}.title`)
-        : t("notifications.fallbackTitle");
-  const body =
-    typeof payload.body === "string"
-      ? payload.body
-      : isNotificationKind(row.kind)
-        ? t(`notifications.kinds.${row.kind}.body`)
-        : t("notifications.fallbackBody");
-
-  return { title, body };
-}
 
 function notificationIcon(
   kind: string,
@@ -131,7 +110,10 @@ export default function NotificationsScreen() {
 
       <View style={styles.list}>
         {rows.map((row) => {
-          const copy = notificationCopy(row, t);
+          const copy = resolveNotificationCopy(
+            { kind: row.kind, payload: row.payload },
+            t,
+          );
           const timestamp = formatUtcInBeirut(row.sent_at ?? row.created_at);
           return (
             <Pressable

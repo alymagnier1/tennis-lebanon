@@ -41,6 +41,16 @@ export function weekdayShortLabels(weekdays: number[], t: TFunction): string[] {
     .map((weekday) => t(`availability.weekdaysShort.${weekday}`));
 }
 
+/** Ultra-short weekday chips for Discover cards (M, T, Th, …). */
+export function weekdayCompactLabels(
+  weekdays: number[],
+  t: TFunction,
+): string[] {
+  return [...weekdays]
+    .sort((a, b) => a - b)
+    .map((weekday) => t(`availability.weekdaysCompact.${weekday}`));
+}
+
 /** Per-weekday blocks for profile chips; falls back when RPC omits `by_weekday`. */
 export function publicAvailabilityByWeekday(
   summary: PublicPlayerAvailabilitySummary | undefined,

@@ -54,7 +54,7 @@ const summary: PublicPlayerAvailabilitySummary = {
 };
 
 describe("player profile availability lines", () => {
-  it("renders the format and intent lines", async () => {
+  it("renders weekday chips and intent without emoji", async () => {
     const view = await render(
       <PlayerAvailabilitySection player={player()} summary={summary} />,
     );

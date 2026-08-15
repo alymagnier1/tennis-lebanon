@@ -3,7 +3,7 @@
 begin;
 
 create extension if not exists pgtap;
-select plan(3);
+select plan(4);
 
 create or replace function pg_temp.assert_true(
   p_condition boolean,
@@ -87,7 +87,7 @@ $$;
 set local role authenticated;
 
 -- ---------------------------------------------------------------------------
--- The stranding case: the club never replied, so someone rang them directly
+-- The stranding case: the club never replied, so the host rang them directly
 -- ---------------------------------------------------------------------------
 
 do $$
@@ -101,6 +101,7 @@ declare
   v_hub public.match_hub_card;
   v_pending_status public.booking_status;
   v_starts timestamptz := now() + interval '6 days';
+  v_joiner_message text := '';
 begin
   v_match_id := pg_temp.ready_match(v_creator, v_joiner, v_starts);
 
@@ -113,9 +114,27 @@ begin
     format('expected booking_pending before the fix applies, got %s', v_hub.status)
   );
 
-  -- The joiner rang the club and booked it. Before 041 this raised, because the
-  -- action was creator-only and hidden outside ready_to_book.
+  -- Joiners cannot record an off-app court (host-only since 058).
   perform pg_temp.set_caller(v_joiner);
+  begin
+    perform public.confirm_external_court(
+      v_match_id,
+      v_court,
+      v_starts,
+      v_starts + interval '90 minutes',
+      'Booked by phone'
+    );
+  exception
+    when others then
+      v_joiner_message := sqlerrm;
+  end;
+
+  perform pg_temp.assert_true(
+    v_joiner_message like '%Only the creator%',
+    format('joiner must be refused, got: %s', v_joiner_message)
+  );
+
+  perform pg_temp.set_caller(v_creator);
   v_external_booking_id := public.confirm_external_court(
     v_match_id,
     v_court,
@@ -126,7 +145,7 @@ begin
 
   perform pg_temp.assert_true(
     v_external_booking_id is not null,
-    'a participant must be able to record a court while the club is still deciding'
+    'the host must be able to record a court while the club is still deciding'
   );
 
   v_hub := public.get_match_hub(v_match_id);
@@ -152,7 +171,8 @@ begin
 end;
 $$;
 
-select pass('a participant can record an off-app court while a club request is pending');
+select pass('joiners cannot record an off-app court while a club request is pending');
+select pass('the host can record an off-app court while a club request is pending');
 
 -- ---------------------------------------------------------------------------
 -- A club must not be able to act on the request that was superseded

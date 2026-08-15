@@ -288,8 +288,7 @@ export default function CreateMatchScheduleScreen() {
     clubsHydrated,
     clubsSettled: clubsQuery.isSuccess || clubsQuery.isError,
   });
-  const showWhereEditor =
-    editingWhere || (whereHydrated && !whereSummaryReady);
+  const showWhereEditor = editingWhere || (whereHydrated && !whereSummaryReady);
 
   function closeWhereEditor() {
     if (selectedZoneIds.length === 0) return;
@@ -656,9 +655,7 @@ export default function CreateMatchScheduleScreen() {
               <CreateMatchSubsection
                 label={t("matches.create.preferredClubsForMatchTitle")}
               >
-                <CreateMatchSummaryValue
-                  empty={effectiveClubIds.length === 0}
-                >
+                <CreateMatchSummaryValue empty={effectiveClubIds.length === 0}>
                   <AppText
                     style={
                       effectiveClubIds.length > 0
@@ -675,7 +672,9 @@ export default function CreateMatchScheduleScreen() {
 
               <Pressable
                 accessibilityRole="link"
-                accessibilityLabel={t("matches.create.whereProfileDefaultsLink")}
+                accessibilityLabel={t(
+                  "matches.create.whereProfileDefaultsLink",
+                )}
                 onPress={() => router.push("/profile/where-i-play")}
               >
                 <AppText style={createMatchStyles.profileLink}>

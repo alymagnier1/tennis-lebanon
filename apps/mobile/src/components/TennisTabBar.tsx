@@ -134,9 +134,7 @@ export function TennisTabBar({
         }}
         style={styles.tab}
       >
-        <View
-          style={[styles.iconWell, isFocused && styles.iconWellActive]}
-        >
+        <View style={[styles.iconWell, isFocused && styles.iconWellActive]}>
           <Icon name={iconName} size={TAB_ICON_SIZE} color={iconColor} />
         </View>
         <AppText
@@ -165,15 +163,16 @@ export function TennisTabBar({
             accessibilityLabel={t("matches.create.cta")}
             testID="tab-create-match"
             onPress={() => void handleCreatePress()}
-            style={({ pressed }) => [
-              styles.fab,
-              pressed && styles.fabPressed,
-            ]}
+            style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
           >
             {openingCreate ? (
               <ActivityIndicator color={tennisColors.white} />
             ) : (
-              <Icon name="add" size={FAB_ICON_SIZE} color={tennisColors.white} />
+              <Icon
+                name="add"
+                size={FAB_ICON_SIZE}
+                color={tennisColors.white}
+              />
             )}
           </Pressable>
         </View>

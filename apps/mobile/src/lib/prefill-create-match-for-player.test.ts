@@ -48,22 +48,13 @@ function samplePlayer(
 }
 
 describe("preferredFormatForPlayer", () => {
-  it("prefers singles when only singles is selected", () => {
-    expect(
-      preferredFormatForPlayer({
-        prefers_singles: true,
-        prefers_doubles: false,
-      }),
-    ).toBe("singles");
+  it("defaults to singles when no explicit format is set", () => {
+    expect(preferredFormatForPlayer()).toBe("singles");
+    expect(preferredFormatForPlayer(null)).toBe("singles");
   });
 
-  it("defaults to singles when both formats are selected", () => {
-    expect(
-      preferredFormatForPlayer({
-        prefers_singles: true,
-        prefers_doubles: true,
-      }),
-    ).toBe("singles");
+  it("uses an explicit create default when provided", () => {
+    expect(preferredFormatForPlayer("doubles")).toBe("doubles");
   });
 });
 

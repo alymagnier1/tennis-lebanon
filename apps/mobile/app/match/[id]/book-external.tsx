@@ -2,19 +2,16 @@ import { useMemo, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  confirmExternalCourt,
-  getClubDetail,
-  getMatchHub,
-} from "@tennis-lebanon/api";
+import { useQuery } from "@tanstack/react-query";
+import { getClubDetail, getMatchHub } from "@tennis-lebanon/api";
 import { ClubsDirectoryList } from "../../../src/components/ClubsDirectoryList";
 import { StatusBanner } from "../../../src/components/AppUi";
 import { AppText } from "../../../src/components/AppText";
-import { Screen } from "../../../src/components/FormUi";
+import { ErrorNotice, Screen } from "../../../src/components/FormUi";
 import {
   FigmaBackButton,
   FigmaPrimaryButton,
+  FigmaSecondaryButton,
   figmaFormStyles,
 } from "../../../src/components/onboarding-ui";
 import {
@@ -32,10 +29,10 @@ import {
 import { CreateMatchPanel } from "../../../src/lib/create-match-ui";
 import { clubIdsFromList } from "../../../src/lib/match-clubs";
 import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
+import { useConfirmExternalCourt } from "../../../src/hooks/useConfirmExternalCourt";
 import { matchHubRoute } from "../../../src/lib/routes";
-import { confirmAction, notify } from "../../../src/lib/confirm-action";
+import { confirmAction } from "../../../src/lib/confirm-action";
 import { supabase } from "../../../src/lib/supabase";
-import { useToast } from "../../../src/providers/ToastProvider";
 import { tennisColors } from "../../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../../src/hooks/useTennisFonts";
 
@@ -68,11 +65,17 @@ function slotFromAgreed(agreed: AgreedSlot | null): SlotDraft {
 }
 
 export default function MatchBookExternalScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, clubId } = useLocalSearchParams<{
+    id: string;
+    clubId?: string;
+  }>();
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const { showToast } = useToast();
-  const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
+  // Seeded from the club card the host came from. `clubQuery` resolves the
+  // court by id rather than from the directory list, so a preselected club
+  // outside the match zones still confirms -- it just is not highlighted below.
+  const [selectedClubId, setSelectedClubId] = useState<string | null>(
+    () => clubId ?? null,
+  );
   const [slot, setSlot] = useState<SlotDraft | null>(null);
 
   const hubQuery = useQuery({
@@ -81,12 +84,14 @@ export default function MatchBookExternalScreen() {
     enabled: Boolean(id),
   });
 
+  const isHost = hubQuery.data?.viewer_is_creator === true;
+
   const matchZoneIds = useMemo(() => {
     const zones = (hubQuery.data?.zones as { id: string }[] | undefined) ?? [];
     return zones.map((zone) => zone.id);
   }, [hubQuery.data?.zones]);
 
-  const clubsQuery = useClubsDirectory(matchZoneIds);
+  const clubsQuery = useClubsDirectory(isHost ? matchZoneIds : []);
 
   const clubQuery = useQuery({
     queryKey: ["club-detail", selectedClubId],
@@ -123,8 +128,8 @@ export default function MatchBookExternalScreen() {
 
   const offPreferredList = Boolean(
     preferredClubIds.length > 0 &&
-      selectedClubId &&
-      !preferredClubIds.includes(selectedClubId),
+    selectedClubId &&
+    !preferredClubIds.includes(selectedClubId),
   );
 
   const effectiveSlot = useMemo(
@@ -149,32 +154,8 @@ export default function MatchBookExternalScreen() {
 
   const selectedClubHasCourts = Boolean(clubQuery.data?.courts.length);
 
-  const confirmMutation = useMutation({
-    mutationFn: () =>
-      confirmExternalCourt(supabase, {
-        matchId: id!,
-        courtId: courtId!,
-        startsAt,
-        endsAt,
-      }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
-      await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
-      showToast(t("matches.booking.externalSuccess"));
-      router.replace(matchHubRoute(id!));
-    },
-    onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : "";
-      notify(
-        message.includes("court_already_booked")
-          ? t("matches.booking.courtAlreadyBooked")
-          : message.includes("Invalid court time")
-            ? t("matches.booking.courtTimeInPast")
-            : message.includes("Court is blocked")
-              ? t("matches.booking.courtBlocked")
-              : t("matches.booking.externalError"),
-      );
-    },
+  const confirmMutation = useConfirmExternalCourt(id!, {
+    onSuccess: () => router.replace(matchHubRoute(id!)),
   });
 
   function handleConfirm() {
@@ -199,16 +180,39 @@ export default function MatchBookExternalScreen() {
       message: body,
       confirmLabel: t("matches.booking.bookedOffAppConfirm"),
       cancelLabel: t("common.cancel"),
-      onConfirm: () => confirmMutation.mutate(),
+      onConfirm: () =>
+        confirmMutation.mutate({ courtId: courtId!, startsAt, endsAt }),
     });
   }
 
   const canConfirm = Boolean(
     selectedClubId &&
-      courtId &&
-      selectedClubHasCourts &&
-      !confirmMutation.isPending,
+    courtId &&
+    selectedClubHasCourts &&
+    !confirmMutation.isPending,
   );
+
+  if (hubQuery.isLoading) {
+    return (
+      <Screen title={t("matches.booking.bookedOffAppTitle")} showTitle={false}>
+        <FigmaBackButton onPress={() => router.back()} />
+        <ActivityIndicator accessibilityLabel={t("common.loading")} />
+      </Screen>
+    );
+  }
+
+  if (hubQuery.data && !isHost) {
+    return (
+      <Screen title={t("matches.booking.bookedOffAppTitle")} showTitle={false}>
+        <FigmaBackButton onPress={() => router.replace(matchHubRoute(id!))} />
+        <ErrorNotice>{t("matches.booking.hostOnly")}</ErrorNotice>
+        <FigmaSecondaryButton
+          label={t("common.back")}
+          onPress={() => router.replace(matchHubRoute(id!))}
+        />
+      </Screen>
+    );
+  }
 
   return (
     <Screen title={t("matches.booking.bookedOffAppTitle")} showTitle={false}>
@@ -219,10 +223,6 @@ export default function MatchBookExternalScreen() {
       <AppText style={screenStyles.description}>
         {t("matches.booking.bookedOffAppDescription")}
       </AppText>
-
-      {hubQuery.isLoading ? (
-        <ActivityIndicator accessibilityLabel={t("common.loading")} />
-      ) : null}
 
       <View style={figmaFormStyles.stack}>
         <CreateMatchPanel title={t("matches.booking.courtTimeLabel")}>
@@ -255,9 +255,7 @@ export default function MatchBookExternalScreen() {
 
         <CreateMatchPanel title={t("matches.booking.selectClub")}>
           {offPreferredList ? (
-            <StatusBanner
-              body={t("matches.booking.offPreferredListWarning")}
-            />
+            <StatusBanner body={t("matches.booking.offPreferredListWarning")} />
           ) : null}
 
           <ClubsDirectoryList

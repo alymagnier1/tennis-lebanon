@@ -120,8 +120,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
 }: MatchCardProps) {
   const { rowDirection, writingDirection } = useLayoutDirection();
   const statusVisual = matchCardStatusVisual(status);
-  const showHostTrailing =
-    Boolean(hostName) && !viewerName && !opponentName;
+  const showHostTrailing = Boolean(hostName) && !viewerName && !opponentName;
   const showLeadingViewer = Boolean(viewerName);
   const showTrailingOpponent = Boolean(opponentName);
   const showPlayerRow =
@@ -139,10 +138,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
 
   const centerContent = (
     <View style={styles.centerColumn}>
-      <AppText
-        style={[styles.headline, { writingDirection }]}
-        maxLines={2}
-      >
+      <AppText style={[styles.headline, { writingDirection }]} maxLines={2}>
         {headline}
       </AppText>
       {badges && badges.length > 0 ? (
@@ -187,8 +183,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
           ]}
         >
           <AppText style={styles.scoreBannerTitle}>
-            {scoreBanner.title ??
-              (scoreBanner.won ? "Victory" : "Defeat")}
+            {scoreBanner.title ?? (scoreBanner.won ? "Victory" : "Defeat")}
           </AppText>
           <AppText style={styles.scoreBannerScore}>{scoreBanner.score}</AppText>
         </View>
@@ -199,7 +194,10 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
           {dateTimeLabel ? (
             <View style={[styles.dateRow, { flexDirection: rowDirection }]}>
               <View
-                style={[styles.statusDot, { backgroundColor: statusVisual.dot }]}
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: statusVisual.dot },
+                ]}
               />
               <AppText
                 style={[styles.dateText, { writingDirection }]}
@@ -266,7 +264,11 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
         ) : (
           <>
             <AppText
-              style={[styles.headline, styles.headlineStandalone, { writingDirection }]}
+              style={[
+                styles.headline,
+                styles.headlineStandalone,
+                { writingDirection },
+              ]}
               maxLines={2}
             >
               {headline}

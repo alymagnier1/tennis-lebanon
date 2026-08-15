@@ -64,29 +64,43 @@ export function FigmaSecondaryButton({
   label,
   onPress,
   disabled = false,
+  loading = false,
   ghostOnDark = false,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
+  loading?: boolean;
   ghostOnDark?: boolean;
 }) {
+  const inactive = disabled || loading;
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled }}
+      accessibilityState={{ disabled: inactive }}
       onPress={onPress}
-      disabled={disabled}
-      style={[styles.secondary, ghostOnDark ? styles.secondaryGhost : null]}
+      disabled={inactive}
+      style={[
+        styles.secondary,
+        ghostOnDark ? styles.secondaryGhost : null,
+        inactive ? styles.secondaryDisabled : null,
+      ]}
     >
-      <AppText
-        style={[
-          styles.secondaryLabel,
-          ghostOnDark ? styles.secondaryLabelGhost : null,
-        ]}
-      >
-        {label}
-      </AppText>
+      {loading ? (
+        <ActivityIndicator
+          color={ghostOnDark ? tennisColors.white : tennisColors.primaryDark}
+        />
+      ) : (
+        <AppText
+          style={[
+            styles.secondaryLabel,
+            ghostOnDark ? styles.secondaryLabelGhost : null,
+            inactive ? styles.secondaryLabelDisabled : null,
+          ]}
+        >
+          {label}
+        </AppText>
+      )}
     </Pressable>
   );
 }
@@ -189,6 +203,9 @@ const styles = StyleSheet.create({
     backgroundColor: tennisColors.heroOverlay,
     borderColor: tennisColors.heroBorder,
   },
+  secondaryDisabled: {
+    opacity: 0.55,
+  },
   secondaryLabel: {
     fontFamily: tennisFontFamily.headingSemi,
     fontSize: 16,
@@ -196,6 +213,9 @@ const styles = StyleSheet.create({
   },
   secondaryLabelGhost: {
     color: tennisColors.white,
+  },
+  secondaryLabelDisabled: {
+    color: tennisColors.mutedForeground,
   },
   textBtn: {
     alignItems: "center",

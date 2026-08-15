@@ -21,7 +21,6 @@ import {
   skillRangeFromSelection,
 } from "./skill-range";
 
-
 export const matchHostDefaultsRowSchema = z.object({
   skill_band: skillBandSchema,
   play_intent: playIntentSchema,
@@ -40,36 +39,23 @@ export type MatchHostDefaultsRow = z.infer<typeof matchHostDefaultsRowSchema>;
 export const updateMatchHostDefaultsSchema = z
   .object({
     playIntent: playIntentSchema,
-    prefersSingles: z.boolean(),
-    prefersDoubles: z.boolean(),
     listOnDiscover: z.boolean(),
     defaultRequiresCreatorApproval: z.boolean(),
     defaultMinSkill: skillBandSchema,
     defaultMaxSkill: skillBandSchema,
-    defaultMatchFormat: matchFormatSchema.optional(),
+    /** Create-flow default only — not a discovery preference. */
+    defaultMatchFormat: matchFormatSchema,
   })
   .superRefine((value, context) => {
-    if (!value.prefersSingles && !value.prefersDoubles) {
-      context.addIssue({
-        code: "custom",
-        path: ["prefersSingles"],
-        message: "Choose at least one match format.",
-      });
-    }
-
-    if (skillBandRank(value.defaultMinSkill) > skillBandRank(value.defaultMaxSkill)) {
+    if (
+      skillBandRank(value.defaultMinSkill) >
+      skillBandRank(value.defaultMaxSkill)
+    ) {
       context.addIssue({
         code: "custom",
         path: ["defaultMinSkill"],
-        message: "defaultMinSkill must be less than or equal to defaultMaxSkill",
-      });
-    }
-
-    if (value.prefersSingles && value.prefersDoubles && !value.defaultMatchFormat) {
-      context.addIssue({
-        code: "custom",
-        path: ["defaultMatchFormat"],
-        message: "Choose a default format when both singles and doubles are enabled.",
+        message:
+          "defaultMinSkill must be less than or equal to defaultMaxSkill",
       });
     }
   });
@@ -101,22 +87,9 @@ export function skillBandsForPlayer(
 }
 
 export function preferredFormatForPlayer(
-  player: Pick<
-    { prefers_singles: boolean; prefers_doubles: boolean },
-    "prefers_singles" | "prefers_doubles"
-  >,
   explicitFormat?: "singles" | "doubles" | null,
 ): "singles" | "doubles" {
-  if (explicitFormat) {
-    return explicitFormat;
-  }
-  if (player.prefers_singles && !player.prefers_doubles) {
-    return "singles";
-  }
-  if (player.prefers_doubles && !player.prefers_singles) {
-    return "doubles";
-  }
-  return "singles";
+  return explicitFormat ?? "singles";
 }
 
 export function hasConfiguredMatchDefaults(
@@ -140,7 +113,7 @@ export function resolveMatchHostDefaults(
     visibility === "public" ? row.default_requires_creator_approval : false;
 
   return {
-    format: preferredFormatForPlayer(row, row.default_match_format),
+    format: preferredFormatForPlayer(row.default_match_format),
     intent: row.play_intent,
     minSkill,
     maxSkill,
@@ -148,7 +121,9 @@ export function resolveMatchHostDefaults(
     visibility,
     requiresCreatorApproval,
     timingMode: "fixed",
-    matchDefaultsConfigured: hasConfiguredMatchDefaults(row.match_defaults_set_at),
+    matchDefaultsConfigured: hasConfiguredMatchDefaults(
+      row.match_defaults_set_at,
+    ),
   };
 }
 
@@ -181,20 +156,18 @@ export function buildCreateMatchDraftFromHostDefaults(
   };
 }
 
-export function matchHostDefaultsRowFromProfile(
-  profile: {
-    skill_band: string;
-    play_intent: string;
-    prefers_singles: boolean;
-    prefers_doubles: boolean;
-    default_match_visibility: string;
-    default_requires_creator_approval: boolean;
-    default_min_skill: string | null;
-    default_max_skill: string | null;
-    default_match_format: string | null;
-    match_defaults_set_at: string | null;
-  },
-): MatchHostDefaultsRow {
+export function matchHostDefaultsRowFromProfile(profile: {
+  skill_band: string;
+  play_intent: string;
+  prefers_singles: boolean;
+  prefers_doubles: boolean;
+  default_match_visibility: string;
+  default_requires_creator_approval: boolean;
+  default_min_skill: string | null;
+  default_max_skill: string | null;
+  default_match_format: string | null;
+  match_defaults_set_at: string | null;
+}): MatchHostDefaultsRow {
   return matchHostDefaultsRowSchema.parse(profile);
 }
 
@@ -206,22 +179,19 @@ export function updateInputToDbPatch(input: UpdateMatchHostDefaultsInput): {
   default_requires_creator_approval: boolean;
   default_min_skill: SkillBand;
   default_max_skill: SkillBand;
-  default_match_format: "singles" | "doubles" | null;
+  default_match_format: "singles" | "doubles";
 } {
   const visibility = visibilityFromListOnDiscover(input.listOnDiscover);
   return {
     play_intent: input.playIntent,
-    prefers_singles: input.prefersSingles,
-    prefers_doubles: input.prefersDoubles,
+    // Columns remain for legacy rows; discovery no longer filters on them.
+    prefers_singles: true,
+    prefers_doubles: true,
     default_match_visibility: visibility,
     default_requires_creator_approval:
       visibility === "public" ? input.defaultRequiresCreatorApproval : false,
     default_min_skill: input.defaultMinSkill,
     default_max_skill: input.defaultMaxSkill,
-    default_match_format:
-      input.prefersSingles && input.prefersDoubles
-        ? (input.defaultMatchFormat ?? null)
-        : null,
+    default_match_format: input.defaultMatchFormat,
   };
 }
-

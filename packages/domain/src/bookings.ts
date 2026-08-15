@@ -15,21 +15,14 @@ export function canRequestCourt(input: {
  * Recording a court arranged directly with the club, rather than through the
  * in-app queue.
  *
- * Deliberately wider than {@link canRequestCourt}. Requesting a court commits
- * the group to a club and stays with the creator; saying "we already have one"
- * only records what happened, and the person who booked it is usually whoever
- * holds the membership. `booking_pending` matters most of all: a club that
- * never replies is the common reason someone picks up the phone, and hiding
- * this action there is what leaves the match stranded.
+ * Host-only, same as {@link canRequestCourt}. Club contact and off-app
+ * confirmation both commit the group to a venue, so joiners do not see either
+ * action. `booking_pending` still matters: if the club never replies, the host
+ * can record that they booked by phone or WhatsApp instead.
  *
- * `open` and `full` are court-first: the host secures the court and recruits
- * against it. That case is narrower than the rest, and the rules mirror the
- * ones enforced in `confirm_external_court`:
- *
- * - creator only, because committing a venue before the group exists is the
- *   host's call and there is often nobody else in the match to make it;
- * - fixed timing with an agreed time, because a court needs an hour and a
- *   flexible match has none until the vote resolves.
+ * Court-first (`open` / `full`) also requires fixed timing with an agreed
+ * time — a court needs an hour, and a flexible match has none until the vote
+ * resolves.
  */
 export function canConfirmExternalCourt(input: {
   viewerIsParticipant: boolean;
@@ -39,12 +32,8 @@ export function canConfirmExternalCourt(input: {
   hasAgreedTime: boolean;
   hasAcceptedBooking?: boolean;
 }): boolean {
-  if (!input.viewerIsParticipant) return false;
+  if (!input.viewerIsParticipant || !input.viewerIsCreator) return false;
 
-  // Before court-first, an accepted booking always meant the match had left
-  // ready_to_book, so the status check covered this on its own. A court-first
-  // match sits at `open` holding a court, and offering to record a second one
-  // only produces "an active booking already exists".
   if (input.hasAcceptedBooking) return false;
 
   if (
@@ -55,11 +44,7 @@ export function canConfirmExternalCourt(input: {
   }
 
   if (input.matchStatus === "open" || input.matchStatus === "full") {
-    return (
-      input.viewerIsCreator &&
-      isFixedTimingMode(input.timingMode) &&
-      input.hasAgreedTime
-    );
+    return isFixedTimingMode(input.timingMode) && input.hasAgreedTime;
   }
 
   return false;

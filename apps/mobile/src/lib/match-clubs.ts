@@ -1,4 +1,6 @@
 import type { MatchPreferredClub } from "@tennis-lebanon/api";
+import type { Json } from "@tennis-lebanon/types";
+import { zoneNameFromJson } from "./zones";
 
 /**
  * The clubs a host named at creation, joined for display.
@@ -21,4 +23,16 @@ export function clubIdsFromList(clubs: unknown): string[] {
   return clubs
     .map((club) => (club as MatchPreferredClub).club_id ?? "")
     .filter(Boolean);
+}
+
+/** Public address first; zone if the club has no street line yet. */
+export function preferredClubLocationLabel(input: {
+  addressPublic?: string | null;
+  zoneNameI18n?: Json;
+  locale: string;
+}): string | null {
+  const address = input.addressPublic?.trim();
+  if (address) return address;
+  const zone = zoneNameFromJson(input.zoneNameI18n ?? null, input.locale);
+  return zone || null;
 }

@@ -10,14 +10,6 @@ export function buildOwnPlayStyleTags(
 ): string[] {
   const tags: string[] = [t(`playIntent.${player.play_intent}`)];
 
-  if (player.prefers_singles && player.prefers_doubles) {
-    tags.push(t("formats.both"));
-  } else if (player.prefers_singles) {
-    tags.push(t("formats.singles"));
-  } else if (player.prefers_doubles) {
-    tags.push(t("formats.doubles"));
-  }
-
   const zoneLabel = zoneLabelFromList(zones, locale);
   if (zoneLabel) {
     tags.push(zoneLabel);

@@ -25,7 +25,9 @@ function SummaryDefaultChip({
 
   return (
     <View style={styles.chip}>
-      <AppText style={styles.chipLabel} maxLines={1}>{label}</AppText>
+      <AppText style={styles.chipLabel} maxLines={1}>
+        {label}
+      </AppText>
       <AppText style={[styles.chipValue, { writingDirection }]} maxLines={2}>
         {value}
       </AppText>
@@ -33,11 +35,7 @@ function SummaryDefaultChip({
   );
 }
 
-export function CreateMatchSummaryBar({
-  onPress,
-}: {
-  onPress: () => void;
-}) {
+export function CreateMatchSummaryBar({ onPress }: { onPress: () => void }) {
   const { t } = useTranslation();
   const { rowDirection } = useLayoutDirection();
   const draft = getCreateMatchDraft();
@@ -92,8 +90,12 @@ export function CreateMatchSummaryBar({
       style={({ pressed }) => [styles.root, pressed && styles.rootPressed]}
     >
       <View style={[styles.headerRow, { flexDirection: rowDirection }]}>
-        <AppText style={styles.title}>{t("matches.create.summaryBar.title")}</AppText>
-        <AppText style={styles.editLabel}>{t("matches.create.summaryBar.edit")}</AppText>
+        <AppText style={styles.title}>
+          {t("matches.create.summaryBar.title")}
+        </AppText>
+        <AppText style={styles.editLabel}>
+          {t("matches.create.summaryBar.edit")}
+        </AppText>
       </View>
 
       {chips.length > 0 ? (

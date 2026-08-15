@@ -4,7 +4,11 @@ import { AppText } from "../components/AppText";
 import { figmaFormStyles } from "../components/onboarding-ui/figma-form-styles";
 import { useLayoutDirection } from "./layout-direction";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
-import { tennisColors, tennisRadii, tennisTypography } from "../theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisRadii,
+  tennisTypography,
+} from "../theme/tennis-tokens";
 import { tennisTextStyles } from "../theme/tennis-text-styles";
 
 export function CreateMatchPanel({

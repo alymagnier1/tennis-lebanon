@@ -1,0 +1,28 @@
+-- Milestone 8.15: let players actually read their own notifications.
+--
+-- The notification centre has never loaded, on any platform. It failed with
+-- "We could not load your notifications." rather than showing an empty list,
+-- because PostgREST could not read the table at all:
+--
+--   ERROR:  permission denied for table notifications
+--
+-- Migration 001 created `notifications`, enabled RLS, and added the
+-- `notifications_read_own` policy — but never granted SELECT to `authenticated`.
+-- An RLS policy filters rows; it does not confer table privileges. With no
+-- grant, the policy was unreachable and every read was rejected before it was
+-- ever evaluated.
+--
+-- This was invisible on review because the policy is right there in 001 and
+-- reads as complete. It stayed invisible in use because almost everything else
+-- the client touches goes through a security-definer RPC, which bypasses table
+-- privileges entirely. `listUserNotifications` is one of the few direct
+-- `.from()` reads in the codebase, and the only one whose table was never
+-- granted — every other directly-read table (profiles, player_profiles, zones,
+-- player_zones, availability_windows, user_blocks, match_messages,
+-- match_activity) carries an explicit grant in the migration that opened it.
+--
+-- Reads only. Marking a notification read stays behind `mark_notification_read`,
+-- and nothing client-side may insert or delete: the outbox is written by
+-- `enqueue_notification` and by the delivery jobs, never by a player.
+
+grant select on table public.notifications to authenticated;

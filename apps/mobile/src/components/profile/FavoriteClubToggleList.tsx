@@ -15,7 +15,9 @@ type FavoriteClubToggleListProps = {
   onToggleFavorite: (clubId: string, favorite: boolean) => void;
 };
 
-function sortClubsFavoritesFirst(clubs: ClubDirectoryRow[]): ClubDirectoryRow[] {
+function sortClubsFavoritesFirst(
+  clubs: ClubDirectoryRow[],
+): ClubDirectoryRow[] {
   return [...clubs].sort((left, right) => {
     if (left.is_favorite === right.is_favorite) {
       return left.name.localeCompare(right.name);
@@ -57,10 +59,7 @@ export function FavoriteClubToggleList({
             style={[styles.row, { flexDirection: rowDirection }]}
           >
             <View style={styles.textBlock}>
-              <AppText
-                style={[styles.name, { writingDirection }]}
-                maxLines={1}
-              >
+              <AppText style={[styles.name, { writingDirection }]} maxLines={1}>
                 {club.name}
               </AppText>
               <AppText style={[styles.zone, { writingDirection }]} maxLines={1}>
@@ -73,9 +72,7 @@ export function FavoriteClubToggleList({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={
-                club.is_favorite
-                  ? t("clubs.unfavorite")
-                  : t("clubs.favorite")
+                club.is_favorite ? t("clubs.unfavorite") : t("clubs.favorite")
               }
               disabled={pending}
               onPress={() => onToggleFavorite(club.club_id, !club.is_favorite)}

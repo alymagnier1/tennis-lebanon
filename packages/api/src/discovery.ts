@@ -241,7 +241,9 @@ export async function discoverOpenMatches(
   });
 
   if (error) throw error;
-  return ((data ?? []) as DiscoverOpenMatchCardRow[]).map(normalizeOpenMatchCard);
+  return ((data ?? []) as DiscoverOpenMatchCardRow[]).map(
+    normalizeOpenMatchCard,
+  );
 }
 
 export async function getPublicPlayerCard(

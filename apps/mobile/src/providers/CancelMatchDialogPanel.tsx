@@ -54,10 +54,7 @@ export function CancelMatchDialogPanel({
       >
         {options.title}
       </AppText>
-      <AppText
-        style={[styles.message, { writingDirection }]}
-        maxLines={8}
-      >
+      <AppText style={[styles.message, { writingDirection }]} maxLines={8}>
         {options.message}
       </AppText>
       {options.showReasonField !== false ? (

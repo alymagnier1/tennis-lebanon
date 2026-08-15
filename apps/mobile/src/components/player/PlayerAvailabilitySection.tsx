@@ -9,13 +9,12 @@ import { Icon, type IconName } from "../Icon";
 import { PlayerProfileSection } from "./PlayerProfileSection";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { playerFormatLabel } from "../../lib/player-format-label";
 import {
   formatAvailabilityDayPartsLabel,
   hasPublicAvailabilitySummary,
   publicAvailabilityByWeekday,
 } from "../../lib/public-availability-summary";
-import { tennisColors } from "../../theme/tennis-tokens";
+import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 
 /**
  * Icon plus text rather than an emoji prefix: emoji render differently on every
@@ -45,7 +44,6 @@ export function PlayerAvailabilitySection({
   const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
   const weekdayEntries = publicAvailabilityByWeekday(summary);
-  const formatLabel = playerFormatLabel(player, t);
   const intentLabel = t(`playIntent.${player.play_intent}`);
   const hasSummary = hasPublicAvailabilitySummary(summary);
 
@@ -74,10 +72,6 @@ export function PlayerAvailabilitySection({
         </View>
       ) : null}
       <DetailLine
-        icon="court"
-        text={t("playerProfile.formatPreference", { format: formatLabel })}
-      />
-      <DetailLine
         icon="playIntent"
         text={t("playerProfile.intentPreference", { intent: intentLabel })}
       />
@@ -97,7 +91,7 @@ const styles = StyleSheet.create({
   },
   weekdayChip: {
     backgroundColor: tennisColors.secondary,
-    borderRadius: 8,
+    borderRadius: tennisRadii.sm,
     paddingHorizontal: 10,
     paddingVertical: 6,
     alignItems: "center",

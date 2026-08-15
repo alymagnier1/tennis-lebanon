@@ -9,10 +9,9 @@ import {
 } from "@tennis-lebanon/api";
 import { DiscoverPlayerCard } from "./DiscoverPlayerCard";
 import { buildMatchInviteUrl } from "../../lib/invite-link";
-import { playerFormatLabel } from "../../lib/player-format-label";
 import { formatMatchesPlayedLabel } from "../../lib/matches-played-label";
 import { publicPlayerLevelChip } from "../../lib/player-level-label";
-import { discoverPlayerAvailabilityTag } from "../../lib/discover-availability-tag";
+import { discoverPlayerAvailabilityTags } from "../../lib/discover-availability-tag";
 import { beginCreateMatchForPlayer } from "../../lib/begin-create-match-for-player";
 import { clubLabelFromList } from "../../lib/match-clubs";
 import { CREATE_MATCH_ROUTE } from "../../lib/routes";
@@ -86,9 +85,8 @@ export function DiscoverPlayerCardRow({
         player.completed_match_count,
         t,
       )}
-      formatTag={playerFormatLabel(player, t)}
       intentTag={t(`playIntent.${player.play_intent}`)}
-      availabilityTag={discoverPlayerAvailabilityTag(
+      availabilityTags={discoverPlayerAvailabilityTags(
         player,
         showOverlapAvailability,
         t,

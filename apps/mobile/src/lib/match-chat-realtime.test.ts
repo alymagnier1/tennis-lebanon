@@ -14,11 +14,14 @@ describe("matchChatChannelName", () => {
 describe("isMatchChatChannelTopic", () => {
   it("matches bare and realtime-prefixed topics", () => {
     const matchId = "abc-123";
-    expect(isMatchChatChannelTopic(matchChatChannelName(matchId), matchId)).toBe(
-      true,
-    );
     expect(
-      isMatchChatChannelTopic(`realtime:${matchChatChannelName(matchId)}`, matchId),
+      isMatchChatChannelTopic(matchChatChannelName(matchId), matchId),
+    ).toBe(true);
+    expect(
+      isMatchChatChannelTopic(
+        `realtime:${matchChatChannelName(matchId)}`,
+        matchId,
+      ),
     ).toBe(true);
     expect(isMatchChatChannelTopic("realtime:other", matchId)).toBe(false);
   });

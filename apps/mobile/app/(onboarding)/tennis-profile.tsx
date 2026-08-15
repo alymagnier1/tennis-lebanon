@@ -7,7 +7,6 @@ import {
   type PlayIntent,
   type SkillQuestionnaire,
 } from "@tennis-lebanon/domain";
-import { ErrorNotice } from "../../src/components/FormUi";
 import { AppText } from "../../src/components/AppText";
 import {
   ChipButton,
@@ -34,22 +33,16 @@ export default function TennisProfileScreen() {
   const { draft, updateDraft } = useOnboarding();
   const [answers, setAnswers] = useState(draft.skillAnswers);
   const [playIntent, setPlayIntent] = useState(draft.playIntent);
-  const [singles, setSingles] = useState(draft.prefersSingles);
-  const [doubles, setDoubles] = useState(draft.prefersDoubles);
-  const [error, setError] = useState(false);
 
   const next = () => {
-    if (!singles && !doubles) {
-      setError(true);
-      return;
-    }
     const skillBand = scoreSkillQuestionnaire(answers);
     updateDraft({
       skillAnswers: answers,
       skillBand,
       playIntent,
-      prefersSingles: singles,
-      prefersDoubles: doubles,
+      // Format is chosen per match; keep both open for discovery liquidity.
+      prefersSingles: true,
+      prefersDoubles: true,
     });
     router.push("/(onboarding)/zones");
   };
@@ -95,21 +88,6 @@ export default function TennisProfileScreen() {
           />
         ))}
       </View>
-      <View style={styles.chips}>
-        <ChipButton
-          label={t("formats.singles")}
-          selected={singles}
-          onPress={() => setSingles((value) => !value)}
-        />
-        <ChipButton
-          label={t("formats.doubles")}
-          selected={doubles}
-          onPress={() => setDoubles((value) => !value)}
-        />
-      </View>
-      {error ? (
-        <ErrorNotice>{t("onboarding.tennis.formatError")}</ErrorNotice>
-      ) : null}
     </OnboardingStepLayout>
   );
 }

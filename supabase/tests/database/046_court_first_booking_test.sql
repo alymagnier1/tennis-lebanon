@@ -241,7 +241,7 @@ begin
   end;
 
   perform pg_temp.assert_true(
-    v_non_creator = 'only_creator_can_secure_court_early',
+    v_non_creator = 'Only the creator can confirm a court',
     format('a joiner must not secure a court early, got %s', v_non_creator)
   );
 

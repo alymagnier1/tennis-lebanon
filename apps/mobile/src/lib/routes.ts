@@ -43,9 +43,27 @@ export function matchBookRoute(matchId: string): Href {
   } as Href;
 }
 
-export function matchBookExternalRoute(matchId: string): Href {
+/**
+ * `clubId` preselects the venue. The host reaches this from a specific club's
+ * card after arranging the court there, so making them pick it again from a
+ * list is a step the tap already answered.
+ */
+export function matchBookExternalRoute(
+  matchId: string,
+  options?: { clubId?: string },
+): Href {
   return {
     pathname: "/match/[id]/book-external",
+    params: {
+      id: matchId,
+      ...(options?.clubId ? { clubId: options.clubId } : {}),
+    },
+  } as Href;
+}
+
+export function matchChatRoute(matchId: string): Href {
+  return {
+    pathname: "/match/[id]/chat",
     params: { id: matchId },
   } as Href;
 }

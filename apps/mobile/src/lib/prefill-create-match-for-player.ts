@@ -66,7 +66,7 @@ export function prefillCreateMatchDraftForPlayer(
   const proposedTime = overlapProposedTimeForPlayer(player);
 
   return {
-    format: preferredFormatForPlayer(player),
+    format: preferredFormatForPlayer(),
     intent,
     minSkill,
     maxSkill,

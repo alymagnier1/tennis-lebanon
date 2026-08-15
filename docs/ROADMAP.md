@@ -184,6 +184,22 @@ Deliver:
 
 Exit: all release gates in `TESTING_SECURITY.md` pass and five partner-club workflows have been rehearsed.
 
+## Milestone 9 — Attendance-driven completion and honest scoring
+
+Reshape the result loop for the pilot as it is actually launching: casual play, no referee, no leagues.
+
+**M9.1 (done):** A match completes when its participants say they played — all of them, or one plus a 72-hour grace window — rather than only on an agreed scoreline. Everyone answering "we did not play" expires it. `complete_matches_from_attendance` runs on the existing hourly job.
+
+**M9.2 (done):** Scores become side-relative (`[sideAGames, sideBGames]` against `side_a_user_ids`), which makes a three-setter the winner dropped a set recordable for the first time and lets the server derive the winner instead of accepting one. Full tennis-set validation moves into SQL; the domain package mirrors it for immediate feedback.
+
+**M9.3 (done):** The two notifications the flow always assumed and never had — `result_confirm_request` and `result_auto_confirmed`. A submitted score auto-confirms after 72 hours only when the request reached the other side (`notifications.sent_at`); otherwise it lands on the terminal `unverified` status, shown and attributed but unrated.
+
+**M9.4 (done):** Disagreeing reopens the result once, to whoever objected. A second disagreement goes to the operator queue built in M7.5, where `void` stays the only honest resolution. Doubles gains the rule that only the opposing side may confirm.
+
+Exit: a casual match with no score reaches `completed` and counts; no result can sit unanswered forever; ratings still move exactly once, and never on a disputed or unverified result.
+
+Deliberately **not** in M9, each rejected during design: rated-vs-social declaration, doubles rating, band-seeded ratings, provisional K, repeat-opponent damping, trust scores, account flagging, strike ladders, evidence capture (photos, GPS, QR), matchmaking lockouts, and rating replay. Rating ships exactly as built in M7 — `match_results` preserves every confirmed score, so a better model can be fitted to real pilot data instead of guessed at now.
+
 ## After pilot evidence only
 
 Consider payments, split deposits, **full coach marketplace** (scheduling and payments), recurring groups, flexible leagues, club promotions, advanced analytics, **swipe-based Players browse**, and **padel** (same app, `sport` dimension on profiles/matches/clubs) only after tennis match-completion and retention thresholds are met.

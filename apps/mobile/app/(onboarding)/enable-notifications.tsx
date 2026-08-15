@@ -9,6 +9,14 @@ import {
 } from "../../src/components/onboarding-ui";
 import { syncDevicePushToken } from "../../src/lib/push-notifications";
 
+/**
+ * Deliberately not named `notifications.tsx`: route groups add no path segment,
+ * so that filename resolved to `/notifications` — the same URL as the
+ * notification centre at `app/notifications.tsx`. Which of the two won was left
+ * to expo-router's internal ordering.
+ *
+ * Declining here is not final. `/profile/notifications` can turn push on later.
+ */
 export default function NotificationPrimerScreen() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);

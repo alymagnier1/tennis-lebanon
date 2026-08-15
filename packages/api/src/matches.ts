@@ -105,6 +105,9 @@ export type MatchHubCard = {
   participant_count: number;
   capacity: number;
   selected_time_option_id: string | null;
+  /** Selected hour even after it has started (past `proposed_times` filter). */
+  agreed_starts_at: string | null;
+  agreed_ends_at: string | null;
   zones: unknown;
   preferred_clubs: MatchPreferredClub[];
   proposed_times: MatchHubTimeOption[];
@@ -144,13 +147,21 @@ export type MyMatchRow = {
   club_name: string | null;
 };
 
+/**
+ * A completed match with no score at all is the ordinary casual case now that
+ * attendance is what completes a match, so every result-derived field here is
+ * nullable.
+ */
 export type CompletedMatchRow = {
   match_id: string;
   format: string;
-  result_status: string;
-  score: { sets: [number, number][] };
+  result_status: string | null;
+  score: { sets: [number, number][] } | null;
   winner_user_id: string | null;
-  viewer_won: boolean;
+  viewer_won: boolean | null;
+  viewer_side: 1 | 2 | null;
+  submitted_by: string | null;
+  submitted_by_name: string | null;
   opponent_names: string | null;
   played_at: string | null;
   club_name: string | null;

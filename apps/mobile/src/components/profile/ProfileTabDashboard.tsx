@@ -203,7 +203,11 @@ export function ProfileTabDashboard() {
             />
             <ProfileMenuRow
               icon={
-                <Icon name="playIntent" size={20} color={tennisColors.primary} />
+                <Icon
+                  name="playIntent"
+                  size={20}
+                  color={tennisColors.primary}
+                />
               }
               label={t("profile.matchDefaults.menu")}
               onPress={() => router.push("/profile/match-defaults")}

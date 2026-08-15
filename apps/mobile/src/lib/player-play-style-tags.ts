@@ -9,14 +9,6 @@ export function buildPlayerPlayStyleTags(
 
   tags.push(t(`playIntent.${player.play_intent}`));
 
-  if (player.prefers_singles && player.prefers_doubles) {
-    tags.push(`${t("formats.singles")} · ${t("formats.doubles")}`);
-  } else if (player.prefers_singles) {
-    tags.push(t("formats.singles"));
-  } else if (player.prefers_doubles) {
-    tags.push(t("formats.doubles"));
-  }
-
   const zones = Array.isArray(player.zones)
     ? (player.zones as { name_i18n?: Record<string, string> }[])
     : [];

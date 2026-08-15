@@ -20,21 +20,44 @@ export async function recordMatchAttendance(
   }
 }
 
+/**
+ * `sideAUserIds` names one side; the server derives the other, validates the
+ * score, and works out who won from it. There is deliberately no winner
+ * parameter — a caller reaching past the app can no longer name themselves the
+ * winner of a match they lost.
+ */
 export async function submitMatchResult(
   client: TennisSupabaseClient,
   matchId: string,
   score: MatchScore,
-  winnerUserId: string,
+  sideAUserIds: string[],
 ): Promise<string> {
   const { data, error } = await client.rpc("submit_match_result", {
     p_match_id: matchId,
     p_score: score,
-    p_winner_user_id: winnerUserId,
+    p_side_a_user_ids: sideAUserIds,
   });
   if (error) {
     throw error;
   }
   return data as string;
+}
+
+/** Available once to whoever disputed, and only before the first reopen. */
+export async function resubmitMatchResult(
+  client: TennisSupabaseClient,
+  matchId: string,
+  score: MatchScore,
+  sideAUserIds: string[],
+): Promise<void> {
+  const { error } = await client.rpc("resubmit_match_result", {
+    p_match_id: matchId,
+    p_score: score,
+    p_side_a_user_ids: sideAUserIds,
+  });
+  if (error) {
+    throw error;
+  }
 }
 
 export async function confirmMatchResult(

@@ -84,7 +84,7 @@ begin
   perform public.submit_match_result(
     v_match_id,
     jsonb_build_object('sets', jsonb_build_array(jsonb_build_array(6, 4), jsonb_build_array(6, 3))),
-    p_creator_id
+    array[p_creator_id]::uuid[]
   );
 
   perform pg_temp.set_caller(p_joiner_id);

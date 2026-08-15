@@ -5,10 +5,7 @@ import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { formatUtcSlotInBeirut } from "../../lib/beirut-time";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import {
-  HubDestructiveLink,
-  HubSummaryRow,
-} from "./HubSummaryRow";
+import { HubDestructiveLink, HubSummaryRow } from "./HubSummaryRow";
 import { hubSectionStyles } from "./hub-section-styles";
 import { FigmaPrimaryButton, FigmaSecondaryButton } from "../onboarding-ui";
 import {
@@ -55,7 +52,10 @@ export function MatchHubPendingBookingSection({
         >
           {`${booking.club_name} · ${booking.court_name}`}
         </AppText>
-        <AppText style={[hubSectionStyles.metaLine, { writingDirection }]} maxLines={2}>
+        <AppText
+          style={[hubSectionStyles.metaLine, { writingDirection }]}
+          maxLines={2}
+        >
           {formatUtcSlotInBeirut(booking.starts_at, booking.ends_at)}
         </AppText>
         <HubSummaryRow

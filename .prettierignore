@@ -9,3 +9,8 @@ supabase/migrations/*.sql
 
 # Vendored Figma Make export kept as a design reference, not app source.
 Figma designs/
+
+# Agent worktrees are full checkouts of this repo. Without this, `pnpm format`
+# reformats another session's uncommitted work and `format:check` reports the
+# same file twice.
+.claude/worktrees/

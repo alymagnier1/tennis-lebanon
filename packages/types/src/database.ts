@@ -605,6 +605,29 @@ export type Database = {
           },
         ];
       };
+      match_activity: {
+        Row: {
+          match_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          match_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          match_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "match_activity_match_id_fkey";
+            columns: ["match_id"];
+            isOneToOne: true;
+            referencedRelation: "matches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       match_invitations: {
         Row: {
           accepted_at: string | null;
@@ -792,45 +815,57 @@ export type Database = {
           confirmed_by: string | null;
           created_at: string;
           dispute_note: string | null;
+          disputed_by: string | null;
           id: string;
           match_id: string;
           resolved_at: string | null;
           resolved_by: string | null;
+          revision: number;
           score: Json;
+          side_a_user_ids: string[];
           status: Database["public"]["Enums"]["result_status"];
           submitted_by: string;
           updated_at: string;
           winner_user_id: string | null;
+          winning_side: number;
         };
         Insert: {
           confirmed_at?: string | null;
           confirmed_by?: string | null;
           created_at?: string;
           dispute_note?: string | null;
+          disputed_by?: string | null;
           id?: string;
           match_id: string;
           resolved_at?: string | null;
           resolved_by?: string | null;
+          revision?: number;
           score: Json;
+          side_a_user_ids: string[];
           status?: Database["public"]["Enums"]["result_status"];
           submitted_by: string;
           updated_at?: string;
           winner_user_id?: string | null;
+          winning_side: number;
         };
         Update: {
           confirmed_at?: string | null;
           confirmed_by?: string | null;
           created_at?: string;
           dispute_note?: string | null;
+          disputed_by?: string | null;
           id?: string;
           match_id?: string;
           resolved_at?: string | null;
           resolved_by?: string | null;
+          revision?: number;
           score?: Json;
+          side_a_user_ids?: string[];
           status?: Database["public"]["Enums"]["result_status"];
           submitted_by?: string;
           updated_at?: string;
           winner_user_id?: string | null;
+          winning_side?: number;
         };
         Relationships: [
           {
@@ -839,6 +874,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "player_profiles";
             referencedColumns: ["user_id"];
+          },
+          {
+            foreignKeyName: "match_results_disputed_by_fkey";
+            columns: ["disputed_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
           },
           {
             foreignKeyName: "match_results_match_id_fkey";
@@ -1206,10 +1248,11 @@ export type Database = {
         Row: {
           bio: string | null;
           created_at: string;
-          default_match_format: Database["public"]["Enums"]["match_format"] | null;
+          default_match_format:
+            Database["public"]["Enums"]["match_format"] | null;
           default_match_visibility: Database["public"]["Enums"]["match_visibility"];
-          default_min_skill: Database["public"]["Enums"]["skill_band"] | null;
           default_max_skill: Database["public"]["Enums"]["skill_band"] | null;
+          default_min_skill: Database["public"]["Enums"]["skill_band"] | null;
           default_requires_creator_approval: boolean;
           internal_rating: number;
           match_defaults_set_at: string | null;
@@ -1225,11 +1268,10 @@ export type Database = {
           bio?: string | null;
           created_at?: string;
           default_match_format?:
-            | Database["public"]["Enums"]["match_format"]
-            | null;
+            Database["public"]["Enums"]["match_format"] | null;
           default_match_visibility?: Database["public"]["Enums"]["match_visibility"];
-          default_min_skill?: Database["public"]["Enums"]["skill_band"] | null;
           default_max_skill?: Database["public"]["Enums"]["skill_band"] | null;
+          default_min_skill?: Database["public"]["Enums"]["skill_band"] | null;
           default_requires_creator_approval?: boolean;
           internal_rating?: number;
           match_defaults_set_at?: string | null;
@@ -1245,11 +1287,10 @@ export type Database = {
           bio?: string | null;
           created_at?: string;
           default_match_format?:
-            | Database["public"]["Enums"]["match_format"]
-            | null;
+            Database["public"]["Enums"]["match_format"] | null;
           default_match_visibility?: Database["public"]["Enums"]["match_visibility"];
-          default_min_skill?: Database["public"]["Enums"]["skill_band"] | null;
           default_max_skill?: Database["public"]["Enums"]["skill_band"] | null;
+          default_min_skill?: Database["public"]["Enums"]["skill_band"] | null;
           default_requires_creator_approval?: boolean;
           internal_rating?: number;
           match_defaults_set_at?: string | null;
@@ -1317,6 +1358,7 @@ export type Database = {
           id: string;
           is_adult_confirmed: boolean;
           languages: string[];
+          notification_locale: string;
           onboarding_completed_at: string | null;
           privacy_accepted_at: string | null;
           privacy_version: string | null;
@@ -1336,6 +1378,7 @@ export type Database = {
           id: string;
           is_adult_confirmed?: boolean;
           languages?: string[];
+          notification_locale?: string;
           onboarding_completed_at?: string | null;
           privacy_accepted_at?: string | null;
           privacy_version?: string | null;
@@ -1355,6 +1398,7 @@ export type Database = {
           id?: string;
           is_adult_confirmed?: boolean;
           languages?: string[];
+          notification_locale?: string;
           onboarding_completed_at?: string | null;
           privacy_accepted_at?: string | null;
           privacy_version?: string | null;
@@ -1579,6 +1623,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      apply_attendance_completion: {
+        Args: { p_match_id: string };
+        Returns: boolean;
+      };
       apply_match_invitation_acceptance: {
         Args: {
           p_invite: Database["public"]["Tables"]["match_invitations"]["Row"];
@@ -1639,7 +1687,22 @@ export type Database = {
         Args: { p_match_id: string };
         Returns: undefined;
       };
+      assert_opposing_side_actor: {
+        Args: {
+          p_result: Database["public"]["Tables"]["match_results"]["Row"];
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
       assert_platform_operator: { Args: never; Returns: string };
+      assert_valid_result_sides: {
+        Args: {
+          p_format: Database["public"]["Enums"]["match_format"];
+          p_match_id: string;
+          p_side_a_user_ids: string[];
+        };
+        Returns: undefined;
+      };
       availability_day_part_from_local: {
         Args: { p_local_start: string };
         Returns: string;
@@ -1666,6 +1729,7 @@ export type Database = {
         Returns: {
           attempt_count: number;
           kind: string;
+          locale: string;
           notification_id: string;
           payload: Json;
           push_tokens: string[];
@@ -1676,6 +1740,7 @@ export type Database = {
         Args: { p_booking_starts_at: string };
         Returns: Database["public"]["Enums"]["attendance_status"];
       };
+      complete_matches_from_attendance: { Args: never; Returns: number };
       complete_onboarding: {
         Args: {
           p_birth_year: number;
@@ -1761,6 +1826,10 @@ export type Database = {
         Args: { p_invited_user_id?: string; p_match_id: string };
         Returns: string;
       };
+      deactivate_club: {
+        Args: { p_club_id: string; p_reason?: string };
+        Returns: undefined;
+      };
       deactivate_device_push_token: {
         Args: { p_device_id: string };
         Returns: boolean;
@@ -1770,6 +1839,7 @@ export type Database = {
         Returns: undefined;
       };
       delete_court_block: { Args: { p_block_id: string }; Returns: undefined };
+      derive_score_winner_side: { Args: { p_score: Json }; Returns: number };
       discover_compatible_players: {
         Args: {
           p_cursor_user_id?: string;
@@ -1898,6 +1968,7 @@ export type Database = {
         Returns: boolean;
       };
       hash_invite_token: { Args: { p_token: string }; Returns: string };
+      invoke_process_notifications: { Args: never; Returns: number };
       is_blocked: {
         Args: { p_user_a: string; p_user_b: string };
         Returns: boolean;
@@ -1914,6 +1985,10 @@ export type Database = {
         Args: { p_club_id: string; p_user_id?: string };
         Returns: boolean;
       };
+      is_match_activity_viewer: {
+        Args: { p_match_id: string; p_user_id?: string };
+        Returns: boolean;
+      };
       is_match_chat_participant: {
         Args: { p_match_id: string; p_user_id?: string };
         Returns: boolean;
@@ -1923,6 +1998,10 @@ export type Database = {
         Returns: boolean;
       };
       is_platform_operator: { Args: { p_user_id?: string }; Returns: boolean };
+      is_valid_tennis_set: {
+        Args: { p_a: number; p_b: number };
+        Returns: boolean;
+      };
       join_match: {
         Args: { p_match_id: string };
         Returns: Database["public"]["Enums"]["participant_status"];
@@ -2012,6 +2091,9 @@ export type Database = {
           played_at: string;
           result_status: Database["public"]["Enums"]["result_status"];
           score: Json;
+          submitted_by: string;
+          submitted_by_name: string;
+          viewer_side: number;
           viewer_won: boolean;
           winner_user_id: string;
         }[];
@@ -2031,9 +2113,8 @@ export type Database = {
         Returns: {
           can_extend_listing: boolean;
           capacity: number;
+          club_name: string;
           court_starts_at: string;
-          opponent_names: string | null;
-          club_name: string | null;
           format: Database["public"]["Enums"]["match_format"];
           has_court: boolean;
           intent: Database["public"]["Enums"]["play_intent"];
@@ -2042,6 +2123,7 @@ export type Database = {
           listing_expires_at: string;
           match_id: string;
           notes: string;
+          opponent_names: string;
           participant_count: number;
           participant_status: Database["public"]["Enums"]["participant_status"];
           soonest_time: string;
@@ -2074,11 +2156,16 @@ export type Database = {
           zone_slug: string;
         }[];
       };
+      list_player_favorite_clubs_json: {
+        Args: { p_user_id: string };
+        Returns: Json;
+      };
       list_public_player_recent_matches: {
         Args: { p_limit?: number; p_user_id: string };
         Returns: {
           opponent_names: string;
           played_at: string;
+          player_side: number;
           player_won: boolean;
           score: Json;
         }[];
@@ -2175,13 +2262,38 @@ export type Database = {
         Args: { p_created_at: string; p_listing_extended_at: string };
         Returns: string;
       };
+      match_outcome_reference_at: {
+        Args: { p_match_id: string };
+        Returns: string;
+      };
       match_participant_count: {
         Args: { p_match_id: string };
         Returns: number;
       };
       match_played_prompts: { Args: never; Returns: number };
+      match_result_entry_open: {
+        Args: { p_match_id: string };
+        Returns: boolean;
+      };
+      match_result_side_for_user: {
+        Args: { p_result_id: string; p_user_id: string };
+        Returns: number;
+      };
       match_should_expire: { Args: { p_match_id: string }; Returns: boolean };
+      match_side_b_user_ids: {
+        Args: { p_match_id: string; p_side_a_user_ids: string[] };
+        Returns: string[];
+      };
       normalize_booking_phone: { Args: { p_phone: string }; Returns: string };
+      notify_match_participants: {
+        Args: {
+          p_dedup_scope: string;
+          p_exclude_user_id: string;
+          p_kind: string;
+          p_match_id: string;
+        };
+        Returns: number;
+      };
       propose_booking_alternative: {
         Args: {
           p_booking_id: string;
@@ -2193,6 +2305,10 @@ export type Database = {
         Returns: undefined;
       };
       publish_match: { Args: { p_match_id: string }; Returns: undefined };
+      reactivate_club: {
+        Args: { p_club_id: string; p_reason?: string };
+        Returns: undefined;
+      };
       record_match_attendance: {
         Args: {
           p_attendance: Database["public"]["Enums"]["attendance_status"];
@@ -2233,6 +2349,10 @@ export type Database = {
         Args: { p_booking_id: string; p_reason?: string };
         Returns: undefined;
       };
+      release_external_court: {
+        Args: { p_match_id: string; p_reason?: string };
+        Returns: undefined;
+      };
       report_match_played: {
         Args: { p_match_id: string; p_played: boolean };
         Returns: undefined;
@@ -2250,6 +2370,7 @@ export type Database = {
         Args: { p_reason: string; p_resolution: string; p_result_id: string };
         Returns: undefined;
       };
+      resolve_stale_results: { Args: never; Returns: Json };
       resolve_user_report: {
         Args: { p_reason: string; p_report_id: string; p_resolution: string };
         Returns: undefined;
@@ -2260,6 +2381,14 @@ export type Database = {
       };
       respond_to_join_request: {
         Args: { p_accept: boolean; p_match_id: string; p_user_id: string };
+        Returns: undefined;
+      };
+      resubmit_match_result: {
+        Args: {
+          p_match_id: string;
+          p_score: Json;
+          p_side_a_user_ids: string[];
+        };
         Returns: undefined;
       };
       review_pilot_club: {
@@ -2286,6 +2415,10 @@ export type Database = {
         Returns: undefined;
       };
       set_own_avatar: { Args: { p_avatar_path?: string }; Returns: string };
+      set_own_notification_locale: {
+        Args: { p_locale: string };
+        Returns: string;
+      };
       set_own_skill_band: {
         Args: { p_skill_band: Database["public"]["Enums"]["skill_band"] };
         Returns: undefined;
@@ -2304,7 +2437,11 @@ export type Database = {
       };
       start_in_progress_matches: { Args: never; Returns: number };
       submit_match_result: {
-        Args: { p_match_id: string; p_score: Json; p_winner_user_id: string };
+        Args: {
+          p_match_id: string;
+          p_score: Json;
+          p_side_a_user_ids: string[];
+        };
         Returns: string;
       };
       submit_user_report: {
@@ -2375,6 +2512,7 @@ export type Database = {
         };
         Returns: string;
       };
+      validate_match_score: { Args: { p_score: Json }; Returns: number[] };
       viewer_is_platform_operator: { Args: never; Returns: boolean };
       viewer_match_time_overlap: {
         Args: {
@@ -2435,7 +2573,8 @@ export type Database = {
       platform_role: "support" | "admin";
       play_intent: "social" | "competitive" | "either";
       report_status: "open" | "investigating" | "resolved" | "dismissed";
-      result_status: "submitted" | "confirmed" | "disputed" | "resolved";
+      result_status:
+        "submitted" | "confirmed" | "disputed" | "resolved" | "unverified";
       skill_band:
         "beginner" | "improving" | "intermediate" | "advanced" | "competitive";
       vote_value: "yes" | "no";
@@ -2535,6 +2674,8 @@ export type Database = {
           Database["public"]["Enums"]["attendance_status"] | null;
         timing_mode: string | null;
         preferred_clubs: Json | null;
+        agreed_starts_at: string | null;
+        agreed_ends_at: string | null;
       };
       match_invite_inbox_row: {
         invitation_id: string | null;
@@ -2733,7 +2874,13 @@ export const Constants = {
       platform_role: ["support", "admin"],
       play_intent: ["social", "competitive", "either"],
       report_status: ["open", "investigating", "resolved", "dismissed"],
-      result_status: ["submitted", "confirmed", "disputed", "resolved"],
+      result_status: [
+        "submitted",
+        "confirmed",
+        "disputed",
+        "resolved",
+        "unverified",
+      ],
       skill_band: [
         "beginner",
         "improving",

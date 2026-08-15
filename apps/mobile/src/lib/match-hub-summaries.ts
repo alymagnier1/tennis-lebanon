@@ -46,10 +46,7 @@ export function matchHubJoinSummary(
 }
 
 export function matchHubMetaLine(
-  hub: Pick<
-    MatchHubCard,
-    "format" | "intent" | "min_skill" | "max_skill"
-  >,
+  hub: Pick<MatchHubCard, "format" | "intent" | "min_skill" | "max_skill">,
   t: Translate,
 ): string {
   return [

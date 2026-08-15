@@ -858,7 +858,7 @@ const styles = StyleSheet.create({
   segmentTabs: {
     gap: spacing.sm,
     backgroundColor: tennisColors.muted,
-    borderRadius: radii.full,
+    borderRadius: tennisRadii.lg,
     padding: spacing.xs,
   },
   segmentTab: {
@@ -868,7 +868,7 @@ const styles = StyleSheet.create({
     minHeight: minTouchTargetPx,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: radii.full,
+    borderRadius: tennisRadii.md,
     paddingHorizontal: spacing.md,
   },
   segmentTabActive: {

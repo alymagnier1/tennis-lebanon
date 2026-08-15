@@ -94,14 +94,6 @@ export const onboardingInputSchema = z
         message: "Adult eligibility is required.",
       });
     }
-
-    if (!value.prefersSingles && !value.prefersDoubles) {
-      context.addIssue({
-        code: "custom",
-        path: ["prefersSingles"],
-        message: "Choose at least one match format.",
-      });
-    }
   });
 
 export type OnboardingInput = z.infer<typeof onboardingInputSchema>;

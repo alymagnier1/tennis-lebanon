@@ -11,7 +11,12 @@ import { Icon } from "./Icon";
 import { clubBookingModeLabelKey } from "../lib/club-booking-label";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { zoneNameFromJson } from "../lib/zones";
-import { tennisBrand, tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import {
+  tennisBrand,
+  tennisColors,
+  tennisRadii,
+  tennisSemantic,
+} from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 type ClubDirectoryCardProps = {
@@ -31,12 +36,17 @@ type BookingBadgeStyle = {
 function bookingBadgeStyle(bookingMode: string): BookingBadgeStyle {
   if (isWhatsAppBookingClub(bookingMode)) {
     return {
-      color: tennisBrand.whatsapp,
+      color: tennisBrand.whatsappText,
       backgroundColor: tennisBrand.whatsappFill,
     };
   }
 
-  return { color: tennisColors.accent, backgroundColor: "#FEF0E7" };
+  // `tennisColors.accent` on the old #FEF0E7 was 3.87:1 -- under AA for 11px
+  // badge text. The attention tone is the same clay family at 5.80:1.
+  return {
+    color: tennisSemantic.attention.text,
+    backgroundColor: tennisSemantic.attention.fill,
+  };
 }
 
 function MetaChip({ children }: { children: string }) {
@@ -78,21 +88,25 @@ export function ClubDirectoryCard({
       ]}
     >
       <View style={[styles.hero, compact && styles.heroCompact]}>
-        <View style={styles.heroOverlay} />
+        {/*
+          The scrim is a fixed 80px designed to sit under the badges on the
+          160px hero. The compact hero is 72px, so it covered the whole thing
+          and buried the placeholder -- which is why compact cards read as a
+          blank grey block. The badges carry their own fill, so compact needs
+          no scrim at all.
+        */}
+        {compact ? null : <View style={styles.heroOverlay} />}
         <View style={styles.heroPattern}>
           <Icon
             name="place"
             size={compact ? 32 : 48}
-            color={tennisColors.border}
+            color={tennisColors.mutedForeground}
           />
         </View>
 
         {selectable ? (
           <View
-            style={[
-              styles.selectMark,
-              selected && styles.selectMarkSelected,
-            ]}
+            style={[styles.selectMark, selected && styles.selectMarkSelected]}
           >
             {selected ? <AppText style={styles.selectCheck}>✓</AppText> : null}
           </View>
@@ -133,10 +147,7 @@ export function ClubDirectoryCard({
             >
               {club.name}
             </AppText>
-            <AppText
-              style={[styles.zone, { writingDirection }]}
-              maxLines={1}
-            >
+            <AppText style={[styles.zone, { writingDirection }]} maxLines={1}>
               {zone}
             </AppText>
           </View>
@@ -154,23 +165,17 @@ export function ClubDirectoryCard({
           ) : null}
         </View>
 
-        {!compact ? (
-          <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
-            <MetaChip>
-              {t("clubs.courtCount", { count: club.court_count })}
-            </MetaChip>
-            <MetaChip>{t("clubs.payAtClub")}</MetaChip>
-          </View>
-        ) : (
-          <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
-            <MetaChip>
-              {t("clubs.courtCount", { count: club.court_count })}
-            </MetaChip>
-            <MetaChip>
-              {t(clubBookingModeLabelKey(club.booking_mode))}
-            </MetaChip>
-          </View>
-        )}
+        {/*
+          The compact branch used to repeat the booking mode here, so every
+          picker card said "Request booking" twice -- once on the hero badge
+          and again below it.
+        */}
+        <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
+          <MetaChip>
+            {t("clubs.courtCount", { count: club.court_count })}
+          </MetaChip>
+          <MetaChip>{t("clubs.payAtClub")}</MetaChip>
+        </View>
 
         {amenities.length > 0 ? (
           <View style={[styles.tagRow, { flexDirection: rowDirection }]}>
@@ -184,12 +189,15 @@ export function ClubDirectoryCard({
           </View>
         ) : null}
 
+        {/*
+          Selection is already carried by the checkbox and the card border, so
+          a third "Selected for this booking" line was restating one boolean
+          three times.
+        */}
         {!selectable ? (
           <View style={styles.cta}>
             <AppText style={styles.ctaLabel}>{t("clubs.viewDetails")}</AppText>
           </View>
-        ) : selected ? (
-          <AppText style={styles.selectedHint}>{t("clubs.selected")}</AppText>
         ) : null}
       </View>
     </Pressable>
@@ -390,11 +398,5 @@ const styles = StyleSheet.create({
     fontFamily: tennisFontFamily.heading,
     fontSize: 14,
     color: tennisColors.white,
-  },
-  selectedHint: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 12,
-    color: tennisColors.primary,
-    textAlign: "center",
   },
 });

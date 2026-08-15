@@ -2,7 +2,11 @@ import { Pressable, StyleSheet, View, type ViewStyle } from "react-native";
 import { AppText } from "../AppText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
-import { tennisColors, tennisRadii, tennisTypography } from "../../theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisRadii,
+  tennisTypography,
+} from "../../theme/tennis-tokens";
 
 export function PolicyToggleCard({
   label,

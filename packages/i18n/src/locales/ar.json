@@ -137,7 +137,7 @@
     },
     "clubSwitcher": {
       "label": "النادي",
-      "pendingOption": "{{name}} (بانتظار الموافقة)"
+      "inactiveOption": "{{name}} (غير نشط)"
     },
     "settings": {
       "title": "إعدادات النادي",
@@ -153,7 +153,20 @@
       "bookingModeWhatsAppHint": "يضغط اللاعبون على الحجز عبر واتساب مع رسالة جاهزة. رقمك لا يظهر في دليل الأندية.",
       "whatsappPhoneLabel": "رقم واتساب",
       "whatsappPhonePlaceholder": "+961 70 123 456",
-      "whatsappPhoneHint": "أدخل رمز الدولة. يتم تنسيق أرقام لبنان تلقائياً."
+      "whatsappPhoneHint": "أدخل رمز الدولة. يتم تنسيق أرقام لبنان تلقائياً.",
+      "dangerZoneTitle": "منطقة الخطر",
+      "dangerZoneStatusActive": "هذا النادي نشط ومرئي للاعبين.",
+      "dangerZoneStatusInactive": "هذا النادي معطّل ومخفي عن اللاعبين.",
+      "dangerZoneReasonLabel": "السبب (اختياري، يُحفظ في سجل التدقيق)",
+      "dangerZoneDeactivate": "تعطيل النادي",
+      "dangerZoneReactivate": "إعادة تفعيل النادي",
+      "dangerZoneConfirmPrompt": "تعطيل {{name}} يخفيه عن اللاعبين فوراً. تبقى الملاعب وسجل الحجوزات كما هي، ويمكن التراجع عن هذا الإجراء.",
+      "dangerZoneConfirmButton": "نعم، تعطيل",
+      "dangerZoneCancelButton": "إلغاء",
+      "dangerZoneDeactivated": "تم تعطيل النادي.",
+      "dangerZoneReactivated": "تمت إعادة تفعيل النادي.",
+      "dangerZoneError": "تعذر تحديث حالة هذا النادي.",
+      "dangerZoneErrorDetail": "تعذر تحديث حالة هذا النادي: {{detail}}"
     },
     "courts": {
       "title": "الملاعب والأسعار",
@@ -418,7 +431,7 @@
       "bookingTitle": "حجز قيد المعالجة",
       "bookingBody": "يراجع أحد الأندية طلب حجز الملعب.",
       "courtTitle": "جاهز لحجز ملعب",
-      "courtBody": "اتُفق على وقت. اطلب حجز ملعب بعد ذلك.",
+      "courtBody": "اتُفق على وقت. تواصل مع نادٍ مفضّل، ثم أكّد الملعب.",
       "playedTitle": "هل لعبتم؟",
       "playedBody": "لم يُسجَّل ملعب لهذه المباراة في التطبيق. أخبرنا إن كانت قد جرت.",
       "playersTitle": "في انتظار اللاعبين",
@@ -766,7 +779,8 @@
       "lost": "خسارة",
       "vsOpponent": "ضد {{name}}",
       "youVsOpponent": "أنت ضد {{name}}",
-      "seekingOpponent": "البحث عن لاعبين"
+      "seekingOpponent": "البحث عن لاعبين",
+      "played": "لعبت"
     },
     "lifecycle": {
       "staleBadge": "ينتهي قريباً",
@@ -789,7 +803,11 @@
       "placeholder": "اكتب رسالة",
       "send": "إرسال",
       "error": "تعذر إرسال هذه الرسالة.",
-      "reconnecting": "جارٍ إعادة الاتصال… قد تتأخر الرسائل الجديدة."
+      "reconnecting": "جارٍ إعادة الاتصال… قد تتأخر الرسائل الجديدة.",
+      "open": "فتح محادثة المباراة",
+      "openHint": "راسل مجموعتك",
+      "denied": "انضم إلى هذه المباراة لاستخدام المحادثة.",
+      "lockedRecruiting": "تُفتح المحادثة عندما يكتمل عدد اللاعبين."
     },
     "hub": {
       "title": "مركز المباراة",
@@ -868,6 +886,21 @@
       "courtHeroTitle": "ملعبك",
       "agreedTimeBookHint": "احجز ملعباً لهذا الوقت.",
       "agreedTimeVenueHint": "المفضّل",
+      "openPlayerSlot": "مقعد فارغ",
+      "preferredClubs": "الأندية المفضّلة",
+      "openClubDetails": "عرض تفاصيل {{club}}",
+      "contactClub": "تواصل مع {{club}} عبر واتساب",
+      "whichCourtTitle": "أين حجزت؟",
+      "whichCourtHint": "يحتاج لاعبوك إلى معرفة مكان الحضور.",
+      "messageClub": "راسل",
+      "clubNotListed": "نادٍ آخر",
+      "differentTime": "وقت مختلف",
+      "confirmNotifiesPlayers": "سيُبلَّغ لاعبوك بأن الملعب محجوز في {{club}}.",
+      "courtFellThrough": "هل تعذّر الحجز؟",
+      "courtFellThroughConfirm": "إلغاء حجز الملعب",
+      "courtFellThroughPrompt": "سيُبلَّغ لاعبوك بأن الملعب لم يعد محجوزاً.",
+      "courtReleased": "تم إلغاء حجز الملعب. تحتاج المباراة إلى ملعب من جديد.",
+      "courtReleaseError": "تعذّر إلغاء حجز هذا الملعب.",
       "expandMatchDetails": "عرض تفاصيل المباراة",
       "collapseMatchDetails": "إخفاء تفاصيل المباراة",
       "sections": {
@@ -886,10 +919,7 @@
       "noShow": "لم ألعب",
       "attendanceError": "تعذر حفظ حضورك.",
       "submitPrompt": "من فاز، وما كانت النتيجة؟",
-      "selectWinner": "اختر الفائز",
       "setLabel": "المجموعة {{number}}",
-      "winnerGamesLabel": "أشواط الفائز",
-      "loserGamesLabel": "أشواط الخصم",
       "addSet": "إضافة مجموعة",
       "removeSet": "إزالة آخر مجموعة",
       "scoreLabel": "النتيجة",
@@ -901,9 +931,9 @@
         "invalidSet": "أدخل نتيجة مجموعة صالحة (مثل 6-4 أو 7-6).",
         "setCount": "أدخل بين مجموعة واحدة وخمس مجموعات.",
         "invalidScore": "تعذر حفظ هذه النتيجة.",
-        "setHint": "المجموعة {{number}} تحتاج مراجعة."
+        "setHint": "المجموعة {{number}} تحتاج مراجعة.",
+        "noWinner": "يجب أن يفوز أحد الطرفين بمجموعات أكثر من الآخر."
       },
-      "winnerOption": "فاز {{name}}",
       "submit": "إرسال النتيجة",
       "submitSuccess": "تم إرسال النتيجة. بانتظار تأكيد الخصم.",
       "submitError": "تعذر إرسال النتيجة.",
@@ -918,13 +948,35 @@
         "submitted": "بانتظار التأكيد",
         "confirmed": "مؤكدة",
         "disputed": "متنازع عليها",
-        "resolved": "محسومة"
-      }
+        "resolved": "محسومة",
+        "unverified": "غير مؤكَّدة"
+      },
+      "gamesForLabel": "أشواط {{name}}",
+      "sidesTitle": "من لعب مع من؟",
+      "sidesHint": "اختر لاعبين لتكوين فريق.",
+      "derivedWinner": "فوز {{name}}",
+      "reportedBy": "سجّلها {{name}}",
+      "reportedByYou": "سجّلتها أنت",
+      "notConfirmed": "لم تُؤكَّد بعد",
+      "awaitingYou": "بانتظار تأكيدك",
+      "optionalScoreHint": "إضافة النتيجة اختيارية. المباراة محتسبة أصلًا.",
+      "thatsWrong": "هذه غير صحيحة",
+      "resubmitPrompt": "أدخل النتيجة كما تتذكّرها. سيؤكّدها خصمك بعد ذلك.",
+      "resubmit": "إرسال التصحيح",
+      "resubmitSuccess": "أُرسل التصحيح. بانتظار خصمك.",
+      "resubmitError": "تعذّر إرسال هذا التصحيح.",
+      "disputeNoteLabel": "ما الخطأ؟ (اختياري)",
+      "unverifiedHint": "لم يؤكّد أحد هذه النتيجة، لذا لا تؤثّر على التصنيف.",
+      "yourSide": "أنت",
+      "theirSide": "هم",
+      "derivedWinnerYou": "أنت تفوز",
+      "derivedWinnerThem": "هم يفوزون"
     },
     "booking": {
       "title": "طلب ملعب",
       "description": "اختر نادياً وملعباً للوقت المتفق عليه.",
       "browseClubsDescription": "تصفّح الأندية، افتح الملف، ثم احجز داخل التطبيق أو عبر واتساب.",
+      "hostOnly": "فقط المضيف يمكنه التواصل مع الأندية وحجز الملعب.",
       "selectClub": "اختر النادي",
       "selectCourt": "اختر الملعب",
       "confirmTime": "الوقت المتفق عليه",
@@ -937,9 +989,9 @@
       "externalSuccess": "تم تأكيد الملعب. المباراة جاهزة.",
       "externalError": "تعذر تأكيد هذا الملعب.",
       "courtAlreadyBooked": "هذا الملعب محجوز بالفعل في هذا الوقت.",
-      "bookedOffAppCta": "حجز خارج التطبيق",
+      "bookedOffAppCta": "حجزت ملعباً",
       "offPreferredListWarning": "هذا النادي لم يكن ضمن القائمة المتفق عليها عند انضمام اللاعبين. سيُبلَّغ الجميع بمكان الملعب.",
-      "bookedOffAppTitle": "تأكيد الحجز خارج التطبيق",
+      "bookedOffAppTitle": "أكّد ملعبك",
       "bookedOffAppDescription": "لقد حجزت الملعب بالفعل عبر الهاتف أو واتساب. اختر النادي وأكّد الوقت حتى تستمر الحضور والنتائج.",
       "bookedOffAppConfirm": "تأكيد الملعب",
       "bookedOffAppConfirmTitle": "تأكيد هذا الملعب؟",
@@ -962,6 +1014,7 @@
       "declineError": "تعذّر رفض هذه الدعوة.",
       "sent": "أُرسلت الدعوة. ستجدها في المباريات ← الدعوات.",
       "pickMatch": "ادعُ إلى إحدى مبارياتك المفتوحة",
+      "pickMatchHint": "أضفهم إلى مباراة تستضيفها بالفعل — أو تحدّاهم إلى مباراة جديدة من الأسفل.",
       "inviteToMatch": "دعوة إلى مباراة {{format}}",
       "inviteToOpenMatch": "الدعوة إلى هذه المباراة",
       "noTimeYet": "الوقت غير محدد بعد",
@@ -1055,6 +1108,15 @@
       "4": "خميس",
       "5": "جمعة",
       "6": "سبت"
+    },
+    "weekdaysCompact": {
+      "0": "أحد",
+      "1": "ن",
+      "2": "ث",
+      "3": "ر",
+      "4": "خ",
+      "5": "ج",
+      "6": "سبت"
     }
   },
   "clubs": {
@@ -1065,6 +1127,7 @@
     "resultCount": "{{count}} نادٍ في لبنان",
     "surfaceAll": "الكل",
     "viewDetails": "عرض النادي",
+    "photoComingSoon": "الصورة قريباً",
     "selected": "محدّد لهذا الحجز",
     "pricePerHour": "/ساعة",
     "loadError": "تعذر تحميل الأندية.",
@@ -1139,6 +1202,25 @@
     "markAllRead": "تعليم الكل كمقروء",
     "fallbackTitle": "تنس لبنان",
     "fallbackBody": "افتح التطبيق للاطلاع على التحديث.",
+    "settings": {
+      "title": "إعدادات الإشعارات",
+      "description": "اختر ما إذا كان هذا الجهاز يستطيع تنبيهك بشأن المباريات.",
+      "pushSection": "الإشعارات الفورية",
+      "statusOn": "مفعّلة",
+      "statusOff": "متوقفة",
+      "statusBlocked": "محظورة",
+      "statusUnsupported": "غير متاحة",
+      "detailOn": "سينبّهك هذا الجهاز بالدعوات والتصويت والحجوزات والتذكيرات.",
+      "detailOff": "فعّلها لتصلك أخبار الدعوات والتصويت وحجز الملاعب من دون فتح التطبيق.",
+      "detailBlocked": "لقد رفضت إشعارات تنس لبنان. اسمح بها من إعدادات جهازك لإعادة تفعيلها.",
+      "detailUnsupported": "لا يمكن لهذا الجهاز استقبال الإشعارات الفورية. لا يزال بإمكانك قراءة كل شيء في قائمة إشعاراتك.",
+      "detailUnconfigured": "لا يمكن لهذه النسخة إرسال إشعارات فورية بعد. لا يزال بإمكانك قراءة كل شيء في قائمة إشعاراتك.",
+      "enable": "تفعيل الإشعارات",
+      "openSystemSettings": "فتح إعدادات الجهاز",
+      "enableError": "تعذّر تفعيل الإشعارات على هذا الجهاز.",
+      "centerHint": "كل ما يُرسل إليك محفوظ هنا، سواء كانت الإشعارات الفورية مفعّلة أم لا.",
+      "openCenter": "فتح الإشعارات"
+    },
     "kinds": {
       "match_invitation": {
         "title": "دعوة مباراة",
@@ -1163,6 +1245,50 @@
       "attendance_prompt": {
         "title": "هل لعبت؟",
         "body": "أكّد حضورك بعد مباراتك."
+      },
+      "match_time_changed": {
+        "title": "تغيّر موعد المباراة",
+        "body": "غيّر المضيف موعد هذه المباراة. افتح التطبيق لرؤية الموعد الجديد."
+      },
+      "match_court_confirmed": {
+        "title": "تم تأكيد الملعب",
+        "body": "تم تأمين ملعب مع النادي. مباراتك مؤكدة."
+      },
+      "match_court_released": {
+        "title": "لم يعد الملعب محجوزًا",
+        "body": "تعذّر حجز {{clubName}} في {{startsAt}}. لا تزال المباراة بحاجة إلى ملعب."
+      },
+      "court_first_roster_short": {
+        "title": "الملعب محجوز والعدد ناقص",
+        "body": "ملعبك في {{clubName}} موعده {{startsAt}}. الأماكن المتبقية: {{spotsLeft}}. ادعُ لاعبًا أو ألغِ حجز الملعب."
+      },
+      "match_played_prompt": {
+        "title": "هل لعبت؟",
+        "body": "مباراتك في {{startsAt}} لم تحصل على ملعب في التطبيق. أخبرنا إن جرت لتُحتسب النتيجة."
+      },
+      "match_played_confirmed": {
+        "title": "تم تسجيل المباراة كملعوبة",
+        "body": "أكّد حضورك وأضف النتيجة لتُحتسب."
+      },
+      "match_participant_joined": {
+        "title": "انضم لاعب",
+        "body": "انضم أحدهم إلى مباراتك. افتح التطبيق لرؤية القائمة."
+      },
+      "match_participant_left": {
+        "title": "غادر لاعب",
+        "body": "غادر أحدهم مباراتك. قد تحتاج إلى دعوة بديل."
+      },
+      "match_message": {
+        "title": "رسالة جديدة",
+        "body": "هناك رسائل جديدة في محادثة مباراتك."
+      },
+      "result_confirm_request": {
+        "title": "نتيجة بانتظار تأكيدك",
+        "body": "أضاف خصمك النتيجة. أكّدها أو أشر إلى أنها غير صحيحة."
+      },
+      "result_auto_confirmed": {
+        "title": "تم تأكيد النتيجة",
+        "body": "لم يعترض أحد خلال ثلاثة أيام، لذا اعتُمدت هذه النتيجة."
       }
     }
   }

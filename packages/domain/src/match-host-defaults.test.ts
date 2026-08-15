@@ -24,7 +24,9 @@ const baseRow = {
 
 describe("resolveMatchHostDefaults", () => {
   it("derives level range from skill band when min/max are null", () => {
-    const resolved = resolveMatchHostDefaults(matchHostDefaultsRowFromProfile(baseRow));
+    const resolved = resolveMatchHostDefaults(
+      matchHostDefaultsRowFromProfile(baseRow),
+    );
     expect(resolved.minSkill).toBe("improving");
     expect(resolved.maxSkill).toBe("advanced");
     expect(resolved.selectedSkillBands).toEqual(
@@ -56,7 +58,7 @@ describe("resolveMatchHostDefaults", () => {
     expect(resolved.requiresCreatorApproval).toBe(false);
   });
 
-  it("uses default_match_format when both formats preferred", () => {
+  it("uses default_match_format when set", () => {
     const resolved = resolveMatchHostDefaults(
       matchHostDefaultsRowFromProfile({
         ...baseRow,
@@ -70,16 +72,16 @@ describe("resolveMatchHostDefaults", () => {
 });
 
 describe("preferredFormatForPlayer", () => {
-  it("defaults to singles when both formats are enabled", () => {
-    expect(
-      preferredFormatForPlayer({ prefers_singles: true, prefers_doubles: true }),
-    ).toBe("singles");
+  it("defaults to singles when no explicit format is set", () => {
+    expect(preferredFormatForPlayer()).toBe("singles");
   });
 });
 
 describe("buildCreateMatchDraftFromHostDefaults", () => {
   it("includes zone ids in the draft patch", () => {
-    const resolved = resolveMatchHostDefaults(matchHostDefaultsRowFromProfile(baseRow));
+    const resolved = resolveMatchHostDefaults(
+      matchHostDefaultsRowFromProfile(baseRow),
+    );
     const draft = buildCreateMatchDraftFromHostDefaults(resolved, ["zone-a"]);
     expect(draft.zoneIds).toEqual(["zone-a"]);
     expect(draft.format).toBe("singles");
@@ -98,11 +100,9 @@ describe("hasConfiguredMatchDefaults", () => {
 });
 
 describe("updateMatchHostDefaultsSchema", () => {
-  it("requires default format when both singles and doubles are on", () => {
+  it("requires an explicit default format for create", () => {
     const result = updateMatchHostDefaultsSchema.safeParse({
       playIntent: "either",
-      prefersSingles: true,
-      prefersDoubles: true,
       listOnDiscover: true,
       defaultRequiresCreatorApproval: false,
       defaultMinSkill: "intermediate",
@@ -111,41 +111,26 @@ describe("updateMatchHostDefaultsSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts a single preferred format without an explicit default", () => {
+  it("accepts intent, level, join settings, and default format", () => {
     const result = updateMatchHostDefaultsSchema.safeParse({
       playIntent: "social",
-      prefersSingles: true,
-      prefersDoubles: false,
       listOnDiscover: true,
       defaultRequiresCreatorApproval: false,
       defaultMinSkill: "improving",
       defaultMaxSkill: "advanced",
+      defaultMatchFormat: "singles",
     });
     expect(result.success).toBe(true);
-  });
-
-  it("rejects when neither singles nor doubles is selected", () => {
-    const result = updateMatchHostDefaultsSchema.safeParse({
-      playIntent: "either",
-      prefersSingles: false,
-      prefersDoubles: false,
-      listOnDiscover: true,
-      defaultRequiresCreatorApproval: false,
-      defaultMinSkill: "intermediate",
-      defaultMaxSkill: "intermediate",
-    });
-    expect(result.success).toBe(false);
   });
 
   it("rejects a min skill above the max", () => {
     const result = updateMatchHostDefaultsSchema.safeParse({
       playIntent: "either",
-      prefersSingles: true,
-      prefersDoubles: false,
       listOnDiscover: true,
       defaultRequiresCreatorApproval: false,
       defaultMinSkill: "advanced",
       defaultMaxSkill: "beginner",
+      defaultMatchFormat: "doubles",
     });
     expect(result.success).toBe(false);
   });

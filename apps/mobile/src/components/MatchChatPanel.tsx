@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   AppState,
   type AppStateStatus,
+  FlatList,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -10,9 +11,14 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { listMatchMessages, sendMatchMessage } from "@tennis-lebanon/api";
+import {
+  listMatchMessages,
+  sendMatchMessage,
+  type MatchMessageRow,
+} from "@tennis-lebanon/api";
 import { AppText } from "./AppText";
 import { formatUtcInBeirut } from "../lib/beirut-time";
 import { useLayoutDirection } from "../lib/layout-direction";
@@ -31,21 +37,29 @@ import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 import { onboardingInputStyle } from "./onboarding-ui/OnboardingStepLayout";
 
+const HUB_MESSAGE_LIST_HEIGHT = 220;
+
 type MatchChatPanelProps = {
   matchId: string;
   enabled: boolean;
   viewerUserId?: string;
+  /** Full-screen chat page vs sticky dock on the match hub. */
+  variant?: "page" | "docked";
 };
 
 export function MatchChatPanel({
   matchId,
   enabled,
   viewerUserId,
+  variant = "page",
 }: MatchChatPanelProps) {
   const { t } = useTranslation();
   const { writingDirection } = useLayoutDirection();
+  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
+  const listRef = useRef<FlatList<MatchMessageRow>>(null);
+  const docked = variant === "docked";
 
   const messagesQuery = useQuery({
     queryKey: ["match-messages", matchId],
@@ -63,9 +77,6 @@ export function MatchChatPanel({
     });
   }, [matchId, queryClient]);
 
-  // Synced in its own effect rather than during render, which React forbids for
-  // refs. The ref exists so the subscription effect below does not tear the
-  // channel down and rebuild it whenever this callback changes identity.
   const refetchMessagesRef = useRef(refetchMessages);
   useEffect(() => {
     refetchMessagesRef.current = refetchMessages;
@@ -91,18 +102,16 @@ export function MatchChatPanel({
         await removeMatchChatChannels(supabase, matchId);
         if (cancelled) return;
 
-        const nextChannel = supabase
-          .channel(matchChatChannelName(matchId))
-          .on(
-            "postgres_changes",
-            {
-              event: "INSERT",
-              schema: "public",
-              table: "match_messages",
-              filter: `match_id=eq.${matchId}`,
-            },
-            refetch,
-          );
+        const nextChannel = supabase.channel(matchChatChannelName(matchId)).on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "match_messages",
+            filter: `match_id=eq.${matchId}`,
+          },
+          refetch,
+        );
 
         if (cancelled) {
           await supabase.removeChannel(nextChannel);
@@ -158,6 +167,9 @@ export function MatchChatPanel({
       await queryClient.invalidateQueries({
         queryKey: ["match-messages", matchId],
       });
+      requestAnimationFrame(() => {
+        listRef.current?.scrollToEnd({ animated: true });
+      });
     },
   });
 
@@ -165,129 +177,207 @@ export function MatchChatPanel({
 
   const messages = [...(messagesQuery.data ?? [])].reverse();
 
+  const messageList = messagesQuery.isLoading ? (
+    <View style={[styles.loading, docked && styles.loadingDocked]}>
+      <ActivityIndicator
+        color={tennisColors.primary}
+        accessibilityLabel={t("common.loading")}
+      />
+    </View>
+  ) : (
+    <FlatList
+      ref={listRef}
+      data={messages}
+      keyExtractor={(item) => item.message_id}
+      style={docked ? styles.listDocked : styles.list}
+      contentContainerStyle={[
+        docked ? styles.listContentDocked : styles.listContent,
+        messages.length === 0 ? styles.listContentEmpty : null,
+      ]}
+      keyboardShouldPersistTaps="handled"
+      nestedScrollEnabled
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+      onContentSizeChange={() => {
+        if (messages.length > 0) {
+          listRef.current?.scrollToEnd({ animated: false });
+        }
+      }}
+      ListEmptyComponent={
+        <AppText style={styles.empty}>{t("matches.chat.empty")}</AppText>
+      }
+      renderItem={({ item }) => {
+        const isOwn = viewerUserId === item.author_id;
+        return (
+          <View
+            style={[
+              styles.bubbleRow,
+              isOwn ? styles.bubbleRowOwn : styles.bubbleRowOther,
+            ]}
+          >
+            <View
+              style={[
+                styles.bubble,
+                isOwn ? styles.bubbleOwn : styles.bubbleOther,
+              ]}
+            >
+              {!isOwn ? (
+                <AppText style={styles.sender} maxLines={1}>
+                  {item.author_display_name}
+                </AppText>
+              ) : null}
+              <AppText
+                style={[
+                  styles.body,
+                  { writingDirection },
+                  isOwn ? styles.bodyOwn : styles.bodyOther,
+                ]}
+              >
+                {item.body}
+              </AppText>
+              <AppText
+                style={[styles.time, isOwn ? styles.timeOwn : styles.timeOther]}
+              >
+                {formatUtcInBeirut(item.created_at)}
+              </AppText>
+            </View>
+          </View>
+        );
+      }}
+    />
+  );
+
+  const composer = (
+    <View
+      style={[
+        styles.composer,
+        docked ? styles.composerDocked : null,
+        !docked ? { paddingBottom: Math.max(insets.bottom, 10) } : null,
+      ]}
+    >
+      <TextInput
+        accessibilityLabel={t("matches.chat.placeholder")}
+        value={draft}
+        onChangeText={setDraft}
+        placeholder={t("matches.chat.placeholder")}
+        style={[onboardingInputStyle.input, styles.input]}
+        multiline
+      />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("matches.chat.send")}
+        disabled={!draft.trim() || sendMutation.isPending}
+        onPress={() => sendMutation.mutate(draft.trim())}
+        style={({ pressed }) => [
+          styles.sendButton,
+          (!draft.trim() || sendMutation.isPending) && styles.sendDisabled,
+          pressed && draft.trim() ? styles.sendPressed : null,
+        ]}
+      >
+        {sendMutation.isPending ? (
+          <ActivityIndicator color={tennisColors.white} size="small" />
+        ) : (
+          <AppText style={styles.sendLabel}>{t("matches.chat.send")}</AppText>
+        )}
+      </Pressable>
+    </View>
+  );
+
+  if (docked) {
+    return (
+      <View style={styles.dock}>
+        <AppText style={styles.title}>{t("matches.chat.title")}</AppText>
+        {realtimeStatus === "interrupted" ? (
+          <AppText style={styles.reconnecting} accessibilityRole="alert">
+            {t("matches.chat.reconnecting")}
+          </AppText>
+        ) : null}
+        {messageList}
+        {composer}
+      </View>
+    );
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.root}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
     >
-      <AppText style={styles.title}>{t("matches.chat.title")}</AppText>
-
-      {messagesQuery.isLoading ? (
-        <ActivityIndicator
-          color={tennisColors.primary}
-          accessibilityLabel={t("common.loading")}
-        />
-      ) : null}
-
       {realtimeStatus === "interrupted" ? (
         <AppText style={styles.reconnecting} accessibilityRole="alert">
           {t("matches.chat.reconnecting")}
         </AppText>
       ) : null}
-
-      <View style={styles.messages}>
-        {messages.length === 0 ? (
-          <AppText style={styles.empty}>{t("matches.chat.empty")}</AppText>
-        ) : (
-          messages.map((message) => {
-            const isOwn = viewerUserId === message.author_id;
-            return (
-              <View
-                key={message.message_id}
-                style={[
-                  styles.bubbleRow,
-                  isOwn ? styles.bubbleRowOwn : styles.bubbleRowOther,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.bubble,
-                    isOwn ? styles.bubbleOwn : styles.bubbleOther,
-                  ]}
-                >
-                  {!isOwn ? (
-                    <AppText style={styles.sender} maxLines={1}>
-                      {message.author_display_name}
-                    </AppText>
-                  ) : null}
-                  <AppText
-                    style={[
-                      styles.body,
-                      { writingDirection },
-                      isOwn ? styles.bodyOwn : styles.bodyOther,
-                    ]}
-                  >
-                    {message.body}
-                  </AppText>
-                  <AppText
-                    style={[
-                      styles.time,
-                      isOwn ? styles.timeOwn : styles.timeOther,
-                    ]}
-                  >
-                    {formatUtcInBeirut(message.created_at)}
-                  </AppText>
-                </View>
-              </View>
-            );
-          })
-        )}
-      </View>
-
-      <View style={styles.composer}>
-        <TextInput
-          accessibilityLabel={t("matches.chat.placeholder")}
-          value={draft}
-          onChangeText={setDraft}
-          placeholder={t("matches.chat.placeholder")}
-          style={[onboardingInputStyle.input, styles.input]}
-          multiline
-        />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("matches.chat.send")}
-          disabled={!draft.trim() || sendMutation.isPending}
-          onPress={() => sendMutation.mutate(draft.trim())}
-          style={({ pressed }) => [
-            styles.sendButton,
-            (!draft.trim() || sendMutation.isPending) && styles.sendDisabled,
-            pressed && draft.trim() ? styles.sendPressed : null,
-          ]}
-        >
-          {sendMutation.isPending ? (
-            <ActivityIndicator color={tennisColors.white} size="small" />
-          ) : (
-            <AppText style={styles.sendLabel}>{t("matches.chat.send")}</AppText>
-          )}
-        </Pressable>
-      </View>
+      {messageList}
+      {composer}
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
-    gap: 12,
-    paddingBottom: 8,
+    flex: 1,
+  },
+  dock: {
+    backgroundColor: tennisColors.card,
+    borderTopWidth: 1,
+    borderTopColor: tennisColors.border,
+    paddingTop: 12,
   },
   title: {
-    fontFamily: tennisFontFamily.bodyMedium,
+    fontFamily: tennisFontFamily.headingSemi,
     fontSize: 15,
     color: tennisColors.primaryDark,
+    letterSpacing: -0.2,
+    paddingHorizontal: 16,
+    marginBottom: 8,
   },
-  messages: {
-    gap: 8,
-    minHeight: 80,
+  loading: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingDocked: {
+    height: HUB_MESSAGE_LIST_HEIGHT,
+    flex: 0,
+  },
+  list: {
+    flex: 1,
+  },
+  listDocked: {
+    height: HUB_MESSAGE_LIST_HEIGHT,
+    flexGrow: 0,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },
+  listContentDocked: {
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 8,
+    flexGrow: 1,
+  },
+  separator: {
+    height: 8,
+  },
+  listContentEmpty: {
+    flexGrow: 1,
+    justifyContent: "center",
   },
   empty: {
     fontFamily: tennisFontFamily.body,
-    fontSize: 13,
+    fontSize: 14,
     color: tennisColors.mutedForeground,
+    textAlign: "center",
   },
   reconnecting: {
     fontFamily: tennisFontFamily.body,
     fontSize: 12,
     color: tennisColors.mutedForeground,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
   },
   bubbleRow: {
     width: "100%",
@@ -348,6 +438,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: tennisColors.border,
     paddingTop: 10,
+    paddingHorizontal: 16,
+    backgroundColor: tennisColors.background,
+  },
+  composerDocked: {
+    backgroundColor: tennisColors.card,
+    paddingBottom: 10,
   },
   input: {
     flex: 1,

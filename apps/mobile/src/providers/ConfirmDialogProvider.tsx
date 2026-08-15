@@ -66,9 +66,12 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
     setDialog({ kind: "choose", options });
   }, []);
 
-  const presentCancelMatch = useCallback((options: CancelMatchDialogOptions) => {
-    setDialog({ kind: "cancelMatch", options });
-  }, []);
+  const presentCancelMatch = useCallback(
+    (options: CancelMatchDialogOptions) => {
+      setDialog({ kind: "cancelMatch", options });
+    },
+    [],
+  );
 
   useEffect(() => {
     registerConfirmPresenters({
@@ -79,10 +82,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
     return () => registerConfirmPresenters(null);
   }, [presentCancelMatch, presentChoose, presentNotify]);
 
-  const value = useMemo(
-    () => ({ visible: dialog !== null }),
-    [dialog],
-  );
+  const value = useMemo(() => ({ visible: dialog !== null }), [dialog]);
 
   return (
     <ConfirmDialogContext.Provider value={value}>
@@ -152,16 +152,19 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                     label={dialog.options.confirmLabel}
                     onPress={() => {
                       const { onConfirm } = dialog.options;
-                      close();
+                      // Run confirm before dismiss so the underlying screen can
+                      // settle while the modal still covers it (avoids a one-
+                      // frame flash of the pre-confirm UI).
                       onConfirm();
+                      close();
                     }}
                   />
                   <FigmaSecondaryButton
                     label={dialog.options.cancelLabel}
                     onPress={() => {
                       const { onCancel } = dialog.options;
-                      close();
                       onCancel?.();
+                      close();
                     }}
                   />
                 </View>

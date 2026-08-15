@@ -7,6 +7,7 @@ import { getMatchHub } from "@tennis-lebanon/api";
 import { ClubsDirectoryList } from "../../../src/components/ClubsDirectoryList";
 import { AppText } from "../../../src/components/AppText";
 import {
+  ErrorNotice,
   Screen,
   SecondaryButton,
   formStyles,
@@ -16,6 +17,7 @@ import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
 import {
   clubDetailRoute,
   matchBookExternalRoute,
+  matchHubRoute,
 } from "../../../src/lib/routes";
 import { supabase } from "../../../src/lib/supabase";
 
@@ -29,12 +31,14 @@ export default function MatchBookCourtScreen() {
     enabled: Boolean(id),
   });
 
+  const isHost = hubQuery.data?.viewer_is_creator === true;
+
   const matchZoneIds = useMemo(() => {
     const zones = (hubQuery.data?.zones as { id: string }[] | undefined) ?? [];
     return zones.map((zone) => zone.id);
   }, [hubQuery.data?.zones]);
 
-  const clubsQuery = useClubsDirectory(matchZoneIds);
+  const clubsQuery = useClubsDirectory(isHost ? matchZoneIds : []);
 
   const agreedSlot = useMemo(() => {
     const selected = hubQuery.data?.selected_time_option_id;
@@ -44,15 +48,31 @@ export default function MatchBookCourtScreen() {
     );
   }, [hubQuery.data]);
 
+  if (hubQuery.isLoading) {
+    return (
+      <Screen title={t("matches.booking.title")}>
+        <ActivityIndicator accessibilityLabel={t("common.loading")} />
+      </Screen>
+    );
+  }
+
+  if (hubQuery.data && !isHost) {
+    return (
+      <Screen title={t("matches.booking.title")}>
+        <ErrorNotice>{t("matches.booking.hostOnly")}</ErrorNotice>
+        <SecondaryButton
+          label={t("common.back")}
+          onPress={() => router.replace(matchHubRoute(id!))}
+        />
+      </Screen>
+    );
+  }
+
   return (
     <Screen
       title={t("matches.booking.title")}
       description={t("matches.booking.browseClubsDescription")}
     >
-      {hubQuery.isLoading ? (
-        <ActivityIndicator accessibilityLabel={t("common.loading")} />
-      ) : null}
-
       {agreedSlot ? (
         <View style={formStyles.compactCard}>
           <AppText style={formStyles.compactCardTitle}>

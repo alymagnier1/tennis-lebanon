@@ -35,9 +35,16 @@ export async function loadDiscoverFilters(
 
   try {
     const parsed = JSON.parse(raw) as PersistedDiscoverFilters;
-    return {
+    const merged = {
       ...DEFAULT_DISCOVER_MATCH_TOGGLES,
       ...parsed.matchToggles,
+    };
+    // Drop legacy matchFormat if still present in older device storage.
+    return {
+      matchLevel: merged.matchLevel,
+      matchIntent: merged.matchIntent,
+      matchArea: merged.matchArea,
+      matchAvailability: merged.matchAvailability,
     };
   } catch {
     return { ...DEFAULT_DISCOVER_MATCH_TOGGLES };

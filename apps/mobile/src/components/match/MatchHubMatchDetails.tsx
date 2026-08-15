@@ -43,11 +43,7 @@ export function MatchHubMatchDetails({ hub }: { hub: MatchHubCard }) {
             isRtl && styles.chevronWrapRtl,
           ]}
         >
-          <Icon
-            name="chevron"
-            size={18}
-            color={tennisColors.mutedForeground}
-          />
+          <Icon name="chevron" size={18} color={tennisColors.mutedForeground} />
         </View>
       </Pressable>
       <AnimatedCollapse visible={open}>

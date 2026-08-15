@@ -38,7 +38,7 @@ The initial migration is `supabase/migrations/001_initial_schema.sql`. It establ
 
 - `bookings`: court request and resolution
 - `booking_events`: immutable status history
-- `match_results`: one result workflow per match
+- `match_results`: one result workflow per match. Sets are stored **side-relative** as `[sideAGames, sideBGames]` against `side_a_user_ids`; the server validates each set and derives `winning_side` from the score rather than accepting a winner from the caller. `revision` caps the reopen-after-disagreement at one.
 - `rating_events`: append-only rating changes with before/after values
 
 ### Delivery and operations
@@ -103,6 +103,8 @@ Raw authentication tokens, secret keys, unmasked contact details, home address, 
 - Match join capacity is enforced in Milestone 3 via a `FOR UPDATE` join RPC; add an optional deferred constraint trigger as defense in depth if race tests justify it.
 - One result workflow exists per match.
 - One rating event per player per finalized result.
+- A match completes on participant attendance, not on a score. A confirmed score also completes it. `result_status.unverified` is terminal and unrated: it is where a submitted score lands when nobody answered and the confirmation request never reached the other side.
+- Only the side opposite the submitter may confirm or dispute a result.
 - Suspended/deleted users cannot create or join public matches. Suspension does not retroactively remove a user from matches/bookings already in progress; it blocks new public activity going forward, cancels their own pending unaccepted booking requests, and leaves existing chat history visible to remaining participants. Full cascade behavior is an operations decision to confirm before Milestone 8.
 - Chat authors must be active participants at the time of insertion.
 

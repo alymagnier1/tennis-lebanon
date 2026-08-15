@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildExpoPushMessages,
+  isNotificationKind,
   normalizeNotificationDeepLink,
   parseNotificationPayload,
 } from "./notifications";
@@ -27,26 +27,32 @@ describe("notifications", () => {
     });
   });
 
-  it("builds expo push messages without leaking extra fields", () => {
-    const messages = buildExpoPushMessages({
-      kind: "match_invitation",
-      payload: {
+  it("parses structured params for localized copy", () => {
+    expect(
+      parseNotificationPayload({
         deepLink: "/match/1",
-        title: "Invite",
-        body: "You were invited",
-      },
-      tokens: ["ExponentPushToken[abc]", "ExponentPushToken[def]"],
+        params: { clubName: "Hippodrome", startsAt: "2026-08-20T15:00:00Z" },
+      })?.params,
+    ).toEqual({
+      clubName: "Hippodrome",
+      startsAt: "2026-08-20T15:00:00Z",
+      spotsLeft: undefined,
     });
+  });
 
-    expect(messages).toHaveLength(2);
-    expect(messages[0]).toEqual({
-      to: "ExponentPushToken[abc]",
-      title: "Invite",
-      body: "You were invited",
-      data: {
-        deepLink: "/match/1",
-        kind: "match_invitation",
-      },
-    });
+  it("ignores a params object with nothing usable in it", () => {
+    expect(
+      parseNotificationPayload({ deepLink: "/match/1", params: { junk: 1 } })
+        ?.params,
+    ).toBeUndefined();
+  });
+
+  it("recognises the kinds the database enqueues", () => {
+    // The six that were missing for a long time, which is why they rendered
+    // untranslated.
+    expect(isNotificationKind("match_time_changed")).toBe(true);
+    expect(isNotificationKind("match_court_confirmed")).toBe(true);
+    expect(isNotificationKind("match_message")).toBe(true);
+    expect(isNotificationKind("not_a_kind")).toBe(false);
   });
 });

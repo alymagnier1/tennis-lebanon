@@ -35,7 +35,7 @@ export function PlayerProfileSection({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: tennisColors.card,
-    borderRadius: 18,
+    borderRadius: tennisRadii.lg,
     borderWidth: 1.5,
     borderColor: tennisColors.border,
     overflow: "hidden",
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     color: tennisColors.primaryDark,
     letterSpacing: -0.2,
     paddingHorizontal: 16,
-    paddingTop: 18,
+    paddingTop: 16,
     paddingBottom: 0,
   },
   groupedTitle: {
@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: 16,
-    paddingTop: 6,
-    paddingBottom: 18,
+    paddingTop: 10,
+    paddingBottom: 16,
     gap: 10,
   },
   groupedBody: {

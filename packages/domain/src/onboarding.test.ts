@@ -32,12 +32,13 @@ describe("onboarding domain rules", () => {
     expect(isAdultBirthYear(2009, 2026)).toBe(false);
   });
 
-  it("requires at least one preferred format", () => {
+  it("accepts either preferred format flags for legacy rows", () => {
     const result = onboardingInputSchema.safeParse({
       ...validInput,
       prefersSingles: false,
+      prefersDoubles: false,
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("rejects stale policy versions", () => {

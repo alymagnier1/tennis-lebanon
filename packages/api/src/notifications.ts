@@ -28,6 +28,24 @@ export async function listUserNotifications(
   return (data ?? []) as UserNotificationRow[];
 }
 
+/**
+ * Tells the server which language to compose push copy in. The app's own locale
+ * lives in device storage, which the Edge Function cannot read, so without this
+ * every push falls back to English regardless of what the player chose.
+ */
+export async function setOwnNotificationLocale(
+  client: TennisSupabaseClient,
+  locale: "en" | "ar" | "fr",
+): Promise<void> {
+  const { error } = await (
+    client.rpc as (
+      name: string,
+      args: Record<string, string>,
+    ) => ReturnType<TennisSupabaseClient["rpc"]>
+  )("set_own_notification_locale", { p_locale: locale });
+  if (error) throw error;
+}
+
 export async function markNotificationRead(
   client: TennisSupabaseClient,
   notificationId: string,

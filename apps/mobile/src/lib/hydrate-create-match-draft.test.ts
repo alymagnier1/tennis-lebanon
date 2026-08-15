@@ -61,7 +61,9 @@ describe("hydrateCreateMatchDraftFromProfile", () => {
     const resolved = resolveMatchHostDefaults(
       matchHostDefaultsRowFromProfile(sampleProfile),
     );
-    const expected = buildCreateMatchDraftFromHostDefaults(resolved, ["zone-1"]);
+    const expected = buildCreateMatchDraftFromHostDefaults(resolved, [
+      "zone-1",
+    ]);
 
     expect(draft.format).toBe(expected.format);
     expect(draft.intent).toBe(expected.intent);

@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
 import { FigmaBackButton } from "../onboarding-ui";
 import { useLayoutDirection } from "../../lib/layout-direction";
+import { stackScreenTopPadding } from "../../lib/stack-screen-padding";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
@@ -11,24 +12,33 @@ import { tennisFontFamily } from "../../hooks/useTennisFonts";
 export function MatchHubLayout({
   title,
   subtitle,
+  statusSlot,
   onBack,
   refreshing = false,
   onRefresh,
   scrollRef,
+  dock,
   footer,
   children,
 }: PropsWithChildren<{
   title: string;
   subtitle?: string;
+  /**
+   * Status badge under the title. The match's state was a 12px grey subtitle,
+   * which made the single most important fact on the page the least visible.
+   */
+  statusSlot?: React.ReactNode;
   onBack: () => void;
   refreshing?: boolean;
   onRefresh?: () => void;
   scrollRef?: RefObject<ScrollView | null>;
+  /** Sticky region above the action bar (e.g. match chat). */
+  dock?: React.ReactNode;
   footer?: React.ReactNode;
 }>) {
   const insets = useSafeAreaInsets();
   const { writingDirection } = useLayoutDirection();
-  const topPadding = Math.max(insets.top + 12, 52);
+  const topPadding = stackScreenTopPadding(insets.top);
 
   return (
     <View style={styles.root}>
@@ -55,6 +65,9 @@ export function MatchHubLayout({
               {subtitle}
             </AppText>
           ) : null}
+          {statusSlot ? (
+            <View style={styles.statusSlot}>{statusSlot}</View>
+          ) : null}
         </View>
       </View>
 
@@ -65,7 +78,7 @@ export function MatchHubLayout({
           styles.content,
           {
             paddingHorizontal: tennisSpacing.screenX,
-            paddingBottom: footer ? 120 : insets.bottom + 24,
+            paddingBottom: dock || footer ? 24 : insets.bottom + 24,
           },
         ]}
         keyboardShouldPersistTaps="handled"
@@ -79,6 +92,7 @@ export function MatchHubLayout({
         {children}
       </ScrollView>
 
+      {dock}
       {footer}
     </View>
   );
@@ -100,6 +114,10 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     color: tennisColors.primaryDark,
     letterSpacing: -0.6,
+  },
+  statusSlot: {
+    alignSelf: "flex-start",
+    marginTop: 6,
   },
   scroll: {
     flex: 1,

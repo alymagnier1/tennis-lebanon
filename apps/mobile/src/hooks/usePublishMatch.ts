@@ -78,7 +78,9 @@ export function usePublishMatch(options?: {
         matchId,
         destination,
         targetPlayerId,
-        favoriteClubIds: seedFavoriteClubs ? (input.preferredClubIds ?? []) : [],
+        favoriteClubIds: seedFavoriteClubs
+          ? (input.preferredClubIds ?? [])
+          : [],
       };
     },
     onSuccess: async ({

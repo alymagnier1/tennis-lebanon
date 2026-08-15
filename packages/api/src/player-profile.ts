@@ -90,7 +90,10 @@ export async function getOwnPlayerProfile(
     };
   }
 
-  if (extended.error && !isMissingMatchHostDefaultsColumnsError(extended.error)) {
+  if (
+    extended.error &&
+    !isMissingMatchHostDefaultsColumnsError(extended.error)
+  ) {
     throw extended.error;
   }
 
@@ -174,6 +177,8 @@ export type PublicPlayerAvailabilitySummary = {
 export type PublicPlayerRecentMatch = {
   opponent_names: string | null;
   player_won: boolean;
+  /** Which side of the stored score this player was on, so it reads their way. */
+  player_side: 1 | 2;
   score: unknown;
   played_at: string | null;
 };
@@ -250,7 +255,10 @@ export async function updateMatchHostDefaults(
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (existing.error && !isMissingMatchHostDefaultsColumnsError(existing.error)) {
+  if (
+    existing.error &&
+    !isMissingMatchHostDefaultsColumnsError(existing.error)
+  ) {
     throw existing.error;
   }
 

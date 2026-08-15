@@ -137,7 +137,7 @@
     },
     "clubSwitcher": {
       "label": "Club",
-      "pendingOption": "{{name}} (en attente d'approbation)"
+      "inactiveOption": "{{name}} (inactif)"
     },
     "settings": {
       "title": "Paramètres du club",
@@ -153,7 +153,20 @@
       "bookingModeWhatsAppHint": "Les joueurs ouvrent WhatsApp avec un message prérempli. Votre numéro n'apparaît pas dans l'annuaire.",
       "whatsappPhoneLabel": "Numéro WhatsApp",
       "whatsappPhonePlaceholder": "+961 70 123 456",
-      "whatsappPhoneHint": "Incluez l'indicatif pays. Les numéros libanais sont normalisés automatiquement."
+      "whatsappPhoneHint": "Incluez l'indicatif pays. Les numéros libanais sont normalisés automatiquement.",
+      "dangerZoneTitle": "Zone à risque",
+      "dangerZoneStatusActive": "Ce club est actif et visible par les joueurs.",
+      "dangerZoneStatusInactive": "Ce club est désactivé et masqué aux joueurs.",
+      "dangerZoneReasonLabel": "Motif (facultatif, conservé dans le journal d'audit)",
+      "dangerZoneDeactivate": "Désactiver le club",
+      "dangerZoneReactivate": "Réactiver le club",
+      "dangerZoneConfirmPrompt": "Désactiver masque {{name}} aux joueurs immédiatement. Les courts et l'historique des réservations restent intacts, et cette action peut être annulée.",
+      "dangerZoneConfirmButton": "Oui, désactiver",
+      "dangerZoneCancelButton": "Annuler",
+      "dangerZoneDeactivated": "Club désactivé.",
+      "dangerZoneReactivated": "Club réactivé.",
+      "dangerZoneError": "Impossible de mettre à jour le statut de ce club.",
+      "dangerZoneErrorDetail": "Impossible de mettre à jour le statut de ce club : {{detail}}"
     },
     "courts": {
       "title": "Courts et tarifs",
@@ -418,7 +431,7 @@
       "bookingTitle": "Booking in progress",
       "bookingBody": "A club is reviewing your court request.",
       "courtTitle": "Ready to book a court",
-      "courtBody": "Everyone agreed on a time. Request a court next.",
+      "courtBody": "Tout le monde a convenu d’un horaire. Contactez un club préféré, puis confirmez le court.",
       "playedTitle": "Avez-vous joué ?",
       "playedBody": "Aucun court n'a été enregistré pour ce match. Dites-nous s'il a eu lieu.",
       "playersTitle": "En attente de joueurs",
@@ -766,7 +779,8 @@
       "lost": "Défaite",
       "vsOpponent": "vs {{name}}",
       "youVsOpponent": "Vous vs {{name}}",
-      "seekingOpponent": "Recherche de joueurs"
+      "seekingOpponent": "Recherche de joueurs",
+      "played": "Joué"
     },
     "lifecycle": {
       "staleBadge": "Expire bientôt",
@@ -789,7 +803,11 @@
       "placeholder": "Écrire un message",
       "send": "Envoyer",
       "error": "Impossible d'envoyer ce message.",
-      "reconnecting": "Reconnexion… les nouveaux messages peuvent tarder."
+      "reconnecting": "Reconnexion… les nouveaux messages peuvent tarder.",
+      "open": "Ouvrir le chat du match",
+      "openHint": "Écrire au groupe",
+      "denied": "Rejoignez ce match pour utiliser le chat.",
+      "lockedRecruiting": "Le chat s’ouvre quand l’équipe est au complet."
     },
     "hub": {
       "title": "Hub du match",
@@ -868,6 +886,21 @@
       "courtHeroTitle": "Votre court",
       "agreedTimeBookHint": "Réservez un court pour ce créneau.",
       "agreedTimeVenueHint": "Préféré",
+      "openPlayerSlot": "Place libre",
+      "preferredClubs": "Clubs préférés",
+      "openClubDetails": "Voir les détails de {{club}}",
+      "contactClub": "Contacter {{club}} sur WhatsApp",
+      "whichCourtTitle": "Où as-tu réservé ?",
+      "whichCourtHint": "Vos joueurs doivent savoir où se présenter.",
+      "messageClub": "Message",
+      "clubNotListed": "Autre club",
+      "differentTime": "Autre horaire",
+      "confirmNotifiesPlayers": "Vos joueurs seront informés que le court est réservé à {{club}}.",
+      "courtFellThrough": "Le court est tombé à l'eau ?",
+      "courtFellThroughConfirm": "Libérer le court",
+      "courtFellThroughPrompt": "Vos joueurs seront informés que le court n'est plus réservé.",
+      "courtReleased": "Court libéré. Le match a de nouveau besoin d'un court.",
+      "courtReleaseError": "Impossible de libérer ce court.",
       "expandMatchDetails": "Afficher les détails du match",
       "collapseMatchDetails": "Masquer les détails du match",
       "sections": {
@@ -886,10 +919,7 @@
       "noShow": "Je n'ai pas joué",
       "attendanceError": "Impossible d'enregistrer votre présence.",
       "submitPrompt": "Qui a gagné et quel était le score ?",
-      "selectWinner": "Sélectionnez le vainqueur",
       "setLabel": "Set {{number}}",
-      "winnerGamesLabel": "Jeux du vainqueur",
-      "loserGamesLabel": "Jeux du perdant",
       "addSet": "Ajouter un set",
       "removeSet": "Retirer le dernier set",
       "scoreLabel": "Score",
@@ -901,9 +931,9 @@
         "invalidSet": "Saisissez un score de set valide (par ex. 6-4 ou 7-6).",
         "setCount": "Saisissez entre un et cinq sets.",
         "invalidScore": "Ce score n'a pas pu être enregistré.",
-        "setHint": "Le set {{number}} doit être corrigé."
+        "setHint": "Le set {{number}} doit être corrigé.",
+        "noWinner": "Un camp doit remporter plus de sets que l'autre."
       },
-      "winnerOption": "{{name}} a gagné",
       "submit": "Envoyer le résultat",
       "submitSuccess": "Résultat envoyé. En attente de confirmation de l'adversaire.",
       "submitError": "Impossible d'envoyer ce résultat.",
@@ -918,13 +948,35 @@
         "submitted": "En attente de confirmation",
         "confirmed": "Confirmé",
         "disputed": "Contesté",
-        "resolved": "Résolu"
-      }
+        "resolved": "Résolu",
+        "unverified": "Non confirmé"
+      },
+      "gamesForLabel": "Jeux de {{name}}",
+      "sidesTitle": "Qui jouait ensemble ?",
+      "sidesHint": "Touchez deux joueurs pour former une paire.",
+      "derivedWinner": "{{name}} l'emporte",
+      "reportedBy": "Saisi par {{name}}",
+      "reportedByYou": "Saisi par vous",
+      "notConfirmed": "Pas encore confirmé",
+      "awaitingYou": "En attente de votre confirmation",
+      "optionalScoreHint": "Saisir le score est facultatif. Le match compte déjà.",
+      "thatsWrong": "C'est inexact",
+      "resubmitPrompt": "Saisissez le score dont vous vous souvenez. Votre adversaire le confirmera.",
+      "resubmit": "Envoyer la correction",
+      "resubmitSuccess": "Correction envoyée. En attente de votre adversaire.",
+      "resubmitError": "Nous n'avons pas pu envoyer cette correction.",
+      "disputeNoteLabel": "Qu'est-ce qui était inexact ? (facultatif)",
+      "unverifiedHint": "Personne n'a confirmé ce score : il n'affecte pas le classement.",
+      "yourSide": "Vous",
+      "theirSide": "Eux",
+      "derivedWinnerYou": "Vous gagnez",
+      "derivedWinnerThem": "Ils gagnent"
     },
     "booking": {
       "title": "Demander un court",
       "description": "Choisissez un club et un court pour l’horaire convenu.",
       "browseClubsDescription": "Parcourez les clubs, ouvrez un profil, puis réservez in-app ou sur WhatsApp.",
+      "hostOnly": "Seul l’hôte peut contacter les clubs et réserver le court.",
       "selectClub": "Choisir un club",
       "selectCourt": "Choisir un court",
       "confirmTime": "Horaire convenu",
@@ -937,9 +989,9 @@
       "externalSuccess": "Court confirmé. Le match est fixé.",
       "externalError": "Nous n’avons pas pu confirmer ce court.",
       "courtAlreadyBooked": "Ce court est déjà réservé à cette heure.",
-      "bookedOffAppCta": "Réservé hors app",
+      "bookedOffAppCta": "J'ai réservé un court",
       "offPreferredListWarning": "Ce club ne figurait pas sur la liste convenue lors de l'inscription des joueurs. Tout le monde sera informé du lieu du court.",
-      "bookedOffAppTitle": "Confirmer une réservation hors app",
+      "bookedOffAppTitle": "Confirmer votre court",
       "bookedOffAppDescription": "Vous avez déjà réservé un court par téléphone ou WhatsApp. Choisissez le club et confirmez l'heure pour que la présence et les résultats fonctionnent.",
       "bookedOffAppConfirm": "Confirmer le court",
       "bookedOffAppConfirmTitle": "Confirmer ce court ?",
@@ -962,6 +1014,7 @@
       "declineError": "Impossible de refuser cette invitation.",
       "sent": "Invitation envoyée. Elle apparaît dans Matchs → Invitations.",
       "pickMatch": "Inviter à l'un de vos matchs ouverts",
+      "pickMatchHint": "Ajoutez-les à un match que vous organisez déjà — ou défiez-les pour un nouveau match ci-dessous.",
       "inviteToMatch": "Inviter au match {{format}}",
       "inviteToOpenMatch": "Inviter à ce match",
       "noTimeYet": "Horaire à confirmer",
@@ -1055,6 +1108,15 @@
       "4": "Jeu",
       "5": "Ven",
       "6": "Sam"
+    },
+    "weekdaysCompact": {
+      "0": "D",
+      "1": "L",
+      "2": "Ma",
+      "3": "Me",
+      "4": "J",
+      "5": "V",
+      "6": "S"
     }
   },
   "clubs": {
@@ -1065,6 +1127,7 @@
     "resultCount": "{{count}} clubs au Liban",
     "surfaceAll": "Tous",
     "viewDetails": "Voir le club",
+    "photoComingSoon": "Photo bientôt",
     "selected": "Sélectionné pour ce booking",
     "pricePerHour": "/h",
     "loadError": "Impossible de charger les clubs.",
@@ -1139,30 +1202,93 @@
     "markAllRead": "Mark all read",
     "fallbackTitle": "Tennis Lebanon",
     "fallbackBody": "Open the app for an update.",
+    "settings": {
+      "title": "Paramètres de notification",
+      "description": "Choisissez si cet appareil peut vous alerter au sujet des matchs.",
+      "pushSection": "Notifications push",
+      "statusOn": "Activées",
+      "statusOff": "Désactivées",
+      "statusBlocked": "Bloquées",
+      "statusUnsupported": "Indisponibles",
+      "detailOn": "Cet appareil vous alertera des invitations, des votes, des réservations et des rappels.",
+      "detailOff": "Activez-les pour suivre les invitations, les votes et les réservations de court sans ouvrir l'application.",
+      "detailBlocked": "Vous avez refusé les notifications de Tennis Lebanon. Autorisez-les dans les réglages de votre appareil pour les réactiver.",
+      "detailUnsupported": "Cet appareil ne peut pas recevoir de notifications push. Vous pouvez toujours tout consulter dans votre liste de notifications.",
+      "detailUnconfigured": "Cette version ne peut pas encore envoyer de notifications push. Vous pouvez toujours tout consulter dans votre liste de notifications.",
+      "enable": "Activer les notifications",
+      "openSystemSettings": "Ouvrir les réglages de l'appareil",
+      "enableError": "Nous n'avons pas pu activer les notifications sur cet appareil.",
+      "centerHint": "Tout ce qui vous est envoyé est conservé ici, que les notifications push soient activées ou non.",
+      "openCenter": "Ouvrir les notifications"
+    },
     "kinds": {
       "match_invitation": {
-        "title": "Match invite",
-        "body": "Someone invited you to a match."
+        "title": "Invitation à un match",
+        "body": "Quelqu'un vous a invité à un match."
       },
       "stale_match_reminder": {
-        "title": "Match expiring soon",
-        "body": "Add a new time or extend your listing."
+        "title": "Match bientôt expiré",
+        "body": "Ajoutez un nouveau créneau ou prolongez votre annonce."
       },
       "match_expired": {
-        "title": "Match expired",
-        "body": "This match is no longer active."
+        "title": "Match expiré",
+        "body": "Ce match n'est plus actif."
       },
       "booking_pending_club": {
-        "title": "Booking update",
-        "body": "A club responded to your booking request."
+        "title": "Mise à jour de réservation",
+        "body": "Un club a répondu à votre demande de réservation."
       },
       "booking_stale_participant": {
-        "title": "Booking waiting",
-        "body": "Your court request is still pending."
+        "title": "Réservation en attente",
+        "body": "Votre demande de court est toujours en attente."
       },
       "attendance_prompt": {
-        "title": "Did you play?",
-        "body": "Confirm attendance after your match."
+        "title": "Avez-vous joué ?",
+        "body": "Confirmez votre présence après votre match."
+      },
+      "match_time_changed": {
+        "title": "Horaire du match modifié",
+        "body": "L'organisateur a déplacé ce match. Ouvrez l'application pour voir le nouvel horaire."
+      },
+      "match_court_confirmed": {
+        "title": "Court confirmé",
+        "body": "Un court a été réservé auprès du club. Votre match est confirmé."
+      },
+      "match_court_released": {
+        "title": "Court plus réservé",
+        "body": "{{clubName}} à {{startsAt}} est tombé à l'eau. Le match a toujours besoin d'un court."
+      },
+      "court_first_roster_short": {
+        "title": "Court réservé, joueurs manquants",
+        "body": "Votre court à {{clubName}} est le {{startsAt}}. Places encore libres : {{spotsLeft}}. Invitez quelqu'un ou libérez le court."
+      },
+      "match_played_prompt": {
+        "title": "Avez-vous joué ?",
+        "body": "Votre match du {{startsAt}} n'a jamais eu de court dans l'application. Dites-nous s'il a eu lieu pour que le résultat compte."
+      },
+      "match_played_confirmed": {
+        "title": "Match marqué comme joué",
+        "body": "Confirmez votre présence et ajoutez le résultat pour qu'il compte."
+      },
+      "match_participant_joined": {
+        "title": "Un joueur a rejoint",
+        "body": "Quelqu'un a rejoint votre match. Ouvrez l'application pour voir la composition."
+      },
+      "match_participant_left": {
+        "title": "Un joueur est parti",
+        "body": "Quelqu'un a quitté votre match. Vous devrez peut-être inviter un remplaçant."
+      },
+      "match_message": {
+        "title": "Nouveau message",
+        "body": "Il y a de nouveaux messages dans la discussion de votre match."
+      },
+      "result_confirm_request": {
+        "title": "Un score attend votre réponse",
+        "body": "Votre adversaire a saisi le score. Confirmez-le, ou signalez une erreur."
+      },
+      "result_auto_confirmed": {
+        "title": "Score confirmé",
+        "body": "Personne n'a contesté sous trois jours : ce score est désormais retenu."
       }
     }
   }

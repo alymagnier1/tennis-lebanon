@@ -17,7 +17,7 @@ import {
 import { PlayerProfileSection } from "../../src/components/player/PlayerProfileSection";
 import { ProfileMenuRow } from "../../src/components/profile/ProfileMenuRow";
 import { env } from "../../src/lib/env";
-import { persistLocale } from "../../src/lib/i18n";
+import { applyLocale } from "../../src/lib/locale-sync";
 import { goBackOrReplace, PROFILE_TAB_ROUTE } from "../../src/lib/navigation";
 import {
   settingsScreenAccountTitle,
@@ -89,7 +89,7 @@ export default function SettingsScreen() {
                   key={locale}
                   label={t(`languages.${locale}`)}
                   selected={i18n.resolvedLanguage === locale}
-                  onPress={() => void persistLocale(locale)}
+                  onPress={() => void applyLocale(locale)}
                 />
               ))}
             </View>
@@ -107,9 +107,16 @@ export default function SettingsScreen() {
                   color={tennisColors.primary}
                 />
               }
+              label={t("notifications.settings.title")}
+              onPress={() => router.push("/profile/notifications")}
+              showDivider={false}
+            />
+            <ProfileMenuRow
+              icon={
+                <Icon name="matches" size={16} color={tennisColors.primary} />
+              }
               label={t("notifications.centerTitle")}
               onPress={() => router.push("/notifications")}
-              showDivider={false}
             />
           </PlayerProfileSection>
 

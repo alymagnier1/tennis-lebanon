@@ -67,17 +67,17 @@ flowchart TD
 
 **Page:** `Create match — flows`
 
-| Frame name                       | Route                          | Purpose                            |
-| -------------------------------- | ------------------------------ | ---------------------------------- |
-| `CM / Entry / Tab + button`      | —                              | Annotate tab bar + entry points    |
-| `CM / 00 / Loading`              | `/match/create`                | Spinner while profile + zones load |
-| `CM / 00 / Load error`           | `/match/create`                | Error + Retry                      |
-| `CM / 02 / When & where`         | `/match/create/schedule`       | **Primary design surface**         |
-| `CM / 02b / Overrides`           | `/match/create/details`        | Format, intent, level only         |
-| `CM / 03 / Active match block`   | schedule                       | Status banner variant              |
-| `CM / 04 / Invite target banner` | schedule                       | “Setting up match for {name}”      |
-| `CM / Post / Match hub`          | `/match/[id]`                  | After Publish                      |
-| `CM / Post / Invite players`     | `/match/[id]/invite`           | After Invite players               |
+| Frame name                       | Route                    | Purpose                            |
+| -------------------------------- | ------------------------ | ---------------------------------- |
+| `CM / Entry / Tab + button`      | —                        | Annotate tab bar + entry points    |
+| `CM / 00 / Loading`              | `/match/create`          | Spinner while profile + zones load |
+| `CM / 00 / Load error`           | `/match/create`          | Error + Retry                      |
+| `CM / 02 / When & where`         | `/match/create/schedule` | **Primary design surface**         |
+| `CM / 02b / Overrides`           | `/match/create/details`  | Format, intent, level only         |
+| `CM / 03 / Active match block`   | schedule                 | Status banner variant              |
+| `CM / 04 / Invite target banner` | schedule                 | “Setting up match for {name}”      |
+| `CM / Post / Match hub`          | `/match/[id]`            | After Publish                      |
+| `CM / Post / Invite players`     | `/match/[id]/invite`     | After Invite players               |
 
 **Page:** `Create match — components`
 
@@ -117,11 +117,11 @@ callers whose `onboarding_completed_at` is null.
 **Title:** Where do you play?  
 **Body:** Areas plus favourite clubs; both pre-fill every hosted match.
 
-| Block   | Content                                          |
-| ------- | ------------------------------------------------ |
-| Areas   | Zone chips, saved on toggle                      |
-| Clubs   | Favourite toggles for clubs in the chosen areas  |
-| Footer  | Primary **Done**, secondary **Skip for now**     |
+| Block  | Content                                         |
+| ------ | ----------------------------------------------- |
+| Areas  | Zone chips, saved on toggle                     |
+| Clubs  | Favourite toggles for clubs in the chosen areas |
+| Footer | Primary **Done**, secondary **Skip for now**    |
 
 A host who skips picks clubs by hand on their first create; those clubs are then
 saved as favourites so the second create is pre-filled.
@@ -286,11 +286,11 @@ Discover / clubs / areas **not** on this screen.
 
 ## States matrix (must design)
 
-| Screen      | Loading              | Empty            | Error                             | Success             |
-| ----------- | -------------------- | ---------------- | --------------------------------- | ------------------- |
-| Index       | Spinner              | —                | Load profile error + Retry        | Navigate away       |
-| Schedule    | Zones/clubs fetching | No clubs in area | Publish error inline              | → Hub / Invite      |
-| Overrides   | Skill band loading   | —                | Format error (no format selected) | Done → schedule     |
+| Screen    | Loading              | Empty            | Error                             | Success         |
+| --------- | -------------------- | ---------------- | --------------------------------- | --------------- |
+| Index     | Spinner              | —                | Load profile error + Retry        | Navigate away   |
+| Schedule  | Zones/clubs fetching | No clubs in area | Publish error inline              | → Hub / Invite  |
+| Overrides | Skill band loading   | —                | Format error (no format selected) | Done → schedule |
 
 **Offline:** Schedule publish shows generic publish error; retry on hub.
 
@@ -324,9 +324,9 @@ Prioritised for Figma exploration — **not** all implemented.
 3. **Time confidence** — Show “3 players free at this time” from suggestions API near slot picker.
 4. **Club cards** — Logo/photo thumbnails in picker; map link for unfamiliar clubs.
 5. **Publish clarity** — Primary = “Publish & find players”; secondary = “Save draft & invite” with one-line difference.
-7. **Success moment** — Brief confirmation before hub (optional); share sheet for WhatsApp.
-8. **Empty favourites** — Inline CTA to Where I play instead of empty club list.
-9. **Accessibility** — Summary card row as individual accessibility elements; toggle labels not only visual.
+6. **Success moment** — Brief confirmation before hub (optional); share sheet for WhatsApp.
+7. **Empty favourites** — Inline CTA to Where I play instead of empty club list.
+8. **Accessibility** — Summary card row as individual accessibility elements; toggle labels not only visual.
 
 ---
 

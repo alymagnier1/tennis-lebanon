@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getClubAdminDetail,
@@ -18,6 +18,7 @@ import {
   labelStackStyle,
   primaryButtonStyle,
 } from "@/lib/form-styles";
+import { ClubDangerZone } from "./ClubDangerZone";
 import { ClubSwitcher } from "./ClubSwitcher";
 
 export function ClubSettingsForm() {
@@ -44,7 +45,7 @@ export function ClubSettingsForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
+  const reloadDetail = useCallback(() => {
     if (!clubId || !isAdmin) return;
     void getClubAdminDetail(client, clubId).then((data) => {
       setDetail(data);
@@ -60,6 +61,10 @@ export function ClubSettingsForm() {
       setBookingPhone(data.club.booking_phone ?? "");
     });
   }, [client, clubId, isAdmin]);
+
+  useEffect(() => {
+    reloadDetail();
+  }, [reloadDetail]);
 
   const toggleAmenity = (amenity: string) => {
     setAmenities((current) =>
@@ -258,6 +263,17 @@ export function ClubSettingsForm() {
           {t("dashboard.settings.save")}
         </button>
       </form>
+
+      {detail ? (
+        <ClubDangerZone
+          client={client}
+          clubId={clubId}
+          clubName={detail.club.name}
+          isActive={detail.club.is_active}
+          isOperator={activeClub?.role === "operator"}
+          onChanged={reloadDetail}
+        />
+      ) : null}
     </DashboardShell>
   );
 }

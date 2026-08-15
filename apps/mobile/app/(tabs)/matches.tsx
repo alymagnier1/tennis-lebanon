@@ -313,55 +313,55 @@ export default function MatchesScreen() {
                       : undefined);
 
                   return (
-                  <View key={match.match_id} style={formStyles.stack}>
-                    <MatchCard
-                      accentBorder
-                      status={match.status}
-                      statusLabel={t(`matches.status.${match.status}`)}
-                      dateTimeLabel={
-                        match.soonest_time
-                          ? formatUtcInBeirut(match.soonest_time)
-                          : undefined
-                      }
-                      headline={buildMatchCardHeadline(t, headlineInput)}
-                      viewerName={viewerName}
-                      viewerAvatarPath={profile?.avatar_path}
-                      opponentName={opponent}
-                      opponentAvatarColor={
-                        opponent ? opponentAvatarColor(opponent) : undefined
-                      }
-                      formatChip={t(`formats.${match.format}`)}
-                      locationChip={locationChip}
-                      badges={
-                        match.is_stale_warning
-                          ? [
-                              {
-                                label: t("matches.lifecycle.staleBadge"),
-                                tone: "attention" as const,
-                              },
-                            ]
-                          : undefined
-                      }
-                      note={match.notes ?? undefined}
-                      onPress={() =>
-                        router.push({
-                          pathname: "/match/[id]",
+                    <View key={match.match_id} style={formStyles.stack}>
+                      <MatchCard
+                        accentBorder
+                        status={match.status}
+                        statusLabel={t(`matches.status.${match.status}`)}
+                        dateTimeLabel={
+                          match.soonest_time
+                            ? formatUtcInBeirut(match.soonest_time)
+                            : undefined
+                        }
+                        headline={buildMatchCardHeadline(t, headlineInput)}
+                        viewerName={viewerName}
+                        viewerAvatarPath={profile?.avatar_path}
+                        opponentName={opponent}
+                        opponentAvatarColor={
+                          opponent ? opponentAvatarColor(opponent) : undefined
+                        }
+                        formatChip={t(`formats.${match.format}`)}
+                        locationChip={locationChip}
+                        badges={
+                          match.is_stale_warning
+                            ? [
+                                {
+                                  label: t("matches.lifecycle.staleBadge"),
+                                  tone: "attention" as const,
+                                },
+                              ]
+                            : undefined
+                        }
+                        note={match.notes ?? undefined}
+                        onPress={() =>
+                          router.push({
+                            pathname: "/match/[id]",
 
-                          params: { id: match.match_id },
-                        })
-                      }
-                    />
-
-                    {match.can_extend_listing ? (
-                      <SecondaryButton
-                        label={t("matches.lifecycle.extendListing")}
-
-                        loading={extendMutation.isPending}
-
-                        onPress={() => extendMutation.mutate(match.match_id)}
+                            params: { id: match.match_id },
+                          })
+                        }
                       />
-                    ) : null}
-                  </View>
+
+                      {match.can_extend_listing ? (
+                        <SecondaryButton
+                          label={t("matches.lifecycle.extendListing")}
+
+                          loading={extendMutation.isPending}
+
+                          onPress={() => extendMutation.mutate(match.match_id)}
+                        />
+                      ) : null}
+                    </View>
                   );
                 })
               : null}
@@ -380,11 +380,19 @@ export default function MatchesScreen() {
           <View style={appStyles.cardList}>
             {!segmentLoading && !segmentError
               ? completedQuery.data?.map((match) => {
-                  const scoreLabel = formatMatchScore(match.score);
+                  // A completed match with no score is the ordinary casual
+                  // case now that attendance is what completes a match, so
+                  // every result-derived field here can be absent.
+                  const scoreLabel = match.score
+                    ? formatMatchScore(match.score, match.viewer_side ?? 1)
+                    : null;
 
-                  const outcomeLabel = match.viewer_won
-                    ? t("matches.list.won")
-                    : t("matches.list.lost");
+                  const outcomeLabel =
+                    match.viewer_won === null
+                      ? t("matches.list.played")
+                      : match.viewer_won
+                        ? t("matches.list.won")
+                        : t("matches.list.lost");
 
                   const opponentLabel = match.opponent_names
                     ? t("matches.list.vsOpponent", {
@@ -418,8 +426,12 @@ export default function MatchesScreen() {
                       headline={
                         resolvedOpponent
                           ? buildMatchCardHeadline(t, headlineInput)
-                          : opponentLabel ??
-                            t(`matches.results.status.${match.result_status}`)
+                          : (opponentLabel ??
+                            (match.result_status
+                              ? t(
+                                  `matches.results.status.${match.result_status}`,
+                                )
+                              : t("matches.list.played")))
                       }
                       viewerName={viewerName}
                       viewerAvatarPath={profile?.avatar_path}
@@ -434,11 +446,9 @@ export default function MatchesScreen() {
                       scoreBanner={
                         scoreLabel
                           ? {
-                              won: match.viewer_won,
+                              won: match.viewer_won === true,
                               score: scoreLabel,
-                              title: match.viewer_won
-                                ? t("matches.list.won")
-                                : t("matches.list.lost"),
+                              title: outcomeLabel,
                             }
                           : undefined
                       }

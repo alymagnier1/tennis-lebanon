@@ -50,7 +50,7 @@ export default function ZonesScreen() {
         <FigmaPrimaryButton
           label={t("common.continue")}
           disabled={draft.zoneIds.length === 0}
-          onPress={() => router.push("/(onboarding)/notifications")}
+          onPress={() => router.push("/(onboarding)/enable-notifications")}
         />
       }
     >

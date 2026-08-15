@@ -14,7 +14,10 @@ export function matchChatChannelName(matchId: string): string {
   return channelNameFor(MATCH_CHAT_CHANNEL_PREFIX, matchId);
 }
 
-export function isMatchChatChannelTopic(topic: string, matchId: string): boolean {
+export function isMatchChatChannelTopic(
+  topic: string,
+  matchId: string,
+): boolean {
   return isChannelTopic(topic, matchChatChannelName(matchId));
 }
 

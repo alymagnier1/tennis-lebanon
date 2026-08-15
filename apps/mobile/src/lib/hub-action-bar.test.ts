@@ -16,16 +16,43 @@ describe("resolveHubPrimaryAction", () => {
     ).toBe("join");
   });
 
-  it("routes ready hosts to request court", () => {
+  it("routes ready hosts to booked off-app when request court is hidden", () => {
     expect(
       resolveHubPrimaryAction({
         joinAction: "none",
-        nextAction: "ready_to_book",
-        showRequestCourt: true,
+        nextAction: "request_court",
+        showRequestCourt: false,
+        showConfirmExternalCourt: true,
+        isDraftCreator: false,
+        viewerIsCreator: true,
+      }),
+    ).toBe("confirm_external_court");
+  });
+
+  it("routes recruiting hosts to invite rather than booking", () => {
+    expect(
+      resolveHubPrimaryAction({
+        joinAction: "none",
+        nextAction: "awaiting_players",
+        showRequestCourt: false,
         showConfirmExternalCourt: false,
         isDraftCreator: false,
+        viewerIsCreator: true,
       }),
-    ).toBe("request_court");
+    ).toBe("invite");
+  });
+
+  it("hides invite and booking CTAs from joiners", () => {
+    expect(
+      resolveHubPrimaryAction({
+        joinAction: "none",
+        nextAction: "awaiting_players",
+        showRequestCourt: false,
+        showConfirmExternalCourt: true,
+        isDraftCreator: false,
+        viewerIsCreator: false,
+      }),
+    ).toBe("none");
   });
 });
 

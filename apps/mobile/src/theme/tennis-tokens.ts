@@ -20,9 +20,16 @@ export const tennisColors = {
   heroBorder: "rgba(255,255,255,0.15)",
 } as const;
 
-/** Brand colours that are not semantic status tones */
+/**
+ * Brand colours that are not semantic status tones.
+ *
+ * `whatsapp` is the brand green, fine for borders and icons at 3.54:1 on
+ * `whatsappFill` (UI boundaries need 3:1). It fails AA as text, so labels use
+ * `whatsappText` -- WhatsApp's own dark teal, 6.56:1 on the fill.
+ */
 export const tennisBrand = {
   whatsapp: "#128C7E",
+  whatsappText: "#075E54",
   whatsappFill: "#E3F0EE",
 } as const;
 

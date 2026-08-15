@@ -10,13 +10,13 @@ Build a one-page flow map in FigJam for design uplift. Pair with [`FIGMA_CREATE_
 2. Name the board **Create match — stickies flow**.
 3. Add **section frames** (FigJam Sections) in a row:
 
-   | Section name | Sticky colour |
-   |--------------|---------------|
-   | ENTRY | Gray |
-   | FLOW | Blue / Green |
-   | POST | Violet |
-   | PROFILE | Yellow (place to the right as sidebar) |
-   | EDGE CASES | Red (below FLOW) |
+   | Section name | Sticky colour                          |
+   | ------------ | -------------------------------------- |
+   | ENTRY        | Gray                                   |
+   | FLOW         | Blue / Green                           |
+   | POST         | Violet                                 |
+   | PROFILE      | Yellow (place to the right as sidebar) |
+   | EDGE CASES   | Red (below FLOW)                       |
 
 4. Import or paste stickies from [`create-match-flow-stickies.csv`](create-match-flow-stickies.csv) (see below).
 5. Draw **connectors** using the map at the end of this file.
@@ -68,19 +68,19 @@ Open the CSV in Excel/Sheets, copy the `title` and `body` columns, paste into st
 
 ## Connector map (draw these arrows)
 
-| From | To | Label |
-|------|-----|--------|
-| Any ENTRY sticky | `00 Loading` | |
-| `00 Loading` | `01 First intro` | first-time host only |
-| `00 Loading` | `02 When and where` | returning host |
-| `00 Loading` | `02 When and where` | invite flow skips intro |
-| `01 First intro` | `02 When and where` | Continue |
-| `02 When and where` | `02b Overrides` | Edit for this match |
-| `02b Overrides` | `02 When and where` | Done |
-| `02 When and where` | `Profile: Where I play` | Set in Profile link |
-| `02 When and where` | `Match hub` | Publish match |
-| `02 When and where` | `Invite players` | Invite players CTA |
-| `02 When and where` | EDGE stickies | validation fails |
+| From                | To                      | Label                   |
+| ------------------- | ----------------------- | ----------------------- |
+| Any ENTRY sticky    | `00 Loading`            |                         |
+| `00 Loading`        | `01 First intro`        | first-time host only    |
+| `00 Loading`        | `02 When and where`     | returning host          |
+| `00 Loading`        | `02 When and where`     | invite flow skips intro |
+| `01 First intro`    | `02 When and where`     | Continue                |
+| `02 When and where` | `02b Overrides`         | Edit for this match     |
+| `02b Overrides`     | `02 When and where`     | Done                    |
+| `02 When and where` | `Profile: Where I play` | Set in Profile link     |
+| `02 When and where` | `Match hub`             | Publish match           |
+| `02 When and where` | `Invite players`        | Invite players CTA      |
+| `02 When and where` | EDGE stickies           | validation fails        |
 
 ---
 
@@ -88,22 +88,22 @@ Open the CSV in Excel/Sheets, copy the `title` and `body` columns, paste into st
 
 If you want a **thin** board, use only these 6 stickies:
 
-1. **ENTRY** — Tab + / Discover / Challenge  
-2. **Loading** — brief  
-3. **First intro** — once (optional branch)  
-4. **When and where** — hero  
-5. **Overrides** — optional branch  
-6. **Match hub** — success  
+1. **ENTRY** — Tab + / Discover / Challenge
+2. **Loading** — brief
+3. **First intro** — once (optional branch)
+4. **When and where** — hero
+5. **Overrides** — optional branch
+6. **Match hub** — success
 
 ---
 
 ## Files in this folder
 
-| File | Purpose |
-|------|---------|
+| File                             | Purpose                              |
+| -------------------------------- | ------------------------------------ |
 | `create-match-flow-stickies.csv` | Bulk data for plugins / spreadsheets |
-| `create-match-flow-stickies.md` | Copy-paste friendly sticky text |
-| `README.md` | This guide |
+| `create-match-flow-stickies.md`  | Copy-paste friendly sticky text      |
+| `README.md`                      | This guide                           |
 
 ---
 

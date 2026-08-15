@@ -31,15 +31,15 @@ Do not pin framework versions until project initialization. Use mutually compati
 1. `docs/APP_SUMMARY.md` — what the app is, who it’s for, core journey (start here for overview)
 2. `CLAUDE.md` — permanent instructions for Claude Code
 3. `docs/PRD.md` — scope, rules, stories, and acceptance criteria
-3. `docs/FLOWS_AND_SCREENS.md` — navigation and user journeys
-4. `docs/ARCHITECTURE.md` — repository and system design
-5. `docs/DATABASE.md` — data model and access rules
-6. `docs/DISCOVERY.md` — discovery queries, privacy, and empty states (Milestone 2)
-7. `docs/LIFECYCLE.md` — match expiry, in_progress, cancellation placeholders
-8. `docs/ROADMAP.md` — implementation sequence and definition of done
-9. `docs/TESTING_SECURITY.md` — release gates
-10. `supabase/migrations/001_initial_schema.sql` — initial database schema
-11. `prompts/01_bootstrap.md` — first Claude Code prompt
+4. `docs/FLOWS_AND_SCREENS.md` — navigation and user journeys
+5. `docs/ARCHITECTURE.md` — repository and system design
+6. `docs/DATABASE.md` — data model and access rules
+7. `docs/DISCOVERY.md` — discovery queries, privacy, and empty states (Milestone 2)
+8. `docs/LIFECYCLE.md` — match expiry, in_progress, cancellation placeholders
+9. `docs/ROADMAP.md` — implementation sequence and definition of done
+10. `docs/TESTING_SECURITY.md` — release gates
+11. `supabase/migrations/001_initial_schema.sql` — initial database schema
+12. `prompts/01_bootstrap.md` — first Claude Code prompt
 
 ## Start here
 

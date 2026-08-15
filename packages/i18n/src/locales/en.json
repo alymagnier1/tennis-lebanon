@@ -137,7 +137,7 @@
     },
     "clubSwitcher": {
       "label": "Club",
-      "pendingOption": "{{name}} (awaiting approval)"
+      "inactiveOption": "{{name}} (inactive)"
     },
     "settings": {
       "title": "Club settings",
@@ -153,7 +153,20 @@
       "bookingModeWhatsAppHint": "Players tap Book on WhatsApp with a prefilled message. Your number is not shown in the club directory.",
       "whatsappPhoneLabel": "WhatsApp number",
       "whatsappPhonePlaceholder": "+961 70 123 456",
-      "whatsappPhoneHint": "Include country code. Lebanon numbers are normalized automatically."
+      "whatsappPhoneHint": "Include country code. Lebanon numbers are normalized automatically.",
+      "dangerZoneTitle": "Danger zone",
+      "dangerZoneStatusActive": "This club is active and visible to players.",
+      "dangerZoneStatusInactive": "This club is deactivated and hidden from players.",
+      "dangerZoneReasonLabel": "Reason (optional, saved to the audit log)",
+      "dangerZoneDeactivate": "Deactivate club",
+      "dangerZoneReactivate": "Reactivate club",
+      "dangerZoneConfirmPrompt": "Deactivating hides {{name}} from players immediately. Courts and booking history stay intact, and this can be undone.",
+      "dangerZoneConfirmButton": "Yes, deactivate",
+      "dangerZoneCancelButton": "Cancel",
+      "dangerZoneDeactivated": "Club deactivated.",
+      "dangerZoneReactivated": "Club reactivated.",
+      "dangerZoneError": "We could not update this club's status.",
+      "dangerZoneErrorDetail": "We could not update this club's status: {{detail}}"
     },
     "courts": {
       "title": "Courts & prices",
@@ -418,7 +431,7 @@
       "bookingTitle": "Booking in progress",
       "bookingBody": "A club is reviewing your court request.",
       "courtTitle": "Ready to book a court",
-      "courtBody": "Everyone agreed on a time. Request a court next.",
+      "courtBody": "Everyone agreed on a time. Contact a preferred club, then confirm the court.",
       "playedTitle": "Did you play?",
       "playedBody": "This match never got a court in the app. Tell us if it happened.",
       "playersTitle": "Waiting for players",
@@ -453,6 +466,25 @@
     "markAllRead": "Mark all read",
     "fallbackTitle": "Tennis Lebanon",
     "fallbackBody": "Open the app for an update.",
+    "settings": {
+      "title": "Notification settings",
+      "description": "Choose whether this device can alert you about matches.",
+      "pushSection": "Push notifications",
+      "statusOn": "On",
+      "statusOff": "Off",
+      "statusBlocked": "Blocked",
+      "statusUnsupported": "Unavailable",
+      "detailOn": "This device will alert you about invites, votes, bookings, and reminders.",
+      "detailOff": "Turn these on to hear about invites, votes, and court bookings without opening the app.",
+      "detailBlocked": "You declined notifications for Tennis Lebanon. Allow them in your device settings to switch them back on.",
+      "detailUnsupported": "This device cannot receive push notifications. You can still read everything in your notification list.",
+      "detailUnconfigured": "This build cannot send push notifications yet. You can still read everything in your notification list.",
+      "enable": "Turn on notifications",
+      "openSystemSettings": "Open device settings",
+      "enableError": "We could not turn on notifications on this device.",
+      "centerHint": "Everything sent to you is kept here, whether or not push is on.",
+      "openCenter": "Open notifications"
+    },
     "kinds": {
       "match_invitation": {
         "title": "Match invite",
@@ -477,6 +509,50 @@
       "attendance_prompt": {
         "title": "Did you play?",
         "body": "Confirm attendance after your match."
+      },
+      "match_time_changed": {
+        "title": "Match time changed",
+        "body": "The host moved this match. Open the app to see the new time."
+      },
+      "match_court_confirmed": {
+        "title": "Court confirmed",
+        "body": "A court has been arranged with the club. Your match is confirmed."
+      },
+      "match_court_released": {
+        "title": "Court no longer booked",
+        "body": "{{clubName}} at {{startsAt}} fell through. The match still needs a court."
+      },
+      "court_first_roster_short": {
+        "title": "Court booked, players missing",
+        "body": "Your court at {{clubName}} is on {{startsAt}}. Spots still open: {{spotsLeft}}. Invite someone or release the court."
+      },
+      "match_played_prompt": {
+        "title": "Did you play?",
+        "body": "Your match on {{startsAt}} never got a court in the app. Tell us if it happened so the result still counts."
+      },
+      "match_played_confirmed": {
+        "title": "Match marked as played",
+        "body": "Confirm your attendance and add the result so it counts."
+      },
+      "match_participant_joined": {
+        "title": "A player joined",
+        "body": "Someone joined your match. Open the app to see the roster."
+      },
+      "match_participant_left": {
+        "title": "A player left",
+        "body": "Someone left your match. You may need to invite a replacement."
+      },
+      "match_message": {
+        "title": "New message",
+        "body": "There are new messages in your match chat."
+      },
+      "result_confirm_request": {
+        "title": "A score is waiting on you",
+        "body": "Your opponent added the score. Confirm it, or say it is wrong."
+      },
+      "result_auto_confirmed": {
+        "title": "Score confirmed",
+        "body": "Nobody objected within three days, so this score now stands."
       }
     }
   },
@@ -630,7 +706,7 @@
   },
   "playerProfile": {
     "aboutTitle": "About",
-    "favoriteClubsTitle": "Favourite clubs",
+    "favoriteClubsTitle": "Preferred clubs",
     "availabilityTitle": "Availability",
     "recentMatchesTitle": "Recent matches",
     "matchesPlayedStat_one": "Match",
@@ -801,7 +877,8 @@
       "lost": "Lost",
       "vsOpponent": "vs {{name}}",
       "youVsOpponent": "You vs {{name}}",
-      "seekingOpponent": "Looking for players"
+      "seekingOpponent": "Looking for players",
+      "played": "Played"
     },
     "lifecycle": {
       "staleBadge": "Expiring soon",
@@ -824,7 +901,11 @@
       "placeholder": "Write a message",
       "send": "Send",
       "error": "We could not send this message.",
-      "reconnecting": "Reconnecting… new messages may be delayed."
+      "reconnecting": "Reconnecting… new messages may be delayed.",
+      "open": "Open match chat",
+      "openHint": "Message your group",
+      "denied": "Join this match to use chat.",
+      "lockedRecruiting": "Chat opens when the roster is full."
     },
     "hub": {
       "title": "Match hub",
@@ -909,6 +990,21 @@
       "courtHeroTitle": "Your court",
       "agreedTimeBookHint": "Book a court for this slot.",
       "agreedTimeVenueHint": "Preferred",
+      "openPlayerSlot": "Open spot",
+      "preferredClubs": "Preferred clubs",
+      "openClubDetails": "View {{club}} details",
+      "contactClub": "Contact {{club}} on WhatsApp",
+      "whichCourtTitle": "Where did you book?",
+      "whichCourtHint": "Your players need to know where to turn up.",
+      "messageClub": "Message",
+      "clubNotListed": "Other club",
+      "differentTime": "Different time",
+      "confirmNotifiesPlayers": "Your players will be told the court is booked at {{club}}.",
+      "courtFellThrough": "Court fell through?",
+      "courtFellThroughConfirm": "Release the court",
+      "courtFellThroughPrompt": "Your players will be told the court is no longer booked.",
+      "courtReleased": "Court released. The match needs a court again.",
+      "courtReleaseError": "Could not release this court.",
       "expandMatchDetails": "Show match details",
       "collapseMatchDetails": "Hide match details"
     },
@@ -921,10 +1017,7 @@
       "noShow": "I did not play",
       "attendanceError": "We could not save your attendance.",
       "submitPrompt": "Who won, and what was the score?",
-      "selectWinner": "Select the winner",
       "setLabel": "Set {{number}}",
-      "winnerGamesLabel": "Winner games",
-      "loserGamesLabel": "Loser games",
       "addSet": "Add another set",
       "removeSet": "Remove last set",
       "scoreLabel": "Score",
@@ -936,9 +1029,9 @@
         "invalidSet": "Enter a valid tennis set score (for example 6-4 or 7-6).",
         "setCount": "Enter between one and five sets.",
         "invalidScore": "This score could not be saved.",
-        "setHint": "Set {{number}} needs attention."
+        "setHint": "Set {{number}} needs attention.",
+        "noWinner": "One side has to win more sets than the other."
       },
-      "winnerOption": "{{name}} won",
       "submit": "Submit result",
       "submitSuccess": "Result submitted. Waiting for your opponent to confirm.",
       "submitError": "We could not submit this result.",
@@ -953,13 +1046,35 @@
         "submitted": "Awaiting confirmation",
         "confirmed": "Confirmed",
         "disputed": "Disputed",
-        "resolved": "Resolved"
-      }
+        "resolved": "Resolved",
+        "unverified": "Unconfirmed"
+      },
+      "gamesForLabel": "{{name}} games",
+      "sidesTitle": "Who played together?",
+      "sidesHint": "Tap two players to pair them.",
+      "derivedWinner": "{{name}} wins",
+      "reportedBy": "Reported by {{name}}",
+      "reportedByYou": "Reported by you",
+      "notConfirmed": "Not confirmed yet",
+      "awaitingYou": "Waiting for you to confirm",
+      "optionalScoreHint": "Adding the score is optional. The match already counts.",
+      "thatsWrong": "That's wrong",
+      "resubmitPrompt": "Enter the score as you remember it. Your opponent confirms it next.",
+      "resubmit": "Send correction",
+      "resubmitSuccess": "Correction sent. Waiting for your opponent.",
+      "resubmitError": "We could not send this correction.",
+      "disputeNoteLabel": "What was wrong? (optional)",
+      "unverifiedHint": "Nobody confirmed this score, so it does not affect ratings.",
+      "yourSide": "You",
+      "theirSide": "Them",
+      "derivedWinnerYou": "You win",
+      "derivedWinnerThem": "They win"
     },
     "booking": {
       "title": "Request a court",
       "description": "Choose a club and court for your agreed time.",
       "browseClubsDescription": "Browse clubs, open a profile, then book in-app or on WhatsApp.",
+      "hostOnly": "Only the host can contact clubs and book the court.",
       "selectClub": "Choose club",
       "selectCourt": "Choose court",
       "confirmTime": "Agreed time",
@@ -972,9 +1087,9 @@
       "externalSuccess": "Court confirmed. The match is set.",
       "externalError": "We could not confirm this court.",
       "courtAlreadyBooked": "That court is already booked for this time.",
-      "bookedOffAppCta": "Booked off-app",
+      "bookedOffAppCta": "I booked a court",
       "offPreferredListWarning": "This club was not on the list agreed when players joined. Everyone will be told where the court is.",
-      "bookedOffAppTitle": "Confirm off-app booking",
+      "bookedOffAppTitle": "Confirm your court",
       "bookedOffAppDescription": "You already secured a court by phone or WhatsApp. Pick the club and confirm the time so attendance and results still work.",
       "bookedOffAppConfirm": "Confirm court",
       "bookedOffAppConfirmTitle": "Confirm this court?",
@@ -997,6 +1112,7 @@
       "declineError": "We could not decline this invite.",
       "sent": "Invite sent. They will see it in Matches → Invites.",
       "pickMatch": "Invite to one of your open matches",
+      "pickMatchHint": "Add them to a match you already host — or challenge them to a new one below.",
       "inviteToMatch": "Invite to {{format}} match",
       "inviteToOpenMatch": "Invite to this match",
       "noTimeYet": "Time to be confirmed",
@@ -1090,6 +1206,15 @@
       "4": "Thu",
       "5": "Fri",
       "6": "Sat"
+    },
+    "weekdaysCompact": {
+      "0": "Sun",
+      "1": "M",
+      "2": "T",
+      "3": "W",
+      "4": "Th",
+      "5": "F",
+      "6": "Sat"
     }
   },
   "clubs": {
@@ -1100,6 +1225,7 @@
     "resultCount": "{{count}} clubs in Lebanon",
     "surfaceAll": "All",
     "viewDetails": "View club",
+    "photoComingSoon": "Photo coming soon",
     "selected": "Selected for this booking",
     "pricePerHour": "/hr",
     "loadError": "We could not load clubs.",

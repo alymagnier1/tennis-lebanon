@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { Platform } from "react-native";
+import { Linking, Platform } from "react-native";
 import {
   deactivateDevicePushToken,
   registerDevicePushToken,
@@ -12,10 +12,34 @@ import {
   type PushPlatform,
 } from "@tennis-lebanon/domain";
 import { getStableDeviceId } from "./device-id";
+import { reportError } from "./sentry";
 import { supabase } from "./supabase";
 
 export type PushRegistrationResult =
-  "registered" | "denied" | "unavailable" | "skipped";
+  | "registered"
+  | "denied"
+  /** No Expo project id in the build; push cannot work at all. */
+  | "unconfigured"
+  /** Simulator, web, or a device that returned no token. */
+  | "unavailable"
+  | "skipped";
+
+export type PushPermissionStatus =
+  | "granted"
+  | "denied"
+  | "undetermined"
+  /** Web or simulator: the OS will never issue a push token here. */
+  | "unsupported";
+
+export type PushPermissionState = {
+  status: PushPermissionStatus;
+  /**
+   * False once the OS has stopped showing the prompt. The only way back on is
+   * the system settings app, so the UI has to say so rather than offer a
+   * button that silently does nothing.
+   */
+  canAskAgain: boolean;
+};
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -31,6 +55,10 @@ function getPushPlatform(): PushPlatform | null {
   return normalizePushPlatform(Platform.OS);
 }
 
+function supportsPush(): boolean {
+  return Platform.OS !== "web" && Device.isDevice;
+}
+
 function getExpoProjectId(): string | undefined {
   return (
     Constants.expoConfig?.extra?.eas?.projectId ??
@@ -39,30 +67,74 @@ function getExpoProjectId(): string | undefined {
   );
 }
 
+/**
+ * A build with no Expo project id can never obtain a push token, so every
+ * notification enqueued for its users is parked as `no_delivery_channel`. That
+ * used to be a bare `return null` — no throw, no log, nothing anywhere. Report
+ * it once per session so a misconfigured build is visible instead of merely
+ * quiet.
+ */
+let reportedMissingProjectId = false;
+
+function reportMissingProjectId(): void {
+  if (reportedMissingProjectId) {
+    return;
+  }
+  reportedMissingProjectId = true;
+  void reportError(
+    new Error("Expo project id missing; push notifications cannot register"),
+    { platform: Platform.OS },
+  );
+}
+
+/** True for a full grant and for iOS provisional (quiet) authorization. */
+function isGranted(
+  permissions: Notifications.NotificationPermissionsStatus,
+): boolean {
+  return (
+    permissions.granted ||
+    permissions.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
+  );
+}
+
+export async function getPushPermissionState(): Promise<PushPermissionState> {
+  if (!supportsPush()) {
+    return { status: "unsupported", canAskAgain: false };
+  }
+
+  const current = await Notifications.getPermissionsAsync();
+  if (isGranted(current)) {
+    return { status: "granted", canAskAgain: false };
+  }
+
+  return {
+    status: current.canAskAgain ? "undetermined" : "denied",
+    canAskAgain: current.canAskAgain,
+  };
+}
+
 export async function requestPushPermission(): Promise<boolean> {
-  if (Platform.OS === "web" || !Device.isDevice) {
+  if (!supportsPush()) {
     return false;
   }
 
   const current = await Notifications.getPermissionsAsync();
-  if (current.granted) {
+  if (isGranted(current)) {
     return true;
   }
 
   const requested = await Notifications.requestPermissionsAsync();
-  return (
-    requested.granted ||
-    requested.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
-  );
+  return isGranted(requested);
 }
 
 export async function getExpoPushTokenValue(): Promise<string | null> {
-  if (Platform.OS === "web" || !Device.isDevice) {
+  if (!supportsPush()) {
     return null;
   }
 
   const projectId = getExpoProjectId();
   if (!projectId) {
+    reportMissingProjectId();
     return null;
   }
 
@@ -85,10 +157,17 @@ export async function syncDevicePushToken(options?: {
       return "denied";
     }
   } else {
-    const current = await Notifications.getPermissionsAsync();
-    if (!current.granted) {
+    const current = await getPushPermissionState();
+    if (current.status !== "granted") {
       return "skipped";
     }
+  }
+
+  // Checked after permission so the caller can tell "the user said no" apart
+  // from "this build was never wired up".
+  if (!getExpoProjectId()) {
+    reportMissingProjectId();
+    return "unconfigured";
   }
 
   const token = await getExpoPushTokenValue();
@@ -109,4 +188,12 @@ export async function unregisterDevicePushToken(): Promise<void> {
 
   const deviceId = await getStableDeviceId();
   await deactivateDevicePushToken(supabase, deviceId);
+}
+
+/**
+ * Opens this app's page in the system settings app. The only route back for
+ * someone who has already declined the OS prompt.
+ */
+export async function openSystemNotificationSettings(): Promise<void> {
+  await Linking.openSettings();
 }
