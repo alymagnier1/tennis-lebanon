@@ -449,6 +449,7 @@
     "liquidityCreate": "Create match",
     "liquidityDiscover": "Find players",
     "liquidityClubs": "Browse clubs",
+    "liquidityClubsHint": "Club directory and WhatsApp booking",
     "quickActionsTitle": "Quick actions",
     "quickActionFindPlayers": "Find players",
     "quickActionBookCourt": "Book a court",
@@ -564,6 +565,7 @@
     "confirmed": "Confirmed",
     "incomplete": "Incomplete",
     "availability": "Manage availability",
+    "availabilityHint": "Weekly times you are free to play",
     "editProfile": "Edit profile",
     "editTitle": "Edit profile",
     "editDescription": "Update how other players see you.",
@@ -599,6 +601,7 @@
     "avatarRemoveError": "Could not remove your photo. Please try again.",
     "matchDefaults": {
       "menu": "Match defaults",
+      "menuHint": "Format, level range, and who can join",
       "title": "Match defaults",
       "description": "These settings apply whenever you organise a match. You can still change them for a single match.",
       "descriptionAutoSave": "These settings apply whenever you organise a match. Changes save automatically.",
@@ -614,6 +617,7 @@
     },
     "whereIPlay": {
       "menu": "Where I play",
+      "menuHint": "Areas and favourite clubs for hosting",
       "title": "Where I play",
       "description": "Areas shape who you meet on Discover. Favourite clubs pre-fill when you host a match.",
       "areasHint": "Choose the areas you usually play in. Other players discover you by area, not address.",
@@ -644,6 +648,11 @@
     "sortRecommended": "Recommended",
     "sortLevel": "Level match",
     "sortZone": "Area match",
+    "sortAvailability": "Availability overlap",
+    "searchPlaceholder": "Search players or matches",
+    "searchEmptyTitle": "No matches for that search",
+    "searchEmptyBody": "Try another name, club, or area — or clear the search.",
+    "clearSearch": "Clear search",
     "preferredLocation": "Preferred areas",
     "zonesFilter": "Areas",
     "formatFilter": "Format",
@@ -702,12 +711,7 @@
     "tomorrow": "Tomorrow",
     "playerAvailabilityManyDays": "{{blocks}} · {{count}} days",
     "noOverlapHint": "No shared time yet",
-    "usualAvailability": "Usually {{schedule}}",
-    "clearSearch": "Clear search",
-    "searchEmptyBody": "Try another name, club, or area — or clear the search.",
-    "searchEmptyTitle": "No matches for that search",
-    "searchPlaceholder": "Search players or matches",
-    "sortAvailability": "Availability overlap"
+    "usualAvailability": "Usually {{schedule}}"
   },
   "playerProfile": {
     "aboutTitle": "About",

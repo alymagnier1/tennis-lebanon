@@ -449,6 +449,7 @@
     "liquidityCreate": "إنشاء مباراة",
     "liquidityDiscover": "ابحث عن لاعبين",
     "liquidityClubs": "تصفح النوادي",
+    "liquidityClubsHint": "دليل النوادي والحجز عبر واتساب",
     "quickActionsTitle": "إجراءات سريعة",
     "quickActionFindPlayers": "البحث عن لاعبين",
     "quickActionBookCourt": "حجز ملعب",
@@ -466,6 +467,7 @@
     "confirmed": "مؤكدة",
     "incomplete": "غير مكتملة",
     "availability": "إدارة التوفر",
+    "availabilityHint": "الأوقات الأسبوعية التي تكون فيها متاحًا للعب",
     "editProfile": "تعديل الملف",
     "editTitle": "تعديل الملف",
     "editDescription": "حدّث ما يراه اللاعبون الآخرون عنك.",
@@ -501,6 +503,7 @@
     "avatarRemoveError": "تعذّرت إزالة صورتك. حاول مرة أخرى.",
     "matchDefaults": {
       "menu": "إعدادات المباراة",
+      "menuHint": "الصيغة ونطاق المستوى ومن يمكنه الانضمام",
       "title": "إعدادات المباراة الافتراضية",
       "description": "تُطبَّق هذه الإعدادات عند تنظيم أي مباراة. يمكنك تغييرها لمباراة واحدة فقط.",
       "descriptionAutoSave": "تُطبَّق هذه الإعدادات عند تنظيم أي مباراة. يتم الحفظ تلقائيًا عند التغيير.",
@@ -516,6 +519,7 @@
     },
     "whereIPlay": {
       "menu": "أين ألعب",
+      "menuHint": "المناطق والنوادي المفضلة عند التنظيم",
       "title": "أين ألعب",
       "description": "المناطق تحدد من تقابل على اكتشف. النوادي المفضلة تُملأ تلقائيًا عند إنشاء مباراة.",
       "areasHint": "اختر المناطق التي تلعب فيها عادةً. يجدك اللاعبون الآخرون حسب المنطقة، وليس العنوان.",
@@ -546,6 +550,11 @@
     "sortRecommended": "موصى به",
     "sortLevel": "تطابق المستوى",
     "sortZone": "تطابق المنطقة",
+    "sortAvailability": "تداخل التوفر",
+    "searchPlaceholder": "ابحث عن لاعبين أو مباريات",
+    "searchEmptyTitle": "لا نتائج لهذا البحث",
+    "searchEmptyBody": "جرّب اسمًا أو ناديًا أو منطقة أخرى — أو امسح البحث.",
+    "clearSearch": "مسح البحث",
     "preferredLocation": "المناطق المفضلة",
     "zonesFilter": "المناطق",
     "formatFilter": "الصيغة",
@@ -604,12 +613,7 @@
     "noOverlapHint": "لا يوجد وقت مشترك بعد",
     "playerBio": "نبذة",
     "playStyleTags": "أسلوب اللعب",
-    "usualAvailability": "عادةً {{schedule}}",
-    "clearSearch": "مسح البحث",
-    "searchEmptyBody": "جرّب اسمًا أو ناديًا أو منطقة أخرى — أو امسح البحث.",
-    "searchEmptyTitle": "لا نتائج لهذا البحث",
-    "searchPlaceholder": "ابحث عن لاعبين أو مباريات",
-    "sortAvailability": "تداخل التوفر"
+    "usualAvailability": "عادةً {{schedule}}"
   },
   "playerProfile": {
     "aboutTitle": "نبذة",

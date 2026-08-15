@@ -199,6 +199,7 @@ export function ProfileTabDashboard() {
                 <Icon name="place" size={20} color={tennisColors.primary} />
               }
               label={t("profile.whereIPlay.menu")}
+              subtitle={t("profile.whereIPlay.menuHint")}
               onPress={() => router.push("/profile/where-i-play")}
             />
             <ProfileMenuRow
@@ -210,21 +211,24 @@ export function ProfileTabDashboard() {
                 />
               }
               label={t("profile.matchDefaults.menu")}
+              subtitle={t("profile.matchDefaults.menuHint")}
               onPress={() => router.push("/profile/match-defaults")}
-            />
-            <ProfileMenuRow
-              icon={
-                <Icon name="clubs" size={20} color={tennisColors.primary} />
-              }
-              label={t("home.liquidityClubs")}
-              onPress={() => router.push(CLUBS_ROUTE)}
             />
             <ProfileMenuRow
               icon={
                 <Icon name="clock" size={20} color={tennisColors.primary} />
               }
               label={t("profile.availability")}
+              subtitle={t("profile.availabilityHint")}
               onPress={() => router.push("/profile/availability")}
+            />
+            <ProfileMenuRow
+              icon={
+                <Icon name="clubs" size={20} color={tennisColors.primary} />
+              }
+              label={t("home.liquidityClubs")}
+              subtitle={t("home.liquidityClubsHint")}
+              onPress={() => router.push(CLUBS_ROUTE)}
               showDivider={false}
             />
           </View>

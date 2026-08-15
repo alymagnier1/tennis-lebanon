@@ -10,6 +10,7 @@ export function ProfileMenuRow({
   icon,
   label,
   value,
+  subtitle,
   onPress,
   showDivider = true,
   showChevron = true,
@@ -17,7 +18,10 @@ export function ProfileMenuRow({
 }: {
   icon: ReactNode;
   label: string;
+  /** Secondary line under the label (current value or short hint). */
   value?: string | null;
+  /** Alias for value — prefer for descriptive hints. */
+  subtitle?: string | null;
   onPress: () => void;
   showDivider?: boolean;
   showChevron?: boolean;
@@ -25,11 +29,13 @@ export function ProfileMenuRow({
 }) {
   const { rowDirection, writingDirection } = useLayoutDirection();
   const isDanger = tone === "danger";
+  const detail = subtitle ?? value ?? null;
+  const a11yLabel = detail ? `${label}. ${detail}` : label;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={a11yLabel}
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
@@ -53,9 +59,12 @@ export function ProfileMenuRow({
         >
           {label}
         </AppText>
-        {value ? (
-          <AppText style={[styles.value, { writingDirection }]}>
-            {value}
+        {detail ? (
+          <AppText
+            style={[styles.value, { writingDirection }]}
+            maxLines={2}
+          >
+            {detail}
           </AppText>
         ) : null}
       </View>
@@ -98,7 +107,7 @@ const styles = StyleSheet.create({
   },
   labelBlock: {
     flex: 1,
-    gap: 1,
+    gap: 2,
   },
   label: {
     fontFamily: tennisFontFamily.body,
@@ -111,6 +120,7 @@ const styles = StyleSheet.create({
   value: {
     fontFamily: tennisFontFamily.body,
     fontSize: 12,
+    lineHeight: 16,
     color: tennisColors.mutedForeground,
   },
 });

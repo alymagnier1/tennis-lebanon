@@ -449,6 +449,7 @@
     "liquidityCreate": "Créer un match",
     "liquidityDiscover": "Trouver des joueurs",
     "liquidityClubs": "Parcourir les clubs",
+    "liquidityClubsHint": "Annuaire des clubs et réservation WhatsApp",
     "quickActionsTitle": "Actions rapides",
     "quickActionFindPlayers": "Trouver des joueurs",
     "quickActionBookCourt": "Réserver un court",
@@ -466,6 +467,7 @@
     "confirmed": "Confirmé",
     "incomplete": "Incomplet",
     "availability": "Gérer la disponibilité",
+    "availabilityHint": "Créneaux hebdomadaires où vous êtes libre",
     "editProfile": "Edit profile",
     "editTitle": "Edit profile",
     "editDescription": "Update how other players see you.",
@@ -501,6 +503,7 @@
     "avatarRemoveError": "Impossible de supprimer votre photo. Veuillez réessayer.",
     "matchDefaults": {
       "menu": "Paramètres de match",
+      "menuHint": "Format, niveau et qui peut rejoindre",
       "title": "Paramètres de match par défaut",
       "description": "Ces paramètres s'appliquent quand vous organisez un match. Vous pouvez les modifier pour un seul match.",
       "descriptionAutoSave": "Ces paramètres s'appliquent quand vous organisez un match. Les changements sont enregistrés automatiquement.",
@@ -516,6 +519,7 @@
     },
     "whereIPlay": {
       "menu": "Où je joue",
+      "menuHint": "Zones et clubs favoris pour organiser",
       "title": "Où je joue",
       "description": "Les zones définissent qui vous rencontrez sur Découvrir. Les clubs favoris préremplissent vos matchs.",
       "areasHint": "Choisissez les zones où vous jouez habituellement. Les autres joueurs vous trouvent par zone, pas par adresse.",
@@ -546,6 +550,11 @@
     "sortRecommended": "Recommandé",
     "sortLevel": "Niveau proche",
     "sortZone": "Zone proche",
+    "sortAvailability": "Disponibilité commune",
+    "searchPlaceholder": "Rechercher joueurs ou matchs",
+    "searchEmptyTitle": "Aucun résultat pour cette recherche",
+    "searchEmptyBody": "Essayez un autre nom, club ou zone — ou effacez la recherche.",
+    "clearSearch": "Effacer la recherche",
     "preferredLocation": "Zones préférées",
     "zonesFilter": "Zones",
     "formatFilter": "Format",
@@ -604,12 +613,7 @@
     "noOverlapHint": "Pas encore de créneau commun",
     "playerBio": "About",
     "playStyleTags": "Play style",
-    "usualAvailability": "Habituellement {{schedule}}",
-    "clearSearch": "Effacer la recherche",
-    "searchEmptyBody": "Essayez un autre nom, club ou zone — ou effacez la recherche.",
-    "searchEmptyTitle": "Aucun résultat pour cette recherche",
-    "searchPlaceholder": "Rechercher joueurs ou matchs",
-    "sortAvailability": "Disponibilité commune"
+    "usualAvailability": "Habituellement {{schedule}}"
   },
   "playerProfile": {
     "aboutTitle": "À propos",
