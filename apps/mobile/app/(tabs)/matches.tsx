@@ -42,6 +42,10 @@ import {
   matchCardOpponentLabel,
   resolveMatchCardOpponent,
 } from "../../src/lib/match-card-headline";
+import {
+  matchCardAreaLabel,
+  matchCardClubLabel,
+} from "../../src/lib/match-clubs";
 import { opponentAvatarColor } from "../../src/lib/match-card-status";
 
 import { supabase } from "../../src/lib/supabase";
@@ -52,9 +56,10 @@ import { useAuth } from "../../src/providers/AuthProvider";
 type MatchesSegment = "invites" | "active" | "completed";
 
 export default function MatchesScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { profile } = useAuth();
   const viewerName = profile?.display_name ?? "";
+  const locale = i18n.resolvedLanguage ?? i18n.language;
 
   const queryClient = useQueryClient();
 
@@ -306,11 +311,13 @@ export default function MatchesScreen() {
                     capacity: match.capacity,
                   };
                   const opponent = resolveMatchCardOpponent(t, headlineInput);
-                  const locationChip =
-                    match.club_name ??
-                    (match.has_court
-                      ? t("matches.list.courtSecuredBadge")
-                      : undefined);
+                  const locationChip = matchCardClubLabel({
+                    clubName: match.club_name,
+                    preferredClubs: match.preferred_clubs,
+                    hasCourt: match.has_court,
+                    courtSecuredFallback: t("matches.list.courtSecuredBadge"),
+                  });
+                  const areaChip = matchCardAreaLabel(match.zones, locale);
 
                   return (
                     <View key={match.match_id} style={formStyles.stack}>
@@ -332,6 +339,7 @@ export default function MatchesScreen() {
                         }
                         formatChip={t(`formats.${match.format}`)}
                         locationChip={locationChip}
+                        areaChip={areaChip}
                         badges={
                           match.is_stale_warning
                             ? [

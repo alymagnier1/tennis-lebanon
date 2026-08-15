@@ -8,7 +8,12 @@ import { initialsFromName } from "../../lib/avatar-url";
 import { useAvatarUrl } from "../../lib/use-avatar-url";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { buildCardAccessibilityLabel } from "../../lib/card-accessibility";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import {
+  tennisBrand,
+  tennisColors,
+  tennisRadii,
+  tennisSemantic,
+} from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 export type MatchCardProps = {
@@ -21,12 +26,13 @@ export type MatchCardProps = {
   opponentName?: string;
   opponentAvatarPath?: string | null;
   opponentAvatarColor?: string;
-  /** Discover-style card: host avatar on the trailing edge without a leading spacer. */
+  /** Discover open-match card: host avatar beside the name (no vs opponent). */
   hostName?: string;
   hostAvatarPath?: string | null;
   hostAvatarColor?: string;
   formatChip?: string;
   locationChip?: string;
+  areaChip?: string;
   badges?: MatchListBadge[];
   scoreBanner?: { won: boolean; score: string; title?: string };
   accentBorder?: boolean;
@@ -111,6 +117,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
   hostAvatarColor = "#7C3AED",
   formatChip,
   locationChip,
+  areaChip,
   badges,
   scoreBanner,
   accentBorder = false,
@@ -120,11 +127,11 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
 }: MatchCardProps) {
   const { rowDirection, writingDirection } = useLayoutDirection();
   const statusVisual = matchCardStatusVisual(status);
-  const showHostTrailing = Boolean(hostName) && !viewerName && !opponentName;
+  const showHostOnly = Boolean(hostName) && !viewerName && !opponentName;
   const showLeadingViewer = Boolean(viewerName);
   const showTrailingOpponent = Boolean(opponentName);
   const showPlayerRow =
-    showLeadingViewer || showTrailingOpponent || showHostTrailing;
+    showLeadingViewer || showTrailingOpponent || showHostOnly;
 
   const accessibilityLabel = buildCardAccessibilityLabel([
     statusLabel,
@@ -133,6 +140,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
     ...(badges?.map((entry) => entry.label) ?? []),
     formatChip,
     locationChip,
+    areaChip,
     note,
   ]);
 
@@ -152,20 +160,27 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
           ))}
         </View>
       ) : null}
-      {formatChip || locationChip ? (
+      {formatChip || locationChip || areaChip ? (
         <View style={[styles.chipRow, { flexDirection: rowDirection }]}>
           {locationChip ? (
             <MatchCardChip
               label={locationChip}
-              backgroundColor="#F0FDF4"
-              color="#16A34A"
+              backgroundColor={tennisBrand.whatsappFill}
+              color={tennisBrand.whatsappText}
+            />
+          ) : null}
+          {areaChip ? (
+            <MatchCardChip
+              label={areaChip}
+              backgroundColor={tennisColors.secondary}
+              color={tennisColors.primary}
             />
           ) : null}
           {formatChip ? (
             <MatchCardChip
               label={formatChip}
-              backgroundColor="#F5F3FF"
-              color="#7C3AED"
+              backgroundColor={tennisSemantic.info.fill}
+              color={tennisSemantic.info.text}
             />
           ) : null}
         </View>
@@ -228,18 +243,24 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
           <View
             style={[
               styles.playerRow,
-              showHostTrailing && styles.playerRowHost,
+              showHostOnly && styles.playerRowHost,
               { flexDirection: rowDirection },
             ]}
           >
-            {showLeadingViewer ? (
+            {showHostOnly ? (
+              <MatchCardAvatar
+                name={hostName!}
+                avatarPath={hostAvatarPath}
+                backgroundColor={hostAvatarColor}
+              />
+            ) : showLeadingViewer ? (
               <MatchCardAvatar
                 name={viewerName!}
                 avatarPath={viewerAvatarPath}
                 backgroundColor={tennisColors.primary}
                 textColor={tennisColors.lime}
               />
-            ) : showHostTrailing ? null : (
+            ) : (
               <View style={styles.avatarSpacer} />
             )}
             {centerContent}
@@ -249,17 +270,9 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
                 avatarPath={opponentAvatarPath}
                 backgroundColor={opponentAvatarColor}
               />
-            ) : showHostTrailing ? (
-              <MatchCardAvatar
-                name={hostName!}
-                avatarPath={hostAvatarPath}
-                backgroundColor={hostAvatarColor}
-              />
-            ) : showLeadingViewer ? (
+            ) : showLeadingViewer && !showHostOnly ? (
               <PlaceholderOpponentAvatar />
-            ) : (
-              <View style={styles.avatarSpacer} />
-            )}
+            ) : null}
           </View>
         ) : (
           <>
@@ -296,20 +309,27 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
                 ))}
               </View>
             ) : null}
-            {formatChip || locationChip ? (
+            {formatChip || locationChip || areaChip ? (
               <View style={[styles.chipRow, { flexDirection: rowDirection }]}>
                 {locationChip ? (
                   <MatchCardChip
                     label={locationChip}
-                    backgroundColor="#F0FDF4"
-                    color="#16A34A"
+                    backgroundColor={tennisBrand.whatsappFill}
+                    color={tennisBrand.whatsappText}
+                  />
+                ) : null}
+                {areaChip ? (
+                  <MatchCardChip
+                    label={areaChip}
+                    backgroundColor={tennisColors.secondary}
+                    color={tennisColors.primary}
                   />
                 ) : null}
                 {formatChip ? (
                   <MatchCardChip
                     label={formatChip}
-                    backgroundColor="#F5F3FF"
-                    color="#7C3AED"
+                    backgroundColor={tennisSemantic.info.fill}
+                    color={tennisSemantic.info.text}
                   />
                 ) : null}
               </View>

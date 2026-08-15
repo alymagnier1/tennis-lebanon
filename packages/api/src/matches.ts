@@ -145,6 +145,10 @@ export type MyMatchRow = {
   court_starts_at: string | null;
   opponent_names: string | null;
   club_name: string | null;
+  /** Host shortlist; present before a court is booked. */
+  preferred_clubs: MatchPreferredClub[] | null;
+  /** Match areas for the list card. */
+  zones: unknown;
 };
 
 /**

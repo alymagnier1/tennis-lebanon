@@ -26,6 +26,10 @@ import {
   buildMatchCardHeadline,
   resolveMatchCardOpponent,
 } from "../../lib/match-card-headline";
+import {
+  matchCardAreaLabel,
+  matchCardClubLabel,
+} from "../../lib/match-clubs";
 import { opponentAvatarColor } from "../../lib/match-card-status";
 import {
   deriveHomeNextActions,
@@ -44,7 +48,8 @@ import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 export function HomeDashboard({ displayName }: { displayName: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage ?? i18n.language;
   const { profile } = useAuth();
   const insets = useSafeAreaInsets();
   const { rowDirection, writingDirection } = useLayoutDirection();
@@ -241,11 +246,13 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
                   capacity: match.capacity,
                 };
                 const opponent = resolveMatchCardOpponent(t, headlineInput);
-                const locationChip =
-                  match.club_name ??
-                  (match.has_court
-                    ? t("matches.list.courtSecuredBadge")
-                    : undefined);
+                const locationChip = matchCardClubLabel({
+                  clubName: match.club_name,
+                  preferredClubs: match.preferred_clubs,
+                  hasCourt: match.has_court,
+                  courtSecuredFallback: t("matches.list.courtSecuredBadge"),
+                });
+                const areaChip = matchCardAreaLabel(match.zones, locale);
 
                 return (
                   <MatchCard
@@ -266,6 +273,7 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
                     }
                     formatChip={t(`formats.${match.format}`)}
                     locationChip={locationChip}
+                    areaChip={areaChip}
                     badges={
                       match.is_stale_warning
                         ? [
