@@ -63,7 +63,10 @@ import { confirmAction } from "../../src/lib/confirm-action";
 import { confirmCancelHostedMatch } from "../../src/lib/confirm-cancel-hosted-match";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitMatchHub } from "../../src/lib/navigation";
-import { resolveHubAgreedStartsAt } from "../../src/lib/hub-agreed-time";
+import {
+  resolveHubAgreedStartsAt,
+  resolveHubHeroStartsAt,
+} from "../../src/lib/hub-agreed-time";
 import { toneForMatchStatus } from "../../src/lib/match-status-tone";
 import { useToast } from "../../src/providers/ToastProvider";
 import {
@@ -320,9 +323,16 @@ export default function MatchHubScreen() {
 
   const hasAcceptedBooking = hub?.booking?.status === "accepted";
   const courtLocked = isHubCourtLocked(booking);
-  const heroStartsAt =
-    courtLocked && booking?.starts_at ? booking.starts_at : agreedStartsAt;
-  const hasAgreedTime = Boolean(heroStartsAt);
+  const hasAgreedTime = Boolean(
+    (courtLocked && booking?.starts_at) || agreedStartsAt,
+  );
+  const heroStartsAt = hub
+    ? resolveHubHeroStartsAt(
+        hub,
+        proposedTimes,
+        courtLocked ? (booking?.starts_at ?? null) : null,
+      )
+    : null;
   const vsHeroStage = hub
     ? isHubVsHeroStage(hub, booking, hasAgreedTime)
     : false;
@@ -497,7 +507,7 @@ export default function MatchHubScreen() {
     );
   }
 
-  const actionsInReadyHero = Boolean(heroStartsAt && vsHeroStage);
+  const actionsInReadyHero = Boolean(vsHeroStage && hub);
   const chatAvailable = hub ? isMatchHubChatAvailable(hub) : false;
   const chatLocked = hub ? isMatchHubChatLocked(hub) : false;
 
@@ -578,7 +588,7 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      {heroStartsAt && vsHeroStage && hub ? (
+      {vsHeroStage && hub ? (
         <MatchHubReadyHero
           hub={hub}
           participants={participants}
@@ -616,6 +626,12 @@ export default function MatchHubScreen() {
           releasing={releaseCourtMutation.isPending}
           onRelease={showReleaseCourt ? handleReleaseCourt : undefined}
         />
+      ) : null}
+
+      {hub?.notes && polishedLayout ? (
+        <AppText style={[styles.hubNotes, { writingDirection }]}>
+          {hub.notes}
+        </AppText>
       ) : null}
 
       {booking && !courtLocked && polishedLayout ? (
@@ -934,5 +950,11 @@ const styles = StyleSheet.create({
   },
   bookingActions: {
     gap: spacing.sm,
+  },
+  hubNotes: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: typography.size.sm,
+    lineHeight: 20,
+    color: tennisColors.primaryDark,
   },
 });

@@ -72,15 +72,11 @@ describe("isHubReadyToBookStage", () => {
 });
 
 describe("isHubVsHeroStage", () => {
-  it("covers open recruiting and ready-to-book when a time is agreed", () => {
+  it("covers open recruiting and ready-to-book with or without an agreed time", () => {
     expect(isHubVsHeroStage(openHub, null, true)).toBe(true);
-    expect(isHubVsHeroStage(fullHub, null, true)).toBe(true);
+    expect(isHubVsHeroStage(openHub, null, false)).toBe(true);
+    expect(isHubVsHeroStage(fullHub, null, false)).toBe(true);
     expect(isHubVsHeroStage(readyHub, null, true)).toBe(true);
-  });
-
-  it("stays off without an agreed time (flexible vote layout)", () => {
-    expect(isHubVsHeroStage(openHub, null, false)).toBe(false);
-    expect(isHubVsHeroStage(fullHub, null, false)).toBe(false);
   });
 
   it("keeps the vs-hero after the court is locked", () => {
@@ -95,27 +91,21 @@ describe("shouldUsePolishedHubLayout", () => {
   it("is true when court is locked or vs-hero stage", () => {
     expect(shouldUsePolishedHubLayout(readyHub, null, true)).toBe(true);
     expect(shouldUsePolishedHubLayout(openHub, null, true)).toBe(true);
+    expect(shouldUsePolishedHubLayout(openHub, null, false)).toBe(true);
     expect(shouldUsePolishedHubLayout(openHub, acceptedBooking, false)).toBe(
       true,
     );
   });
-
-  it("is false during open discovery without an agreed time", () => {
-    expect(shouldUsePolishedHubLayout(openHub, null, false)).toBe(false);
-  });
 });
 
 describe("shouldShowDiscoveryOverview", () => {
-  it("hides during polished stages", () => {
+  it("hides during polished stages including open recruiting", () => {
     expect(shouldShowDiscoveryOverview(readyHub, null, true)).toBe(false);
     expect(shouldShowDiscoveryOverview(openHub, acceptedBooking, false)).toBe(
       false,
     );
     expect(shouldShowDiscoveryOverview(openHub, null, true)).toBe(false);
-  });
-
-  it("shows during open discovery without agreed time", () => {
-    expect(shouldShowDiscoveryOverview(openHub, null, false)).toBe(true);
+    expect(shouldShowDiscoveryOverview(openHub, null, false)).toBe(false);
   });
 });
 
@@ -152,12 +142,9 @@ describe("shouldShowTimeAgreedBanner", () => {
     expect(shouldShowTimeAgreedBanner("time_agreed", openHub, null, true)).toBe(
       false,
     );
-  });
-
-  it("shows during flexible discovery before a slot is agreed", () => {
     expect(
       shouldShowTimeAgreedBanner("time_agreed", openHub, null, false),
-    ).toBe(true);
+    ).toBe(false);
   });
 });
 

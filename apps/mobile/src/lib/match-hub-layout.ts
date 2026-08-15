@@ -19,17 +19,19 @@ export function isHubRosterHeroStatus(status: string): boolean {
 }
 
 /**
- * Same card as open-for-players: chips, vs avatars, time.
+ * Same card as open-for-players: chips, vs avatars, time, preferred clubs.
  * Court-locked matches keep this layout and swap preferred clubs for the
- * booked venue. Flexible matches without a time still use the vote layout.
+ * booked venue. Flexible matches still list proposed times below for voting.
+ *
+ * `hasAgreedTime` is retained for call-site compatibility; recruiting uses the
+ * vs card before a slot is agreed so joiners see clubs before they commit.
  */
 export function isHubVsHeroStage(
   hub: Pick<MatchHubCard, "status">,
-  booking: MatchHubBooking | null,
-  hasAgreedTime: boolean,
+  _booking: MatchHubBooking | null,
+  _hasAgreedTime = false,
 ): boolean {
   if (hub.status === "confirmed") return true;
-  if (!hasAgreedTime) return false;
   return isHubRosterHeroStatus(hub.status);
 }
 

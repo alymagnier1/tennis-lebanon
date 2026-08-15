@@ -27,7 +27,8 @@ type MatchHubReadyHeroProps = {
     "format" | "intent" | "min_skill" | "max_skill" | "capacity"
   >;
   participants: HubVsParticipant[];
-  startsAt: string;
+  /** Agreed, booked, or earliest proposed starts_at. Null shows a pending label. */
+  startsAt?: string | null;
   onReschedule?: () => void;
   /**
    * Join / invite / continue-setup only. Booking is owned by the preferred
@@ -98,7 +99,7 @@ function PlayerColumn({
 export function MatchHubReadyHero({
   hub,
   participants,
-  startsAt,
+  startsAt = null,
   onReschedule,
   primaryLabel,
   primaryLoading = false,
@@ -108,7 +109,9 @@ export function MatchHubReadyHero({
   const { rowDirection, writingDirection } = useLayoutDirection();
   const chips = matchHubReadyChips(hub, t);
   const sides = pickHubVsSides(participants, hub.capacity);
-  const timeLabel = formatCompactUtcInBeirut(startsAt);
+  const timeLabel = startsAt
+    ? formatCompactUtcInBeirut(startsAt)
+    : t("matches.hub.timePending");
   const showActions = Boolean(primaryLabel && onPrimary);
 
   return (

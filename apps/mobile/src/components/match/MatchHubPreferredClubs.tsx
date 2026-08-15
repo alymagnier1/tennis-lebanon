@@ -116,6 +116,19 @@ export function MatchHubPreferredClubs({
     }
   }
 
+  // Confirm stage needs a club for Message / Booked off-app. Seed the first
+  // preferred club so selection is never an empty radio with a disabled CTA.
+  if (
+    isHost &&
+    canConfirmCourt &&
+    !booking &&
+    !optimisticBooking &&
+    selectedClubId == null &&
+    clubs.length > 0
+  ) {
+    setSelectedClubId(clubs[0]!.club_id);
+  }
+
   const effectiveBooking = booking ?? optimisticBooking;
   const settled = Boolean(effectiveBooking);
 
@@ -283,26 +296,34 @@ export function MatchHubPreferredClubs({
           const courtName = settled ? effectiveBooking?.court_name : undefined;
 
           return (
-            <Pressable
+            <View
               key={club.club_id}
-              accessibilityRole={isConfirmStage ? "radio" : "button"}
-              accessibilityState={isConfirmStage ? { selected } : undefined}
-              accessibilityLabel={club.name}
-              disabled={settled}
-              onPress={() => {
-                if (isConfirmStage) {
-                  setSelectedClubId(club.club_id);
-                  return;
-                }
-                openClub(club);
-              }}
-              style={({ pressed }) => [
+              style={[
                 styles.clubCard,
-                pressed && !settled && styles.pressed,
+                isConfirmStage && selected && styles.clubCardSelected,
               ]}
             >
               <View style={styles.cardBody}>
-                <View style={styles.infoColumn}>
+                <Pressable
+                  accessibilityRole={isConfirmStage ? "radio" : "button"}
+                  accessibilityState={
+                    isConfirmStage ? { selected } : undefined
+                  }
+                  accessibilityLabel={club.name}
+                  disabled={settled}
+                  onPress={() => {
+                    if (isConfirmStage) {
+                      setSelectedClubId(club.club_id);
+                      return;
+                    }
+                    openClub(club);
+                  }}
+                  style={({ pressed }) => [
+                    styles.infoColumn,
+                    isConfirmStage && selected && styles.infoColumnSelected,
+                    pressed && !settled && styles.pressed,
+                  ]}
+                >
                   <View style={styles.titleRow}>
                     {isConfirmStage ? (
                       <View
@@ -351,7 +372,7 @@ export function MatchHubPreferredClubs({
                       ) : null}
                     </View>
                   </View>
-                </View>
+                </Pressable>
 
                 <View style={styles.photoHalf} pointerEvents="none">
                   <View style={styles.photoSkew}>
@@ -416,7 +437,7 @@ export function MatchHubPreferredClubs({
                   </Pressable>
                 </View>
               </View>
-            </Pressable>
+            </View>
           );
         })}
       </View>
@@ -498,6 +519,10 @@ const styles = StyleSheet.create({
     borderColor: tennisColors.border,
     overflow: "hidden",
   },
+  clubCardSelected: {
+    borderColor: tennisColors.primary,
+    borderWidth: 2,
+  },
   cardBody: {
     flexDirection: "row",
     alignItems: "stretch",
@@ -513,6 +538,9 @@ const styles = StyleSheet.create({
     paddingStart: 12,
     paddingEnd: 16,
     backgroundColor: tennisColors.background,
+  },
+  infoColumnSelected: {
+    backgroundColor: tennisColors.secondary,
   },
   titleRow: {
     flexDirection: "row",
