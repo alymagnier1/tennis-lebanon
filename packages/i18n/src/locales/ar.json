@@ -604,7 +604,12 @@
     "noOverlapHint": "لا يوجد وقت مشترك بعد",
     "playerBio": "نبذة",
     "playStyleTags": "أسلوب اللعب",
-    "usualAvailability": "عادةً {{schedule}}"
+    "usualAvailability": "عادةً {{schedule}}",
+    "clearSearch": "مسح البحث",
+    "searchEmptyBody": "جرّب اسمًا أو ناديًا أو منطقة أخرى — أو امسح البحث.",
+    "searchEmptyTitle": "لا نتائج لهذا البحث",
+    "searchPlaceholder": "ابحث عن لاعبين أو مباريات",
+    "sortAvailability": "تداخل التوفر"
   },
   "playerProfile": {
     "aboutTitle": "نبذة",

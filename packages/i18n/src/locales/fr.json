@@ -604,7 +604,12 @@
     "noOverlapHint": "Pas encore de créneau commun",
     "playerBio": "About",
     "playStyleTags": "Play style",
-    "usualAvailability": "Habituellement {{schedule}}"
+    "usualAvailability": "Habituellement {{schedule}}",
+    "clearSearch": "Effacer la recherche",
+    "searchEmptyBody": "Essayez un autre nom, club ou zone — ou effacez la recherche.",
+    "searchEmptyTitle": "Aucun résultat pour cette recherche",
+    "searchPlaceholder": "Rechercher joueurs ou matchs",
+    "sortAvailability": "Disponibilité commune"
   },
   "playerProfile": {
     "aboutTitle": "À propos",

@@ -125,9 +125,6 @@ export function Screen({
           <>
             {!fixedHeader ? titleBlock : null}
             {children}
-            {virtualizedList.data.length > 0 ? (
-              <View style={styles.listHeaderSpacer} />
-            ) : null}
           </>
         }
         contentContainerStyle={[
@@ -587,9 +584,6 @@ const styles = StyleSheet.create({
   },
   screenCompact: {
     flexGrow: 0,
-  },
-  listHeaderSpacer: {
-    height: spacing.md,
   },
   listItemSeparator: {
     height: spacing.md,

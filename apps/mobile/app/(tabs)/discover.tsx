@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   discoverCompatiblePlayers,
   discoverOpenMatches,
@@ -26,6 +26,7 @@ import {
   SegmentTabs,
 } from "../../src/components/AppUi";
 import { DiscoverMatchChips } from "../../src/components/discover/DiscoverMatchChips";
+import { DiscoverSearchSortBar } from "../../src/components/discover/DiscoverSearchSortBar";
 import { DiscoverHeaderShell } from "../../src/components/discover/DiscoverHeaderShell";
 import { DiscoverSectionSplitter } from "../../src/components/discover/DiscoverSectionSplitter";
 import { DiscoverPlayerCardRow } from "../../src/components/discover/DiscoverPlayerCardRow";
@@ -37,16 +38,27 @@ import {
   type ScreenVirtualizedListProps,
   formStyles,
 } from "../../src/components/FormUi";
-import { buildMatchListBadges } from "../../src/lib/match-status-tone";
 import { startNewMatchCreate } from "../../src/lib/create-match-guard";
 import {
   loadDiscoverFilters,
   saveDiscoverFilters,
 } from "../../src/lib/discovery-filters";
+import {
+  filterDiscoverMatchesBySearch,
+  filterDiscoverPlayersBySearch,
+} from "../../src/lib/discover-search";
+import {
+  DEFAULT_DISCOVER_SORT,
+  type DiscoverSortMode,
+  sortDiscoverMatches,
+  sortDiscoverPlayers,
+} from "../../src/lib/discover-sort";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
-import { zoneLabelFromList } from "../../src/lib/zones";
-import { clubLabelFromList } from "../../src/lib/match-clubs";
+import {
+  matchCardAreaLabel,
+  matchCardClubLabel,
+} from "../../src/lib/match-clubs";
 import { opponentAvatarColor } from "../../src/lib/match-card-status";
 import { openMatchCardDateTimeLabel } from "../../src/lib/open-match-card-time";
 
@@ -64,6 +76,11 @@ export default function DiscoverScreen() {
   const [hydratedForUserId, setHydratedForUserId] = useState<string | null>(
     null,
   );
+  const [pullRefreshing, setPullRefreshing] = useState(false);
+  const [sortMode, setSortMode] = useState<DiscoverSortMode>(
+    DEFAULT_DISCOVER_SORT,
+  );
+  const [searchQuery, setSearchQuery] = useState("");
   const filtersHydrated = !userId || hydratedForUserId === userId;
 
   const zonesQuery = useQuery({
@@ -115,6 +132,7 @@ export default function DiscoverScreen() {
     queryKey: ["discover-players", resolvedFilters],
     queryFn: () => discoverCompatiblePlayers(supabase, resolvedFilters ?? {}),
     staleTime: 60_000,
+    placeholderData: keepPreviousData,
     enabled:
       segment === "players" &&
       filtersHydrated &&
@@ -126,6 +144,7 @@ export default function DiscoverScreen() {
     queryKey: ["discover-matches", resolvedFilters],
     queryFn: () => discoverOpenMatches(supabase, resolvedFilters ?? {}),
     staleTime: 60_000,
+    placeholderData: keepPreviousData,
     enabled:
       segment === "matches" &&
       filtersHydrated &&
@@ -133,17 +152,55 @@ export default function DiscoverScreen() {
       ownProfileQuery.isSuccess,
   });
 
-  const filteredPlayers = playersQuery.data ?? [];
+  const locale = i18n.resolvedLanguage ?? i18n.language;
+  const hasSearch = searchQuery.trim().length > 0;
+
+  const filteredPlayers = useMemo(
+    () =>
+      sortDiscoverPlayers(
+        filterDiscoverPlayersBySearch(playersQuery.data ?? [], searchQuery),
+        sortMode,
+        ownProfileQuery.data?.skill_band,
+      ),
+    [
+      ownProfileQuery.data?.skill_band,
+      playersQuery.data,
+      searchQuery,
+      sortMode,
+    ],
+  );
+
+  const sortedMatches = useMemo(
+    () =>
+      sortDiscoverMatches(
+        filterDiscoverMatchesBySearch(
+          matchesQuery.data ?? [],
+          searchQuery,
+          locale,
+        ),
+        sortMode,
+      ),
+    [locale, matchesQuery.data, searchQuery, sortMode],
+  );
 
   const activeQuery = segment === "players" ? playersQuery : matchesQuery;
   const resultsCount =
-    segment === "players"
-      ? filteredPlayers.length
-      : (matchesQuery.data?.length ?? 0);
+    segment === "players" ? filteredPlayers.length : sortedMatches.length;
+  // First paint only — filter toggles keep previous rows via placeholderData.
+  const showListSkeleton =
+    (activeQuery.isPending && !activeQuery.isPlaceholderData) ||
+    ownProfileQuery.isLoading;
 
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["discover-players"] });
-    await queryClient.invalidateQueries({ queryKey: ["discover-matches"] });
+    setPullRefreshing(true);
+    try {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["discover-players"] }),
+        queryClient.invalidateQueries({ queryKey: ["discover-matches"] }),
+      ]);
+    } finally {
+      setPullRefreshing(false);
+    }
   };
 
   const toggleMatchFilter = (key: keyof DiscoverMatchToggles) => {
@@ -173,8 +230,6 @@ export default function DiscoverScreen() {
     [inviteableMatchesQuery.data],
   );
 
-  const locale = i18n.resolvedLanguage ?? i18n.language;
-
   const virtualizedList = useMemo(():
     ScreenVirtualizedListProps | undefined => {
     if (segment === "players") {
@@ -197,19 +252,18 @@ export default function DiscoverScreen() {
 
     if (segment === "matches") {
       return {
-        data: matchesQuery.data ?? [],
+        data: sortedMatches,
         keyExtractor: (match) => (match as OpenMatchCard).match_id,
         renderItem: ({ item }) => {
           const match = item as OpenMatchCard;
-          // A booked court beats the shortlist, which beats the zone: deciding
-          // whether to drive needs the venue, and the card has room for one.
-          const whereLabel =
-            match.court_club_name ||
-            clubLabelFromList(match.preferred_clubs) ||
-            zoneLabelFromList(
-              match.zones,
-              i18n.resolvedLanguage ?? i18n.language,
-            );
+          const clubLabel = matchCardClubLabel({
+            clubName: match.court_club_name,
+            preferredClubs: match.preferred_clubs,
+          });
+          const areaLabel = matchCardAreaLabel(
+            match.zones,
+            i18n.resolvedLanguage ?? i18n.language,
+          );
           const dateTimeLabel = openMatchCardDateTimeLabel(match);
           return (
             <MatchCard
@@ -221,7 +275,8 @@ export default function DiscoverScreen() {
               hostAvatarPath={match.creator_avatar_path}
               hostAvatarColor={opponentAvatarColor(match.creator_display_name)}
               formatChip={t(`formats.${match.format}`)}
-              locationChip={whereLabel}
+              locationChip={clubLabel}
+              areaChip={areaLabel}
               note={match.notes ?? undefined}
               onPress={() =>
                 router.push({
@@ -241,16 +296,18 @@ export default function DiscoverScreen() {
     inviteableMatches,
     locale,
     matchToggles.matchAvailability,
-    matchesQuery.data,
+    sortedMatches,
     segment,
     t,
+    i18n.resolvedLanguage,
+    i18n.language,
   ]);
 
   return (
     <Screen
       title={t("discover.title")}
       showTitle={false}
-      refreshing={activeQuery.isFetching}
+      refreshing={pullRefreshing}
       onRefresh={() => void handleRefresh()}
       virtualizedList={virtualizedList}
       fixedHeader={
@@ -271,15 +328,20 @@ export default function DiscoverScreen() {
         </DiscoverHeaderShell>
       }
     >
-      {!activeQuery.isLoading &&
-      !activeQuery.isError &&
-      !ownProfileQuery.isLoading ? (
+      <View style={styles.resultsToolbar}>
+        <DiscoverSearchSortBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortMode={sortMode}
+          onSortChange={setSortMode}
+        />
+      </View>
+
+      {!showListSkeleton && !activeQuery.isError && !ownProfileQuery.isError ? (
         <DiscoverSectionSplitter segment={segment} count={resultsCount} />
       ) : null}
 
-      {activeQuery.isLoading || ownProfileQuery.isLoading ? (
-        <ListSkeleton rows={4} />
-      ) : null}
+      {showListSkeleton ? <ListSkeleton rows={4} /> : null}
 
       {activeQuery.isError || ownProfileQuery.isError ? (
         <View>
@@ -293,47 +355,83 @@ export default function DiscoverScreen() {
 
       {segment === "players" &&
       filteredPlayers.length === 0 &&
-      !playersQuery.isLoading &&
-      !ownProfileQuery.isLoading ? (
+      !showListSkeleton &&
+      !playersQuery.isFetching ? (
         <EmptyState
-          title={t("discover.emptyPlayersTitle")}
-          body={t("discover.emptyPlayersBody")}
+          title={
+            hasSearch
+              ? t("discover.searchEmptyTitle")
+              : t("discover.emptyPlayersTitle")
+          }
+          body={
+            hasSearch
+              ? t("discover.searchEmptyBody")
+              : t("discover.emptyPlayersBody")
+          }
           action={
-            <>
-              <PrimaryButton
-                label={t("matches.create.organiseCta")}
-                onPress={() => startNewMatchCreate()}
-              />
+            hasSearch ? (
               <SecondaryButton
-                label={t("discover.relaxFilters")}
-                onPress={relaxFilters}
+                label={t("discover.clearSearch")}
+                onPress={() => setSearchQuery("")}
               />
-            </>
+            ) : (
+              <>
+                <PrimaryButton
+                  label={t("matches.create.organiseCta")}
+                  onPress={() => startNewMatchCreate()}
+                />
+                <SecondaryButton
+                  label={t("discover.relaxFilters")}
+                  onPress={relaxFilters}
+                />
+              </>
+            )
           }
         />
       ) : null}
 
       {segment === "matches" &&
-      matchesQuery.data?.length === 0 &&
-      !matchesQuery.isLoading &&
-      !ownProfileQuery.isLoading ? (
+      sortedMatches.length === 0 &&
+      !showListSkeleton &&
+      !matchesQuery.isFetching ? (
         <EmptyState
-          title={t("discover.emptyMatchesTitle")}
-          body={t("discover.emptyMatchesBody")}
+          title={
+            hasSearch
+              ? t("discover.searchEmptyTitle")
+              : t("discover.emptyMatchesTitle")
+          }
+          body={
+            hasSearch
+              ? t("discover.searchEmptyBody")
+              : t("discover.emptyMatchesBody")
+          }
           action={
-            <>
-              <PrimaryButton
-                label={t("matches.create.organiseCta")}
-                onPress={() => startNewMatchCreate()}
-              />
+            hasSearch ? (
               <SecondaryButton
-                label={t("discover.relaxFilters")}
-                onPress={relaxFilters}
+                label={t("discover.clearSearch")}
+                onPress={() => setSearchQuery("")}
               />
-            </>
+            ) : (
+              <>
+                <PrimaryButton
+                  label={t("matches.create.organiseCta")}
+                  onPress={() => startNewMatchCreate()}
+                />
+                <SecondaryButton
+                  label={t("discover.relaxFilters")}
+                  onPress={relaxFilters}
+                />
+              </>
+            )
           }
         />
       ) : null}
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  resultsToolbar: {
+    marginBottom: 4,
+  },
+});

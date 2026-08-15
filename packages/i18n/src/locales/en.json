@@ -702,7 +702,12 @@
     "tomorrow": "Tomorrow",
     "playerAvailabilityManyDays": "{{blocks}} · {{count}} days",
     "noOverlapHint": "No shared time yet",
-    "usualAvailability": "Usually {{schedule}}"
+    "usualAvailability": "Usually {{schedule}}",
+    "clearSearch": "Clear search",
+    "searchEmptyBody": "Try another name, club, or area — or clear the search.",
+    "searchEmptyTitle": "No matches for that search",
+    "searchPlaceholder": "Search players or matches",
+    "sortAvailability": "Availability overlap"
   },
   "playerProfile": {
     "aboutTitle": "About",
