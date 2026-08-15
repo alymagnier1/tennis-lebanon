@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   TextInput,
   View,
@@ -20,8 +21,14 @@ import {
   type MatchMessageRow,
 } from "@tennis-lebanon/api";
 import { AppText } from "./AppText";
+import { Icon } from "./Icon";
 import { formatUtcInBeirut } from "../lib/beirut-time";
 import { useLayoutDirection } from "../lib/layout-direction";
+import {
+  MATCH_CHAT_EMOJIS,
+  appendChatEmoji,
+  isEmojiOnlyMessage,
+} from "../lib/match-chat-emojis";
 import {
   matchChatChannelName,
   MATCH_CHAT_POLL_MS,
@@ -58,6 +65,7 @@ export function MatchChatPanel({
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
+  const [emojiOpen, setEmojiOpen] = useState(false);
   const listRef = useRef<FlatList<MatchMessageRow>>(null);
   const docked = variant === "docked";
 
@@ -164,6 +172,7 @@ export function MatchChatPanel({
     mutationFn: (body: string) => sendMatchMessage(supabase, matchId, body),
     onSuccess: async () => {
       setDraft("");
+      setEmojiOpen(false);
       await queryClient.invalidateQueries({
         queryKey: ["match-messages", matchId],
       });
@@ -172,6 +181,10 @@ export function MatchChatPanel({
       });
     },
   });
+
+  function insertEmoji(emoji: string) {
+    setDraft((current) => appendChatEmoji(current, emoji));
+  }
 
   if (!enabled) return null;
 
@@ -228,6 +241,7 @@ export function MatchChatPanel({
               <AppText
                 style={[
                   styles.body,
+                  isEmojiOnlyMessage(item.body) && styles.bodyEmojiOnly,
                   { writingDirection },
                   isOwn ? styles.bodyOwn : styles.bodyOther,
                 ]}
@@ -249,36 +263,87 @@ export function MatchChatPanel({
   const composer = (
     <View
       style={[
-        styles.composer,
+        styles.composerWrap,
         docked ? styles.composerDocked : null,
         !docked ? { paddingBottom: Math.max(insets.bottom, 10) } : null,
       ]}
     >
-      <TextInput
-        accessibilityLabel={t("matches.chat.placeholder")}
-        value={draft}
-        onChangeText={setDraft}
-        placeholder={t("matches.chat.placeholder")}
-        style={[onboardingInputStyle.input, styles.input]}
-        multiline
-      />
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t("matches.chat.send")}
-        disabled={!draft.trim() || sendMutation.isPending}
-        onPress={() => sendMutation.mutate(draft.trim())}
-        style={({ pressed }) => [
-          styles.sendButton,
-          (!draft.trim() || sendMutation.isPending) && styles.sendDisabled,
-          pressed && draft.trim() ? styles.sendPressed : null,
-        ]}
-      >
-        {sendMutation.isPending ? (
-          <ActivityIndicator color={tennisColors.white} size="small" />
-        ) : (
-          <AppText style={styles.sendLabel}>{t("matches.chat.send")}</AppText>
-        )}
-      </Pressable>
+      {emojiOpen ? (
+        <ScrollView
+          horizontal
+          keyboardShouldPersistTaps="handled"
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.emojiTray}
+          accessibilityRole="toolbar"
+        >
+          {MATCH_CHAT_EMOJIS.map((emoji) => (
+            <Pressable
+              key={emoji}
+              accessibilityRole="button"
+              accessibilityLabel={t("matches.chat.insertEmoji", { emoji })}
+              onPress={() => insertEmoji(emoji)}
+              style={({ pressed }) => [
+                styles.emojiChip,
+                pressed && styles.emojiChipPressed,
+              ]}
+            >
+              <AppText style={styles.emojiGlyph}>{emoji}</AppText>
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : null}
+
+      <View style={styles.composer}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            emojiOpen
+              ? t("matches.chat.emojiPickerClose")
+              : t("matches.chat.emojiPicker")
+          }
+          accessibilityState={{ expanded: emojiOpen }}
+          onPress={() => setEmojiOpen((open) => !open)}
+          style={({ pressed }) => [
+            styles.emojiToggle,
+            emojiOpen && styles.emojiToggleOpen,
+            pressed && styles.emojiTogglePressed,
+          ]}
+        >
+          <Icon
+            name={emojiOpen ? "close" : "emoji"}
+            size={22}
+            color={
+              emojiOpen ? tennisColors.primary : tennisColors.mutedForeground
+            }
+          />
+        </Pressable>
+        <TextInput
+          accessibilityLabel={t("matches.chat.placeholder")}
+          value={draft}
+          onChangeText={setDraft}
+          onFocus={() => setEmojiOpen(false)}
+          placeholder={t("matches.chat.placeholder")}
+          style={[onboardingInputStyle.input, styles.input]}
+          multiline
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("matches.chat.send")}
+          disabled={!draft.trim() || sendMutation.isPending}
+          onPress={() => sendMutation.mutate(draft.trim())}
+          style={({ pressed }) => [
+            styles.sendButton,
+            (!draft.trim() || sendMutation.isPending) && styles.sendDisabled,
+            pressed && draft.trim() ? styles.sendPressed : null,
+          ]}
+        >
+          {sendMutation.isPending ? (
+            <ActivityIndicator color={tennisColors.white} size="small" />
+          ) : (
+            <AppText style={styles.sendLabel}>{t("matches.chat.send")}</AppText>
+          )}
+        </Pressable>
+      </View>
     </View>
   );
 
@@ -413,6 +478,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  bodyEmojiOnly: {
+    fontSize: 28,
+    lineHeight: 34,
+  },
   bodyOwn: {
     color: tennisColors.white,
   },
@@ -431,19 +500,58 @@ const styles = StyleSheet.create({
   timeOther: {
     color: tennisColors.mutedForeground,
   },
-  composer: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 8,
+  composerWrap: {
     borderTopWidth: 1,
     borderTopColor: tennisColors.border,
-    paddingTop: 10,
-    paddingHorizontal: 16,
     backgroundColor: tennisColors.background,
+    paddingTop: 8,
   },
   composerDocked: {
     backgroundColor: tennisColors.card,
     paddingBottom: 10,
+  },
+  emojiTray: {
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    gap: 4,
+    alignItems: "center",
+  },
+  emojiChip: {
+    minWidth: 40,
+    minHeight: 40,
+    borderRadius: tennisRadii.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emojiChipPressed: {
+    backgroundColor: tennisColors.muted,
+  },
+  emojiGlyph: {
+    fontSize: 24,
+    lineHeight: 30,
+  },
+  composer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  emojiToggle: {
+    width: 44,
+    height: 44,
+    borderRadius: tennisRadii.md,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
+  },
+  emojiToggleOpen: {
+    borderColor: tennisColors.primary,
+    backgroundColor: tennisColors.secondary,
+  },
+  emojiTogglePressed: {
+    opacity: 0.88,
   },
   input: {
     flex: 1,

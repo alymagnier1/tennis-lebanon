@@ -812,7 +812,10 @@
       "open": "Ouvrir le chat du match",
       "openHint": "Écrire au groupe",
       "denied": "Rejoignez ce match pour utiliser le chat.",
-      "lockedRecruiting": "Le chat s’ouvre quand l’équipe est au complet."
+      "lockedRecruiting": "Le chat s’ouvre quand l’équipe est au complet.",
+      "emojiPicker": "Émojis",
+      "emojiPickerClose": "Fermer les émojis",
+      "insertEmoji": "Insérer {{emoji}}"
     },
     "hub": {
       "title": "Hub du match",
