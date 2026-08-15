@@ -21,6 +21,10 @@
         "8081"
       ],
       "port": 8081
+    },
+    {
+      "name": "dashboard",
+      "url": "http://localhost:3000"
     }
   ]
 }
