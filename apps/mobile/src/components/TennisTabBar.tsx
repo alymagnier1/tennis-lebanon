@@ -2,11 +2,15 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { listMyMatches, type MyMatchRow } from "@tennis-lebanon/api";
+import { listMyMatchInvites, listMyMatches, type MyMatchRow } from "@tennis-lebanon/api";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "./AppText";
 import { Icon, type IconName } from "./Icon";
 import { openCreateMatchFlow } from "../lib/create-match-guard";
+import {
+  formatTabBadgeCount,
+  matchTabBadgeCounts,
+} from "../lib/match-list-card";
 import {
   TAB_BAR_BOTTOM_PADDING_MIN,
   TAB_BAR_ICON_WELL_HEIGHT,
@@ -60,10 +64,20 @@ export function TennisTabBar({
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [openingCreate, setOpeningCreate] = useState(false);
-  useQuery({
+  const matchesQuery = useQuery({
     queryKey: ["my-matches"],
     queryFn: () => listMyMatches(supabase),
   });
+  const invitesQuery = useQuery({
+    queryKey: ["my-match-invites"],
+    queryFn: () => listMyMatchInvites(supabase),
+  });
+  const matchesBadgeLabel = formatTabBadgeCount(
+    matchTabBadgeCounts({
+      inviteCount: invitesQuery.data?.length ?? 0,
+      matches: matchesQuery.data ?? [],
+    }).matchesTab,
+  );
 
   async function handleCreatePress() {
     if (openingCreate) return;
@@ -115,13 +129,17 @@ export function TennisTabBar({
     const iconColor = isFocused
       ? tennisColors.primary
       : tennisColors.mutedForeground;
+    const badgeLabel =
+      route.name === "matches" ? matchesBadgeLabel : null;
 
     return (
       <Pressable
         key={route.key}
         accessibilityRole="button"
         accessibilityState={isFocused ? { selected: true } : {}}
-        accessibilityLabel={label}
+        accessibilityLabel={
+          badgeLabel ? `${label}, ${badgeLabel}` : label
+        }
         onPress={() => {
           const event = navigation.emit({
             type: "tabPress",
@@ -136,6 +154,11 @@ export function TennisTabBar({
       >
         <View style={[styles.iconWell, isFocused && styles.iconWellActive]}>
           <Icon name={iconName} size={TAB_ICON_SIZE} color={iconColor} />
+          {badgeLabel ? (
+            <View style={styles.tabBadge} accessibilityElementsHidden>
+              <AppText style={styles.tabBadgeText}>{badgeLabel}</AppText>
+            </View>
+          ) : null}
         </View>
         <AppText
           style={[styles.label, isFocused && styles.labelActive]}
@@ -217,6 +240,24 @@ const styles = StyleSheet.create({
   },
   iconWellActive: {
     backgroundColor: tennisColors.secondary,
+  },
+  tabBadge: {
+    position: "absolute",
+    top: 2,
+    end: 2,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    paddingHorizontal: 4,
+    backgroundColor: tennisColors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabBadgeText: {
+    color: tennisColors.white,
+    fontSize: 9,
+    lineHeight: 11,
+    fontFamily: tennisFontFamily.bodySemi,
   },
   label: {
     fontSize: 11,

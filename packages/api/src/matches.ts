@@ -132,6 +132,8 @@ export type MyMatchRow = {
   intent: string;
   participant_status: string;
   is_creator: boolean;
+  /** Self-reported attendance once the match is in progress. */
+  viewer_attendance: string | null;
   participant_count: number;
   capacity: number;
   soonest_time: string | null;

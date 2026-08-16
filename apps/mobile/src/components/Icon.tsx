@@ -15,6 +15,7 @@ const ICONS = {
   settings: "settings-outline",
   chevron: "chevron-forward",
   chevronBack: "chevron-back",
+  chevronDown: "chevron-down",
   clock: "time-outline",
   calendar: "calendar-outline",
   place: "location-outline",

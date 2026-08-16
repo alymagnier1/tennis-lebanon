@@ -19,6 +19,15 @@ const ACTIVE_STATUSES = new Set([
   "in_progress",
 ]);
 
+/** Home "Upcoming matches" — still ahead, not waiting on a result. */
+const UPCOMING_LIST_STATUSES = new Set([
+  "open",
+  "full",
+  "ready_to_book",
+  "booking_pending",
+  "confirmed",
+]);
+
 export function deriveHomeNextActions(
   invites: MatchInviteInboxRow[],
   matches: MyMatchRow[],
@@ -115,7 +124,7 @@ export function deriveHomeNextActions(
 
 export function sortUpcomingMatches(matches: MyMatchRow[]): MyMatchRow[] {
   return [...matches]
-    .filter((match) => ACTIVE_STATUSES.has(match.status))
+    .filter((match) => UPCOMING_LIST_STATUSES.has(match.status))
     .sort((left, right) => {
       if (!left.soonest_time && !right.soonest_time) {
         return right.updated_at.localeCompare(left.updated_at);

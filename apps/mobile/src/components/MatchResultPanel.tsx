@@ -1,5 +1,10 @@
-import { useMemo, useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { useMemo, useState, type PropsWithChildren } from "react";
+import {
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
@@ -35,8 +40,13 @@ import {
 } from "./onboarding-ui";
 import { PlayerProfileSection } from "./player/PlayerProfileSection";
 import { useLayoutDirection } from "../lib/layout-direction";
+import { useToast } from "../providers/ToastProvider";
 import { supabase } from "../lib/supabase";
-import { tennisColors } from "../theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisRadii,
+  tennisSpacing,
+} from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 type HubParticipant = {
@@ -65,6 +75,7 @@ function MatchScoreEditor({
   disabled: boolean;
 }) {
   const { t } = useTranslation();
+  const { rowDirection } = useLayoutDirection();
 
   const updateSet = (index: number, patch: Partial<SetScoreDraft>) => {
     onChange(
@@ -75,62 +86,106 @@ function MatchScoreEditor({
   };
 
   return (
-    <View style={styles.stack}>
+    <View style={styles.scoreBlock}>
+      <View style={[styles.scoreHeaderRow, { flexDirection: rowDirection }]}>
+        <AppText style={styles.scoreColumnLabel} maxLines={1}>
+          {sideALabel}
+        </AppText>
+        <View style={styles.scoreDashSpacer} />
+        <AppText style={styles.scoreColumnLabel} maxLines={1}>
+          {sideBLabel}
+        </AppText>
+      </View>
+
       {setDrafts.map((draft, index) => (
-        <View key={`set-${index}`} style={styles.stack}>
+        <View key={`set-${index}`} style={styles.setCard}>
           <AppText style={styles.setLabel}>
             {t("matches.results.setLabel", { number: index + 1 })}
           </AppText>
-          <View style={styles.row}>
-            <View style={styles.flex}>
-              <FormField
-                label={t("matches.results.gamesForLabel", {
+          <View style={[styles.scoreInputRow, { flexDirection: rowDirection }]}>
+            <View style={styles.scoreInputWrap}>
+              <TextInput
+                accessibilityLabel={t("matches.results.gamesForLabel", {
                   name: sideALabel,
                 })}
                 value={draft.sideAGames}
                 onChangeText={(value) =>
-                  updateSet(index, { sideAGames: value })
+                  updateSet(index, {
+                    sideAGames: value.replace(/[^0-9]/g, ""),
+                  })
                 }
                 keyboardType="number-pad"
                 editable={!disabled}
                 maxLength={1}
+                placeholder="0"
+                placeholderTextColor={tennisColors.mutedForeground}
+                style={[
+                  styles.scoreInput,
+                  disabled ? styles.scoreInputDisabled : null,
+                ]}
               />
             </View>
-            <View style={styles.flex}>
-              <FormField
-                label={t("matches.results.gamesForLabel", {
+            <AppText style={styles.scoreDash}>–</AppText>
+            <View style={styles.scoreInputWrap}>
+              <TextInput
+                accessibilityLabel={t("matches.results.gamesForLabel", {
                   name: sideBLabel,
                 })}
                 value={draft.sideBGames}
                 onChangeText={(value) =>
-                  updateSet(index, { sideBGames: value })
+                  updateSet(index, {
+                    sideBGames: value.replace(/[^0-9]/g, ""),
+                  })
                 }
                 keyboardType="number-pad"
                 editable={!disabled}
                 maxLength={1}
+                placeholder="0"
+                placeholderTextColor={tennisColors.mutedForeground}
+                style={[
+                  styles.scoreInput,
+                  disabled ? styles.scoreInputDisabled : null,
+                ]}
               />
             </View>
           </View>
         </View>
       ))}
-      <View style={styles.row}>
+
+      <View style={[styles.setActions, { flexDirection: rowDirection }]}>
         {setDrafts.length < MAX_MATCH_SETS ? (
-          <View style={styles.flex}>
-            <FigmaSecondaryButton
-              label={t("matches.results.addSet")}
-              disabled={disabled}
-              onPress={() => onChange([...setDrafts, createEmptySetDraft()])}
-            />
-          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("matches.results.addSet")}
+            disabled={disabled}
+            onPress={() => onChange([...setDrafts, createEmptySetDraft()])}
+            style={({ pressed }) => [
+              styles.setAction,
+              pressed && styles.setActionPressed,
+              disabled && styles.setActionDisabled,
+            ]}
+          >
+            <AppText style={styles.setActionLabel}>
+              {t("matches.results.addSet")}
+            </AppText>
+          </Pressable>
         ) : null}
         {setDrafts.length > MIN_MATCH_SETS ? (
-          <View style={styles.flex}>
-            <FigmaSecondaryButton
-              label={t("matches.results.removeSet")}
-              disabled={disabled}
-              onPress={() => onChange(setDrafts.slice(0, -1))}
-            />
-          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("matches.results.removeSet")}
+            disabled={disabled}
+            onPress={() => onChange(setDrafts.slice(0, -1))}
+            style={({ pressed }) => [
+              styles.setAction,
+              pressed && styles.setActionPressed,
+              disabled && styles.setActionDisabled,
+            ]}
+          >
+            <AppText style={styles.setActionLabelMuted}>
+              {t("matches.results.removeSet")}
+            </AppText>
+          </Pressable>
         ) : null}
       </View>
     </View>
@@ -141,17 +196,25 @@ export function MatchResultPanel({
   matchId,
   hub,
   viewerUserId,
+  presentation = "section",
+  onComplete,
 }: {
   matchId: string;
   hub: MatchHubCard;
   viewerUserId: string;
+  /** Sheet embeds skip the outer section chrome (title lives on the sheet). */
+  presentation?: "section" | "plain";
+  /** Called after a terminal action (no-show, submit, confirm, dispute). */
+  onComplete?: () => void;
 }) {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const { rowDirection } = useLayoutDirection();
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [disputeNote, setDisputeNote] = useState("");
   const [isCorrecting, setIsCorrecting] = useState(false);
+  const [scoreError, setScoreError] = useState<string | null>(null);
   const [setDrafts, setSetDrafts] = useState<SetScoreDraft[]>(() =>
     createDefaultSetDrafts(2),
   );
@@ -181,8 +244,14 @@ export function MatchResultPanel({
   const attendanceMutation = useMutation({
     mutationFn: (attendance: "attended" | "no_show") =>
       recordMatchAttendance(supabase, matchId, attendance),
-    onSuccess: invalidate,
-    onError: () => Alert.alert(t("matches.results.attendanceError")),
+    onSuccess: async (_data, attendance) => {
+      // Close before refetch so "I did not play" never flashes the score form.
+      if (attendance === "no_show") {
+        onComplete?.();
+      }
+      await invalidate();
+    },
+    onError: () => showToast(t("matches.results.attendanceError")),
   });
 
   const submitMutation = useMutation({
@@ -194,10 +263,12 @@ export function MatchResultPanel({
       sideAUserIds: string[];
     }) => submitMatchResult(supabase, matchId, score, sideAUserIds),
     onSuccess: async () => {
+      setScoreError(null);
       await invalidate();
-      Alert.alert(t("matches.results.submitSuccess"));
+      showToast(t("matches.results.submitSuccess"));
+      onComplete?.();
     },
-    onError: () => Alert.alert(t("matches.results.submitError")),
+    onError: () => showToast(t("matches.results.submitError")),
   });
 
   const resubmitMutation = useMutation({
@@ -210,19 +281,22 @@ export function MatchResultPanel({
     }) => resubmitMatchResult(supabase, matchId, score, sideAUserIds),
     onSuccess: async () => {
       setIsCorrecting(false);
+      setScoreError(null);
       await invalidate();
-      Alert.alert(t("matches.results.resubmitSuccess"));
+      showToast(t("matches.results.resubmitSuccess"));
+      onComplete?.();
     },
-    onError: () => Alert.alert(t("matches.results.resubmitError")),
+    onError: () => showToast(t("matches.results.resubmitError")),
   });
 
   const confirmMutation = useMutation({
     mutationFn: () => confirmMatchResult(supabase, matchId),
     onSuccess: async () => {
       await invalidate();
-      Alert.alert(t("matches.results.confirmSuccess"));
+      showToast(t("matches.results.confirmSuccess"));
+      onComplete?.();
     },
-    onError: () => Alert.alert(t("matches.results.confirmError")),
+    onError: () => showToast(t("matches.results.confirmError")),
   });
 
   const disputeMutation = useMutation({
@@ -231,8 +305,9 @@ export function MatchResultPanel({
     onSuccess: async () => {
       setDisputeNote("");
       await invalidate();
+      onComplete?.();
     },
-    onError: () => Alert.alert(t("matches.results.disputeError")),
+    onError: () => showToast(t("matches.results.disputeError")),
   });
 
   const showAttendance = canRecordAttendance({
@@ -244,6 +319,7 @@ export function MatchResultPanel({
     matchStatus: hub.status,
     viewerStatus: hub.viewer_status,
     hasResult: Boolean(result),
+    viewerAttendance: hub.viewer_attendance ?? "unknown",
   });
   const showConfirm = canConfirmResult({
     matchStatus: hub.status,
@@ -322,10 +398,9 @@ export function MatchResultPanel({
     onValid: (score: MatchHubResult["score"], sideA: string[]) => void,
   ) => {
     if (!sideAUserIds) {
-      Alert.alert(
-        t("matches.results.sidesTitle"),
-        t("matches.results.sidesHint"),
-      );
+      const message = t("matches.results.sidesHint");
+      setScoreError(message);
+      showToast(message);
       return;
     }
 
@@ -337,15 +412,15 @@ export function MatchResultPanel({
               number: parsed.setIndex + 1,
             })
           : null;
-      Alert.alert(
-        t("matches.results.scoreErrors.title"),
-        [t(`matches.results.scoreErrors.${parsed.error}`), setHint]
-          .filter(Boolean)
-          .join(" "),
-      );
+      const message = [t(`matches.results.scoreErrors.${parsed.error}`), setHint]
+        .filter(Boolean)
+        .join(" ");
+      setScoreError(message);
+      showToast(message);
       return;
     }
 
+    setScoreError(null);
     onValid(parsed.score, sideAUserIds);
   };
 
@@ -376,13 +451,25 @@ export function MatchResultPanel({
         <>
           <MatchScoreEditor
             setDrafts={setDrafts}
-            onChange={setSetDrafts}
+            onChange={(next) => {
+              setScoreError(null);
+              setSetDrafts(next);
+            }}
             sideALabel={sideALabel}
             sideBLabel={sideBLabel}
             disabled={submitMutation.isPending || resubmitMutation.isPending}
           />
           {previewWinnerLabel ? (
-            <AppText style={styles.muted}>{previewWinnerLabel}</AppText>
+            <View style={styles.winnerPreview}>
+              <AppText style={styles.winnerPreviewText}>
+                {previewWinnerLabel}
+              </AppText>
+            </View>
+          ) : null}
+          {scoreError ? (
+            <AppText accessibilityRole="alert" style={styles.error}>
+              {scoreError}
+            </AppText>
           ) : null}
         </>
       ) : null}
@@ -390,7 +477,7 @@ export function MatchResultPanel({
   );
 
   return (
-    <PlayerProfileSection title={t("matches.results.title")}>
+    <ResultShell presentation={presentation} title={t("matches.results.title")}>
       {result ? (
         <>
           <HubSummaryRow
@@ -413,10 +500,10 @@ export function MatchResultPanel({
               attributed, so the other player can see the claim and correct it
               rather than discovering it later in their history. */}
           {attribution ? (
-            <AppText style={styles.muted}>{attribution}</AppText>
+            <AppText style={styles.hint}>{attribution}</AppText>
           ) : null}
           {result.status === "unverified" ? (
-            <AppText style={styles.muted}>
+            <AppText style={styles.hint}>
               {t("matches.results.unverifiedHint")}
             </AppText>
           ) : null}
@@ -424,8 +511,8 @@ export function MatchResultPanel({
       ) : null}
 
       {showAttendance ? (
-        <View style={styles.stack}>
-          <AppText style={styles.muted}>
+        <View style={styles.section}>
+          <AppText style={styles.prompt}>
             {t("matches.results.attendancePrompt")}
           </AppText>
           <FigmaPrimaryButton
@@ -442,13 +529,15 @@ export function MatchResultPanel({
       ) : null}
 
       {showSubmit ? (
-        <View style={styles.stack}>
-          <AppText style={styles.muted}>
-            {t("matches.results.submitPrompt")}
-          </AppText>
-          <AppText style={styles.muted}>
-            {t("matches.results.optionalScoreHint")}
-          </AppText>
+        <View style={styles.section}>
+          <View style={styles.intro}>
+            <AppText style={styles.prompt}>
+              {t("matches.results.submitPrompt")}
+            </AppText>
+            <AppText style={styles.hint}>
+              {t("matches.results.optionalScoreHint")}
+            </AppText>
+          </View>
           {scoreEditor}
           {sideAUserIds ? (
             <FigmaPrimaryButton
@@ -465,8 +554,8 @@ export function MatchResultPanel({
       ) : null}
 
       {showConfirm ? (
-        <View style={styles.stack}>
-          <AppText style={styles.muted}>
+        <View style={styles.section}>
+          <AppText style={styles.hint}>
             {t("matches.results.awaitingYou")}
           </AppText>
           <FigmaPrimaryButton
@@ -478,7 +567,7 @@ export function MatchResultPanel({
       ) : null}
 
       {showDispute ? (
-        <View style={styles.stack}>
+        <View style={styles.section}>
           {/* dispute_match_result has always accepted a note and the UI never
               sent one, so operators only ever saw that somebody objected. */}
           <FormField
@@ -496,8 +585,8 @@ export function MatchResultPanel({
       ) : null}
 
       {showResubmit ? (
-        <View style={styles.stack}>
-          <AppText style={styles.muted}>
+        <View style={styles.section}>
+          <AppText style={styles.hint}>
             {t("matches.results.resubmitPrompt")}
           </AppText>
           {isCorrecting ? (
@@ -523,22 +612,173 @@ export function MatchResultPanel({
           )}
         </View>
       ) : null}
-    </PlayerProfileSection>
+    </ResultShell>
   );
 }
 
+function ResultShell({
+  presentation,
+  title,
+  children,
+}: PropsWithChildren<{
+  presentation: "section" | "plain";
+  title: string;
+}>) {
+  if (presentation === "plain") {
+    return <View style={styles.plainShell}>{children}</View>;
+  }
+
+  return <PlayerProfileSection title={title}>{children}</PlayerProfileSection>;
+}
+
 const styles = StyleSheet.create({
-  stack: {
-    gap: 12,
+  plainShell: {
+    gap: tennisSpacing.section,
   },
-  row: {
-    flexDirection: "row",
-    gap: 12,
+  section: {
+    gap: 14,
   },
-  flex: {
-    flex: 1,
+  intro: {
+    gap: 6,
+  },
+  prompt: {
+    fontFamily: tennisFontFamily.headingSemi,
+    fontSize: 16,
+    lineHeight: 22,
+    color: tennisColors.primaryDark,
+    letterSpacing: -0.2,
+  },
+  hint: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    lineHeight: 19,
+    color: tennisColors.mutedForeground,
+  },
+  scoreBlock: {
+    width: "100%",
+    gap: 10,
+  },
+  scoreHeaderRow: {
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    gap: 10,
+  },
+  scoreColumnLabel: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    minWidth: 0,
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 12,
+    lineHeight: 16,
+    color: tennisColors.mutedForeground,
+    textAlign: "center",
+  },
+  scoreDashSpacer: {
+    flexShrink: 0,
+    width: 18,
+  },
+  setCard: {
+    width: "100%",
+    gap: 10,
+    padding: 14,
+    borderRadius: tennisRadii.lg,
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.muted,
+    overflow: "hidden",
   },
   setLabel: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 13,
+    color: tennisColors.primaryDark,
+  },
+  scoreInputRow: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  scoreInputWrap: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    minWidth: 0,
+  },
+  scoreInput: {
+    width: "100%",
+    minHeight: 52,
+    borderRadius: tennisRadii.md,
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.card,
+    textAlign: "center",
+    fontFamily: tennisFontFamily.headingExtra,
+    fontSize: 22,
+    color: tennisColors.primaryDark,
+    paddingHorizontal: 8,
+  },
+  scoreInputDisabled: {
+    opacity: 0.55,
+  },
+  scoreDash: {
+    flexShrink: 0,
+    width: 18,
+    textAlign: "center",
+    fontFamily: tennisFontFamily.headingSemi,
+    fontSize: 18,
+    color: tennisColors.mutedForeground,
+  },
+  setActions: {
+    flexWrap: "wrap",
+    gap: 8,
+    justifyContent: "center",
+  },
+  setAction: {
+    minHeight: 40,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: tennisRadii.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  setActionPressed: {
+    opacity: 0.8,
+  },
+  setActionDisabled: {
+    opacity: 0.45,
+  },
+  setActionLabel: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 13,
+    color: tennisColors.primary,
+  },
+  setActionLabelMuted: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 13,
+    color: tennisColors.mutedForeground,
+  },
+  winnerPreview: {
+    alignSelf: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: tennisRadii.md,
+    backgroundColor: tennisColors.secondary,
+  },
+  winnerPreviewText: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 13,
+    color: tennisColors.primary,
+  },
+  error: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 13,
+    color: tennisColors.danger,
+    lineHeight: 18,
+    textAlign: "center",
+  },
+  subheading: {
     fontFamily: tennisFontFamily.bodySemi,
     fontSize: 13,
     color: tennisColors.primaryDark,
@@ -549,13 +789,11 @@ const styles = StyleSheet.create({
     color: tennisColors.mutedForeground,
     lineHeight: 20,
   },
-  subheading: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-  },
   chips: {
     flexWrap: "wrap",
     gap: 8,
+  },
+  stack: {
+    gap: 12,
   },
 });

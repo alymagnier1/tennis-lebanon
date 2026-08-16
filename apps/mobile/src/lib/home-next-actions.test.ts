@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MatchInviteInboxRow, MyMatchRow } from "@tennis-lebanon/api";
-import { deriveHomeNextActions } from "./home-next-actions";
+import { deriveHomeNextActions, sortUpcomingMatches } from "./home-next-actions";
 import { homeNextActionRoute } from "./routes";
 
 function match(overrides: Partial<MyMatchRow> = {}): MyMatchRow {
@@ -145,6 +145,33 @@ describe("deriveHomeNextActions", () => {
     );
 
     expect(actions).toHaveLength(3);
+  });
+});
+
+describe("sortUpcomingMatches", () => {
+  it("excludes in_progress matches waiting on a result", () => {
+    const upcoming = sortUpcomingMatches([
+      match({
+        match_id: "pending",
+        status: "in_progress",
+        soonest_time: "2026-08-10T12:00:00.000Z",
+      }),
+      match({
+        match_id: "open",
+        status: "open",
+        soonest_time: "2026-08-18T15:00:00.000Z",
+      }),
+      match({
+        match_id: "confirmed",
+        status: "confirmed",
+        soonest_time: "2026-08-17T15:00:00.000Z",
+      }),
+    ]);
+
+    expect(upcoming.map((row) => row.match_id)).toEqual([
+      "confirmed",
+      "open",
+    ]);
   });
 });
 

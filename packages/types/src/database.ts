@@ -2126,10 +2126,13 @@ export type Database = {
           opponent_names: string;
           participant_count: number;
           participant_status: Database["public"]["Enums"]["participant_status"];
+          preferred_clubs: Json;
           soonest_time: string;
           status: Database["public"]["Enums"]["match_status"];
           updated_at: string;
+          viewer_attendance: Database["public"]["Enums"]["attendance_status"];
           visibility: Database["public"]["Enums"]["match_visibility"];
+          zones: Json;
         }[];
       };
       list_open_user_reports: {

@@ -4,7 +4,10 @@ import {
   Animated,
   Easing,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -26,6 +29,7 @@ import { initialsFromName } from "../lib/avatar-url";
 import { useAvatarUrl } from "../lib/use-avatar-url";
 import { buildCardAccessibilityLabel } from "../lib/card-accessibility";
 import { useLayoutDirection } from "../lib/layout-direction";
+import { formatTabBadgeCount } from "../lib/match-list-card";
 import { useResponsiveLayout } from "../lib/responsive";
 import { AppText } from "./AppText";
 import { Icon, type IconName } from "./Icon";
@@ -45,39 +49,91 @@ export function SegmentTabs<T extends string>({
   value,
   options,
   onChange,
+  variant = "primary",
 }: {
   value: T;
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; badgeCount?: number }[];
   onChange: (value: T) => void;
+  /** Nested sits under a parent segment (e.g. Active → Now / Upcoming). */
+  variant?: "primary" | "nested";
 }) {
-  const { rowDirection, writingDirection } = useLayoutDirection();
+  const { rowDirection, writingDirection, isRtl } = useLayoutDirection();
+  const nested = variant === "nested";
 
   return (
-    <View style={[styles.segmentTabs, { flexDirection: rowDirection }]}>
-      {options.map((option) => {
-        const selected = option.value === value;
-        return (
-          <Pressable
-            key={option.value}
-            accessibilityRole="tab"
-            accessibilityLabel={option.label}
-            accessibilityState={{ selected }}
-            onPress={() => onChange(option.value)}
-            style={[styles.segmentTab, selected && styles.segmentTabActive]}
-          >
-            <AppText
+    <View
+      style={[
+        nested && styles.segmentTabsNestedRail,
+        nested && (isRtl ? styles.segmentTabsNestedRailRtl : null),
+      ]}
+    >
+      <View
+        style={[
+          nested ? styles.segmentTabsNested : styles.segmentTabs,
+          { flexDirection: rowDirection },
+        ]}
+        accessibilityRole="tablist"
+      >
+        {options.map((option) => {
+          const selected = option.value === value;
+          const badgeLabel = formatTabBadgeCount(option.badgeCount ?? 0);
+          return (
+            <Pressable
+              key={option.value}
+              accessibilityRole="tab"
+              accessibilityLabel={
+                badgeLabel
+                  ? `${option.label}, ${badgeLabel}`
+                  : option.label
+              }
+              accessibilityState={{ selected }}
+              onPress={() => onChange(option.value)}
               style={[
-                styles.segmentTabText,
-                selected && styles.segmentTabTextActive,
-                { writingDirection },
+                nested ? styles.segmentTabNested : styles.segmentTab,
+                selected &&
+                  (nested
+                    ? styles.segmentTabNestedActive
+                    : styles.segmentTabActive),
               ]}
-              maxLines={2}
             >
-              {option.label}
-            </AppText>
-          </Pressable>
-        );
-      })}
+              <View
+                style={[
+                  styles.segmentTabLabelRow,
+                  { flexDirection: rowDirection },
+                ]}
+              >
+                <AppText
+                  style={[
+                    nested
+                      ? styles.segmentTabTextNested
+                      : styles.segmentTabText,
+                    selected &&
+                      (nested
+                        ? styles.segmentTabTextNestedActive
+                        : styles.segmentTabTextActive),
+                    { writingDirection },
+                  ]}
+                  maxLines={2}
+                >
+                  {option.label}
+                </AppText>
+                {badgeLabel ? (
+                  <View
+                    style={[
+                      styles.segmentTabBadge,
+                      nested && styles.segmentTabBadgeNested,
+                    ]}
+                  >
+                    <AppText style={styles.segmentTabBadgeText}>
+                      {badgeLabel}
+                    </AppText>
+                  </View>
+                ) : null}
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -551,6 +607,7 @@ export function BottomSheet({
   const { writingDirection } = useLayoutDirection();
   const [rendered, setRendered] = useState(visible);
   const [opacity] = useState(() => new Animated.Value(visible ? 1 : 0));
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
     if (visible) {
@@ -576,6 +633,48 @@ export function BottomSheet({
     });
   }, [opacity, visible]);
 
+  useEffect(() => {
+    if (!visible) {
+      setKeyboardHeight(0);
+      return;
+    }
+
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      const viewport = window.visualViewport;
+      if (!viewport) return;
+
+      const update = () => {
+        const covered = Math.max(
+          0,
+          window.innerHeight - viewport.height - viewport.offsetTop,
+        );
+        setKeyboardHeight(covered);
+      };
+      update();
+      viewport.addEventListener("resize", update);
+      viewport.addEventListener("scroll", update);
+      return () => {
+        viewport.removeEventListener("resize", update);
+        viewport.removeEventListener("scroll", update);
+      };
+    }
+
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const onShow = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const onHide = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      onShow.remove();
+      onHide.remove();
+    };
+  }, [visible]);
+
   if (!rendered) {
     return null;
   }
@@ -587,7 +686,11 @@ export function BottomSheet({
       visible={rendered}
       onRequestClose={onClose}
     >
-      <View style={styles.sheetRoot}>
+      <KeyboardAvoidingView
+        style={styles.sheetRoot}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
+      >
         <Animated.View style={[styles.sheetBackdrop, { opacity }]}>
           <Pressable
             accessibilityRole="button"
@@ -606,7 +709,10 @@ export function BottomSheet({
                 insets.left,
                 insets.right,
               ),
-              paddingBottom: Math.max(insets.bottom, spacing.xl),
+              paddingBottom:
+                Math.max(insets.bottom, spacing.xl) +
+                (Platform.OS === "ios" ? 0 : keyboardHeight),
+              maxHeight: keyboardHeight > 0 ? "92%" : "85%",
             },
           ]}
         >
@@ -619,13 +725,17 @@ export function BottomSheet({
           </AppText>
           <ScrollView
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.sheetContent}
+            keyboardDismissMode="interactive"
+            contentContainerStyle={[
+              styles.sheetContent,
+              keyboardHeight > 0 ? styles.sheetContentKeyboard : null,
+            ]}
           >
             {children}
           </ScrollView>
           {footer ? <View style={styles.sheetFooter}>{footer}</View> : null}
         </Animated.View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -861,6 +971,20 @@ const styles = StyleSheet.create({
     borderRadius: tennisRadii.lg,
     padding: spacing.xs,
   },
+  segmentTabsNestedRail: {
+    marginTop: -2,
+    paddingStart: spacing.lg,
+  },
+  segmentTabsNestedRailRtl: {
+    paddingStart: 0,
+    paddingEnd: spacing.lg,
+  },
+  segmentTabsNested: {
+    gap: spacing.xs,
+    flex: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: tennisColors.border,
+  },
   segmentTab: {
     flex: 1,
     flexShrink: 1,
@@ -871,6 +995,46 @@ const styles = StyleSheet.create({
     borderRadius: tennisRadii.md,
     paddingHorizontal: spacing.md,
   },
+  segmentTabNested: {
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    minHeight: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+    marginBottom: -StyleSheet.hairlineWidth,
+  },
+  segmentTabLabelRow: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    maxWidth: "100%",
+  },
+  segmentTabBadge: {
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 5,
+    backgroundColor: tennisColors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  segmentTabBadgeNested: {
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    paddingHorizontal: 4,
+  },
+  segmentTabBadgeText: {
+    color: tennisColors.white,
+    fontSize: 10,
+    lineHeight: 12,
+    fontFamily: tennisFontFamily.bodySemi,
+  },
   segmentTabActive: {
     backgroundColor: tennisColors.card,
     shadowColor: colors.neutral[900],
@@ -879,13 +1043,28 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     elevation: 1,
   },
+  segmentTabNestedActive: {
+    borderBottomColor: tennisColors.primary,
+  },
   segmentTabText: {
     color: colors.neutral[700],
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     textAlign: "center",
+    flexShrink: 1,
+  },
+  segmentTabTextNested: {
+    color: tennisColors.mutedForeground,
+    fontSize: 12,
+    fontFamily: tennisFontFamily.bodyMedium,
+    textAlign: "center",
+    flexShrink: 1,
   },
   segmentTabTextActive: {
+    color: tennisColors.primary,
+    fontFamily: tennisFontFamily.headingSemi,
+  },
+  segmentTabTextNestedActive: {
     color: tennisColors.primary,
     fontFamily: tennisFontFamily.headingSemi,
   },
@@ -1175,6 +1354,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radii.xl,
     borderTopRightRadius: radii.xl,
     paddingTop: spacing.sm,
+    zIndex: 2,
+    elevation: 8,
   },
   sheetHandle: {
     alignSelf: "center",
@@ -1192,6 +1373,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   sheetContent: { gap: spacing.lg, paddingBottom: spacing.lg },
+  sheetContentKeyboard: { paddingBottom: spacing.xl * 2 },
   sheetFooter: {
     flexDirection: "row",
     alignItems: "center",

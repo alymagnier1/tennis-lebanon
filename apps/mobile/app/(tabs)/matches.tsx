@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Alert, View } from "react-native";
 
@@ -27,7 +27,6 @@ import {
   SegmentTabs,
   appStyles,
 } from "../../src/components/AppUi";
-import { SplitSection } from "../../src/components/TabSectionSplitter";
 import { TabPageHeader } from "../../src/components/TabPageHeader";
 
 import {
@@ -54,14 +53,31 @@ import {
 import { opponentAvatarColor } from "../../src/lib/match-card-status";
 import {
   ACTIVE_MATCH_GROUPS,
-  activeMatchGroupLabelKey,
+  activeMatchGroupEmptyBodyKey,
+  activeMatchGroupEmptyTitleKey,
+  activeMatchGroupTabKey,
+  defaultActiveMatchGroup,
   groupActiveMatches,
   matchListAction,
+  matchListOpensResultSheet,
+  matchListStartsAt,
+  matchTabBadgeCounts,
+  completedMatchNeedsScore,
+  type ActiveMatchGroup,
 } from "../../src/lib/match-list-card";
+import {
+  DEFAULT_COMPLETED_TIME_FILTER,
+  completedTimeFilterEmptyBodyKey,
+  completedTimeFilterEmptyTitleKey,
+  filterCompletedMatchesByTime,
+  type CompletedTimeFilter,
+} from "../../src/lib/completed-match-time-filter";
+import { CompletedTimeFilterControl } from "../../src/components/match/CompletedTimeFilterControl";
 
 import { supabase } from "../../src/lib/supabase";
 
 import { startNewMatchCreate } from "../../src/lib/create-match-guard";
+import { MatchResultSheet } from "../../src/components/MatchResultSheet";
 import { useAuth } from "../../src/providers/AuthProvider";
 
 type MatchesSegment = "invites" | "active" | "completed";
@@ -75,6 +91,10 @@ export default function MatchesScreen() {
   const queryClient = useQueryClient();
 
   const [segment, setSegment] = useState<MatchesSegment>("invites");
+  const [activeGroup, setActiveGroup] = useState<ActiveMatchGroup>("upcoming");
+  const [completedTimeFilter, setCompletedTimeFilter] =
+    useState<CompletedTimeFilter>(DEFAULT_COMPLETED_TIME_FILTER);
+  const [resultMatchId, setResultMatchId] = useState<string | null>(null);
 
   const invitesQuery = useQuery({
     queryKey: ["my-match-invites"],
@@ -145,6 +165,34 @@ export default function MatchesScreen() {
     [matchesQuery.data],
   );
 
+  const badgeCounts = useMemo(
+    () =>
+      matchTabBadgeCounts({
+        inviteCount: invitesQuery.data?.length ?? 0,
+        matches: matchesQuery.data ?? [],
+      }),
+    [invitesQuery.data, matchesQuery.data],
+  );
+
+  useEffect(() => {
+    if (segment !== "active") return;
+    setActiveGroup((current) => {
+      if (groupedActive[current].length > 0) return current;
+      return defaultActiveMatchGroup(groupedActive);
+    });
+  }, [segment, groupedActive]);
+
+  const activeGroupMatches = groupedActive[activeGroup];
+
+  const filteredCompletedMatches = useMemo(
+    () =>
+      filterCompletedMatchesByTime(
+        completedQuery.data ?? [],
+        completedTimeFilter,
+      ),
+    [completedQuery.data, completedTimeFilter],
+  );
+
   const refreshing =
     invitesQuery.isRefetching ||
     matchesQuery.isRefetching ||
@@ -167,12 +215,19 @@ export default function MatchesScreen() {
 
   const showEmptyActive =
     segment === "active" &&
-    matchesQuery.data?.length === 0 &&
-    !matchesQuery.isLoading;
+    !matchesQuery.isLoading &&
+    groupedActive.now.length === 0 &&
+    groupedActive.upcoming.length === 0;
+
+  const showEmptyActiveGroup =
+    segment === "active" &&
+    !showEmptyActive &&
+    !matchesQuery.isLoading &&
+    activeGroupMatches.length === 0;
 
   const showEmptyCompleted =
     segment === "completed" &&
-    completedQuery.data?.length === 0 &&
+    filteredCompletedMatches.length === 0 &&
     !completedQuery.isLoading;
 
   const segmentLoading =
@@ -190,10 +245,6 @@ export default function MatchesScreen() {
     if (segment === "active") void matchesQuery.refetch();
     if (segment === "completed") void completedQuery.refetch();
   };
-
-  const visibleActiveGroups = ACTIVE_MATCH_GROUPS.filter(
-    (group) => groupedActive[group].length > 0,
-  );
 
   function renderActiveMatch(match: MyMatchRow) {
     const headlineInput = {
@@ -216,6 +267,7 @@ export default function MatchesScreen() {
     const action = matchListAction({
       status: match.status,
       isCreator: match.is_creator,
+      viewerAttendance: match.viewer_attendance,
     });
 
     return (
@@ -226,11 +278,10 @@ export default function MatchesScreen() {
           statusLabel={t(`matches.status.${match.status}`)}
           actionLabel={action ? t(action.labelKey) : undefined}
           actionTone={action?.tone}
-          dateTimeLabel={
-            match.soonest_time
-              ? formatCompactUtcInBeirut(match.soonest_time)
-              : undefined
-          }
+          dateTimeLabel={(() => {
+            const startsAt = matchListStartsAt(match);
+            return startsAt ? formatCompactUtcInBeirut(startsAt) : undefined;
+          })()}
           headline={buildMatchCardHeadline(t, headlineInput)}
           viewerName={viewerName}
           viewerAvatarPath={profile?.avatar_path}
@@ -257,6 +308,11 @@ export default function MatchesScreen() {
               pathname: "/match/[id]",
               params: { id: match.match_id },
             })
+          }
+          onActionPress={
+            matchListOpensResultSheet(match)
+              ? () => setResultMatchId(match.match_id)
+              : undefined
           }
         />
 
@@ -286,12 +342,41 @@ export default function MatchesScreen() {
           <SegmentTabs
             value={segment}
             options={[
-              { value: "invites", label: t("matches.invite.inboxTab") },
-              { value: "active", label: t("matches.list.activeTab") },
+              {
+                value: "invites",
+                label: t("matches.invite.inboxTab"),
+                badgeCount: badgeCounts.invites,
+              },
+              {
+                value: "active",
+                label: t("matches.list.activeTab"),
+                badgeCount: badgeCounts.active,
+              },
               { value: "completed", label: t("matches.list.completedTab") },
             ]}
             onChange={setSegment}
           />
+          {segment === "active" ? (
+            <SegmentTabs
+              variant="nested"
+              value={activeGroup}
+              options={ACTIVE_MATCH_GROUPS.map((group) => ({
+                value: group,
+                label: t(activeMatchGroupTabKey(group)),
+                badgeCount:
+                  group === "now"
+                    ? badgeCounts.pending
+                    : badgeCounts.upcoming,
+              }))}
+              onChange={setActiveGroup}
+            />
+          ) : null}
+          {segment === "completed" ? (
+            <CompletedTimeFilterControl
+              value={completedTimeFilter}
+              onChange={setCompletedTimeFilter}
+            />
+          ) : null}
         </>
       }
     >
@@ -384,30 +469,34 @@ export default function MatchesScreen() {
           {showEmptyActive ? (
             <EmptyState
               title={t("matches.list.emptyTitle")}
-
               body={t("matches.list.empty")}
-
               action={
                 <PrimaryButton
                   label={t("matches.create.organiseCta")}
-
                   onPress={() => startNewMatchCreate()}
                 />
               }
             />
           ) : null}
 
+          {showEmptyActiveGroup ? (
+            <EmptyState
+              title={t(activeMatchGroupEmptyTitleKey(activeGroup))}
+              body={t(activeMatchGroupEmptyBodyKey(activeGroup))}
+              action={
+                activeGroup === "upcoming" ? (
+                  <PrimaryButton
+                    label={t("matches.create.organiseCta")}
+                    onPress={() => startNewMatchCreate()}
+                  />
+                ) : undefined
+              }
+            />
+          ) : null}
+
           <View style={appStyles.cardList}>
             {!segmentLoading && !segmentError
-              ? visibleActiveGroups.map((group, index) => (
-                  <SplitSection
-                    key={group}
-                    label={t(activeMatchGroupLabelKey(group))}
-                    showDivider={index > 0}
-                  >
-                    {groupedActive[group].map(renderActiveMatch)}
-                  </SplitSection>
-                ))
+              ? activeGroupMatches.map(renderActiveMatch)
               : null}
           </View>
         </>
@@ -415,15 +504,14 @@ export default function MatchesScreen() {
         <>
           {showEmptyCompleted ? (
             <EmptyState
-              title={t("matches.list.completedEmptyTitle")}
-
-              body={t("matches.list.completedEmpty")}
+              title={t(completedTimeFilterEmptyTitleKey(completedTimeFilter))}
+              body={t(completedTimeFilterEmptyBodyKey(completedTimeFilter))}
             />
           ) : null}
 
           <View style={appStyles.cardList}>
             {!segmentLoading && !segmentError
-              ? completedQuery.data?.map((match) => {
+              ? filteredCompletedMatches.map((match) => {
                   // A completed match with no score is the ordinary casual
                   // case now that attendance is what completes a match, so
                   // every result-derived field here can be absent.
@@ -459,6 +547,7 @@ export default function MatchesScreen() {
                     t,
                     headlineInput,
                   );
+                  const needsScore = completedMatchNeedsScore(match);
 
                   return (
                     <MatchCard
@@ -466,6 +555,12 @@ export default function MatchesScreen() {
                       accentBorder
                       status="completed"
                       statusLabel={outcomeLabel}
+                      actionLabel={
+                        needsScore
+                          ? t("matches.list.action.submitScore")
+                          : undefined
+                      }
+                      actionTone="actionable"
                       dateTimeLabel={playedLabel}
                       headline={
                         resolvedOpponent
@@ -503,6 +598,11 @@ export default function MatchesScreen() {
                           params: { id: match.match_id },
                         })
                       }
+                      onActionPress={
+                        needsScore
+                          ? () => setResultMatchId(match.match_id)
+                          : undefined
+                      }
                     />
                   );
                 })
@@ -510,6 +610,12 @@ export default function MatchesScreen() {
           </View>
         </>
       )}
+
+      <MatchResultSheet
+        matchId={resultMatchId}
+        visible={resultMatchId != null}
+        onClose={() => setResultMatchId(null)}
+      />
     </Screen>
   );
 }

@@ -31,7 +31,7 @@ import {
   matchCardClubLabel,
 } from "../../lib/match-clubs";
 import { opponentAvatarColor } from "../../lib/match-card-status";
-import { matchListAction } from "../../lib/match-list-card";
+import { matchListAction, matchListStartsAt } from "../../lib/match-list-card";
 import {
   deriveHomeNextActions,
   sortUpcomingMatches,
@@ -269,11 +269,12 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
                     statusLabel={t(`matches.status.${match.status}`)}
                     actionLabel={action ? t(action.labelKey) : undefined}
                     actionTone={action?.tone}
-                    dateTimeLabel={
-                      match.soonest_time
-                        ? formatCompactUtcInBeirut(match.soonest_time)
-                        : undefined
-                    }
+                    dateTimeLabel={(() => {
+                      const startsAt = matchListStartsAt(match);
+                      return startsAt
+                        ? formatCompactUtcInBeirut(startsAt)
+                        : undefined;
+                    })()}
                     headline={buildMatchCardHeadline(t, headlineInput)}
                     viewerName={displayName}
                     viewerAvatarPath={profile?.avatar_path}

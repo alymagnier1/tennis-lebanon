@@ -42,6 +42,8 @@ export type MatchCardProps = {
   accentBorder?: boolean;
   note?: string;
   onPress?: () => void;
+  /** When set, the action bar is its own control (does not navigate with the card). */
+  onActionPress?: () => void;
   footer?: ReactNode;
 };
 
@@ -178,6 +180,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
   accentBorder = false,
   note,
   onPress,
+  onActionPress,
   footer,
 }: MatchCardProps) {
   const { rowDirection, writingDirection } = useLayoutDirection();
@@ -252,7 +255,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
     </>
   );
 
-  const content = (
+  const body = (
     <>
       {scoreBanner ? (
         <View
@@ -358,39 +361,45 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
 
         {footer}
       </View>
-
-      {actionLabel ? (
-        <View
-          style={[
-            styles.actionBar,
-            {
-              flexDirection: rowDirection,
-              backgroundColor: tennisSemantic[actionTone].fill,
-              borderTopColor: tennisSemantic[actionTone].border,
-            },
-          ]}
-        >
-          <AppText
-            style={[
-              styles.actionBarText,
-              {
-                color: tennisSemantic[actionTone].text,
-                writingDirection,
-              },
-            ]}
-            maxLines={1}
-          >
-            {actionLabel}
-          </AppText>
-          <Icon
-            name="chevron"
-            size={16}
-            color={tennisSemantic[actionTone].text}
-          />
-        </View>
-      ) : null}
     </>
   );
+
+  const actionHandler = onActionPress ?? onPress;
+  const actionBar = actionLabel ? (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={actionLabel}
+      disabled={!actionHandler}
+      onPress={actionHandler}
+      style={({ pressed }) => [
+        styles.actionBar,
+        {
+          flexDirection: rowDirection,
+          backgroundColor: tennisSemantic[actionTone].fill,
+          borderTopColor: tennisSemantic[actionTone].border,
+        },
+        pressed && actionHandler && styles.actionBarPressed,
+      ]}
+    >
+      <AppText
+        style={[
+          styles.actionBarText,
+          {
+            color: tennisSemantic[actionTone].text,
+            writingDirection,
+          },
+        ]}
+        maxLines={1}
+      >
+        {actionLabel}
+      </AppText>
+      <Icon
+        name="chevron"
+        size={16}
+        color={tennisSemantic[actionTone].text}
+      />
+    </Pressable>
+  ) : null;
 
   const cardStyle = [
     styles.card,
@@ -401,18 +410,26 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
   ];
 
   if (!onPress) {
-    return <View style={cardStyle}>{content}</View>;
+    return (
+      <View style={cardStyle}>
+        {body}
+        {actionBar}
+      </View>
+    );
   }
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      onPress={onPress}
-      style={({ pressed }) => [cardStyle, pressed && styles.pressed]}
-    >
-      {content}
-    </Pressable>
+    <View style={cardStyle}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        onPress={onPress}
+        style={({ pressed }) => [pressed && styles.pressed]}
+      >
+        {body}
+      </Pressable>
+      {actionBar}
+    </View>
   );
 });
 
@@ -575,6 +592,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderTopWidth: 1,
+  },
+  actionBarPressed: {
+    opacity: 0.88,
   },
   actionBarText: {
     flex: 1,

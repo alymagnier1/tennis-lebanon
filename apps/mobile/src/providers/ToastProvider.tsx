@@ -76,7 +76,8 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     alignItems: "center",
-    zIndex: 100,
+    zIndex: 10000,
+    elevation: 10000,
   },
   toast: {
     maxWidth: 420,

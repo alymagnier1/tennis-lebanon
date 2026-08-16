@@ -175,6 +175,7 @@ describe("results", () => {
           matchStatus,
           viewerStatus: "accepted",
           hasResult: false,
+          viewerAttendance: "attended",
         }),
       ).toBe(true);
     }
@@ -184,6 +185,26 @@ describe("results", () => {
         matchStatus: "confirmed",
         viewerStatus: "accepted",
         hasResult: false,
+        viewerAttendance: "attended",
+      }),
+    ).toBe(false);
+  });
+
+  it("blocks score entry after the viewer says they did not play", () => {
+    expect(
+      canSubmitResult({
+        matchStatus: "in_progress",
+        viewerStatus: "accepted",
+        hasResult: false,
+        viewerAttendance: "no_show",
+      }),
+    ).toBe(false);
+    expect(
+      canSubmitResult({
+        matchStatus: "in_progress",
+        viewerStatus: "accepted",
+        hasResult: false,
+        viewerAttendance: "unknown",
       }),
     ).toBe(false);
   });

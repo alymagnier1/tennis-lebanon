@@ -242,14 +242,26 @@ export function canRecordAttendance(input: {
   );
 }
 
+/** Viewer said they were not there — no score, and no pending-result nag. */
+export function viewerDeclinedToPlay(attendance: string | null | undefined): boolean {
+  return (
+    attendance === "no_show" ||
+    attendance === "late_cancel" ||
+    attendance === "cancelled_in_time"
+  );
+}
+
 export function canSubmitResult(input: {
   matchStatus: string;
   viewerStatus: string | null;
   hasResult: boolean;
+  /** Score is only for players who said they played. */
+  viewerAttendance: string;
 }): boolean {
   return (
     OUTCOME_STATUSES.has(input.matchStatus) &&
     input.viewerStatus === "accepted" &&
+    input.viewerAttendance === "attended" &&
     !input.hasResult
   );
 }
