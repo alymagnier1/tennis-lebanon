@@ -259,10 +259,12 @@ export default function DiscoverScreen() {
           const clubLabel = matchCardClubLabel({
             clubName: match.court_club_name,
             preferredClubs: match.preferred_clubs,
+            compact: true,
           });
           const areaLabel = matchCardAreaLabel(
             match.zones,
             i18n.resolvedLanguage ?? i18n.language,
+            { compact: true },
           );
           const dateTimeLabel = openMatchCardDateTimeLabel(match);
           return (

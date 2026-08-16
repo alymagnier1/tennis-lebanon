@@ -11,7 +11,10 @@
 -- See docs/PILOT_OPERATIONS.md for roles and workflow rehearsal steps.
 
 -- ---------------------------------------------------------------------------
--- Pilot placeholder zones (replace with real geography before public pilot)
+-- Zones. `beirut` is real geography and is where the real pilot clubs live.
+-- The three `pilot-*` rows stay because the seeded demo matches and player
+-- preferences below still hang off them; docs/PILOT_OPERATIONS.md lists
+-- retiring them as a pre-pilot blocker.
 -- ---------------------------------------------------------------------------
 
 insert into public.zones (
@@ -54,6 +57,17 @@ values
     'Asia/Beirut',
     true,
     3
+  ),
+  -- Sorts first: it is the only zone a real player should be picking today.
+  (
+    'aaaaaaaa-0001-0001-0001-000000000004',
+    'LB',
+    'beirut',
+    'beirut',
+    '{"en":"Beirut","ar":"بيروت","fr":"Beyrouth"}'::jsonb,
+    'Asia/Beirut',
+    true,
+    0
   )
 on conflict do nothing;
 
@@ -224,6 +238,173 @@ set
   price_minor = excluded.price_minor,
   currency = excluded.currency,
   is_active = excluded.is_active;
+
+-- ---------------------------------------------------------------------------
+-- Real pilot clubs (Beirut)
+--
+-- These are actual venues, not fixtures. They live here rather than being
+-- typed into the dashboard because `supabase db reset` drops the whole
+-- database and replays this file -- anything entered by hand is erased and
+-- only what is written here comes back.
+--
+-- Every field below that could mislead a real player is deliberately left
+-- unset rather than guessed:
+--   booking_phone  placeholder digits, NOT reachable numbers
+--   price_minor    null -- a wrong price is a player turning up to a surprise
+--   address/coords null -- a wrong pin sends someone to the wrong street
+--
+-- TODO(founder): replace the placeholder WhatsApp numbers with each club's
+-- real booking number, and fill in address, coordinates and court prices,
+-- before these clubs are shown to anyone outside the team. Until then the
+-- "Book on WhatsApp" button will not reach the club.
+-- ---------------------------------------------------------------------------
+
+insert into public.clubs (
+  id,
+  zone_id,
+  name,
+  slug,
+  description,
+  address_public,
+  latitude,
+  longitude,
+  booking_mode,
+  amenities,
+  is_active
+)
+values
+  (
+    'bbbbbbbb-0001-0001-0001-000000000003',
+    'aaaaaaaa-0001-0001-0001-000000000004',
+    'Riyadi',
+    'riyadi',
+    null,
+    null,
+    null,
+    null,
+    'external_link',
+    '{}'::text[],
+    true
+  ),
+  (
+    'bbbbbbbb-0001-0001-0001-000000000004',
+    'aaaaaaaa-0001-0001-0001-000000000004',
+    'Movenpick',
+    'movenpick',
+    null,
+    null,
+    null,
+    null,
+    'external_link',
+    '{}'::text[],
+    true
+  ),
+  (
+    'bbbbbbbb-0001-0001-0001-000000000005',
+    'aaaaaaaa-0001-0001-0001-000000000004',
+    'Hoops',
+    'hoops',
+    null,
+    null,
+    null,
+    null,
+    'external_link',
+    '{}'::text[],
+    true
+  )
+on conflict (id) do update
+set
+  name = excluded.name,
+  zone_id = excluded.zone_id,
+  booking_mode = excluded.booking_mode,
+  is_active = excluded.is_active;
+
+-- Placeholder numbers. See the TODO above -- these do not reach the clubs.
+insert into public.club_private_contacts (club_id, booking_phone)
+values
+  ('bbbbbbbb-0001-0001-0001-000000000003', '+96170000001'),
+  ('bbbbbbbb-0001-0001-0001-000000000004', '+96170000002'),
+  ('bbbbbbbb-0001-0001-0001-000000000005', '+96170000003')
+on conflict (club_id) do update
+set booking_phone = excluded.booking_phone;
+
+-- One court each: register_pilot_club requires at least one, and a club with
+-- no court cannot be picked as a match venue.
+insert into public.courts (
+  id,
+  club_id,
+  name,
+  surface,
+  is_indoor,
+  price_minor,
+  currency,
+  slot_minutes,
+  is_active
+)
+values
+  (
+    'cccccccc-0001-0001-0001-000000000004',
+    'bbbbbbbb-0001-0001-0001-000000000003',
+    'Court 1',
+    'hard',
+    false,
+    null,
+    'USD',
+    90,
+    true
+  ),
+  (
+    'cccccccc-0001-0001-0001-000000000005',
+    'bbbbbbbb-0001-0001-0001-000000000004',
+    'Court 1',
+    'hard',
+    false,
+    null,
+    'USD',
+    90,
+    true
+  ),
+  (
+    'cccccccc-0001-0001-0001-000000000006',
+    'bbbbbbbb-0001-0001-0001-000000000005',
+    'Court 1',
+    'hard',
+    false,
+    null,
+    'USD',
+    90,
+    true
+  )
+on conflict (id) do update
+set
+  club_id = excluded.club_id,
+  slot_minutes = excluded.slot_minutes,
+  is_active = excluded.is_active;
+
+insert into public.court_operating_hours (
+  court_id,
+  weekday,
+  opens_at,
+  closes_at
+)
+select
+  courts.court_id,
+  weekdays.weekday,
+  time '07:00',
+  time '22:00'
+from (
+  values
+    ('cccccccc-0001-0001-0001-000000000004'::uuid),
+    ('cccccccc-0001-0001-0001-000000000005'::uuid),
+    ('cccccccc-0001-0001-0001-000000000006'::uuid)
+) as courts(court_id)
+cross join generate_series(0, 6) as weekdays(weekday)
+where not exists (
+  select 1
+  from public.court_operating_hours as coh
+  where coh.court_id = courts.court_id
+    and coh.weekday = weekdays.weekday
+);
 
 -- ---------------------------------------------------------------------------
 -- Auth test users (local Supabase only)

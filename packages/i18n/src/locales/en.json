@@ -600,9 +600,9 @@
     "avatarRemove": "Remove photo",
     "avatarRemoveError": "Could not remove your photo. Please try again.",
     "matchDefaults": {
-      "menu": "Match defaults",
+      "menu": "Match preferences",
       "menuHint": "Format, level range, and who can join",
-      "title": "Match defaults",
+      "title": "Match preferences",
       "description": "These settings apply whenever you organise a match. You can still change them for a single match.",
       "descriptionAutoSave": "These settings apply whenever you organise a match. Changes save automatically.",
       "playIntentSection": "Play intent",
@@ -610,10 +610,10 @@
       "defaultFormatSection": "Default format when hosting",
       "levelSection": "Level range for your listings",
       "joinSection": "Who can join by default",
-      "save": "Save defaults",
+      "save": "Save preferences",
       "saving": "Saving…",
-      "loadError": "We could not load your match defaults.",
-      "saveError": "We could not save your match defaults."
+      "loadError": "We could not load your match preferences.",
+      "saveError": "We could not save your match preferences."
     },
     "whereIPlay": {
       "menu": "Where I play",
@@ -855,7 +855,7 @@
       "ready_to_book": "Ready to book",
       "booking_pending": "Booking pending",
       "confirmed": "Confirmed",
-      "in_progress": "In progress",
+      "in_progress": "Confirm you played",
       "completed": "Completed",
       "cancelled": "Cancelled",
       "expired": "Expired",
@@ -887,7 +887,21 @@
       "vsOpponent": "vs {{name}}",
       "youVsOpponent": "You vs {{name}}",
       "seekingOpponent": "Looking for players",
-      "played": "Played"
+      "played": "Played",
+      "sectionNow": "Happening now",
+      "sectionUpcoming": "Upcoming",
+      "sectionLooking": "Looking for players",
+      "action": {
+        "confirmPlayed": "Confirm you played",
+        "invitePlayers": "Invite players",
+        "waitingPlayers": "Waiting for players",
+        "finishSetup": "Finish setup",
+        "agreeTime": "Agree a time",
+        "bookCourt": "Book a court",
+        "timeAgreed": "Time agreed",
+        "awaitingClub": "Waiting for the club",
+        "matchOn": "Match is on"
+      }
     },
     "lifecycle": {
       "staleBadge": "Expiring soon",

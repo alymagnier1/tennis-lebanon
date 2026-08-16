@@ -3,7 +3,9 @@ import {
   favoriteClubIdsFromDirectory,
   seedFavoriteClubIds,
   seedZoneIdsFromProfile,
+  shouldPromoteWhereEditing,
   shouldSeedFavoriteClubs,
+  shouldShowWhereEditor,
   whereSectionHydrated,
 } from "./schedule-prefill";
 
@@ -89,6 +91,67 @@ describe("whereSectionHydrated", () => {
         clubsSettled: true,
       }),
     ).toBe(true);
+  });
+});
+
+describe("shouldShowWhereEditor", () => {
+  it("stays open while editing even after the summary is ready", () => {
+    expect(
+      shouldShowWhereEditor({
+        editingWhere: true,
+        whereHydrated: true,
+        whereSummaryReady: true,
+      }),
+    ).toBe(true);
+  });
+
+  it("opens when hydrated but incomplete", () => {
+    expect(
+      shouldShowWhereEditor({
+        editingWhere: false,
+        whereHydrated: true,
+        whereSummaryReady: false,
+      }),
+    ).toBe(true);
+  });
+
+  it("shows the summary when ready and not editing", () => {
+    expect(
+      shouldShowWhereEditor({
+        editingWhere: false,
+        whereHydrated: true,
+        whereSummaryReady: true,
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("shouldPromoteWhereEditing", () => {
+  it("promotes incomplete forced-open into explicit edit", () => {
+    expect(
+      shouldPromoteWhereEditing({
+        editingWhere: false,
+        whereHydrated: true,
+        whereSummaryReady: false,
+      }),
+    ).toBe(true);
+  });
+
+  it("does not promote when already editing or summary-ready", () => {
+    expect(
+      shouldPromoteWhereEditing({
+        editingWhere: true,
+        whereHydrated: true,
+        whereSummaryReady: false,
+      }),
+    ).toBe(false);
+    expect(
+      shouldPromoteWhereEditing({
+        editingWhere: false,
+        whereHydrated: true,
+        whereSummaryReady: true,
+      }),
+    ).toBe(false);
   });
 });
 

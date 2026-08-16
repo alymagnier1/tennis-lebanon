@@ -21,7 +21,7 @@ import { AppText } from "../AppText";
 import { ListSkeleton, MatchCard } from "../AppUi";
 import { HomeNextActionCard } from "./HomeNextActionCard";
 import { Icon, type IconName } from "../Icon";
-import { formatUtcInBeirut } from "../../lib/beirut-time";
+import { formatCompactUtcInBeirut } from "../../lib/beirut-time";
 import {
   buildMatchCardHeadline,
   resolveMatchCardOpponent,
@@ -31,6 +31,7 @@ import {
   matchCardClubLabel,
 } from "../../lib/match-clubs";
 import { opponentAvatarColor } from "../../lib/match-card-status";
+import { matchListAction } from "../../lib/match-list-card";
 import {
   deriveHomeNextActions,
   sortUpcomingMatches,
@@ -251,17 +252,26 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
                   preferredClubs: match.preferred_clubs,
                   hasCourt: match.has_court,
                   courtSecuredFallback: t("matches.list.courtSecuredBadge"),
+                  compact: true,
                 });
-                const areaChip = matchCardAreaLabel(match.zones, locale);
+                const areaChip = matchCardAreaLabel(match.zones, locale, {
+                  compact: true,
+                });
+                const action = matchListAction({
+                  status: match.status,
+                  isCreator: match.is_creator,
+                });
 
                 return (
                   <MatchCard
                     key={match.match_id}
                     status={match.status}
                     statusLabel={t(`matches.status.${match.status}`)}
+                    actionLabel={action ? t(action.labelKey) : undefined}
+                    actionTone={action?.tone}
                     dateTimeLabel={
                       match.soonest_time
-                        ? formatUtcInBeirut(match.soonest_time)
+                        ? formatCompactUtcInBeirut(match.soonest_time)
                         : undefined
                     }
                     headline={buildMatchCardHeadline(t, headlineInput)}

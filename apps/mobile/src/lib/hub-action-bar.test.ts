@@ -42,6 +42,20 @@ describe("resolveHubPrimaryAction", () => {
     ).toBe("invite");
   });
 
+  it("invites when the host still has open slots even without awaiting_players", () => {
+    expect(
+      resolveHubPrimaryAction({
+        joinAction: "none",
+        nextAction: "propose_times",
+        showRequestCourt: false,
+        showConfirmExternalCourt: false,
+        isDraftCreator: false,
+        viewerIsCreator: true,
+        canInvite: true,
+      }),
+    ).toBe("invite");
+  });
+
   it("hides invite and booking CTAs from joiners", () => {
     expect(
       resolveHubPrimaryAction({

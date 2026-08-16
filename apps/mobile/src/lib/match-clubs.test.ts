@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  compactJoinedLabel,
   matchCardAreaLabel,
   matchCardClubLabel,
   preferredClubLocationLabel,
@@ -37,6 +38,22 @@ describe("preferredClubLocationLabel", () => {
   });
 });
 
+describe("compactJoinedLabel", () => {
+  it("returns undefined for empty input", () => {
+    expect(compactJoinedLabel([])).toBeUndefined();
+  });
+
+  it("keeps a short list intact", () => {
+    expect(compactJoinedLabel(["Hoops"])).toBe("Hoops");
+  });
+
+  it("adds a +N overflow count", () => {
+    expect(compactJoinedLabel(["Hoops", "Movempic", "Riyadi"])).toBe(
+      "Hoops +2",
+    );
+  });
+});
+
 describe("matchCardClubLabel", () => {
   it("prefers the booked club over preferred clubs", () => {
     expect(
@@ -57,6 +74,19 @@ describe("matchCardClubLabel", () => {
         ],
       }),
     ).toBe("Hoops · Movempic");
+  });
+
+  it("compacts multi-club lists for dense cards", () => {
+    expect(
+      matchCardClubLabel({
+        clubName: null,
+        preferredClubs: [
+          { club_id: "1", name: "Hoops" },
+          { club_id: "2", name: "Movempic" },
+        ],
+        compact: true,
+      }),
+    ).toBe("Hoops +1");
   });
 
   it("falls back to court-secured copy when only hasCourt is set", () => {
@@ -82,6 +112,20 @@ describe("matchCardAreaLabel", () => {
         "en",
       ),
     ).toBe("Beirut · Metn");
+  });
+
+  it("compacts multi-zone lists for dense cards", () => {
+    expect(
+      matchCardAreaLabel(
+        [
+          { id: "1", slug: "north", name_i18n: { en: "Pilot North" } },
+          { id: "2", slug: "central", name_i18n: { en: "Pilot Central" } },
+          { id: "3", slug: "south", name_i18n: { en: "Pilot South" } },
+        ],
+        "en",
+        { compact: true },
+      ),
+    ).toBe("Pilot North +2");
   });
 
   it("is undefined when empty", () => {

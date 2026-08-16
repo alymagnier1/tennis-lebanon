@@ -14,6 +14,8 @@ export function resolveHubPrimaryAction(input: {
   showConfirmExternalCourt: boolean;
   isDraftCreator: boolean;
   viewerIsCreator?: boolean;
+  /** Host still has open roster slots and may invite. */
+  canInvite?: boolean;
 }): HubPrimaryActionKind {
   if (input.isDraftCreator) {
     return "continue_setup";
@@ -40,7 +42,10 @@ export function resolveHubPrimaryAction(input: {
     return "confirm_external_court";
   }
 
-  if (input.nextAction === "awaiting_players") {
+  // Prefer the hub next_action, but also invite whenever the host still has
+  // open slots — some open listings report a different next_action while
+  // recruiting, and the vs-hero used to hide the footer Invite entirely.
+  if (input.nextAction === "awaiting_players" || input.canInvite) {
     return "invite";
   }
 

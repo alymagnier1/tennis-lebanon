@@ -502,9 +502,9 @@
     "avatarRemove": "إزالة الصورة",
     "avatarRemoveError": "تعذّرت إزالة صورتك. حاول مرة أخرى.",
     "matchDefaults": {
-      "menu": "إعدادات المباراة",
+      "menu": "تفضيلات المباراة",
       "menuHint": "الصيغة ونطاق المستوى ومن يمكنه الانضمام",
-      "title": "إعدادات المباراة الافتراضية",
+      "title": "تفضيلات المباراة",
       "description": "تُطبَّق هذه الإعدادات عند تنظيم أي مباراة. يمكنك تغييرها لمباراة واحدة فقط.",
       "descriptionAutoSave": "تُطبَّق هذه الإعدادات عند تنظيم أي مباراة. يتم الحفظ تلقائيًا عند التغيير.",
       "playIntentSection": "نية اللعب",
@@ -512,10 +512,10 @@
       "defaultFormatSection": "الصيغة الافتراضية عند التنظيم",
       "levelSection": "نطاق المستوى لعروضك",
       "joinSection": "من يمكنه الانضمام افتراضيًا",
-      "save": "حفظ الإعدادات",
+      "save": "حفظ التفضيلات",
       "saving": "جارٍ الحفظ…",
-      "loadError": "تعذّر تحميل إعدادات المباراة.",
-      "saveError": "تعذّر حفظ إعدادات المباراة."
+      "loadError": "تعذّر تحميل تفضيلات المباراة.",
+      "saveError": "تعذّر حفظ تفضيلات المباراة."
     },
     "whereIPlay": {
       "menu": "أين ألعب",
@@ -757,7 +757,7 @@
       "ready_to_book": "جاهزة للحجز",
       "booking_pending": "حجز قيد الانتظار",
       "confirmed": "مؤكدة",
-      "in_progress": "قيد التنفيذ",
+      "in_progress": "أكّد أنكم لعبتم",
       "completed": "منتهية",
       "cancelled": "ملغاة",
       "expired": "منتهية الصلاحية",
@@ -789,7 +789,21 @@
       "vsOpponent": "ضد {{name}}",
       "youVsOpponent": "أنت ضد {{name}}",
       "seekingOpponent": "البحث عن لاعبين",
-      "played": "لعبت"
+      "played": "لعبت",
+      "sectionNow": "الآن",
+      "sectionUpcoming": "القادمة",
+      "sectionLooking": "البحث عن لاعبين",
+      "action": {
+        "confirmPlayed": "أكّد أنكم لعبتم",
+        "invitePlayers": "دعوة لاعبين",
+        "waitingPlayers": "بانتظار لاعبين",
+        "finishSetup": "إكمال الإعداد",
+        "agreeTime": "الاتفاق على وقت",
+        "bookCourt": "حجز ملعب",
+        "timeAgreed": "تم الاتفاق على الوقت",
+        "awaitingClub": "بانتظار النادي",
+        "matchOn": "المباراة قائمة"
+      }
     },
     "lifecycle": {
       "staleBadge": "ينتهي قريباً",

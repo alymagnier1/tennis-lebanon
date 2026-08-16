@@ -120,8 +120,8 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
             <Avatar
               name={name}
               avatarPath={player.avatar_path}
-              size={56}
-              borderRadius={14}
+              size={72}
+              borderRadius={16}
             />
           </View>
 
@@ -150,6 +150,12 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
                     </AppText>
                   </View>
                 ) : null}
+                <AppText
+                  style={[styles.matchesPlayed, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {matchesPlayedLabel}
+                </AppText>
               </View>
               <View style={[styles.levelBadge, { backgroundColor: bandFill }]}>
                 <AppText style={[styles.levelBadgeText, { color: bandColor }]}>
@@ -159,10 +165,6 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
             </View>
           </View>
         </View>
-
-        <AppText style={[styles.matchesPlayed, { writingDirection }]}>
-          {matchesPlayedLabel}
-        </AppText>
 
         <View style={[styles.tagRow, { flexDirection: rowDirection }]}>
           {formatTag ? (
@@ -222,11 +224,11 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
   header: {
-    alignItems: "flex-start",
+    alignItems: "center",
     gap: 12,
   },
   avatarWrap: {
-    borderRadius: 14,
+    borderRadius: 16,
     overflow: "hidden",
   },
   headerBody: {

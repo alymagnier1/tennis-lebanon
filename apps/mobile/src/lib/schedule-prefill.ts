@@ -46,6 +46,35 @@ export function whereSectionHydrated(input: {
 }
 
 /**
+ * Keep the Where editor open until Done. Incomplete selections force it open;
+ * once the host is editing, the first club that makes the summary "ready" must
+ * not snap the panel shut — they may still want a second or third club.
+ */
+export function shouldShowWhereEditor(input: {
+  editingWhere: boolean;
+  whereHydrated: boolean;
+  whereSummaryReady: boolean;
+}): boolean {
+  return (
+    input.editingWhere ||
+    (input.whereHydrated && !input.whereSummaryReady)
+  );
+}
+
+/** Promote incomplete forced-open into explicit edit so Done owns collapse. */
+export function shouldPromoteWhereEditing(input: {
+  editingWhere: boolean;
+  whereHydrated: boolean;
+  whereSummaryReady: boolean;
+}): boolean {
+  return (
+    !input.editingWhere &&
+    input.whereHydrated &&
+    !input.whereSummaryReady
+  );
+}
+
+/**
  * Whether the clubs a host just published with should become their favourites.
  *
  * Only when they have none: nothing seeded the picker, so they chose by hand

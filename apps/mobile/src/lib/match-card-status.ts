@@ -1,4 +1,8 @@
-import { tennisColors, type SemanticTone } from "../theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisSemantic,
+  type SemanticTone,
+} from "../theme/tennis-tokens";
 import { toneForMatchStatus } from "./match-status-tone";
 
 export type MatchCardStatusVisual = {
@@ -36,11 +40,19 @@ const INFO: MatchCardStatusVisual = {
   border: tennisColors.primary,
 };
 
+const ACTIONABLE: MatchCardStatusVisual = {
+  dot: tennisSemantic.actionable.border,
+  pillBg: tennisSemantic.actionable.fill,
+  pillText: tennisSemantic.actionable.text,
+  border: tennisSemantic.actionable.border,
+};
+
 export function matchCardStatusVisual(status: string): MatchCardStatusVisual {
   switch (status) {
     case "confirmed":
-    case "in_progress":
       return CONFIRMED;
+    case "in_progress":
+      return ACTIONABLE;
     case "booking_pending":
     case "ready_to_book":
     case "full":

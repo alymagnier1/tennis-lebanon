@@ -85,6 +85,19 @@ describe("isHubVsHeroStage", () => {
       isHubVsHeroStage({ status: "confirmed" }, acceptedBooking, false),
     ).toBe(true);
   });
+
+  it("keeps the same vs card through play and completion", () => {
+    expect(isHubVsHeroStage({ status: "in_progress" }, null, true)).toBe(true);
+    expect(isHubVsHeroStage({ status: "completed" }, acceptedBooking, true)).toBe(
+      true,
+    );
+    expect(isHubVsHeroStage({ status: "cancelled" }, null, false)).toBe(true);
+    expect(isHubVsHeroStage({ status: "expired" }, null, false)).toBe(true);
+  });
+
+  it("leaves draft on the setup overview", () => {
+    expect(isHubVsHeroStage({ status: "draft" }, null, false)).toBe(false);
+  });
 });
 
 describe("shouldUsePolishedHubLayout", () => {
@@ -95,6 +108,12 @@ describe("shouldUsePolishedHubLayout", () => {
     expect(shouldUsePolishedHubLayout(openHub, acceptedBooking, false)).toBe(
       true,
     );
+    expect(
+      shouldUsePolishedHubLayout({ status: "in_progress" }, null, true),
+    ).toBe(true);
+    expect(
+      shouldUsePolishedHubLayout({ status: "completed" }, acceptedBooking, true),
+    ).toBe(true);
   });
 });
 
@@ -106,6 +125,12 @@ describe("shouldShowDiscoveryOverview", () => {
     );
     expect(shouldShowDiscoveryOverview(openHub, null, true)).toBe(false);
     expect(shouldShowDiscoveryOverview(openHub, null, false)).toBe(false);
+    expect(
+      shouldShowDiscoveryOverview({ status: "in_progress" }, null, true),
+    ).toBe(false);
+    expect(
+      shouldShowDiscoveryOverview({ status: "completed" }, acceptedBooking, true),
+    ).toBe(false);
   });
 });
 
@@ -119,6 +144,12 @@ describe("shouldShowAgreedTimeSection", () => {
   it("hides when the vs-hero owns the time", () => {
     expect(shouldShowAgreedTimeSection(true, readyHub, null)).toBe(false);
     expect(shouldShowAgreedTimeSection(true, openHub, null)).toBe(false);
+    expect(
+      shouldShowAgreedTimeSection(true, { status: "in_progress" }, null),
+    ).toBe(false);
+    expect(
+      shouldShowAgreedTimeSection(true, { status: "completed" }, null),
+    ).toBe(false);
   });
 });
 

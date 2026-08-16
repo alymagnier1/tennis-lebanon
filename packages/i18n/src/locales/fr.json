@@ -502,9 +502,9 @@
     "avatarRemove": "Supprimer la photo",
     "avatarRemoveError": "Impossible de supprimer votre photo. Veuillez réessayer.",
     "matchDefaults": {
-      "menu": "Paramètres de match",
+      "menu": "Préférences de match",
       "menuHint": "Format, niveau et qui peut rejoindre",
-      "title": "Paramètres de match par défaut",
+      "title": "Préférences de match",
       "description": "Ces paramètres s'appliquent quand vous organisez un match. Vous pouvez les modifier pour un seul match.",
       "descriptionAutoSave": "Ces paramètres s'appliquent quand vous organisez un match. Les changements sont enregistrés automatiquement.",
       "playIntentSection": "Intention de jeu",
@@ -514,8 +514,8 @@
       "joinSection": "Qui peut rejoindre par défaut",
       "save": "Enregistrer",
       "saving": "Enregistrement…",
-      "loadError": "Impossible de charger vos paramètres de match.",
-      "saveError": "Impossible d'enregistrer vos paramètres de match."
+      "loadError": "Impossible de charger vos préférences de match.",
+      "saveError": "Impossible d'enregistrer vos préférences de match."
     },
     "whereIPlay": {
       "menu": "Où je joue",
@@ -757,7 +757,7 @@
       "ready_to_book": "Prêt à réserver",
       "booking_pending": "Réservation en attente",
       "confirmed": "Confirmé",
-      "in_progress": "En cours",
+      "in_progress": "Confirmer que vous avez joué",
       "completed": "Terminé",
       "cancelled": "Annulé",
       "expired": "Expiré",
@@ -789,7 +789,21 @@
       "vsOpponent": "vs {{name}}",
       "youVsOpponent": "Vous vs {{name}}",
       "seekingOpponent": "Recherche de joueurs",
-      "played": "Joué"
+      "played": "Joué",
+      "sectionNow": "En ce moment",
+      "sectionUpcoming": "À venir",
+      "sectionLooking": "Recherche de joueurs",
+      "action": {
+        "confirmPlayed": "Confirmer que vous avez joué",
+        "invitePlayers": "Inviter des joueurs",
+        "waitingPlayers": "En attente de joueurs",
+        "finishSetup": "Terminer la configuration",
+        "agreeTime": "Convenir d’un horaire",
+        "bookCourt": "Réserver un court",
+        "timeAgreed": "Horaire convenu",
+        "awaitingClub": "En attente du club",
+        "matchOn": "Match confirmé"
+      }
     },
     "lifecycle": {
       "staleBadge": "Expire bientôt",

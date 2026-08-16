@@ -2,6 +2,7 @@ import { memo, type ReactNode } from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import { AppText } from "../AppText";
 import { SemanticBadge } from "../SemanticBadge";
+import { Icon } from "../Icon";
 import type { MatchListBadge } from "../../lib/match-status-tone";
 import { matchCardStatusVisual } from "../../lib/match-card-status";
 import { initialsFromName } from "../../lib/avatar-url";
@@ -11,8 +12,8 @@ import { buildCardAccessibilityLabel } from "../../lib/card-accessibility";
 import {
   tennisBrand,
   tennisColors,
-  tennisRadii,
   tennisSemantic,
+  type SemanticTone,
 } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
@@ -35,6 +36,9 @@ export type MatchCardProps = {
   areaChip?: string;
   badges?: MatchListBadge[];
   scoreBanner?: { won: boolean; score: string; title?: string };
+  /** Next job on this card. Replaces the lifecycle status chip when set. */
+  actionLabel?: string;
+  actionTone?: SemanticTone;
   accentBorder?: boolean;
   note?: string;
   onPress?: () => void;
@@ -102,6 +106,55 @@ function PlaceholderOpponentAvatar() {
   );
 }
 
+function MetaChips({
+  statusChip,
+  formatChip,
+  locationChip,
+  areaChip,
+  rowDirection,
+}: {
+  statusChip?: { label: string; backgroundColor: string; color: string };
+  formatChip?: string;
+  locationChip?: string;
+  areaChip?: string;
+  rowDirection: "row" | "row-reverse";
+}) {
+  if (!statusChip && !formatChip && !locationChip && !areaChip) return null;
+
+  return (
+    <View style={[styles.chipRow, { flexDirection: rowDirection }]}>
+      {statusChip ? (
+        <MatchCardChip
+          label={statusChip.label}
+          backgroundColor={statusChip.backgroundColor}
+          color={statusChip.color}
+        />
+      ) : null}
+      {formatChip ? (
+        <MatchCardChip
+          label={formatChip}
+          backgroundColor={tennisSemantic.info.fill}
+          color={tennisSemantic.info.text}
+        />
+      ) : null}
+      {locationChip ? (
+        <MatchCardChip
+          label={locationChip}
+          backgroundColor={tennisBrand.whatsappFill}
+          color={tennisBrand.whatsappText}
+        />
+      ) : null}
+      {areaChip ? (
+        <MatchCardChip
+          label={areaChip}
+          backgroundColor={tennisColors.secondary}
+          color={tennisColors.primary}
+        />
+      ) : null}
+    </View>
+  );
+}
+
 export const FigmaMatchCard = memo(function FigmaMatchCard({
   status,
   statusLabel,
@@ -120,6 +173,8 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
   areaChip,
   badges,
   scoreBanner,
+  actionLabel,
+  actionTone = "actionable",
   accentBorder = false,
   note,
   onPress,
@@ -134,7 +189,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
     showLeadingViewer || showTrailingOpponent || showHostOnly;
 
   const accessibilityLabel = buildCardAccessibilityLabel([
-    statusLabel,
+    actionLabel ?? statusLabel,
     dateTimeLabel,
     headline,
     ...(badges?.map((entry) => entry.label) ?? []),
@@ -144,48 +199,57 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
     note,
   ]);
 
-  const centerContent = (
+  const badgesRow =
+    badges && badges.length > 0 ? (
+      <View style={[styles.badgeRow, { flexDirection: rowDirection }]}>
+        {badges.map((entry) => (
+          <SemanticBadge
+            key={entry.label}
+            label={entry.label}
+            tone={entry.tone}
+          />
+        ))}
+      </View>
+    ) : null;
+
+  const vsCenterContent = (
     <View style={styles.centerColumn}>
-      <AppText style={[styles.headline, { writingDirection }]} maxLines={2}>
+      <AppText
+        style={[styles.headline, styles.vsHeadline, { writingDirection }]}
+        maxLines={2}
+      >
         {headline}
       </AppText>
-      {badges && badges.length > 0 ? (
-        <View style={[styles.badgeRow, { flexDirection: rowDirection }]}>
-          {badges.map((entry) => (
-            <SemanticBadge
-              key={entry.label}
-              label={entry.label}
-              tone={entry.tone}
-            />
-          ))}
-        </View>
-      ) : null}
-      {formatChip || locationChip || areaChip ? (
-        <View style={[styles.chipRow, { flexDirection: rowDirection }]}>
-          {locationChip ? (
-            <MatchCardChip
-              label={locationChip}
-              backgroundColor={tennisBrand.whatsappFill}
-              color={tennisBrand.whatsappText}
-            />
-          ) : null}
-          {areaChip ? (
-            <MatchCardChip
-              label={areaChip}
-              backgroundColor={tennisColors.secondary}
-              color={tennisColors.primary}
-            />
-          ) : null}
-          {formatChip ? (
-            <MatchCardChip
-              label={formatChip}
-              backgroundColor={tennisSemantic.info.fill}
-              color={tennisSemantic.info.text}
-            />
-          ) : null}
-        </View>
+      {dateTimeLabel ? (
+        <AppText
+          style={[styles.dateTimeLine, styles.vsHeadline, { writingDirection }]}
+          maxLines={1}
+        >
+          {dateTimeLabel}
+        </AppText>
       ) : null}
     </View>
+  );
+
+  const metaBelow = (
+    <>
+      {badgesRow}
+      <MetaChips
+        statusChip={
+          actionLabel
+            ? undefined
+            : {
+                label: statusLabel,
+                backgroundColor: statusVisual.pillBg,
+                color: statusVisual.pillText,
+              }
+        }
+        formatChip={formatChip}
+        locationChip={locationChip}
+        areaChip={areaChip}
+        rowDirection={rowDirection}
+      />
+    </>
   );
 
   const content = (
@@ -205,74 +269,58 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
       ) : null}
 
       <View style={styles.body}>
-        <View style={[styles.topRow, { flexDirection: rowDirection }]}>
-          {dateTimeLabel ? (
-            <View style={[styles.dateRow, { flexDirection: rowDirection }]}>
-              <View
-                style={[
-                  styles.statusDot,
-                  { backgroundColor: statusVisual.dot },
-                ]}
-              />
-              <AppText
-                style={[styles.dateText, { writingDirection }]}
-                maxLines={1}
-              >
-                {dateTimeLabel}
-              </AppText>
-            </View>
-          ) : (
-            <View style={styles.topRowSpacer} />
-          )}
-          <View
-            style={[
-              styles.statusPill,
-              { backgroundColor: statusVisual.pillBg },
-            ]}
-          >
-            <AppText
-              style={[styles.statusPillText, { color: statusVisual.pillText }]}
-              maxLines={1}
-            >
-              {statusLabel}
-            </AppText>
-          </View>
-        </View>
-
-        {showPlayerRow ? (
-          <View
-            style={[
-              styles.playerRow,
-              showHostOnly && styles.playerRowHost,
-              { flexDirection: rowDirection },
-            ]}
-          >
-            {showHostOnly ? (
+        {showHostOnly ? (
+          <View style={styles.hostBlock}>
+            <View style={[styles.hostIdentity, { flexDirection: rowDirection }]}>
               <MatchCardAvatar
                 name={hostName!}
                 avatarPath={hostAvatarPath}
                 backgroundColor={hostAvatarColor}
               />
-            ) : showLeadingViewer ? (
-              <MatchCardAvatar
-                name={viewerName!}
-                avatarPath={viewerAvatarPath}
-                backgroundColor={tennisColors.primary}
-                textColor={tennisColors.lime}
-              />
-            ) : (
-              <View style={styles.avatarSpacer} />
-            )}
-            {centerContent}
-            {showTrailingOpponent ? (
-              <MatchCardAvatar
-                name={opponentName!}
-                avatarPath={opponentAvatarPath}
-                backgroundColor={opponentAvatarColor}
-              />
-            ) : showLeadingViewer && !showHostOnly ? (
-              <PlaceholderOpponentAvatar />
-            ) : null}
+              <View style={styles.hostCopy}>
+                <AppText
+                  style={[styles.headline, styles.hostName, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {headline}
+                </AppText>
+                {dateTimeLabel ? (
+                  <AppText
+                    style={[styles.dateTimeLine, { writingDirection }]}
+                    maxLines={1}
+                  >
+                    {dateTimeLabel}
+                  </AppText>
+                ) : null}
+              </View>
+            </View>
+            {metaBelow}
+          </View>
+        ) : showPlayerRow ? (
+          <View style={styles.vsBlock}>
+            <View style={[styles.playerRow, { flexDirection: rowDirection }]}>
+              {showLeadingViewer ? (
+                <MatchCardAvatar
+                  name={viewerName!}
+                  avatarPath={viewerAvatarPath}
+                  backgroundColor={tennisColors.primary}
+                  textColor={tennisColors.lime}
+                />
+              ) : (
+                <View style={styles.avatarSpacer} />
+              )}
+              {vsCenterContent}
+              {showTrailingOpponent ? (
+                <MatchCardAvatar
+                  name={opponentName!}
+                  avatarPath={opponentAvatarPath}
+                  backgroundColor={opponentAvatarColor}
+                />
+              ) : showLeadingViewer ? (
+                <PlaceholderOpponentAvatar />
+              ) : null}
+            </View>
+            {metaBelow}
           </View>
         ) : (
           <>
@@ -298,42 +346,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
                 {dateTimeLabel}
               </AppText>
             ) : null}
-            {badges && badges.length > 0 ? (
-              <View style={[styles.badgeRow, { flexDirection: rowDirection }]}>
-                {badges.map((entry) => (
-                  <SemanticBadge
-                    key={entry.label}
-                    label={entry.label}
-                    tone={entry.tone}
-                  />
-                ))}
-              </View>
-            ) : null}
-            {formatChip || locationChip || areaChip ? (
-              <View style={[styles.chipRow, { flexDirection: rowDirection }]}>
-                {locationChip ? (
-                  <MatchCardChip
-                    label={locationChip}
-                    backgroundColor={tennisBrand.whatsappFill}
-                    color={tennisBrand.whatsappText}
-                  />
-                ) : null}
-                {areaChip ? (
-                  <MatchCardChip
-                    label={areaChip}
-                    backgroundColor={tennisColors.secondary}
-                    color={tennisColors.primary}
-                  />
-                ) : null}
-                {formatChip ? (
-                  <MatchCardChip
-                    label={formatChip}
-                    backgroundColor={tennisSemantic.info.fill}
-                    color={tennisSemantic.info.text}
-                  />
-                ) : null}
-              </View>
-            ) : null}
+            {metaBelow}
           </>
         )}
 
@@ -345,6 +358,37 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
 
         {footer}
       </View>
+
+      {actionLabel ? (
+        <View
+          style={[
+            styles.actionBar,
+            {
+              flexDirection: rowDirection,
+              backgroundColor: tennisSemantic[actionTone].fill,
+              borderTopColor: tennisSemantic[actionTone].border,
+            },
+          ]}
+        >
+          <AppText
+            style={[
+              styles.actionBarText,
+              {
+                color: tennisSemantic[actionTone].text,
+                writingDirection,
+              },
+            ]}
+            maxLines={1}
+          >
+            {actionLabel}
+          </AppText>
+          <Icon
+            name="chevron"
+            size={16}
+            color={tennisSemantic[actionTone].text}
+          />
+        </View>
+      ) : null}
     </>
   );
 
@@ -415,87 +459,59 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     gap: 12,
   },
-  topRow: {
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  topRowSpacer: {
-    flex: 1,
-  },
-  dateRow: {
-    alignItems: "center",
-    gap: 6,
-    flex: 1,
-    minWidth: 0,
-  },
-  statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    flexShrink: 0,
-  },
-  dateText: {
-    flex: 1,
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    lineHeight: 16,
-    color: tennisColors.mutedForeground,
-  },
-  dateTimeLine: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    lineHeight: 18,
-    color: tennisColors.mutedForeground,
-  },
-  dateTimeStandalone: {
-    textAlign: "center",
-  },
   playerRow: {
     alignItems: "center",
     gap: 12,
   },
-  playerRowHost: {
-    alignItems: "flex-start",
+  vsBlock: {
+    gap: 10,
   },
-  statusPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: tennisRadii.pill,
-    maxWidth: "48%",
-    flexShrink: 0,
+  hostBlock: {
+    gap: 10,
   },
-  statusPillText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 11,
+  hostIdentity: {
+    alignItems: "center",
+    gap: 12,
+  },
+  hostCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  hostName: {
+    minWidth: 0,
   },
   centerColumn: {
     flex: 1,
-    gap: 6,
     minWidth: 0,
+    justifyContent: "center",
+    gap: 2,
+  },
+  vsHeadline: {
+    textAlign: "center",
   },
   avatar: {
-    width: 46,
-    height: 46,
+    width: 64,
+    height: 64,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
   avatarImage: {
-    width: 46,
-    height: 46,
+    width: 64,
+    height: 64,
     borderRadius: 14,
     flexShrink: 0,
   },
   avatarSpacer: {
-    width: 46,
-    height: 46,
+    width: 64,
+    height: 64,
     flexShrink: 0,
   },
   avatarText: {
     fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 15,
+    fontSize: 18,
   },
   placeholderAvatar: {
     backgroundColor: "#E2E8F0",
@@ -507,11 +523,21 @@ const styles = StyleSheet.create({
   },
   headline: {
     fontFamily: tennisFontFamily.heading,
-    fontSize: 15,
+    fontSize: 16,
+    lineHeight: 20,
     color: "#0D1117",
     letterSpacing: -0.2,
   },
   headlineStandalone: {
+    textAlign: "center",
+  },
+  dateTimeLine: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 12,
+    lineHeight: 16,
+    color: tennisColors.mutedForeground,
+  },
+  dateTimeStandalone: {
     textAlign: "center",
   },
   badgeRow: {
@@ -519,23 +545,42 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   chipRow: {
+    flexDirection: "row",
     flexWrap: "wrap",
+    alignItems: "center",
     gap: 6,
   },
   chip: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
+    flexShrink: 1,
     maxWidth: "100%",
   },
   chipText: {
     fontFamily: tennisFontFamily.bodyMedium,
     fontSize: 11,
+    lineHeight: 14,
   },
   note: {
     fontFamily: tennisFontFamily.body,
     fontSize: 12,
     color: tennisColors.mutedForeground,
-    textAlign: "center",
+    textAlign: "left",
+  },
+  actionBar: {
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+  },
+  actionBarText: {
+    flex: 1,
+    minWidth: 0,
+    fontFamily: tennisFontFamily.headingSemi,
+    fontSize: 13,
+    letterSpacing: -0.1,
   },
 });

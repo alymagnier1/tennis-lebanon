@@ -33,42 +33,42 @@ import {
   hasUnanimousTimeYes,
 } from "@tennis-lebanon/domain";
 import { spacing, typography } from "@tennis-lebanon/ui";
-import { StatusBanner } from "../../src/components/AppUi";
-import { MatchChatEntry } from "../../src/components/MatchChatEntry";
-import { MatchResultPanel } from "../../src/components/MatchResultPanel";
-import { AppText } from "../../src/components/AppText";
-import { SemanticBadge } from "../../src/components/SemanticBadge";
-import { ErrorNotice } from "../../src/components/FormUi";
+import { StatusBanner } from "../../../src/components/AppUi";
+import { MatchChatEntry } from "../../../src/components/MatchChatEntry";
+import { MatchResultPanel } from "../../../src/components/MatchResultPanel";
+import { AppText } from "../../../src/components/AppText";
+import { SemanticBadge } from "../../../src/components/SemanticBadge";
+import { ErrorNotice } from "../../../src/components/FormUi";
 import {
   HubDestructiveLink,
   HubSummaryRow,
-} from "../../src/components/match/HubSummaryRow";
-import { MatchHubActionBar } from "../../src/components/match/MatchHubActionBar";
-import { MatchHubOverviewDetails } from "../../src/components/match/MatchHubOverviewDetails";
-import { MatchHubConfirmedHero } from "../../src/components/match/MatchHubConfirmedHero";
-import { MatchHubReadyHero } from "../../src/components/match/MatchHubReadyHero";
-import { MatchHubPreferredClubs } from "../../src/components/match/MatchHubPreferredClubs";
-import { MatchHubPendingBookingSection } from "../../src/components/match/MatchHubPendingBookingSection";
-import { MatchHubParticipants } from "../../src/components/match/MatchHubParticipants";
-import { MatchHubMatchDetails } from "../../src/components/match/MatchHubMatchDetails";
-import { MatchHubLayout } from "../../src/components/match/MatchHubLayout";
-import { PlayerProfileSection } from "../../src/components/player/PlayerProfileSection";
+} from "../../../src/components/match/HubSummaryRow";
+import { MatchHubActionBar } from "../../../src/components/match/MatchHubActionBar";
+import { MatchHubOverviewDetails } from "../../../src/components/match/MatchHubOverviewDetails";
+import { MatchHubConfirmedHero } from "../../../src/components/match/MatchHubConfirmedHero";
+import { MatchHubReadyHero } from "../../../src/components/match/MatchHubReadyHero";
+import { MatchHubPreferredClubs } from "../../../src/components/match/MatchHubPreferredClubs";
+import { MatchHubPendingBookingSection } from "../../../src/components/match/MatchHubPendingBookingSection";
+import { MatchHubParticipants } from "../../../src/components/match/MatchHubParticipants";
+import { MatchHubMatchDetails } from "../../../src/components/match/MatchHubMatchDetails";
+import { MatchHubLayout } from "../../../src/components/match/MatchHubLayout";
+import { PlayerProfileSection } from "../../../src/components/player/PlayerProfileSection";
 import {
   ChipButton,
   FigmaPrimaryButton,
   FigmaSecondaryButton,
-} from "../../src/components/onboarding-ui";
-import { formatUtcSlotInBeirut } from "../../src/lib/beirut-time";
-import { confirmAction } from "../../src/lib/confirm-action";
-import { confirmCancelHostedMatch } from "../../src/lib/confirm-cancel-hosted-match";
-import { useLayoutDirection } from "../../src/lib/layout-direction";
-import { exitMatchHub } from "../../src/lib/navigation";
+} from "../../../src/components/onboarding-ui";
+import { formatUtcSlotInBeirut } from "../../../src/lib/beirut-time";
+import { confirmAction } from "../../../src/lib/confirm-action";
+import { confirmCancelHostedMatch } from "../../../src/lib/confirm-cancel-hosted-match";
+import { useLayoutDirection } from "../../../src/lib/layout-direction";
+import { exitMatchHub } from "../../../src/lib/navigation";
 import {
   resolveHubAgreedStartsAt,
   resolveHubHeroStartsAt,
-} from "../../src/lib/hub-agreed-time";
-import { toneForMatchStatus } from "../../src/lib/match-status-tone";
-import { useToast } from "../../src/providers/ToastProvider";
+} from "../../../src/lib/hub-agreed-time";
+import { toneForMatchStatus } from "../../../src/lib/match-status-tone";
+import { useToast } from "../../../src/providers/ToastProvider";
 import {
   canConfirmCourtOnHub,
   isHubCourtLocked,
@@ -80,24 +80,24 @@ import {
   shouldShowPayAtClubBanner,
   shouldShowTimeAgreedBanner,
   shouldUsePolishedHubLayout,
-} from "../../src/lib/match-hub-layout";
+} from "../../../src/lib/match-hub-layout";
 import {
   hubPrimaryActionLabelKey,
   resolveHubPrimaryAction,
   type HubPrimaryActionKind,
-} from "../../src/lib/hub-action-bar";
+} from "../../../src/lib/hub-action-bar";
 import {
   matchBookExternalRoute,
   matchBookRoute,
   matchChatRoute,
   matchInviteRoute,
   matchWithdrawRoute,
-} from "../../src/lib/routes";
-import { supabase } from "../../src/lib/supabase";
-import { useMatchActivity } from "../../src/hooks/useMatchActivity";
-import { useAuth } from "../../src/providers/AuthProvider";
-import { tennisColors, tennisRadii } from "../../src/theme/tennis-tokens";
-import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
+} from "../../../src/lib/routes";
+import { supabase } from "../../../src/lib/supabase";
+import { useMatchActivity } from "../../../src/hooks/useMatchActivity";
+import { useAuth } from "../../../src/providers/AuthProvider";
+import { tennisColors, tennisRadii } from "../../../src/theme/tennis-tokens";
+import { tennisFontFamily } from "../../../src/hooks/useTennisFonts";
 
 /** Court-first matches hold a court before they fill, so `confirmed` is not the
  * only state a booking can be released from. Anything from `in_progress` on has
@@ -371,8 +371,15 @@ export default function MatchHubScreen() {
       showConfirmExternalCourt,
       isDraftCreator: hub.status === "draft" && hub.viewer_is_creator,
       viewerIsCreator: hub.viewer_is_creator,
+      canInvite: Boolean(canInvite),
     });
-  }, [hub, viewerJoinAction, showConfirmExternalCourt, showRequestCourt]);
+  }, [
+    canInvite,
+    hub,
+    viewerJoinAction,
+    showConfirmExternalCourt,
+    showRequestCourt,
+  ]);
 
   function handlePrimaryAction() {
     switch (primaryActionKind) {
@@ -382,13 +389,13 @@ export default function MatchHubScreen() {
         break;
       case "invite":
       case "continue_setup":
-        router.push(matchInviteRoute(id!));
+        router.push(matchInviteRoute(String(id)));
         break;
       case "request_court":
-        router.push(matchBookRoute(id!));
+        router.push(matchBookRoute(String(id)));
         break;
       case "confirm_external_court":
-        router.push(matchBookExternalRoute(id!));
+        router.push(matchBookExternalRoute(String(id)));
         break;
       default:
         break;
@@ -448,7 +455,7 @@ export default function MatchHubScreen() {
             yes: slot.yes_count,
             required: slot.required_count,
           })}
-          {unanimous ? ` · ${t("matches.hub.agreedTime")}` : ""}
+          {unanimous ? ` Â· ${t("matches.hub.agreedTime")}` : ""}
         </AppText>
         {showVoteUi ? (
           <View style={[styles.voteRow, { flexDirection: rowDirection }]}>
@@ -507,7 +514,6 @@ export default function MatchHubScreen() {
     );
   }
 
-  const actionsInReadyHero = Boolean(vsHeroStage && hub);
   const chatAvailable = hub ? isMatchHubChatAvailable(hub) : false;
   const chatLocked = hub ? isMatchHubChatLocked(hub) : false;
 
@@ -522,6 +528,9 @@ export default function MatchHubScreen() {
       ? "none"
       : primaryActionKind;
   const primaryActionLabelKey = hubPrimaryActionLabelKey(heroPrimaryKind);
+  const actionsInReadyHero = Boolean(
+    vsHeroStage && hub && heroPrimaryKind !== "none",
+  );
 
   const [pullRefreshing, setPullRefreshing] = useState(false);
 
@@ -534,7 +543,7 @@ export default function MatchHubScreen() {
       />
     ) : undefined,
     onBack: exitMatchHub,
-    // Only user pull-to-refresh — background invalidate after confirm was
+    // Only user pull-to-refresh â€” background invalidate after confirm was
     // flashing RefreshControl and reading as a full-screen flicker.
     refreshing: pullRefreshing,
     onRefresh: () => {
@@ -601,7 +610,11 @@ export default function MatchHubScreen() {
           primaryLabel={
             primaryActionLabelKey ? t(primaryActionLabelKey) : undefined
           }
-          primaryLoading={joinMutation.isPending}
+          primaryLoading={
+            heroPrimaryKind === "join" || heroPrimaryKind === "request_join"
+              ? joinMutation.isPending
+              : false
+          }
           onPrimary={
             heroPrimaryKind !== "none" ? handlePrimaryAction : undefined
           }
@@ -661,7 +674,7 @@ export default function MatchHubScreen() {
         <PlayerProfileSection title={t("matches.hub.bookingTitle")}>
           <HubSummaryRow
             label={t("clubs.title")}
-            value={`${booking.club_name} · ${booking.court_name}`}
+            value={`${booking.club_name} Â· ${booking.court_name}`}
           />
           <HubSummaryRow
             label={t("matches.booking.confirmTime")}
@@ -690,7 +703,7 @@ export default function MatchHubScreen() {
           booking.proposed_end_at ? (
             <HubSummaryRow
               label={t("matches.hub.bookingAlternative")}
-              value={`${booking.proposed_court_name ?? ""} · ${formatUtcSlotInBeirut(
+              value={`${booking.proposed_court_name ?? ""} Â· ${formatUtcSlotInBeirut(
                 booking.proposed_start_at,
                 booking.proposed_end_at,
               )}`}
@@ -756,7 +769,7 @@ export default function MatchHubScreen() {
       {canInvite && !actionsInReadyHero ? (
         <FigmaSecondaryButton
           label={t("matches.invite.invitePlayers")}
-          onPress={() => router.push(matchInviteRoute(id!))}
+          onPress={() => router.push(matchInviteRoute(String(id)))}
         />
       ) : null}
 

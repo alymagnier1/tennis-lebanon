@@ -204,6 +204,14 @@ export function ProfileTabDashboard() {
             />
             <ProfileMenuRow
               icon={
+                <Icon name="clock" size={20} color={tennisColors.primary} />
+              }
+              label={t("profile.availability")}
+              subtitle={t("profile.availabilityHint")}
+              onPress={() => router.push("/profile/availability")}
+            />
+            <ProfileMenuRow
+              icon={
                 <Icon
                   name="playIntent"
                   size={20}
@@ -213,14 +221,6 @@ export function ProfileTabDashboard() {
               label={t("profile.matchDefaults.menu")}
               subtitle={t("profile.matchDefaults.menuHint")}
               onPress={() => router.push("/profile/match-defaults")}
-            />
-            <ProfileMenuRow
-              icon={
-                <Icon name="clock" size={20} color={tennisColors.primary} />
-              }
-              label={t("profile.availability")}
-              subtitle={t("profile.availabilityHint")}
-              onPress={() => router.push("/profile/availability")}
             />
             <ProfileMenuRow
               icon={

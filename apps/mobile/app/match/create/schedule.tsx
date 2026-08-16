@@ -63,7 +63,9 @@ import {
   favoriteClubIdsFromDirectory,
   seedFavoriteClubIds,
   seedZoneIdsFromProfile,
+  shouldPromoteWhereEditing,
   shouldSeedFavoriteClubs,
+  shouldShowWhereEditor,
   whereSectionHydrated,
 } from "../../../src/lib/schedule-prefill";
 import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
@@ -288,7 +290,25 @@ export default function CreateMatchScheduleScreen() {
     clubsHydrated,
     clubsSettled: clubsQuery.isSuccess || clubsQuery.isError,
   });
-  const showWhereEditor = editingWhere || (whereHydrated && !whereSummaryReady);
+
+  // Incomplete Where forces the editor open with editingWhere still false.
+  // Promote to explicit edit so the first club that completes the summary
+  // does not collapse the picker before the host taps Done.
+  if (
+    shouldPromoteWhereEditing({
+      editingWhere,
+      whereHydrated,
+      whereSummaryReady,
+    })
+  ) {
+    setEditingWhere(true);
+  }
+
+  const showWhereEditor = shouldShowWhereEditor({
+    editingWhere,
+    whereHydrated,
+    whereSummaryReady,
+  });
 
   function closeWhereEditor() {
     if (selectedZoneIds.length === 0) return;

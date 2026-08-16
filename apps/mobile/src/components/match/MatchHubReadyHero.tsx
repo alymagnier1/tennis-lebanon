@@ -13,7 +13,6 @@ import {
 import { FigmaPrimaryButton, FigmaTextButton } from "../onboarding-ui";
 import {
   tennisColors,
-  tennisRadii,
   tennisSemantic,
 } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
@@ -201,7 +200,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 8,
     paddingVertical: 8,
-    borderRadius: tennisRadii.pill,
+    borderRadius: 8,
     backgroundColor: tennisSemantic.neutral.fill,
     borderWidth: 1,
     borderColor: tennisSemantic.neutral.border,

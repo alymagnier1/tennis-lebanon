@@ -14,8 +14,9 @@ export type MatchListBadge = {
 export function toneForMatchStatus(status: string): SemanticTone {
   switch (status) {
     case "confirmed":
-    case "in_progress":
       return "positive";
+    case "in_progress":
+      return "actionable";
     case "cancelled":
     case "expired":
       return "critical";

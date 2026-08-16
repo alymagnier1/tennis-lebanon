@@ -1,21 +1,38 @@
 import type { MatchPreferredClub } from "@tennis-lebanon/api";
 import type { Json } from "@tennis-lebanon/types";
-import { zoneLabelFromList, zoneNameFromJson } from "./zones";
+import { zoneNameFromJson } from "./zones";
 
 /**
  * The clubs a host named at creation, joined for display.
  *
  * Club names are plain text rather than localized like zone names, so this is
- * simpler than {@link zoneLabelFromList} — but it takes the same defensive
- * stance on shape, since the value arrives as `jsonb` from the hub and
- * discovery RPCs.
+ * simpler than zone labels — but it takes the same defensive stance on shape,
+ * since the value arrives as `jsonb` from the hub and discovery RPCs.
  */
-export function clubLabelFromList(clubs: unknown): string {
-  if (!Array.isArray(clubs) || clubs.length === 0) return "";
+export function clubNamesFromList(clubs: unknown): string[] {
+  if (!Array.isArray(clubs) || clubs.length === 0) return [];
   return clubs
     .map((club) => (club as MatchPreferredClub).name ?? "")
-    .filter(Boolean)
-    .join(" · ");
+    .map((name) => name.trim())
+    .filter(Boolean);
+}
+
+export function clubLabelFromList(clubs: unknown): string {
+  return clubNamesFromList(clubs).join(" · ");
+}
+
+/** First label, plus "+N" when the list is longer — keeps match cards scannable. */
+export function compactJoinedLabel(
+  parts: string[],
+  maxVisible = 1,
+): string | undefined {
+  const clean = parts.map((part) => part.trim()).filter(Boolean);
+  if (clean.length === 0) return undefined;
+  if (clean.length <= maxVisible) {
+    return clean.join(" · ");
+  }
+  const shown = clean.slice(0, maxVisible).join(" · ");
+  return `${shown} +${clean.length - maxVisible}`;
 }
 
 export function clubIdsFromList(clubs: unknown): string[] {
@@ -46,12 +63,16 @@ export function matchCardClubLabel(input: {
   preferredClubs?: unknown;
   hasCourt?: boolean;
   courtSecuredFallback?: string;
+  /** Shorten multi-club lists to "Club +N" for dense cards. */
+  compact?: boolean;
 }): string | undefined {
   const booked = input.clubName?.trim();
   if (booked) return booked;
 
-  const preferred = clubLabelFromList(input.preferredClubs);
-  if (preferred) return preferred;
+  const names = clubNamesFromList(input.preferredClubs);
+  if (names.length > 0) {
+    return input.compact ? compactJoinedLabel(names) : names.join(" · ");
+  }
 
   if (input.hasCourt && input.courtSecuredFallback) {
     return input.courtSecuredFallback;
@@ -64,7 +85,21 @@ export function matchCardClubLabel(input: {
 export function matchCardAreaLabel(
   zones: unknown,
   locale: string,
+  options?: { compact?: boolean },
 ): string | undefined {
-  const label = zoneLabelFromList(zones, locale);
-  return label || undefined;
+  if (!Array.isArray(zones) || zones.length === 0) return undefined;
+  const labels = zones
+    .map((zone) => {
+      const entry = zone as {
+        name_i18n?: Record<string, string>;
+        slug?: string;
+      };
+      return (
+        entry.name_i18n?.[locale] ?? entry.name_i18n?.en ?? entry.slug ?? ""
+      ).trim();
+    })
+    .filter(Boolean);
+  if (labels.length === 0) return undefined;
+  if (options?.compact) return compactJoinedLabel(labels);
+  return labels.join(" · ");
 }

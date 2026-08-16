@@ -10,6 +10,10 @@ describe("toneForMatchStatus", () => {
     expect(toneForMatchStatus("confirmed")).toBe("positive");
   });
 
+  it("maps in_progress to actionable so the list asks for a result", () => {
+    expect(toneForMatchStatus("in_progress")).toBe("actionable");
+  });
+
   it("maps open to info", () => {
     expect(toneForMatchStatus("open")).toBe("info");
   });

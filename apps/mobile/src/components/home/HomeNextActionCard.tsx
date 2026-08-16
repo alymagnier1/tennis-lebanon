@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import type { HomeNextAction } from "../../lib/home-next-actions";
 import {
   homeNextActionLabelKey,
@@ -31,30 +32,34 @@ export function HomeNextActionCard({ action }: { action: HomeNextAction }) {
   const { rowDirection, writingDirection } = useLayoutDirection();
   const tone: SemanticTone = homeNextActionTone(action.kind);
   const palette = tennisSemantic[tone];
+  const actionLabel = t(homeNextActionLabelKey(action.kind));
 
   return (
     <View
       style={[
         styles.card,
         { backgroundColor: palette.fill, borderColor: palette.border },
+        { flexDirection: rowDirection },
       ]}
     >
-      <View style={[styles.top, { flexDirection: rowDirection }]}>
+      <View style={[styles.leading, { flexDirection: rowDirection }]}>
         <View style={[styles.iconWrap, { backgroundColor: palette.border }]}>
           <Icon
             name={ACTION_ICONS[action.kind]}
-            size={18}
+            size={16}
             color={palette.text}
           />
         </View>
         <View style={styles.textBlock}>
           <AppText
             style={[styles.title, { color: palette.text, writingDirection }]}
+            maxLines={1}
           >
             {t(action.titleKey)}
           </AppText>
           <AppText
             style={[styles.body, { color: palette.text, writingDirection }]}
+            maxLines={2}
           >
             {t(action.bodyKey, action.bodyParams)}
           </AppText>
@@ -62,7 +67,7 @@ export function HomeNextActionCard({ action }: { action: HomeNextAction }) {
       </View>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t(homeNextActionLabelKey(action.kind))}
+        accessibilityLabel={actionLabel}
         onPress={() =>
           router.push(homeNextActionRoute(action.kind, action.matchId))
         }
@@ -72,8 +77,8 @@ export function HomeNextActionCard({ action }: { action: HomeNextAction }) {
           pressed && styles.buttonPressed,
         ]}
       >
-        <AppText style={styles.buttonLabel}>
-          {t(homeNextActionLabelKey(action.kind))}
+        <AppText style={styles.buttonLabel} maxLines={1}>
+          {actionLabel}
         </AppText>
       </Pressable>
     </View>
@@ -83,47 +88,57 @@ export function HomeNextActionCard({ action }: { action: HomeNextAction }) {
 const styles = StyleSheet.create({
   card: {
     borderWidth: 1.5,
-    borderRadius: tennisRadii.lg,
-    padding: 16,
-    gap: 14,
+    borderRadius: tennisRadii.md,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    gap: 10,
   },
-  top: {
-    alignItems: "flex-start",
-    gap: 12,
+  leading: {
+    flex: 1,
+    minWidth: 0,
+    alignItems: "center",
+    gap: 10,
   },
   iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   textBlock: {
     flex: 1,
-    gap: 4,
+    minWidth: 0,
+    gap: 2,
   },
   title: {
     fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 16,
+    fontSize: 14,
+    lineHeight: 18,
   },
   body: {
     fontFamily: tennisFontFamily.body,
-    fontSize: 14,
+    fontSize: 12,
+    lineHeight: 16,
     opacity: 0.9,
   },
   button: {
-    minHeight: 44,
+    minHeight: minTouchTargetPx,
+    minWidth: 72,
+    paddingHorizontal: 14,
     borderRadius: tennisRadii.md,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    flexShrink: 0,
   },
   buttonPressed: {
     opacity: 0.9,
   },
   buttonLabel: {
     fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 15,
+    fontSize: 13,
     color: tennisSemantic.actionable.text,
   },
 });

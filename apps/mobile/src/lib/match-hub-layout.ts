@@ -5,10 +5,7 @@ export function isHubCourtLocked(booking: MatchHubBooking | null): boolean {
   return booking?.status === "accepted";
 }
 
-/**
- * Statuses that share the polished vs-hero once a time is agreed
- * (open recruiting through ready-to-book / awaiting club).
- */
+/** Recruiting through awaiting-club — vs-hero plus invite/book actions. */
 export function isHubRosterHeroStatus(status: string): boolean {
   return (
     status === "open" ||
@@ -17,6 +14,24 @@ export function isHubRosterHeroStatus(status: string): boolean {
     status === "booking_pending"
   );
 }
+
+/**
+ * Played and closed matches keep the same vs card as open-for-players.
+ * Draft stays on the setup overview; everything else shares chips, roster,
+ * time, and clubs so the hub does not change shape after kickoff.
+ */
+const HUB_VS_HERO_STATUSES = new Set([
+  "open",
+  "full",
+  "ready_to_book",
+  "booking_pending",
+  "confirmed",
+  "in_progress",
+  "completed",
+  "cancelled",
+  "expired",
+  "disputed",
+]);
 
 /**
  * Same card as open-for-players: chips, vs avatars, time, preferred clubs.
@@ -31,8 +46,7 @@ export function isHubVsHeroStage(
   _booking: MatchHubBooking | null,
   _hasAgreedTime = false,
 ): boolean {
-  if (hub.status === "confirmed") return true;
-  return isHubRosterHeroStatus(hub.status);
+  return HUB_VS_HERO_STATUSES.has(hub.status);
 }
 
 /** Roster and time are set; next step is booking (or awaiting club). */
