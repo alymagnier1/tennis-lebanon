@@ -422,6 +422,11 @@
       "skillBand": "Skill band",
       "provisionalBand": "Provisional band"
     },
+    "ratingProgress": {
+      "title": "Your rating",
+      "progress": "{{done}} / {{threshold}} rated",
+      "remaining": "{{remaining}} more to unlock your number."
+    },
     "nextActionsTitle": "Next actions",
     "nextAction": {
       "inviteTitle": "Match invite waiting",
@@ -488,64 +493,64 @@
     },
     "kinds": {
       "match_invitation": {
-        "title": "Match invite",
-        "body": "Someone invited you to a match."
+        "title": "You have been invited to play",
+        "body": "A player picked you for their match. Open it to accept or decline."
       },
       "stale_match_reminder": {
-        "title": "Match expiring soon",
-        "body": "Add a new time or extend your listing."
+        "title": "Your match expires soon",
+        "body": "Nobody has locked a time yet. Add one or extend the listing."
       },
       "match_expired": {
-        "title": "Match expired",
-        "body": "This match is no longer active."
+        "title": "Your match expired",
+        "body": "Nobody locked a time in. Create a new one when you are ready to play."
       },
       "booking_pending_club": {
-        "title": "Booking update",
-        "body": "A club responded to your booking request."
+        "title": "The club replied about your court",
+        "body": "Open the match to see whether your court is confirmed."
       },
       "booking_stale_participant": {
-        "title": "Booking waiting",
-        "body": "Your court request is still pending."
+        "title": "Your court is still unconfirmed",
+        "body": "The club has not replied yet. Chase it or try another club."
       },
       "attendance_prompt": {
-        "title": "Did you play?",
-        "body": "Confirm attendance after your match."
+        "title": "Your match is waiting on you",
+        "body": "Say whether you played so the result can count."
       },
       "match_time_changed": {
-        "title": "Match time changed",
-        "body": "The host moved this match. Open the app to see the new time."
+        "title": "The host moved your match",
+        "body": "Check the new time and make sure it still works for you."
       },
       "match_court_confirmed": {
-        "title": "Court confirmed",
-        "body": "A court has been arranged with the club. Your match is confirmed."
+        "title": "Your court is booked",
+        "body": "The match is confirmed. Open it to check the details before you go."
       },
       "match_court_released": {
-        "title": "Court no longer booked",
-        "body": "{{clubName}} at {{startsAt}} fell through. The match still needs a court."
+        "title": "Your court fell through",
+        "body": "{{clubName}} at {{startsAt}} is gone. The match still needs a court."
       },
       "court_first_roster_short": {
         "title": "Court booked, players missing",
         "body": "Your court at {{clubName}} is on {{startsAt}}. Spots still open: {{spotsLeft}}. Invite someone or release the court."
       },
       "match_played_prompt": {
-        "title": "Did you play?",
+        "title": "Did your match happen?",
         "body": "Your match on {{startsAt}} never got a court in the app. Tell us if it happened so the result still counts."
       },
       "match_played_confirmed": {
-        "title": "Match marked as played",
-        "body": "Confirm your attendance and add the result so it counts."
+        "title": "Your match counts once you confirm",
+        "body": "Confirm you played and add the score so the result stands."
       },
       "match_participant_joined": {
-        "title": "A player joined",
-        "body": "Someone joined your match. Open the app to see the roster."
+        "title": "Your match gained a player",
+        "body": "Someone joined. Open it to see the roster and keep it moving."
       },
       "match_participant_left": {
-        "title": "A player left",
-        "body": "Someone left your match. You may need to invite a replacement."
+        "title": "Your match lost a player",
+        "body": "Someone left. Invite a replacement before the hour comes round."
       },
       "match_message": {
-        "title": "New message",
-        "body": "There are new messages in your match chat."
+        "title": "New message in your match",
+        "body": "Your match group is talking. Open the chat to catch up."
       },
       "result_confirm_request": {
         "title": "A score is waiting on you",
@@ -1046,6 +1051,10 @@
       "clubNotListed": "Other club",
       "differentTime": "Different time",
       "confirmNotifiesPlayers": "Your players will be told the court is booked at {{club}}.",
+      "courtRequestPrompt": "Did you send the request to {{club}}?",
+      "courtRequestSent": "Yes, sent",
+      "courtRequestNotSent": "Not yet",
+      "courtRequestAsked": "Asked {{club}} · {{when}}",
       "courtFellThrough": "Court fell through?",
       "courtFellThroughConfirm": "Release the court",
       "courtFellThroughPrompt": "Your players will be told the court is no longer booked.",
@@ -1054,6 +1063,12 @@
       "expandMatchDetails": "Show match details",
       "collapseMatchDetails": "Hide match details"
     },
+    "rematch": {
+      "title": "Play again",
+      "bodySingle": "You and {{name}} just played. Set up the next one while it is fresh.",
+      "bodyMultiple": "Set up the next one with someone you just played.",
+      "cta": "Play {{name}} again"
+    },
     "results": {
       "title": "Result",
       "statusLabel": "Status",
@@ -1061,6 +1076,12 @@
       "attendancePrompt": "Did you play this match?",
       "attended": "I played",
       "noShow": "I did not play",
+      "noShowConfirmTitle": "Confirm you did not play",
+      "noShowConfirmMessage": "This removes the match from your Active list. If everyone says they did not play, the match expires. This cannot be undone from here.",
+      "noShowConfirm": "Yes, I did not play",
+      "noShowReasonLabel": "Reason (optional)",
+      "noShowReasonPlaceholder": "e.g. cancelled, weather, could not make it",
+      "noShowReasonRequired": "Add a short reason, or leave it blank.",
       "attendanceError": "We could not save your attendance.",
       "submitPrompt": "Who won, and what was the score?",
       "setLabel": "Set {{number}}",

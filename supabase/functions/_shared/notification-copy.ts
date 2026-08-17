@@ -32,64 +32,64 @@ export const NOTIFICATION_COPY: Record<
 > = {
   en: {
     match_invitation: {
-      title: "Match invite",
-      body: "Someone invited you to a match.",
+      title: "You have been invited to play",
+      body: "A player picked you for their match. Open it to accept or decline.",
     },
     stale_match_reminder: {
-      title: "Match expiring soon",
-      body: "Add a new time or extend your listing.",
+      title: "Your match expires soon",
+      body: "Nobody has locked a time yet. Add one or extend the listing.",
     },
     match_expired: {
-      title: "Match expired",
-      body: "This match is no longer active.",
+      title: "Your match expired",
+      body: "Nobody locked a time in. Create a new one when you are ready to play.",
     },
     booking_pending_club: {
-      title: "Booking update",
-      body: "A club responded to your booking request.",
+      title: "The club replied about your court",
+      body: "Open the match to see whether your court is confirmed.",
     },
     booking_stale_participant: {
-      title: "Booking waiting",
-      body: "Your court request is still pending.",
+      title: "Your court is still unconfirmed",
+      body: "The club has not replied yet. Chase it or try another club.",
     },
     attendance_prompt: {
-      title: "Did you play?",
-      body: "Confirm attendance after your match.",
+      title: "Your match is waiting on you",
+      body: "Say whether you played so the result can count.",
     },
     match_time_changed: {
-      title: "Match time changed",
-      body: "The host moved this match. Open the app to see the new time.",
+      title: "The host moved your match",
+      body: "Check the new time and make sure it still works for you.",
     },
     match_court_confirmed: {
-      title: "Court confirmed",
-      body: "A court has been arranged with the club. Your match is confirmed.",
+      title: "Your court is booked",
+      body: "The match is confirmed. Open it to check the details before you go.",
     },
     match_court_released: {
-      title: "Court no longer booked",
-      body: "{{clubName}} at {{startsAt}} fell through. The match still needs a court.",
+      title: "Your court fell through",
+      body: "{{clubName}} at {{startsAt}} is gone. The match still needs a court.",
     },
     court_first_roster_short: {
       title: "Court booked, players missing",
       body: "Your court at {{clubName}} is on {{startsAt}}. Spots still open: {{spotsLeft}}. Invite someone or release the court.",
     },
     match_played_prompt: {
-      title: "Did you play?",
+      title: "Did your match happen?",
       body: "Your match on {{startsAt}} never got a court in the app. Tell us if it happened so the result still counts.",
     },
     match_played_confirmed: {
-      title: "Match marked as played",
-      body: "Confirm your attendance and add the result so it counts.",
+      title: "Your match counts once you confirm",
+      body: "Confirm you played and add the score so the result stands.",
     },
     match_participant_joined: {
-      title: "A player joined",
-      body: "Someone joined your match. Open the app to see the roster.",
+      title: "Your match gained a player",
+      body: "Someone joined. Open it to see the roster and keep it moving.",
     },
     match_participant_left: {
-      title: "A player left",
-      body: "Someone left your match. You may need to invite a replacement.",
+      title: "Your match lost a player",
+      body: "Someone left. Invite a replacement before the hour comes round.",
     },
     match_message: {
-      title: "New message",
-      body: "There are new messages in your match chat.",
+      title: "New message in your match",
+      body: "Your match group is talking. Open the chat to catch up.",
     },
     result_confirm_request: {
       title: "A score is waiting on you",
@@ -102,64 +102,64 @@ export const NOTIFICATION_COPY: Record<
   },
   ar: {
     match_invitation: {
-      title: "دعوة مباراة",
-      body: "دعاك أحد إلى مباراة.",
+      title: "تمت دعوتك للعب",
+      body: "اختارك لاعب لمباراته. افتحها لقبول الدعوة أو رفضها.",
     },
     stale_match_reminder: {
-      title: "المباراة تنتهي قريبًا",
-      body: "أضف وقتًا جديدًا أو مدّد الإعلان.",
+      title: "مباراتك تنتهي قريبًا",
+      body: "لم يُثبَّت أي موعد بعد. أضف موعدًا أو مدّد الإعلان.",
     },
     match_expired: {
-      title: "انتهت المباراة",
-      body: "لم تعد هذه المباراة نشطة.",
+      title: "انتهت مباراتك",
+      body: "لم يُثبَّت أي موعد. أنشئ مباراة جديدة عندما تكون مستعدًا للعب.",
     },
     booking_pending_club: {
-      title: "تحديث الحجز",
-      body: "ردّ نادٍ على طلب حجزك.",
+      title: "ردّ النادي بشأن ملعبك",
+      body: "افتح المباراة لمعرفة إن تم تأكيد الملعب.",
     },
     booking_stale_participant: {
-      title: "حجز بانتظار الرد",
-      body: "طلب حجز الملعب لا يزال قيد الانتظار.",
+      title: "ملعبك لم يُؤكَّد بعد",
+      body: "لم يردّ النادي حتى الآن. تابع الطلب أو جرّب ناديًا آخر.",
     },
     attendance_prompt: {
-      title: "هل لعبت؟",
-      body: "أكّد حضورك بعد مباراتك.",
+      title: "مباراتك بانتظارك",
+      body: "أخبرنا إن كنت قد لعبت لتُحتسب النتيجة.",
     },
     match_time_changed: {
-      title: "تغيّر موعد المباراة",
-      body: "غيّر المضيف موعد هذه المباراة. افتح التطبيق لرؤية الموعد الجديد.",
+      title: "غيّر المضيف موعد مباراتك",
+      body: "راجع الموعد الجديد وتأكد أنه ما زال مناسبًا لك.",
     },
     match_court_confirmed: {
-      title: "تم تأكيد الملعب",
-      body: "تم تأمين ملعب مع النادي. مباراتك مؤكدة.",
+      title: "تم حجز ملعبك",
+      body: "المباراة مؤكدة. افتحها لمراجعة التفاصيل قبل الذهاب.",
     },
     match_court_released: {
-      title: "لم يعد الملعب محجوزًا",
-      body: "تعذّر حجز {{clubName}} في {{startsAt}}. لا تزال المباراة بحاجة إلى ملعب.",
+      title: "تعذّر حجز ملعبك",
+      body: "لم يعد {{clubName}} في {{startsAt}} متاحًا. لا تزال المباراة بحاجة إلى ملعب.",
     },
     court_first_roster_short: {
       title: "الملعب محجوز والعدد ناقص",
       body: "ملعبك في {{clubName}} موعده {{startsAt}}. الأماكن المتبقية: {{spotsLeft}}. ادعُ لاعبًا أو ألغِ حجز الملعب.",
     },
     match_played_prompt: {
-      title: "هل لعبت؟",
+      title: "هل جرت مباراتك؟",
       body: "مباراتك في {{startsAt}} لم تحصل على ملعب في التطبيق. أخبرنا إن جرت لتُحتسب النتيجة.",
     },
     match_played_confirmed: {
-      title: "تم تسجيل المباراة كملعوبة",
-      body: "أكّد حضورك وأضف النتيجة لتُحتسب.",
+      title: "تُحتسب مباراتك بعد تأكيدك",
+      body: "أكّد أنك لعبت وأضف النتيجة لتُعتمد.",
     },
     match_participant_joined: {
-      title: "انضم لاعب",
-      body: "انضم أحدهم إلى مباراتك. افتح التطبيق لرؤية القائمة.",
+      title: "انضم لاعب إلى مباراتك",
+      body: "انضم أحدهم. افتح المباراة لرؤية القائمة ومتابعة التحضير.",
     },
     match_participant_left: {
-      title: "غادر لاعب",
-      body: "غادر أحدهم مباراتك. قد تحتاج إلى دعوة بديل.",
+      title: "غادر لاعب مباراتك",
+      body: "غادر أحدهم. ادعُ بديلًا قبل حلول الموعد.",
     },
     match_message: {
-      title: "رسالة جديدة",
-      body: "هناك رسائل جديدة في محادثة مباراتك.",
+      title: "رسالة جديدة في مباراتك",
+      body: "هناك حديث في محادثة مباراتك. افتحها لمتابعة الرسائل.",
     },
     result_confirm_request: {
       title: "نتيجة بانتظار تأكيدك",
@@ -172,64 +172,64 @@ export const NOTIFICATION_COPY: Record<
   },
   fr: {
     match_invitation: {
-      title: "Invitation à un match",
-      body: "Quelqu'un vous a invité à un match.",
+      title: "Vous êtes invité à jouer",
+      body: "Un joueur vous a choisi pour son match. Ouvrez-le pour accepter ou refuser.",
     },
     stale_match_reminder: {
-      title: "Match bientôt expiré",
-      body: "Ajoutez un nouveau créneau ou prolongez votre annonce.",
+      title: "Votre match expire bientôt",
+      body: "Aucun créneau n'est encore fixé. Ajoutez-en un ou prolongez l'annonce.",
     },
     match_expired: {
-      title: "Match expiré",
-      body: "Ce match n'est plus actif.",
+      title: "Votre match a expiré",
+      body: "Aucun créneau n'a été fixé. Créez-en un nouveau quand vous voulez jouer.",
     },
     booking_pending_club: {
-      title: "Mise à jour de réservation",
-      body: "Un club a répondu à votre demande de réservation.",
+      title: "Le club a répondu pour votre court",
+      body: "Ouvrez le match pour voir si votre court est confirmé.",
     },
     booking_stale_participant: {
-      title: "Réservation en attente",
-      body: "Votre demande de court est toujours en attente.",
+      title: "Votre court n'est toujours pas confirmé",
+      body: "Le club n'a pas encore répondu. Relancez-le ou essayez un autre club.",
     },
     attendance_prompt: {
-      title: "Avez-vous joué ?",
-      body: "Confirmez votre présence après votre match.",
+      title: "Votre match vous attend",
+      body: "Dites si vous avez joué pour que le résultat compte.",
     },
     match_time_changed: {
-      title: "Horaire du match modifié",
-      body: "L'organisateur a déplacé ce match. Ouvrez l'application pour voir le nouvel horaire.",
+      title: "L'organisateur a déplacé votre match",
+      body: "Vérifiez le nouvel horaire et confirmez qu'il vous convient toujours.",
     },
     match_court_confirmed: {
-      title: "Court confirmé",
-      body: "Un court a été réservé auprès du club. Votre match est confirmé.",
+      title: "Votre court est réservé",
+      body: "Le match est confirmé. Ouvrez-le pour vérifier les détails avant de partir.",
     },
     match_court_released: {
-      title: "Court plus réservé",
-      body: "{{clubName}} à {{startsAt}} est tombé à l'eau. Le match a toujours besoin d'un court.",
+      title: "Votre court est tombé à l'eau",
+      body: "{{clubName}} à {{startsAt}} n'est plus disponible. Le match a toujours besoin d'un court.",
     },
     court_first_roster_short: {
       title: "Court réservé, joueurs manquants",
       body: "Votre court à {{clubName}} est le {{startsAt}}. Places encore libres : {{spotsLeft}}. Invitez quelqu'un ou libérez le court.",
     },
     match_played_prompt: {
-      title: "Avez-vous joué ?",
+      title: "Votre match a-t-il eu lieu ?",
       body: "Votre match du {{startsAt}} n'a jamais eu de court dans l'application. Dites-nous s'il a eu lieu pour que le résultat compte.",
     },
     match_played_confirmed: {
-      title: "Match marqué comme joué",
-      body: "Confirmez votre présence et ajoutez le résultat pour qu'il compte.",
+      title: "Votre match compte une fois confirmé",
+      body: "Confirmez que vous avez joué et ajoutez le score pour qu'il soit retenu.",
     },
     match_participant_joined: {
-      title: "Un joueur a rejoint",
-      body: "Quelqu'un a rejoint votre match. Ouvrez l'application pour voir la composition.",
+      title: "Un joueur a rejoint votre match",
+      body: "Quelqu'un a rejoint. Ouvrez le match pour voir la composition et avancer.",
     },
     match_participant_left: {
-      title: "Un joueur est parti",
-      body: "Quelqu'un a quitté votre match. Vous devrez peut-être inviter un remplaçant.",
+      title: "Un joueur a quitté votre match",
+      body: "Quelqu'un est parti. Invitez un remplaçant avant l'heure du match.",
     },
     match_message: {
-      title: "Nouveau message",
-      body: "Il y a de nouveaux messages dans la discussion de votre match.",
+      title: "Nouveau message dans votre match",
+      body: "Ça discute dans le chat de votre match. Ouvrez-le pour suivre.",
     },
     result_confirm_request: {
       title: "Un score attend votre réponse",
