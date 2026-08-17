@@ -119,21 +119,38 @@ export function shouldShowTimeAgreedBanner(
   );
 }
 
-/** Chat opens once recruiting ends; alone on an open listing there is nobody to message. */
+/**
+ * Chat opens once the roster is full.
+ *
+ * `full` used to be locked as well, which put the lock on precisely the state
+ * where a group most needs to talk: `full` -> `ready_to_book` requires everyone
+ * to vote yes on one time option (`docs/LIFECYCLE.md`), so a flexible match sat
+ * at `full` needing a conversation to resolve the vote while the conversation
+ * only unlocked once the vote resolved. It also meant withdrawing a time option
+ * took `ready_to_book` -> `full` and re-locked a live thread mid-sentence, and
+ * it made `matches.chat.lockedRecruiting` ("Chat opens when the roster is
+ * full") describe a rule the code did not implement.
+ *
+ * `open` stays locked: a public listing has a fluid participant set, so
+ * join-read-leave is a real privacy problem there, and a half-filled match
+ * usually has nobody to message yet.
+ *
+ * This was never a security boundary. `send_match_message` and
+ * `list_match_messages` gate on accepted participation only (019) and never on
+ * match status, so the server already allowed both states -- the lock is
+ * presentation, which is why widening it needs no migration.
+ */
 export function isMatchHubChatAvailable(
   hub: Pick<MatchHubCard, "status" | "viewer_status">,
 ): boolean {
   if (hub.viewer_status !== "accepted") return false;
-  if (hub.status === "open" || hub.status === "full") return false;
+  if (hub.status === "open") return false;
   return true;
 }
 
-/** Show a locked chat row while the roster is still filling. */
+/** Show a locked chat row while the listing is still recruiting. */
 export function isMatchHubChatLocked(
   hub: Pick<MatchHubCard, "status" | "viewer_status">,
 ): boolean {
-  return (
-    hub.viewer_status === "accepted" &&
-    (hub.status === "open" || hub.status === "full")
-  );
+  return hub.viewer_status === "accepted" && hub.status === "open";
 }

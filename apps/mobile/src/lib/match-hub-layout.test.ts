@@ -88,9 +88,9 @@ describe("isHubVsHeroStage", () => {
 
   it("keeps the same vs card through play and completion", () => {
     expect(isHubVsHeroStage({ status: "in_progress" }, null, true)).toBe(true);
-    expect(isHubVsHeroStage({ status: "completed" }, acceptedBooking, true)).toBe(
-      true,
-    );
+    expect(
+      isHubVsHeroStage({ status: "completed" }, acceptedBooking, true),
+    ).toBe(true);
     expect(isHubVsHeroStage({ status: "cancelled" }, null, false)).toBe(true);
     expect(isHubVsHeroStage({ status: "expired" }, null, false)).toBe(true);
   });
@@ -112,7 +112,11 @@ describe("shouldUsePolishedHubLayout", () => {
       shouldUsePolishedHubLayout({ status: "in_progress" }, null, true),
     ).toBe(true);
     expect(
-      shouldUsePolishedHubLayout({ status: "completed" }, acceptedBooking, true),
+      shouldUsePolishedHubLayout(
+        { status: "completed" },
+        acceptedBooking,
+        true,
+      ),
     ).toBe(true);
   });
 });
@@ -129,7 +133,11 @@ describe("shouldShowDiscoveryOverview", () => {
       shouldShowDiscoveryOverview({ status: "in_progress" }, null, true),
     ).toBe(false);
     expect(
-      shouldShowDiscoveryOverview({ status: "completed" }, acceptedBooking, true),
+      shouldShowDiscoveryOverview(
+        { status: "completed" },
+        acceptedBooking,
+        true,
+      ),
     ).toBe(false);
   });
 });
@@ -196,12 +204,23 @@ describe("canConfirmCourtOnHub", () => {
 });
 
 describe("match hub chat gates", () => {
-  it("locks chat while recruiting", () => {
+  it("locks chat while the listing is still recruiting", () => {
     expect(
       isMatchHubChatLocked({ status: "open", viewer_status: "accepted" }),
     ).toBe(true);
     expect(
       isMatchHubChatAvailable({ status: "open", viewer_status: "accepted" }),
+    ).toBe(false);
+  });
+
+  it("opens chat as soon as the roster is full", () => {
+    // `full` -> `ready_to_book` needs a unanimous time vote, so locking `full`
+    // withheld chat from the one state that needs a conversation to leave it.
+    expect(
+      isMatchHubChatAvailable({ status: "full", viewer_status: "accepted" }),
+    ).toBe(true);
+    expect(
+      isMatchHubChatLocked({ status: "full", viewer_status: "accepted" }),
     ).toBe(false);
   });
 
@@ -218,5 +237,41 @@ describe("match hub chat gates", () => {
         viewer_status: "accepted",
       }),
     ).toBe(false);
+  });
+
+  it("does not re-lock a live thread when an agreed time is withdrawn", () => {
+    // `ready_to_book` -> `full` used to close chat mid-conversation.
+    for (const status of ["ready_to_book", "full"]) {
+      expect(
+        isMatchHubChatAvailable({ status, viewer_status: "accepted" }),
+      ).toBe(true);
+    }
+  });
+
+  it("stays open for the rest of the lifecycle", () => {
+    for (const status of [
+      "booking_pending",
+      "confirmed",
+      "in_progress",
+      "completed",
+    ]) {
+      expect(
+        isMatchHubChatAvailable({ status, viewer_status: "accepted" }),
+      ).toBe(true);
+    }
+  });
+
+  it("stays shut for anyone who is not an accepted participant", () => {
+    for (const status of ["open", "full", "confirmed"]) {
+      expect(
+        isMatchHubChatAvailable({ status, viewer_status: "invited" }),
+      ).toBe(false);
+      expect(isMatchHubChatAvailable({ status, viewer_status: null })).toBe(
+        false,
+      );
+      expect(isMatchHubChatLocked({ status, viewer_status: "left" })).toBe(
+        false,
+      );
+    }
   });
 });
