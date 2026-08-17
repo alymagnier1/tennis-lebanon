@@ -274,7 +274,9 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
       <View style={styles.body}>
         {showHostOnly ? (
           <View style={styles.hostBlock}>
-            <View style={[styles.hostIdentity, { flexDirection: rowDirection }]}>
+            <View
+              style={[styles.hostIdentity, { flexDirection: rowDirection }]}
+            >
               <MatchCardAvatar
                 name={hostName!}
                 avatarPath={hostAvatarPath}
@@ -282,7 +284,11 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
               />
               <View style={styles.hostCopy}>
                 <AppText
-                  style={[styles.headline, styles.hostName, { writingDirection }]}
+                  style={[
+                    styles.headline,
+                    styles.hostName,
+                    { writingDirection },
+                  ]}
                   maxLines={1}
                 >
                   {headline}
@@ -358,8 +364,6 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
             {note}
           </AppText>
         ) : null}
-
-        {footer}
       </View>
     </>
   );
@@ -393,11 +397,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
       >
         {actionLabel}
       </AppText>
-      <Icon
-        name="chevron"
-        size={16}
-        color={tennisSemantic[actionTone].text}
-      />
+      <Icon name="chevron" size={16} color={tennisSemantic[actionTone].text} />
     </Pressable>
   ) : null;
 
@@ -414,6 +414,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
       <View style={cardStyle}>
         {body}
         {actionBar}
+        {footer ? <View style={styles.footer}>{footer}</View> : null}
       </View>
     );
   }
@@ -429,6 +430,10 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
         {body}
       </Pressable>
       {actionBar}
+      {/* Outside the card's Pressable on purpose: a footer holds its own
+          controls, and nesting a button inside the card's button breaks keyboard
+          navigation and screen readers (and is invalid HTML on web). */}
+      {footer ? <View style={styles.footer}>{footer}</View> : null}
     </View>
   );
 });
@@ -443,6 +448,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.07,
     shadowRadius: 12,
     elevation: 3,
+  },
+  footer: {
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 14,
   },
   pressed: {
     opacity: 0.94,

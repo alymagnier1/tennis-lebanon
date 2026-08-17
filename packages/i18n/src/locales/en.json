@@ -425,7 +425,9 @@
     "ratingProgress": {
       "title": "Your rating",
       "progress": "{{done}} / {{threshold}} rated",
-      "remaining": "{{remaining}} more to unlock your number."
+      "remaining": "{{remaining}} more to unlock your number.",
+      "awaitingScore": "A match counts once its score is confirmed. Yours waiting: {{pending}}.",
+      "awaitingScoreAction": "See matches waiting for a score"
     },
     "nextActionsTitle": "Next actions",
     "nextAction": {
@@ -443,6 +445,9 @@
       "playersBody": "Invite someone or share your match so it can fill.",
       "playersCourtSecuredTitle": "Court booked, players missing",
       "playersCourtSecuredBody": "Your court is held. Invite someone before the hour comes round.",
+      "rematchTitle": "Play {{name}} again",
+      "rematchBody": "You played {{name}} recently. Set up the next one.",
+      "actionRematch": "Play again",
       "actionInvite": "View invite",
       "actionVote": "Vote",
       "actionBooking": "View booking",
@@ -926,6 +931,7 @@
         "confirmPlayed": "Confirm you played",
         "submitResult": "Submit result",
         "submitScore": "Submit score",
+        "rematch": "Play again",
         "invitePlayers": "Invite players",
         "waitingPlayers": "Waiting for players",
         "finishSetup": "Finish setup",
@@ -1072,6 +1078,11 @@
       "collapseMatchDetails": "Hide match details"
     },
     "rematch": {
+      "milestone": "That is match number {{total}} for you.",
+      "milestoneWithPair": "That is match number {{total}} for you, and number {{together}} with {{name}}.",
+      "headToHeadLead": "You lead {{wins}}–{{losses}}.",
+      "headToHeadTrail": "You trail {{wins}}–{{losses}}.",
+      "headToHeadLevel": "You are level at {{wins}}–{{losses}}.",
       "title": "Play again",
       "bodySingle": "You and {{name}} just played. Set up the next one while it is fresh.",
       "bodyMultiple": "Set up the next one with someone you just played.",

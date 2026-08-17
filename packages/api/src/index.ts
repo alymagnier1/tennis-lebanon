@@ -5,6 +5,7 @@ export * from "./discovery";
 export * from "./availability";
 export * from "./blocks";
 export * from "./matches";
+export * from "./rematch";
 export * from "./bookings";
 export * from "./club-admin";
 export * from "./chat";

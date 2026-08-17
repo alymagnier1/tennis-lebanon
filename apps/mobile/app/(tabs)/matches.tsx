@@ -75,6 +75,10 @@ import {
 import { CompletedTimeFilterControl } from "../../src/components/match/CompletedTimeFilterControl";
 
 import { supabase } from "../../src/lib/supabase";
+import { trackRematch } from "../../src/lib/analytics";
+import { beginRematch } from "../../src/lib/rematch-draft";
+import { resolveRematchTarget } from "../../src/lib/start-rematch";
+import { CREATE_MATCH_ROUTE, matchHubRoute } from "../../src/lib/routes";
 
 import { startNewMatchCreate } from "../../src/lib/create-match-guard";
 import { MatchResultSheet } from "../../src/components/MatchResultSheet";
@@ -84,7 +88,7 @@ type MatchesSegment = "invites" | "active" | "completed";
 
 export default function MatchesScreen() {
   const { t, i18n } = useTranslation();
-  const { profile } = useAuth();
+  const { profile, session } = useAuth();
   const viewerName = profile?.display_name ?? "";
   const locale = i18n.resolvedLanguage ?? i18n.language;
 
@@ -95,6 +99,46 @@ export default function MatchesScreen() {
   const [completedTimeFilter, setCompletedTimeFilter] =
     useState<CompletedTimeFilter>(DEFAULT_COMPLETED_TIME_FILTER);
   const [resultMatchId, setResultMatchId] = useState<string | null>(null);
+
+  /**
+   * A CompletedMatchRow has no opponent ids and none of the match shape a draft
+   * needs, so the hub is fetched on tap. Doubles is sent to the hub, where the
+   * card renders one button per opponent, rather than guessing which of three
+   * "again" means.
+   */
+  const [rematchPending, setRematchPending] = useState(false);
+  const startRematch = async (matchId: string) => {
+    const viewerUserId = session?.user.id;
+    if (!viewerUserId || rematchPending) {
+      return;
+    }
+
+    setRematchPending(true);
+    try {
+      const { outcome, hub } = await resolveRematchTarget({
+        client: supabase,
+        matchId,
+        viewerUserId,
+      });
+
+      if (outcome.kind !== "ready") {
+        router.push(matchHubRoute(matchId));
+        return;
+      }
+
+      trackRematch("started", { surface: "completed_list" });
+      beginRematch(
+        hub,
+        { userId: outcome.opponentUserId, displayName: outcome.opponentName },
+        "completed_list",
+      );
+      router.push(CREATE_MATCH_ROUTE);
+    } catch {
+      router.push(matchHubRoute(matchId));
+    } finally {
+      setRematchPending(false);
+    }
+  };
 
   const invitesQuery = useQuery({
     queryKey: ["my-match-invites"],
@@ -364,9 +408,7 @@ export default function MatchesScreen() {
                 value: group,
                 label: t(activeMatchGroupTabKey(group)),
                 badgeCount:
-                  group === "now"
-                    ? badgeCounts.pending
-                    : badgeCounts.upcoming,
+                  group === "now" ? badgeCounts.pending : badgeCounts.upcoming,
               }))}
               onChange={setActiveGroup}
             />
@@ -602,6 +644,18 @@ export default function MatchesScreen() {
                         needsScore
                           ? () => setResultMatchId(match.match_id)
                           : undefined
+                      }
+                      // Footer rather than the action slot: "Submit score" is
+                      // what makes a match count towards a rating, so a rematch
+                      // must sit beside it, never replace it.
+                      footer={
+                        match.opponent_names ? (
+                          <SecondaryButton
+                            label={t("matches.list.action.rematch")}
+                            disabled={rematchPending}
+                            onPress={() => void startRematch(match.match_id)}
+                          />
+                        ) : undefined
                       }
                     />
                   );

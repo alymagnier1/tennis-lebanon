@@ -2043,6 +2043,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_rematch_context: {
+        Args: { p_opponent_id: string }
+        Returns: {
+          opponent_wins: number
+          played_together: number
+          viewer_total_completed: number
+          viewer_wins: number
+        }[]
+      }
       has_availability_overlap: {
         Args: {
           p_range_end: string

@@ -1,4 +1,5 @@
 import type { SemanticTone } from "../theme/tennis-tokens";
+import type { HomeNextActionKind } from "./home-next-actions";
 
 export type MatchListBadgeInput = {
   status: string;
@@ -66,9 +67,7 @@ export function buildMatchListBadges(
   return badges.slice(0, 2);
 }
 
-export function homeNextActionTone(
-  kind: "invite" | "players" | "vote" | "booking" | "court" | "played",
-): SemanticTone {
+export function homeNextActionTone(kind: HomeNextActionKind): SemanticTone {
   switch (kind) {
     case "invite":
     case "court":
@@ -79,14 +78,16 @@ export function homeNextActionTone(
       return "info";
     case "players":
       return "attention";
+    // Positive rather than actionable: nobody is waiting on a rematch, so it
+    // should not wear the same urgency as a vote somebody is blocked on.
+    case "rematch":
+      return "positive";
     default:
       return "info";
   }
 }
 
-export function homeNextActionLabelKey(
-  kind: "invite" | "players" | "vote" | "booking" | "court" | "played",
-): string {
+export function homeNextActionLabelKey(kind: HomeNextActionKind): string {
   switch (kind) {
     case "invite":
       return "home.nextAction.actionInvite";
@@ -100,6 +101,8 @@ export function homeNextActionLabelKey(
       return "home.nextAction.actionPlayed";
     case "players":
       return "home.nextAction.actionPlayers";
+    case "rematch":
+      return "home.nextAction.actionRematch";
     default:
       return "common.continue";
   }

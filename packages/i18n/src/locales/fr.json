@@ -425,7 +425,9 @@
     "ratingProgress": {
       "title": "Votre note",
       "progress": "{{done}} / {{threshold}} comptés",
-      "remaining": "Encore {{remaining}} pour débloquer votre note."
+      "remaining": "Encore {{remaining}} pour débloquer votre note.",
+      "awaitingScore": "Un match compte dès que son score est confirmé. Les vôtres en attente : {{pending}}.",
+      "awaitingScoreAction": "Voir les matchs en attente d'un score"
     },
     "nextActionsTitle": "Next actions",
     "nextAction": {
@@ -443,6 +445,9 @@
       "playersBody": "Invitez quelquun ou partagez votre match pour le remplir.",
       "playersCourtSecuredTitle": "Court réservé, joueurs manquants",
       "playersCourtSecuredBody": "Votre court est retenu. Invitez quelqu'un avant l'heure prévue.",
+      "rematchTitle": "Rejouer contre {{name}}",
+      "rematchBody": "Vous avez joué contre {{name}} récemment. Organisez le prochain match.",
+      "actionRematch": "Rejouer",
       "actionInvite": "Voir l'invitation",
       "actionVote": "Voter",
       "actionBooking": "Voir la réservation",
@@ -820,6 +825,7 @@
         "confirmPlayed": "Confirmer que vous avez joué",
         "submitResult": "Envoyer le résultat",
         "submitScore": "Envoyer le score",
+        "rematch": "Rejouer",
         "invitePlayers": "Inviter des joueurs",
         "waitingPlayers": "En attente de joueurs",
         "finishSetup": "Terminer la configuration",
@@ -966,6 +972,11 @@
       }
     },
     "rematch": {
+      "milestone": "C'est votre match numéro {{total}}.",
+      "milestoneWithPair": "C'est votre match numéro {{total}}, et le numéro {{together}} contre {{name}}.",
+      "headToHeadLead": "Vous menez {{wins}}–{{losses}}.",
+      "headToHeadTrail": "Vous êtes mené {{wins}}–{{losses}}.",
+      "headToHeadLevel": "Vous êtes à égalité {{wins}}–{{losses}}.",
       "title": "Rejouer",
       "bodySingle": "Vous venez de jouer contre {{name}}. Organisez le prochain match tant que c'est frais.",
       "bodyMultiple": "Organisez le prochain match avec quelqu'un contre qui vous venez de jouer.",

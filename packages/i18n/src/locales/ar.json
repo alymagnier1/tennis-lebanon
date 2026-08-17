@@ -425,7 +425,9 @@
     "ratingProgress": {
       "title": "تقييمك",
       "progress": "{{done}} / {{threshold}} محتسبة",
-      "remaining": "المتبقّي: {{remaining}} قبل ظهور رقمك."
+      "remaining": "المتبقّي: {{remaining}} قبل ظهور رقمك.",
+      "awaitingScore": "تُحتسب المباراة بعد تأكيد نتيجتها. مبارياتك المنتظِرة: {{pending}}.",
+      "awaitingScoreAction": "عرض المباريات التي تنتظر نتيجة"
     },
     "nextActionsTitle": "الإجراءات التالية",
     "nextAction": {
@@ -443,6 +445,9 @@
       "playersBody": "ادعُ لاعبًا أو شارك مباراتك حتى تكتمل.",
       "playersCourtSecuredTitle": "الملعب محجوز، اللاعبون ناقصون",
       "playersCourtSecuredBody": "ملعبك محجوز. ادعُ لاعبًا قبل حلول الموعد.",
+      "rematchTitle": "العب مع {{name}} مجددًا",
+      "rematchBody": "لعبتَ مع {{name}} مؤخرًا. رتّب المباراة التالية.",
+      "actionRematch": "العب مجددًا",
       "actionInvite": "عرض الدعوة",
       "actionVote": "صوّت",
       "actionBooking": "عرض الحجز",
@@ -820,6 +825,7 @@
         "confirmPlayed": "أكّد أنكم لعبتم",
         "submitResult": "أدخل النتيجة",
         "submitScore": "أدخل النتيجة",
+        "rematch": "العب مجددًا",
         "invitePlayers": "دعوة لاعبين",
         "waitingPlayers": "بانتظار لاعبين",
         "finishSetup": "إكمال الإعداد",
@@ -966,6 +972,11 @@
       }
     },
     "rematch": {
+      "milestone": "هذه مباراتك رقم {{total}}.",
+      "milestoneWithPair": "هذه مباراتك رقم {{total}}، ورقم {{together}} مع {{name}}.",
+      "headToHeadLead": "أنت متقدّم {{wins}}–{{losses}}.",
+      "headToHeadTrail": "أنت متأخّر {{wins}}–{{losses}}.",
+      "headToHeadLevel": "أنتما متعادلان {{wins}}–{{losses}}.",
       "title": "العبوا مجددًا",
       "bodySingle": "لعبتَ للتو مع {{name}}. رتّب المباراة التالية ما دام الحماس موجودًا.",
       "bodyMultiple": "رتّب المباراة التالية مع أحد من لعبتَ معهم للتو.",

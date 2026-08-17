@@ -25,9 +25,20 @@ const ACTION_ICONS: Record<HomeNextAction["kind"], IconName> = {
   court: "place",
   played: "check",
   players: "discover",
+  rematch: "court",
 };
 
-export function HomeNextActionCard({ action }: { action: HomeNextAction }) {
+export function HomeNextActionCard({
+  action,
+  /**
+   * Overrides the default navigation. Needed by `rematch`, which has to fetch the
+   * hub and seed a create draft rather than simply route somewhere.
+   */
+  onPress,
+}: {
+  action: HomeNextAction;
+  onPress?: (action: HomeNextAction) => void;
+}) {
   const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
   const tone: SemanticTone = homeNextActionTone(action.kind);
@@ -55,22 +66,26 @@ export function HomeNextActionCard({ action }: { action: HomeNextAction }) {
             style={[styles.title, { color: palette.text, writingDirection }]}
             maxLines={1}
           >
-            {t(action.titleKey)}
+            {t(action.titleKey, action.params)}
           </AppText>
           <AppText
             style={[styles.body, { color: palette.text, writingDirection }]}
             maxLines={2}
           >
-            {t(action.bodyKey, action.bodyParams)}
+            {t(action.bodyKey, action.params)}
           </AppText>
         </View>
       </View>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={actionLabel}
-        onPress={() =>
-          router.push(homeNextActionRoute(action.kind, action.matchId))
-        }
+        onPress={() => {
+          if (onPress) {
+            onPress(action);
+            return;
+          }
+          router.push(homeNextActionRoute(action.kind, action.matchId));
+        }}
         style={({ pressed }) => [
           styles.button,
           { backgroundColor: tennisSemantic.actionable.fill },

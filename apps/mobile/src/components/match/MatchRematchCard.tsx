@@ -1,10 +1,14 @@
 import { StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { getRematchContext } from "@tennis-lebanon/api";
 import { AppText } from "../AppText";
 import { Icon } from "../Icon";
 import { FigmaPrimaryButton, FigmaSecondaryButton } from "../onboarding-ui";
 import { useLayoutDirection } from "../../lib/layout-direction";
+import { buildRematchContextCopy } from "../../lib/rematch-context-copy";
 import type { RematchOpponent } from "../../lib/rematch-draft";
+import { supabase } from "../../lib/supabase";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
@@ -26,14 +30,44 @@ export function MatchRematchCard({
   const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
 
+  const single = opponents.length === 1 ? opponents[0]! : null;
+
+  /**
+   * Only asked for a singles pair. With several opponents there is no single
+   * head-to-head to report, and the milestone would need a name it does not have.
+   */
+  const contextQuery = useQuery({
+    queryKey: ["rematch-context", single?.userId],
+    queryFn: () => getRematchContext(supabase, single!.userId),
+    enabled: Boolean(single),
+    staleTime: 60_000,
+  });
+
   if (opponents.length === 0) {
     return null;
   }
 
-  const single = opponents.length === 1 ? opponents[0]! : null;
+  const copy =
+    single && contextQuery.data
+      ? buildRematchContextCopy({
+          context: contextQuery.data,
+          opponentName: single.displayName,
+        })
+      : null;
 
   return (
     <View style={styles.root}>
+      {/* The milestone is the celebration this event never had: a completed
+          match used to resolve into a status change and a score form. */}
+      {copy?.milestone ? (
+        <AppText style={[styles.milestone, { writingDirection }]}>
+          {t(copy.milestone.key, copy.milestone.params)}
+          {copy.headToHead
+            ? ` ${t(copy.headToHead.key, copy.headToHead.params)}`
+            : ""}
+        </AppText>
+      ) : null}
+
       <View style={[styles.header, { flexDirection: rowDirection }]}>
         <View style={styles.iconWrap}>
           <Icon name="court" size={20} color={tennisColors.primary} />
@@ -78,6 +112,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: tennisColors.border,
     backgroundColor: tennisColors.card,
+  },
+  milestone: {
+    fontFamily: tennisFontFamily.headingSemi,
+    fontSize: 15,
+    lineHeight: 21,
+    color: tennisColors.primary,
+    letterSpacing: -0.2,
   },
   header: {
     alignItems: "flex-start",

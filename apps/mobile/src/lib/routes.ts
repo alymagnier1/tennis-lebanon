@@ -1,7 +1,9 @@
 import type { Href } from "expo-router";
+import type { HomeNextActionKind } from "./home-next-actions";
 
 export const CREATE_MATCH_ROUTE = "/match/create" as Href;
 export const CLUBS_ROUTE = "/(tabs)/clubs" as Href;
+export const MATCHES_ROUTE = "/(tabs)/matches" as Href;
 
 export function matchInviteRoute(
   matchId: string,
@@ -26,13 +28,17 @@ export function matchHubRoute(matchId: string): Href {
 }
 
 export function homeNextActionRoute(
-  kind: "invite" | "players" | "vote" | "booking" | "court" | "played",
+  kind: HomeNextActionKind,
   matchId: string,
 ): Href {
   if (kind === "players") {
     return matchInviteRoute(matchId);
   }
   // "played" lands on the hub too: the yes/no prompt lives in its banner.
+  //
+  // "rematch" never reaches here — the card overrides onPress, because it has to
+  // fetch the hub and seed a create draft rather than navigate. The hub is a safe
+  // fallback if that override is ever dropped.
   return matchHubRoute(matchId);
 }
 

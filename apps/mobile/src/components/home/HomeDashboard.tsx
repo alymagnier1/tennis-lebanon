@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Pressable,
   RefreshControl,
@@ -37,8 +38,18 @@ import { matchListAction, matchListStartsAt } from "../../lib/match-list-card";
 import {
   deriveHomeNextActions,
   sortUpcomingMatches,
+  type HomeNextAction,
 } from "../../lib/home-next-actions";
-import { CLUBS_ROUTE, matchHubRoute } from "../../lib/routes";
+import { trackRematch } from "../../lib/analytics";
+import { beginRematch } from "../../lib/rematch-draft";
+import { resolveRematchTarget } from "../../lib/start-rematch";
+import {
+  CLUBS_ROUTE,
+  CREATE_MATCH_ROUTE,
+  MATCHES_ROUTE,
+  matchHubRoute,
+} from "../../lib/routes";
+import { completedMatchNeedsScore } from "../../lib/match-list-card";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../providers/AuthProvider";
@@ -53,7 +64,7 @@ import { tennisFontFamily } from "../../hooks/useTennisFonts";
 export function HomeDashboard({ displayName }: { displayName: string }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? i18n.language;
-  const { profile } = useAuth();
+  const { profile, session } = useAuth();
   const insets = useSafeAreaInsets();
   const { rowDirection, writingDirection } = useLayoutDirection();
 
@@ -96,6 +107,7 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
   const nextActions = deriveHomeNextActions(
     invitesQuery.data ?? [],
     matchesQuery.data ?? [],
+    completedQuery.data ?? [],
   );
   const upcomingMatches = sortUpcomingMatches(matchesQuery.data ?? []);
   const playerProfile = profileQuery.data;
@@ -109,6 +121,58 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
     playerProfile && isProvisionalPlayerRating(ratedMatchCount),
   );
   const ratingRemaining = ratedMatchesUntilRatingUnlock(ratedMatchCount);
+
+  /**
+   * "7 played / 0 of 5 rated" is honest but reads as a broken counter without the
+   * reason. A match only counts towards a rating once a score is confirmed, so
+   * say that, and say how many of theirs are still waiting on one.
+   */
+  const awaitingScore = (completedQuery.data ?? []).filter(
+    completedMatchNeedsScore,
+  ).length;
+
+  /**
+   * Home holds a CompletedMatchRow, which has no opponent ids and none of the
+   * match shape a draft needs, so the hub is fetched on tap. Doubles is handed to
+   * the hub instead of guessing which of three opponents "again" means.
+   */
+  const [rematchPending, setRematchPending] = useState(false);
+  const startRematch = async (action: HomeNextAction) => {
+    const viewerUserId = session?.user.id;
+    if (!viewerUserId || rematchPending) {
+      return;
+    }
+
+    setRematchPending(true);
+    try {
+      const { outcome, hub } = await resolveRematchTarget({
+        client: supabase,
+        matchId: action.matchId,
+        viewerUserId,
+      });
+
+      if (outcome.kind !== "ready") {
+        router.push(matchHubRoute(action.matchId));
+        return;
+      }
+
+      trackRematch("started", { surface: "home" });
+      beginRematch(
+        hub,
+        {
+          userId: outcome.opponentUserId,
+          displayName: outcome.opponentName,
+        },
+        "home",
+      );
+      router.push(CREATE_MATCH_ROUTE);
+    } catch {
+      // The hub could not be read; the hub screen will show its own error.
+      router.push(matchHubRoute(action.matchId));
+    } finally {
+      setRematchPending(false);
+    }
+  };
 
   const refresh = () => {
     void invitesQuery.refetch();
@@ -236,6 +300,28 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
                 remaining: ratingRemaining,
               })}
             </AppText>
+
+            {awaitingScore > 0 ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t(
+                  "home.ratingProgress.awaitingScoreAction",
+                )}
+                onPress={() => router.push(MATCHES_ROUTE)}
+                style={({ pressed }) => [pressed && { opacity: 0.85 }]}
+              >
+                <AppText
+                  style={[styles.ratingProgressLink, { writingDirection }]}
+                >
+                  {/* `pending`, not `count`: `count` makes i18next look for
+                      plural-suffixed keys, and Arabic has six forms while the
+                      locale parity test compares leaf keys exactly. */}
+                  {t("home.ratingProgress.awaitingScore", {
+                    pending: awaitingScore,
+                  })}
+                </AppText>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
       </View>
@@ -262,7 +348,15 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
               {t("home.nextActionsTitle")}
             </AppText>
             {nextActions.map((action) => (
-              <HomeNextActionCard key={action.id} action={action} />
+              <HomeNextActionCard
+                key={action.id}
+                action={action}
+                onPress={
+                  action.kind === "rematch"
+                    ? (pressed) => void startRematch(pressed)
+                    : undefined
+                }
+              />
             ))}
           </View>
         ) : null}
@@ -515,6 +609,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     color: "rgba(255,255,255,0.8)",
+  },
+  ratingProgressLink: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 13,
+    lineHeight: 18,
+    color: tennisColors.lime,
+    textDecorationLine: "underline",
   },
   body: {
     paddingHorizontal: tennisSpacing.screenX,
