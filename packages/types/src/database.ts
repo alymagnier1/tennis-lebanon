@@ -278,6 +278,38 @@ export type Database = {
           },
         ]
       }
+      client_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: number
+          props: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: never
+          props?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: never
+          props?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_memberships: {
         Row: {
           club_id: string
@@ -2371,6 +2403,10 @@ export type Database = {
         Args: { p_club_id: string; p_reason?: string }
         Returns: undefined
       }
+      record_client_event: {
+        Args: { p_event: string; p_props?: Json }
+        Returns: undefined
+      }
       record_court_request_opened: {
         Args: { p_club_id: string; p_match_id: string }
         Returns: string
@@ -2964,3 +3000,4 @@ export const Constants = {
     },
   },
 } as const
+

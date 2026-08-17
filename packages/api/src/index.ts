@@ -1,4 +1,5 @@
 export * from "./client";
+export * from "./analytics";
 export * from "./onboarding";
 export * from "./discovery";
 export * from "./availability";
