@@ -1263,6 +1263,14 @@
   },
   "notifications": {
     "centerTitle": "Notifications",
+    "nudge": {
+      "title": "Sachez dès qu'ils répondent",
+      "body": "Nous vous préviendrons quand un joueur accepte, qu'un horaire est fixé, ou qu'un club confirme votre court.",
+      "bodyBlocked": "Les notifications sont désactivées pour cette application : vous ne saurez pas quand un joueur accepte ou qu'un club confirme. Vous pouvez les réactiver dans les réglages du système.",
+      "enable": "Activer les notifications",
+      "openSettings": "Ouvrir les réglages",
+      "dismiss": "Pas maintenant"
+    },
     "centerDescription": "Updates about invites, votes, bookings, and reminders.",
     "loadError": "We could not load your notifications.",
     "empty": "You are all caught up.",

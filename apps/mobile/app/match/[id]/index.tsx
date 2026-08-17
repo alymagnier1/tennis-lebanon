@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -52,6 +52,7 @@ import { MatchHubPendingBookingSection } from "../../../src/components/match/Mat
 import { MatchHubParticipants } from "../../../src/components/match/MatchHubParticipants";
 import { MatchHubMatchDetails } from "../../../src/components/match/MatchHubMatchDetails";
 import { MatchHubLayout } from "../../../src/components/match/MatchHubLayout";
+import { MatchPushNudge } from "../../../src/components/match/MatchPushNudge";
 import { MatchRematchCard } from "../../../src/components/match/MatchRematchCard";
 import { PlayerProfileSection } from "../../../src/components/player/PlayerProfileSection";
 import {
@@ -69,6 +70,7 @@ import {
   resolveHubHeroStartsAt,
 } from "../../../src/lib/hub-agreed-time";
 import { toneForMatchStatus } from "../../../src/lib/match-status-tone";
+import { trackRematch } from "../../../src/lib/analytics";
 import {
   beginRematch,
   canOfferRematch,
@@ -385,8 +387,21 @@ export default function MatchHubScreen() {
     }),
   );
 
+  // Offered vs started, per surface: the audit's open question is not whether
+  // rematch converts but which surface converts, and the hub is only one of three
+  // planned. Recorded once per match rather than per render.
+  useEffect(() => {
+    if (showRematch) {
+      trackRematch("offered", {
+        surface: "hub",
+        opponentCount: rematchOpponents.length,
+      });
+    }
+  }, [showRematch, rematchOpponents.length]);
+
   function handleRematch(opponent: RematchOpponent) {
     if (!hub) return;
+    trackRematch("started", { surface: "hub" });
     // Same route the Challenge button on a player profile takes, so the create
     // flow sees a normal invite-a-player draft and skips host-default hydration.
     beginRematch(hub, opponent);
@@ -619,6 +634,13 @@ export default function MatchHubScreen() {
       {secondaryBannerBody ? (
         <StatusBanner body={secondaryBannerBody} tone="info" />
       ) : null}
+
+      {/* Asked here rather than in onboarding: this is the first screen where
+          "we'll tell you when they reply" is about a real named opponent. */}
+      <MatchPushNudge
+        userId={session?.user.id}
+        viewerIsParticipant={hub?.viewer_status === "accepted"}
+      />
 
       {hub?.can_extend_listing ? (
         <FigmaSecondaryButton

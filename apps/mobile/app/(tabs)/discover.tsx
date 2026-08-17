@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   discoverCompatiblePlayers,
   discoverOpenMatches,
@@ -38,6 +42,7 @@ import {
   type ScreenVirtualizedListProps,
   formStyles,
 } from "../../src/components/FormUi";
+import { trackDiscoverViewed } from "../../src/lib/analytics";
 import { startNewMatchCreate } from "../../src/lib/create-match-guard";
 import {
   loadDiscoverFilters,
@@ -190,6 +195,31 @@ export default function DiscoverScreen() {
   const showListSkeleton =
     (activeQuery.isPending && !activeQuery.isPlaceholderData) ||
     ownProfileQuery.isLoading;
+
+  const activeFilterCount = useMemo(
+    () => Object.values(matchToggles).filter(Boolean).length,
+    [matchToggles],
+  );
+  const resultsSettled =
+    !showListSkeleton && !activeQuery.isError && !ownProfileQuery.isError;
+
+  /**
+   * Discover's empty-room rate is the cold-start canary: at pilot density,
+   * stacked filters can return nothing by construction. Recorded once per
+   * settled state rather than per render, so the count means "screens a player
+   * actually saw".
+   */
+  useEffect(() => {
+    if (!resultsSettled) {
+      return;
+    }
+
+    trackDiscoverViewed({
+      segment,
+      resultCount: resultsCount,
+      filtersActive: activeFilterCount,
+    });
+  }, [activeFilterCount, resultsCount, resultsSettled, segment]);
 
   const handleRefresh = async () => {
     setPullRefreshing(true);

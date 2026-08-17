@@ -8,6 +8,12 @@ export type Draft = Partial<CreateMatchInput> & {
   targetPlayerName?: string;
   /** Set only when the host started create from a player card, not the tab + button. */
   inviteForPlayer?: boolean;
+  /**
+   * Which surface offered the rematch that started this draft, if any. Needed
+   * because `targetPlayerId` is also set by the Challenge flow on a player
+   * profile, so it cannot on its own tell a rematch from a cold challenge.
+   */
+  rematchSurface?: string;
 };
 
 let draft: Draft = {};

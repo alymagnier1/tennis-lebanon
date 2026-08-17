@@ -9,6 +9,7 @@ import {
   visibilityFromListOnDiscover,
   type PlayIntent,
 } from "@tennis-lebanon/domain";
+import type { RematchSurface } from "./analytics";
 import {
   resetCreateMatchDraft,
   updateCreateMatchDraft,
@@ -141,13 +142,20 @@ export function buildRematchDraft(
   };
 }
 
+/**
+ * `surface` is carried on the draft so `rematch_published` can be attributed
+ * when the match is actually created — the hub is only one of three planned
+ * surfaces, and the open question is which of them converts.
+ */
 export function beginRematch(
   hub: RematchHubFields,
   opponent: RematchOpponent,
+  surface: RematchSurface = "hub",
 ): void {
   resetCreateMatchDraft();
   updateCreateMatchDraft({
     ...buildRematchDraft(hub, opponent),
     inviteForPlayer: true,
+    rematchSurface: surface,
   });
 }

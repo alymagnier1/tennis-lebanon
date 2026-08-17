@@ -13,6 +13,10 @@ import {
   getCreateMatchDraft,
   resetCreateMatchDraft,
 } from "../lib/create-match-draft";
+import {
+  markCreateFlowPublished,
+  trackRematchPublished,
+} from "../lib/create-flow-analytics";
 import { notify } from "../lib/confirm-action";
 import { matchHubRoute, matchInviteRoute } from "../lib/routes";
 import { supabase } from "../lib/supabase";
@@ -64,7 +68,10 @@ export function usePublishMatch(options?: {
       input,
       seedFavoriteClubs,
     }: PublishVariables) => {
-      const targetPlayerId = getCreateMatchDraft().targetPlayerId;
+      const draft = getCreateMatchDraft();
+      const targetPlayerId = draft.targetPlayerId;
+      // Read before the draft is reset in onSuccess.
+      const rematchSurface = draft.rematchSurface;
       const matchId = await createMatchDraft(supabase, input);
       if (destination === "hub") {
         await publishMatch(supabase, matchId);
@@ -78,6 +85,7 @@ export function usePublishMatch(options?: {
         matchId,
         destination,
         targetPlayerId,
+        rematchSurface,
         favoriteClubIds: seedFavoriteClubs
           ? (input.preferredClubIds ?? [])
           : [],
@@ -87,12 +95,18 @@ export function usePublishMatch(options?: {
       matchId,
       destination,
       targetPlayerId,
+      rematchSurface,
       favoriteClubIds,
     }) => {
       if (typeof matchId !== "string" || matchId.length === 0) {
         notify(t("matches.create.publishError"));
         return;
       }
+
+      // Before the navigation below, or the create stack's unmount would read
+      // this flow as abandoned.
+      markCreateFlowPublished();
+      trackRematchPublished(rematchSurface);
 
       const invitedTargetPlayer =
         destination === "hub" && Boolean(targetPlayerId);

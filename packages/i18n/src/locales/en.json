@@ -466,6 +466,14 @@
   },
   "notifications": {
     "centerTitle": "Notifications",
+    "nudge": {
+      "title": "Know the moment they reply",
+      "body": "We will tell you when a player accepts, a time is agreed, or a club confirms your court.",
+      "bodyBlocked": "Notifications are turned off for this app, so you will not hear when a player accepts or a club confirms. You can turn them back on in system settings.",
+      "enable": "Turn on notifications",
+      "openSettings": "Open settings",
+      "dismiss": "Not now"
+    },
     "centerDescription": "Updates about invites, votes, bookings, and reminders.",
     "loadError": "We could not load your notifications.",
     "empty": "You are all caught up.",
