@@ -52,6 +52,7 @@ import { MatchHubPendingBookingSection } from "../../../src/components/match/Mat
 import { MatchHubParticipants } from "../../../src/components/match/MatchHubParticipants";
 import { MatchHubMatchDetails } from "../../../src/components/match/MatchHubMatchDetails";
 import { MatchHubLayout } from "../../../src/components/match/MatchHubLayout";
+import { MatchRematchCard } from "../../../src/components/match/MatchRematchCard";
 import { PlayerProfileSection } from "../../../src/components/player/PlayerProfileSection";
 import {
   ChipButton,
@@ -68,6 +69,12 @@ import {
   resolveHubHeroStartsAt,
 } from "../../../src/lib/hub-agreed-time";
 import { toneForMatchStatus } from "../../../src/lib/match-status-tone";
+import {
+  beginRematch,
+  canOfferRematch,
+  resolveRematchOpponents,
+  type RematchOpponent,
+} from "../../../src/lib/rematch-draft";
 import { useToast } from "../../../src/providers/ToastProvider";
 import {
   canConfirmCourtOnHub,
@@ -87,6 +94,7 @@ import {
   type HubPrimaryActionKind,
 } from "../../../src/lib/hub-action-bar";
 import {
+  CREATE_MATCH_ROUTE,
   matchBookExternalRoute,
   matchBookRoute,
   matchChatRoute,
@@ -361,6 +369,29 @@ export default function MatchHubScreen() {
     booking?.status === "accepted" &&
     RELEASABLE_MATCH_STATUSES.has(hub.status),
   );
+
+  const rematchOpponents = useMemo(
+    () => resolveRematchOpponents(hub?.participants, session?.user.id ?? ""),
+    [hub?.participants, session?.user.id],
+  );
+
+  const showRematch = Boolean(
+    hub &&
+    canOfferRematch({
+      matchStatus: hub.status,
+      viewerStatus: hub.viewer_status,
+      viewerAttendance: hub.viewer_attendance,
+      opponentCount: rematchOpponents.length,
+    }),
+  );
+
+  function handleRematch(opponent: RematchOpponent) {
+    if (!hub) return;
+    // Same route the Challenge button on a player profile takes, so the create
+    // flow sees a normal invite-a-player draft and skips host-default hydration.
+    beginRematch(hub, opponent);
+    router.push(CREATE_MATCH_ROUTE);
+  }
 
   const primaryActionKind = useMemo((): HubPrimaryActionKind => {
     if (!hub) return "none";
@@ -883,6 +914,15 @@ export default function MatchHubScreen() {
           matchId={id!}
           hub={hub}
           viewerUserId={session.user.id}
+        />
+      ) : null}
+
+      {/* Last on the hub on purpose: everything above a completed match is
+          paperwork, and this is the only thing that leads to another match. */}
+      {showRematch ? (
+        <MatchRematchCard
+          opponents={rematchOpponents}
+          onRematch={handleRematch}
         />
       ) : null}
 
