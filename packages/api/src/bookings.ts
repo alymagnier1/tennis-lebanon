@@ -120,6 +120,58 @@ export async function getClubWhatsAppBookingLink(
   return data as ClubWhatsAppBookingLink;
 }
 
+export type CourtRequestStatus = "opened" | "sent" | "not_sent";
+
+export type MatchCourtRequest = {
+  request_id: string;
+  club_id: string;
+  club_name: string;
+  status: CourtRequestStatus;
+  opened_at: string;
+  answered_at: string | null;
+  is_viewer_request: boolean;
+};
+
+/**
+ * Records that the host opened a club's WhatsApp channel for this match, before
+ * the app loses sight of them. Returns the request id to answer on return.
+ */
+export async function recordCourtRequestOpened(
+  client: TennisSupabaseClient,
+  matchId: string,
+  clubId: string,
+): Promise<string> {
+  const { data, error } = await client.rpc("record_court_request_opened", {
+    p_match_id: matchId,
+    p_club_id: clubId,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function answerCourtRequest(
+  client: TennisSupabaseClient,
+  requestId: string,
+  sent: boolean,
+): Promise<void> {
+  const { error } = await client.rpc("answer_court_request", {
+    p_request_id: requestId,
+    p_sent: sent,
+  });
+  if (error) throw error;
+}
+
+export async function listMatchCourtRequests(
+  client: TennisSupabaseClient,
+  matchId: string,
+): Promise<MatchCourtRequest[]> {
+  const { data, error } = await client.rpc("list_match_court_requests", {
+    p_match_id: matchId,
+  });
+  if (error) throw error;
+  return (data ?? []) as MatchCourtRequest[];
+}
+
 export async function requestMatchBooking(
   client: TennisSupabaseClient,
   matchId: string,

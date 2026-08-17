@@ -1,21 +1,39 @@
 import { useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type {
   MatchHubBooking,
   MatchHubCard,
   MatchPreferredClub,
 } from "@tennis-lebanon/api";
-import { getClubDetail, getClubWhatsAppBookingLink } from "@tennis-lebanon/api";
+import {
+  answerCourtRequest,
+  getClubDetail,
+  getClubWhatsAppBookingLink,
+  listMatchCourtRequests,
+  recordCourtRequestOpened,
+} from "@tennis-lebanon/api";
 import { formatPriceMinor } from "@tennis-lebanon/domain";
 import type { Json } from "@tennis-lebanon/types";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { Icon } from "../Icon";
-import { FigmaPrimaryButton } from "../onboarding-ui";
-import { formatUtcSlotInBeirut } from "../../lib/beirut-time";
+import { FigmaPrimaryButton, FigmaSecondaryButton } from "../onboarding-ui";
+import {
+  formatCompactUtcInBeirut,
+  formatUtcSlotInBeirut,
+} from "../../lib/beirut-time";
 import { clubBookingAction } from "../../lib/club-booking-action";
+import {
+  latestSentCourtRequest,
+  pendingCourtRequest,
+} from "../../lib/court-request";
 import { confirmAction } from "../../lib/confirm-action";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { preferredClubLocationLabel } from "../../lib/match-clubs";
@@ -140,6 +158,24 @@ export function MatchHubPreferredClubs({
     })),
   });
 
+  const courtRequestsQuery = useQuery({
+    queryKey: ["match-court-requests", matchId],
+    queryFn: () => listMatchCourtRequests(supabase, matchId),
+  });
+  const courtRequests = courtRequestsQuery.data ?? [];
+  const askedRequest = latestSentCourtRequest(courtRequests);
+  const unansweredRequest = pendingCourtRequest(courtRequests, isHost);
+
+  const answerMutation = useMutation({
+    mutationFn: ({ requestId, sent }: { requestId: string; sent: boolean }) =>
+      answerCourtRequest(supabase, requestId, sent),
+    onSettled: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["match-court-requests", matchId],
+      });
+    },
+  });
+
   const { showToast } = useToast();
   const confirmMutation = useConfirmExternalCourt(matchId, {
     suppressToast: true,
@@ -210,6 +246,20 @@ export function MatchHubPreferredClubs({
         club.club_id,
         matchId,
       );
+
+      // Recorded before the app backgrounds, so the "did you send it?" prompt
+      // is already waiting on return — and survives the app being killed.
+      // Best effort on purpose: measurement must never stop a host from
+      // reaching the club.
+      try {
+        await recordCourtRequestOpened(supabase, matchId, club.club_id);
+        void queryClient.invalidateQueries({
+          queryKey: ["match-court-requests", matchId],
+        });
+      } catch {
+        // Swallowed: the booking conversation matters more than the record.
+      }
+
       await openWhatsAppBooking(link);
     } catch {
       Alert.alert(t("clubs.whatsappError"));
@@ -306,9 +356,7 @@ export function MatchHubPreferredClubs({
               <View style={styles.cardBody}>
                 <Pressable
                   accessibilityRole={isConfirmStage ? "radio" : "button"}
-                  accessibilityState={
-                    isConfirmStage ? { selected } : undefined
-                  }
+                  accessibilityState={isConfirmStage ? { selected } : undefined}
                   accessibilityLabel={club.name}
                   disabled={settled}
                   onPress={() => {
@@ -441,6 +489,55 @@ export function MatchHubPreferredClubs({
           );
         })}
       </View>
+
+      {/* Everyone sees that a club was asked. A joiner who has committed to a
+          time previously had no way to tell whether anything was happening. */}
+      {!settled && askedRequest ? (
+        <AppText style={[styles.askedLine, { writingDirection }]}>
+          {t("matches.hub.courtRequestAsked", {
+            club: askedRequest.club_name,
+            when: formatCompactUtcInBeirut(askedRequest.opened_at),
+          })}
+        </AppText>
+      ) : null}
+
+      {/* Inline rather than a modal on return: it needs no app-lifecycle
+          plumbing, and the state is server-side, so it is still here tomorrow. */}
+      {!settled && unansweredRequest ? (
+        <View style={styles.askPrompt}>
+          <AppText style={[styles.askPromptText, { writingDirection }]}>
+            {t("matches.hub.courtRequestPrompt", {
+              club: unansweredRequest.club_name,
+            })}
+          </AppText>
+          <View style={styles.askPromptActions}>
+            <View style={styles.askPromptAction}>
+              <FigmaSecondaryButton
+                label={t("matches.hub.courtRequestSent")}
+                disabled={answerMutation.isPending}
+                onPress={() =>
+                  answerMutation.mutate({
+                    requestId: unansweredRequest.request_id,
+                    sent: true,
+                  })
+                }
+              />
+            </View>
+            <View style={styles.askPromptAction}>
+              <FigmaSecondaryButton
+                label={t("matches.hub.courtRequestNotSent")}
+                disabled={answerMutation.isPending}
+                onPress={() =>
+                  answerMutation.mutate({
+                    requestId: unansweredRequest.request_id,
+                    sent: false,
+                  })
+                }
+              />
+            </View>
+          </View>
+        </View>
+      ) : null}
 
       {settled && onRelease && booking ? (
         <HubDestructiveLink
@@ -636,6 +733,33 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.88,
+  },
+  askedLine: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 12,
+    lineHeight: 16,
+    color: tennisColors.mutedForeground,
+  },
+  askPrompt: {
+    gap: 10,
+    padding: 12,
+    borderRadius: tennisRadii.md,
+    borderWidth: 1.5,
+    borderColor: tennisColors.border,
+    backgroundColor: tennisColors.muted,
+  },
+  askPromptText: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 13,
+    lineHeight: 18,
+    color: tennisColors.primaryDark,
+  },
+  askPromptActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  askPromptAction: {
+    flex: 1,
   },
   confirmFooter: {
     gap: 10,

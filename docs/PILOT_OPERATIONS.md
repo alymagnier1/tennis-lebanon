@@ -62,6 +62,85 @@ Use these for fast UI checks; still run workflows 1–5 on staging before pilot 
 
 Rehearse: creator cancels a full match with reason; participant withdraws from confirmed booking inside/outside 24h.
 
+## Court handoff funnel (pilot measurement)
+
+v1 secures courts over WhatsApp, so the pilot has to separate two questions that
+one completion number blends together:
+
+| Half                   | What it proves                                   |
+| ---------------------- | ------------------------------------------------ |
+| discover → agreed time | The player side — the thing the pilot is testing |
+| agreed time → played   | The court side — gated on clubs not yet signed   |
+
+A healthy first half with the loss concentrated in the second is a **pass** for
+the player side and the mandate for club partnerships. Migration `070` records
+each reach-out in `match_court_requests` so the second half is visible.
+
+Run against the pilot database (read-only; no personal data in any result):
+
+```sql
+-- Court conversion: how many matches that reached a time actually got a court.
+select
+  count(*) filter (where m.status in ('confirmed','in_progress','completed')) as got_court,
+  count(*)                                                                    as reached_time,
+  round(100.0 * count(*) filter (
+    where m.status in ('confirmed','in_progress','completed')
+  ) / nullif(count(*), 0), 1) as pct
+from public.matches as m
+where m.selected_time_option_id is not null;
+```
+
+```sql
+-- How many clubs a match had to be taken to before a court was secured.
+select clubs_tried, count(*) as matches
+from (
+  select match_id, count(distinct club_id) as clubs_tried
+  from public.match_court_requests
+  group by match_id
+) as t
+group by clubs_tried
+order by clubs_tried;
+```
+
+```sql
+-- Reach-outs that were never answered: the host left for WhatsApp and the app
+-- never heard back. A rising share here means the prompt is being ignored.
+select status, count(*)
+from public.match_court_requests
+group by status;
+```
+
+```sql
+-- Silent clubs. Which venues get asked and never convert to a booking.
+-- `bookings` has no club_id -- a booking reaches its club through `courts`.
+with booked as (
+  select mcr.id
+  from public.match_court_requests as mcr
+  where exists (
+    select 1
+    from public.bookings as b
+    join public.courts as ct on ct.id = b.court_id
+    where b.match_id = mcr.match_id
+      and ct.club_id = mcr.club_id
+      and b.status = 'accepted'
+  )
+)
+select
+  c.name,
+  count(*)                                             as asked,
+  count(booked.id)                                     as booked,
+  round(100.0 * count(booked.id) / nullif(count(*), 0), 1) as pct
+from public.match_court_requests as mcr
+join public.clubs as c on c.id = mcr.club_id
+left join booked on booked.id = mcr.id
+where mcr.status = 'sent'
+group by c.name
+order by asked desc;
+```
+
+The last query is also the **club pitch**: it is a per-club count of booking
+requests the pilot sent them before they ever joined the project.
+
 ## Platform operations (no SQL required)
 
 | Situation       | Dashboard route   | Action                                                       |
