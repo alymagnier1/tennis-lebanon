@@ -15,7 +15,12 @@ import {
   listMyMatches,
   listUserNotifications,
 } from "@tennis-lebanon/api";
-import { isProvisionalPlayerRating } from "@tennis-lebanon/domain";
+import {
+  isProvisionalPlayerRating,
+  PROVISIONAL_RATING_MATCH_THRESHOLD,
+  ratedMatchesUntilRatingUnlock,
+  ratingUnlockProgress,
+} from "@tennis-lebanon/domain";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
 import { ListSkeleton, MatchCard } from "../AppUi";
@@ -26,10 +31,7 @@ import {
   buildMatchCardHeadline,
   resolveMatchCardOpponent,
 } from "../../lib/match-card-headline";
-import {
-  matchCardAreaLabel,
-  matchCardClubLabel,
-} from "../../lib/match-clubs";
+import { matchCardAreaLabel, matchCardClubLabel } from "../../lib/match-clubs";
 import { opponentAvatarColor } from "../../lib/match-card-status";
 import { matchListAction, matchListStartsAt } from "../../lib/match-list-card";
 import {
@@ -98,6 +100,15 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
   const upcomingMatches = sortUpcomingMatches(matchesQuery.data ?? []);
   const playerProfile = profileQuery.data;
   const matchesPlayed = completedQuery.data?.length ?? 0;
+
+  // Rated matches, not completed ones: an unverified or disputed result never
+  // moved the rating, so counting it here would promise a number that is not
+  // actually coming.
+  const ratedMatchCount = playerProfile?.rated_match_count ?? 0;
+  const showRatingProgress = Boolean(
+    playerProfile && isProvisionalPlayerRating(ratedMatchCount),
+  );
+  const ratingRemaining = ratedMatchesUntilRatingUnlock(ratedMatchCount);
 
   const refresh = () => {
     void invitesQuery.refetch();
@@ -169,13 +180,64 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
                 : "—"}
             </AppText>
             <AppText style={styles.statLabel}>
-              {playerProfile &&
-              isProvisionalPlayerRating(playerProfile.rated_match_count)
+              {showRatingProgress
                 ? t("home.stats.provisionalBand")
                 : t("home.stats.skillBand")}
             </AppText>
           </View>
         </View>
+
+        {/* A provisional player has no number to look at and no sense of how
+            far off one is. Naming the distance makes the wait finishable. */}
+        {showRatingProgress ? (
+          <View
+            accessible
+            accessibilityRole="progressbar"
+            accessibilityLabel={t("home.ratingProgress.title")}
+            accessibilityValue={{
+              min: 0,
+              max: PROVISIONAL_RATING_MATCH_THRESHOLD,
+              now: ratedMatchCount,
+              text: t("home.ratingProgress.remaining", {
+                remaining: ratingRemaining,
+              }),
+            }}
+            style={styles.ratingProgress}
+          >
+            <View
+              style={[
+                styles.ratingProgressTop,
+                { flexDirection: rowDirection },
+              ]}
+            >
+              <AppText
+                style={[styles.ratingProgressTitle, { writingDirection }]}
+                maxLines={1}
+              >
+                {t("home.ratingProgress.title")}
+              </AppText>
+              <AppText style={styles.ratingProgressCount}>
+                {t("home.ratingProgress.progress", {
+                  done: ratedMatchCount,
+                  threshold: PROVISIONAL_RATING_MATCH_THRESHOLD,
+                })}
+              </AppText>
+            </View>
+            <View style={styles.ratingTrack}>
+              <View
+                style={[
+                  styles.ratingFill,
+                  { width: `${ratingUnlockProgress(ratedMatchCount) * 100}%` },
+                ]}
+              />
+            </View>
+            <AppText style={[styles.ratingProgressHint, { writingDirection }]}>
+              {t("home.ratingProgress.remaining", {
+                remaining: ratingRemaining,
+              })}
+            </AppText>
+          </View>
+        ) : null}
       </View>
 
       <View style={styles.body}>
@@ -410,6 +472,49 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "rgba(255,255,255,0.8)",
     marginTop: 4,
+  },
+  ratingProgress: {
+    marginTop: 12,
+    gap: 8,
+    padding: 14,
+    borderRadius: tennisRadii.lg,
+    backgroundColor: tennisColors.heroOverlay,
+    borderWidth: 1,
+    borderColor: tennisColors.heroBorder,
+  },
+  ratingProgressTop: {
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  ratingProgressTitle: {
+    flexShrink: 1,
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 14,
+    color: tennisColors.white,
+  },
+  ratingProgressCount: {
+    flexShrink: 0,
+    fontFamily: tennisFontFamily.headingSemi,
+    fontSize: 14,
+    color: tennisColors.lime,
+  },
+  ratingTrack: {
+    height: 6,
+    borderRadius: 3,
+    overflow: "hidden",
+    backgroundColor: "rgba(255,255,255,0.22)",
+  },
+  ratingFill: {
+    height: "100%",
+    borderRadius: 3,
+    backgroundColor: tennisColors.lime,
+  },
+  ratingProgressHint: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 13,
+    lineHeight: 18,
+    color: "rgba(255,255,255,0.8)",
   },
   body: {
     paddingHorizontal: tennisSpacing.screenX,

@@ -7,6 +7,33 @@ export function isProvisionalPlayerRating(
   return ratedMatchCount < threshold;
 }
 
+/**
+ * Rated matches still owed before the numeric rating is earned; 0 once it is.
+ *
+ * Withholding the number until it means something is the honest call, but it
+ * leaves a new player with nothing to feel during exactly the stretch where
+ * they decide whether to come back. Stating the distance turns the constraint
+ * into something they can finish.
+ */
+export function ratedMatchesUntilRatingUnlock(
+  ratedMatchCount: number,
+  threshold = PROVISIONAL_RATING_MATCH_THRESHOLD,
+): number {
+  return Math.max(0, threshold - Math.max(0, ratedMatchCount));
+}
+
+/** Share of the way to an earned rating, clamped to between 0 and 1. */
+export function ratingUnlockProgress(
+  ratedMatchCount: number,
+  threshold = PROVISIONAL_RATING_MATCH_THRESHOLD,
+): number {
+  if (threshold <= 0) {
+    return 1;
+  }
+
+  return Math.min(1, Math.max(0, ratedMatchCount) / threshold);
+}
+
 export function formatPublicPlayerLevelLabel(input: {
   skillBand: string;
   displayRating: number | null;

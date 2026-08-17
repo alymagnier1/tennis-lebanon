@@ -5,6 +5,8 @@ import {
   formatPublicPlayerLevelLabel,
   isProvisionalPlayerRating,
   PROVISIONAL_RATING_MATCH_THRESHOLD,
+  ratedMatchesUntilRatingUnlock,
+  ratingUnlockProgress,
 } from "./rating-display";
 
 describe("rating-display", () => {
@@ -12,6 +14,24 @@ describe("rating-display", () => {
     expect(isProvisionalPlayerRating(4)).toBe(true);
     expect(isProvisionalPlayerRating(5)).toBe(false);
     expect(PROVISIONAL_RATING_MATCH_THRESHOLD).toBe(5);
+  });
+
+  it("counts the rated matches still owed before the number is earned", () => {
+    expect(ratedMatchesUntilRatingUnlock(0)).toBe(5);
+    expect(ratedMatchesUntilRatingUnlock(4)).toBe(1);
+    expect(ratedMatchesUntilRatingUnlock(5)).toBe(0);
+    // Never counts backwards once the threshold is passed.
+    expect(ratedMatchesUntilRatingUnlock(9)).toBe(0);
+    expect(ratedMatchesUntilRatingUnlock(-1)).toBe(5);
+  });
+
+  it("reports unlock progress as a clamped share", () => {
+    expect(ratingUnlockProgress(0)).toBe(0);
+    expect(ratingUnlockProgress(2)).toBeCloseTo(0.4);
+    expect(ratingUnlockProgress(5)).toBe(1);
+    expect(ratingUnlockProgress(12)).toBe(1);
+    expect(ratingUnlockProgress(-3)).toBe(0);
+    expect(ratingUnlockProgress(0, 0)).toBe(1);
   });
 
   it("formats public player labels with provisional badge or earned rating", () => {
