@@ -12,6 +12,7 @@ function match(overrides: Partial<MyMatchRow> = {}): MyMatchRow {
     intent: "either",
     participant_status: "accepted",
     is_creator: true,
+    viewer_attendance: null,
     participant_count: 1,
     capacity: 2,
     soonest_time: "2026-08-10T15:00:00.000Z",
