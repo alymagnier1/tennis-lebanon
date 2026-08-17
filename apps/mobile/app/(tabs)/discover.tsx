@@ -10,7 +10,7 @@ import {
 import {
   discoverCompatiblePlayers,
   discoverOpenMatches,
-  getActiveZones,
+  listOwnPreferredZoneIds,
   getOwnPlayerProfile,
   listMyMatches,
   type CompatiblePlayerCard,
@@ -88,9 +88,13 @@ export default function DiscoverScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const filtersHydrated = !userId || hydratedForUserId === userId;
 
-  const zonesQuery = useQuery({
-    queryKey: ["active-zones"],
-    queryFn: () => getActiveZones(supabase),
+  // The player's own preferred zones, not the country's zone directory. This used
+  // to be getActiveZones, so the Area filter was handed every zone in Lebanon and
+  // restricting to all of them matched everyone.
+  const ownZonesQuery = useQuery({
+    queryKey: ["own-preferred-zone-ids", userId],
+    queryFn: () => listOwnPreferredZoneIds(supabase),
+    enabled: Boolean(userId),
   });
 
   const ownProfileQuery = useQuery({
@@ -129,9 +133,9 @@ export default function DiscoverScreen() {
     return resolveDiscoverFiltersFromProfile({
       toggles: matchToggles,
       playIntent: profile.play_intent as PlayIntent,
-      allZoneIds: zonesQuery.data?.map((zone) => zone.id),
+      ownZoneIds: ownZonesQuery.data,
     });
-  }, [matchToggles, ownProfileQuery.data, zonesQuery.data]);
+  }, [matchToggles, ownProfileQuery.data, ownZonesQuery.data]);
 
   const playersQuery = useQuery({
     queryKey: ["discover-players", resolvedFilters],
@@ -370,7 +374,13 @@ export default function DiscoverScreen() {
       </View>
 
       {!showListSkeleton && !activeQuery.isError && !ownProfileQuery.isError ? (
-        <DiscoverSectionSplitter segment={segment} count={resultsCount} />
+        <DiscoverSectionSplitter
+          segment={segment}
+          count={resultsCount}
+          // Read off the resolved filters rather than the toggle, so the wording
+          // cannot drift from what was actually sent to the RPC.
+          nearbyOnly={resolvedFilters?.zoneIds !== undefined}
+        />
       ) : null}
 
       {showListSkeleton ? <ListSkeleton rows={4} /> : null}

@@ -27,10 +27,19 @@ export type DiscoverMatchToggles = {
   matchAvailability: boolean;
 };
 
+/**
+ * Every toggle **narrows** when true. `matchArea` used to do the opposite, which
+ * made the chip labelled "Area" widen the search and made "Show everyone" — which
+ * clears all four — add a zone restriction.
+ *
+ * `matchArea` defaults to false so the room stays as wide as it actually is today
+ * at pilot density; the difference is that the chip now tells the truth about it,
+ * and turning it on is a real opt-in to your own areas.
+ */
 export const DEFAULT_DISCOVER_MATCH_TOGGLES: DiscoverMatchToggles = {
   matchLevel: true,
   matchIntent: false,
-  matchArea: true,
+  matchArea: false,
   matchAvailability: false,
 };
 
@@ -99,13 +108,21 @@ export function widenDiscoveryZoneIds(allZoneIds: string[]): string[] {
 export function resolveDiscoverFiltersFromProfile(input: {
   toggles: DiscoverMatchToggles;
   playIntent: PlayIntent;
-  allZoneIds?: string[];
+  /**
+   * The player's **own** preferred zones. Named `allZoneIds` once and fed from
+   * `getActiveZones`, which is every zone in the country — restricting to all of
+   * them matches everyone, so the Area toggle filtered nothing in either state.
+   */
+  ownZoneIds?: string[];
 }): DiscoveryFiltersInput {
   return {
+    // Narrows when on, like the other three. `undefined` means "no zone filter"
+    // to `discover_compatible_players`, so a player with no zones set cannot be
+    // restricted to nothing.
     zoneIds:
-      input.toggles.matchArea || !input.allZoneIds?.length
-        ? undefined
-        : input.allZoneIds,
+      input.toggles.matchArea && input.ownZoneIds?.length
+        ? input.ownZoneIds
+        : undefined,
     // Format is a per-match choice, not a discovery identity filter.
     format: null,
     intent:

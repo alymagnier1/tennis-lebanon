@@ -9,8 +9,15 @@ export type PersistedDiscoverFilters = {
   matchToggles?: Partial<DiscoverMatchToggles>;
 };
 
+/**
+ * `v2` because `matchArea` changed meaning: it used to widen the search when on
+ * and narrow it when off. A stored `true` was recorded under the old meaning, so
+ * honouring it now would restrict a player who had asked for the opposite. The
+ * old key is left to expire rather than migrated — there is nothing worth
+ * translating in a value whose sense was reversed.
+ */
 function storageKey(userId: string): string {
-  return `tennis-lebanon:discover-filters:${userId}`;
+  return `tennis-lebanon:discover-filters:v2:${userId}`;
 }
 
 async function readValue(key: string): Promise<string | null> {
