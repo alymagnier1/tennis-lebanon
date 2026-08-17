@@ -62,21 +62,262 @@ Use these for fast UI checks; still run workflows 1–5 on staging before pilot 
 
 Rehearse: creator cancels a full match with reason; participant withdraws from confirmed booking inside/outside 24h.
 
-## Court handoff funnel (pilot measurement)
+## Pilot measurement
 
-v1 secures courts over WhatsApp, so the pilot has to separate two questions that
-one completion number blends together:
+**OMTM: completed matches per active player per month.**
+**Counter-metric: no-show + late-cancel rate** — without it, completions can be inflated by
+pushing people into matches they abandon. Report the two together, always.
+
+Not DAU, sessions or opens. For a weekly sport those measure the wrong thing, and optimising
+them would justify building the social feed the PRD excludes.
+
+Every query below is read-only and returns no personal data. All were executed against a live
+database before being written here.
+
+### Read the funnel in two halves
+
+v1 secures courts over WhatsApp, so one completion number blends two different questions:
 
 | Half                   | What it proves                                   |
 | ---------------------- | ------------------------------------------------ |
 | discover → agreed time | The player side — the thing the pilot is testing |
 | agreed time → played   | The court side — gated on clubs not yet signed   |
 
-A healthy first half with the loss concentrated in the second is a **pass** for
-the player side and the mandate for club partnerships. Migration `070` records
-each reach-out in `match_court_requests` so the second half is visible.
+A healthy first half with the loss concentrated in the second is a **pass** for the player side
+and the mandate for club partnerships. One blended number cannot tell them apart, and a pilot
+that cannot tell them apart has to be run twice.
 
-Run against the pilot database (read-only; no personal data in any result):
+```sql
+select
+  count(*) filter (where m.selected_time_option_id is not null) as reached_agreed_time,
+  count(*)                                                      as published_or_later,
+  round(100.0 * count(*) filter (where m.selected_time_option_id is not null)
+        / nullif(count(*), 0), 1) as pct_discover_to_agreed,
+  count(*) filter (where m.status = 'completed')                as played,
+  round(100.0 * count(*) filter (where m.status = 'completed')
+        / nullif(count(*) filter (where m.selected_time_option_id is not null), 0), 1)
+        as pct_agreed_to_played
+from public.matches as m
+where m.status <> 'draft';
+```
+
+### Activation — the A1 magic moment
+
+**A1 = a named opponent accepted and a time is agreed, within 7 days of finishing onboarding.**
+The first proof the network works. Not signup, not a profile, not browsing.
+
+Cohort anchor is `onboarding_completed_at`, not `created_at` — someone who never finished
+onboarding never entered the funnel. The A1 timestamp is the later of the last accepted join and
+the last yes-vote on the selected time option; a fixed-timing match has no votes, so it correctly
+falls back to the join.
+
+```sql
+with onboarded as (
+  select p.id as user_id, p.onboarding_completed_at as joined_at
+  from public.profiles as p
+  where p.onboarding_completed_at is not null
+),
+a1 as (
+  select
+    mp.user_id,
+    min(greatest(second_join.joined_at,
+                 coalesce(last_yes.voted_at, second_join.joined_at))) as a1_at
+  from public.match_participants as mp
+  join public.matches as m on m.id = mp.match_id
+  join lateral (
+    select max(x.joined_at) as joined_at
+    from public.match_participants as x
+    where x.match_id = m.id and x.status = 'accepted'
+  ) as second_join on true
+  left join lateral (
+    select max(v.updated_at) as voted_at
+    from public.match_time_votes as v
+    where v.time_option_id = m.selected_time_option_id and v.vote = 'yes'
+  ) as last_yes on true
+  where mp.status = 'accepted'
+    and m.selected_time_option_id is not null
+    and (select count(*) from public.match_participants as c
+         where c.match_id = m.id and c.status = 'accepted') >= 2
+  group by mp.user_id
+)
+select
+  date_trunc('week', o.joined_at)::date as cohort_week,
+  count(*)                              as onboarded,
+  count(a1.a1_at) filter (where a1.a1_at <= o.joined_at + interval '7 days') as reached_a1_7d,
+  round(100.0 * count(a1.a1_at) filter (where a1.a1_at <= o.joined_at + interval '7 days')
+        / nullif(count(*), 0), 1) as pct
+from onboarded as o
+left join a1 on a1.user_id = o.user_id
+group by 1
+order by 1;
+```
+
+```sql
+-- Time to first completed match, by cohort week.
+with onboarded as (
+  select p.id as user_id, p.onboarding_completed_at as joined_at
+  from public.profiles as p
+  where p.onboarding_completed_at is not null
+),
+first_done as (
+  select mp.user_id,
+         min(coalesce(mr.confirmed_at, mr.resolved_at, m.updated_at)) as first_completed_at
+  from public.match_participants as mp
+  join public.matches as m on m.id = mp.match_id
+  left join public.match_results as mr on mr.match_id = m.id
+  where mp.status = 'accepted' and m.status = 'completed'
+  group by mp.user_id
+)
+select
+  date_trunc('week', o.joined_at)::date as cohort_week,
+  count(*)                              as onboarded,
+  count(f.first_completed_at)           as ever_completed,
+  round(percentile_cont(0.5) within group (
+    order by extract(epoch from (f.first_completed_at - o.joined_at)) / 3600
+  )::numeric, 1) as median_hours_to_first
+from onboarded as o
+left join first_done as f on f.user_id = o.user_id
+group by 1
+order by 1;
+```
+
+### Repeat play — the pilot's pass/fail
+
+One match is a novelty. Two is a behaviour.
+
+```sql
+-- Second completed match within 30 days of the first.
+with done as (
+  select mp.user_id,
+         coalesce(mr.confirmed_at, mr.resolved_at, m.updated_at) as completed_at
+  from public.match_participants as mp
+  join public.matches as m on m.id = mp.match_id
+  left join public.match_results as mr on mr.match_id = m.id
+  where mp.status = 'accepted' and m.status = 'completed'
+),
+ranked as (
+  select user_id, completed_at,
+         row_number() over (partition by user_id order by completed_at) as n,
+         min(completed_at) over (partition by user_id)                  as first_at
+  from done
+)
+select
+  count(distinct user_id) as players_with_1,
+  count(distinct user_id) filter (
+    where n = 2 and completed_at <= first_at + interval '30 days'
+  ) as players_with_2_in_30d,
+  round(100.0 * count(distinct user_id) filter (
+    where n = 2 and completed_at <= first_at + interval '30 days'
+  ) / nullif(count(distinct user_id), 0), 1) as pct
+from ranked;
+```
+
+```sql
+-- H7: repeat-opponent share. If this runs high, prioritise standing groups over
+-- discovery ranking. Counts viewer -> opponent pairings, so one singles match
+-- appears twice; do not read the count as a number of matches.
+with pairs as (
+  select m.id as match_id,
+         mine.user_id   as viewer,
+         theirs.user_id as opponent,
+         coalesce(mr.confirmed_at, mr.resolved_at, m.updated_at) as completed_at
+  from public.matches as m
+  join public.match_participants as mine
+    on mine.match_id = m.id and mine.status = 'accepted'
+  join public.match_participants as theirs
+    on theirs.match_id = m.id and theirs.status = 'accepted'
+   and theirs.user_id <> mine.user_id
+  left join public.match_results as mr on mr.match_id = m.id
+  where m.status = 'completed'
+)
+select
+  count(*)                                as viewer_opponent_pairings,
+  count(*) filter (where prior.n > 0)     as with_prior_history,
+  round(100.0 * count(*) filter (where prior.n > 0) / nullif(count(*), 0), 1) as pct_repeat
+from pairs as p
+cross join lateral (
+  select count(*) as n from pairs as q
+  where q.viewer = p.viewer and q.opponent = p.opponent and q.completed_at < p.completed_at
+) as prior;
+```
+
+### Liquidity and coordination health
+
+```sql
+-- Fill rate and expiry rate. Below ~50% filled, the hard side stops hosting.
+select
+  count(*) as published,
+  count(*) filter (
+    where (select count(*) from public.match_participants mp
+           where mp.match_id = m.id and mp.status = 'accepted')
+          >= public.match_capacity_for_format(m.format)
+  ) as reached_capacity,
+  count(*) filter (where m.status = 'expired') as expired,
+  round(100.0 * count(*) filter (
+    where (select count(*) from public.match_participants mp
+           where mp.match_id = m.id and mp.status = 'accepted')
+          >= public.match_capacity_for_format(m.format)
+  ) / nullif(count(*), 0), 1) as pct_filled,
+  round(100.0 * count(*) filter (where m.status = 'expired')
+        / nullif(count(*), 0), 1) as pct_expired
+from public.matches as m
+where m.status <> 'draft';
+```
+
+```sql
+-- H3: completion by timing mode. Fixed is already the default
+-- (resolveMatchHostDefaults), so a large flexible population here would be a
+-- surprise worth investigating.
+select m.timing_mode,
+       count(*)                                      as matches,
+       count(*) filter (where m.status = 'completed') as completed,
+       round(100.0 * count(*) filter (where m.status = 'completed')
+             / nullif(count(*), 0), 1) as pct_completed
+from public.matches as m
+where m.status <> 'draft'
+group by m.timing_mode
+order by matches desc;
+```
+
+```sql
+-- H8: host vs joiner. If hosts retain materially worse, host tooling becomes the
+-- roadmap. Role is per-match, so someone who both hosts and joins appears in
+-- both rows -- these are not mutually exclusive cohorts.
+select case when mp.is_creator then 'host' else 'joiner' end as role,
+       count(distinct mp.user_id)                            as players,
+       count(distinct mp.user_id) filter (where m.status = 'completed') as ever_completed,
+       round(100.0 * count(distinct mp.user_id) filter (where m.status = 'completed')
+             / nullif(count(distinct mp.user_id), 0), 1) as pct
+from public.match_participants as mp
+join public.matches as m on m.id = mp.match_id
+where mp.status = 'accepted'
+group by 1
+order by 1;
+```
+
+### Counter-metric — abandonment
+
+Report beside the OMTM. A rising completed-match count with a rising abandonment rate is not
+progress; it is the network's trust being spent.
+
+```sql
+select
+  count(*)                                                    as attendance_rows,
+  count(*) filter (where mp.attendance = 'attended')           as attended,
+  count(*) filter (where mp.attendance = 'no_show')            as no_show,
+  count(*) filter (where mp.attendance = 'late_cancel')        as late_cancel,
+  round(100.0 * count(*) filter (where mp.attendance in ('no_show', 'late_cancel'))
+        / nullif(count(*), 0), 1) as pct_abandoned
+from public.match_participants as mp
+join public.matches as m on m.id = mp.match_id
+where mp.status = 'accepted'
+  and m.status in ('completed', 'in_progress', 'cancelled', 'expired');
+```
+
+### Court handoff
+
+Migration `070` records each reach-out in `match_court_requests`, which is what makes the second
+half of the funnel visible at all.
 
 ```sql
 -- Court conversion: how many matches that reached a time actually got a court.
@@ -140,6 +381,23 @@ order by asked desc;
 
 The last query is also the **club pitch**: it is a per-club count of booking
 requests the pilot sent them before they ever joined the project.
+
+### Reading these honestly
+
+- **Cohort by signup week.** Blended averages hide whether the product is improving, and at pilot
+  scale a handful of enthusiasts carry the mean for months. The activation queries above already
+  group by `cohort_week`; add the same `date_trunc('week', p.onboarding_completed_at)` to any
+  query you care about over time.
+- **Cut liquidity per zone, never aggregated.** Networks are local. A healthy corridor and a dead
+  one average into a lie.
+- **`completed_at` is approximate.** There is no `matches.completed_at` column, so completion time
+  is `coalesce(mr.confirmed_at, mr.resolved_at, m.updated_at)` — the same expression
+  `list_my_completed_matches` uses, kept identical on purpose. The `m.updated_at` fallback is
+  imprecise because any row update bumps it, so treat time-to-first-match as a trend, not a
+  measurement. If precision starts to matter, add a real `completed_at`.
+- **These are hypotheses until the pilot runs.** Nothing here has met a real user. Draw the line in
+  the sand — a target, a date, and what you do if you miss — before results arrive, or every number
+  gets rationalised after the fact.
 
 ## Platform operations (no SQL required)
 
