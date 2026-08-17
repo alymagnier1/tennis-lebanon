@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   beirutDateKeyWithOffset,
-  isSlotAlreadyPinged,
+  findSlotCoverage,
   nextPingSlots,
   PING_BLOCKS,
 } from "./availability-ping";
 import { availabilityDayPartFromLocalTime } from "./player-availability-label";
-import { utcIsoToBeirutFields } from "./beirut-time";
+import { beirutLocalToUtcIso, utcIsoToBeirutFields } from "./beirut-time";
 
 describe("PING_BLOCKS", () => {
   it("agrees with how discovery classifies a time", () => {
@@ -126,50 +126,146 @@ describe("nextPingSlots", () => {
   });
 });
 
-describe("isSlotAlreadyPinged", () => {
+describe("findSlotCoverage", () => {
+  // Monday 17 Aug 2026, evening block: 17:00-22:00 Beirut.
   const slot = {
-    startsAt: "2026-08-17T14:00:00.000Z",
-    endsAt: "2026-08-17T19:00:00.000Z",
+    startsAt: beirutLocalToUtcIso("2026-08-17", "17:00"),
+    endsAt: beirutLocalToUtcIso("2026-08-17", "22:00"),
+    dateKey: "2026-08-17",
   };
+  const MONDAY = 1;
 
-  it("detects an exact match", () => {
+  function oneOff(startsAt: string, endsAt: string, id = "one-off") {
+    return {
+      id,
+      is_recurring: false,
+      starts_at: startsAt,
+      ends_at: endsAt,
+      weekday: null,
+      local_start: null,
+      local_end: null,
+      valid_from: null,
+      valid_until: null,
+    };
+  }
+
+  function recurring(
+    weekday: number,
+    localStart: string,
+    localEnd: string,
+    extra: { valid_from?: string; valid_until?: string } = {},
+  ) {
+    return {
+      id: "recurring",
+      is_recurring: true,
+      starts_at: null,
+      ends_at: null,
+      weekday,
+      local_start: localStart,
+      local_end: localEnd,
+      valid_from: extra.valid_from ?? null,
+      valid_until: extra.valid_until ?? null,
+    };
+  }
+
+  it("finds an exact one-off match", () => {
     expect(
-      isSlotAlreadyPinged(slot, [
-        { starts_at: slot.startsAt, ends_at: slot.endsAt },
-      ]),
-    ).toBe(true);
+      findSlotCoverage(slot, MONDAY, [oneOff(slot.startsAt, slot.endsAt)]),
+    ).toMatchObject({ kind: "one_off" });
   });
 
-  it("detects a partial overlap, matching the RPC's dedupe rule", () => {
+  it("finds a partial one-off overlap, matching the RPC's dedupe rule", () => {
     expect(
-      isSlotAlreadyPinged(slot, [
-        {
-          starts_at: "2026-08-17T18:00:00.000Z",
-          ends_at: "2026-08-17T21:00:00.000Z",
-        },
+      findSlotCoverage(slot, MONDAY, [
+        oneOff(
+          beirutLocalToUtcIso("2026-08-17", "20:00"),
+          beirutLocalToUtcIso("2026-08-17", "23:00"),
+        ),
       ]),
-    ).toBe(true);
+    ).toMatchObject({ kind: "one_off" });
   });
 
   it("treats a touching boundary as not overlapping", () => {
-    // A window ending exactly when the slot starts is a different block.
+    // A window ending exactly when the block starts is a different block.
     expect(
-      isSlotAlreadyPinged(slot, [
-        {
-          starts_at: "2026-08-17T09:00:00.000Z",
-          ends_at: "2026-08-17T14:00:00.000Z",
-        },
+      findSlotCoverage(slot, MONDAY, [
+        oneOff(
+          beirutLocalToUtcIso("2026-08-17", "12:00"),
+          beirutLocalToUtcIso("2026-08-17", "17:00"),
+        ),
       ]),
-    ).toBe(false);
+    ).toBeNull();
   });
 
-  it("ignores recurring windows, which carry no timestamps", () => {
+  it("finds a recurring window on the same weekday", () => {
+    // The bug this replaces: recurring windows were skipped because they carry no
+    // timestamps, so a player whose grid said "free Monday evenings" was still
+    // asked to declare it, and the tap wrote a duplicate.
     expect(
-      isSlotAlreadyPinged(slot, [{ starts_at: null, ends_at: null }]),
-    ).toBe(false);
+      findSlotCoverage(slot, MONDAY, [
+        recurring(MONDAY, "17:00:00", "22:00:00"),
+      ]),
+    ).toMatchObject({ kind: "recurring" });
   });
 
-  it("is false against an empty list", () => {
-    expect(isSlotAlreadyPinged(slot, [])).toBe(false);
+  it("ignores a recurring window on another weekday", () => {
+    expect(
+      findSlotCoverage(slot, MONDAY, [recurring(2, "17:00:00", "22:00:00")]),
+    ).toBeNull();
+  });
+
+  it("ignores a recurring window whose hours do not reach the block", () => {
+    expect(
+      findSlotCoverage(slot, MONDAY, [
+        recurring(MONDAY, "07:00:00", "12:00:00"),
+      ]),
+    ).toBeNull();
+  });
+
+  it("counts a recurring window that only partly overlaps the block", () => {
+    expect(
+      findSlotCoverage(slot, MONDAY, [
+        recurring(MONDAY, "12:00:00", "18:00:00"),
+      ]),
+    ).toMatchObject({ kind: "recurring" });
+  });
+
+  it("respects the validity window on a recurring entry", () => {
+    expect(
+      findSlotCoverage(slot, MONDAY, [
+        recurring(MONDAY, "17:00:00", "22:00:00", {
+          valid_from: "2026-09-01",
+        }),
+      ]),
+    ).toBeNull();
+    expect(
+      findSlotCoverage(slot, MONDAY, [
+        recurring(MONDAY, "17:00:00", "22:00:00", {
+          valid_until: "2026-08-01",
+        }),
+      ]),
+    ).toBeNull();
+    expect(
+      findSlotCoverage(slot, MONDAY, [
+        recurring(MONDAY, "17:00:00", "22:00:00", {
+          valid_from: "2026-08-01",
+          valid_until: "2026-08-31",
+        }),
+      ]),
+    ).toMatchObject({ kind: "recurring" });
+  });
+
+  it("returns the window itself, so a ping can be told from a grid entry", () => {
+    // Only a one-off is the caller's to delete; removing a grid entry from Home
+    // would quietly rewrite the player's usual week.
+    const coverage = findSlotCoverage(slot, MONDAY, [
+      oneOff(slot.startsAt, slot.endsAt, "window-42"),
+    ]);
+
+    expect(coverage?.window.id).toBe("window-42");
+  });
+
+  it("is null against an empty list", () => {
+    expect(findSlotCoverage(slot, MONDAY, [])).toBeNull();
   });
 });

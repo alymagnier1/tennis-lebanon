@@ -461,14 +461,17 @@
     "liquidityClubs": "Parcourir les clubs",
     "liquidityClubsHint": "Annuaire des clubs et réservation WhatsApp",
     "free": {
-      "title": "Quand êtes-vous libre ?",
-      "subtitle": "Une seule touche. Pas de match, aucun engagement — les joueurs libres au même moment peuvent vous trouver.",
-      "chipLabel": "Je suis libre {{slot}}",
-      "chipLabelSet": "Déjà libre {{slot}}",
+      "busiestTitle": "Le plus de joueurs libres cette semaine",
+      "busiestSubtitle": "Touchez un créneau pour dire que vous êtes libre. Pas de match, aucun engagement.",
+      "rowLabelAdd": "Je suis libre {{slot}}",
+      "rowLabelCovered": "Déjà libre {{slot}}",
       "confirmation": "Vous êtes libre {{slot}}. Les joueurs libres à ce moment peuvent maintenant vous trouver.",
       "error": "Nous n'avons pas pu enregistrer. Réessayez.",
       "othersFree": "{{players}} dispo",
-      "busiestTitle": "Le plus de joueurs libres cette semaine"
+      "remove": "Retirer",
+      "fromAvailability": "Depuis vos disponibilités",
+      "rowLabelRemove": "Libre {{slot}}. Touchez pour retirer.",
+      "removedConfirmation": "{{slot}} retiré."
     },
     "quickActionsTitle": "Actions rapides",
     "quickActionFindPlayers": "Trouver des joueurs",

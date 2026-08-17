@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  liquidityCountForSlot,
   peakLiquidity,
-  pickLiquidityHighlights,
+  pickBusiestBlocks,
   toLiquidityRows,
   type LiquidityRow,
 } from "./availability-liquidity";
-import { nextPingSlots, PING_BLOCKS } from "./availability-ping";
+import { PING_BLOCKS } from "./availability-ping";
 import { beirutLocalToUtcIso } from "./beirut-time";
 
 /** A block as the RPC returns it, built from Beirut wall clock like the SQL does. */
@@ -95,31 +94,28 @@ describe("toLiquidityRows", () => {
   });
 });
 
-describe("pickLiquidityHighlights", () => {
-  const rows = toLiquidityRows(
-    [
-      slot("2026-08-17", "morning", 2),
-      slot("2026-08-20", "evening", 6),
-      slot("2026-08-22", "morning", 4),
-    ],
-    NOW,
-  );
-
-  it("leaves out blocks a chip already offers", () => {
-    // At 08:00 the first chip is this morning, which carries its own count.
-    const chips = nextPingSlots(NOW, 1);
-    expect(chips[0]).toMatchObject({ dayOffset: 0, part: "morning" });
-
-    const highlights = pickLiquidityHighlights(rows, chips, 5);
-    expect(
-      highlights.some((row) => row.dayOffset === 0 && row.part === "morning"),
-    ).toBe(false);
-    expect(highlights).toHaveLength(2);
-  });
-
+describe("pickBusiestBlocks", () => {
   it("ranks the busiest block first, not the soonest", () => {
-    const highlights = pickLiquidityHighlights(rows, [], 3);
-    expect(highlights.map((row) => row.playerCount)).toEqual([6, 4, 2]);
+    const rows = toLiquidityRows(
+      [
+        slot("2026-08-17", "morning", 2),
+        slot("2026-08-20", "evening", 6),
+        slot("2026-08-22", "morning", 4),
+      ],
+      NOW,
+    );
+
+    expect(
+      pickBusiestBlocks(rows, 3).map((row) => [
+        row.dayOffset,
+        row.part,
+        row.playerCount,
+      ]),
+    ).toEqual([
+      [3, "evening", 6],
+      [5, "morning", 4],
+      [0, "morning", 2],
+    ]);
   });
 
   it("breaks a tie on count by taking the sooner block", () => {
@@ -128,42 +124,44 @@ describe("pickLiquidityHighlights", () => {
       NOW,
     );
 
-    expect(pickLiquidityHighlights(tied, [], 2)[0]?.dayOffset).toBe(2);
+    expect(pickBusiestBlocks(tied, 2)[0]).toMatchObject({
+      dayOffset: 2,
+      part: "evening",
+    });
   });
 
   it("honours the limit", () => {
-    expect(pickLiquidityHighlights(rows, [], 1)).toHaveLength(1);
+    const rows = toLiquidityRows(
+      [
+        slot("2026-08-18", "evening", 1),
+        slot("2026-08-19", "evening", 2),
+        slot("2026-08-20", "evening", 3),
+      ],
+      NOW,
+    );
+
+    expect(pickBusiestBlocks(rows, 2)).toHaveLength(2);
+  });
+
+  it("is empty when no block has anyone free", () => {
+    // toLiquidityRows already drops zero counts, so an empty week reaches here as
+    // an empty list — and the section renders nothing rather than a dead heading.
+    expect(
+      pickBusiestBlocks(
+        toLiquidityRows([slot("2026-08-18", "evening", 0)], NOW),
+      ),
+    ).toEqual([]);
   });
 
   it("does not reorder the caller's array", () => {
+    const rows = toLiquidityRows(
+      [slot("2026-08-18", "evening", 1), slot("2026-08-20", "evening", 9)],
+      NOW,
+    );
     const before = rows.map((row) => row.startsAt);
-    pickLiquidityHighlights(rows, [], 3);
+
+    pickBusiestBlocks(rows, 2);
     expect(rows.map((row) => row.startsAt)).toEqual(before);
-  });
-});
-
-describe("liquidityCountForSlot", () => {
-  const rows = toLiquidityRows([slot("2026-08-17", "evening", 5)], NOW);
-
-  it("finds the count for a chip's own block", () => {
-    const evening = nextPingSlots(NOW, 3).find(
-      (candidate) => candidate.part === "evening",
-    )!;
-
-    expect(liquidityCountForSlot(evening, rows)).toBe(5);
-  });
-
-  it("matches on the instant, not the string form", () => {
-    // The RPC and beirutLocalToUtcIso can format the same instant differently;
-    // the chip's count must not disappear because of a trailing-zeros mismatch.
-    expect(
-      liquidityCountForSlot({ startsAt: "2026-08-17T14:00:00+00:00" }, rows),
-    ).toBe(5);
-  });
-
-  it("returns zero when nobody is free in that block", () => {
-    const morning = nextPingSlots(NOW, 1)[0]!;
-    expect(liquidityCountForSlot(morning, rows)).toBe(0);
   });
 });
 

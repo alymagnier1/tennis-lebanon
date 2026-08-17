@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  deleteAvailabilityWindow,
   getAvailabilityLiquidity,
   listOwnAvailability,
   recordAvailabilityPing,
@@ -11,14 +12,14 @@ import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { trackEvent, trackLiquiditySignalViewed } from "../../lib/analytics";
 import {
-  liquidityCountForSlot,
   peakLiquidity,
-  pickLiquidityHighlights,
+  pickBusiestBlocks,
   toLiquidityRows,
+  type LiquidityRow,
 } from "../../lib/availability-liquidity";
 import {
-  isSlotAlreadyPinged,
-  nextPingSlots,
+  findSlotCoverage,
+  type AvailabilityWindowLike,
   type PingSlot,
 } from "../../lib/availability-ping";
 import { useLayoutDirection } from "../../lib/layout-direction";
@@ -31,39 +32,40 @@ import {
 } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
-type PingRequest = {
-  slot: PingSlot;
-  /** Which half of the section the tap came from. */
-  surface: "chip" | "liquidity";
-  /** Others already free in that block when the player tapped. */
-  playerCount: number;
-};
+/** How far ahead the counts look, and how many blocks to list. */
+const OFFER_HORIZON_DAYS = 7;
+const OFFER_LIMIT = 3;
 
 /**
- * The smallest thing a player can do that means "I would play", and the reason to
- * bother doing it.
+ * Where the week's demand is, and one tap to join it.
  *
- * Creating a match asks for format, level, zone, clubs and a time. Someone with a
- * free evening and mild interest does none of that, so the evening is lost. One
- * tap here writes a one-off availability window, which makes them visible to
- * everyone whose availability overlaps — no match, no commitment, nothing to
- * cancel.
+ * The list reports the busiest upcoming blocks — a fact about the week, not a
+ * prompt — because a player deciding when to be free needs to know when everyone
+ * else already is. Tapping a block writes a one-off availability window, which makes
+ * them visible to everyone whose availability overlaps: no match, no commitment,
+ * nothing to cancel.
  *
- * The counts are what stop that tap being a diary entry. Declaring a free Thursday
- * into silence teaches a player that nothing happens; seeing that four others are
- * free the same evening is the reason to declare it. The two halves are one
- * section on purpose — the question and the answer belong together.
+ * Each row's right-hand state comes from the player's own availability, read from
+ * the **recurring grid** as well as from earlier pings. That distinction is the
+ * whole point of `findSlotCoverage`: a block they are already free for is shown as
+ * a statement rather than offered as a question, so the section can never ask
+ * something "manage availability" has already answered — which is how three of the
+ * first six real taps ended up duplicating the tapper's own grid.
+ *
+ * A grid entry is not removable here. It belongs to the availability screen, and
+ * deleting it from Home would quietly rewrite the player's usual week.
  */
 export function HomeFreeSlots() {
   const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
   const queryClient = useQueryClient();
-  const [justPinged, setJustPinged] = useState<string | null>(null);
+  const [lastChanged, setLastChanged] = useState<{
+    startsAt: string;
+    action: "added" | "removed";
+  } | null>(null);
 
-  // Recomputed per render from a single clock read, so every slot in one paint
-  // agrees about "now".
+  // One clock read per mount, so every block in one paint agrees about "now".
   const nowIso = useMemo(() => new Date().toISOString(), []);
-  const slots = useMemo(() => nextPingSlots(nowIso, 4), [nowIso]);
 
   const availabilityQuery = useQuery({
     queryKey: ["own-availability"],
@@ -73,45 +75,66 @@ export function HomeFreeSlots() {
 
   const liquidityQuery = useQuery({
     queryKey: ["availability-liquidity"],
-    queryFn: () => getAvailabilityLiquidity(supabase, 7),
+    queryFn: () => getAvailabilityLiquidity(supabase, OFFER_HORIZON_DAYS),
     staleTime: 60_000,
   });
 
-  const pingMutation = useMutation({
-    mutationFn: (request: PingRequest) =>
-      recordAvailabilityPing(
-        supabase,
-        request.slot.startsAt,
-        request.slot.endsAt,
-      ),
-    onSuccess: async (_id, request) => {
-      setJustPinged(request.slot.startsAt);
-      trackEvent("availability_ping_sent", {
-        day_part: request.slot.part,
-        day_offset: request.slot.dayOffset,
-        surface: request.surface,
-        player_count: request.playerCount,
-      });
-      // Discovery reads availability overlap, so a fresh ping changes what other
-      // players see and what this player's own filters return. The liquidity
-      // counts are left alone deliberately: they exclude the caller, so pinging
-      // never changes the player's own numbers.
-      await queryClient.invalidateQueries({ queryKey: ["own-availability"] });
-      await queryClient.invalidateQueries({ queryKey: ["discover-players"] });
-    },
-  });
+  const windows: AvailabilityWindowLike[] = availabilityQuery.data ?? [];
 
-  const windows = availabilityQuery.data ?? [];
+  const coverageIn = useCallback(
+    (slot: PingSlot, against: AvailabilityWindowLike[]) =>
+      findSlotCoverage(
+        slot,
+        weekdayIndexFromBeirutDateKey(slot.dateKey),
+        against,
+      ),
+    [],
+  );
 
   const liquidityRows = useMemo(
     () => toLiquidityRows(liquidityQuery.data ?? [], nowIso),
     [liquidityQuery.data, nowIso],
   );
 
-  const highlights = useMemo(
-    () => pickLiquidityHighlights(liquidityRows, slots, 2),
-    [liquidityRows, slots],
+  // Rows never come and go as the player taps: ranking keys on the count and the
+  // start, and a player's own window moves neither. That is what makes a tap
+  // reversible — the row is still there to tap again.
+  const offers = useMemo(
+    () => pickBusiestBlocks(liquidityRows, OFFER_LIMIT),
+    [liquidityRows],
   );
+
+  const addMutation = useMutation({
+    mutationFn: (offer: LiquidityRow) =>
+      recordAvailabilityPing(supabase, offer.startsAt, offer.endsAt),
+    onSuccess: async (_id, offer) => {
+      setLastChanged({ startsAt: offer.startsAt, action: "added" });
+      trackEvent("availability_ping_sent", {
+        day_part: offer.part,
+        day_offset: offer.dayOffset,
+        surface: "home",
+        player_count: offer.playerCount,
+      });
+      await refreshAvailability();
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: (input: { windowId: string; offer: LiquidityRow }) =>
+      deleteAvailabilityWindow(supabase, input.windowId),
+    onSuccess: async (_result, input) => {
+      setLastChanged({ startsAt: input.offer.startsAt, action: "removed" });
+      await refreshAvailability();
+    },
+  });
+
+  async function refreshAvailability() {
+    // Discovery reads availability overlap, so this changes what other players
+    // see. The liquidity counts are left alone on purpose: they exclude the
+    // caller, so a player's own window never moves their own numbers.
+    await queryClient.invalidateQueries({ queryKey: ["own-availability"] });
+    await queryClient.invalidateQueries({ queryKey: ["discover-players"] });
+  }
 
   // Fired once per mount, and deliberately fired when empty too: a tap rate is
   // meaningless without knowing how often a player was shown any demand at all.
@@ -144,167 +167,128 @@ export function HomeFreeSlots() {
     return `${dayLabel} · ${t(`availability.blocks.${slot.part}`)}`;
   }
 
-  if (slots.length === 0) {
+  // No block in the week has anyone free in it. Under a heading that says "most
+  // players free" there is nothing honest to list, so the section disappears.
+  if (offers.length === 0) {
     return null;
   }
 
-  // Searched across both halves: a tap on a busiest-week row deserves the same
-  // confirmation sentence as a chip, and looking only at `slots` would leave the
-  // row silent apart from turning green.
-  const pingedSlot = [...slots, ...highlights].find(
-    (slot) => slot.startsAt === justPinged,
+  const busy = addMutation.isPending || removeMutation.isPending;
+  const changedOffer = offers.find(
+    (offer) => offer.startsAt === lastChanged?.startsAt,
   );
 
   return (
     <View style={styles.root}>
       <AppText style={[styles.title, { writingDirection }]}>
-        {t("home.free.title")}
+        {t("home.free.busiestTitle")}
       </AppText>
       <AppText style={[styles.subtitle, { writingDirection }]}>
-        {t("home.free.subtitle")}
+        {t("home.free.busiestSubtitle")}
       </AppText>
 
-      <View style={[styles.chips, { flexDirection: rowDirection }]}>
-        {slots.map((slot) => {
-          const alreadyFree = isSlotAlreadyPinged(slot, windows);
-          const label = slotLabel(slot);
-          const others = liquidityCountForSlot(slot, liquidityRows);
-
-          return (
-            <Pressable
-              key={slot.startsAt}
-              accessibilityRole="button"
-              // The state goes in the label, not only in accessibilityState:
-              // react-native-web does not emit aria-selected for role="button",
-              // so a screen reader would otherwise announce the chip as merely
-              // dimmed without saying why.
-              accessibilityLabel={[
-                t(
-                  alreadyFree
-                    ? "home.free.chipLabelSet"
-                    : "home.free.chipLabel",
-                  { slot: label },
-                ),
-                others > 0
-                  ? t("home.free.othersFree", { players: others })
+      <View style={styles.rows}>
+        {offers.map((offer) => {
+          const coverage = coverageIn(offer, windows);
+          const label = slotLabel(offer);
+          // Only a one-off window is ours to take back. A grid entry belongs to
+          // the availability screen, and removing it from Home would quietly edit
+          // the player's usual week.
+          const removable = coverage?.kind === "one_off";
+          const accessibilityLabel = coverage
+            ? t(
+                removable
+                  ? "home.free.rowLabelRemove"
+                  : "home.free.rowLabelCovered",
+                { slot: label },
+              )
+            : [
+                t("home.free.rowLabelAdd", { slot: label }),
+                offer.playerCount > 0
+                  ? t("home.free.othersFree", { players: offer.playerCount })
                   : "",
               ]
                 .filter(Boolean)
-                .join(", ")}
+                .join(", ");
+
+          return (
+            <Pressable
+              key={offer.startsAt}
+              accessibilityRole="button"
+              // State goes in the label, not only in accessibilityState:
+              // react-native-web does not emit aria-selected for role="button",
+              // so a screen reader would otherwise hear only a dimmed row.
+              accessibilityLabel={accessibilityLabel}
               accessibilityState={{
-                selected: alreadyFree,
-                disabled: alreadyFree,
+                selected: Boolean(coverage),
+                disabled: Boolean(coverage) && !removable,
               }}
-              disabled={alreadyFree || pingMutation.isPending}
-              onPress={() =>
-                pingMutation.mutate({
-                  slot,
-                  surface: "chip",
-                  playerCount: others,
-                })
-              }
+              disabled={busy || (Boolean(coverage) && !removable)}
+              onPress={() => {
+                if (!coverage) {
+                  addMutation.mutate(offer);
+                  return;
+                }
+                if (removable) {
+                  removeMutation.mutate({
+                    windowId: coverage.window.id,
+                    offer,
+                  });
+                }
+              }}
               style={({ pressed }) => [
-                styles.chip,
-                alreadyFree && styles.chipSelected,
-                pressed && !alreadyFree && styles.chipPressed,
+                styles.row,
+                { flexDirection: rowDirection },
+                coverage && styles.rowSelected,
+                pressed && styles.rowPressed,
               ]}
             >
               <AppText
-                style={[
-                  styles.chipText,
-                  alreadyFree && styles.chipTextSelected,
-                ]}
+                style={[styles.rowLabel, coverage && styles.rowLabelSelected]}
                 maxLines={1}
               >
                 {label}
               </AppText>
-              {others > 0 ? (
+              <View style={styles.rowMetaGroup}>
+                {/* The count stays put whatever the player's own state is: it is
+                    information about the week, not feedback on their tap. */}
                 <AppText
-                  style={[
-                    styles.chipCount,
-                    alreadyFree && styles.chipTextSelected,
-                  ]}
+                  style={[styles.rowMeta, coverage && styles.rowMetaSelected]}
                   maxLines={1}
                 >
-                  {t("home.free.othersFree", { players: others })}
+                  {t("home.free.othersFree", { players: offer.playerCount })}
                 </AppText>
-              ) : null}
+                {coverage ? (
+                  <AppText style={styles.rowState} maxLines={1}>
+                    {removable
+                      ? t("home.free.remove")
+                      : t("home.free.fromAvailability")}
+                  </AppText>
+                ) : null}
+              </View>
             </Pressable>
           );
         })}
       </View>
 
-      {/* Feedback, not a fake number: the ping genuinely makes them findable by
-          availability overlap, so say that rather than inventing a count. */}
-      {pingedSlot ? (
+      {changedOffer && lastChanged ? (
         <AppText style={[styles.confirmation, { writingDirection }]}>
-          {t("home.free.confirmation", { slot: slotLabel(pingedSlot) })}
+          {t(
+            lastChanged.action === "added"
+              ? "home.free.confirmation"
+              : "home.free.removedConfirmation",
+            { slot: slotLabel(changedOffer) },
+          )}
         </AppText>
       ) : null}
 
-      {pingMutation.isError ? (
+      {addMutation.isError || removeMutation.isError ? (
         <AppText
           accessibilityRole="alert"
           style={[styles.error, { writingDirection }]}
         >
           {t("home.free.error")}
         </AppText>
-      ) : null}
-
-      {/* The week's peak, which the chips cannot reach: they only cover the next
-          few blocks, and "everyone plays Thursday" is the thing worth knowing.
-          Rendered only when there is real demand — an empty version would be a
-          dead heading, and the chips above are already the answer to "nobody is
-          free", since somebody has to go first. */}
-      {highlights.length > 0 ? (
-        <View style={styles.highlights}>
-          <AppText style={[styles.highlightsTitle, { writingDirection }]}>
-            {t("home.free.busiestTitle")}
-          </AppText>
-
-          {highlights.map((row) => {
-            const alreadyFree = isSlotAlreadyPinged(row, windows);
-            const label = slotLabel(row);
-
-            return (
-              <Pressable
-                key={row.startsAt}
-                accessibilityRole="button"
-                accessibilityLabel={`${t(
-                  alreadyFree
-                    ? "home.free.chipLabelSet"
-                    : "home.free.chipLabel",
-                  { slot: label },
-                )}, ${t("home.free.othersFree", { players: row.playerCount })}`}
-                accessibilityState={{
-                  selected: alreadyFree,
-                  disabled: alreadyFree,
-                }}
-                disabled={alreadyFree || pingMutation.isPending}
-                onPress={() =>
-                  pingMutation.mutate({
-                    slot: row,
-                    surface: "liquidity",
-                    playerCount: row.playerCount,
-                  })
-                }
-                style={({ pressed }) => [
-                  styles.row,
-                  { flexDirection: rowDirection },
-                  alreadyFree && styles.rowSelected,
-                  pressed && !alreadyFree && styles.chipPressed,
-                ]}
-              >
-                <AppText style={styles.rowLabel} maxLines={1}>
-                  {label}
-                </AppText>
-                <AppText style={styles.rowCount} maxLines={1}>
-                  {t("home.free.othersFree", { players: row.playerCount })}
-                </AppText>
-              </Pressable>
-            );
-          })}
-        </View>
       ) : null}
     </View>
   );
@@ -325,50 +309,9 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     color: tennisColors.mutedForeground,
   },
-  chips: {
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 2,
-  },
-  chip: {
-    minHeight: minTouchTargetPx,
-    justifyContent: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: tennisRadii.pill,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  chipSelected: {
-    backgroundColor: tennisSemantic.positive.fill,
-    borderColor: tennisSemantic.positive.border,
-  },
-  chipPressed: {
-    opacity: 0.9,
-  },
-  chipText: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-  },
-  chipCount: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    lineHeight: 14,
-    color: tennisColors.mutedForeground,
-  },
-  chipTextSelected: {
-    color: tennisSemantic.positive.text,
-  },
-  highlights: {
+  rows: {
     gap: 6,
-    marginTop: 6,
-  },
-  highlightsTitle: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
+    marginTop: 2,
   },
   row: {
     minHeight: minTouchTargetPx,
@@ -386,16 +329,34 @@ const styles = StyleSheet.create({
     backgroundColor: tennisSemantic.positive.fill,
     borderColor: tennisSemantic.positive.border,
   },
+  rowPressed: {
+    opacity: 0.9,
+  },
   rowLabel: {
     flexShrink: 1,
     fontFamily: tennisFontFamily.bodyMedium,
     fontSize: 14,
     color: tennisColors.primaryDark,
   },
-  rowCount: {
+  rowLabelSelected: {
+    color: tennisSemantic.positive.text,
+  },
+  rowMetaGroup: {
+    alignItems: "flex-end",
+  },
+  rowMeta: {
     fontFamily: tennisFontFamily.bodySemi,
     fontSize: 13,
     color: tennisColors.primary,
+  },
+  rowMetaSelected: {
+    color: tennisSemantic.positive.text,
+  },
+  rowState: {
+    fontFamily: tennisFontFamily.body,
+    fontSize: 11,
+    lineHeight: 14,
+    color: tennisColors.mutedForeground,
   },
   confirmation: {
     fontFamily: tennisFontFamily.bodyMedium,

@@ -1,4 +1,8 @@
-import { beirutDateKey, beirutLocalToUtcIso } from "./beirut-time";
+import {
+  beirutDateKey,
+  beirutLocalToUtcIso,
+  utcIsoToBeirutFields,
+} from "./beirut-time";
 import type { AvailabilityDayPart } from "./player-availability-label";
 
 /**
@@ -104,20 +108,84 @@ export function nextPingSlots(
   return slots;
 }
 
-/** True when an existing one-off window already covers this slot. */
-export function isSlotAlreadyPinged(
-  slot: Pick<PingSlot, "startsAt" | "endsAt">,
-  windows: { starts_at: string | null; ends_at: string | null }[],
-): boolean {
+/** The shape of an `availability_windows` row that coverage needs to read. */
+export type AvailabilityWindowLike = {
+  id: string;
+  is_recurring: boolean;
+  starts_at: string | null;
+  ends_at: string | null;
+  weekday: number | null;
+  local_start: string | null;
+  local_end: string | null;
+  valid_from: string | null;
+  valid_until: string | null;
+};
+
+export type SlotCoverage = {
+  window: AvailabilityWindowLike;
+  /** `recurring` came from the availability grid and is not ours to delete. */
+  kind: "recurring" | "one_off";
+};
+
+function minutesOfDay(localTime: string): number {
+  // Postgres `time` arrives as HH:MM:SS; the blocks are written as HH:MM.
+  const [hours, minutes] = localTime.split(":").map(Number);
+  return (hours ?? 0) * 60 + (minutes ?? 0);
+}
+
+/**
+ * The window that already makes the player free for this block, if any.
+ *
+ * Reads the **recurring** grid as well as one-off pings. Checking only one-off
+ * windows was the original mistake: someone whose profile said "free Wednesday
+ * mornings" was still offered a chip to declare exactly that, and tapping it
+ * stored the same availability a second time. Three of the first six real taps
+ * were duplicates of the tapper's own grid.
+ *
+ * Returns the window rather than a boolean so the caller can tell a ping it may
+ * remove from a grid entry it must not touch behind the player's back.
+ */
+export function findSlotCoverage(
+  slot: Pick<PingSlot, "startsAt" | "endsAt" | "dateKey">,
+  weekday: number,
+  windows: AvailabilityWindowLike[],
+): SlotCoverage | null {
   const start = Date.parse(slot.startsAt);
   const end = Date.parse(slot.endsAt);
+  const blockStart = minutesOfDay(utcIsoToBeirutFields(slot.startsAt).time);
+  const blockEnd = minutesOfDay(utcIsoToBeirutFields(slot.endsAt).time);
 
-  return windows.some((window) => {
-    if (!window.starts_at || !window.ends_at) return false;
-    const windowStart = Date.parse(window.starts_at);
-    const windowEnd = Date.parse(window.ends_at);
+  for (const window of windows) {
+    if (window.is_recurring) {
+      if (
+        window.weekday !== weekday ||
+        !window.local_start ||
+        !window.local_end
+      ) {
+        continue;
+      }
+      if (window.valid_from && slot.dateKey < window.valid_from) continue;
+      if (window.valid_until && slot.dateKey > window.valid_until) continue;
+
+      if (
+        minutesOfDay(window.local_start) < blockEnd &&
+        minutesOfDay(window.local_end) > blockStart
+      ) {
+        return { window, kind: "recurring" };
+      }
+      continue;
+    }
+
+    if (!window.starts_at || !window.ends_at) continue;
     // Same overlap rule the RPC dedupes on, so the UI and the database agree
-    // about which chips are already covered.
-    return windowStart < end && windowEnd > start;
-  });
+    // about which blocks are already covered.
+    if (
+      Date.parse(window.starts_at) < end &&
+      Date.parse(window.ends_at) > start
+    ) {
+      return { window, kind: "one_off" };
+    }
+  }
+
+  return null;
 }

@@ -62,49 +62,30 @@ export function toLiquidityRows(
 }
 
 /**
- * The busiest blocks that the chips are not already offering.
+ * The busiest few blocks in the week ahead.
  *
- * Chips cover the next few blocks and carry their own count, so repeating one as a
- * row would show the same number twice with two different affordances. What is
- * left is the part the chips cannot reach: the peak later in the week, which is
- * the whole point of looking at seven days.
+ * Ranked by how many others are free, then by soonest — "Thursday is when everyone
+ * plays" is the insight, and a block nobody is free in is already absent, because
+ * `toLiquidityRows` drops it. Under a heading that reports where the demand is,
+ * there is nothing honest to say about an empty block.
  *
- * Ranked by count first, not by soonest — "Thursday is when everyone plays" is the
- * insight; the soonest block is already a chip.
+ * Blocks the player is already free for are deliberately **kept**. The redundancy
+ * this feature had was about *asking* a question the availability grid had already
+ * answered, not about showing the week's demand: "Friday evening, four free, and so
+ * are you" is worth knowing. The caller decides whether a row is a prompt or a
+ * statement by looking up the player's own coverage.
  */
-export function pickLiquidityHighlights(
+export function pickBusiestBlocks(
   rows: LiquidityRow[],
-  chips: PingSlot[],
-  limit = 2,
+  limit = 3,
 ): LiquidityRow[] {
-  const chipStarts = new Set(chips.map((chip) => Date.parse(chip.startsAt)));
-
-  return rows
-    .filter((row) => !chipStarts.has(Date.parse(row.startsAt)))
+  return [...rows]
     .sort(
       (left, right) =>
         right.playerCount - left.playerCount ||
         Date.parse(left.startsAt) - Date.parse(right.startsAt),
     )
     .slice(0, limit);
-}
-
-/**
- * Players free in this chip's block, or 0 when nobody is.
- *
- * Matched on the parsed instant, not the string: the RPC and `beirutLocalToUtcIso`
- * can render the same moment as `...+00:00` and `...000Z`, and a chip must not
- * lose its count to a formatting difference.
- */
-export function liquidityCountForSlot(
-  slot: Pick<PingSlot, "startsAt">,
-  rows: LiquidityRow[],
-): number {
-  const startMs = Date.parse(slot.startsAt);
-
-  return (
-    rows.find((row) => Date.parse(row.startsAt) === startMs)?.playerCount ?? 0
-  );
 }
 
 /** Busiest block in the horizon — the denominator for whether this ever fires. */
