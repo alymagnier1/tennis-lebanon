@@ -462,16 +462,11 @@
     "liquidityClubsHint": "Club directory and WhatsApp booking",
     "free": {
       "busiestTitle": "Most players free this week",
-      "busiestSubtitle": "Tap a block to say you are free then. No match, no commitment.",
-      "rowLabelAdd": "I am free {{slot}}",
-      "rowLabelCovered": "Already free {{slot}}",
-      "confirmation": "You are free {{slot}}. Players free then can now find you.",
-      "error": "We could not save that. Try again.",
+      "busiestSubtitle": "Tap a block to see who is free then.",
       "othersFree": "{{players}} free",
-      "remove": "Remove",
       "fromAvailability": "From your availability",
-      "rowLabelRemove": "Free {{slot}}. Tap to remove.",
-      "removedConfirmation": "Removed {{slot}}."
+      "rowLabel": "{{slot}}, {{players}} free. See who.",
+      "youAreFree": "You are free then"
     },
     "quickActionsTitle": "Quick actions",
     "quickActionFindPlayers": "Find players",
@@ -1390,5 +1385,14 @@
       "AM": "AM",
       "PM": "PM"
     }
+  },
+  "freeBlock": {
+    "title": "Who is free",
+    "invalid": "That time block is not valid.",
+    "empty": "Nobody is free in this block any more. Try another one.",
+    "addMe": "I am free then too",
+    "removeMe": "I am not free then",
+    "youAreFree": "You are free then, so these players can find you too.",
+    "youAreFreeFromAvailability": "You are free then, from your saved availability."
   }
 }

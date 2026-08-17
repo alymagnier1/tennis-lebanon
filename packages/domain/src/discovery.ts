@@ -62,6 +62,17 @@ export const discoveryFiltersSchema = z.object({
     .default(DEFAULT_DISCOVERY_HORIZON_DAYS),
   levelWindow: z.number().int().min(0).max(4).default(DEFAULT_LEVEL_WINDOW),
   limit: z.number().int().min(1).max(50).default(20),
+  /**
+   * Restrict to players free inside one specific block, as ISO instants. Both or
+   * neither — the SQL ignores the filter unless it has a complete window.
+   *
+   * This is what "5 free" opens onto, so it applies the same rule the liquidity
+   * count uses: at least one contiguous hour inside the block. Pass the viewer's
+   * own zones alongside it, or the list will be wider than the count that
+   * offered it.
+   */
+  freeFrom: z.string().datetime({ offset: true }).optional(),
+  freeTo: z.string().datetime({ offset: true }).optional(),
 });
 
 export type DiscoveryFilters = z.infer<typeof discoveryFiltersSchema>;

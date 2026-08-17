@@ -215,6 +215,8 @@ export async function discoverCompatiblePlayers(
     p_level_window: filters.levelWindow ?? 1,
     p_limit: filters.limit ?? 20,
     p_cursor_user_id: cursorUserId ?? undefined,
+    p_free_from: filters.freeFrom ?? undefined,
+    p_free_to: filters.freeTo ?? undefined,
   });
 
   if (error) throw error;

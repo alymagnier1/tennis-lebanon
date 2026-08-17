@@ -1935,6 +1935,8 @@ export type Database = {
         Args: {
           p_cursor_user_id?: string
           p_format?: Database["public"]["Enums"]["match_format"]
+          p_free_from?: string
+          p_free_to?: string
           p_horizon_days?: number
           p_intent?: Database["public"]["Enums"]["play_intent"]
           p_level_window?: number

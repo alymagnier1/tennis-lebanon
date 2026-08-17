@@ -462,16 +462,11 @@
     "liquidityClubsHint": "Annuaire des clubs et réservation WhatsApp",
     "free": {
       "busiestTitle": "Le plus de joueurs libres cette semaine",
-      "busiestSubtitle": "Touchez un créneau pour dire que vous êtes libre. Pas de match, aucun engagement.",
-      "rowLabelAdd": "Je suis libre {{slot}}",
-      "rowLabelCovered": "Déjà libre {{slot}}",
-      "confirmation": "Vous êtes libre {{slot}}. Les joueurs libres à ce moment peuvent maintenant vous trouver.",
-      "error": "Nous n'avons pas pu enregistrer. Réessayez.",
+      "busiestSubtitle": "Touchez un créneau pour voir qui est libre.",
       "othersFree": "{{players}} dispo",
-      "remove": "Retirer",
       "fromAvailability": "Depuis vos disponibilités",
-      "rowLabelRemove": "Libre {{slot}}. Touchez pour retirer.",
-      "removedConfirmation": "{{slot}} retiré."
+      "rowLabel": "{{slot}}, {{players}} dispo. Voir qui.",
+      "youAreFree": "Vous êtes libre alors"
     },
     "quickActionsTitle": "Actions rapides",
     "quickActionFindPlayers": "Trouver des joueurs",
@@ -1390,5 +1385,14 @@
         "body": "Personne n'a contesté sous trois jours : ce score est désormais retenu."
       }
     }
+  },
+  "freeBlock": {
+    "title": "Qui est libre",
+    "invalid": "Ce créneau n'est pas valide.",
+    "empty": "Plus personne n'est libre sur ce créneau. Essayez-en un autre.",
+    "addMe": "Je suis libre aussi",
+    "removeMe": "Je ne suis pas libre",
+    "youAreFree": "Vous êtes libre alors, ces joueurs peuvent donc vous trouver aussi.",
+    "youAreFreeFromAvailability": "Vous êtes libre alors, d'après vos disponibilités enregistrées."
   }
 }
