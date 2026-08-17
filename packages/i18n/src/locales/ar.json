@@ -460,6 +460,16 @@
     "liquidityDiscover": "ابحث عن لاعبين",
     "liquidityClubs": "تصفح النوادي",
     "liquidityClubsHint": "دليل النوادي والحجز عبر واتساب",
+    "free": {
+      "title": "متى أنت متفرّغ؟",
+      "subtitle": "لمسة واحدة. بلا مباراة وبلا التزام — من يتفرّغ في الوقت نفسه يمكنه أن يجدك.",
+      "chipLabel": "أنا متفرّغ {{slot}}",
+      "chipLabelSet": "متفرّغ سابقًا {{slot}}",
+      "confirmation": "أنت متفرّغ {{slot}}. من يتفرّغ حينها يمكنه الآن أن يجدك.",
+      "error": "تعذّر الحفظ. حاول مرة أخرى.",
+      "othersFree": "{{players}} متاح",
+      "busiestTitle": "أكثر الأوقات التي يتفرّغ فيها اللاعبون هذا الأسبوع"
+    },
     "quickActionsTitle": "إجراءات سريعة",
     "quickActionFindPlayers": "البحث عن لاعبين",
     "quickActionBookCourt": "حجز ملعب",

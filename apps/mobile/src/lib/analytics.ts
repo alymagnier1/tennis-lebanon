@@ -88,6 +88,26 @@ export function trackDiscoverViewed(input: {
   });
 }
 
+/**
+ * Whether the liquidity signal ever had anything to say.
+ *
+ * This is the denominator for the ping: a tap rate means nothing without knowing
+ * how often a player was shown demand in the first place. `result_count` is the
+ * number of blocks with someone free, `player_count` the busiest of them — so a
+ * pilot where the signal is permanently empty is visible as such, rather than
+ * looking like players ignoring it.
+ */
+export function trackLiquiditySignalViewed(input: {
+  slotCount: number;
+  peakPlayers: number;
+}): void {
+  trackEvent("liquidity_signal_viewed", {
+    result_count: input.slotCount,
+    player_count: input.peakPlayers,
+    is_empty: input.slotCount === 0,
+  });
+}
+
 /** Where a rematch was offered, started, or published. */
 export type RematchSurface = "hub" | "home" | "completed_list";
 

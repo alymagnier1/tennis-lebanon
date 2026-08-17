@@ -460,6 +460,16 @@
     "liquidityDiscover": "Find players",
     "liquidityClubs": "Browse clubs",
     "liquidityClubsHint": "Club directory and WhatsApp booking",
+    "free": {
+      "title": "When are you free?",
+      "subtitle": "One tap. No match, no commitment — players free at the same time can find you.",
+      "chipLabel": "I am free {{slot}}",
+      "chipLabelSet": "Already free {{slot}}",
+      "confirmation": "You are free {{slot}}. Players free then can now find you.",
+      "error": "We could not save that. Try again.",
+      "othersFree": "{{players}} free",
+      "busiestTitle": "Most players free this week"
+    },
     "quickActionsTitle": "Quick actions",
     "quickActionFindPlayers": "Find players",
     "quickActionBookCourt": "Book a court",

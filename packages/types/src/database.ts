@@ -2012,6 +2012,14 @@ export type Database = {
           starts_at: string
         }[]
       }
+      get_availability_liquidity: {
+        Args: { p_horizon_days?: number; p_zone_ids?: string[] }
+        Returns: {
+          ends_at: string
+          player_count: number
+          starts_at: string
+        }[]
+      }
       get_club_admin_detail: { Args: { p_club_id: string }; Returns: Json }
       get_club_booking_detail: { Args: { p_booking_id: string }; Returns: Json }
       get_club_detail: { Args: { p_club_id: string }; Returns: Json }
@@ -2411,6 +2419,10 @@ export type Database = {
       reactivate_club: {
         Args: { p_club_id: string; p_reason?: string }
         Returns: undefined
+      }
+      record_availability_ping: {
+        Args: { p_ends_at: string; p_starts_at: string }
+        Returns: string
       }
       record_client_event: {
         Args: { p_event: string; p_props?: Json }

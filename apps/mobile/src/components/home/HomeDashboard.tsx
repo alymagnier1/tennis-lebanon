@@ -25,6 +25,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
 import { ListSkeleton, MatchCard } from "../AppUi";
+import { HomeFreeSlots } from "./HomeFreeSlots";
 import { HomeNextActionCard } from "./HomeNextActionCard";
 import { Icon, type IconName } from "../Icon";
 import { formatCompactUtcInBeirut } from "../../lib/beirut-time";
@@ -358,6 +359,15 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
                 }
               />
             ))}
+          </View>
+        ) : null}
+
+        {/* Above Quick actions on purpose: this is the one thing on Home that
+            costs a single tap, and it is what turns a free evening into a match
+            instead of losing it. */}
+        {!bodyLoading && !bodyError ? (
+          <View style={styles.section}>
+            <HomeFreeSlots />
           </View>
         ) : null}
 

@@ -295,6 +295,70 @@ group by 1
 order by 1;
 ```
 
+### Latent intent — the "I'm free" ping and the liquidity signal
+
+Read the first query before the other two. A low tap rate on the ping means one of two very
+different things, and only the denominator separates them: players ignoring the prompt, or
+players never being shown any demand to respond to.
+
+```sql
+-- Did the signal ever have anything to say? `is_empty` is the denominator for
+-- everything below: a pilot where this is 90% empty is a liquidity problem, not a
+-- design problem, and no amount of copy will fix it.
+select
+  count(*)                                                     as views,
+  count(*) filter (where (props->>'is_empty')::boolean)         as empty_views,
+  round(100.0 * count(*) filter (where (props->>'is_empty')::boolean)
+        / nullif(count(*), 0), 1)                               as pct_empty,
+  round(avg((props->>'player_count')::numeric), 1)              as avg_peak_players,
+  max((props->>'player_count')::integer)                        as best_peak
+from public.client_events
+where event = 'liquidity_signal_viewed';
+```
+
+```sql
+-- Which half converts, and whether a bigger number converts better. `chip` is the
+-- "when are you free" row; `liquidity` is a tap on one of the busiest-week blocks.
+-- A high `pings_into_an_empty_block` on `chip` is the good case: someone going
+-- first, with nobody to respond to yet.
+select coalesce(props->>'surface', 'unknown')                   as surface,
+       count(*)                                                 as pings,
+       round(avg((props->>'player_count')::numeric), 1)          as avg_players_on_offer,
+       count(*) filter (where (props->>'player_count')::integer = 0)
+                                                                as pings_into_an_empty_block
+from public.client_events
+where event = 'availability_ping_sent'
+group by 1
+order by pings desc;
+```
+
+```sql
+-- The only question that matters: did a pinged block become a match the player
+-- actually joined? A lower bound -- one-off windows are hard-deleted when a player
+-- tidies their availability, so a ping that produced a match and was then removed
+-- disappears from this. `availability_ping_sent` is the durable record of the tap,
+-- but it stores day_part/day_offset relative to the tap, not the block's instant,
+-- so it cannot be joined to a match time.
+with pings as (
+  select aw.user_id, aw.starts_at, aw.ends_at
+  from public.availability_windows as aw
+  where aw.is_recurring = false
+)
+select
+  count(*) as pinged_blocks,
+  count(*) filter (where exists (
+    select 1
+    from public.match_participants as mp
+    join public.matches as m on m.id = mp.match_id
+    join public.match_time_options as mto on mto.id = m.selected_time_option_id
+    where mp.user_id = pings.user_id
+      and mp.status = 'accepted'
+      and mto.starts_at < pings.ends_at
+      and mto.ends_at > pings.starts_at
+  )) as blocks_that_became_a_match
+from pings;
+```
+
 ### Counter-metric — abandonment
 
 Report beside the OMTM. A rising completed-match count with a rising abandonment rate is not

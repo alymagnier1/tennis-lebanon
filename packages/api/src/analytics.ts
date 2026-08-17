@@ -19,6 +19,8 @@ export const CLIENT_EVENT_NAMES = [
   "rematch_offered",
   "rematch_started",
   "rematch_published",
+  "availability_ping_sent",
+  "liquidity_signal_viewed",
 ] as const;
 
 export type ClientEventName = (typeof CLIENT_EVENT_NAMES)[number];
@@ -44,6 +46,17 @@ export type ClientEventProps = {
   can_ask_again?: boolean;
   opponent_count?: number;
   hours_since_prior?: number;
+  /** `morning`, `afternoon` or `evening` — which block was pinged. */
+  day_part?: string;
+  /** 0 = today in Beirut, 1 = tomorrow. */
+  day_offset?: number;
+  /**
+   * Other players shown as free in a block: the peak for
+   * `liquidity_signal_viewed`, or how many were on offer in the block a
+   * `availability_ping_sent` responded to. Tests whether a bigger number
+   * actually converts.
+   */
+  player_count?: number;
 };
 
 /**
