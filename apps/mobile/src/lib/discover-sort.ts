@@ -75,10 +75,7 @@ export function sortDiscoverPlayers(
       sort,
       viewerBand
         ? (card) =>
-            skillDistance(
-              viewerBand,
-              (card as CompatiblePlayerCard).skill_band,
-            )
+            skillDistance(viewerBand, (card as CompatiblePlayerCard).skill_band)
         : undefined,
     );
     if (primary !== 0) return primary;

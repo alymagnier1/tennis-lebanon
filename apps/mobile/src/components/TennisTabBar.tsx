@@ -2,7 +2,11 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { listMyMatchInvites, listMyMatches, type MyMatchRow } from "@tennis-lebanon/api";
+import {
+  listMyMatchInvites,
+  listMyMatches,
+  type MyMatchRow,
+} from "@tennis-lebanon/api";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "./AppText";
 import { Icon, type IconName } from "./Icon";
@@ -129,17 +133,14 @@ export function TennisTabBar({
     const iconColor = isFocused
       ? tennisColors.primary
       : tennisColors.mutedForeground;
-    const badgeLabel =
-      route.name === "matches" ? matchesBadgeLabel : null;
+    const badgeLabel = route.name === "matches" ? matchesBadgeLabel : null;
 
     return (
       <Pressable
         key={route.key}
         accessibilityRole="button"
         accessibilityState={isFocused ? { selected: true } : {}}
-        accessibilityLabel={
-          badgeLabel ? `${label}, ${badgeLabel}` : label
-        }
+        accessibilityLabel={badgeLabel ? `${label}, ${badgeLabel}` : label}
         onPress={() => {
           const event = navigation.emit({
             type: "tabPress",

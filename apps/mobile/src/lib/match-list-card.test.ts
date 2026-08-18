@@ -174,7 +174,14 @@ describe("completedMatchNeedsScore", () => {
   it("asks for a score when the completed match has none", () => {
     expect(completedMatchNeedsScore({ score: null })).toBe(true);
     expect(
-      completedMatchNeedsScore({ score: { sets: [[6, 4], [6, 3]] } }),
+      completedMatchNeedsScore({
+        score: {
+          sets: [
+            [6, 4],
+            [6, 3],
+          ],
+        },
+      }),
     ).toBe(false);
   });
 });

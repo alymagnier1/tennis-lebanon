@@ -23,7 +23,7 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "dotenv -v DO_NOT_TRACK=1 -- supabase test db supabase/tests/database --local",
-    "db:types": "dotenv -v DO_NOT_TRACK=1 -- supabase gen types typescript --local > packages/types/src/database.ts",
+    "db:types": "dotenv -v DO_NOT_TRACK=1 -- supabase gen types typescript --local > packages/types/src/database.ts && prettier --write packages/types/src/database.ts",
     "db:diff": "supabase db diff",
     "verify:pilot": "node scripts/verify-pilot-gates.mjs",
     "drill:backup": "node scripts/backup-restore-drill.mjs",

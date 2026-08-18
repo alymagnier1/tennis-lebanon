@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { CompatiblePlayerCard, OpenMatchCard } from "@tennis-lebanon/api";
-import {
-  sortDiscoverMatches,
-  sortDiscoverPlayers,
-} from "./discover-sort";
+import { sortDiscoverMatches, sortDiscoverPlayers } from "./discover-sort";
 
 function player(
-  overrides: Partial<CompatiblePlayerCard> & Pick<CompatiblePlayerCard, "user_id" | "display_name">,
+  overrides: Partial<CompatiblePlayerCard> &
+    Pick<CompatiblePlayerCard, "user_id" | "display_name">,
 ): CompatiblePlayerCard {
   return {
     avatar_path: null,
@@ -70,10 +68,9 @@ describe("sortDiscoverPlayers", () => {
       player({ user_id: "a", display_name: "A", availability_overlap: false }),
       player({ user_id: "b", display_name: "B", availability_overlap: true }),
     ];
-    expect(sortDiscoverPlayers(rows, "recommended").map((p) => p.user_id)).toEqual([
-      "a",
-      "b",
-    ]);
+    expect(
+      sortDiscoverPlayers(rows, "recommended").map((p) => p.user_id),
+    ).toEqual(["a", "b"]);
   });
 
   it("sorts by area overlap first", () => {

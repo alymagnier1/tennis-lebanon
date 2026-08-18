@@ -11,10 +11,7 @@ import {
   type HubVsParticipant,
 } from "../../lib/match-hub-ready-hero";
 import { FigmaPrimaryButton, FigmaTextButton } from "../onboarding-ui";
-import {
-  tennisColors,
-  tennisSemantic,
-} from "../../theme/tennis-tokens";
+import { tennisColors, tennisSemantic } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { hubSectionStyles } from "./hub-section-styles";
 

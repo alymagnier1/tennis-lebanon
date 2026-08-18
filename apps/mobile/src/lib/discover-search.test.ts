@@ -48,7 +48,9 @@ function match(
     min_skill: "beginner",
     max_skill: "advanced",
     zones: [{ id: "1", slug: "beirut", name_i18n: { en: "Pilotirut" } }],
-    preferred_clubs: [{ club_id: "c1", name: "Hoops", booking_mode: "external_link" }],
+    preferred_clubs: [
+      { club_id: "c1", name: "Hoops", booking_mode: "external_link" },
+    ],
     proposed_times: [],
     participant_count: 1,
     capacity: 2,

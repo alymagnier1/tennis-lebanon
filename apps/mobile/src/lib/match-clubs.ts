@@ -95,7 +95,10 @@ export function matchCardAreaLabel(
         slug?: string;
       };
       return (
-        entry.name_i18n?.[locale] ?? entry.name_i18n?.en ?? entry.slug ?? ""
+        entry.name_i18n?.[locale] ??
+        entry.name_i18n?.en ??
+        entry.slug ??
+        ""
       ).trim();
     })
     .filter(Boolean);

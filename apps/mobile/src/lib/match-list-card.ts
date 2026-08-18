@@ -40,10 +40,14 @@ export function isViewerActiveMatch(match: ActiveListMatch): boolean {
 }
 
 /** Now = on court / confirm result. Upcoming = scheduled + still recruiting. */
-export function activeMatchGroup(match: ActiveListMatch | string): ActiveMatchGroup {
+export function activeMatchGroup(
+  match: ActiveListMatch | string,
+): ActiveMatchGroup {
   const status = typeof match === "string" ? match : match.status;
   const attendance =
-    typeof match === "string" ? "unknown" : (match.viewer_attendance ?? "unknown");
+    typeof match === "string"
+      ? "unknown"
+      : (match.viewer_attendance ?? "unknown");
 
   if (status === "in_progress" && !viewerDeclinedToPlay(attendance)) {
     return "now";

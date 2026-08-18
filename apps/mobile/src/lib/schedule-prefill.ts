@@ -56,8 +56,7 @@ export function shouldShowWhereEditor(input: {
   whereSummaryReady: boolean;
 }): boolean {
   return (
-    input.editingWhere ||
-    (input.whereHydrated && !input.whereSummaryReady)
+    input.editingWhere || (input.whereHydrated && !input.whereSummaryReady)
   );
 }
 
@@ -67,11 +66,7 @@ export function shouldPromoteWhereEditing(input: {
   whereHydrated: boolean;
   whereSummaryReady: boolean;
 }): boolean {
-  return (
-    !input.editingWhere &&
-    input.whereHydrated &&
-    !input.whereSummaryReady
-  );
+  return !input.editingWhere && input.whereHydrated && !input.whereSummaryReady;
 }
 
 /**

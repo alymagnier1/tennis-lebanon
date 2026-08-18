@@ -60,10 +60,7 @@ export function ProfileMenuRow({
           {label}
         </AppText>
         {detail ? (
-          <AppText
-            style={[styles.value, { writingDirection }]}
-            maxLines={2}
-          >
+          <AppText style={[styles.value, { writingDirection }]} maxLines={2}>
             {detail}
           </AppText>
         ) : null}

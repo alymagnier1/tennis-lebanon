@@ -243,7 +243,9 @@ export function canRecordAttendance(input: {
 }
 
 /** Viewer said they were not there — no score, and no pending-result nag. */
-export function viewerDeclinedToPlay(attendance: string | null | undefined): boolean {
+export function viewerDeclinedToPlay(
+  attendance: string | null | undefined,
+): boolean {
   return (
     attendance === "no_show" ||
     attendance === "late_cancel" ||

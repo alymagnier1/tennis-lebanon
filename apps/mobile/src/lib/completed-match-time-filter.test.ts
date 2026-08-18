@@ -38,8 +38,16 @@ describe("completedTimeFilterCutoff", () => {
 
 describe("filterCompletedMatchesByTime", () => {
   const rows = [
-    { id: "recent", played_at: "2026-08-14T10:00:00.000Z", completed_at: "2026-08-14T12:00:00.000Z" },
-    { id: "month", played_at: "2026-07-20T10:00:00.000Z", completed_at: "2026-07-20T12:00:00.000Z" },
+    {
+      id: "recent",
+      played_at: "2026-08-14T10:00:00.000Z",
+      completed_at: "2026-08-14T12:00:00.000Z",
+    },
+    {
+      id: "month",
+      played_at: "2026-07-20T10:00:00.000Z",
+      completed_at: "2026-07-20T12:00:00.000Z",
+    },
     { id: "old", played_at: null, completed_at: "2026-04-01T10:00:00.000Z" },
   ];
 
