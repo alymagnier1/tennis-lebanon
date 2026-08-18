@@ -1,10 +1,5 @@
 import { useMemo, useState, type PropsWithChildren } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
@@ -39,6 +34,7 @@ import {
   FigmaSecondaryButton,
 } from "./onboarding-ui";
 import { PlayerProfileSection } from "./player/PlayerProfileSection";
+import { confirmDidNotPlay } from "../lib/confirm-did-not-play";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { useToast } from "../providers/ToastProvider";
 import { supabase } from "../lib/supabase";
@@ -242,11 +238,16 @@ export function MatchResultPanel({
   };
 
   const attendanceMutation = useMutation({
-    mutationFn: (attendance: "attended" | "no_show") =>
-      recordMatchAttendance(supabase, matchId, attendance),
-    onSuccess: async (_data, attendance) => {
+    mutationFn: ({
+      attendance,
+      note,
+    }: {
+      attendance: "attended" | "no_show";
+      note?: string;
+    }) => recordMatchAttendance(supabase, matchId, attendance, note),
+    onSuccess: async (_data, variables) => {
       // Close before refetch so "I did not play" never flashes the score form.
-      if (attendance === "no_show") {
+      if (variables.attendance === "no_show") {
         onComplete?.();
       }
       await invalidate();
@@ -412,7 +413,10 @@ export function MatchResultPanel({
               number: parsed.setIndex + 1,
             })
           : null;
-      const message = [t(`matches.results.scoreErrors.${parsed.error}`), setHint]
+      const message = [
+        t(`matches.results.scoreErrors.${parsed.error}`),
+        setHint,
+      ]
         .filter(Boolean)
         .join(" ");
       setScoreError(message);
@@ -518,12 +522,26 @@ export function MatchResultPanel({
           <FigmaPrimaryButton
             label={t("matches.results.attended")}
             loading={attendanceMutation.isPending}
-            onPress={() => attendanceMutation.mutate("attended")}
+            onPress={() =>
+              attendanceMutation.mutate({ attendance: "attended" })
+            }
           />
           <FigmaSecondaryButton
             label={t("matches.results.noShow")}
             disabled={attendanceMutation.isPending}
-            onPress={() => attendanceMutation.mutate("no_show")}
+            onPress={() =>
+              confirmDidNotPlay(t, async (reason) => {
+                try {
+                  await attendanceMutation.mutateAsync({
+                    attendance: "no_show",
+                    note: reason || undefined,
+                  });
+                } catch {
+                  // Keep the confirm dialog open; toast already fired.
+                  throw new Error("attendance failed");
+                }
+              })
+            }
           />
         </View>
       ) : null}

@@ -28,6 +28,7 @@ import {
 import { initialsFromName } from "../lib/avatar-url";
 import { useAvatarUrl } from "../lib/use-avatar-url";
 import { buildCardAccessibilityLabel } from "../lib/card-accessibility";
+import { useConfirmDialogVisible } from "../providers/ConfirmDialogProvider";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { formatTabBadgeCount } from "../lib/match-list-card";
 import { useResponsiveLayout } from "../lib/responsive";
@@ -82,9 +83,7 @@ export function SegmentTabs<T extends string>({
               key={option.value}
               accessibilityRole="tab"
               accessibilityLabel={
-                badgeLabel
-                  ? `${option.label}, ${badgeLabel}`
-                  : option.label
+                badgeLabel ? `${option.label}, ${badgeLabel}` : option.label
               }
               accessibilityState={{ selected }}
               onPress={() => onChange(option.value)}
@@ -605,6 +604,7 @@ export function BottomSheet({
   const insets = useSafeAreaInsets();
   const { horizontalPadding } = useResponsiveLayout();
   const { writingDirection } = useLayoutDirection();
+  const confirmDialogVisible = useConfirmDialogVisible();
   const [rendered, setRendered] = useState(visible);
   const [opacity] = useState(() => new Animated.Value(visible ? 1 : 0));
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -690,8 +690,17 @@ export function BottomSheet({
         style={styles.sheetRoot}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
+        pointerEvents={confirmDialogVisible ? "none" : "auto"}
       >
-        <Animated.View style={[styles.sheetBackdrop, { opacity }]}>
+        <Animated.View
+          pointerEvents={confirmDialogVisible ? "none" : "auto"}
+          style={[
+            styles.sheetBackdrop,
+            {
+              opacity: confirmDialogVisible ? 0 : opacity,
+            },
+          ]}
+        >
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Close"
@@ -700,6 +709,7 @@ export function BottomSheet({
           />
         </Animated.View>
         <Animated.View
+          pointerEvents={confirmDialogVisible ? "none" : "auto"}
           style={[
             styles.sheetContainer,
             { opacity },

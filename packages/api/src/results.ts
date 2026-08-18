@@ -10,10 +10,12 @@ export async function recordMatchAttendance(
   client: TennisSupabaseClient,
   matchId: string,
   attendance: "attended" | "no_show" | "late_cancel" | "cancelled_in_time",
+  note?: string,
 ): Promise<void> {
   const { error } = await client.rpc("record_match_attendance", {
     p_match_id: matchId,
     p_attendance: attendance,
+    p_note: note?.trim() ? note.trim().slice(0, 200) : undefined,
   });
   if (error) {
     throw error;

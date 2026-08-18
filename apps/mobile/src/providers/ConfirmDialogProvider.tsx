@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { Modal, Pressable, StyleSheet, View, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import {
@@ -87,100 +87,104 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   return (
     <ConfirmDialogContext.Provider value={value}>
       {children}
-      <Modal
-        animationType="fade"
-        transparent
-        visible={dialog !== null}
-        onRequestClose={close}
-      >
-        <View style={styles.backdrop}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Close"
-            onPress={close}
-            style={StyleSheet.absoluteFill}
-          />
+      {/* Mount only while open so this portal stacks above any earlier Modal
+          (e.g. BottomSheet). A always-mounted Modal stays under a later sheet. */}
+      {dialog !== null ? (
+        <Modal animationType="none" transparent visible onRequestClose={close}>
           <View
             style={[
-              styles.card,
-              {
-                marginTop: insets.top + 24,
-                marginBottom: insets.bottom + 24,
-              },
+              styles.backdrop,
+              Platform.OS === "web" ? styles.backdropWeb : null,
             ]}
           >
-            {dialog?.kind === "notify" ? (
-              <>
-                <AppText
-                  accessibilityRole="header"
-                  style={[styles.title, { writingDirection }]}
-                >
-                  {dialog.title}
-                </AppText>
-                {dialog.message ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              onPress={close}
+              style={StyleSheet.absoluteFill}
+            />
+            <View
+              style={[
+                styles.card,
+                {
+                  marginTop: insets.top + 24,
+                  marginBottom: insets.bottom + 24,
+                },
+              ]}
+            >
+              {dialog.kind === "notify" ? (
+                <>
+                  <AppText
+                    accessibilityRole="header"
+                    style={[styles.title, { writingDirection }]}
+                  >
+                    {dialog.title}
+                  </AppText>
+                  {dialog.message ? (
+                    <AppText
+                      style={[styles.message, { writingDirection }]}
+                      maxLines={6}
+                    >
+                      {dialog.message}
+                    </AppText>
+                  ) : null}
+                  <FigmaPrimaryButton
+                    label={t("common.done")}
+                    onPress={close}
+                    style={styles.singleAction}
+                  />
+                </>
+              ) : null}
+
+              {dialog.kind === "choose" ? (
+                <>
+                  <AppText
+                    accessibilityRole="header"
+                    style={[styles.title, { writingDirection }]}
+                  >
+                    {dialog.options.title}
+                  </AppText>
                   <AppText
                     style={[styles.message, { writingDirection }]}
                     maxLines={6}
                   >
-                    {dialog.message}
+                    {dialog.options.message}
                   </AppText>
-                ) : null}
-                <FigmaPrimaryButton
-                  label={t("common.done")}
-                  onPress={close}
-                  style={styles.singleAction}
+                  <View style={styles.actions}>
+                    <FigmaPrimaryButton
+                      label={dialog.options.confirmLabel}
+                      onPress={() => {
+                        const { onConfirm } = dialog.options;
+                        // Run confirm before dismiss so the underlying screen can
+                        // settle while the modal still covers it (avoids a one-
+                        // frame flash of the pre-confirm UI).
+                        onConfirm();
+                        close();
+                      }}
+                    />
+                    <FigmaSecondaryButton
+                      label={dialog.options.cancelLabel}
+                      onPress={() => {
+                        const { onCancel } = dialog.options;
+                        onCancel?.();
+                        close();
+                      }}
+                    />
+                  </View>
+                </>
+              ) : null}
+
+              {dialog.kind === "cancelMatch" ? (
+                <CancelMatchDialogPanel
+                  options={dialog.options}
+                  writingDirection={writingDirection}
+                  onClose={close}
                 />
-              </>
-            ) : null}
-
-            {dialog?.kind === "choose" ? (
-              <>
-                <AppText
-                  accessibilityRole="header"
-                  style={[styles.title, { writingDirection }]}
-                >
-                  {dialog.options.title}
-                </AppText>
-                <AppText
-                  style={[styles.message, { writingDirection }]}
-                  maxLines={6}
-                >
-                  {dialog.options.message}
-                </AppText>
-                <View style={styles.actions}>
-                  <FigmaPrimaryButton
-                    label={dialog.options.confirmLabel}
-                    onPress={() => {
-                      const { onConfirm } = dialog.options;
-                      // Run confirm before dismiss so the underlying screen can
-                      // settle while the modal still covers it (avoids a one-
-                      // frame flash of the pre-confirm UI).
-                      onConfirm();
-                      close();
-                    }}
-                  />
-                  <FigmaSecondaryButton
-                    label={dialog.options.cancelLabel}
-                    onPress={() => {
-                      const { onCancel } = dialog.options;
-                      onCancel?.();
-                      close();
-                    }}
-                  />
-                </View>
-              </>
-            ) : null}
-
-            {dialog?.kind === "cancelMatch" ? (
-              <CancelMatchDialogPanel
-                options={dialog.options}
-                writingDirection={writingDirection}
-                onClose={close}
-              />
-            ) : null}
+              ) : null}
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      ) : null}
     </ConfirmDialogContext.Provider>
   );
 }
@@ -191,6 +195,15 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(13, 28, 20, 0.45)",
     justifyContent: "center",
     paddingHorizontal: 28,
+  },
+  backdropWeb: {
+    // Above BottomSheet / other RN-web Modals that default near 9999.
+    zIndex: 10050,
+    elevation: 10050,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   },
   card: {
     backgroundColor: tennisColors.card,
@@ -204,6 +217,8 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     width: "100%",
     alignSelf: "center",
+    zIndex: 1,
+    elevation: 12,
   },
   title: {
     fontFamily: tennisFontFamily.headingSemi,
