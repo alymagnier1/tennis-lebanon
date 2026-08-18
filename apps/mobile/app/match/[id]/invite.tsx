@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   RefreshControl,
-  Share,
   StyleSheet,
   TextInput,
   View,
@@ -34,7 +32,12 @@ import {
   formStyles,
 } from "../../../src/components/FormUi";
 import { matchHubRoute } from "../../../src/lib/routes";
-import { buildMatchInviteUrl } from "../../../src/lib/invite-link";
+import {
+  buildMatchInviteUrl,
+  matchInviteErrorKey,
+  shareMatchInvite,
+} from "../../../src/lib/invite-link";
+import { useToast } from "../../../src/providers/ToastProvider";
 import { useLayoutDirection } from "../../../src/lib/layout-direction";
 import { useResponsiveLayout } from "../../../src/lib/responsive";
 import { supabase } from "../../../src/lib/supabase";
@@ -76,6 +79,7 @@ export default function MatchInvitePlayersScreen() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
   const { horizontalPadding, titleFontSize } = useResponsiveLayout();
   const { writingDirection } = useLayoutDirection();
   const [invitedIds, setInvitedIds] = useState<string[]>([]);
@@ -127,21 +131,14 @@ export default function MatchInvitePlayersScreen() {
         current.includes(playerId) ? current : [...current, playerId],
       );
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
-      Alert.alert(t("matches.invite.sent"));
-      await Share.share({
-        message: t("matches.invite.shareMessage", {
+      showToast(t("matches.invite.sent"));
+      await shareMatchInvite(
+        t("matches.invite.shareMessage", {
           url: buildMatchInviteUrl(token),
         }),
-      });
-    },
-    onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : "";
-      Alert.alert(
-        message.includes("invite_rate_limited")
-          ? t("matches.invite.rateLimited")
-          : t("matches.invite.error"),
       );
     },
+    onError: (error: unknown) => showToast(t(matchInviteErrorKey(error))),
   });
 
   useEffect(() => {
@@ -178,7 +175,7 @@ export default function MatchInvitePlayersScreen() {
       await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
       router.replace(matchHubRoute(id!));
     },
-    onError: () => Alert.alert(t("matches.create.publishError")),
+    onError: () => showToast(t("matches.create.publishError")),
   });
 
   const isDraft = hub?.status === "draft";

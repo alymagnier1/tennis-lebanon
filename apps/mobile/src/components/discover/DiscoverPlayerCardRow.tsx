@@ -1,4 +1,3 @@
-import { Alert, Share } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +7,11 @@ import {
   type MyMatchRow,
 } from "@tennis-lebanon/api";
 import { DiscoverPlayerCard } from "./DiscoverPlayerCard";
-import { buildMatchInviteUrl } from "../../lib/invite-link";
+import {
+  buildMatchInviteUrl,
+  matchInviteErrorKey,
+  shareMatchInvite,
+} from "../../lib/invite-link";
 import { formatMatchesPlayedLabel } from "../../lib/matches-played-label";
 import { publicPlayerLevelChip } from "../../lib/player-level-label";
 import { discoverPlayerAvailabilityTags } from "../../lib/discover-availability-tag";
@@ -17,6 +20,7 @@ import { clubLabelFromList } from "../../lib/match-clubs";
 import { CREATE_MATCH_ROUTE } from "../../lib/routes";
 import { supabase } from "../../lib/supabase";
 import { zoneLabelFromList } from "../../lib/zones";
+import { useToast } from "../../providers/ToastProvider";
 
 export function DiscoverPlayerCardRow({
   player,
@@ -31,20 +35,23 @@ export function DiscoverPlayerCardRow({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
+  // Feedback goes through the toast, not `Alert`: `Alert.alert` is a no-op on
+  // react-native-web, which left the card's only action looking dead there.
   const inviteMutation = useMutation({
     mutationFn: (matchId: string) =>
       createMatchInvite(supabase, matchId, player.user_id),
     onSuccess: async (token) => {
       await queryClient.invalidateQueries({ queryKey: ["my-match-invites"] });
-      Alert.alert(t("matches.invite.sent"));
-      await Share.share({
-        message: t("matches.invite.shareMessage", {
+      showToast(t("matches.invite.sent"));
+      await shareMatchInvite(
+        t("matches.invite.shareMessage", {
           url: buildMatchInviteUrl(token),
         }),
-      });
+      );
     },
-    onError: () => Alert.alert(t("matches.invite.error")),
+    onError: (error: unknown) => showToast(t(matchInviteErrorKey(error))),
   });
 
   const hasInviteableMatch = inviteableMatches.length > 0;

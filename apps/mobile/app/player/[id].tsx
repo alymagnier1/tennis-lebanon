@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  Share,
   StyleSheet,
   View,
 } from "react-native";
@@ -23,8 +22,13 @@ import { isInviteableHostedMatch } from "@tennis-lebanon/domain";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../../src/components/AppText";
 import { formatUtcInBeirut } from "../../src/lib/beirut-time";
-import { buildMatchInviteUrl } from "../../src/lib/invite-link";
+import {
+  buildMatchInviteUrl,
+  matchInviteErrorKey,
+  shareMatchInvite,
+} from "../../src/lib/invite-link";
 import { supabase } from "../../src/lib/supabase";
+import { useToast } from "../../src/providers/ToastProvider";
 import { beginCreateMatchForPlayer } from "../../src/lib/begin-create-match-for-player";
 import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
 import { zoneLabelFromList } from "../../src/lib/zones";
@@ -59,6 +63,7 @@ export default function PlayerDetailScreen() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const { showToast } = useToast();
   const { writingDirection } = useLayoutDirection();
   const [invitingMatchId, setInvitingMatchId] = useState<string | null>(null);
 
@@ -106,6 +111,9 @@ export default function PlayerDetailScreen() {
     },
   });
 
+  // Toast rather than `Alert`, which react-native-web ignores: this is where a
+  // host with several open matches lands from a Discover card, so a silent
+  // result here reads as the invite never happening.
   const inviteMutation = useMutation({
     mutationFn: (matchId: string) => {
       setInvitingMatchId(matchId);
@@ -113,14 +121,14 @@ export default function PlayerDetailScreen() {
     },
     onSuccess: async (token) => {
       await queryClient.invalidateQueries({ queryKey: ["my-match-invites"] });
-      Alert.alert(t("matches.invite.sent"));
-      await Share.share({
-        message: t("matches.invite.shareMessage", {
+      showToast(t("matches.invite.sent"));
+      await shareMatchInvite(
+        t("matches.invite.shareMessage", {
           url: buildMatchInviteUrl(token),
         }),
-      });
+      );
     },
-    onError: () => Alert.alert(t("matches.invite.error")),
+    onError: (error: unknown) => showToast(t(matchInviteErrorKey(error))),
     onSettled: () => setInvitingMatchId(null),
   });
 
