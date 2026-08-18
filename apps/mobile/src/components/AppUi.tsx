@@ -633,11 +633,16 @@ export function BottomSheet({
     });
   }, [opacity, visible]);
 
+  /*
+   * Cleared on the way out rather than on the way in. Resetting synchronously in
+   * the effect body when `!visible` renders the sheet once at the old keyboard
+   * height and then again at zero, which is the cascading render the React
+   * Compiler lint rejects. Doing it in cleanup keeps a reopened sheet from
+   * inheriting the last keyboard height, which the render guard below cannot fix
+   * on its own: `visible` is already true by then.
+   */
   useEffect(() => {
-    if (!visible) {
-      setKeyboardHeight(0);
-      return;
-    }
+    if (!visible) return;
 
     if (Platform.OS === "web" && typeof window !== "undefined") {
       const viewport = window.visualViewport;
@@ -656,6 +661,7 @@ export function BottomSheet({
       return () => {
         viewport.removeEventListener("resize", update);
         viewport.removeEventListener("scroll", update);
+        setKeyboardHeight(0);
       };
     }
 
@@ -672,6 +678,7 @@ export function BottomSheet({
     return () => {
       onShow.remove();
       onHide.remove();
+      setKeyboardHeight(0);
     };
   }, [visible]);
 

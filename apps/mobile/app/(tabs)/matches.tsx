@@ -218,15 +218,22 @@ export default function MatchesScreen() {
     [invitesQuery.data, matchesQuery.data],
   );
 
-  useEffect(() => {
-    if (segment !== "active") return;
-    setActiveGroup((current) => {
-      if (groupedActive[current].length > 0) return current;
-      return defaultActiveMatchGroup(groupedActive);
-    });
-  }, [segment, groupedActive]);
+  /*
+   * Derived during render rather than corrected afterwards in an effect.
+   *
+   * The selected group can empty out underneath the player -- a match moves on,
+   * or a refetch lands -- and the tab should fall back to one with something in
+   * it. Doing that with `setActiveGroup` inside an effect meant rendering the
+   * empty group once, then re-rendering, which is the cascading-render the
+   * React Compiler lint rejects. `activeGroup` still records what the player
+   * chose; this is only what that choice resolves to right now.
+   */
+  const effectiveActiveGroup: ActiveMatchGroup =
+    groupedActive[activeGroup].length > 0
+      ? activeGroup
+      : defaultActiveMatchGroup(groupedActive);
 
-  const activeGroupMatches = groupedActive[activeGroup];
+  const activeGroupMatches = groupedActive[effectiveActiveGroup];
 
   const filteredCompletedMatches = useMemo(
     () =>
@@ -403,7 +410,7 @@ export default function MatchesScreen() {
           {segment === "active" ? (
             <SegmentTabs
               variant="nested"
-              value={activeGroup}
+              value={effectiveActiveGroup}
               options={ACTIVE_MATCH_GROUPS.map((group) => ({
                 value: group,
                 label: t(activeMatchGroupTabKey(group)),
@@ -523,10 +530,10 @@ export default function MatchesScreen() {
 
           {showEmptyActiveGroup ? (
             <EmptyState
-              title={t(activeMatchGroupEmptyTitleKey(activeGroup))}
-              body={t(activeMatchGroupEmptyBodyKey(activeGroup))}
+              title={t(activeMatchGroupEmptyTitleKey(effectiveActiveGroup))}
+              body={t(activeMatchGroupEmptyBodyKey(effectiveActiveGroup))}
               action={
-                activeGroup === "upcoming" ? (
+                effectiveActiveGroup === "upcoming" ? (
                   <PrimaryButton
                     label={t("matches.create.organiseCta")}
                     onPress={() => startNewMatchCreate()}
