@@ -289,6 +289,10 @@ begin
     'a unanimous flexible match should be ready_to_book'
   );
 
+  -- Back to the host: 058 made court confirmation host-only, and the joiner's
+  -- vote above left them as the caller.
+  perform pg_temp.set_caller(v_creator);
+
   -- Re-syncing withdraws the option they voted on. Without the court-aware
   -- promotion the vote check would demote this straight back to full.
   perform public.confirm_external_court(

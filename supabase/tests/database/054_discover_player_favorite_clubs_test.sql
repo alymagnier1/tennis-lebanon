@@ -19,13 +19,16 @@ values (
 )
 on conflict do nothing;
 
-select is(
-  jsonb_array_length(
-    public.list_player_favorite_clubs_json(
-      '22222222-2222-2222-2222-222222222222'
-    )
+-- Asserts the inserted club is present rather than that it is the only one. The
+-- player may already have favourites from other fixtures or from manual use of a
+-- long-lived dev database, and a total-length assertion turns that into a failure
+-- about nothing.
+select ok(
+  public.list_player_favorite_clubs_json(
+    '22222222-2222-2222-2222-222222222222'
+  ) @> jsonb_build_array(
+    jsonb_build_object('club_id', 'bbbbbbbb-0001-0001-0001-000000000001')
   ),
-  1,
   'favorite clubs json returns seeded club'
 );
 

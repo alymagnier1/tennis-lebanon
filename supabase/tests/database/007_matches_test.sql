@@ -109,6 +109,41 @@ begin
 end;
 $$;
 
+-- An open singles match this file owns outright. It used to join the seeded
+-- d1111111, which any manual use of a dev database can cancel or fill -- and a
+-- cancelled fixture makes this fail with match_not_joinable, which says nothing
+-- about joining. The shape mirrors the seed's so the eligibility rules exercised
+-- here are unchanged.
+insert into public.matches (
+  id, creator_id, format, visibility, status, intent,
+  min_skill, max_skill, requires_creator_approval
+)
+values (
+  'd0000007-0000-0000-0000-000000000007',
+  '22222222-2222-2222-2222-222222222222',
+  'singles', 'public', 'open', 'social', 'improving', 'intermediate', false
+);
+
+insert into public.match_zones (match_id, zone_id)
+values ('d0000007-0000-0000-0000-000000000007', 'aaaaaaaa-0001-0001-0001-000000000002');
+
+insert into public.match_participants (match_id, user_id, status, is_creator)
+values (
+  'd0000007-0000-0000-0000-000000000007',
+  '22222222-2222-2222-2222-222222222222',
+  'accepted',
+  true
+);
+
+insert into public.match_time_options (id, match_id, starts_at, ends_at, proposed_by)
+values (
+  'e0000007-0000-0000-0000-000000000007',
+  'd0000007-0000-0000-0000-000000000007',
+  now() + interval '2 days',
+  now() + interval '2 days 90 minutes',
+  '22222222-2222-2222-2222-222222222222'
+);
+
 set local role authenticated;
 select pg_temp.set_caller('11111111-1111-1111-1111-111111111111');
 
@@ -136,7 +171,7 @@ select pg_temp.assert_true(
 select pg_temp.set_caller('11111111-1111-1111-1111-111111111111');
 
 select pg_temp.assert_true(
-  public.join_match('d1111111-1111-1111-1111-111111111111') = 'accepted',
+  public.join_match('d0000007-0000-0000-0000-000000000007') = 'accepted',
   'eligible player can instantly join an open public singles match'
 );
 
@@ -149,7 +184,7 @@ select set_config('request.jwt.claim.role', 'authenticated', true);
 
 do $$
 begin
-  perform public.join_match('d1111111-1111-1111-1111-111111111111');
+  perform public.join_match('d0000007-0000-0000-0000-000000000007');
   raise exception 'expected full match join to fail';
 exception
   when others then
@@ -248,7 +283,7 @@ select pg_temp.set_caller('11111111-1111-1111-1111-111111111111');
 
 select pg_temp.assert_raises(
   $$select public.create_match_invite(
-    'd1111111-1111-1111-1111-111111111111',
+    'd0000007-0000-0000-0000-000000000007',
     '66666666-6666-6666-6666-666666666666'::uuid
   )$$,
   '42501',

@@ -68,9 +68,18 @@ begin
   on conflict (user_id, device_id) do update
   set token = excluded.token, is_active = true, last_seen_at = now();
 
+  -- Batch sized from what is actually pending rather than a fixed 10. A
+  -- long-lived dev database carries a backlog, and this test's own notification
+  -- simply fell outside the first ten -- a failure about queue depth, not about
+  -- whether claiming works.
   select count(*)::integer
   into v_claimed
-  from public.claim_due_notifications(10) as c
+  from public.claim_due_notifications(
+    greatest(
+      (select count(*)::integer from public.notifications where sent_at is null),
+      1
+    )
+  ) as c
   where c.notification_id = v_notification_id;
 
   if v_claimed <> 1 then
@@ -103,7 +112,14 @@ begin
     set scheduled_at = now()
     where n.id = v_notification_id;
 
-    perform public.claim_due_notifications(10);
+    -- Same reason as above: the claim has to reach this notification, and a
+    -- fixed batch does not on a database with a backlog.
+    perform public.claim_due_notifications(
+      greatest(
+        (select count(*)::integer from public.notifications where sent_at is null),
+        1
+      )
+    );
     perform public.mark_notification_failed(v_notification_id, 'no_active_token');
   end loop;
 

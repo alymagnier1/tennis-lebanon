@@ -51,6 +51,42 @@ begin
 end;
 $$;
 
+-- The seeded match this used to assert on is mutable: manual use of a dev
+-- database can cancel or fill it, and then this fails for reasons unrelated to
+-- discovery. The test now owns an open match of its own, mirroring the seed's
+-- shape, so the assertion is about `discover_open_matches` and nothing else.
+insert into public.matches (
+  id, creator_id, format, visibility, status, intent,
+  min_skill, max_skill, requires_creator_approval
+)
+values (
+  'd0000004-0000-0000-0000-000000000004',
+  '22222222-2222-2222-2222-222222222222',
+  'singles', 'public', 'open', 'social', 'improving', 'intermediate', false
+);
+
+insert into public.match_zones (match_id, zone_id)
+values ('d0000004-0000-0000-0000-000000000004', 'aaaaaaaa-0001-0001-0001-000000000002');
+
+insert into public.match_participants (match_id, user_id, status, is_creator)
+values (
+  'd0000004-0000-0000-0000-000000000004',
+  '22222222-2222-2222-2222-222222222222',
+  'accepted',
+  true
+);
+
+-- A proposed time is part of being discoverable: an open match with no slot on
+-- offer is not something anyone can join.
+insert into public.match_time_options (id, match_id, starts_at, ends_at, proposed_by)
+values (
+  'e0000004-0000-0000-0000-000000000004',
+  'd0000004-0000-0000-0000-000000000004',
+  now() + interval '2 days',
+  now() + interval '2 days 90 minutes',
+  '22222222-2222-2222-2222-222222222222'
+);
+
 set local role authenticated;
 select set_config(
   'request.jwt.claim.sub',
@@ -87,7 +123,7 @@ select pg_temp.assert_true(
   exists (
     select 1
     from public.discover_open_matches() as result
-    where result.match_id = 'd1111111-1111-1111-1111-111111111111'
+    where result.match_id = 'd0000004-0000-0000-0000-000000000004'
   ),
   'eligible public open matches are discoverable'
 );

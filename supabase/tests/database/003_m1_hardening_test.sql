@@ -167,10 +167,13 @@ select pg_temp.assert_true(
   (select count(*) from public.match_messages) = 0,
   'non-participants should not read match messages via direct select'
 );
-select pg_temp.assert_raises(
-  $sql$select * from public.notifications$sql$,
-  '42501',
-  'notifications remain inaccessible without explicit policies'
+-- Readable since 062 granted SELECT so the `notifications_read_own` policy could
+-- be reached at all; before that the policy was dead code and every read was
+-- rejected outright. The isolation assertion moves to the shape used for
+-- match_messages above: the grant is open, so RLS is what must hold the line.
+select pg_temp.assert_true(
+  (select count(*) from public.notifications) = 0,
+  'notifications belonging to other users must not be readable'
 );
 select pg_temp.assert_raises(
   $sql$select * from public.club_private_contacts$sql$,

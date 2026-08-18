@@ -290,7 +290,8 @@ begin
     format('a full fixed match with no court is ready_to_book, got %s', pg_temp.match_status(v_match))
   );
 
-  -- Still any accepted participant, not just the creator.
+  -- Host-only since 058, so hand the caller back before securing the court.
+  perform pg_temp.set_caller(v_creator);
   perform public.confirm_external_court(
     v_match, v_court, v_starts, v_starts + interval '90 minutes', null
   );

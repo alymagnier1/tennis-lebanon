@@ -119,13 +119,22 @@ $$;
 
 set local role authenticated;
 
-select is(
+-- Recorded rather than asserted to be zero. A long-lived dev database
+-- accumulates finished matches, so "starts empty" fails for reasons that have
+-- nothing to do with this function; the delta below is the real claim and holds
+-- whatever the player has played before.
+select set_config(
+  'tests.completed_baseline',
   (
-    select count(*)::integer
+    select count(*)::text
     from public.list_my_completed_matches() as row
   ),
-  0,
-  'completed list starts empty for creator before any finished match'
+  true
+);
+
+select ok(
+  current_setting('tests.completed_baseline')::integer >= 0,
+  'completed list is readable for the creator before the new finished match'
 );
 
 set local role postgres;
@@ -141,6 +150,12 @@ begin
   );
 
   perform pg_temp.set_caller('11111111-1111-1111-1111-111111111111');
+
+  if (
+    select count(*)::integer from public.list_my_completed_matches() as row
+  ) <> current_setting('tests.completed_baseline')::integer + 1 then
+    raise exception 'finishing one match should add exactly one row to the list';
+  end if;
 
   if not exists (
     select 1

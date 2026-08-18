@@ -307,6 +307,10 @@ begin
   perform pg_temp.set_caller(v_joiner);
   perform public.join_match(v_match_id);
 
+  -- 058 made securing a court host-only, and joining above left the joiner as
+  -- the caller.
+  perform pg_temp.set_caller(v_creator);
+
   perform public.confirm_external_court(
     v_match_id,
     v_court,
@@ -359,6 +363,10 @@ begin
 
   perform pg_temp.set_caller(v_joiner);
   perform public.join_match(v_match_id);
+
+  -- 058 made securing a court host-only, and joining above left the joiner as
+  -- the caller.
+  perform pg_temp.set_caller(v_creator);
 
   perform public.confirm_external_court(
     v_match_id,
