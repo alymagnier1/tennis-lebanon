@@ -32,7 +32,7 @@ Do this before spending money on hosted infra.
 | 0.2 | Run database authorization matrix | `pnpm db:test` passes (Docker + local Supabase)                                                                  |
 | 0.3 | Rehearse five workflows locally   | All rows in `docs/PILOT_OPERATIONS.md` § “Five partner-club workflow rehearsals” pass on a fresh `pnpm db:reset` |
 | 0.4 | Fix P0 bugs from rehearsal        | No crashers or dead-ends on auth, onboarding, discover, create/join, hub, WhatsApp handoff, result               |
-| 0.5 | Decide pilot geography            | One dense corridor chosen; real zone names/slugs defined (replace `Pilot North/Central/South`)                   |
+| 0.5 | Decide pilot geography            | **Done** — Beirut, one zone. See `docs/DECISIONS.md` 2026-08-19 and `supabase/pilot/beirut-zones.sql`            |
 | 0.6 | Decide pilot locales              | English + French only for cohort 1 (`docs/DECISIONS.md` 2026-07-28)                                              |
 | 0.7 | Name ops owner                    | Single inbox + on-call for reports, disputes, and stuck matches                                                  |
 
@@ -47,19 +47,19 @@ pnpm db:test
 
 Create a **dedicated staging** Supabase project (Frankfurt `eu-central-1` per `docs/ARCHITECTURE.md`). Do **not** use local `127.0.0.1` for real testers.
 
-| #    | Task                               | Success criterion                                                                      |
-| ---- | ---------------------------------- | -------------------------------------------------------------------------------------- |
-| 1.1  | Create Supabase staging project    | Project ref recorded; separate from any future production project                      |
-| 1.2  | Link CLI                           | `supabase link --project-ref <staging-ref>`                                            |
-| 1.3  | Push migrations                    | `supabase db push` — all migrations applied, no errors                                 |
-| 1.4  | Regenerate types                   | `pnpm db:types` committed if schema changed                                            |
-| 1.5  | **Do not run seed.sql on staging** | No `@tennis-lebanon.test` accounts, no fictional clubs in staging/production           |
-| 1.6  | Insert real pilot zones            | 2–4 active zones for your corridor via SQL or Studio (`zones` table)                   |
-| 1.7  | Create platform operator           | Your admin user in `platform_roles`; can access `/admin/reports` on dashboard          |
-| 1.8  | Configure Auth redirect URLs       | `tennislebanon://auth/callback` added in Supabase Auth → URL configuration             |
-| 1.9  | Configure Auth email               | Supabase built-in email works for magic links **or** custom SMTP configured and tested |
-| 1.10 | Enable RLS spot-check              | Run `pnpm db:test` against linked staging if supported, or manual smoke as two users   |
-| 1.11 | Backup drill                       | Follow `docs/BACKUP_RESTORE.md`; record date in sign-off table                         |
+| #    | Task                               | Success criterion                                                                          |
+| ---- | ---------------------------------- | ------------------------------------------------------------------------------------------ |
+| 1.1  | Create Supabase staging project    | Project ref recorded; separate from any future production project                          |
+| 1.2  | Link CLI                           | `supabase link --project-ref <staging-ref>`                                                |
+| 1.3  | Push migrations                    | `supabase db push` — all migrations applied, no errors                                     |
+| 1.4  | Regenerate types                   | `pnpm db:types` committed if schema changed                                                |
+| 1.5  | **Do not run seed.sql on staging** | No `@tennis-lebanon.test` accounts, no fictional clubs in staging/production               |
+| 1.6  | Insert real pilot zones            | Run `supabase/pilot/beirut-zones.sql`; its final query must report exactly one active zone |
+| 1.7  | Create platform operator           | Your admin user in `platform_roles`; can access `/admin/reports` on dashboard              |
+| 1.8  | Configure Auth redirect URLs       | `tennislebanon://auth/callback` added in Supabase Auth → URL configuration                 |
+| 1.9  | Configure Auth email               | Supabase built-in email works for magic links **or** custom SMTP configured and tested     |
+| 1.10 | Enable RLS spot-check              | Run `pnpm db:test` against linked staging if supported, or manual smoke as two users       |
+| 1.11 | Backup drill                       | Follow `docs/BACKUP_RESTORE.md`; record date in sign-off table                             |
 
 **Staging env vars (dashboard + mobile builds):**
 
@@ -78,15 +78,19 @@ Create a **dedicated staging** Supabase project (Frankfurt `eu-central-1` per `d
 
 v1 pilot model: **you add clubs**; players book via **WhatsApp**, then record the court in-app (`confirm_external_court`). Do **not** promise in-app club approval unless you also staff the dashboard queue.
 
-| #   | Task                                    | Success criterion                                                                                       |
-| --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 2.1 | Onboard 5–8 real clubs                  | Each club: name, slug, zone, address, amenities, at least one court, operating hours                    |
-| 2.2 | Set `booking_mode = external_link`      | Every pilot club; WhatsApp number on each club                                                          |
-| 2.3 | Verify club appears in mobile directory | Signed-in player in matching zone sees club in Clubs tab                                                |
-| 2.4 | Test WhatsApp deep link                 | “Book on WhatsApp” opens with sensible prefilled message; no raw phone in public directory              |
-| 2.5 | Add club photos (optional)              | Upload via dashboard/Storage if ready; empty photo is OK for cohort 1                                   |
-| 2.6 | Document club playbook                  | How each club expects WhatsApp bookings, cancellation, and no-show handling (1-pager per club)          |
-| 2.7 | Agree club response expectation         | Ops knows how to nudge clubs (dashboard has **no push to staff** — see `docs/STAGING_CHECKLIST.md` §7b) |
+**Beirut has four bookable venues, not eight.** The original 5–8 target does not survive contact with the city: the tennis academies (Beirut Tennis Club, Rah, Lebanon Tennis Inc, Professional Tennis School) coach and do **not** rent courts outside lesson hours, and the remaining clubs — AUB, Club Sportif Français, Yarze Country Club, Mont La Salle — are members-only and cannot serve a stranger who matched in the app. Chasing eight would mean signing venues your players cannot book. Sign the four that work.
+
+Supply is adequate rather than tight: roughly 6+ courts across the Manara cluster, about 18 prime-time slots on a weekday evening (17:00–22:00, 90-minute matches), against about five matches an evening if 50 players each play weekly. Watch it anyway — if fill rate stalls while `agreed → played` holds, court contention is the first thing to check.
+
+| #   | Task                                    | Success criterion                                                                                                                          |
+| --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2.1 | Onboard the 4 bookable Beirut venues    | Renaissance, Al Riyadi and JDK (all at Manara) plus The Private Club (Dekwaneh). Each: name, slug, zone, address, amenities, courts, hours |
+| 2.2 | Set `booking_mode = external_link`      | Every pilot club; WhatsApp number on each club                                                                                             |
+| 2.3 | Verify club appears in mobile directory | Signed-in player in matching zone sees club in Clubs tab                                                                                   |
+| 2.4 | Test WhatsApp deep link                 | “Book on WhatsApp” opens with sensible prefilled message; no raw phone in public directory                                                 |
+| 2.5 | Add club photos (optional)              | Upload via dashboard/Storage if ready; empty photo is OK for cohort 1                                                                      |
+| 2.6 | Document club playbook                  | How each club expects WhatsApp bookings, cancellation, and no-show handling (1-pager per club)                                             |
+| 2.7 | Agree club response expectation         | Ops knows how to nudge clubs (dashboard has **no push to staff** — see `docs/STAGING_CHECKLIST.md` §7b)                                    |
 
 **Dashboard path:** log in as platform operator → `/onboarding` → add club on behalf of partner (`asOperator` = live immediately, no approval queue).
 
