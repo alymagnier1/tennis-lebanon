@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-19 — Cohort 1 lists clubs; it does not partner with them
+
+- Status: accepted
+- Context: the launch checklist and operations guide were written around onboarding 5–8 partner clubs, a club-staff booking queue, and a per-club playbook. None of that reflects how cohort 1 works. Players find a venue in the app's directory, tap through to the club's own public WhatsApp, book exactly as they would have without the app, and record the court themselves through `confirm_external_court`. Supersedes the framing in the 2026-08-16 court-handoff entry, which described the second half of the funnel as "gated on clubs not yet signed" — there is nothing to sign.
+- Decision: **no club is a partner for cohort 1.** The app is a directory plus a coordination layer; the booking is unchanged from what a player would have done anyway. Phase 2 of the launch checklist becomes listing four venues with their published WhatsApp numbers rather than negotiating with eight. The "Club queue (Flow C)" rehearsal is removed — it exercised a path the pilot does not use — and the booking rehearsal is rewritten around the WhatsApp handoff and `confirm_external_court`, which is what cohort A actually depends on and what nothing rehearsed before.
+- Alternatives considered: keeping the club-queue rehearsal as insurance (rejected — the in-app queue is already listed as out of scope for cohort 1 because there is no reliable staff notification channel, so rehearsing it spends an evening proving a path nobody will walk; the seeded club keeps it testable if that changes); pursuing partnerships anyway for better court access (rejected for cohort 1 — it makes launch dependent on other people's willingness, and the survey has not been done; supply is already adequate at roughly 6+ courts across the Manara cluster).
+- Consequences: no club can block or delay the pilot, and Phase 2 shrinks from 2–5 days to 1–2. The club dashboard is still needed, but only for the operator adding clubs and for `/admin/reports` moderation — not for club staff. Two limits are now explicit in the docs rather than implied: court state is **self-reported**, since `confirm_external_court` records what a player says they booked and nothing checks it against the club, so a double-booking surfaces at the court; and the club's WhatsApp response time is outside the product and unmeasurable from inside it, with the `match_court_requests` tracking from `070` recording only that a player left for WhatsApp. The second half of the funnel therefore measures the handoff — an unanswered message, no free court, or two people who agreed and never went — not a missing partnership.
+- Owner: Founder
+
 ## 2026-08-19 — Beirut is one zone, and area stays a preference rather than a location
 
 - Status: accepted

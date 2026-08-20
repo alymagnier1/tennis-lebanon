@@ -1,6 +1,6 @@
 # Pilot Operations Guide
 
-Operational runbook for local rehearsal, staging smoke tests, and partner-club onboarding before the Lebanon tennis pilot. Pair with `docs/FLOWS_AND_SCREENS.md`, `docs/LIFECYCLE.md`, and `docs/TESTING_SECURITY.md`.
+Operational runbook for local rehearsal, staging smoke tests, and club listing before the Lebanon tennis pilot. Cohort 1 has no partner clubs: venues are listed, players book on the club's own WhatsApp. Pair with `docs/FLOWS_AND_SCREENS.md`, `docs/LIFECYCLE.md`, and `docs/TESTING_SECURITY.md`.
 
 ## Local environment
 
@@ -26,24 +26,29 @@ Additional discover liquidity: `player-c` … `player-j@tennis-lebanon.test` (sa
 
 ## Seeded clubs
 
-| Club                     | Booking mode  | Notes                                       |
-| ------------------------ | ------------- | ------------------------------------------- |
-| **Pilot Tennis Club**    | In-app queue  | Default rehearsal club; staff account above |
-| **WhatsApp Tennis Club** | External link | Tests pay-at-club / WhatsApp handoff copy   |
+| Club                     | Booking mode  | Notes                                                                                       |
+| ------------------------ | ------------- | ------------------------------------------------------------------------------------------- |
+| **Pilot Tennis Club**    | In-app queue  | Seed only. The in-app queue is **not** the cohort-1 model — kept so the path stays testable |
+| **WhatsApp Tennis Club** | External link | Tests pay-at-club / WhatsApp handoff copy                                                   |
 
-Zones: **Pilot North**, **Pilot Central**, **Pilot South** (placeholder geography — replace before public pilot).
+Zones: **Pilot North**, **Pilot Central**, **Pilot South**. These are permanent **local fixtures** — 31 test files and `seed.sql` reference them by id. Staging and production get a single `beirut` zone from `supabase/pilot/beirut-zones.sql`; see `docs/DECISIONS.md` 2026-08-19.
 
-## Five partner-club workflow rehearsals
+## Four workflow rehearsals
 
-Rehearse end-to-end on a fresh `pnpm db:reset` before inviting real clubs. Mark each row when passed on staging.
+Rehearse end-to-end on a fresh `pnpm db:reset` before inviting players, then again on staging before sign-off.
 
-| #   | Workflow                         | Primary accounts                  | Success criteria                                                                                    |
-| --- | -------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------- |
-| 1   | **Join a public match** (Flow A) | Player B → open match by Player A | Join or request approved; time vote unanimous; hub shows next action                                |
-| 2   | **Create and book** (Flow B)     | Player A hosts; Player B joins    | Match full → agreed time → booking requested → club accepts → status `confirmed`                    |
-| 3   | **Club queue** (Flow C)          | Club staff                        | Staff sees request, accepts/rejects/alternative; booking events audit; players notified             |
-| 4   | **Result and rating** (Flow D)   | Both players                      | Attendance prompt → result submit → confirm → completed history; provisional rating rules respected |
-| 5   | **Safety escalation**            | Player A reports; platform admin  | Report in `/admin/reports`; dismiss or resolve with audit; no direct DB edits                       |
+No club takes part in any of these. Cohort 1 has **no partner clubs**: players find a venue in the directory, book on the club's own public WhatsApp, and record the court themselves. Nothing reaches a club dashboard, so there is no staff-queue rehearsal — the old "Club queue (Flow C)" walkthrough tested a path this pilot does not use, and the in-app booking queue is out of scope per the launch checklist.
+
+| #   | Workflow                               | Primary accounts                  | Success criteria                                                                                                                                                                                  |
+| --- | -------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Join a public match** (Flow A)       | Player B → open match by Player A | Join or request approved; time vote unanimous; hub shows next action                                                                                                                              |
+| 2   | **Create and secure a court** (Flow B) | Player A hosts; Player B joins    | Match full → agreed time → "Book on WhatsApp" opens a prefilled message → court recorded via `confirm_external_court` → status `confirmed`. Only the host can confirm the court (migration `058`) |
+| 3   | **Result and rating** (Flow D)         | Both players                      | Attendance prompt → result submit → confirm → completed history; provisional rating rules respected                                                                                               |
+| 4   | **Safety escalation**                  | Player A reports; platform admin  | Report in `/admin/reports`; dismiss or resolve with audit; no direct DB edits                                                                                                                     |
+
+Workflow 3 is the awkward one to reach by hand: a match only turns `in_progress` once its agreed hour has passed, the auto-confirm and grace windows are measured in days, and the rating itself is only visible in the database. Drive those from outside with `node scripts/rating-sandbox.mjs setup player-a player-b`, which refuses to run against anything but `127.0.0.1`.
+
+What to record is not "it worked" but **where you hesitated**. Every pause over what to tap next, and every screen that left you unsure whether something had happened, is a Phase 0.4 fix — far cheaper to find now than with fifty strangers.
 
 ### Quick paths (seed shortcuts)
 
@@ -52,7 +57,7 @@ After reset, seed includes sample open matches and participants so Discover is n
 - Player A hosts an open singles match in Pilot Central (`d1111111-…`).
 - Player B can join seeded matches without creating liquidity from scratch.
 
-Use these for fast UI checks; still run workflows 1–5 on staging before pilot sign-off.
+Use these for fast UI checks; still run workflows 1–4 on staging before pilot sign-off.
 
 ## Cancellation and reliability (pilot policy)
 
@@ -78,14 +83,15 @@ database before being written here.
 
 v1 secures courts over WhatsApp, so one completion number blends two different questions:
 
-| Half                   | What it proves                                   |
-| ---------------------- | ------------------------------------------------ |
-| discover → agreed time | The player side — the thing the pilot is testing |
-| agreed time → played   | The court side — gated on clubs not yet signed   |
+| Half                   | What it proves                                          |
+| ---------------------- | ------------------------------------------------------- |
+| discover → agreed time | The player side — the thing the pilot is testing        |
+| agreed time → played   | The court side — WhatsApp, the club's reply, turning up |
 
-A healthy first half with the loss concentrated in the second is a **pass** for the player side
-and the mandate for club partnerships. One blended number cannot tell them apart, and a pilot
-that cannot tell them apart has to be run twice.
+A healthy first half with the loss concentrated in the second is a **pass** for the player side,
+and points at the handoff rather than the product: an unanswered WhatsApp, a club with no free
+court, or two people who agreed and never went. One blended number cannot tell those apart, and a
+pilot that cannot tell them apart has to be run twice.
 
 ```sql
 select

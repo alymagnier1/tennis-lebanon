@@ -35,7 +35,7 @@ pnpm db:test               # RLS / RPC authorization matrix
 ## 3. Database and migrations
 
 - [ ] All migrations applied to staging in order (`supabase db push` or CI deploy)
-- [ ] Staging smoke: five workflows in `docs/PILOT_OPERATIONS.md` rehearsed
+- [ ] Staging smoke: four workflows in `docs/PILOT_OPERATIONS.md` rehearsed
 - [ ] Backup/restore drill completed within last 30 days (`docs/BACKUP_RESTORE.md`)
 - [ ] `platform_policy_settings`, lifecycle cron (`process-notifications`), and RLS spot-check documented
 - [ ] Seed data **not** copied to production (real clubs onboarded via dashboard)

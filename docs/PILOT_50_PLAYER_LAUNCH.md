@@ -26,15 +26,15 @@ Pair with:
 
 Do this before spending money on hosted infra.
 
-| #   | Task                              | Success criterion                                                                                                |
-| --- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| 0.1 | Run automated gates               | `pnpm verify:pilot` passes                                                                                       |
-| 0.2 | Run database authorization matrix | `pnpm db:test` passes (Docker + local Supabase)                                                                  |
-| 0.3 | Rehearse five workflows locally   | All rows in `docs/PILOT_OPERATIONS.md` § “Five partner-club workflow rehearsals” pass on a fresh `pnpm db:reset` |
-| 0.4 | Fix P0 bugs from rehearsal        | No crashers or dead-ends on auth, onboarding, discover, create/join, hub, WhatsApp handoff, result               |
-| 0.5 | Decide pilot geography            | **Done** — Beirut, one zone. See `docs/DECISIONS.md` 2026-08-19 and `supabase/pilot/beirut-zones.sql`            |
-| 0.6 | Decide pilot locales              | English + French only for cohort 1 (`docs/DECISIONS.md` 2026-07-28)                                              |
-| 0.7 | Name ops owner                    | Single inbox + on-call for reports, disputes, and stuck matches                                                  |
+| #   | Task                              | Success criterion                                                                                     |
+| --- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| 0.1 | Run automated gates               | `pnpm verify:pilot` passes                                                                            |
+| 0.2 | Run database authorization matrix | `pnpm db:test` passes (Docker + local Supabase)                                                       |
+| 0.3 | Rehearse four workflows locally   | All rows in `docs/PILOT_OPERATIONS.md` § “Four workflow rehearsals” pass on a fresh `pnpm db:reset`   |
+| 0.4 | Fix P0 bugs from rehearsal        | No crashers or dead-ends on auth, onboarding, discover, create/join, hub, WhatsApp handoff, result    |
+| 0.5 | Decide pilot geography            | **Done** — Beirut, one zone. See `docs/DECISIONS.md` 2026-08-19 and `supabase/pilot/beirut-zones.sql` |
+| 0.6 | Decide pilot locales              | English + French only for cohort 1 (`docs/DECISIONS.md` 2026-07-28)                                   |
+| 0.7 | Name ops owner                    | Single inbox + on-call for reports, disputes, and stuck matches                                       |
 
 ```powershell
 pnpm verify:pilot
@@ -74,7 +74,7 @@ Create a **dedicated staging** Supabase project (Frankfurt `eu-central-1` per `d
 
 ---
 
-## Phase 2 — Clubs and content (2–5 days)
+## Phase 2 — Club listings (1–2 days)
 
 v1 pilot model: **you add clubs**; players book via **WhatsApp**, then record the court in-app (`confirm_external_court`). Do **not** promise in-app club approval unless you also staff the dashboard queue.
 
@@ -82,17 +82,21 @@ v1 pilot model: **you add clubs**; players book via **WhatsApp**, then record th
 
 Supply is adequate rather than tight: roughly 6+ courts across the Manara cluster, about 18 prime-time slots on a weekday evening (17:00–22:00, 90-minute matches), against about five matches an evening if 50 players each play weekly. Watch it anyway — if fill rate stalls while `agreed → played` holds, court contention is the first thing to check.
 
-| #   | Task                                    | Success criterion                                                                                                                          |
-| --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2.1 | Onboard the 4 bookable Beirut venues    | Renaissance, Al Riyadi and JDK (all at Manara) plus The Private Club (Dekwaneh). Each: name, slug, zone, address, amenities, courts, hours |
-| 2.2 | Set `booking_mode = external_link`      | Every pilot club; WhatsApp number on each club                                                                                             |
-| 2.3 | Verify club appears in mobile directory | Signed-in player in matching zone sees club in Clubs tab                                                                                   |
-| 2.4 | Test WhatsApp deep link                 | “Book on WhatsApp” opens with sensible prefilled message; no raw phone in public directory                                                 |
-| 2.5 | Add club photos (optional)              | Upload via dashboard/Storage if ready; empty photo is OK for cohort 1                                                                      |
-| 2.6 | Document club playbook                  | How each club expects WhatsApp bookings, cancellation, and no-show handling (1-pager per club)                                             |
-| 2.7 | Agree club response expectation         | Ops knows how to nudge clubs (dashboard has **no push to staff** — see `docs/STAGING_CHECKLIST.md` §7b)                                    |
+| #   | Task                                                       | Success criterion                                                                                                                                                                       |
+| --- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2.1 | Onboard the 4 bookable Beirut venues                       | Renaissance, Al Riyadi and JDK (all at Manara) plus The Private Club (Dekwaneh). Each: name, slug, zone, address, amenities, courts, hours                                              |
+| 2.2 | Set `booking_mode = external_link`                         | Every pilot club; WhatsApp number on each club                                                                                                                                          |
+| 2.3 | Verify club appears in mobile directory                    | Any signed-in player sees all four in the Clubs tab. The directory is **not** zone-filtered — `useClubsDirectory()` passes no zones — so zone is a label and a search facet, not a gate |
+| 2.4 | Test WhatsApp deep link                                    | “Book on WhatsApp” opens with sensible prefilled message; no raw phone in public directory                                                                                              |
+| 2.5 | Add club photos (optional)                                 | Upload via dashboard/Storage if ready; empty photo is OK for cohort 1                                                                                                                   |
+| 2.6 | Confirm each club takes WhatsApp bookings from non-members | A booking request from a stranger is normal business for them. This is the one fact the pilot depends on                                                                                |
+| 2.7 | Record each club's public WhatsApp number                  | Published number only. Never a personal mobile, and never shown raw in the directory                                                                                                    |
 
-**Dashboard path:** log in as platform operator → `/onboarding` → add club on behalf of partner (`asOperator` = live immediately, no approval queue).
+**Dashboard path:** log in as platform operator → `/onboarding` → add club (`asOperator` = live immediately, no approval queue).
+
+**No club is a partner.** Cohort 1 asks nothing of any venue: players find a club in the directory, tap through to the club's own public WhatsApp, and book exactly as they would have without the app. Nothing lands in a club dashboard and no staff account is created, so there is no relationship to negotiate before launch, and no club can block it. What the app adds is the part that was hard — finding an opponent at your level who is free at the same hour — not the booking.
+
+Two consequences worth holding on to. Court state in the app is **self-reported**: `confirm_external_court` records what a player says they booked, and nothing verifies it against the club, so a double-booking surfaces at the court, not in the app. And the club's WhatsApp response time is outside your control and unmeasurable from inside the product — the court-request tracking in migration `070` records that a player _left_ for WhatsApp, which is the closest signal available.
 
 ---
 
