@@ -19,6 +19,7 @@ export const NOTIFICATION_KINDS = [
   "court_first_roster_short",
   "match_played_prompt",
   "match_played_confirmed",
+  "match_join_request",
   "match_participant_joined",
   "match_participant_left",
   "match_message",

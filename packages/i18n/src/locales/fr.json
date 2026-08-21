@@ -1364,6 +1364,10 @@
         "title": "Votre match compte une fois confirmé",
         "body": "Confirmez que vous avez joué et ajoutez le score pour qu'il soit retenu."
       },
+      "match_join_request": {
+        "title": "Un joueur demande à rejoindre votre match",
+        "body": "Un joueur attend votre réponse. Ouvrez le match pour accepter ou refuser."
+      },
       "match_participant_joined": {
         "title": "Un joueur a rejoint votre match",
         "body": "Quelqu'un a rejoint. Ouvrez le match pour voir la composition et avancer."

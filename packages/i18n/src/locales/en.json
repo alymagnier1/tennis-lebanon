@@ -561,6 +561,10 @@
         "title": "Your match counts once you confirm",
         "body": "Confirm you played and add the score so the result stands."
       },
+      "match_join_request": {
+        "title": "Someone asked to join your match",
+        "body": "A player is waiting on your answer. Open it to accept or decline."
+      },
       "match_participant_joined": {
         "title": "Your match gained a player",
         "body": "Someone joined. Open it to see the roster and keep it moving."

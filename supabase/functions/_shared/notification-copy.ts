@@ -79,6 +79,10 @@ export const NOTIFICATION_COPY: Record<
       title: "Your match counts once you confirm",
       body: "Confirm you played and add the score so the result stands.",
     },
+    match_join_request: {
+      title: "Someone asked to join your match",
+      body: "A player is waiting on your answer. Open it to accept or decline.",
+    },
     match_participant_joined: {
       title: "Your match gained a player",
       body: "Someone joined. Open it to see the roster and keep it moving.",
@@ -149,6 +153,10 @@ export const NOTIFICATION_COPY: Record<
       title: "تُحتسب مباراتك بعد تأكيدك",
       body: "أكّد أنك لعبت وأضف النتيجة لتُعتمد.",
     },
+    match_join_request: {
+      title: "طلب أحدهم الانضمام إلى مباراتك",
+      body: "لاعب ينتظر ردك. افتح المباراة للقبول أو الرفض.",
+    },
     match_participant_joined: {
       title: "انضم لاعب إلى مباراتك",
       body: "انضم أحدهم. افتح المباراة لرؤية القائمة ومتابعة التحضير.",
@@ -218,6 +226,10 @@ export const NOTIFICATION_COPY: Record<
     match_played_confirmed: {
       title: "Votre match compte une fois confirmé",
       body: "Confirmez que vous avez joué et ajoutez le score pour qu'il soit retenu.",
+    },
+    match_join_request: {
+      title: "Un joueur demande à rejoindre votre match",
+      body: "Un joueur attend votre réponse. Ouvrez le match pour accepter ou refuser.",
     },
     match_participant_joined: {
       title: "Un joueur a rejoint votre match",
