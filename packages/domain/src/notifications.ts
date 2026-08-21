@@ -20,6 +20,8 @@ export const NOTIFICATION_KINDS = [
   "match_played_prompt",
   "match_played_confirmed",
   "match_join_request",
+  "match_request_accepted",
+  "match_request_declined",
   "match_participant_joined",
   "match_participant_left",
   "match_message",

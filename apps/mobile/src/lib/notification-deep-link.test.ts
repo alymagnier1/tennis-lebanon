@@ -18,4 +18,10 @@ describe("resolveNotificationHref", () => {
       "/(tabs)/matches",
     );
   });
+
+  it("routes a declined request to discovery, not to the match", () => {
+    expect(resolveNotificationHref({ deepLink: "/discover" })).toBe(
+      "/(tabs)/discover",
+    );
+  });
 });

@@ -28,5 +28,11 @@ export function resolveNotificationHref(
     return "/(tabs)/matches" as Href;
   }
 
+  // A declined join request sends the player here rather than to the match:
+  // `get_match_hub` refuses a declined viewer, so the hub would be a dead end.
+  if (deepLink === "/discover" || deepLink.startsWith("/(tabs)/discover")) {
+    return "/(tabs)/discover" as Href;
+  }
+
   return deepLink as Href;
 }

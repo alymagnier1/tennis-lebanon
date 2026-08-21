@@ -1368,6 +1368,14 @@
         "title": "Un joueur demande à rejoindre votre match",
         "body": "Un joueur attend votre réponse. Ouvrez le match pour accepter ou refuser."
       },
+      "match_request_accepted": {
+        "title": "Vous êtes dans le match",
+        "body": "L'hôte a accepté votre demande. Ouvrez le match pour voir l'heure et le lieu."
+      },
+      "match_request_declined": {
+        "title": "Votre demande n'a pas été retenue",
+        "body": "L'hôte a choisi quelqu'un d'autre cette fois. D'autres matchs cherchent encore des joueurs."
+      },
       "match_participant_joined": {
         "title": "Un joueur a rejoint votre match",
         "body": "Quelqu'un a rejoint. Ouvrez le match pour voir la composition et avancer."

@@ -83,6 +83,14 @@ export const NOTIFICATION_COPY: Record<
       title: "Someone asked to join your match",
       body: "A player is waiting on your answer. Open it to accept or decline.",
     },
+    match_request_accepted: {
+      title: "You are in the match",
+      body: "The host accepted your request. Open it to see the time and where you are playing.",
+    },
+    match_request_declined: {
+      title: "Your request was not accepted",
+      body: "The host went with someone else this time. Other matches are still looking for players.",
+    },
     match_participant_joined: {
       title: "Your match gained a player",
       body: "Someone joined. Open it to see the roster and keep it moving.",
@@ -157,6 +165,14 @@ export const NOTIFICATION_COPY: Record<
       title: "طلب أحدهم الانضمام إلى مباراتك",
       body: "لاعب ينتظر ردك. افتح المباراة للقبول أو الرفض.",
     },
+    match_request_accepted: {
+      title: "أنت الآن في المباراة",
+      body: "قبل المضيف طلبك. افتح المباراة لرؤية الوقت والمكان.",
+    },
+    match_request_declined: {
+      title: "لم يُقبل طلبك",
+      body: "اختار المضيف لاعبًا آخر هذه المرة. هناك مباريات أخرى تبحث عن لاعبين.",
+    },
     match_participant_joined: {
       title: "انضم لاعب إلى مباراتك",
       body: "انضم أحدهم. افتح المباراة لرؤية القائمة ومتابعة التحضير.",
@@ -230,6 +246,14 @@ export const NOTIFICATION_COPY: Record<
     match_join_request: {
       title: "Un joueur demande à rejoindre votre match",
       body: "Un joueur attend votre réponse. Ouvrez le match pour accepter ou refuser.",
+    },
+    match_request_accepted: {
+      title: "Vous êtes dans le match",
+      body: "L'hôte a accepté votre demande. Ouvrez le match pour voir l'heure et le lieu.",
+    },
+    match_request_declined: {
+      title: "Votre demande n'a pas été retenue",
+      body: "L'hôte a choisi quelqu'un d'autre cette fois. D'autres matchs cherchent encore des joueurs.",
     },
     match_participant_joined: {
       title: "Un joueur a rejoint votre match",
