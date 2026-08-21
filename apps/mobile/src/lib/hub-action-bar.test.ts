@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   hubPrimaryActionLabelKey,
+  resolveHubChromeAction,
   resolveHubPrimaryAction,
 } from "./hub-action-bar";
 
@@ -75,5 +76,55 @@ describe("hubPrimaryActionLabelKey", () => {
     expect(hubPrimaryActionLabelKey("request_court")).toBe(
       "matches.hub.requestCourt",
     );
+  });
+});
+
+describe("resolveHubChromeAction", () => {
+  it("drops booking from the chrome when the clubs section owns it", () => {
+    expect(
+      resolveHubChromeAction({
+        primaryAction: "confirm_external_court",
+        hasPreferredClubs: true,
+      }),
+    ).toBe("none");
+  });
+
+  it("keeps booking in the chrome when no club section can own it", () => {
+    expect(
+      resolveHubChromeAction({
+        primaryAction: "confirm_external_court",
+        hasPreferredClubs: false,
+      }),
+    ).toBe("confirm_external_court");
+  });
+
+  it("leaves every other action alone even with preferred clubs", () => {
+    for (const kind of [
+      "join",
+      "request_join",
+      "invite",
+      "request_court",
+    ] as const) {
+      expect(
+        resolveHubChromeAction({
+          primaryAction: kind,
+          hasPreferredClubs: true,
+        }),
+      ).toBe(kind);
+    }
+  });
+
+  it("gives the chrome no label once the clubs section owns booking", () => {
+    // The footer and the hero both read this, so a suppressed action must also
+    // produce no label -- that is what stops the sticky bar rendering a second
+    // "I booked a court" beside the section's own Confirm court.
+    expect(
+      hubPrimaryActionLabelKey(
+        resolveHubChromeAction({
+          primaryAction: "confirm_external_court",
+          hasPreferredClubs: true,
+        }),
+      ),
+    ).toBeNull();
   });
 });

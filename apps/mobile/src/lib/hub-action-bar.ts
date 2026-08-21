@@ -72,3 +72,32 @@ export function hubPrimaryActionLabelKey(
       return null;
   }
 }
+
+/**
+ * Which primary action the shared hub chrome -- the ready-hero and the sticky
+ * footer -- is allowed to show.
+ *
+ * Once a match lists preferred clubs, that section owns booking: it carries its
+ * own club picker and Confirm court button, so the chrome repeating "I booked a
+ * court" gives the host two controls for one job, each taking a different route
+ * to it. With no clubs to own it, the chrome is the only way to the confirm
+ * screen and keeps the action.
+ *
+ * Both surfaces must read this rather than one of them filtering for itself:
+ * the hero and the footer are mutually exclusive, so blanking the action in the
+ * hero is what reveals the footer. Suppressing it in one place alone moves the
+ * duplicate instead of removing it.
+ */
+export function resolveHubChromeAction(input: {
+  primaryAction: HubPrimaryActionKind;
+  hasPreferredClubs: boolean;
+}): HubPrimaryActionKind {
+  if (
+    input.primaryAction === "confirm_external_court" &&
+    input.hasPreferredClubs
+  ) {
+    return "none";
+  }
+
+  return input.primaryAction;
+}

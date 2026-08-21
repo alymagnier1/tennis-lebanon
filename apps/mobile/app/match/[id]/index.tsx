@@ -92,6 +92,7 @@ import {
 } from "../../../src/lib/match-hub-layout";
 import {
   hubPrimaryActionLabelKey,
+  resolveHubChromeAction,
   resolveHubPrimaryAction,
   type HubPrimaryActionKind,
 } from "../../../src/lib/hub-action-bar";
@@ -566,16 +567,13 @@ export default function MatchHubScreen() {
   const hasPreferredClubs =
     Array.isArray(hub?.preferred_clubs) && hub.preferred_clubs.length > 0;
 
-  // The preferred-clubs section owns booking, so the hero does not repeat it as
-  // a primary button -- unless there are no clubs to own it, in which case the
-  // hero is the only route to the confirm screen.
-  const heroPrimaryKind: HubPrimaryActionKind =
-    primaryActionKind === "confirm_external_court" && hasPreferredClubs
-      ? "none"
-      : primaryActionKind;
-  const primaryActionLabelKey = hubPrimaryActionLabelKey(heroPrimaryKind);
+  const chromePrimaryKind = resolveHubChromeAction({
+    primaryAction: primaryActionKind,
+    hasPreferredClubs,
+  });
+  const primaryActionLabelKey = hubPrimaryActionLabelKey(chromePrimaryKind);
   const actionsInReadyHero = Boolean(
-    vsHeroStage && hub && heroPrimaryKind !== "none",
+    vsHeroStage && hub && chromePrimaryKind !== "none",
   );
 
   const [pullRefreshing, setPullRefreshing] = useState(false);
@@ -599,9 +597,9 @@ export default function MatchHubScreen() {
     footer:
       !actionsInReadyHero &&
       hub &&
-      (primaryActionKind !== "none" || showCancel) ? (
+      (chromePrimaryKind !== "none" || showCancel) ? (
         <MatchHubActionBar
-          actionKind={primaryActionKind}
+          actionKind={chromePrimaryKind}
           loading={joinMutation.isPending}
           onPress={handlePrimaryAction}
           cancelLabel={showCancel ? t("matches.hub.cancel") : undefined}
@@ -664,12 +662,12 @@ export default function MatchHubScreen() {
             primaryActionLabelKey ? t(primaryActionLabelKey) : undefined
           }
           primaryLoading={
-            heroPrimaryKind === "join" || heroPrimaryKind === "request_join"
+            chromePrimaryKind === "join" || chromePrimaryKind === "request_join"
               ? joinMutation.isPending
               : false
           }
           onPrimary={
-            heroPrimaryKind !== "none" ? handlePrimaryAction : undefined
+            chromePrimaryKind !== "none" ? handlePrimaryAction : undefined
           }
         />
       ) : null}
