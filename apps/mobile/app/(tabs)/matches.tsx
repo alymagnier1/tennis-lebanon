@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { notify } from "../../src/lib/confirm-action";
 
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 
 import { router } from "expo-router";
 
@@ -184,7 +185,7 @@ export default function MatchesScreen() {
       });
     },
 
-    onError: () => Alert.alert(t("matches.invite.acceptError")),
+    onError: () => notify(t("matches.invite.acceptError")),
   });
 
   const declineMutation = useMutation({
@@ -193,7 +194,7 @@ export default function MatchesScreen() {
 
     onSuccess: invalidate,
 
-    onError: () => Alert.alert(t("matches.invite.declineError")),
+    onError: () => notify(t("matches.invite.declineError")),
   });
 
   const extendMutation = useMutation({
@@ -201,7 +202,7 @@ export default function MatchesScreen() {
 
     onSuccess: invalidate,
 
-    onError: () => Alert.alert(t("matches.lifecycle.extendError")),
+    onError: () => notify(t("matches.lifecycle.extendError")),
   });
 
   const groupedActive = useMemo(

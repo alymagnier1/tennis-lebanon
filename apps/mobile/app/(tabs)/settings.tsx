@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { confirmAction } from "../../src/lib/confirm-action";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import * as Linking from "expo-linking";
 import Constants from "expo-constants";
 import { router } from "expo-router";
@@ -49,14 +50,13 @@ export default function SettingsScreen() {
   });
 
   const confirmDeletion = () => {
-    Alert.alert(t("settings.deleteTitle"), t("settings.deleteDescription"), [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("settings.requestDeletion"),
-        style: "destructive",
-        onPress: () => deletion.mutate(),
-      },
-    ]);
+    confirmAction({
+      title: t("settings.deleteTitle"),
+      message: t("settings.deleteDescription"),
+      confirmLabel: t("settings.requestDeletion"),
+      cancelLabel: t("common.cancel"),
+      onConfirm: () => deletion.mutate(),
+    });
   };
 
   const logout = async () => {

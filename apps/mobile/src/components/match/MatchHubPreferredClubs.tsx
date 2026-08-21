@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import {
   useMutation,
@@ -34,7 +34,7 @@ import {
   latestSentCourtRequest,
   pendingCourtRequest,
 } from "../../lib/court-request";
-import { confirmAction } from "../../lib/confirm-action";
+import { confirmAction, notify } from "../../lib/confirm-action";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { preferredClubLocationLabel } from "../../lib/match-clubs";
 import { clubDetailRoute, matchBookExternalRoute } from "../../lib/routes";
@@ -262,7 +262,7 @@ export function MatchHubPreferredClubs({
 
       await openWhatsAppBooking(link);
     } catch {
-      Alert.alert(t("clubs.whatsappError"));
+      notify(t("clubs.whatsappError"));
     } finally {
       setPendingClubId(null);
     }

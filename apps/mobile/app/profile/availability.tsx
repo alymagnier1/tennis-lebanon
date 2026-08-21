@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
+import { notify } from "../../src/lib/confirm-action";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   StyleSheet,
   TextInput,
@@ -144,7 +144,7 @@ export default function AvailabilityScreen() {
     mutationFn: () =>
       setRecurringAvailability(supabase, selectionToWindows(selected)),
     onSuccess: invalidateDiscovery,
-    onError: () => Alert.alert(t("availability.saveError")),
+    onError: () => notify(t("availability.saveError")),
   });
 
   const addOneOff = useMutation({
@@ -163,14 +163,14 @@ export default function AvailabilityScreen() {
       await invalidateDiscovery();
       setOneOffDate("");
     },
-    onError: () => Alert.alert(t("availability.saveError")),
+    onError: () => notify(t("availability.saveError")),
   });
 
   const removeWindow = useMutation({
     mutationFn: (windowId: string) =>
       deleteAvailabilityWindow(supabase, windowId),
     onSuccess: invalidateDiscovery,
-    onError: () => Alert.alert(t("availability.saveError")),
+    onError: () => notify(t("availability.saveError")),
   });
 
   const toggleCell = (weekday: number, block: BlockId) => {

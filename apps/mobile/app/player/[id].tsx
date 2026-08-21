@@ -1,11 +1,6 @@
 import { useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { notify } from "../../src/lib/confirm-action";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -103,11 +98,11 @@ export default function PlayerDetailScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["discover-players"] });
       await queryClient.invalidateQueries({ queryKey: ["discover-matches"] });
-      Alert.alert(t("discover.blockSuccess"));
+      notify(t("discover.blockSuccess"));
       exitPlayerProfile();
     },
     onError: () => {
-      Alert.alert(t("discover.blockError"));
+      notify(t("discover.blockError"));
     },
   });
 

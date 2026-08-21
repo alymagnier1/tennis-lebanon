@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { notify } from "../../lib/confirm-action";
 import {
   Alert,
   Modal,
@@ -112,11 +113,11 @@ export function ProfileTabDashboard() {
       }
 
       if (result.status === "permission_denied") {
-        Alert.alert(t("profile.avatarPermissionDenied"));
+        notify(t("profile.avatarPermissionDenied"));
       }
     },
     onError: () => {
-      Alert.alert(t("profile.avatarUploadError"));
+      notify(t("profile.avatarUploadError"));
     },
   });
 
@@ -124,7 +125,7 @@ export function ProfileTabDashboard() {
     mutationFn: () => clearOwnAvatar(supabase),
     onSuccess: refreshAvatarViews,
     onError: () => {
-      Alert.alert(t("profile.avatarRemoveError"));
+      notify(t("profile.avatarRemoveError"));
     },
   });
 
@@ -136,6 +137,13 @@ export function ProfileTabDashboard() {
       return;
     }
 
+    // KNOWN GAP — silent on web. `Alert.alert` is a no-op under
+    // react-native-web, so this sheet never opens there. It is the only dialog
+    // left on `Alert` because it offers three outcomes (change / remove /
+    // cancel) and every shared helper collapses to two: `chooseAction` would
+    // either drop "remove" or make dismissing the sheet delete the photo.
+    // Fixing it properly means giving the dialog a real third action rather
+    // than degrading it here. Not in the cohort-1 rehearsal path.
     Alert.alert(t("profile.avatarEditLabel"), undefined, [
       {
         text: t("profile.avatarChange"),

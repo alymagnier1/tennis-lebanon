@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, View } from "react-native";
+import { notify } from "../../../src/lib/confirm-action";
+import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
@@ -29,17 +30,17 @@ export default function ReportPlayerScreen() {
         reportedUserId: id!,
       }),
     onSuccess: () => {
-      Alert.alert(t("reports.submitSuccess"));
+      notify(t("reports.submitSuccess"));
       router.back();
     },
     onError: (error: unknown) => {
       const message =
         error instanceof Error ? error.message : String(error ?? "");
       if (message.includes("report_rate_limited")) {
-        Alert.alert(t("reports.rateLimited"));
+        notify(t("reports.rateLimited"));
         return;
       }
-      Alert.alert(t("reports.submitError"));
+      notify(t("reports.submitError"));
     },
   });
 

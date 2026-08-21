@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { notify } from "../../../src/lib/confirm-action";
+
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -40,12 +41,12 @@ export default function RescheduleMatchScreen() {
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
-      Alert.alert(t("matches.hub.rescheduleSuccess"));
+      notify(t("matches.hub.rescheduleSuccess"));
       router.back();
     },
     onError: (error: unknown) => {
       const message = error instanceof Error ? error.message : "";
-      Alert.alert(
+      notify(
         message.includes("match_time_locked_by_booking")
           ? t("matches.hub.rescheduleLocked")
           : t("matches.hub.rescheduleError"),

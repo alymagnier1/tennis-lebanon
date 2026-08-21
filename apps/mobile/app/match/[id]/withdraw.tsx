@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { notify } from "../../../src/lib/confirm-action";
+
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
@@ -21,10 +22,10 @@ export default function WithdrawMatchScreen() {
   const withdrawMutation = useMutation({
     mutationFn: () => withdrawFromBookedMatch(supabase, id!, reason.trim()),
     onSuccess: () => {
-      Alert.alert(t("matches.hub.withdrawSuccess"));
+      notify(t("matches.hub.withdrawSuccess"));
       router.replace("/(tabs)/matches");
     },
-    onError: () => Alert.alert(t("matches.hub.withdrawError")),
+    onError: () => notify(t("matches.hub.withdrawError")),
   });
 
   return (
@@ -45,7 +46,7 @@ export default function WithdrawMatchScreen() {
         loading={withdrawMutation.isPending}
         onPress={() => {
           if (reason.trim().length < 3) {
-            Alert.alert(t("matches.hub.withdrawReasonRequired"));
+            notify(t("matches.hub.withdrawReasonRequired"));
             return;
           }
           withdrawMutation.mutate();

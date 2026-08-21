@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -36,7 +35,7 @@ import {
 } from "../../src/components/onboarding-ui";
 import { formatUtcSlotInBeirut } from "../../src/lib/beirut-time";
 import { clubBookingModeLabelKey } from "../../src/lib/club-booking-label";
-import { confirmAction } from "../../src/lib/confirm-action";
+import { confirmAction, notify } from "../../src/lib/confirm-action";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitClubDetail } from "../../src/lib/navigation";
 import { preferredClubLocationLabel } from "../../src/lib/match-clubs";
@@ -121,7 +120,7 @@ export default function ClubDetailScreen() {
       await queryClient.invalidateQueries({ queryKey: ["club-detail", id] });
       await queryClient.invalidateQueries({ queryKey: ["clubs-directory"] });
     },
-    onError: () => Alert.alert(t("clubs.favoriteError")),
+    onError: () => notify(t("clubs.favoriteError")),
   });
 
   const whatsappMutation = useMutation({
@@ -135,10 +134,10 @@ export default function ClubDetailScreen() {
       try {
         await openWhatsAppBooking(link);
       } catch {
-        Alert.alert(t("clubs.whatsappError"));
+        notify(t("clubs.whatsappError"));
       }
     },
-    onError: () => Alert.alert(t("clubs.whatsappError")),
+    onError: () => notify(t("clubs.whatsappError")),
   });
 
   const requestMutation = useMutation({
@@ -147,10 +146,10 @@ export default function ClubDetailScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", matchId] });
       await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
-      Alert.alert(t("matches.booking.submitSuccess"));
+      notify(t("matches.booking.submitSuccess"));
       router.replace(matchHubRoute(matchId!));
     },
-    onError: () => Alert.alert(t("matches.booking.submitError")),
+    onError: () => notify(t("matches.booking.submitError")),
   });
 
   const confirmExternalMutation = useMutation({
@@ -164,12 +163,12 @@ export default function ClubDetailScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", matchId] });
       await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
-      Alert.alert(t("matches.booking.externalSuccess"));
+      notify(t("matches.booking.externalSuccess"));
       router.replace(matchHubRoute(matchId!));
     },
     onError: (error: unknown) => {
       const message = error instanceof Error ? error.message : "";
-      Alert.alert(
+      notify(
         message.includes("court_already_booked")
           ? t("matches.booking.courtAlreadyBooked")
           : t("matches.booking.externalError"),

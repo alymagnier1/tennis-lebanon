@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { notify } from "../../../src/lib/confirm-action";
+
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,10 +33,10 @@ export default function AddMatchTimeScreen() {
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
-      Alert.alert(t("matches.hub.addTimeSuccess"));
+      notify(t("matches.hub.addTimeSuccess"));
       router.back();
     },
-    onError: () => Alert.alert(t("matches.hub.addTimeError")),
+    onError: () => notify(t("matches.hub.addTimeError")),
   });
 
   return (

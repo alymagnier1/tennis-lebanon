@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { notify } from "../../../src/lib/confirm-action";
+
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
@@ -30,10 +31,10 @@ export default function CancelMatchScreen() {
   const cancelMutation = useMutation({
     mutationFn: () => cancelMatch(supabase, id!, reason.trim() || undefined),
     onSuccess: () => {
-      Alert.alert(t("matches.hub.cancelSuccess"));
+      notify(t("matches.hub.cancelSuccess"));
       router.replace("/(tabs)/matches");
     },
-    onError: () => Alert.alert(t("matches.hub.cancelError")),
+    onError: () => notify(t("matches.hub.cancelError")),
   });
 
   return (
@@ -62,7 +63,7 @@ export default function CancelMatchScreen() {
         loading={cancelMutation.isPending}
         onPress={() => {
           if (reasonRequired && reason.trim().length < 3) {
-            Alert.alert(t("matches.hub.cancelReasonRequired"));
+            notify(t("matches.hub.cancelReasonRequired"));
             return;
           }
           cancelMutation.mutate();

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -61,7 +61,7 @@ import {
   FigmaSecondaryButton,
 } from "../../../src/components/onboarding-ui";
 import { formatUtcSlotInBeirut } from "../../../src/lib/beirut-time";
-import { confirmAction } from "../../../src/lib/confirm-action";
+import { confirmAction, notify } from "../../../src/lib/confirm-action";
 import { confirmCancelHostedMatch } from "../../../src/lib/confirm-cancel-hosted-match";
 import { useLayoutDirection } from "../../../src/lib/layout-direction";
 import { exitMatchHub } from "../../../src/lib/navigation";
@@ -169,16 +169,16 @@ export default function MatchHubScreen() {
     mutationFn: () => joinMatch(supabase, id!),
     onSuccess: async () => {
       await invalidate();
-      Alert.alert(t("matches.hub.joinSuccess"));
+      notify(t("matches.hub.joinSuccess"));
     },
-    onError: () => Alert.alert(t("matches.hub.joinError")),
+    onError: () => notify(t("matches.hub.joinError")),
   });
 
   const respondMutation = useMutation({
     mutationFn: ({ userId, accept }: { userId: string; accept: boolean }) =>
       respondToJoinRequest(supabase, id!, userId, accept),
     onSuccess: invalidate,
-    onError: () => Alert.alert(t("matches.hub.respondError")),
+    onError: () => notify(t("matches.hub.respondError")),
   });
 
   const leaveMutation = useMutation({
@@ -187,7 +187,7 @@ export default function MatchHubScreen() {
       await invalidate();
       exitMatchHub();
     },
-    onError: () => Alert.alert(t("matches.hub.leaveError")),
+    onError: () => notify(t("matches.hub.leaveError")),
   });
 
   const voteMutation = useMutation({
@@ -199,21 +199,21 @@ export default function MatchHubScreen() {
       vote: "yes" | "no";
     }) => castMatchTimeVote(supabase, id!, timeOptionId, vote),
     onSuccess: invalidate,
-    onError: () => Alert.alert(t("matches.hub.voteError")),
+    onError: () => notify(t("matches.hub.voteError")),
   });
 
   const withdrawMutation = useMutation({
     mutationFn: (timeOptionId: string) =>
       withdrawMatchTimeOption(supabase, timeOptionId),
     onSuccess: invalidate,
-    onError: () => Alert.alert(t("matches.hub.withdrawTimeError")),
+    onError: () => notify(t("matches.hub.withdrawTimeError")),
   });
 
   const cancelBookingMutation = useMutation({
     mutationFn: (bookingId: string) =>
       cancelBookingRequest(supabase, bookingId),
     onSuccess: invalidate,
-    onError: () => Alert.alert(t("matches.hub.cancelBookingError")),
+    onError: () => notify(t("matches.hub.cancelBookingError")),
   });
 
   const releaseCourtMutation = useMutation({
@@ -222,7 +222,7 @@ export default function MatchHubScreen() {
       invalidate();
       showToast(t("matches.hub.courtReleased"));
     },
-    onError: () => Alert.alert(t("matches.hub.courtReleaseError")),
+    onError: () => notify(t("matches.hub.courtReleaseError")),
   });
 
   const alternativeMutation = useMutation({
@@ -234,16 +234,16 @@ export default function MatchHubScreen() {
       accept: boolean;
     }) => respondBookingAlternative(supabase, bookingId, accept),
     onSuccess: invalidate,
-    onError: () => Alert.alert(t("matches.hub.alternativeError")),
+    onError: () => notify(t("matches.hub.alternativeError")),
   });
 
   const extendMutation = useMutation({
     mutationFn: () => extendMatchListing(supabase, id!),
     onSuccess: async () => {
       await invalidate();
-      Alert.alert(t("matches.lifecycle.extendSuccess"));
+      notify(t("matches.lifecycle.extendSuccess"));
     },
-    onError: () => Alert.alert(t("matches.lifecycle.extendError")),
+    onError: () => notify(t("matches.lifecycle.extendError")),
   });
 
   const hub = hubQuery.data;

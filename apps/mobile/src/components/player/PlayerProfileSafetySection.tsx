@@ -1,4 +1,5 @@
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { confirmAction } from "../../lib/confirm-action";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
@@ -22,18 +23,13 @@ export function PlayerProfileSafetySection({
   const { writingDirection } = useLayoutDirection();
 
   const confirmBlock = () => {
-    Alert.alert(
-      t("discover.blockConfirmTitle"),
-      t("discover.blockConfirmBody"),
-      [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("discover.blockPlayer"),
-          style: "destructive",
-          onPress: onBlock,
-        },
-      ],
-    );
+    confirmAction({
+      title: t("discover.blockConfirmTitle"),
+      message: t("discover.blockConfirmBody"),
+      confirmLabel: t("discover.blockPlayer"),
+      cancelLabel: t("common.cancel"),
+      onConfirm: onBlock,
+    });
   };
 
   return (
