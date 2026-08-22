@@ -1,10 +1,12 @@
 import { useMemo, useState, type PropsWithChildren } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   confirmMatchResult,
+  declineMatchScore,
   disputeMatchResult,
+  getOwnScoreDeclined,
   recordMatchAttendance,
   resubmitMatchResult,
   submitMatchResult,
@@ -311,6 +313,27 @@ export function MatchResultPanel({
     onError: () => showToast(t("matches.results.disputeError")),
   });
 
+  // Per participant, so it is keyed by viewer as well as match: one player
+  // declining says nothing about the other.
+  const declinedQuery = useQuery({
+    queryKey: ["match-score-declined", matchId, viewerUserId],
+    queryFn: () => getOwnScoreDeclined(supabase, matchId),
+    enabled: hub.viewer_status === "accepted",
+  });
+  const declinedAt = declinedQuery.data ?? null;
+
+  const declineMutation = useMutation({
+    mutationFn: (declined: boolean) =>
+      declineMatchScore(supabase, matchId, declined),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["match-score-declined", matchId, viewerUserId],
+      });
+      await invalidate();
+    },
+    onError: () => showToast(t("matches.results.declineError")),
+  });
+
   const showAttendance = canRecordAttendance({
     matchStatus: hub.status,
     viewerStatus: hub.viewer_status,
@@ -321,6 +344,7 @@ export function MatchResultPanel({
     viewerStatus: hub.viewer_status,
     hasResult: Boolean(result),
     viewerAttendance: hub.viewer_attendance ?? "unknown",
+    viewerDeclinedScore: Boolean(declinedAt),
   });
   const showConfirm = canConfirmResult({
     matchStatus: hub.status,
@@ -346,6 +370,9 @@ export function MatchResultPanel({
     !showConfirm &&
     !showDispute &&
     !showResubmit &&
+    // Without this the panel disappears the moment someone declines, so the
+    // one positive act that resolves this screen would show no trace of itself.
+    !declinedAt &&
     !result
   ) {
     return null;
@@ -568,6 +595,44 @@ export function MatchResultPanel({
               }
             />
           ) : null}
+
+          {/* The resting state this screen never had. Most pilot matches are
+              expected to have no score at all, and until now saying so meant
+              walking away and leaving the form open forever. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("matches.results.declineScore")}
+            disabled={declineMutation.isPending}
+            onPress={() => declineMutation.mutate(true)}
+            style={({ pressed }) => [
+              styles.declineRow,
+              pressed && styles.declinePressed,
+            ]}
+          >
+            <AppText style={styles.declineLabel}>
+              {t("matches.results.declineScore")}
+            </AppText>
+          </Pressable>
+        </View>
+      ) : null}
+
+      {declinedAt && !result ? (
+        <View style={styles.section}>
+          <AppText style={styles.hint}>{t("matches.results.declined")}</AppText>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("matches.results.declineUndo")}
+            disabled={declineMutation.isPending}
+            onPress={() => declineMutation.mutate(false)}
+            style={({ pressed }) => [
+              styles.declineRow,
+              pressed && styles.declinePressed,
+            ]}
+          >
+            <AppText style={styles.declineLabel}>
+              {t("matches.results.declineUndo")}
+            </AppText>
+          </Pressable>
         </View>
       ) : null}
 
@@ -652,6 +717,19 @@ function ResultShell({
 const styles = StyleSheet.create({
   plainShell: {
     gap: tennisSpacing.section,
+  },
+  declineRow: {
+    alignSelf: "flex-start",
+    paddingVertical: 10,
+  },
+  declinePressed: {
+    opacity: 0.6,
+  },
+  declineLabel: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 14,
+    color: tennisColors.primary,
+    textDecorationLine: "underline",
   },
   section: {
     gap: 14,

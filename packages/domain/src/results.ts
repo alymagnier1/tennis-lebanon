@@ -259,11 +259,19 @@ export function canSubmitResult(input: {
   hasResult: boolean;
   /** Score is only for players who said they played. */
   viewerAttendance: string;
+  /**
+   * The viewer said this match had no score to record. Without this the form
+   * has no resting state: `hasResult` never becomes true if nobody submits, so
+   * the score editor rendered forever on exactly the matches `064` expects to
+   * be most common -- the ones nobody wrote the games down for.
+   */
+  viewerDeclinedScore?: boolean;
 }): boolean {
   return (
     OUTCOME_STATUSES.has(input.matchStatus) &&
     input.viewerStatus === "accepted" &&
     input.viewerAttendance === "attended" &&
+    !input.viewerDeclinedScore &&
     !input.hasResult
   );
 }

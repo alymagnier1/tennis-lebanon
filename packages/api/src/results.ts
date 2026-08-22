@@ -23,6 +23,40 @@ export async function recordMatchAttendance(
 }
 
 /**
+ * Say this match had no score to record, or take that back with `declined`
+ * false. Per participant, not per match: it never speaks for the other player,
+ * who can still submit a real score afterwards.
+ */
+export async function declineMatchScore(
+  client: TennisSupabaseClient,
+  matchId: string,
+  declined = true,
+): Promise<string | null> {
+  const { data, error } = await client.rpc("decline_match_score", {
+    p_match_id: matchId,
+    p_declined: declined,
+  });
+  if (error) {
+    throw error;
+  }
+  return data ?? null;
+}
+
+/** When the viewer said this match had no score, or null if they have not. */
+export async function getOwnScoreDeclined(
+  client: TennisSupabaseClient,
+  matchId: string,
+): Promise<string | null> {
+  const { data, error } = await client.rpc("get_own_score_declined", {
+    p_match_id: matchId,
+  });
+  if (error) {
+    throw error;
+  }
+  return data ?? null;
+}
+
+/**
  * `sideAUserIds` names one side; the server derives the other, validates the
  * score, and works out who won from it. There is deliberately no winner
  * parameter — a caller reaching past the app can no longer name themselves the

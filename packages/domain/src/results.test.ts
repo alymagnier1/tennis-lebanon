@@ -190,6 +190,35 @@ describe("results", () => {
     ).toBe(false);
   });
 
+  it("closes the form once the viewer says there was no score", () => {
+    // Without this the editor has no resting state: `hasResult` never turns
+    // true if nobody submits, so it rendered forever on the matches the pilot
+    // expects most of -- the ones nobody wrote the games down for.
+    expect(
+      canSubmitResult({
+        matchStatus: "completed",
+        viewerStatus: "accepted",
+        hasResult: false,
+        viewerAttendance: "attended",
+        viewerDeclinedScore: true,
+      }),
+    ).toBe(false);
+  });
+
+  it("keeps the form open for a player who has not declined", () => {
+    // Declining is per participant, so one player's answer must never close
+    // the other player's form.
+    expect(
+      canSubmitResult({
+        matchStatus: "completed",
+        viewerStatus: "accepted",
+        hasResult: false,
+        viewerAttendance: "attended",
+        viewerDeclinedScore: false,
+      }),
+    ).toBe(true);
+  });
+
   it("blocks score entry after the viewer says they did not play", () => {
     expect(
       canSubmitResult({

@@ -826,6 +826,7 @@ export type Database = {
           joined_at: string | null;
           left_at: string | null;
           match_id: string;
+          score_declined_at: string | null;
           status: Database["public"]["Enums"]["participant_status"];
           user_id: string;
         };
@@ -836,6 +837,7 @@ export type Database = {
           joined_at?: string | null;
           left_at?: string | null;
           match_id: string;
+          score_declined_at?: string | null;
           status: Database["public"]["Enums"]["participant_status"];
           user_id: string;
         };
@@ -846,6 +848,7 @@ export type Database = {
           joined_at?: string | null;
           left_at?: string | null;
           match_id?: string;
+          score_declined_at?: string | null;
           status?: Database["public"]["Enums"]["participant_status"];
           user_id?: string;
         };
@@ -1932,6 +1935,10 @@ export type Database = {
         Args: { p_invitation_id: string };
         Returns: undefined;
       };
+      decline_match_score: {
+        Args: { p_declined?: boolean; p_match_id: string };
+        Returns: string;
+      };
       delete_court_block: { Args: { p_block_id: string }; Returns: undefined };
       derive_score_winner_side: { Args: { p_score: Json }; Returns: number };
       discover_compatible_players: {
@@ -2048,6 +2055,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      get_own_score_declined: { Args: { p_match_id: string }; Returns: string };
       get_public_player_availability_summary: {
         Args: { p_user_id: string };
         Returns: Json;
