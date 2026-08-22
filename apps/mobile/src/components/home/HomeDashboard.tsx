@@ -15,6 +15,7 @@ import {
   listMyMatchInvites,
   listMyMatches,
   listUserNotifications,
+  countUnreadNotifications,
 } from "@tennis-lebanon/api";
 import {
   isProvisionalPlayerRating,
@@ -102,8 +103,14 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
     completedQuery.isError ||
     profileQuery.isError;
 
-  const unreadCount =
-    notificationsQuery.data?.filter((item) => !item.read_at).length ?? 0;
+  // Counted server side rather than filtered from the 20-row page above: that
+  // page answers "unread among the newest 20", which stops matching the badge
+  // the moment anything older is left unread.
+  const unreadQuery = useQuery({
+    queryKey: ["user-notifications-unread"],
+    queryFn: () => countUnreadNotifications(supabase),
+  });
+  const unreadCount = unreadQuery.data ?? 0;
 
   const nextActions = deriveHomeNextActions(
     invitesQuery.data ?? [],

@@ -7,6 +7,7 @@ import {
   listUserNotifications,
   markNotificationRead,
   type UserNotificationRow,
+  markAllNotificationsRead,
 } from "@tennis-lebanon/api";
 import { AppText } from "../src/components/AppText";
 import { Icon } from "../src/components/Icon";
@@ -42,17 +43,21 @@ export default function NotificationsScreen() {
       markNotificationRead(supabase, notificationId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["user-notifications"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["user-notifications-unread"],
+      });
     },
   });
 
   const markAllRead = useCallback(async () => {
-    const unread = (notificationsQuery.data ?? []).filter(
-      (row) => !row.read_at,
-    );
-    await Promise.all(
-      unread.map((row) => markNotificationRead(supabase, row.id)),
-    );
+    // One statement server side rather than a loop over the loaded page: the
+    // page is 20 rows, and anything unread below it would survive the loop and
+    // keep the bell lit.
+    await markAllNotificationsRead(supabase);
     await queryClient.invalidateQueries({ queryKey: ["user-notifications"] });
+    await queryClient.invalidateQueries({
+      queryKey: ["user-notifications-unread"],
+    });
   }, [notificationsQuery.data, queryClient]);
 
   const openNotification = useCallback(

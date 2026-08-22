@@ -2321,6 +2321,7 @@ export type Database = {
           slug: string;
         }[];
       };
+      mark_all_notifications_read: { Args: never; Returns: number };
       mark_match_chat_read: { Args: { p_match_id: string }; Returns: string };
       mark_notification_failed: {
         Args: { p_failure_code: string; p_notification_id: string };
