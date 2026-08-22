@@ -37,28 +37,6 @@ export function isAdultBirthYear(
   return Number.isInteger(birthYear) && birthYear <= currentYear - 18;
 }
 
-export const skillQuestionnaireSchema = z.object({
-  experience: z.number().int().min(0).max(4),
-  frequency: z.number().int().min(0).max(4),
-  rally: z.number().int().min(0).max(4),
-  matchExperience: z.number().int().min(0).max(4),
-});
-
-export type SkillQuestionnaire = z.infer<typeof skillQuestionnaireSchema>;
-
-export function scoreSkillQuestionnaire(
-  answers: SkillQuestionnaire,
-): SkillBand {
-  const parsed = skillQuestionnaireSchema.parse(answers);
-  const score = Object.values(parsed).reduce((sum, value) => sum + value, 0);
-
-  if (score <= 3) return "beginner";
-  if (score <= 6) return "improving";
-  if (score <= 9) return "intermediate";
-  if (score <= 12) return "advanced";
-  return "competitive";
-}
-
 const currentYear = new Date().getUTCFullYear();
 
 export const onboardingInputSchema = z

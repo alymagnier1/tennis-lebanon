@@ -302,17 +302,13 @@
     },
     "tennis": {
       "title": "Votre profil de tennis",
-      "description": "Répondez à quelques questions pour obtenir un niveau provisoire.",
-      "questions": {
-        "experience": "Quelle est votre expérience du tennis ?",
-        "frequency": "À quelle fréquence jouez-vous actuellement ?",
-        "rally": "Avec quelle aisance tenez-vous un échange ?",
-        "matchExperience": "Quelle est votre expérience des matchs ?"
-      },
-      "answerLevels": {
-        "0": "Débutant ou peu expérimenté",
-        "1": "Une certaine expérience",
-        "2": "À l’aise et régulier"
+      "description": "Choisissez la phrase qui vous ressemble le plus. Vous pourrez l'ajuster tant que votre classement est provisoire.",
+      "bands": {
+        "beginner": "Je débute au tennis",
+        "improving": "J'apprends encore à échanger",
+        "intermediate": "Je peux échanger et jouer des points",
+        "advanced": "Je joue des matchs régulièrement",
+        "competitive": "Je m'entraîne et je joue en compétition"
       },
       "provisional": "Choisissez votre style de jeu et vos formats préférés.",
       "formatError": "Choisissez le simple, le double ou les deux."

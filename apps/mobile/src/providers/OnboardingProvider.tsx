@@ -12,7 +12,6 @@ import * as SecureStore from "expo-secure-store";
 import type {
   PlayIntent,
   SkillBand,
-  SkillQuestionnaire,
   SupportedLanguage,
 } from "@tennis-lebanon/domain";
 import { useAuth } from "./AuthProvider";
@@ -25,7 +24,6 @@ export interface OnboardingDraft {
   birthYear: string;
   isAdultConfirmed: boolean;
   languages: SupportedLanguage[];
-  skillAnswers: SkillQuestionnaire;
   skillBand: SkillBand | null;
   playIntent: PlayIntent;
   prefersSingles: boolean;
@@ -41,12 +39,6 @@ const initialDraft: OnboardingDraft = {
   birthYear: "",
   isAdultConfirmed: false,
   languages: ["en"],
-  skillAnswers: {
-    experience: 0,
-    frequency: 0,
-    rally: 0,
-    matchExperience: 0,
-  },
   skillBand: null,
   playIntent: "either",
   prefersSingles: true,

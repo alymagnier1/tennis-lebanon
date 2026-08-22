@@ -4,7 +4,6 @@ import {
   isAdultBirthYear,
   normalizeDisplayName,
   onboardingInputSchema,
-  scoreSkillQuestionnaire,
 } from "./onboarding";
 
 const validInput = {
@@ -57,24 +56,5 @@ describe("onboarding domain rules", () => {
     });
     expect(result.languages).toEqual(["en"]);
     expect(result.zoneIds).toHaveLength(1);
-  });
-
-  it("maps questionnaire scores to provisional bands", () => {
-    expect(
-      scoreSkillQuestionnaire({
-        experience: 0,
-        frequency: 0,
-        rally: 0,
-        matchExperience: 0,
-      }),
-    ).toBe("beginner");
-    expect(
-      scoreSkillQuestionnaire({
-        experience: 4,
-        frequency: 4,
-        rally: 4,
-        matchExperience: 4,
-      }),
-    ).toBe("competitive");
   });
 });

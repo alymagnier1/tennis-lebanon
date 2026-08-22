@@ -302,17 +302,13 @@
     },
     "tennis": {
       "title": "Your tennis profile",
-      "description": "Answer a few questions for a provisional skill band.",
-      "questions": {
-        "experience": "How much tennis experience do you have?",
-        "frequency": "How often do you currently play?",
-        "rally": "How comfortably can you sustain a rally?",
-        "matchExperience": "How much match experience do you have?"
-      },
-      "answerLevels": {
-        "0": "New or limited",
-        "1": "Some experience",
-        "2": "Confident and regular"
+      "description": "Pick the line that sounds most like you. You can adjust it later while your rating is still provisional.",
+      "bands": {
+        "beginner": "I am new to tennis",
+        "improving": "I am still learning to rally",
+        "intermediate": "I can rally and play points",
+        "advanced": "I play matches regularly",
+        "competitive": "I train and compete"
       },
       "provisional": "Choose your play style and preferred formats.",
       "formatError": "Choose singles, doubles, or both."

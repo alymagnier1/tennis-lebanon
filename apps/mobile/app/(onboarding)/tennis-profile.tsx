@@ -1,12 +1,8 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import {
-  scoreSkillQuestionnaire,
-  type PlayIntent,
-  type SkillQuestionnaire,
-} from "@tennis-lebanon/domain";
+import type { PlayIntent, SkillBand } from "@tennis-lebanon/domain";
 import { AppText } from "../../src/components/AppText";
 import {
   ChipButton,
@@ -17,27 +13,45 @@ import {
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import { tennisColors } from "../../src/theme/tennis-tokens";
-import { StyleSheet } from "react-native";
 
-const questions: (keyof SkillQuestionnaire)[] = [
-  "experience",
-  "frequency",
-  "rally",
-  "matchExperience",
+/**
+ * Ordered weakest to strongest, matching the database enum.
+ *
+ * This replaced a four-question scored questionnaire. The questionnaire's
+ * defence was that it resists inflation, but its four inputs were themselves
+ * self-assessments, so it collected four judgements instead of one and then
+ * hid the arithmetic. Two things settled it: `ProfileSkillBandSection` already
+ * lets a player pick a band directly for as long as their rating is
+ * provisional, so onboarding was deriving a value the rest of the app asks for
+ * outright; and the questionnaire's defaults were all zero while zero was also
+ * the first option, so anyone who tapped straight through was silently filed as
+ * a beginner with no way to tell that apart from a real answer.
+ *
+ * The labels describe what a player does rather than what they are. Nobody
+ * inflates "I am still learning to rally" the way they inflate "Advanced", so
+ * the anti-inflation argument survives the change at a fifth of the taps.
+ */
+const bands: SkillBand[] = [
+  "beginner",
+  "improving",
+  "intermediate",
+  "advanced",
+  "competitive",
 ];
-const answerValues = [0, 2, 4] as const;
 const intents: PlayIntent[] = ["social", "competitive", "either"];
 
 export default function TennisProfileScreen() {
   const { t } = useTranslation();
   const { draft, updateDraft } = useOnboarding();
-  const [answers, setAnswers] = useState(draft.skillAnswers);
+  const [skillBand, setSkillBand] = useState(draft.skillBand);
   const [playIntent, setPlayIntent] = useState(draft.playIntent);
 
   const next = () => {
-    const skillBand = scoreSkillQuestionnaire(answers);
+    if (!skillBand) {
+      return;
+    }
+
     updateDraft({
-      skillAnswers: answers,
       skillBand,
       playIntent,
       // Format is chosen per match; keep both open for discovery liquidity.
@@ -55,25 +69,22 @@ export default function TennisProfileScreen() {
       totalSteps={6}
       onBack={() => router.back()}
       footer={
-        <FigmaPrimaryButton label={t("common.continue")} onPress={next} />
+        <FigmaPrimaryButton
+          label={t("common.continue")}
+          disabled={!skillBand}
+          onPress={next}
+        />
       }
     >
-      {questions.map((question) => (
-        <View key={question} style={styles.block}>
-          <AppText style={styles.question}>
-            {t(`onboarding.tennis.questions.${question}`)}
-          </AppText>
-          {answerValues.map((value, index) => (
-            <SelectionCard
-              key={value}
-              label={t(`onboarding.tennis.answerLevels.${index}`)}
-              selected={answers[question] === value}
-              onPress={() =>
-                setAnswers((current) => ({ ...current, [question]: value }))
-              }
-            />
-          ))}
-        </View>
+      {bands.map((band) => (
+        <SelectionCard
+          key={band}
+          label={t(`onboarding.tennis.bands.${band}`)}
+          // The band name the rest of the app will show them afterwards.
+          description={t(`skillBands.${band}`)}
+          selected={skillBand === band}
+          onPress={() => setSkillBand(band)}
+        />
       ))}
       <AppText style={styles.section}>
         {t("onboarding.tennis.provisional")}
@@ -93,15 +104,6 @@ export default function TennisProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  block: {
-    marginBottom: 16,
-  },
-  question: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primaryDark,
-    marginBottom: 8,
-  },
   section: {
     fontFamily: tennisFontFamily.heading,
     fontSize: 16,
