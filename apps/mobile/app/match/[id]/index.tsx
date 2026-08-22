@@ -905,6 +905,7 @@ export default function MatchHubScreen() {
         matchId={id!}
         enabled={chatAvailable}
         locked={chatLocked}
+        viewerUserId={session?.user.id}
         onPress={() => router.push(matchChatRoute(id!))}
       />
 

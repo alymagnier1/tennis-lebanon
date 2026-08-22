@@ -1,10 +1,14 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { listMatchMessages } from "@tennis-lebanon/api";
+import { getOwnChatLastRead, listMatchMessages } from "@tennis-lebanon/api";
 import { AppText } from "./AppText";
 import { Icon } from "./Icon";
 import { matchChatPreviewLabel } from "../lib/match-chat-preview";
+import {
+  countUnreadMatchMessages,
+  formatUnreadBadge,
+} from "../lib/unread-match-messages";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { supabase } from "../lib/supabase";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
@@ -16,6 +20,8 @@ type MatchChatEntryProps = {
   enabled: boolean;
   /** Show the row but block open (roster still filling). */
   locked?: boolean;
+  /** Needed to tell somebody else's message from your own. */
+  viewerUserId?: string;
   onPress: () => void;
 };
 
@@ -23,6 +29,7 @@ export function MatchChatEntry({
   matchId,
   enabled,
   locked = false,
+  viewerUserId,
   onPress,
 }: MatchChatEntryProps) {
   const { t } = useTranslation();
@@ -34,7 +41,23 @@ export function MatchChatEntry({
     enabled,
   });
 
+  const lastReadQuery = useQuery({
+    queryKey: ["match-chat-last-read", matchId, viewerUserId],
+    queryFn: () => getOwnChatLastRead(supabase, matchId),
+    enabled: enabled && Boolean(viewerUserId),
+  });
+
   if (!enabled && !locked) return null;
+
+  // A locked thread cannot be opened, so a badge on it would only nag.
+  const unread = locked
+    ? 0
+    : countUnreadMatchMessages({
+        messages: messagesQuery.data ?? [],
+        lastReadAt: lastReadQuery.data ?? null,
+        viewerUserId,
+      });
+  const badge = formatUnreadBadge(unread);
 
   const preview = locked
     ? t("matches.chat.lockedRecruiting")
@@ -43,7 +66,11 @@ export function MatchChatEntry({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t("matches.chat.open")}
+      accessibilityLabel={
+        badge
+          ? t("matches.chat.openWithUnread", { count: unread })
+          : t("matches.chat.open")
+      }
       accessibilityState={{ disabled: locked }}
       disabled={locked}
       onPress={onPress}
@@ -69,6 +96,13 @@ export function MatchChatEntry({
             {preview}
           </AppText>
         </View>
+        {badge ? (
+          <View style={styles.badge}>
+            <AppText style={styles.badgeLabel} maxLines={1}>
+              {badge}
+            </AppText>
+          </View>
+        ) : null}
         {!locked ? (
           <Icon name="chevron" size={18} color={tennisColors.mutedForeground} />
         ) : null}
@@ -95,6 +129,20 @@ const styles = StyleSheet.create({
   row: {
     alignItems: "center",
     gap: 12,
+  },
+  badge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    paddingHorizontal: 6,
+    backgroundColor: tennisColors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeLabel: {
+    fontFamily: tennisFontFamily.bodySemi,
+    fontSize: 12,
+    color: tennisColors.white,
   },
   iconWrap: {
     width: 40,

@@ -997,6 +997,7 @@
       "error": "We could not send this message.",
       "reconnecting": "Reconnecting… new messages may be delayed.",
       "open": "Open match chat",
+      "openWithUnread": "Open chat, {{count}} unread",
       "openHint": "Message your group",
       "denied": "Join this match to use chat.",
       "lockedRecruiting": "Chat opens when the roster is full.",

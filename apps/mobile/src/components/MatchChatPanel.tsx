@@ -19,6 +19,7 @@ import {
   listMatchMessages,
   sendMatchMessage,
   type MatchMessageRow,
+  markMatchChatRead,
 } from "@tennis-lebanon/api";
 import { AppText } from "./AppText";
 import { Icon } from "./Icon";
@@ -74,6 +75,29 @@ export function MatchChatPanel({
     queryFn: () => listMatchMessages(supabase, matchId),
     enabled,
   });
+
+  // Reading the thread is what clears the badge. Keyed on the newest message
+  // rather than firing per render, so a poll that returns nothing new does not
+  // re-mark, while a message arriving while you are looking at it does.
+  const newestMessageAt = messagesQuery.data?.[0]?.created_at ?? null;
+  const markedUpToRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!enabled || !viewerUserId || newestMessageAt === null) return;
+    if (markedUpToRef.current === newestMessageAt) return;
+
+    markedUpToRef.current = newestMessageAt;
+    void markMatchChatRead(supabase, matchId)
+      .then(() =>
+        queryClient.invalidateQueries({
+          queryKey: ["match-chat-last-read", matchId, viewerUserId],
+        }),
+      )
+      .catch(() => {
+        // Let the next render try again rather than staying silently unread.
+        markedUpToRef.current = null;
+      });
+  }, [enabled, viewerUserId, matchId, newestMessageAt, queryClient]);
 
   const [realtimeStatus, setRealtimeStatus] =
     useState<RealtimeStatus>("connecting");

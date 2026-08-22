@@ -34,3 +34,34 @@ export async function sendMatchMessage(
   if (error) throw error;
   return data as string;
 }
+
+/**
+ * Mark the viewer as caught up on this match's chat, returning the marker that
+ * was written so a caller can update its cache without a refetch.
+ */
+export async function markMatchChatRead(
+  client: TennisSupabaseClient,
+  matchId: string,
+): Promise<string | null> {
+  const { data, error } = await client.rpc("mark_match_chat_read", {
+    p_match_id: matchId,
+  });
+  if (error) {
+    throw error;
+  }
+  return data ?? null;
+}
+
+/** When the viewer last opened this chat, or null if they never have. */
+export async function getOwnChatLastRead(
+  client: TennisSupabaseClient,
+  matchId: string,
+): Promise<string | null> {
+  const { data, error } = await client.rpc("get_own_chat_last_read", {
+    p_match_id: matchId,
+  });
+  if (error) {
+    throw error;
+  }
+  return data ?? null;
+}

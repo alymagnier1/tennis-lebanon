@@ -821,6 +821,7 @@ export type Database = {
       match_participants: {
         Row: {
           attendance: Database["public"]["Enums"]["attendance_status"];
+          chat_last_read_at: string | null;
           created_at: string;
           is_creator: boolean;
           joined_at: string | null;
@@ -832,6 +833,7 @@ export type Database = {
         };
         Insert: {
           attendance?: Database["public"]["Enums"]["attendance_status"];
+          chat_last_read_at?: string | null;
           created_at?: string;
           is_creator?: boolean;
           joined_at?: string | null;
@@ -843,6 +845,7 @@ export type Database = {
         };
         Update: {
           attendance?: Database["public"]["Enums"]["attendance_status"];
+          chat_last_read_at?: string | null;
           created_at?: string;
           is_creator?: boolean;
           joined_at?: string | null;
@@ -2055,6 +2058,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      get_own_chat_last_read: { Args: { p_match_id: string }; Returns: string };
       get_own_score_declined: { Args: { p_match_id: string }; Returns: string };
       get_public_player_availability_summary: {
         Args: { p_user_id: string };
@@ -2316,6 +2320,7 @@ export type Database = {
           slug: string;
         }[];
       };
+      mark_match_chat_read: { Args: { p_match_id: string }; Returns: string };
       mark_notification_failed: {
         Args: { p_failure_code: string; p_notification_id: string };
         Returns: undefined;

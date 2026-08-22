@@ -879,6 +879,7 @@
       "error": "Impossible d'envoyer ce message.",
       "reconnecting": "Reconnexion… les nouveaux messages peuvent tarder.",
       "open": "Ouvrir le chat du match",
+      "openWithUnread": "Ouvrir la discussion, {{count}} non lus",
       "openHint": "Écrire au groupe",
       "denied": "Rejoignez ce match pour utiliser le chat.",
       "lockedRecruiting": "Le chat s’ouvre quand l’équipe est au complet.",
