@@ -61,8 +61,6 @@ export function dayKey(offsetDays: number): string {
   return startOfBeirutDay(offsetDays).toISOString().slice(0, 10);
 }
 
-export { timeOptions } from "../lib/match-start-time";
-
 export function addMinutes(time: string, minutes: number): string {
   const [hours = 0, mins = 0] = time.split(":").map(Number);
   const total = hours * 60 + mins + minutes;
