@@ -652,6 +652,7 @@ export default function MatchHubScreen() {
         <MatchHubReadyHero
           hub={hub}
           participants={participants}
+          viewerUserId={session?.user.id}
           startsAt={heroStartsAt}
           onReschedule={
             showReschedule

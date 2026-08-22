@@ -1,4 +1,5 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { router } from "expo-router";
 import type { MatchHubCard } from "@tennis-lebanon/api";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
@@ -35,14 +36,18 @@ type MatchHubReadyHeroProps = {
   primaryLabel?: string;
   primaryLoading?: boolean;
   onPrimary?: () => void;
+  /** Own block is not a link: `/player/[id]` is the public card, not your profile. */
+  viewerUserId?: string;
 };
 
 function PlayerColumn({
   players,
   openSlots,
+  viewerUserId,
 }: {
   players: HubVsParticipant[];
   openSlots: number;
+  viewerUserId?: string;
 }) {
   const { t } = useTranslation();
   const slots = [
@@ -57,20 +62,11 @@ function PlayerColumn({
     <View style={styles.playerColumn}>
       {slots.map((slot) =>
         slot.kind === "player" ? (
-          <View key={slot.player.user_id} style={styles.playerBlock}>
-            <Avatar
-              name={slot.player.display_name}
-              avatarPath={slot.player.avatar_path}
-              size={AVATAR_SIZE}
-              borderRadius={16}
-            />
-            <AppText style={styles.playerName} maxLines={1}>
-              {slot.player.display_name}
-            </AppText>
-            <AppText style={styles.playerMeta} maxLines={1}>
-              {slot.player.is_creator ? t("matches.hub.hostBadge") : " "}
-            </AppText>
-          </View>
+          <PlayerBlock
+            key={slot.player.user_id}
+            player={slot.player}
+            isSelf={slot.player.user_id === viewerUserId}
+          />
         ) : (
           <View key={slot.key} style={styles.playerBlock}>
             <View
@@ -92,6 +88,63 @@ function PlayerColumn({
   );
 }
 
+/**
+ * The hero replaces the roster list whenever it renders, so these are the only
+ * player cards on the screen -- and the only route from a match to someone's
+ * profile, which is where report and block live.
+ */
+function PlayerBlock({
+  player,
+  isSelf,
+}: {
+  player: HubVsParticipant;
+  isSelf: boolean;
+}) {
+  const { t } = useTranslation();
+  const body = (
+    <>
+      <Avatar
+        name={player.display_name}
+        avatarPath={player.avatar_path}
+        size={AVATAR_SIZE}
+        borderRadius={16}
+      />
+      <AppText style={styles.playerName} maxLines={1}>
+        {player.display_name}
+      </AppText>
+      <AppText style={styles.playerMeta} maxLines={1}>
+        {player.is_creator ? t("matches.hub.hostBadge") : " "}
+      </AppText>
+    </>
+  );
+
+  if (isSelf) {
+    return <View style={styles.playerBlock}>{body}</View>;
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      // Same string as the discover list; no reason to duplicate the copy.
+      accessibilityLabel={t("discover.openPlayerProfile", {
+        name: player.display_name,
+      })}
+      onPress={() =>
+        router.push({
+          pathname: "/player/[id]",
+          params: { id: player.user_id },
+        })
+      }
+      style={({ pressed }) => [
+        styles.playerBlock,
+        pressed && styles.playerBlockPressed,
+      ]}
+    >
+      {body}
+    </Pressable>
+  );
+}
+
 export function MatchHubReadyHero({
   hub,
   participants,
@@ -100,6 +153,7 @@ export function MatchHubReadyHero({
   primaryLabel,
   primaryLoading = false,
   onPrimary,
+  viewerUserId,
 }: MatchHubReadyHeroProps) {
   const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
@@ -136,7 +190,11 @@ export function MatchHubReadyHero({
             .map((p) => p.display_name)
             .join(", ")}`}
         >
-          <PlayerColumn players={sides.left} openSlots={sides.leftOpen} />
+          <PlayerColumn
+            players={sides.left}
+            openSlots={sides.leftOpen}
+            viewerUserId={viewerUserId}
+          />
 
           <View style={styles.centerColumn}>
             <View style={styles.connector} />
@@ -149,7 +207,11 @@ export function MatchHubReadyHero({
             <View style={styles.connector} />
           </View>
 
-          <PlayerColumn players={sides.right} openSlots={sides.rightOpen} />
+          <PlayerColumn
+            players={sides.right}
+            openSlots={sides.rightOpen}
+            viewerUserId={viewerUserId}
+          />
         </View>
 
         {onReschedule ? (
@@ -226,6 +288,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     minWidth: 0,
+  },
+  playerBlockPressed: {
+    opacity: 0.6,
   },
   playerBlock: {
     alignItems: "center",
