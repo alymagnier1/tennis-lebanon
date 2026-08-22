@@ -814,7 +814,10 @@ export default function MatchHubScreen() {
       ) : null}
 
       {participants.length > 0 && !vsHeroStage ? (
-        <MatchHubParticipants participants={participants} />
+        <MatchHubParticipants
+          participants={participants}
+          viewerUserId={session?.user.id}
+        />
       ) : null}
 
       {canInvite && !actionsInReadyHero ? (
