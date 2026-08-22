@@ -44,7 +44,7 @@ export type SetOwnSkillBandInput = z.infer<typeof setOwnSkillBandSchema>;
  * absent gender and a declined one are the same thing to everything
  * downstream, and nothing filters on either.
  */
-export const genderSchema = z.enum(["woman", "man", "other"]);
+export const genderSchema = z.enum(["female", "male"]);
 
 export type Gender = z.infer<typeof genderSchema>;
 

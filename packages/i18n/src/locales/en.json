@@ -295,6 +295,7 @@
       "name": "Display name",
       "birthYear": "Birth year",
       "birthYearHint": "We ask for the year only, never your full date of birth.",
+      "birthYearPlaceholder": "Select a year",
       "birthYearAge": "That makes you {{age}} this year.",
       "birthYearError": "Enter a four-digit year, for example 1995.",
       "gender": "Gender (optional)",
@@ -374,9 +375,8 @@
     "both": "Both"
   },
   "gender": {
-    "woman": "Woman",
-    "man": "Man",
-    "other": "Other"
+    "female": "Female",
+    "male": "Male"
   },
   "skillBands": {
     "beginner": "Beginner",

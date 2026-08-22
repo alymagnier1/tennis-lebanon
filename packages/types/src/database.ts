@@ -2700,7 +2700,7 @@ export type Database = {
         | "completed";
       club_role: "staff" | "admin";
       court_request_status: "opened" | "sent" | "not_sent";
-      gender: "woman" | "man" | "other";
+      gender: "female" | "male";
       match_format: "singles" | "doubles";
       match_status:
         | "draft"
@@ -2996,7 +2996,7 @@ export const Constants = {
       ],
       club_role: ["staff", "admin"],
       court_request_status: ["opened", "sent", "not_sent"],
-      gender: ["woman", "man", "other"],
+      gender: ["female", "male"],
       match_format: ["singles", "doubles"],
       match_status: [
         "draft",

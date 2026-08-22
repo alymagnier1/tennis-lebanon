@@ -295,6 +295,7 @@
       "name": "اسم العرض",
       "birthYear": "سنة الميلاد",
       "birthYearHint": "نسأل عن السنة فقط، ولا نطلب تاريخ ميلادك الكامل.",
+      "birthYearPlaceholder": "اختر السنة",
       "birthYearAge": "أي أن عمرك {{age}} هذا العام.",
       "birthYearError": "أدخل سنة من أربعة أرقام، مثل 1995.",
       "gender": "الجنس (اختياري)",
@@ -374,9 +375,8 @@
     "both": "كلاهما"
   },
   "gender": {
-    "woman": "امرأة",
-    "man": "رجل",
-    "other": "آخر"
+    "female": "أنثى",
+    "male": "ذكر"
   },
   "skillBands": {
     "beginner": "مبتدئ",

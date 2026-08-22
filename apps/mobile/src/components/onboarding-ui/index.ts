@@ -15,6 +15,7 @@ export {
   OnboardingFormField,
   onboardingInputStyle,
 } from "./OnboardingStepLayout";
+export { OnboardingYearField } from "./OnboardingYearField";
 export {
   PolicyToggleCard,
   SelectionCard,

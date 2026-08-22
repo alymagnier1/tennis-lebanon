@@ -43,11 +43,11 @@ begin
   update public.profiles set onboarding_completed_at = null where id = v_user;
 
   perform pg_temp.set_caller(v_user);
-  perform public.set_own_gender('woman');
+  perform public.set_own_gender('female');
 
   select p.gender into v_stored from public.profiles as p where p.id = v_user;
   perform pg_temp.assert_true(
-    v_stored = 'woman',
+    v_stored = 'female',
     'a player still in onboarding should be able to state their gender'
   );
 

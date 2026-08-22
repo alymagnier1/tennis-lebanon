@@ -15,6 +15,7 @@ import {
   FigmaPrimaryButton,
   OnboardingFormField,
   OnboardingStepLayout,
+  OnboardingYearField,
   PolicyToggleCard,
   onboardingInputStyle,
 } from "../../src/components/onboarding-ui";
@@ -28,20 +29,19 @@ import { AppText } from "../../src/components/AppText";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
 const languages: SupportedLanguage[] = ["en", "ar", "fr"];
-const genders: Gender[] = ["woman", "man", "other"];
+const genders: Gender[] = ["female", "male"];
 
 /**
  * Only the year is collected, and the field says so.
  *
  * `profiles.birth_year` is a `smallint` and the only thing the product asks of
  * it is adult eligibility, so a full date of birth would be more personal data
- * than anything downstream uses. The field used to be a bare four-digit box
- * with no placeholder and no feedback, which read as unfinished rather than
- * deliberate; the hint and the echoed age below make the narrower ask look like
- * the choice it is.
+ * than anything downstream uses. The list starts at the youngest year that can
+ * join, which makes the rule visible instead of enforcing it after submission.
  */
 const currentYear = new Date().getUTCFullYear();
-const earliestYear = 1900;
+const youngestEligibleYear = currentYear - 18;
+const oldestOfferedYear = currentYear - 90;
 
 type FieldErrors = {
   displayName?: string;
@@ -81,11 +81,7 @@ export default function IdentityScreen() {
   });
 
   const numericYear = Number(birthYear);
-  const yearLooksComplete =
-    birthYear.length === 4 &&
-    Number.isInteger(numericYear) &&
-    numericYear >= earliestYear &&
-    numericYear <= currentYear;
+  const hasYear = birthYear.length === 4 && Number.isInteger(numericYear);
 
   const toggleLanguage = (language: SupportedLanguage) => {
     setErrors((current) => ({ ...current, languages: undefined }));
@@ -104,12 +100,11 @@ export default function IdentityScreen() {
       nextErrors.displayName = t("onboarding.identity.nameError");
     }
 
-    // Two failures worth telling apart: a year that is not a year, and a year
-    // that is a year but too recent to join. The screen used to report both as
-    // "you must be 18 or older", which is confusing after a typo.
-    if (!yearLooksComplete) {
+    // The list cannot offer an ineligible year, so the only failures left are
+    // choosing nothing and not ticking the attestation.
+    if (!hasYear || !isAdultBirthYear(numericYear, currentYear)) {
       nextErrors.birthYear = t("onboarding.identity.birthYearError");
-    } else if (!isAdultBirthYear(numericYear, currentYear) || !adultConfirmed) {
+    } else if (!adultConfirmed) {
       nextErrors.birthYear = t("onboarding.identity.adultError");
     }
 
@@ -133,6 +128,10 @@ export default function IdentityScreen() {
     router.push("/(onboarding)/tennis-profile");
   };
 
+  const photoLabel = profile?.avatar_path
+    ? t("onboarding.identity.photoChange")
+    : t("onboarding.identity.photoAdd");
+
   return (
     <OnboardingStepLayout
       title={t("onboarding.identity.title")}
@@ -144,6 +143,32 @@ export default function IdentityScreen() {
         <FigmaPrimaryButton label={t("common.continue")} onPress={next} />
       }
     >
+      {/* The avatar leads: it anchors the page and stops the step reading as an
+          undifferentiated stack of inputs. Optional, and labelled as such. */}
+      <View style={styles.photoBlock}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={photoLabel}
+          disabled={avatarMutation.isPending}
+          onPress={() => avatarMutation.mutate()}
+          style={({ pressed }) => [
+            styles.photoTarget,
+            pressed && styles.photoTargetPressed,
+          ]}
+        >
+          <Avatar
+            name={displayName}
+            avatarPath={profile?.avatar_path}
+            size={92}
+          />
+          <AppText style={styles.photoAction}>{photoLabel}</AppText>
+        </Pressable>
+        <AppText style={[tennisTextStyles.fieldHint, styles.photoHint]}>
+          {t("onboarding.identity.photoHint")}
+        </AppText>
+        {photoError ? <ErrorNotice>{photoError}</ErrorNotice> : null}
+      </View>
+
       <OnboardingFormField
         label={t("onboarding.identity.name")}
         error={errors.displayName}
@@ -162,61 +187,23 @@ export default function IdentityScreen() {
         />
       </OnboardingFormField>
 
-      <AppText style={styles.langLabel}>
-        {t("onboarding.identity.photo")}
-      </AppText>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={
-          profile?.avatar_path
-            ? t("onboarding.identity.photoChange")
-            : t("onboarding.identity.photoAdd")
-        }
-        disabled={avatarMutation.isPending}
-        onPress={() => avatarMutation.mutate()}
-        style={({ pressed }) => [
-          styles.photoRow,
-          pressed && styles.photoRowPressed,
-        ]}
-      >
-        <Avatar
-          name={displayName}
-          avatarPath={profile?.avatar_path}
-          size={64}
-        />
-        <AppText style={styles.photoAction}>
-          {profile?.avatar_path
-            ? t("onboarding.identity.photoChange")
-            : t("onboarding.identity.photoAdd")}
-        </AppText>
-      </Pressable>
-      <AppText style={[tennisTextStyles.fieldHint, styles.photoHint]}>
-        {t("onboarding.identity.photoHint")}
-      </AppText>
-      {photoError ? <ErrorNotice>{photoError}</ErrorNotice> : null}
-
       <OnboardingFormField
         label={t("onboarding.identity.birthYear")}
         error={errors.birthYear}
       >
-        <TextInput
+        <OnboardingYearField
           value={birthYear}
-          onChangeText={(value) => {
-            // Strip anything that is not a digit so a stray character cannot
-            // silently make the year unparseable.
-            setBirthYear(value.replace(/[^0-9]/g, "").slice(0, 4));
+          onChange={(year) => {
+            setBirthYear(year);
             setErrors((current) => ({ ...current, birthYear: undefined }));
           }}
-          keyboardType="number-pad"
-          inputMode="numeric"
-          maxLength={4}
-          placeholder={String(currentYear - 30)}
-          accessibilityLabel={t("onboarding.identity.birthYear")}
-          style={onboardingInputStyle.input}
-          placeholderTextColor={tennisColors.mutedForeground}
+          minYear={oldestOfferedYear}
+          maxYear={youngestEligibleYear}
+          label={t("onboarding.identity.birthYear")}
+          placeholder={t("onboarding.identity.birthYearPlaceholder")}
         />
-        <AppText style={[tennisTextStyles.fieldHint, styles.hint]}>
-          {yearLooksComplete
+        <AppText style={[tennisTextStyles.fieldHint, styles.fieldHint]}>
+          {hasYear
             ? t("onboarding.identity.birthYearAge", {
                 age: currentYear - numericYear,
               })
@@ -224,24 +211,41 @@ export default function IdentityScreen() {
         </AppText>
       </OnboardingFormField>
 
-      <AppText style={styles.langLabel}>
-        {t("onboarding.identity.gender")}
-      </AppText>
-      <View style={styles.chips}>
-        {genders.map((option) => (
-          <ChipButton
-            key={option}
-            label={t(`gender.${option}`)}
-            selected={gender === option}
-            // Tapping the chosen chip clears it. Not stating a gender is a
-            // valid answer, so it has to stay reachable after answering.
-            onPress={() =>
-              setGender((current) => (current === option ? null : option))
-            }
-          />
-        ))}
-      </View>
+      <OnboardingFormField label={t("onboarding.identity.gender")}>
+        <View style={styles.chips}>
+          {genders.map((option) => (
+            <ChipButton
+              key={option}
+              label={t(`gender.${option}`)}
+              selected={gender === option}
+              // Tapping the chosen chip clears it. Not stating a gender is a
+              // valid answer, so it has to stay reachable after answering.
+              onPress={() =>
+                setGender((current) => (current === option ? null : option))
+              }
+            />
+          ))}
+        </View>
+      </OnboardingFormField>
 
+      <OnboardingFormField
+        label={t("onboarding.identity.languages")}
+        error={errors.languages}
+      >
+        <View style={styles.chips}>
+          {languages.map((language) => (
+            <ChipButton
+              key={language}
+              label={t(`languages.${language}`)}
+              selected={selectedLanguages.includes(language)}
+              onPress={() => toggleLanguage(language)}
+            />
+          ))}
+        </View>
+      </OnboardingFormField>
+
+      {/* Last, next to the commitment it is: an attestation rather than another
+          detail about you. */}
       <PolicyToggleCard
         label={t("onboarding.identity.adultConfirm")}
         selected={adultConfirmed}
@@ -250,36 +254,20 @@ export default function IdentityScreen() {
           setErrors((current) => ({ ...current, birthYear: undefined }));
         }}
       />
-
-      <AppText style={styles.langLabel}>
-        {t("onboarding.identity.languages")}
-      </AppText>
-      <View style={styles.chips}>
-        {languages.map((language) => (
-          <ChipButton
-            key={language}
-            label={t(`languages.${language}`)}
-            selected={selectedLanguages.includes(language)}
-            onPress={() => toggleLanguage(language)}
-          />
-        ))}
-      </View>
-      {errors.languages ? <ErrorNotice>{errors.languages}</ErrorNotice> : null}
     </OnboardingStepLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  hint: {
-    marginTop: 6,
-  },
-  photoRow: {
-    flexDirection: "row",
+  photoBlock: {
     alignItems: "center",
-    gap: 14,
-    marginBottom: 6,
+    marginBottom: 28,
   },
-  photoRowPressed: {
+  photoTarget: {
+    alignItems: "center",
+    gap: 10,
+  },
+  photoTargetPressed: {
     opacity: 0.7,
   },
   photoAction: {
@@ -288,17 +276,15 @@ const styles = StyleSheet.create({
     color: tennisColors.primary,
   },
   photoHint: {
-    marginBottom: 16,
+    marginTop: 8,
+    textAlign: "center",
   },
-  langLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-    marginBottom: 8,
+  fieldHint: {
+    marginTop: 6,
   },
   chips: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 16,
+    gap: 8,
   },
 });
