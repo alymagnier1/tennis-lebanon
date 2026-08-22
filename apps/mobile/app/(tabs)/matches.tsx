@@ -47,6 +47,7 @@ import {
   matchCardOpponentLabel,
   resolveMatchCardOpponent,
 } from "../../src/lib/match-card-headline";
+import { buildMatchCardBadges } from "../../src/lib/match-card-badges";
 import {
   matchCardAreaLabel,
   matchCardClubLabel,
@@ -344,16 +345,7 @@ export default function MatchesScreen() {
           formatChip={t(`formats.${match.format}`)}
           locationChip={locationChip}
           areaChip={areaChip}
-          badges={
-            match.is_stale_warning
-              ? [
-                  {
-                    label: t("matches.lifecycle.staleBadge"),
-                    tone: "attention" as const,
-                  },
-                ]
-              : undefined
-          }
+          badges={buildMatchCardBadges(t, match)}
           note={match.notes ?? undefined}
           onPress={() =>
             router.push({

@@ -2266,6 +2266,7 @@ export type Database = {
           preferred_clubs: Json;
           soonest_time: string;
           status: Database["public"]["Enums"]["match_status"];
+          unread_message_count: number;
           updated_at: string;
           viewer_attendance: Database["public"]["Enums"]["attendance_status"];
           visibility: Database["public"]["Enums"]["match_visibility"];

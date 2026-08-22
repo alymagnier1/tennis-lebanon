@@ -151,6 +151,8 @@ export type MyMatchRow = {
   preferred_clubs: MatchPreferredClub[] | null;
   /** Match areas for the list card. */
   zones: unknown;
+  /** Chat messages from others since this viewer last opened the thread. */
+  unread_message_count: number;
 };
 
 /**
