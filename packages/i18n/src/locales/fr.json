@@ -270,6 +270,8 @@
     "restoring": "Restauration de votre session…",
     "sessionError": "Impossible de restaurer votre session.",
     "signOut": "Se déconnecter",
+    "signOutConfirmTitle": "Se déconnecter ?",
+    "signOutConfirmBody": "Vous aurez besoin d'un nouveau lien de connexion pour revenir.",
     "signOutError": "Impossible de vous déconnecter. Veuillez réessayer.",
     "emailPlaceholder": "you@example.com",
     "noAccount": "Don't have an account?",
@@ -278,7 +280,8 @@
   "onboarding": {
     "consent": {
       "title": "Avant de continuer",
-      "description": "Consultez et acceptez chaque projet de politique de développement.",
+      "description": "Lisez-les, puis acceptez pour continuer. Ce sont des brouillons de développement pour le pilote.",
+      "acceptAll": "J'accepte les conditions d'utilisation, l'avis de confidentialité et les règles de la communauté",
       "terms": "J’accepte le projet de conditions d’utilisation",
       "readTerms": "Lire les conditions d’utilisation",
       "privacy": "J’accepte le projet d’avis de confidentialité",
@@ -315,7 +318,7 @@
       "formatError": "Choisissez le simple, le double ou les deux."
     },
     "zones": {
-      "title": "Où souhaitez-vous jouer ?",
+      "title": "Où jouez-vous habituellement ?",
       "description": "Choisissez une ou plusieurs zones générales. Nous ne demandons jamais votre adresse personnelle.",
       "loadError": "Impossible de charger les zones disponibles.",
       "empty": "Aucune zone pilote n’est disponible pour le moment."

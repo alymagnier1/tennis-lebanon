@@ -273,12 +273,15 @@
     "restoring": "Restoring your session…",
     "sessionError": "We could not restore your session.",
     "signOut": "Sign out",
+    "signOutConfirmTitle": "Sign out?",
+    "signOutConfirmBody": "You will need a new sign-in link to get back in.",
     "signOutError": "We could not sign you out. Please try again."
   },
   "onboarding": {
     "consent": {
       "title": "Before you continue",
-      "description": "Review and accept each development policy draft.",
+      "description": "Read each one, then accept to continue. These are development drafts for the pilot.",
+      "acceptAll": "I accept the Terms of Use, Privacy Notice and Community Rules",
       "terms": "I accept the Terms of Use draft",
       "readTerms": "Read Terms of Use",
       "privacy": "I accept the Privacy Notice draft",
@@ -315,7 +318,7 @@
       "formatError": "Choose singles, doubles, or both."
     },
     "zones": {
-      "title": "Where do you want to play?",
+      "title": "Where do you usually play?",
       "description": "Choose one or more broad areas. We never ask for your home address.",
       "loadError": "We could not load the available areas.",
       "empty": "No pilot areas are available yet."

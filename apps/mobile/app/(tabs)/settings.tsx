@@ -69,6 +69,19 @@ export default function SettingsScreen() {
     }
   };
 
+  // Sign-in is a magic link, so signing out is not the cheap, reversible thing
+  // it is on a password app -- getting back in means waiting on an email. That
+  // earns the same confirmation the delete row above already gets.
+  const confirmLogout = () => {
+    confirmAction({
+      title: t("auth.signOutConfirmTitle"),
+      message: t("auth.signOutConfirmBody"),
+      confirmLabel: t("auth.signOut"),
+      cancelLabel: t("common.cancel"),
+      onConfirm: () => void logout(),
+    });
+  };
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -155,7 +168,7 @@ export default function SettingsScreen() {
             <ProfileMenuRow
               icon={<Icon name="close" size={16} color={tennisColors.accent} />}
               label={t("auth.signOut")}
-              onPress={() => void logout()}
+              onPress={confirmLogout}
               showDivider={false}
               tone="danger"
             />

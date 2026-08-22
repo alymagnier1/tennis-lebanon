@@ -18,6 +18,19 @@ export default function ConsentScreen() {
     draft.acceptedPrivacy &&
     draft.acceptedCommunityRules;
 
+  // One affirmative act covering all three documents. Each stays separately
+  // readable and is still stored as its own flag, so nothing downstream changes
+  // -- this only stops the funnel asking for three taps at its highest
+  // drop-off point.
+  const toggleAll = () => {
+    const next = !complete;
+    updateDraft({
+      acceptedTerms: next,
+      acceptedPrivacy: next,
+      acceptedCommunityRules: next,
+    });
+  };
+
   const leaveOnboarding = () => {
     void (async () => {
       await signOut().catch(() => undefined);
@@ -41,31 +54,17 @@ export default function ConsentScreen() {
       }
     >
       <PolicyToggleCard
-        label={t("onboarding.consent.terms")}
-        selected={draft.acceptedTerms}
-        onPress={() => updateDraft({ acceptedTerms: !draft.acceptedTerms })}
+        label={t("onboarding.consent.acceptAll")}
+        selected={complete}
+        onPress={toggleAll}
       />
       <FigmaSecondaryButton
         label={t("onboarding.consent.readTerms")}
         onPress={() => router.push("/policies?document=terms")}
       />
-      <PolicyToggleCard
-        label={t("onboarding.consent.privacy")}
-        selected={draft.acceptedPrivacy}
-        onPress={() => updateDraft({ acceptedPrivacy: !draft.acceptedPrivacy })}
-      />
       <FigmaSecondaryButton
         label={t("onboarding.consent.readPrivacy")}
         onPress={() => router.push("/policies?document=privacy")}
-      />
-      <PolicyToggleCard
-        label={t("onboarding.consent.community")}
-        selected={draft.acceptedCommunityRules}
-        onPress={() =>
-          updateDraft({
-            acceptedCommunityRules: !draft.acceptedCommunityRules,
-          })
-        }
       />
       <FigmaSecondaryButton
         label={t("onboarding.consent.readCommunity")}

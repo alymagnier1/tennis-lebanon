@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import {
   OnboardingStepLayout,
   SelectionCard,
 } from "../../src/components/onboarding-ui";
+import { autoSelectedZoneIds } from "../../src/lib/onboarding-zone-autoselect";
 import { supabase } from "../../src/lib/supabase";
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
 
@@ -31,6 +33,22 @@ export default function ZonesScreen() {
     queryKey: ["active-zones"],
     queryFn: () => getActiveZones(supabase),
   });
+
+  const zones = query.data;
+
+  // With a single pilot zone this step has one possible answer; fill it in and
+  // let the card stand as confirmation of where the pilot runs. Rule and its
+  // guards live in `autoSelectedZoneIds`.
+  useEffect(() => {
+    if (!zones) return;
+    const next = autoSelectedZoneIds({
+      availableZoneIds: zones.map((zone) => zone.id),
+      selectedZoneIds: draft.zoneIds,
+    });
+    if (next) {
+      updateDraft({ zoneIds: next });
+    }
+  }, [zones, draft.zoneIds, updateDraft]);
 
   const toggle = (zoneId: string) => {
     const zoneIds = draft.zoneIds.includes(zoneId)
@@ -64,10 +82,10 @@ export default function ZonesScreen() {
           />
         </>
       ) : null}
-      {query.data?.length === 0 ? (
+      {zones?.length === 0 ? (
         <ErrorNotice>{t("onboarding.zones.empty")}</ErrorNotice>
       ) : null}
-      {query.data?.map((zone) => (
+      {zones?.map((zone) => (
         <SelectionCard
           key={zone.id}
           label={zoneName(zone.name_i18n, i18n.resolvedLanguage ?? "en")}
