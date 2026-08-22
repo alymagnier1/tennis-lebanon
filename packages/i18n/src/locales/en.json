@@ -297,6 +297,11 @@
       "birthYearHint": "We ask for the year only, never your full date of birth.",
       "birthYearAge": "That makes you {{age}} this year.",
       "birthYearError": "Enter a four-digit year, for example 1995.",
+      "gender": "Gender (optional)",
+      "photo": "Profile photo (optional)",
+      "photoAdd": "Add a photo",
+      "photoChange": "Change photo",
+      "photoHint": "Players recognise a face faster than a name. You can add one later instead.",
       "adultConfirm": "I confirm that I am 18 or older",
       "languages": "Languages you speak",
       "nameError": "Enter a display name between 2 and 50 characters.",
@@ -367,6 +372,11 @@
     "singles": "Singles",
     "doubles": "Doubles",
     "both": "Both"
+  },
+  "gender": {
+    "woman": "Woman",
+    "man": "Man",
+    "other": "Other"
   },
   "skillBands": {
     "beginner": "Beginner",

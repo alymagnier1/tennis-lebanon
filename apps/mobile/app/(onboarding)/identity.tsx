@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { router } from "expo-router";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   isAdultBirthYear,
   normalizeDisplayName,
+  type Gender,
   type SupportedLanguage,
 } from "@tennis-lebanon/domain";
 import { ErrorNotice } from "../../src/components/FormUi";
@@ -16,6 +18,9 @@ import {
   PolicyToggleCard,
   onboardingInputStyle,
 } from "../../src/components/onboarding-ui";
+import { Avatar } from "../../src/components/AppUi";
+import { pickAndUploadOwnAvatar } from "../../src/lib/pick-own-avatar";
+import { useAuth } from "../../src/providers/AuthProvider";
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
 import { tennisColors } from "../../src/theme/tennis-tokens";
 import { tennisTextStyles } from "../../src/theme/tennis-text-styles";
@@ -23,6 +28,7 @@ import { AppText } from "../../src/components/AppText";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
 const languages: SupportedLanguage[] = ["en", "ar", "fr"];
+const genders: Gender[] = ["woman", "man", "other"];
 
 /**
  * Only the year is collected, and the field says so.
@@ -45,12 +51,34 @@ type FieldErrors = {
 
 export default function IdentityScreen() {
   const { t } = useTranslation();
+  const { profile, refreshProfile } = useAuth();
   const { draft, updateDraft } = useOnboarding();
   const [displayName, setDisplayName] = useState(draft.displayName);
   const [birthYear, setBirthYear] = useState(draft.birthYear);
   const [adultConfirmed, setAdultConfirmed] = useState(draft.isAdultConfirmed);
   const [selectedLanguages, setSelectedLanguages] = useState(draft.languages);
+  const [gender, setGender] = useState<Gender | null>(draft.gender);
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [photoError, setPhotoError] = useState<string | null>(null);
+
+  // The profile row exists from signup (trigger in 002), and `set_own_avatar`
+  // no longer demands a completed onboarding, so the upload can happen right
+  // here rather than being held in memory until the end.
+  const avatarMutation = useMutation({
+    mutationFn: pickAndUploadOwnAvatar,
+    onSuccess: async (result) => {
+      if (result.status === "success") {
+        setPhotoError(null);
+        await refreshProfile();
+        return;
+      }
+
+      if (result.status === "permission_denied") {
+        setPhotoError(t("profile.avatarPermissionDenied"));
+      }
+    },
+    onError: () => setPhotoError(t("profile.avatarUploadError")),
+  });
 
   const numericYear = Number(birthYear);
   const yearLooksComplete =
@@ -98,6 +126,7 @@ export default function IdentityScreen() {
     updateDraft({
       displayName: normalizedName,
       birthYear,
+      gender,
       isAdultConfirmed: adultConfirmed,
       languages: selectedLanguages,
     });
@@ -133,6 +162,39 @@ export default function IdentityScreen() {
         />
       </OnboardingFormField>
 
+      <AppText style={styles.langLabel}>
+        {t("onboarding.identity.photo")}
+      </AppText>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={
+          profile?.avatar_path
+            ? t("onboarding.identity.photoChange")
+            : t("onboarding.identity.photoAdd")
+        }
+        disabled={avatarMutation.isPending}
+        onPress={() => avatarMutation.mutate()}
+        style={({ pressed }) => [
+          styles.photoRow,
+          pressed && styles.photoRowPressed,
+        ]}
+      >
+        <Avatar
+          name={displayName}
+          avatarPath={profile?.avatar_path}
+          size={64}
+        />
+        <AppText style={styles.photoAction}>
+          {profile?.avatar_path
+            ? t("onboarding.identity.photoChange")
+            : t("onboarding.identity.photoAdd")}
+        </AppText>
+      </Pressable>
+      <AppText style={[tennisTextStyles.fieldHint, styles.photoHint]}>
+        {t("onboarding.identity.photoHint")}
+      </AppText>
+      {photoError ? <ErrorNotice>{photoError}</ErrorNotice> : null}
+
       <OnboardingFormField
         label={t("onboarding.identity.birthYear")}
         error={errors.birthYear}
@@ -161,6 +223,24 @@ export default function IdentityScreen() {
             : t("onboarding.identity.birthYearHint")}
         </AppText>
       </OnboardingFormField>
+
+      <AppText style={styles.langLabel}>
+        {t("onboarding.identity.gender")}
+      </AppText>
+      <View style={styles.chips}>
+        {genders.map((option) => (
+          <ChipButton
+            key={option}
+            label={t(`gender.${option}`)}
+            selected={gender === option}
+            // Tapping the chosen chip clears it. Not stating a gender is a
+            // valid answer, so it has to stay reachable after answering.
+            onPress={() =>
+              setGender((current) => (current === option ? null : option))
+            }
+          />
+        ))}
+      </View>
 
       <PolicyToggleCard
         label={t("onboarding.identity.adultConfirm")}
@@ -192,6 +272,23 @@ export default function IdentityScreen() {
 const styles = StyleSheet.create({
   hint: {
     marginTop: 6,
+  },
+  photoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    marginBottom: 6,
+  },
+  photoRowPressed: {
+    opacity: 0.7,
+  },
+  photoAction: {
+    fontFamily: tennisFontFamily.bodyMedium,
+    fontSize: 15,
+    color: tennisColors.primary,
+  },
+  photoHint: {
+    marginBottom: 16,
   },
   langLabel: {
     fontFamily: tennisFontFamily.bodyMedium,

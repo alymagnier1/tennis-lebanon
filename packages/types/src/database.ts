@@ -1442,6 +1442,7 @@ export type Database = {
           created_at: string;
           deletion_requested_at: string | null;
           display_name: string | null;
+          gender: Database["public"]["Enums"]["gender"] | null;
           id: string;
           is_adult_confirmed: boolean;
           languages: string[];
@@ -1462,6 +1463,7 @@ export type Database = {
           created_at?: string;
           deletion_requested_at?: string | null;
           display_name?: string | null;
+          gender?: Database["public"]["Enums"]["gender"] | null;
           id: string;
           is_adult_confirmed?: boolean;
           languages?: string[];
@@ -1482,6 +1484,7 @@ export type Database = {
           created_at?: string;
           deletion_requested_at?: string | null;
           display_name?: string | null;
+          gender?: Database["public"]["Enums"]["gender"] | null;
           id?: string;
           is_adult_confirmed?: boolean;
           languages?: string[];
@@ -2553,6 +2556,10 @@ export type Database = {
         Returns: undefined;
       };
       set_own_avatar: { Args: { p_avatar_path?: string }; Returns: string };
+      set_own_gender: {
+        Args: { p_gender?: Database["public"]["Enums"]["gender"] };
+        Returns: undefined;
+      };
       set_own_notification_locale: {
         Args: { p_locale: string };
         Returns: string;
@@ -2693,6 +2700,7 @@ export type Database = {
         | "completed";
       club_role: "staff" | "admin";
       court_request_status: "opened" | "sent" | "not_sent";
+      gender: "woman" | "man" | "other";
       match_format: "singles" | "doubles";
       match_status:
         | "draft"
@@ -2988,6 +2996,7 @@ export const Constants = {
       ],
       club_role: ["staff", "admin"],
       court_request_status: ["opened", "sent", "not_sent"],
+      gender: ["woman", "man", "other"],
       match_format: ["singles", "doubles"],
       match_status: [
         "draft",

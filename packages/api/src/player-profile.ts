@@ -1,4 +1,5 @@
 import type {
+  SetOwnGenderInput,
   SetOwnSkillBandInput,
   UpdateMatchHostDefaultsInput,
   UpdatePreferredZonesInput,
@@ -410,6 +411,19 @@ export async function uploadOwnAvatar(
   }
 
   return storagePath;
+}
+
+export async function setOwnGender(
+  client: TennisSupabaseClient,
+  gender: SetOwnGenderInput["gender"],
+): Promise<void> {
+  const { error } = await client.rpc("set_own_gender", {
+    p_gender: gender ?? undefined,
+  });
+
+  if (error) {
+    throw error;
+  }
 }
 
 export async function setOwnSkillBand(

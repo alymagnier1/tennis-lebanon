@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { completeOnboarding } from "@tennis-lebanon/api";
+import { completeOnboarding, setOwnGender } from "@tennis-lebanon/api";
 import { POLICY_VERSIONS, onboardingInputSchema } from "@tennis-lebanon/domain";
 import { ErrorNotice } from "../../src/components/FormUi";
 import { AppText } from "../../src/components/AppText";
@@ -40,6 +40,13 @@ export default function ReviewScreen() {
         communityRulesVersion: POLICY_VERSIONS.communityRules,
       });
       await completeOnboarding(supabase, input);
+
+      // Optional and display-only, so it is written after the profile exists
+      // rather than being threaded through `complete_onboarding`. Declining to
+      // say is the null case and needs no call at all.
+      if (draft.gender) {
+        await setOwnGender(supabase, draft.gender);
+      }
     },
     onSuccess: async () => {
       await clearDraft();

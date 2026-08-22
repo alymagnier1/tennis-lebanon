@@ -297,6 +297,11 @@
       "birthYearHint": "Nous demandons seulement l'année, jamais votre date de naissance complète.",
       "birthYearAge": "Vous aurez donc {{age}} ans cette année.",
       "birthYearError": "Saisissez une année à quatre chiffres, par exemple 1995.",
+      "gender": "Genre (facultatif)",
+      "photo": "Photo de profil (facultatif)",
+      "photoAdd": "Ajouter une photo",
+      "photoChange": "Changer la photo",
+      "photoHint": "On reconnaît un visage plus vite qu'un nom. Vous pourrez en ajouter une plus tard.",
       "adultConfirm": "Je confirme avoir au moins 18 ans",
       "nameError": "Saisissez un nom d’affichage de 2 à 50 caractères.",
       "adultError": "Vous devez avoir au moins 18 ans pour participer à ce pilote.",
@@ -367,6 +372,11 @@
     "singles": "Simple",
     "doubles": "Double",
     "both": "Les deux"
+  },
+  "gender": {
+    "woman": "Femme",
+    "man": "Homme",
+    "other": "Autre"
   },
   "skillBands": {
     "beginner": "Débutant",

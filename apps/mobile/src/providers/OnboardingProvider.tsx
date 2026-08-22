@@ -10,6 +10,7 @@ import {
 import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import type {
+  Gender,
   PlayIntent,
   SkillBand,
   SupportedLanguage,
@@ -24,6 +25,7 @@ export interface OnboardingDraft {
   birthYear: string;
   isAdultConfirmed: boolean;
   languages: SupportedLanguage[];
+  gender: Gender | null;
   skillBand: SkillBand | null;
   playIntent: PlayIntent;
   prefersSingles: boolean;
@@ -39,6 +41,7 @@ const initialDraft: OnboardingDraft = {
   birthYear: "",
   isAdultConfirmed: false,
   languages: ["en"],
+  gender: null,
   skillBand: null,
   playIntent: "either",
   prefersSingles: true,

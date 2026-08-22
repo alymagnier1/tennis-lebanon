@@ -37,3 +37,19 @@ export const setOwnSkillBandSchema = z.object({
 });
 
 export type SetOwnSkillBandInput = z.infer<typeof setOwnSkillBandSchema>;
+
+/**
+ * Self-declared and optional. `null` is the answer "prefer not to say" rather
+ * than a missing value, which is why there is no sentinel member for it: an
+ * absent gender and a declined one are the same thing to everything
+ * downstream, and nothing filters on either.
+ */
+export const genderSchema = z.enum(["woman", "man", "other"]);
+
+export type Gender = z.infer<typeof genderSchema>;
+
+export const setOwnGenderSchema = z.object({
+  gender: genderSchema.nullable(),
+});
+
+export type SetOwnGenderInput = z.infer<typeof setOwnGenderSchema>;
