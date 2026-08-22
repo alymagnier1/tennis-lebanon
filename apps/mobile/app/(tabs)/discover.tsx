@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
   keepPreviousData,
@@ -30,6 +30,7 @@ import {
   SegmentTabs,
 } from "../../src/components/AppUi";
 import { DiscoverMatchChips } from "../../src/components/discover/DiscoverMatchChips";
+import { DiscoverTimeChip } from "../../src/components/discover/DiscoverTimeChip";
 import { DiscoverSearchSortBar } from "../../src/components/discover/DiscoverSearchSortBar";
 import { DiscoverHeaderShell } from "../../src/components/discover/DiscoverHeaderShell";
 import { DiscoverSectionSplitter } from "../../src/components/discover/DiscoverSectionSplitter";
@@ -48,6 +49,11 @@ import {
   loadDiscoverFilters,
   saveDiscoverFilters,
 } from "../../src/lib/discovery-filters";
+import { formatCompactUtcInBeirut } from "../../src/lib/beirut-time";
+import {
+  parseDiscoverTimeWindow,
+  type DiscoverTimeWindow,
+} from "../../src/lib/discover-time-window";
 import {
   filterDiscoverMatchesBySearch,
   filterDiscoverPlayersBySearch,
@@ -86,6 +92,38 @@ export default function DiscoverScreen() {
     DEFAULT_DISCOVER_SORT,
   );
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Arrives from a Home free-block tap.
+  //
+  // What is stored is which window was *dismissed*, not the window itself, so
+  // the filter stays derived from the params. Holding the window in state and
+  // resetting it from an effect works, but sets state during an effect for
+  // something that is plainly derivable, which cascades a render and is what
+  // the compiler rule objects to. Keying the dismissal also gets the behaviour
+  // right for free: tapping a different block produces a different key, so a
+  // fresh window shows even though the previous one was cleared.
+  //
+  // Deliberately not persisted: `loadDiscoverFilters` stores only the toggles,
+  // and a window chosen for one evening has no business surviving the session.
+  const timeParams = useLocalSearchParams<{
+    freeFrom?: string;
+    freeTo?: string;
+  }>();
+  const paramWindow = useMemo(
+    () => parseDiscoverTimeWindow(timeParams),
+    [timeParams],
+  );
+  const [dismissedWindowKey, setDismissedWindowKey] = useState<string | null>(
+    null,
+  );
+
+  const paramWindowKey = paramWindow
+    ? `${paramWindow.freeFrom}|${paramWindow.freeTo}`
+    : null;
+  const timeWindow: DiscoverTimeWindow | null =
+    paramWindowKey && paramWindowKey !== dismissedWindowKey
+      ? paramWindow
+      : null;
   const filtersHydrated = !userId || hydratedForUserId === userId;
 
   // The player's own preferred zones, not the country's zone directory. This used
@@ -130,12 +168,15 @@ export default function DiscoverScreen() {
       return null;
     }
 
-    return resolveDiscoverFiltersFromProfile({
-      toggles: matchToggles,
-      playIntent: profile.play_intent as PlayIntent,
-      ownZoneIds: ownZonesQuery.data,
-    });
-  }, [matchToggles, ownProfileQuery.data, ownZonesQuery.data]);
+    return {
+      ...resolveDiscoverFiltersFromProfile({
+        toggles: matchToggles,
+        playIntent: profile.play_intent as PlayIntent,
+        ownZoneIds: ownZonesQuery.data,
+      }),
+      ...(timeWindow ?? {}),
+    };
+  }, [matchToggles, ownProfileQuery.data, ownZonesQuery.data, timeWindow]);
 
   const playersQuery = useQuery({
     queryKey: ["discover-players", resolvedFilters],
@@ -361,6 +402,12 @@ export default function DiscoverScreen() {
             toggles={matchToggles}
             onToggle={toggleMatchFilter}
           />
+          {timeWindow ? (
+            <DiscoverTimeChip
+              label={formatCompactUtcInBeirut(timeWindow.freeFrom)}
+              onClear={() => setDismissedWindowKey(paramWindowKey)}
+            />
+          ) : null}
         </DiscoverHeaderShell>
       }
     >

@@ -474,11 +474,13 @@
     "liquidityClubsHint": "دليل النوادي والحجز عبر واتساب",
     "free": {
       "busiestTitle": "أكثر الأوقات التي يتفرّغ فيها اللاعبون هذا الأسبوع",
-      "busiestSubtitle": "المس فترة لترى من يتفرّغ فيها.",
+      "busiestSubtitle": "متى يكون اللاعبون متاحين، ومن هو متاح الآن.",
       "othersFree": "{{players}} متاح",
       "fromAvailability": "من أوقات فراغك",
       "rowLabel": "{{slot}}، {{players}} متاح. شاهد من.",
-      "youAreFree": "أنت متفرّغ حينها"
+      "youAreFree": "أنت متفرّغ حينها",
+      "carouselTitle": "متاحون {{slot}}",
+      "seeAllInDiscover": "عرض الـ {{count}} في الاستكشاف"
     },
     "quickActionsTitle": "إجراءات سريعة",
     "quickActionFindPlayers": "البحث عن لاعبين",
@@ -643,7 +645,9 @@
     "noOverlapHint": "لا يوجد وقت مشترك بعد",
     "playerBio": "نبذة",
     "playStyleTags": "أسلوب اللعب",
-    "usualAvailability": "عادةً {{schedule}}"
+    "usualAvailability": "عادةً {{schedule}}",
+    "createMatchWith": "أنشئ مباراة مع {{name}}",
+    "clearTimeFilter": "عرض اللاعبين المتاحين {{slot}}. اضغط للمسح."
   },
   "playerProfile": {
     "aboutTitle": "نبذة",
@@ -1415,14 +1419,5 @@
         "body": "لم يعترض أحد خلال ثلاثة أيام، لذا اعتُمدت هذه النتيجة."
       }
     }
-  },
-  "freeBlock": {
-    "title": "من يتفرّغ",
-    "invalid": "هذه الفترة غير صالحة.",
-    "empty": "لم يعد أحد متفرّغًا في هذه الفترة. جرّب فترة أخرى.",
-    "addMe": "أنا متفرّغ حينها أيضًا",
-    "removeMe": "لست متفرّغًا حينها",
-    "youAreFree": "أنت متفرّغ حينها، لذا يمكن لهؤلاء اللاعبين أن يجدوك أيضًا.",
-    "youAreFreeFromAvailability": "أنت متفرّغ حينها، حسب أوقات فراغك المحفوظة."
   }
 }

@@ -53,28 +53,6 @@ export async function setRecurringAvailability(
   return data ?? 0;
 }
 
-/**
- * "I'm free then" — one tap, no match created.
- *
- * Writes a one-off `availability_windows` row, so the player becomes visible to
- * everyone whose availability overlaps through the discovery machinery that
- * already exists. Idempotent by overlap: tapping twice, or tapping two adjacent
- * blocks, will not produce two openings for one person.
- */
-export async function recordAvailabilityPing(
-  client: TennisSupabaseClient,
-  startsAt: string,
-  endsAt: string,
-): Promise<string> {
-  const { data, error } = await client.rpc("record_availability_ping", {
-    p_starts_at: startsAt,
-    p_ends_at: endsAt,
-  });
-
-  if (error) throw error;
-  return data as string;
-}
-
 export type AvailabilityLiquiditySlot = {
   starts_at: string;
   ends_at: string;
@@ -84,9 +62,9 @@ export type AvailabilityLiquiditySlot = {
 /**
  * How many other players are free in each upcoming block.
  *
- * The read half of the ping: `recordAvailabilityPing` writes intent, this is what
- * makes it visible to someone deciding when to be free. Counts only — no names,
- * no ids — and only players the caller could actually be shown in Discover.
+ * Counts only — no names, no ids — and only players the caller could actually
+ * be shown in Discover. This is what turns "when should I play" into a fact
+ * about the week rather than a guess.
  *
  * Aggregated in SQL on purpose. `discoverCompatiblePlayers` is paginated, so
  * counting its rows here would undercount any block with more free players than

@@ -474,11 +474,13 @@
     "liquidityClubsHint": "Club directory and WhatsApp booking",
     "free": {
       "busiestTitle": "Most players free this week",
-      "busiestSubtitle": "Tap a block to see who is free then.",
+      "busiestSubtitle": "When other players are free, and who is free soonest.",
       "othersFree": "{{players}} free",
       "fromAvailability": "From your availability",
       "rowLabel": "{{slot}}, {{players}} free. See who.",
-      "youAreFree": "You are free then"
+      "youAreFree": "You are free then",
+      "carouselTitle": "Free {{slot}}",
+      "seeAllInDiscover": "See all {{count}} in Discover"
     },
     "quickActionsTitle": "Quick actions",
     "quickActionFindPlayers": "Find players",
@@ -761,7 +763,9 @@
     "tomorrow": "Tomorrow",
     "playerAvailabilityManyDays": "{{blocks}} · {{count}} days",
     "noOverlapHint": "No shared time yet",
-    "usualAvailability": "Usually {{schedule}}"
+    "usualAvailability": "Usually {{schedule}}",
+    "createMatchWith": "Create a match with {{name}}",
+    "clearTimeFilter": "Showing players free {{slot}}. Tap to clear."
   },
   "playerProfile": {
     "aboutTitle": "About",
@@ -1415,14 +1419,5 @@
       "AM": "AM",
       "PM": "PM"
     }
-  },
-  "freeBlock": {
-    "title": "Who is free",
-    "invalid": "That time block is not valid.",
-    "empty": "Nobody is free in this block any more. Try another one.",
-    "addMe": "I am free then too",
-    "removeMe": "I am not free then",
-    "youAreFree": "You are free then, so these players can find you too.",
-    "youAreFreeFromAvailability": "You are free then, from your saved availability."
   }
 }

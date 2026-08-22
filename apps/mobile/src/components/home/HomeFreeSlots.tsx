@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import { router } from "expo-router";
+import { StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -9,6 +8,7 @@ import {
 } from "@tennis-lebanon/api";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
+import { HomeFreePlayersCarousel } from "./HomeFreePlayersCarousel";
 import { trackLiquiditySignalViewed } from "../../lib/analytics";
 import {
   peakLiquidity,
@@ -43,9 +43,13 @@ const OFFER_LIMIT = 3;
  * worth printing: "5 free" was a fact nobody could act on until it led somewhere.
  *
  * Each row's second line comes from the player's own availability, read from the
- * **recurring grid** as well as from earlier pings. Declaring yourself free lives on
- * the block screen rather than here: it reads better once you have seen who is
- * there, and it keeps this row to a single, obvious action.
+ * **recurring grid** as well as from earlier pings.
+ *
+ * The rows do not navigate. They used to open `/free-block`, a screen that ran the
+ * same query against the same RPC as the Discover tab and drew the same cards --
+ * a second discovery surface reachable only from here. The players behind the
+ * busiest block now sit in a carousel directly beneath, and the full list lives
+ * where players already look for people.
  */
 export function HomeFreeSlots() {
   const { t } = useTranslation();
@@ -124,6 +128,17 @@ export function HomeFreeSlots() {
         {t("home.free.busiestSubtitle")}
       </AppText>
 
+      {offers[0] ? (
+        <HomeFreePlayersCarousel
+          block={{
+            startsAt: offers[0].startsAt,
+            endsAt: offers[0].endsAt,
+            playerCount: offers[0].playerCount,
+            label: slotLabel(offers[0]),
+          }}
+        />
+      ) : null}
+
       <View style={styles.rows}>
         {offers.map((offer) => {
           const coverage = findSlotCoverage(
@@ -134,12 +149,10 @@ export function HomeFreeSlots() {
           const label = slotLabel(offer);
 
           return (
-            <Pressable
+            <View
               key={offer.startsAt}
-              accessibilityRole="button"
-              // Everything the row shows goes in the label: react-native-web does
-              // not emit aria-selected for role="button", so a screen reader would
-              // otherwise hear the block name and nothing about the count.
+              // Read as one statement rather than a label and a stray number:
+              // the row is no longer a control, so nothing here is tappable.
               accessibilityLabel={[
                 t("home.free.rowLabel", {
                   slot: label,
@@ -155,17 +168,10 @@ export function HomeFreeSlots() {
               ]
                 .filter(Boolean)
                 .join(", ")}
-              onPress={() =>
-                router.push({
-                  pathname: "/free-block",
-                  params: { startsAt: offer.startsAt, endsAt: offer.endsAt },
-                })
-              }
-              style={({ pressed }) => [
+              style={[
                 styles.row,
                 { flexDirection: rowDirection },
                 coverage && styles.rowSelected,
-                pressed && styles.rowPressed,
               ]}
             >
               <AppText
@@ -193,7 +199,7 @@ export function HomeFreeSlots() {
                   </AppText>
                 ) : null}
               </View>
-            </Pressable>
+            </View>
           );
         })}
       </View>
@@ -235,9 +241,6 @@ const styles = StyleSheet.create({
   rowSelected: {
     backgroundColor: tennisSemantic.positive.fill,
     borderColor: tennisSemantic.positive.border,
-  },
-  rowPressed: {
-    opacity: 0.9,
   },
   rowLabel: {
     flexShrink: 1,

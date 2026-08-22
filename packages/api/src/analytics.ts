@@ -19,7 +19,6 @@ export const CLIENT_EVENT_NAMES = [
   "rematch_offered",
   "rematch_started",
   "rematch_published",
-  "availability_ping_sent",
   "liquidity_signal_viewed",
 ] as const;
 
@@ -51,10 +50,9 @@ export type ClientEventProps = {
   /** 0 = today in Beirut, 1 = tomorrow. */
   day_offset?: number;
   /**
-   * Other players shown as free in a block: the peak for
-   * `liquidity_signal_viewed`, or how many were on offer in the block a
-   * `availability_ping_sent` responded to. Tests whether a bigger number
-   * actually converts.
+   * Other players shown as free in a block: the peak reported by
+   * `liquidity_signal_viewed`. Tests whether a bigger number actually
+   * converts.
    */
   player_count?: number;
 };
