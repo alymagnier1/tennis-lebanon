@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { notify } from "../../src/lib/confirm-action";
+import { availabilitySelectionChanged } from "../../src/lib/availability-selection";
+import { useToast } from "../../src/providers/ToastProvider";
 import {
   ActivityIndicator,
   Pressable,
@@ -108,6 +110,7 @@ export default function AvailabilityScreen() {
   const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const { rowDirection, writingDirection } = useLayoutDirection();
   const userId = session?.user.id;
   const [mode, setMode] = useState<AvailabilityMode>("recurring");
@@ -143,7 +146,13 @@ export default function AvailabilityScreen() {
   const saveGrid = useMutation({
     mutationFn: () =>
       setRecurringAvailability(supabase, selectionToWindows(selected)),
-    onSuccess: invalidateDiscovery,
+    onSuccess: async () => {
+      // Refetch first, then drop the local copy. Clearing it before the server
+      // answers would fall back to the pre-save grid for a frame.
+      await invalidateDiscovery();
+      setLocalSelection(null);
+      showToast(t("availability.saved"));
+    },
     onError: () => notify(t("availability.saveError")),
   });
 
@@ -186,6 +195,10 @@ export default function AvailabilityScreen() {
     });
   };
 
+  // Content comparison, not "has the user tapped anything": toggling a cell on
+  // and back off again leaves local state populated with nothing to save.
+  const gridChanged = availabilitySelectionChanged(selected, serverSelection);
+
   const sectionCount =
     mode === "recurring" ? selected.size : oneOffWindows.length;
 
@@ -193,12 +206,16 @@ export default function AvailabilityScreen() {
     mode === "recurring" ? (
       <FigmaPrimaryButton
         label={t("availability.saveGrid")}
+        disabled={!gridChanged || saveGrid.isPending}
         loading={saveGrid.isPending}
         onPress={() => saveGrid.mutate()}
       />
     ) : (
       <FigmaPrimaryButton
         label={t("availability.addWindow")}
+        // Without a date this threw "Date required" straight into the generic
+        // save-failed alert, which reads as a bug rather than a missing field.
+        disabled={!oneOffDate || addOneOff.isPending}
         loading={addOneOff.isPending}
         onPress={() => addOneOff.mutate()}
       />
