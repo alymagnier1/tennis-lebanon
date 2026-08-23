@@ -275,7 +275,21 @@ export function canCreatorCancelBeforeBooking(status: string): boolean {
   return isActiveHostedMatchStatus(status);
 }
 
-export function isInviteableHostedMatch(
+/**
+ * A match of mine that someone else could still be added to.
+ *
+ * Deliberately does **not** require `is_creator`, despite taking a
+ * `HostedMatchRef`. `create_match_invite` authorises any accepted participant,
+ * not just the host, and that is the point in doubles: a player who joined and
+ * needs a fourth can find one. It was called `isInviteableHostedMatch`, which
+ * read as a hosted-only rule and hid that, so a card could invite into another
+ * host's match while looking like it was using your own.
+ *
+ * The safeguard is not here but at the point of choice: the profile sheet names
+ * every match and says whose it is, so nobody is added to a match the inviter
+ * never saw.
+ */
+export function isInviteableMatch(
   match: HostedMatchRef & { participant_count: number; capacity: number },
 ): boolean {
   return (

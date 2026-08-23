@@ -10,7 +10,7 @@ import {
   createMatchInputSchema,
   findActiveHostedMatch,
   hasUnanimousTimeYes,
-  isInviteableHostedMatch,
+  isInviteableMatch,
   isParticipantStatusActive,
   listOnDiscoverFromVisibility,
   visibilityFromListOnDiscover,
@@ -322,10 +322,39 @@ describe("matches domain rules", () => {
 
     expect(findActiveHostedMatch(matches, "singles")?.match_id).toBe("a");
     expect(findActiveHostedMatch(matches, "doubles")?.match_id).toBe("b");
-    expect(isInviteableHostedMatch(matches[0]!)).toBe(true);
-    expect(isInviteableHostedMatch(matches[1]!)).toBe(true);
+    expect(isInviteableMatch(matches[0]!)).toBe(true);
+    expect(isInviteableMatch(matches[1]!)).toBe(true);
     expect(canCreatorCancelBeforeBooking("ready_to_book")).toBe(true);
     expect(canCreatorCancelBeforeBooking("confirmed")).toBe(false);
+  });
+
+  it("counts a match you joined, not only one you host", () => {
+    // `create_match_invite` authorises any accepted participant, which is what
+    // lets someone who joined a doubles match go and find the fourth. The old
+    // name said "hosted" and hid that.
+    expect(
+      isInviteableMatch({
+        match_id: "c",
+        format: "doubles",
+        status: "open",
+        is_creator: false,
+        participant_count: 3,
+        capacity: 4,
+      }),
+    ).toBe(true);
+  });
+
+  it("excludes a match with no room left", () => {
+    expect(
+      isInviteableMatch({
+        match_id: "d",
+        format: "singles",
+        status: "open",
+        is_creator: true,
+        participant_count: 2,
+        capacity: 2,
+      }),
+    ).toBe(false);
   });
 
   it("tracks active participant statuses", () => {

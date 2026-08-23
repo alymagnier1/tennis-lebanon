@@ -14,7 +14,7 @@ import {
   listPublicPlayerRecentMatches,
   type MyMatchRow,
 } from "@tennis-lebanon/api";
-import { isInviteableHostedMatch } from "@tennis-lebanon/domain";
+import { isInviteableMatch } from "@tennis-lebanon/domain";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../../src/components/AppText";
 import { BottomSheet, SheetOption } from "../../src/components/AppUi";
@@ -104,7 +104,7 @@ export default function PlayerDetailScreen() {
   const inviteableMatches = useMemo(
     () =>
       (inviteableMatchesQuery.data ?? [])
-        .filter(isInviteableHostedMatch)
+        .filter(isInviteableMatch)
         .sort(sortBySoonestTime),
     [inviteableMatchesQuery.data],
   );
@@ -255,11 +255,18 @@ export default function PlayerDetailScreen() {
           <SheetOption
             key={match.match_id}
             label={`${t(`formats.${match.format}`)} · ${t(`matches.status.${match.status}`)}`}
-            description={
+            // Whose match it is, always. Any accepted participant may invite,
+            // so this list can hold a match you merely joined -- and adding a
+            // stranger to someone else's match is not something to do without
+            // being told that is what you are doing.
+            description={[
               match.soonest_time
                 ? formatUtcInBeirut(match.soonest_time)
-                : t("matches.invite.noTimeYet")
-            }
+                : t("matches.invite.noTimeYet"),
+              match.is_creator
+                ? t("matches.invite.yourMatch")
+                : t("matches.invite.joinedMatch"),
+            ].join(" · ")}
             // Nothing is pre-chosen: picking one sends the invite, so a
             // selected-looking row would be a row somebody had been invited to.
             selected={invitingMatchId === match.match_id}

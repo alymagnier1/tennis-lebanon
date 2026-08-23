@@ -19,7 +19,7 @@ import {
 import {
   DEFAULT_DISCOVER_MATCH_TOGGLES,
   type DiscoverMatchToggles,
-  isInviteableHostedMatch,
+  isInviteableMatch,
   canShowJoinAction,
   resolveDiscoverFiltersFromProfile,
   type PlayIntent,
@@ -315,7 +315,7 @@ export default function DiscoverScreen() {
   });
 
   const inviteableMatches = useMemo(
-    () => (inviteableMatchesQuery.data ?? []).filter(isInviteableHostedMatch),
+    () => (inviteableMatchesQuery.data ?? []).filter(isInviteableMatch),
     [inviteableMatchesQuery.data],
   );
 

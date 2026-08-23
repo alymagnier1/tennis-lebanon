@@ -1171,7 +1171,9 @@
       "autoSendOnPublish": "Ils recevront une invitation dans l'app à la publication.",
       "rateLimited": "Vous avez envoyé beaucoup d’invitations aujourd’hui. Réessayez demain.",
       "notSentTitle": "Match créé, invitation non envoyée",
-      "createInstead": "Créer un nouveau match"
+      "createInstead": "Créer un nouveau match",
+      "yourMatch": "Votre match",
+      "joinedMatch": "Vous l'avez rejoint"
     },
     "policy": {
       "leaveBeforeBooking": "Vous pouvez quitter librement tant qu'aucun court n'est réservé. Les changements tardifs répétés peuvent affecter votre fiabilité.",

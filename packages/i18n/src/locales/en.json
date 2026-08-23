@@ -1289,7 +1289,9 @@
       "autoSendOnPublish": "They will receive an in-app invite when you publish.",
       "rateLimited": "You have sent a lot of invites today. Try again tomorrow.",
       "notSentTitle": "Match created, invite not sent",
-      "createInstead": "Create a new match"
+      "createInstead": "Create a new match",
+      "yourMatch": "Your match",
+      "joinedMatch": "You joined this one"
     },
     "policy": {
       "leaveBeforeBooking": "You can leave freely while no court is booked. Repeated late changes may affect your reliability.",
