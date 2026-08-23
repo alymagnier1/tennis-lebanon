@@ -66,6 +66,7 @@ declare
   v_other_start timestamptz := (v_day + time '17:00') at time zone 'Asia/Beirut';
   v_other_end timestamptz := (v_day + time '22:00') at time zone 'Asia/Beirut';
   v_row record;
+  v_listed integer;
   v_checked integer := 0;
 begin
   perform pg_temp.set_caller(v_viewer);
@@ -78,13 +79,23 @@ begin
    */
   for v_row in select * from public.get_availability_liquidity()
   loop
+    -- Listed once into a variable rather than called twice. PL/pgSQL evaluates
+    -- both arguments of `assert_true` before entering it, so building the
+    -- failure message re-ran the whole discovery query on every passing
+    -- iteration -- two rate-limited calls per block where one was needed. With
+    -- enough availability seeded that doubling crossed the 30-per-minute limit
+    -- in `enforce_discovery_rate_limit` and the test aborted before asserting
+    -- anything, which reads as a broken feature rather than a self-inflicted
+    -- throttle.
+    v_listed := pg_temp.block_players(v_viewer, v_row.starts_at, v_row.ends_at);
+
     perform pg_temp.assert_true(
-      v_row.player_count = pg_temp.block_players(v_viewer, v_row.starts_at, v_row.ends_at),
+      v_row.player_count = v_listed,
       format(
         'count and list must agree for %s: count said %s, list had %s',
         v_row.starts_at,
         v_row.player_count,
-        pg_temp.block_players(v_viewer, v_row.starts_at, v_row.ends_at)
+        v_listed
       )
     );
     v_checked := v_checked + 1;

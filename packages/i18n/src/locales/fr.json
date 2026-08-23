@@ -23,6 +23,10 @@
   "profileScreenZonesError": "Choisissez au moins une zone.",
   "settingsScreenGeneral": "Général",
   "settingsScreenLanguage": "Langue",
+  "settingsScreenAppearance": "Apparence",
+  "settingsAppearanceSystem": "Système",
+  "settingsAppearanceLight": "Clair",
+  "settingsAppearanceDark": "Sombre",
   "settingsScreenSupport": "Assistance",
   "settingsScreenAccount": "Compte",
   "dashboard": {
@@ -427,7 +431,8 @@
     "title": "Bienvenue, {{name}}",
     "m1Description": "Votre compte et votre profil de tennis sont prêts. Parcourez les joueurs compatibles et les matchs ouverts dans Découvrir.",
     "m3Description": "Créez un match, rejoignez des parties ouvertes et gérez vos matchs actifs ici.",
-    "greeting": "Hi, {{name}}",
+    "greeting": "Bonjour, {{name}}",
+    "heroStats": "{{count}} matchs · {{band}}",
     "subtitle": "Here is what needs your attention today.",
     "stats": {
       "matchesPlayed": "Matches played",
@@ -475,12 +480,10 @@
     "free": {
       "busiestTitle": "Le plus de joueurs libres cette semaine",
       "busiestSubtitle": "Quand les autres joueurs sont libres, et qui l'est le plus tôt.",
-      "othersFree": "{{players}} dispo",
-      "fromAvailability": "Depuis vos disponibilités",
-      "rowLabel": "{{slot}}, {{players}} dispo. Voir qui.",
-      "youAreFree": "Vous êtes libre alors",
-      "carouselTitle": "Libres {{slot}}",
-      "seeAllInDiscover": "Voir les {{count}} dans Découvrir"
+      "chipLabel": "Joueurs libres {{slot}}",
+      "chipSelectedLabel": "Affichage des joueurs libres {{slot}}",
+      "viewAll": "Voir tout dans Découvrir",
+      "viewAllForSlot": "Voir tous les joueurs libres {{slot}} dans Découvrir"
     },
     "quickActionsTitle": "Actions rapides",
     "quickActionFindPlayers": "Trouver des joueurs",

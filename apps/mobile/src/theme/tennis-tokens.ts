@@ -1,10 +1,24 @@
 /**
  * Mobile-only Figma tennis theme. Do not use in dashboard — shared @tennis-lebanon/ui
  * keeps the blue brand ramp for club web.
+ *
+ * `tennisColors` (and sibling palettes) read the active scheme so live style
+ * sheets pick up dark mode. Prefer `useTennisTheme()` when a component must
+ * re-render on scheme change; module-level StyleSheet.create snapshots values.
  */
-export const tennisColors = {
+
+export type TennisColorName = keyof typeof tennisColorsLight;
+
+export type TennisColorTokens = { readonly [K in TennisColorName]: string };
+
+export type AppearancePreference = "system" | "light" | "dark";
+
+export type ResolvedAppearance = "light" | "dark";
+
+export const tennisColorsLight = {
   primary: "#0C382E",
   primaryDark: "#0D1C14",
+  onPrimary: "#FFFFFF",
   lime: "#C8E63B",
   limeText: "#0D1C14",
   background: "#FAF9F6",
@@ -14,10 +28,37 @@ export const tennisColors = {
   mutedForeground: "#627068",
   border: "#E9EBE8",
   accent: "#C4521A",
+  violet: "#7C3AED",
+  onViolet: "#FFFFFF",
   danger: "#B91C1C",
   white: "#FFFFFF",
   heroOverlay: "rgba(255,255,255,0.12)",
   heroBorder: "rgba(255,255,255,0.15)",
+} as const;
+
+/**
+ * Dark surfaces follow the olive-black canvas. CTAs use violet so lime is not
+ * a full-bleed fill; lime remains on skill-band chips only.
+ */
+export const tennisColorsDark = {
+  primary: "#7C3AED",
+  primaryDark: "#F4F1E8",
+  onPrimary: "#FFFFFF",
+  lime: "#C8E63B",
+  limeText: "#0D1C14",
+  background: "#0F0E04",
+  card: "#22221A",
+  secondary: "#2C2B22",
+  muted: "#1A1912",
+  mutedForeground: "#B5B3A8",
+  border: "#3D3C32",
+  accent: "#E07A3D",
+  violet: "#7C3AED",
+  onViolet: "#FFFFFF",
+  danger: "#F87171",
+  white: "#FFFFFF",
+  heroOverlay: "rgba(255,255,255,0.08)",
+  heroBorder: "rgba(255,255,255,0.12)",
 } as const;
 
 /**
@@ -27,39 +68,167 @@ export const tennisColors = {
  * `whatsappFill` (UI boundaries need 3:1). It fails AA as text, so labels use
  * `whatsappText` -- WhatsApp's own dark teal, 6.56:1 on the fill.
  */
-export const tennisBrand = {
+export type TennisBrandTokens = {
+  whatsapp: string;
+  whatsappText: string;
+  whatsappFill: string;
+};
+
+export const tennisBrandLight: TennisBrandTokens = {
   whatsapp: "#128C7E",
   whatsappText: "#075E54",
   whatsappFill: "#E3F0EE",
-} as const;
+};
+
+export const tennisBrandDark: TennisBrandTokens = {
+  whatsapp: "#2DD4BF",
+  whatsappText: "#99F6E4",
+  whatsappFill: "#14302C",
+};
 
 /** Ordinal skill-band ramp — separate from match status semantics */
-export const tennisSkillBands: Record<string, { fill: string; text: string }> =
-  {
-    beginner: { fill: "#E8F4EC", text: "#1A6B42" },
-    improving: { fill: "#DBF1E2", text: "#0C382E" },
-    intermediate: { fill: "#C8E63B", text: "#0D1C14" },
-    advanced: { fill: "#FBE8DC", text: "#9A3D0F" },
-    competitive: { fill: "#F3E8FF", text: "#5B21B6" },
-  };
+export const tennisSkillBandsLight: Record<
+  string,
+  { fill: string; text: string }
+> = {
+  beginner: { fill: "#E8F4EC", text: "#1A6B42" },
+  improving: { fill: "#DBF1E2", text: "#0C382E" },
+  intermediate: { fill: "#C8E63B", text: "#0D1C14" },
+  advanced: { fill: "#FBE8DC", text: "#9A3D0F" },
+  competitive: { fill: "#F3E8FF", text: "#5B21B6" },
+};
+
+export const tennisSkillBandsDark: Record<
+  string,
+  { fill: string; text: string }
+> = {
+  beginner: { fill: "#143328", text: "#86EFAC" },
+  improving: { fill: "#1A3D2E", text: "#BBF7D0" },
+  intermediate: { fill: "#C8E63B", text: "#0D1C14" },
+  advanced: { fill: "#3A2418", text: "#F4C7A8" },
+  competitive: { fill: "#2A1A3A", text: "#E9D5FF" },
+};
 
 export type SemanticTone =
   "neutral" | "info" | "positive" | "attention" | "critical" | "actionable";
 
-export const tennisSemantic: Record<
-  SemanticTone,
-  { fill: string; text: string; border: string }
-> = {
+export type SemanticToneTokens = {
+  fill: string;
+  text: string;
+  border: string;
+};
+
+export const tennisSemanticLight: Record<SemanticTone, SemanticToneTokens> = {
   neutral: { fill: "#ECF0EE", text: "#3D4A42", border: "#E9EBE8" },
   info: { fill: "#E3EDE6", text: "#0C382E", border: "#B8D4C4" },
   positive: { fill: "#DBF1E2", text: "#0A6B45", border: "#9FD4B5" },
   attention: { fill: "#FBE8DC", text: "#9A3D0F", border: "#F0C9AE" },
   critical: { fill: "#FBE4E2", text: "#A32E22", border: "#EFB8B2" },
   actionable: { fill: "#C8E63B", text: "#0D1C14", border: "#A8C42E" },
-} as const;
+};
 
-/** AA-safe on white for error/destructive copy */
-export const tennisDangerText = "#B91C1C";
+export const tennisSemanticDark: Record<SemanticTone, SemanticToneTokens> = {
+  neutral: { fill: "#2C2B22", text: "#D8D6CC", border: "#3D3C32" },
+  info: { fill: "#1A2E28", text: "#C8E63B", border: "#2A4A40" },
+  positive: { fill: "#143328", text: "#86EFAC", border: "#1A4A32" },
+  attention: { fill: "#3A2418", text: "#F4C7A8", border: "#5A3828" },
+  critical: { fill: "#3A1818", text: "#FECACA", border: "#5A2828" },
+  actionable: { fill: "#7C3AED", text: "#FFFFFF", border: "#6D28D9" },
+};
+
+const DANGER_TEXT_LIGHT = "#B91C1C";
+const DANGER_TEXT_DARK = "#FCA5A5";
+
+type ActiveTennisTheme = {
+  scheme: ResolvedAppearance;
+  colors: TennisColorTokens;
+  brand: TennisBrandTokens;
+  skillBands: Record<string, { fill: string; text: string }>;
+  semantic: Record<SemanticTone, SemanticToneTokens>;
+  dangerText: string;
+};
+
+function themeFor(scheme: ResolvedAppearance): ActiveTennisTheme {
+  if (scheme === "dark") {
+    return {
+      scheme,
+      colors: tennisColorsDark,
+      brand: tennisBrandDark,
+      skillBands: tennisSkillBandsDark,
+      semantic: tennisSemanticDark,
+      dangerText: DANGER_TEXT_DARK,
+    };
+  }
+  return {
+    scheme,
+    colors: tennisColorsLight,
+    brand: tennisBrandLight,
+    skillBands: tennisSkillBandsLight,
+    semantic: tennisSemanticLight,
+    dangerText: DANGER_TEXT_LIGHT,
+  };
+}
+
+let activeTheme: ActiveTennisTheme = themeFor("light");
+
+export function getActiveTennisScheme(): ResolvedAppearance {
+  return activeTheme.scheme;
+}
+
+export function getActiveTennisTheme(): ActiveTennisTheme {
+  return activeTheme;
+}
+
+export function setActiveTennisScheme(scheme: ResolvedAppearance): void {
+  activeTheme = themeFor(scheme);
+}
+
+export function resolveAppearance(
+  preference: AppearancePreference,
+  systemScheme: ResolvedAppearance | null | undefined,
+): ResolvedAppearance {
+  if (preference === "light" || preference === "dark") {
+    return preference;
+  }
+  return systemScheme === "dark" ? "dark" : "light";
+}
+
+function live<T extends object>(read: () => T): T {
+  return new Proxy({} as T, {
+    get(_target, prop, receiver) {
+      const current = read();
+      const value = Reflect.get(current, prop, current);
+      if (typeof value === "function") {
+        return (value as (...args: unknown[]) => unknown).bind(current);
+      }
+      return value ?? Reflect.get(current, prop, receiver);
+    },
+    ownKeys() {
+      return Reflect.ownKeys(read());
+    },
+    getOwnPropertyDescriptor(_target, prop) {
+      const desc = Reflect.getOwnPropertyDescriptor(read(), prop);
+      if (!desc) return undefined;
+      return { ...desc, configurable: true };
+    },
+  });
+}
+
+/** Active colour tokens. Reads the current scheme (light until ThemeProvider hydrates). */
+export const tennisColors: TennisColorTokens = live(() => activeTheme.colors);
+
+export const tennisBrand: TennisBrandTokens = live(() => activeTheme.brand);
+
+export const tennisSkillBands: Record<string, { fill: string; text: string }> =
+  live(() => activeTheme.skillBands);
+
+export const tennisSemantic: Record<SemanticTone, SemanticToneTokens> = live(
+  () => activeTheme.semantic,
+);
+
+export function getTennisDangerText(): string {
+  return activeTheme.dangerText;
+}
 
 export const tennisRadii = {
   sm: 10,

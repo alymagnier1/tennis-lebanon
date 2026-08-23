@@ -6,7 +6,12 @@ import {
 import type { AvailabilityDayPart } from "./player-availability-label";
 
 /**
- * The one-tap "I'm free" slots offered on Home.
+ * The day-part blocks the week is divided into.
+ *
+ * Named for the one-tap "I'm free" pings they were introduced for. That action
+ * is gone -- it recorded intent nobody was ever notified of -- but the blocks
+ * outlived it: they are how liquidity counts, Home's chips and discovery
+ * overlap all agree on what "evening" means.
  *
  * Blocks match `TIME_BLOCKS` in `app/profile/availability.tsx` exactly. They have
  * to: discovery classifies an overlap into morning/afternoon/evening with the same
@@ -56,136 +61,4 @@ export function beirutDateKeyWithOffset(
     Date.UTC(year ?? 0, (month ?? 1) - 1, (day ?? 1) + offset, 12),
   );
   return beirutDateKey(shifted.toISOString());
-}
-
-/**
- * The next `limit` blocks a player could still turn up for, starting from now.
- *
- * A block whose end has already passed in Beirut is skipped rather than shown
- * greyed out: offering "this morning" at 6pm invites a tap that the RPC would
- * then reject for being out of range.
- */
-export function nextPingSlots(
-  nowIso: string,
-  limit = 4,
-  maxDaysAhead = 7,
-): PingSlot[] {
-  const slots: PingSlot[] = [];
-  const nowMs = Date.parse(nowIso);
-  if (Number.isNaN(nowMs)) {
-    return slots;
-  }
-
-  for (
-    let offset = 0;
-    offset <= maxDaysAhead && slots.length < limit;
-    offset++
-  ) {
-    const dateKey = beirutDateKeyWithOffset(nowIso, offset);
-
-    for (const block of PING_BLOCKS) {
-      if (slots.length >= limit) break;
-
-      const startsAt = beirutLocalToUtcIso(dateKey, block.localStart);
-      const endsAt = beirutLocalToUtcIso(dateKey, block.localEnd);
-
-      // Judged on the end, not the start: at 18:00 the evening block is still
-      // worth pinging even though it began an hour ago.
-      if (Date.parse(endsAt) <= nowMs) {
-        continue;
-      }
-
-      slots.push({
-        dayOffset: offset,
-        part: block.part,
-        dateKey,
-        startsAt,
-        endsAt,
-      });
-    }
-  }
-
-  return slots;
-}
-
-/** The shape of an `availability_windows` row that coverage needs to read. */
-export type AvailabilityWindowLike = {
-  id: string;
-  is_recurring: boolean;
-  starts_at: string | null;
-  ends_at: string | null;
-  weekday: number | null;
-  local_start: string | null;
-  local_end: string | null;
-  valid_from: string | null;
-  valid_until: string | null;
-};
-
-export type SlotCoverage = {
-  window: AvailabilityWindowLike;
-  /** `recurring` came from the availability grid and is not ours to delete. */
-  kind: "recurring" | "one_off";
-};
-
-function minutesOfDay(localTime: string): number {
-  // Postgres `time` arrives as HH:MM:SS; the blocks are written as HH:MM.
-  const [hours, minutes] = localTime.split(":").map(Number);
-  return (hours ?? 0) * 60 + (minutes ?? 0);
-}
-
-/**
- * The window that already makes the player free for this block, if any.
- *
- * Reads the **recurring** grid as well as one-off pings. Checking only one-off
- * windows was the original mistake: someone whose profile said "free Wednesday
- * mornings" was still offered a chip to declare exactly that, and tapping it
- * stored the same availability a second time. Three of the first six real taps
- * were duplicates of the tapper's own grid.
- *
- * Returns the window rather than a boolean so the caller can tell a ping it may
- * remove from a grid entry it must not touch behind the player's back.
- */
-export function findSlotCoverage(
-  slot: Pick<PingSlot, "startsAt" | "endsAt" | "dateKey">,
-  weekday: number,
-  windows: AvailabilityWindowLike[],
-): SlotCoverage | null {
-  const start = Date.parse(slot.startsAt);
-  const end = Date.parse(slot.endsAt);
-  const blockStart = minutesOfDay(utcIsoToBeirutFields(slot.startsAt).time);
-  const blockEnd = minutesOfDay(utcIsoToBeirutFields(slot.endsAt).time);
-
-  for (const window of windows) {
-    if (window.is_recurring) {
-      if (
-        window.weekday !== weekday ||
-        !window.local_start ||
-        !window.local_end
-      ) {
-        continue;
-      }
-      if (window.valid_from && slot.dateKey < window.valid_from) continue;
-      if (window.valid_until && slot.dateKey > window.valid_until) continue;
-
-      if (
-        minutesOfDay(window.local_start) < blockEnd &&
-        minutesOfDay(window.local_end) > blockStart
-      ) {
-        return { window, kind: "recurring" };
-      }
-      continue;
-    }
-
-    if (!window.starts_at || !window.ends_at) continue;
-    // Same overlap rule the RPC dedupes on, so the UI and the database agree
-    // about which blocks are already covered.
-    if (
-      Date.parse(window.starts_at) < end &&
-      Date.parse(window.ends_at) > start
-    ) {
-      return { window, kind: "one_off" };
-    }
-  }
-
-  return null;
 }

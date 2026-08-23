@@ -1,55 +1,42 @@
-import { useEffect, useMemo, useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import {
-  getAvailabilityLiquidity,
-  listOwnAvailability,
-} from "@tennis-lebanon/api";
+import { getAvailabilityLiquidity } from "@tennis-lebanon/api";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { HomeFreePlayersCarousel } from "./HomeFreePlayersCarousel";
 import { trackLiquiditySignalViewed } from "../../lib/analytics";
 import {
   peakLiquidity,
-  pickBusiestBlocks,
+  pickUpcomingBlocks,
   toLiquidityRows,
 } from "../../lib/availability-liquidity";
-import {
-  findSlotCoverage,
-  type AvailabilityWindowLike,
-  type PingSlot,
-} from "../../lib/availability-ping";
+import { type PingSlot } from "../../lib/availability-ping";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { weekdayIndexFromBeirutDateKey } from "../../lib/near-term-availability";
 import { supabase } from "../../lib/supabase";
-import {
-  tennisColors,
-  tennisRadii,
-  tennisSemantic,
-} from "../../theme/tennis-tokens";
+import { tennisColors } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
-/** How far ahead the counts look, and how many blocks to list. */
+/** How far ahead the counts look, and how many blocks to offer. */
 const OFFER_HORIZON_DAYS = 7;
 const OFFER_LIMIT = 3;
 
 /**
- * Where the week's demand is, and a way through to the players behind it.
+ * The next few hours anyone is free, and the people behind the one you pick.
  *
- * The list reports the busiest upcoming blocks — a fact about the week, not a
- * prompt — because a player deciding when to play needs to know when everyone else
- * already is. Tapping opens that block's players, which is what makes the number
- * worth printing: "5 free" was a fact nobody could act on until it led somewhere.
+ * Two revisions worth remembering. The blocks used to be full-width rows that
+ * opened `/free-block`, a screen running the same query against the same RPC as
+ * the Discover tab — a second discovery surface reachable only from here. They
+ * are now a chip row that selects, and the players sit directly beneath.
  *
- * Each row's second line comes from the player's own availability, read from the
- * **recurring grid** as well as from earlier pings.
- *
- * The rows do not navigate. They used to open `/free-block`, a screen that ran the
- * same query against the same RPC as the Discover tab and drew the same cards --
- * a second discovery surface reachable only from here. The players behind the
- * busiest block now sit in a carousel directly beneath, and the full list lives
- * where players already look for people.
+ * And the counts are gone from the chips. "5 free" was a proxy for the people,
+ * printed because there was no room to show them; now that the carousel shows
+ * actual faces, the number competes with the thing it stood in for. Whoever
+ * wants the full list taps through to Discover, where the count is the length
+ * of the list.
  */
 export function HomeFreeSlots() {
   const { t } = useTranslation();
@@ -57,12 +44,7 @@ export function HomeFreeSlots() {
 
   // One clock read per mount, so every block in one paint agrees about "now".
   const nowIso = useMemo(() => new Date().toISOString(), []);
-
-  const availabilityQuery = useQuery({
-    queryKey: ["own-availability"],
-    queryFn: () => listOwnAvailability(supabase),
-    staleTime: 30_000,
-  });
+  const [selectedStartsAt, setSelectedStartsAt] = useState<string | null>(null);
 
   const liquidityQuery = useQuery({
     queryKey: ["availability-liquidity"],
@@ -70,15 +52,13 @@ export function HomeFreeSlots() {
     staleTime: 60_000,
   });
 
-  const windows: AvailabilityWindowLike[] = availabilityQuery.data ?? [];
-
   const liquidityRows = useMemo(
     () => toLiquidityRows(liquidityQuery.data ?? [], nowIso),
     [liquidityQuery.data, nowIso],
   );
 
   const offers = useMemo(
-    () => pickBusiestBlocks(liquidityRows, OFFER_LIMIT),
+    () => pickUpcomingBlocks(liquidityRows, OFFER_LIMIT),
     [liquidityRows],
   );
 
@@ -113,11 +93,15 @@ export function HomeFreeSlots() {
     return `${dayLabel} · ${t(`availability.blocks.${slot.part}`)}`;
   }
 
-  // No block in the week has anyone free in it. Under a heading that says "most
-  // players free" there is nothing honest to list, so the section disappears.
+  // No block in the week has anyone free in it, so there is nothing to offer.
   if (offers.length === 0) {
     return null;
   }
+
+  // Derived rather than stored, so a refreshed list that no longer contains the
+  // chosen block falls back to the soonest instead of selecting nothing.
+  const selected =
+    offers.find((offer) => offer.startsAt === selectedStartsAt) ?? offers[0]!;
 
   return (
     <View style={styles.root}>
@@ -128,144 +112,107 @@ export function HomeFreeSlots() {
         {t("home.free.busiestSubtitle")}
       </AppText>
 
-      {offers[0] ? (
-        <HomeFreePlayersCarousel
-          block={{
-            startsAt: offers[0].startsAt,
-            endsAt: offers[0].endsAt,
-            playerCount: offers[0].playerCount,
-            label: slotLabel(offers[0]),
-          }}
-        />
-      ) : null}
-
-      <View style={styles.rows}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.chipRow,
+          { flexDirection: rowDirection },
+        ]}
+      >
         {offers.map((offer) => {
-          const coverage = findSlotCoverage(
-            offer,
-            weekdayIndexFromBeirutDateKey(offer.dateKey),
-            windows,
-          );
           const label = slotLabel(offer);
+          const isSelected = offer.startsAt === selected.startsAt;
 
           return (
-            <View
+            <Pressable
               key={offer.startsAt}
-              // Read as one statement rather than a label and a stray number:
-              // the row is no longer a control, so nothing here is tappable.
-              accessibilityLabel={[
-                t("home.free.rowLabel", {
-                  slot: label,
-                  players: offer.playerCount,
-                }),
-                coverage
-                  ? t(
-                      coverage.kind === "one_off"
-                        ? "home.free.youAreFree"
-                        : "home.free.fromAvailability",
-                    )
-                  : "",
-              ]
-                .filter(Boolean)
-                .join(", ")}
-              style={[
-                styles.row,
-                { flexDirection: rowDirection },
-                coverage && styles.rowSelected,
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              // react-native-web does not emit aria-selected for role="button",
+              // so the state has to be said rather than implied.
+              accessibilityLabel={
+                isSelected
+                  ? t("home.free.chipSelectedLabel", { slot: label })
+                  : t("home.free.chipLabel", { slot: label })
+              }
+              onPress={() => setSelectedStartsAt(offer.startsAt)}
+              style={({ pressed }) => [
+                styles.chip,
+                isSelected && styles.chipSelected,
+                pressed && styles.chipPressed,
               ]}
             >
               <AppText
-                style={[styles.rowLabel, coverage && styles.rowLabelSelected]}
+                style={[
+                  styles.chipLabel,
+                  isSelected && styles.chipLabelSelected,
+                ]}
                 maxLines={1}
               >
                 {label}
               </AppText>
-              <View style={styles.rowMetaGroup}>
-                {/* The count stays put whatever the player's own state is: it is
-                    information about the week, not feedback on their tap. */}
-                <AppText
-                  style={[styles.rowMeta, coverage && styles.rowMetaSelected]}
-                  maxLines={1}
-                >
-                  {t("home.free.othersFree", { players: offer.playerCount })}
-                </AppText>
-                {coverage ? (
-                  <AppText style={styles.rowState} maxLines={1}>
-                    {t(
-                      coverage.kind === "one_off"
-                        ? "home.free.youAreFree"
-                        : "home.free.fromAvailability",
-                    )}
-                  </AppText>
-                ) : null}
-              </View>
-            </View>
+            </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
+
+      <HomeFreePlayersCarousel
+        block={{
+          startsAt: selected.startsAt,
+          endsAt: selected.endsAt,
+          label: slotLabel(selected),
+        }}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 8,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 18,
-    color: tennisColors.primaryDark,
-  },
-  subtitle: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 18,
-    color: tennisColors.mutedForeground,
-  },
-  rows: {
-    gap: 6,
-    marginTop: 2,
-  },
-  row: {
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  rowSelected: {
-    backgroundColor: tennisSemantic.positive.fill,
-    borderColor: tennisSemantic.positive.border,
-  },
-  rowLabel: {
-    flexShrink: 1,
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primaryDark,
-  },
-  rowLabelSelected: {
-    color: tennisSemantic.positive.text,
-  },
-  rowMetaGroup: {
-    alignItems: "flex-end",
-  },
-  rowMeta: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.primary,
-  },
-  rowMetaSelected: {
-    color: tennisSemantic.positive.text,
-  },
-  rowState: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    lineHeight: 14,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      gap: 6,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 18,
+      color: tennisColors.primaryDark,
+    },
+    subtitle: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+    },
+    // Text tabs rather than filled pills. Three of them sit directly above the
+    // cards they switch, so a filled chip would carry more weight than the
+    // players it is selecting between; the accent alone marks the active one.
+    chipRow: {
+      gap: 16,
+      paddingVertical: 0,
+      marginBottom: 4,
+    },
+    chip: {
+      minHeight: minTouchTargetPx,
+      justifyContent: "center",
+      paddingHorizontal: 2,
+      paddingVertical: 8,
+      backgroundColor: "transparent",
+    },
+    chipSelected: {
+      backgroundColor: "transparent",
+    },
+    chipPressed: {
+      opacity: 0.7,
+    },
+    chipLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    chipLabelSelected: {
+      color: tennisColors.violet,
+      fontFamily: tennisFontFamily.bodySemi,
+    },
+  }),
+);

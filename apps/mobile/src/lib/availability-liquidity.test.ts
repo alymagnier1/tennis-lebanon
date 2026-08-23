@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   peakLiquidity,
-  pickBusiestBlocks,
+  pickUpcomingBlocks,
   toLiquidityRows,
   type LiquidityRow,
 } from "./availability-liquidity";
@@ -94,8 +94,11 @@ describe("toLiquidityRows", () => {
   });
 });
 
-describe("pickBusiestBlocks", () => {
-  it("ranks the busiest block first, not the soonest", () => {
+describe("pickUpcomingBlocks", () => {
+  it("ranks the soonest block first, not the busiest", () => {
+    // The block you could play tonight beats a busier one four days out: intent
+    // decays, and a court is easier to arrange for an hour people are still
+    // thinking about.
     const rows = toLiquidityRows(
       [
         slot("2026-08-17", "morning", 2),
@@ -106,27 +109,26 @@ describe("pickBusiestBlocks", () => {
     );
 
     expect(
-      pickBusiestBlocks(rows, 3).map((row) => [
+      pickUpcomingBlocks(rows, 3).map((row) => [
         row.dayOffset,
         row.part,
         row.playerCount,
       ]),
     ).toEqual([
+      [0, "morning", 2],
       [3, "evening", 6],
       [5, "morning", 4],
-      [0, "morning", 2],
     ]);
   });
 
-  it("breaks a tie on count by taking the sooner block", () => {
+  it("breaks a tie on time by taking the busier block", () => {
     const tied = toLiquidityRows(
-      [slot("2026-08-22", "evening", 3), slot("2026-08-19", "evening", 3)],
+      [slot("2026-08-19", "evening", 3), slot("2026-08-19", "evening", 7)],
       NOW,
     );
 
-    expect(pickBusiestBlocks(tied, 2)[0]).toMatchObject({
-      dayOffset: 2,
-      part: "evening",
+    expect(pickUpcomingBlocks(tied, 2)[0]).toMatchObject({
+      playerCount: 7,
     });
   });
 
@@ -140,14 +142,14 @@ describe("pickBusiestBlocks", () => {
       NOW,
     );
 
-    expect(pickBusiestBlocks(rows, 2)).toHaveLength(2);
+    expect(pickUpcomingBlocks(rows, 2)).toHaveLength(2);
   });
 
   it("is empty when no block has anyone free", () => {
     // toLiquidityRows already drops zero counts, so an empty week reaches here as
     // an empty list — and the section renders nothing rather than a dead heading.
     expect(
-      pickBusiestBlocks(
+      pickUpcomingBlocks(
         toLiquidityRows([slot("2026-08-18", "evening", 0)], NOW),
       ),
     ).toEqual([]);
@@ -160,7 +162,7 @@ describe("pickBusiestBlocks", () => {
     );
     const before = rows.map((row) => row.startsAt);
 
-    pickBusiestBlocks(rows, 2);
+    pickUpcomingBlocks(rows, 2);
     expect(rows.map((row) => row.startsAt)).toEqual(before);
   });
 });

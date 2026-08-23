@@ -23,6 +23,10 @@
   "profileScreenZonesError": "Choose at least one area.",
   "settingsScreenGeneral": "General",
   "settingsScreenLanguage": "Language",
+  "settingsScreenAppearance": "Appearance",
+  "settingsAppearanceSystem": "System",
+  "settingsAppearanceLight": "Light",
+  "settingsAppearanceDark": "Dark",
   "settingsScreenSupport": "Support",
   "settingsScreenAccount": "Account",
   "dashboard": {
@@ -425,7 +429,8 @@
   },
   "home": {
     "title": "Welcome, {{name}}",
-    "greeting": "Hi, {{name}}",
+    "greeting": "Hello, {{name}}",
+    "heroStats": "{{count}} matches · {{band}}",
     "subtitle": "Here is what needs your attention today.",
     "m1Description": "Your account and tennis profile are ready. Browse compatible players and open matches on Discover.",
     "m3Description": "Create a match, join open games, and manage your active matches from here.",
@@ -475,12 +480,10 @@
     "free": {
       "busiestTitle": "Most players free this week",
       "busiestSubtitle": "When other players are free, and who is free soonest.",
-      "othersFree": "{{players}} free",
-      "fromAvailability": "From your availability",
-      "rowLabel": "{{slot}}, {{players}} free. See who.",
-      "youAreFree": "You are free then",
-      "carouselTitle": "Free {{slot}}",
-      "seeAllInDiscover": "See all {{count}} in Discover"
+      "chipLabel": "Players free {{slot}}",
+      "chipSelectedLabel": "Showing players free {{slot}}",
+      "viewAll": "View all in Discover",
+      "viewAllForSlot": "View everyone free {{slot}} in Discover"
     },
     "quickActionsTitle": "Quick actions",
     "quickActionFindPlayers": "Find players",

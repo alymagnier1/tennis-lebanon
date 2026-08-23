@@ -62,28 +62,31 @@ export function toLiquidityRows(
 }
 
 /**
- * The busiest few blocks in the week ahead.
+ * The next few blocks in the week ahead that anyone is free for.
  *
- * Ranked by how many others are free, then by soonest — "Thursday is when everyone
- * plays" is the insight, and a block nobody is free in is already absent, because
- * `toLiquidityRows` drops it. Under a heading that reports where the demand is,
- * there is nothing honest to say about an empty block.
+ * A block nobody is free in is already absent — `toLiquidityRows` drops it — so
+ * every block here has someone behind it.
+ *
+ * Ordered by **when**, not by how many. Ranking on headcount put Friday's six
+ * above tomorrow's five, which reads backwards on a strip you are meant to pick
+ * from: a block you could play tonight is worth more than a busier one four days
+ * out, because intent decays and a court is easier to arrange for an hour people
+ * are still thinking about. Count survives only as a tiebreaker between blocks
+ * that start at the same moment.
  *
  * Blocks the player is already free for are deliberately **kept**. The redundancy
  * this feature had was about *asking* a question the availability grid had already
- * answered, not about showing the week's demand: "Friday evening, four free, and so
- * are you" is worth knowing. The caller decides whether a row is a prompt or a
- * statement by looking up the player's own coverage.
+ * answered, not about showing the week's demand.
  */
-export function pickBusiestBlocks(
+export function pickUpcomingBlocks(
   rows: LiquidityRow[],
   limit = 3,
 ): LiquidityRow[] {
   return [...rows]
     .sort(
       (left, right) =>
-        right.playerCount - left.playerCount ||
-        Date.parse(left.startsAt) - Date.parse(right.startsAt),
+        Date.parse(left.startsAt) - Date.parse(right.startsAt) ||
+        right.playerCount - left.playerCount,
     )
     .slice(0, limit);
 }

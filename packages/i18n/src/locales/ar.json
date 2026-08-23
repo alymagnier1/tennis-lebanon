@@ -23,6 +23,10 @@
   "profileScreenZonesError": "اختر منطقة واحدة على الأقل.",
   "settingsScreenGeneral": "عام",
   "settingsScreenLanguage": "اللغة",
+  "settingsScreenAppearance": "المظهر",
+  "settingsAppearanceSystem": "النظام",
+  "settingsAppearanceLight": "فاتح",
+  "settingsAppearanceDark": "داكن",
   "settingsScreenSupport": "الدعم",
   "settingsScreenAccount": "الحساب",
   "dashboard": {
@@ -428,6 +432,7 @@
     "m1Description": "أصبح حسابك وملفك في التنس جاهزين. تصفّح اللاعبين المتوافقين والمباريات المفتوحة من استكشاف.",
     "m3Description": "أنشئ مباراة، انضم إلى مباريات مفتوحة، وأدر مبارياتك النشطة من هنا.",
     "greeting": "مرحبًا، {{name}}",
+    "heroStats": "{{count}} مباريات · {{band}}",
     "subtitle": "إليك ما يحتاج انتباهك اليوم.",
     "stats": {
       "matchesPlayed": "مباريات لُعبت",
@@ -475,12 +480,10 @@
     "free": {
       "busiestTitle": "أكثر الأوقات التي يتفرّغ فيها اللاعبون هذا الأسبوع",
       "busiestSubtitle": "متى يكون اللاعبون متاحين، ومن هو متاح الآن.",
-      "othersFree": "{{players}} متاح",
-      "fromAvailability": "من أوقات فراغك",
-      "rowLabel": "{{slot}}، {{players}} متاح. شاهد من.",
-      "youAreFree": "أنت متفرّغ حينها",
-      "carouselTitle": "متاحون {{slot}}",
-      "seeAllInDiscover": "عرض الـ {{count}} في الاستكشاف"
+      "chipLabel": "لاعبون متاحون {{slot}}",
+      "chipSelectedLabel": "عرض اللاعبين المتاحين {{slot}}",
+      "viewAll": "عرض الكل في الاستكشاف",
+      "viewAllForSlot": "عرض كل المتاحين {{slot}} في الاستكشاف"
     },
     "quickActionsTitle": "إجراءات سريعة",
     "quickActionFindPlayers": "البحث عن لاعبين",

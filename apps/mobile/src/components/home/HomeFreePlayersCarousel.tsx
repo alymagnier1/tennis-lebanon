@@ -1,4 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +26,7 @@ const CARD_LIMIT = 5;
 type FreeBlock = {
   startsAt: string;
   endsAt: string;
-  playerCount: number;
+  /** For the accessibility label only; the selected chip carries it visually. */
   label: string;
 };
 
@@ -41,6 +42,9 @@ type FreeBlock = {
  * and `075` computes that overlap inside the requested window, so the create
  * flow opens already knowing when. A CTA carrying only "who" would make this a
  * worse Discover rather than a shortcut past it.
+ *
+ * No heading of its own: the selected chip above already names the block, and
+ * repeating it here would be the same words twice in ten vertical pixels.
  */
 export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
   const { t } = useTranslation();
@@ -75,8 +79,8 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
 
   const players = playersQuery.data ?? [];
 
-  // Nothing to scroll through, and a heading over an empty strip is worse than
-  // no strip. The block list above still reports the count.
+  // Nothing to scroll through. The chips stay either way, so a player can pick
+  // another block rather than being left with a dead strip.
   if (players.length === 0) {
     return null;
   }
@@ -91,10 +95,6 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
 
   return (
     <View style={styles.root}>
-      <AppText style={[styles.heading, { writingDirection }]} maxLines={1}>
-        {t("home.free.carouselTitle", { slot: block.label })}
-      </AppText>
-
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -156,8 +156,8 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t("home.free.seeAllInDiscover", {
-            count: block.playerCount,
+          accessibilityLabel={t("home.free.viewAllForSlot", {
+            slot: block.label,
           })}
           onPress={() =>
             router.push({
@@ -172,7 +172,7 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
           ]}
         >
           <AppText style={[styles.seeAllLabel, { writingDirection }]}>
-            {t("home.free.seeAllInDiscover", { count: block.playerCount })}
+            {t("home.free.viewAll")}
           </AppText>
         </Pressable>
       </ScrollView>
@@ -180,81 +180,78 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 8,
-  },
-  heading: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-  },
-  strip: {
-    gap: 8,
-    paddingVertical: 2,
-  },
-  // Same shell as the block rows above, so the strip reads as part of the
-  // section rather than a widget dropped into it.
-  card: {
-    width: 148,
-    gap: 10,
-    padding: 12,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  identity: {
-    alignItems: "center",
-    gap: 6,
-  },
-  pressed: {
-    opacity: 0.9,
-  },
-  name: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primaryDark,
-    textAlign: "center",
-  },
-  levelBadge: {
-    borderRadius: tennisRadii.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    flexShrink: 0,
-  },
-  levelBadgeText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 11,
-  },
-  cta: {
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 10,
-    borderRadius: tennisRadii.sm,
-    backgroundColor: tennisColors.primary,
-  },
-  ctaLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.white,
-  },
-  seeAll: {
-    width: 132,
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 12,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.muted,
-  },
-  seeAllLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.primary,
-    textAlign: "center",
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      gap: 0,
+    },
+    strip: {
+      gap: 8,
+      paddingVertical: 2,
+    },
+    // Bordered card on the section's own surface, so the strip reads as part of
+    // Home rather than a widget dropped into it.
+    card: {
+      width: 148,
+      gap: 10,
+      padding: 12,
+      borderRadius: tennisRadii.md,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+    },
+    identity: {
+      alignItems: "center",
+      gap: 6,
+    },
+    pressed: {
+      opacity: 0.9,
+    },
+    name: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.primaryDark,
+      textAlign: "center",
+    },
+    levelBadge: {
+      borderRadius: tennisRadii.pill,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      flexShrink: 0,
+    },
+    levelBadgeText: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 11,
+    },
+    cta: {
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 10,
+      borderRadius: tennisRadii.sm,
+      backgroundColor: tennisColors.violet,
+    },
+    ctaLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.onViolet,
+    },
+    seeAll: {
+      width: 132,
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 12,
+      borderRadius: tennisRadii.md,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.muted,
+    },
+    seeAllLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.violet,
+      textAlign: "center",
+    },
+  }),
+);
