@@ -16,7 +16,7 @@ import { formatMatchesPlayedLabel } from "../../lib/matches-played-label";
 import { publicPlayerLevelChip } from "../../lib/player-level-label";
 import { discoverPlayerAvailabilityTags } from "../../lib/discover-availability-tag";
 import { beginCreateMatchForPlayer } from "../../lib/begin-create-match-for-player";
-import { clubLabelFromList } from "../../lib/match-clubs";
+import { clubNamesFromList } from "../../lib/match-clubs";
 import { CREATE_MATCH_ROUTE } from "../../lib/routes";
 import { supabase } from "../../lib/supabase";
 import { zoneLabelFromList } from "../../lib/zones";
@@ -65,9 +65,12 @@ export function DiscoverPlayerCardRow({
       return;
     }
     if (inviteableMatches.length > 1) {
+      // Straight to the choice rather than to a profile the host then has to
+      // press again: the reason this card routes away is that there is more
+      // than one match to pick from.
       router.push({
         pathname: "/player/[id]",
-        params: { id: player.user_id },
+        params: { id: player.user_id, pickMatch: "1" },
       });
       return;
     }
@@ -92,13 +95,14 @@ export function DiscoverPlayerCardRow({
         player.completed_match_count,
         t,
       )}
-      intentTag={t(`playIntent.${player.play_intent}`)}
       availabilityTags={discoverPlayerAvailabilityTags(
         player,
         showOverlapAvailability,
         t,
       )}
-      clubsTag={clubLabelFromList(player.favorite_clubs) || null}
+      clubsTag={
+        clubNamesFromList(player.favorite_clubs).slice(0, 2).join(" · ") || null
+      }
       profileAccessibilityLabel={t("discover.openPlayerProfile", {
         name: player.display_name,
       })}

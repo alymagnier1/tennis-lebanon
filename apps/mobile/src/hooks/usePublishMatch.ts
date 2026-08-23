@@ -18,6 +18,7 @@ import {
   trackRematchPublished,
 } from "../lib/create-flow-analytics";
 import { notify } from "../lib/confirm-action";
+import { matchInviteErrorKey } from "../lib/invite-link";
 import { matchHubRoute, matchInviteRoute } from "../lib/routes";
 import { supabase } from "../lib/supabase";
 
@@ -73,10 +74,21 @@ export function usePublishMatch(options?: {
       // Read before the draft is reset in onSuccess.
       const rematchSurface = draft.rematchSurface;
       const matchId = await createMatchDraft(supabase, input);
+      // Carried out, not thrown. The match is created and published by the time
+      // the invite runs, so letting the invite reject the mutation reported a
+      // live match as "we could not publish this match" -- and left the draft
+      // in place, so retrying hit `active_hosted_match_exists` and contradicted
+      // the first message. A blocked target or the 20-a-day invite ceiling is
+      // enough to trigger it.
+      let inviteError: unknown = null;
       if (destination === "hub") {
         await publishMatch(supabase, matchId);
         if (targetPlayerId) {
-          await createMatchInvite(supabase, matchId, targetPlayerId);
+          try {
+            await createMatchInvite(supabase, matchId, targetPlayerId);
+          } catch (error) {
+            inviteError = error;
+          }
         }
       }
       // Read off the built input rather than the draft: the draft is reset in
@@ -85,6 +97,7 @@ export function usePublishMatch(options?: {
         matchId,
         destination,
         targetPlayerId,
+        inviteError,
         rematchSurface,
         favoriteClubIds: seedFavoriteClubs
           ? (input.preferredClubIds ?? [])
@@ -95,6 +108,7 @@ export function usePublishMatch(options?: {
       matchId,
       destination,
       targetPlayerId,
+      inviteError,
       rematchSurface,
       favoriteClubIds,
     }) => {
@@ -132,7 +146,15 @@ export function usePublishMatch(options?: {
       );
 
       if (invitedTargetPlayer) {
-        notify(t("matches.invite.sent"));
+        if (inviteError) {
+          // The match is live either way; say which half failed and why.
+          notify(
+            t("matches.invite.notSentTitle"),
+            t(matchInviteErrorKey(inviteError)),
+          );
+        } else {
+          notify(t("matches.invite.sent"));
+        }
       }
     },
     onError: (error) => {

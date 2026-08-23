@@ -441,8 +441,9 @@
     },
     "ratingProgress": {
       "title": "تقييمك",
-      "progress": "{{done}} / {{threshold}} محتسبة",
-      "remaining": "المتبقّي: {{remaining}} قبل ظهور رقمك.",
+      "progress": "{{done}} من {{threshold}} نتائج مؤكدة",
+      "remaining_one": "يتبقى مباراة واحدة حتى يظهر تقييمك.",
+      "remaining_other": "يتبقى {{count}} مباريات حتى يظهر تقييمك.",
       "awaitingScore": "تُحتسب المباراة بعد تأكيد نتيجتها. مبارياتك المنتظِرة: {{pending}}.",
       "awaitingScoreAction": "عرض المباريات التي تنتظر نتيجة"
     },
@@ -478,12 +479,16 @@
     "liquidityClubs": "تصفح النوادي",
     "liquidityClubsHint": "دليل النوادي والحجز عبر واتساب",
     "free": {
-      "busiestTitle": "أكثر الأوقات التي يتفرّغ فيها اللاعبون هذا الأسبوع",
-      "busiestSubtitle": "متى يكون اللاعبون متاحين، ومن هو متاح الآن.",
+      "busiestTitle": "متاح لك",
       "chipLabel": "لاعبون متاحون {{slot}}",
       "chipSelectedLabel": "عرض اللاعبين المتاحين {{slot}}",
       "viewAll": "عرض الكل في الاستكشاف",
       "viewAllForSlot": "عرض كل المتاحين {{slot}} في الاستكشاف"
+    },
+    "openMatches": {
+      "title": "مباريات مفتوحة",
+      "viewAll": "عرض الكل",
+      "viewAllA11y": "عرض كل المباريات المفتوحة في الاستكشاف"
     },
     "quickActionsTitle": "إجراءات سريعة",
     "quickActionFindPlayers": "البحث عن لاعبين",
@@ -654,8 +659,17 @@
   },
   "playerProfile": {
     "aboutTitle": "نبذة",
+    "emptyAbout": "لم يُضف هذا اللاعب نبذة بعد.",
+    "headerRating": "{{rating}} ({{count}} مباريات)",
+    "headerMatches": "{{count}} مباريات",
     "favoriteClubsTitle": "النوادي المفضلة",
     "availabilityTitle": "التوفر",
+    "preferredTimeLabel": "الوقت المفضّل",
+    "availableTodayLabel": "متاح اليوم",
+    "weeklyLabel": "أسبوعيًا",
+    "playStyleLabel": "أسلوب اللعب",
+    "weeklyDaysTwo": "{{first}} و{{second}}",
+    "weeklyDaysMany": "{{list}} و{{last}}",
     "recentMatchesTitle": "المباريات الأخيرة",
     "matchesPlayedStat_one": "مباراة",
     "matchesPlayedStat_other": "مباريات",
@@ -665,7 +679,7 @@
     "intentPreference": "أسلوب اللعب: {{intent}}",
     "availabilityPartsTwo": "{{first}} و{{second}}",
     "availabilityPartsMany": "{{first}} و{{last}}",
-    "challengeCta": "تحدّ إلى مباراة",
+    "challengeCta": "طلب لعب",
     "safetyTitle": "الدعم",
     "safetyDescription": "أبلغ عن مشكلة أو احظر هذا اللاعب من نتائج الاكتشاف.",
     "matchWin": "ف",
@@ -854,6 +868,8 @@
         "submitScore": "أدخل النتيجة",
         "rematch": "العب مجددًا",
         "invitePlayers": "دعوة لاعبين",
+        "join": "انضم",
+        "requestJoin": "اطلب الانضمام",
         "waitingPlayers": "بانتظار لاعبين",
         "finishSetup": "إكمال الإعداد",
         "agreeTime": "الاتفاق على وقت",
@@ -1127,7 +1143,6 @@
       "pickMatch": "ادعُ إلى إحدى مبارياتك المفتوحة",
       "pickMatchHint": "أضفهم إلى مباراة تستضيفها بالفعل — أو تحدّاهم إلى مباراة جديدة من الأسفل.",
       "inviteToMatch": "دعوة إلى مباراة {{format}}",
-      "inviteToOpenMatch": "الدعوة إلى هذه المباراة",
       "noTimeYet": "الوقت غير محدد بعد",
       "invitePlayer": "دعوة",
       "invitePlayers": "دعوة لاعبين",
@@ -1154,7 +1169,9 @@
       "decline": "رفض",
       "pendingCount": "{{count}} لاعب/لاعبين للدعوة",
       "autoSendOnPublish": "سيستلمون دعوة داخل التطبيق عند النشر.",
-      "rateLimited": "لقد أرسلت دعوات كثيرة اليوم. حاول مرة أخرى غداً."
+      "rateLimited": "لقد أرسلت دعوات كثيرة اليوم. حاول مرة أخرى غداً.",
+      "notSentTitle": "تم إنشاء المباراة، ولم تُرسل الدعوة",
+      "createInstead": "أنشئ مباراة جديدة"
     },
     "policy": {
       "leaveBeforeBooking": "يمكنك المغادرة بحرية ما دام لم يُحجز ملعب. التغييرات المتأخرة المتكررة قد تؤثر على موثوقيتك.",

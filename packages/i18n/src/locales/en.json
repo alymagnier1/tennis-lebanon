@@ -441,8 +441,9 @@
     },
     "ratingProgress": {
       "title": "Your rating",
-      "progress": "{{done}} / {{threshold}} rated",
-      "remaining": "{{remaining}} more to unlock your number.",
+      "progress": "{{done}} of {{threshold}} confirmed results",
+      "remaining_one": "{{count}} more match until your rating is visible.",
+      "remaining_other": "{{count}} more matches until your rating is visible.",
       "awaitingScore": "A match counts once its score is confirmed. Yours waiting: {{pending}}.",
       "awaitingScoreAction": "See matches waiting for a score"
     },
@@ -478,12 +479,16 @@
     "liquidityClubs": "Browse clubs",
     "liquidityClubsHint": "Club directory and WhatsApp booking",
     "free": {
-      "busiestTitle": "Most players free this week",
-      "busiestSubtitle": "When other players are free, and who is free soonest.",
+      "busiestTitle": "Available for you",
       "chipLabel": "Players free {{slot}}",
       "chipSelectedLabel": "Showing players free {{slot}}",
       "viewAll": "View all in Discover",
       "viewAllForSlot": "View everyone free {{slot}} in Discover"
+    },
+    "openMatches": {
+      "title": "Open matches",
+      "viewAll": "View all",
+      "viewAllA11y": "View all open matches in Discover"
     },
     "quickActionsTitle": "Quick actions",
     "quickActionFindPlayers": "Find players",
@@ -772,8 +777,17 @@
   },
   "playerProfile": {
     "aboutTitle": "About",
+    "emptyAbout": "This player has not added a bio yet.",
+    "headerRating": "{{rating}} ({{count}} matches)",
+    "headerMatches": "{{count}} matches",
     "favoriteClubsTitle": "Preferred clubs",
     "availabilityTitle": "Availability",
+    "preferredTimeLabel": "Preferred time",
+    "availableTodayLabel": "Available today",
+    "weeklyLabel": "Weekly",
+    "playStyleLabel": "Play style",
+    "weeklyDaysTwo": "{{first}} & {{second}}",
+    "weeklyDaysMany": "{{list}} & {{last}}",
     "recentMatchesTitle": "Recent matches",
     "matchesPlayedStat_one": "Match",
     "matchesPlayedStat_other": "Matches",
@@ -783,7 +797,7 @@
     "intentPreference": "Play style: {{intent}}",
     "availabilityPartsTwo": "{{first}} and {{second}}",
     "availabilityPartsMany": "{{first}}, and {{last}}",
-    "challengeCta": "Challenge to match",
+    "challengeCta": "Play request",
     "safetyTitle": "Support",
     "safetyDescription": "Report a concern or block this player from your discovery results.",
     "matchWin": "W",
@@ -972,6 +986,8 @@
         "submitScore": "Submit score",
         "rematch": "Play again",
         "invitePlayers": "Invite players",
+        "join": "Join",
+        "requestJoin": "Request to join",
         "waitingPlayers": "Waiting for players",
         "finishSetup": "Finish setup",
         "agreeTime": "Agree a time",
@@ -1245,7 +1261,6 @@
       "pickMatch": "Invite to one of your open matches",
       "pickMatchHint": "Add them to a match you already host — or challenge them to a new one below.",
       "inviteToMatch": "Invite to {{format}} match",
-      "inviteToOpenMatch": "Invite to this match",
       "noTimeYet": "Time to be confirmed",
       "invitePlayer": "Invite",
       "invitePlayers": "Invite players",
@@ -1272,7 +1287,9 @@
       "decline": "Decline",
       "pendingCount": "{{count}} player(s) to invite",
       "autoSendOnPublish": "They will receive an in-app invite when you publish.",
-      "rateLimited": "You have sent a lot of invites today. Try again tomorrow."
+      "rateLimited": "You have sent a lot of invites today. Try again tomorrow.",
+      "notSentTitle": "Match created, invite not sent",
+      "createInstead": "Create a new match"
     },
     "policy": {
       "leaveBeforeBooking": "You can leave freely while no court is booked. Repeated late changes may affect your reliability.",

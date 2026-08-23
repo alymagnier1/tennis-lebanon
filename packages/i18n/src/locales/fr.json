@@ -441,8 +441,9 @@
     },
     "ratingProgress": {
       "title": "Votre note",
-      "progress": "{{done}} / {{threshold}} comptés",
-      "remaining": "Encore {{remaining}} pour débloquer votre note.",
+      "progress": "{{done}} sur {{threshold}} résultats confirmés",
+      "remaining_one": "Encore {{count}} match avant que votre note s'affiche.",
+      "remaining_other": "Encore {{count}} matchs avant que votre note s'affiche.",
       "awaitingScore": "Un match compte dès que son score est confirmé. Les vôtres en attente : {{pending}}.",
       "awaitingScoreAction": "Voir les matchs en attente d'un score"
     },
@@ -478,12 +479,16 @@
     "liquidityClubs": "Parcourir les clubs",
     "liquidityClubsHint": "Annuaire des clubs et réservation WhatsApp",
     "free": {
-      "busiestTitle": "Le plus de joueurs libres cette semaine",
-      "busiestSubtitle": "Quand les autres joueurs sont libres, et qui l'est le plus tôt.",
+      "busiestTitle": "Disponible pour vous",
       "chipLabel": "Joueurs libres {{slot}}",
       "chipSelectedLabel": "Affichage des joueurs libres {{slot}}",
       "viewAll": "Voir tout dans Découvrir",
       "viewAllForSlot": "Voir tous les joueurs libres {{slot}} dans Découvrir"
+    },
+    "openMatches": {
+      "title": "Matchs ouverts",
+      "viewAll": "Tout voir",
+      "viewAllA11y": "Voir tous les matchs ouverts dans Découvrir"
     },
     "quickActionsTitle": "Actions rapides",
     "quickActionFindPlayers": "Trouver des joueurs",
@@ -654,8 +659,17 @@
   },
   "playerProfile": {
     "aboutTitle": "À propos",
+    "emptyAbout": "Ce joueur n'a pas encore ajouté de bio.",
+    "headerRating": "{{rating}} ({{count}} matchs)",
+    "headerMatches": "{{count}} matchs",
     "favoriteClubsTitle": "Clubs favoris",
     "availabilityTitle": "Disponibilité",
+    "preferredTimeLabel": "Heure préférée",
+    "availableTodayLabel": "Disponible aujourd'hui",
+    "weeklyLabel": "Hebdomadaire",
+    "playStyleLabel": "Style de jeu",
+    "weeklyDaysTwo": "{{first}} et {{second}}",
+    "weeklyDaysMany": "{{list}} et {{last}}",
     "recentMatchesTitle": "Matchs récents",
     "matchesPlayedStat_one": "Match",
     "matchesPlayedStat_other": "Matchs",
@@ -665,7 +679,7 @@
     "intentPreference": "Style de jeu : {{intent}}",
     "availabilityPartsTwo": "{{first}} et {{second}}",
     "availabilityPartsMany": "{{first}} et {{last}}",
-    "challengeCta": "Défier en match",
+    "challengeCta": "Demande de match",
     "safetyTitle": "Assistance",
     "safetyDescription": "Signalez un problème ou bloquez ce joueur dans vos résultats Découvrir.",
     "matchWin": "V",
@@ -854,6 +868,8 @@
         "submitScore": "Envoyer le score",
         "rematch": "Rejouer",
         "invitePlayers": "Inviter des joueurs",
+        "join": "Rejoindre",
+        "requestJoin": "Demander à rejoindre",
         "waitingPlayers": "En attente de joueurs",
         "finishSetup": "Terminer la configuration",
         "agreeTime": "Convenir d’un horaire",
@@ -1127,7 +1143,6 @@
       "pickMatch": "Inviter à l'un de vos matchs ouverts",
       "pickMatchHint": "Ajoutez-les à un match que vous organisez déjà — ou défiez-les pour un nouveau match ci-dessous.",
       "inviteToMatch": "Inviter au match {{format}}",
-      "inviteToOpenMatch": "Inviter à ce match",
       "noTimeYet": "Horaire à confirmer",
       "invitePlayer": "Inviter",
       "invitePlayers": "Inviter des joueurs",
@@ -1154,7 +1169,9 @@
       "decline": "Refuser",
       "pendingCount": "{{count}} joueur(s) à inviter",
       "autoSendOnPublish": "Ils recevront une invitation dans l'app à la publication.",
-      "rateLimited": "Vous avez envoyé beaucoup d’invitations aujourd’hui. Réessayez demain."
+      "rateLimited": "Vous avez envoyé beaucoup d’invitations aujourd’hui. Réessayez demain.",
+      "notSentTitle": "Match créé, invitation non envoyée",
+      "createInstead": "Créer un nouveau match"
     },
     "policy": {
       "leaveBeforeBooking": "Vous pouvez quitter librement tant qu'aucun court n'est réservé. Les changements tardifs répétés peuvent affecter votre fiabilité.",
