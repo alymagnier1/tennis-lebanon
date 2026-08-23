@@ -29,6 +29,16 @@ begin
 end;
 $$;
 
+-- Start the day at zero. The ceiling counts real invitations over 24 hours, so
+-- anything this creator already sent -- a sandbox match, a manual run -- shifts
+-- the loop below and trips the limit inside it, where the exception is
+-- uncaught, instead of at the deliberate 21st call. Done before the role
+-- switch because `authenticated` has no DELETE here, and rolled back with the
+-- rest of the test.
+delete from public.match_invitations
+where created_by = '11111111-1111-1111-1111-111111111111'
+  and created_at > now() - interval '1 day';
+
 set local role authenticated;
 
 -- ---------------------------------------------------------------------------

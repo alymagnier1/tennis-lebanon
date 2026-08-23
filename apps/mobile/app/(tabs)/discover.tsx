@@ -20,6 +20,7 @@ import {
   DEFAULT_DISCOVER_MATCH_TOGGLES,
   type DiscoverMatchToggles,
   isInviteableHostedMatch,
+  canShowJoinAction,
   resolveDiscoverFiltersFromProfile,
   type PlayIntent,
 } from "@tennis-lebanon/domain";
@@ -35,7 +36,6 @@ import { DiscoverSearchSortBar } from "../../src/components/discover/DiscoverSea
 import { DiscoverHeaderShell } from "../../src/components/discover/DiscoverHeaderShell";
 import { DiscoverSectionSplitter } from "../../src/components/discover/DiscoverSectionSplitter";
 import { DiscoverPlayerCardRow } from "../../src/components/discover/DiscoverPlayerCardRow";
-import { TabPageHeader } from "../../src/components/TabPageHeader";
 import {
   PrimaryButton,
   Screen,
@@ -67,10 +67,12 @@ import {
 import { useAuth } from "../../src/providers/AuthProvider";
 import { supabase } from "../../src/lib/supabase";
 import {
+  compactJoinedLabel,
+  clubNamesFromList,
   matchCardAreaLabel,
-  matchCardClubLabel,
 } from "../../src/lib/match-clubs";
 import { opponentAvatarColor } from "../../src/lib/match-card-status";
+import { matchHubLevelSummary } from "../../src/lib/match-hub-summaries";
 import { openMatchCardDateTimeLabel } from "../../src/lib/open-match-card-time";
 
 type DiscoverSegment = "players" | "matches";
@@ -80,7 +82,9 @@ export default function DiscoverScreen() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const userId = session?.user.id;
-  const [segment, setSegment] = useState<DiscoverSegment>("players");
+  const [chosenSegment, setChosenSegment] = useState<DiscoverSegment | null>(
+    null,
+  );
   const [matchToggles, setMatchToggles] = useState<DiscoverMatchToggles>({
     ...DEFAULT_DISCOVER_MATCH_TOGGLES,
   });
@@ -108,7 +112,17 @@ export default function DiscoverScreen() {
   const timeParams = useLocalSearchParams<{
     freeFrom?: string;
     freeTo?: string;
+    segment?: string;
   }>();
+
+  // Derived, not synced from an effect: a caller can open Discover straight on
+  // Matches, and tapping a tab afterwards wins. Setting state from an effect
+  // for something this plainly derivable is what the compiler's
+  // cascading-render rule objects to, and the time window above already had to
+  // be rewritten the same way.
+  const paramSegment: DiscoverSegment | null =
+    timeParams.segment === "matches" ? "matches" : null;
+  const segment: DiscoverSegment = chosenSegment ?? paramSegment ?? "players";
   const paramWindow = useMemo(
     () => parseDiscoverTimeWindow(timeParams),
     [timeParams],
@@ -331,29 +345,41 @@ export default function DiscoverScreen() {
         keyExtractor: (match) => (match as OpenMatchCard).match_id,
         renderItem: ({ item }) => {
           const match = item as OpenMatchCard;
-          const clubLabel = matchCardClubLabel({
-            clubName: match.court_club_name,
-            preferredClubs: match.preferred_clubs,
-            compact: true,
-          });
+          const preferredClubLabel = compactJoinedLabel(
+            clubNamesFromList(match.preferred_clubs),
+            2,
+          );
           const areaLabel = matchCardAreaLabel(
             match.zones,
             i18n.resolvedLanguage ?? i18n.language,
             { compact: true },
           );
           const dateTimeLabel = openMatchCardDateTimeLabel(match);
+          const joinAction = canShowJoinAction({
+            matchStatus: match.status,
+            requiresCreatorApproval: match.requires_creator_approval,
+          });
+          const joinLabel =
+            joinAction === "join"
+              ? t("matches.list.action.join")
+              : joinAction === "request"
+                ? t("matches.list.action.requestJoin")
+                : undefined;
           return (
             <MatchCard
               status={match.status}
               statusLabel={t(`matches.status.${match.status}`)}
+              actionLabel={joinLabel}
+              actionTone="actionable"
               dateTimeLabel={dateTimeLabel}
               headline={match.creator_display_name}
               hostName={match.creator_display_name}
               hostAvatarPath={match.creator_avatar_path}
               hostAvatarColor={opponentAvatarColor(match.creator_display_name)}
               formatChip={t(`formats.${match.format}`)}
-              locationChip={clubLabel}
+              locationChip={preferredClubLabel}
               areaChip={areaLabel}
+              levelChip={matchHubLevelSummary(match, t)}
               note={match.notes ?? undefined}
               onPress={() =>
                 router.push({
@@ -389,14 +415,13 @@ export default function DiscoverScreen() {
       virtualizedList={virtualizedList}
       fixedHeader={
         <DiscoverHeaderShell>
-          <TabPageHeader title={t("discover.title")} />
           <SegmentTabs
             value={segment}
             options={[
               { value: "players", label: t("discover.playersTab") },
               { value: "matches", label: t("discover.matchesTab") },
             ]}
-            onChange={setSegment}
+            onChange={setChosenSegment}
           />
           <DiscoverMatchChips
             toggles={matchToggles}

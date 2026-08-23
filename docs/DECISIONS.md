@@ -11,6 +11,51 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-23 — Public player profile: challenge in header, safety as text links
+
+- Status: accepted
+- Context: Support was a full card with bordered Report/Block buttons, and Challenge sat in a sticky footer, duplicating the reference header CTA.
+- Decision: Challenge to match sits in the profile header under the bio. Report and Block are text-only links at the bottom of the page, with no Support card.
+- Alternatives considered: keeping a sticky footer for Challenge (rejected — fights the compact header layout); a two-button Chat + Challenge row (rejected — Chat is not a public-profile action).
+- Consequences: Blocking still confirms before applying. Safety copy remains an accessibility hint, not visible body text.
+- Owner: Founder
+
+## 2026-08-23 — Dark mode follows the olive-charcoal mock, not yellow-black
+
+- Status: accepted
+- Context: Dark Home used a yellow-olive canvas (`#0F0E04`, brown cards) and Material violet `#7C3AED`. The product mock is green-charcoal with a lighter lavender.
+- Decision: Dark surfaces are `#0D0F0A` canvas, `#1C1E19` cards, `#252722` wells, `#2E322C` borders. Dark primary/violet is `#8B6DFF`. Headings use cool off-white `#F3F4F0`. The tab bar’s selected well in dark is that lavender with a white icon, matching the mock Home pill. Light tokens are unchanged.
+- Alternatives considered: keeping the yellow-olive canvas and only brightening violet (rejected — the hue mismatch is the glare); copying the mock’s promo banner and photo match cards (rejected — colour accuracy, not a Home redesign).
+- Consequences: dark CTAs, FABs, and join pills pick up `#8B6DFF`. Lime stays on skill-band chips.
+- Owner: Founder
+
+## 2026-08-23 — Home shows two open matches that overlap time or place
+
+- Status: accepted
+- Context: Home already surfaces free players. Open listings to join were only on Discover, so a player with overlapping time or a preferred club/area had to leave Home to find a game.
+- Decision: Home lists at most two public open matches where the viewer's availability overlaps a proposed time, or a preferred club/area matches. Rank time overlap first, then club, then area. "View all" opens Discover on the matches segment. Hide the section when none qualify.
+- Alternatives considered: showing the latest two open matches with no overlap filter (rejected — Home would repeat Discover without being more useful); requiring time and place together (rejected — too empty at low density).
+- Consequences: `discover_open_matches` still applies its own zone constraint when the viewer has preferred areas, so a club-only listing in another area will not appear until that RPC is relaxed.
+- Owner: Founder
+
+## 2026-08-23 — Home uses compact header and violet, not a lime hero
+
+- Status: accepted
+- Context: Home's lime full-bleed header and stat boxes made the screen loud and busy. A dark-mode reference used a small avatar+greeting header, text stats, and violet CTAs.
+- Decision: Home header sits on the canvas (no lime banner). Matches played and skill band are one text line; rating progress is a bar plus hint, not boxed stats. Quick-action tiles are removed (Discover and Create already cover find/book). Dark-mode primary CTA fill is violet `#7C3AED`; lime stays on skill-band chips. Time chips in "players free this week" are text-only.
+- Alternatives considered: keeping the lime hero and only shrinking type (rejected — the fill is the glare); adding the mock's marketing community banner (rejected — not a product surface).
+- Consequences: tab-bar FAB in dark mode is violet with the rest of dark CTAs. Light mode still uses forest green as `primary` except Home accents that read `violet`.
+- Owner: Founder
+
+## 2026-08-22 — Mobile dark mode uses olive-black surfaces and lime CTAs
+
+- Status: superseded
+- Context: the mobile app shipped light-only Figma tokens. Players asked for a dark theme; a profile-screen reference used olive-black canvas, charcoal cards, and a violet primary button.
+- Decision: add a persisted Appearance preference (System / Light / Dark) on Settings. Dark surfaces follow that reference (`#0F0E04` canvas, `#22221A` cards). Primary actions stay lime/green (`#C8E63B` fill, dark label) so the mobile brand does not switch to violet. Club dashboard keeps the existing light blue ramp.
+- Alternatives considered: violet CTAs from the mock (rejected — splits mobile brand from Figma light and from lime skill-band / actionable tone); dark-only with no light theme (rejected — daytime outdoor use); per-screen restyle without a token switch (rejected — too easy to drift).
+- Consequences: superseded on 2026-08-23 — Home glare from lime heroes led to violet CTAs in dark mode. Surfaces and the Appearance setting remain.
+- Owner: Founder
+
 ## 2026-08-19 — Cohort 1 lists clubs; it does not partner with them
 
 - Status: accepted
@@ -811,3 +856,12 @@ Record decisions using this template:
 - Alternatives considered: a standalone Messages-style "free players" tab (rejected in the same discussion — the block list already aggregates the same data, and a fifth tab would surface nothing new); restricting the blocks to today and tomorrow (rejected — liquidity is the scarce resource at 50 players, and CLAUDE.md's empty-state rule points at widening filters, not narrowing defaults); a carousel as the primary discovery surface (rejected — carousels hide items behind a swipe and are poor for comparison, which is why Discover stays the list and this stays a shortcut); keeping the window in state and resetting it from an effect (works, but sets state during an effect for a plainly derivable value, which the React Compiler lint rule rejects; storing _which window was dismissed_ keeps it derived and gets the multi-block case right for free).
 - Consequences: The filter is transient — `loadDiscoverFilters` persists only `matchToggles`, and a window chosen for one evening should not survive the session. Discover now reads route params, which it did not before. The carousel adds one query to Home, scoped to the top block and skipped entirely when that block has no players, so Home never shows an empty strip. Visually it reuses the block rows' own shell (`tennisRadii.md`, `borderWidth: 1.5`, `border`, `card`) so the strip reads as part of the section, and the chip reuses `DiscoverMatchChips`' selected-state metrics because an applied filter _is_ selected. `home.free.busiestSubtitle` changed: it promised a tap-through that no longer exists.
 - Owner: Founder/product validation
+
+## 2026-08-23 — A player can edit their own name, languages and bio
+
+- Status: accepted
+- Context: Saving the About box failed with "permission denied for table profiles", and `/profile/edit` was broken the same way. `updateOwnProfile` writes `profiles` (display_name, languages) and then `player_profiles` (bio); migration `002` granted `authenticated` only `SELECT` on `profiles` plus `update (avatar_path)`, so display_name and languages were never grantable, and `042` later revoked avatar_path when avatars moved behind `set_own_avatar`. That left `profiles` with no UPDATE grant at all, and the first statement took the whole call down with it. This is the shape `062` already fixed once on `notifications`: an RLS policy filters rows, it does not confer table privileges, and `profiles_update_own` has been in place since `001`. The bio was collateral — the About box sent an unchanged display name with every save, so writing a bio depended on permission to rewrite identity.
+- Decision: Grant `update (display_name, languages)` on `public.profiles` to `authenticated` in `084`, per column rather than table-wide, keeping the posture `002` set: the Data API gets only what a player edits about themselves, while `avatar_path`, `gender`, `account_status` and `onboarding_completed_at` stay unreachable from a client. Add a `profiles_languages_supported` CHECK, since a grant without one lets a caller reaching past the app store an empty array or an unsupported code that every reader would then have to defend against. Split `updateOwnBio` out of `updateOwnProfile` so the About box writes only the bio — a bio save should not depend on identity permissions whatever the grants say.
+- Alternatives considered: a `set_own_profile_identity` RPC matching `set_own_skill_band` and `set_own_gender` (those exist because their columns carry rules a client must not set — a locked skill band, a storage path — whereas `display_name` already has its own CHECK and `languages` now does too, so an RPC would add a hop without adding a guarantee); granting UPDATE table-wide on `profiles` (re-opens every column `003`, `042` and `079` deliberately closed); leaving the About box writing all three fields and only adding the grant (fixes the symptom while leaving a bio save coupled to identity permissions).
+- Consequences: `cardinality(languages) >= 1`, not `array_length(...) >= 1` — the latter returns NULL for an empty array and a CHECK only rejects on FALSE, so the obvious spelling would have let `array[]::text[]` through. The test caught that before it shipped. pgTAP coverage in `084_profile_self_edit_grants_test.sql` asserts both halves: the three columns a player may write, and that avatar_path and account_status still refuse them.
+- Owner: Founder/technical reviewer

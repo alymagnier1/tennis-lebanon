@@ -119,6 +119,42 @@ export async function getOwnPlayerProfile(
   };
 }
 
+/**
+ * Write only the bio.
+ *
+ * `updateOwnProfile` writes `profiles` and `player_profiles` together, which is
+ * right for the edit form and wrong for the About box: sending an unchanged
+ * display name with every bio save made the bio depend on permission to rewrite
+ * identity, and that is exactly how it broke -- `profiles` had no UPDATE grant,
+ * so saving a bio failed on a column the player had not touched.
+ */
+export async function updateOwnBio(
+  client: TennisSupabaseClient,
+  bio: string | null,
+): Promise<void> {
+  const {
+    data: { user },
+    error: userError,
+  } = await client.auth.getUser();
+
+  if (userError) {
+    throw userError;
+  }
+  if (!user) {
+    throw new Error("Authentication required");
+  }
+
+  const trimmed = bio?.trim();
+  const { error } = await client
+    .from("player_profiles")
+    .update({ bio: trimmed ? trimmed : null })
+    .eq("user_id", user.id);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function updateOwnProfile(
   client: TennisSupabaseClient,
   input: {
@@ -305,6 +341,20 @@ export async function listOwnPreferredZoneIds(
   }
 
   return (data ?? []).map((row) => row.zone_id);
+}
+
+export async function listOwnFavoriteClubIds(
+  client: TennisSupabaseClient,
+): Promise<string[]> {
+  const { data, error } = await client
+    .from("player_favorite_clubs")
+    .select("club_id");
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((row) => row.club_id);
 }
 
 export async function updatePreferredZones(

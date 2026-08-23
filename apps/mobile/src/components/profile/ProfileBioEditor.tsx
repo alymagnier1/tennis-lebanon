@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateOwnProfile } from "@tennis-lebanon/api";
+import { updateOwnBio } from "@tennis-lebanon/api";
 import { AppText } from "../AppText";
 import { profileScreenBioPlaceholder } from "../../lib/profile-screen-copy";
 import { useLayoutDirection } from "../../lib/layout-direction";
@@ -10,15 +11,7 @@ import { supabase } from "../../lib/supabase";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
-export function ProfileBioEditor({
-  displayName,
-  languages,
-  bio,
-}: {
-  displayName: string;
-  languages: string[];
-  bio: string | null;
-}) {
+export function ProfileBioEditor({ bio }: { bio: string | null }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { writingDirection } = useLayoutDirection();
@@ -36,12 +29,9 @@ export function ProfileBioEditor({
   }
 
   const saveMutation = useMutation({
-    mutationFn: (nextBio: string) =>
-      updateOwnProfile(supabase, {
-        displayName,
-        languages,
-        bio: nextBio.trim() ? nextBio.trim() : undefined,
-      }),
+    // Bio only. Sending the unchanged display name along with it made this
+    // save depend on permission to rewrite identity, which is how it broke.
+    mutationFn: (nextBio: string) => updateOwnBio(supabase, nextBio),
     onSuccess: async (_, nextBio) => {
       setLastSaved(nextBio);
       await queryClient.invalidateQueries({ queryKey: ["own-player-profile"] });
@@ -75,26 +65,28 @@ export function ProfileBioEditor({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    gap: 6,
-  },
-  input: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 22,
-    color: tennisColors.primaryDark,
-    minHeight: 100,
-    textAlignVertical: "top",
-    padding: 12,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.muted,
-  },
-  error: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.accent,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    wrap: {
+      gap: 6,
+    },
+    input: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 22,
+      color: tennisColors.primaryDark,
+      minHeight: 100,
+      textAlignVertical: "top",
+      padding: 12,
+      borderRadius: tennisRadii.md,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.muted,
+    },
+    error: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.accent,
+    },
+  }),
+);

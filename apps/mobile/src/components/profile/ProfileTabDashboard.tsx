@@ -8,6 +8,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -189,11 +190,7 @@ export function ProfileTabDashboard() {
         <View style={styles.body}>
           <PlayerProfileSection title={profileScreenAboutTitle(t)}>
             {profile && playerProfile ? (
-              <ProfileBioEditor
-                displayName={profile.display_name ?? playerProfile.display_name}
-                languages={profile.languages ?? []}
-                bio={playerProfile.bio}
-              />
+              <ProfileBioEditor bio={playerProfile.bio} />
             ) : null}
           </PlayerProfileSection>
 
@@ -280,50 +277,52 @@ export function ProfileTabDashboard() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  fabOverlay: {
-    ...StyleSheet.absoluteFill,
-  },
-  screen: {
-    flex: 1,
-  },
-  body: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    gap: 16,
-  },
-  menuCard: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.xl,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    overflow: "hidden",
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "center",
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.xl,
-    padding: 20,
-    gap: 12,
-  },
-  modalTitle: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 18,
-    color: tennisColors.primaryDark,
-  },
-  modalBody: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 22,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    fabOverlay: {
+      ...StyleSheet.absoluteFill,
+    },
+    screen: {
+      flex: 1,
+    },
+    body: {
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      gap: 16,
+    },
+    menuCard: {
+      backgroundColor: tennisColors.card,
+      borderRadius: tennisRadii.xl,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      overflow: "hidden",
+    },
+    modalBackdrop: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.45)",
+      justifyContent: "center",
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: tennisColors.card,
+      borderRadius: tennisRadii.xl,
+      padding: 20,
+      gap: 12,
+    },
+    modalTitle: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 18,
+      color: tennisColors.primaryDark,
+    },
+    modalBody: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 22,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);
