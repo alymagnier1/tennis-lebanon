@@ -298,6 +298,30 @@ export function hasReachedHostedMatchCap<T extends HostedMatchRef>(
   return activeHostedMatches(matches).length >= HOSTED_MATCH_CAP;
 }
 
+/**
+ * Whether this viewer may add somebody to this match.
+ *
+ * Mirrors `create_match_invite`, which authorises **any accepted participant**
+ * rather than only the creator. That is deliberate: it is what lets a player
+ * who joined a doubles match go and find the fourth. Gating the invite screen
+ * on `viewer_is_creator` contradicted it silently, and once Discover stopped
+ * inviting there was nowhere else for a joiner to do it.
+ */
+export function viewerMayInvite(match: {
+  viewer_status: string | null;
+  participant_count: number;
+  capacity: number;
+  status: string;
+}): boolean {
+  return (
+    match.viewer_status === "accepted" &&
+    match.participant_count < match.capacity &&
+    (match.status === "open" ||
+      match.status === "full" ||
+      match.status === "draft")
+  );
+}
+
 export function canCreatorCancelBeforeBooking(status: string): boolean {
   return isActiveHostedMatchStatus(status);
 }

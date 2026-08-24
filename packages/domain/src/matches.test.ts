@@ -10,6 +10,7 @@ import {
   createMatchInputSchema,
   findActiveHostedMatch,
   hasReachedHostedMatchCap,
+  viewerMayInvite,
   HOSTED_MATCH_CAP,
   hasUnanimousTimeYes,
   isInviteableMatch,
@@ -354,6 +355,50 @@ describe("matches domain rules", () => {
     // The plainer question is unchanged: a draft is still in flight, which is
     // what the resume-an-abandoned-draft path asks about.
     expect(findActiveHostedMatch(atCap, "singles")?.match_id).toBe("a");
+  });
+
+  it("lets any accepted participant invite, not only the host", () => {
+    // create_match_invite authorises every accepted participant on purpose --
+    // it is what lets someone who joined a doubles match find the fourth.
+    const joined = {
+      viewer_status: "accepted",
+      participant_count: 3,
+      capacity: 4,
+      status: "open",
+    };
+
+    expect(viewerMayInvite(joined)).toBe(true);
+  });
+
+  it("refuses inviting when the viewer is not an accepted participant", () => {
+    const base = { participant_count: 1, capacity: 2, status: "open" };
+
+    expect(viewerMayInvite({ ...base, viewer_status: "invited" })).toBe(false);
+    expect(viewerMayInvite({ ...base, viewer_status: "requested" })).toBe(
+      false,
+    );
+    expect(viewerMayInvite({ ...base, viewer_status: "left" })).toBe(false);
+    expect(viewerMayInvite({ ...base, viewer_status: null })).toBe(false);
+  });
+
+  it("refuses inviting into a full match or one past inviting", () => {
+    expect(
+      viewerMayInvite({
+        viewer_status: "accepted",
+        participant_count: 2,
+        capacity: 2,
+        status: "open",
+      }),
+    ).toBe(false);
+
+    expect(
+      viewerMayInvite({
+        viewer_status: "accepted",
+        participant_count: 1,
+        capacity: 2,
+        status: "confirmed",
+      }),
+    ).toBe(false);
   });
 
   it("ignores matches somebody else hosts, and ones already finished", () => {

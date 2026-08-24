@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 import { router } from "expo-router";
-import type { MyMatchRow } from "@tennis-lebanon/api";
+import type { CompatiblePlayerCard, MyMatchRow } from "@tennis-lebanon/api";
 import {
   HOSTED_MATCH_CAP,
   hasReachedHostedMatchCap,
@@ -8,6 +8,7 @@ import {
 import { CREATE_MATCH_ROUTE, MATCHES_ROUTE } from "./routes";
 import { chooseAction } from "./confirm-action";
 import { resetCreateMatchDraft } from "./create-match-draft";
+import { beginCreateMatchForPlayer } from "./begin-create-match-for-player";
 import {
   activeHostedContinueRoute,
   findAnyActiveHostedMatch,
@@ -38,6 +39,27 @@ export function showMatchCapAlert(t: TFunction): void {
     cancelLabel: t("common.cancel"),
     onCancel: () => undefined,
   });
+}
+
+/**
+ * "Ask to play", from Discover or a player profile.
+ *
+ * Guarded like the `+` button rather than walking the host four steps in to
+ * meet the cap at the end. The two entry points diverging is what made the old
+ * per-format rule feel arbitrary, and there is no reason to repeat it.
+ */
+export function openAskToPlayFlow(
+  player: CompatiblePlayerCard,
+  matches: MyMatchRow[] | undefined,
+  t: TFunction,
+): void {
+  if (hasReachedHostedMatchCap(matches ?? [])) {
+    showMatchCapAlert(t);
+    return;
+  }
+
+  beginCreateMatchForPlayer(player);
+  router.push(CREATE_MATCH_ROUTE);
 }
 
 /**

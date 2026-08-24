@@ -1,20 +1,20 @@
 import { notify } from "../../src/lib/confirm-action";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../src/theme/create-live-sheet";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   blockUser,
   getPublicPlayerAvailabilitySummary,
   getPublicPlayerCard,
+  listMyMatches,
   listPublicPlayerRecentMatches,
 } from "@tennis-lebanon/api";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../../src/components/AppText";
 import { supabase } from "../../src/lib/supabase";
-import { beginCreateMatchForPlayer } from "../../src/lib/begin-create-match-for-player";
-import { CREATE_MATCH_ROUTE } from "../../src/lib/routes";
+import { openAskToPlayFlow } from "../../src/lib/create-match-guard";
 import { PlayerAvailabilitySection } from "../../src/components/player/PlayerAvailabilitySection";
 import { PlayerPreferredClubsSection } from "../../src/components/player/PlayerPreferredClubsSection";
 import { PlayerProfileHero } from "../../src/components/player/PlayerProfileHero";
@@ -46,6 +46,13 @@ export default function PlayerDetailScreen() {
     enabled: Boolean(id),
   });
 
+  // Same cache entry the tab bar already fills; "Play request" creates, and
+  // creating has a limit, so the guard needs the count.
+  const myMatchesQuery = useQuery({
+    queryKey: ["my-matches"],
+    queryFn: () => listMyMatches(supabase),
+  });
+
   const recentMatchesQuery = useQuery({
     queryKey: ["player-recent-matches", id],
     queryFn: () => listPublicPlayerRecentMatches(supabase, id!, 5),
@@ -69,8 +76,7 @@ export default function PlayerDetailScreen() {
 
   const startCreate = () => {
     if (!player) return;
-    beginCreateMatchForPlayer(player);
-    router.push(CREATE_MATCH_ROUTE);
+    openAskToPlayFlow(player, myMatchesQuery.data, t);
   };
   const isLoading =
     playerQuery.isLoading ||

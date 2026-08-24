@@ -20,6 +20,7 @@ import {
 } from "@tennis-lebanon/api";
 import {
   discoveryFiltersForMatchInvite,
+  viewerMayInvite,
   widenLevelWindow,
 } from "@tennis-lebanon/domain";
 import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
@@ -115,7 +116,9 @@ export default function MatchInvitePlayersScreen() {
     queryKey: ["match-invite-players", id, playerFilters],
     queryFn: () => discoverCompatiblePlayers(supabase, playerFilters!),
     enabled:
-      Boolean(hub?.viewer_is_creator) && !matchFull && Boolean(playerFilters),
+      Boolean(hub && viewerMayInvite(hub)) &&
+      !matchFull &&
+      Boolean(playerFilters),
   });
 
   const filteredPlayers = useMemo(
@@ -145,7 +148,7 @@ export default function MatchInvitePlayersScreen() {
     if (
       !invitePlayerId ||
       !id ||
-      !hub?.viewer_is_creator ||
+      !(hub && viewerMayInvite(hub)) ||
       autoInviteStarted.current
     ) {
       return;
@@ -162,7 +165,7 @@ export default function MatchInvitePlayersScreen() {
     inviteMutation.mutate(invitePlayerId);
     // Auto-invite once when arriving from create-for-player.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hub?.viewer_is_creator, id, invitePlayerId, participants]);
+  }, [hub, id, invitePlayerId, participants]);
 
   const finishMutation = useMutation({
     mutationFn: async () => {
@@ -299,7 +302,11 @@ export default function MatchInvitePlayersScreen() {
     );
   }
 
-  if (!hub.viewer_is_creator) {
+  // Not creator-only. `create_match_invite` authorises any accepted
+  // participant, deliberately -- it is what lets somebody who joined a doubles
+  // match go and find the fourth. Gating this screen on the host left them
+  // with nowhere to do it once Discover stopped inviting.
+  if (!viewerMayInvite(hub)) {
     return <Redirect href={{ pathname: "/match/[id]", params: { id: id! } }} />;
   }
 

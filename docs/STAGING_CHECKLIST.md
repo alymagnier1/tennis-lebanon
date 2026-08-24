@@ -12,6 +12,19 @@ pnpm db:reset              # requires Docker + Supabase CLI
 pnpm db:test               # RLS / RPC authorization matrix
 ```
 
+`db:test` is transactional and does not pollute the database, but it does read
+it. Run `db:reset` first, or if you are keeping local data you have been using
+the app against, clear the three things that accumulate through real use and
+make the suite fail for reasons unrelated to the change:
+
+```sql
+delete from public.discovery_search_log;                                  -- 30 searches/minute
+delete from public.match_invitations where created_at > now() - interval '1 day';  -- 20 invites/day
+select public.cancel_match(id, 'test reset') from public.matches           -- 3 hosted matches
+  where creator_id = '<your test user>'
+    and status in ('draft', 'open', 'full', 'ready_to_book');
+```
+
 - [ ] `pnpm verify:pilot` passes
 - [ ] `pnpm db:test` passes on the release commit
 - [ ] No open critical/high security findings

@@ -32,6 +32,7 @@ import {
   leavePolicyMessageKey,
   formatPriceMinor,
   hasUnanimousTimeYes,
+  viewerMayInvite,
 } from "@tennis-lebanon/domain";
 import { spacing, typography } from "@tennis-lebanon/ui";
 import { StatusBanner } from "../../../src/components/AppUi";
@@ -328,10 +329,9 @@ export default function MatchHubScreen() {
     return resolveHubAgreedStartsAt(hub, proposedTimes);
   }, [hub, proposedTimes]);
 
-  const canInvite =
-    hub?.viewer_is_creator &&
-    hub.participant_count < hub.capacity &&
-    (hub.status === "open" || hub.status === "full" || hub.status === "draft");
+  // The capacity and status checks moved into viewerMayInvite with the
+  // participant rule, so all three live where the server rule is mirrored.
+  const canInvite = Boolean(hub && viewerMayInvite(hub));
 
   const hasAcceptedBooking = hub?.booking?.status === "accepted";
   const courtLocked = isHubCourtLocked(booking);

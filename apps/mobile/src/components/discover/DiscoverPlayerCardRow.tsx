@@ -1,13 +1,14 @@
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
+import { useQuery } from "@tanstack/react-query";
+import { listMyMatches, type CompatiblePlayerCard } from "@tennis-lebanon/api";
 import { DiscoverPlayerCard } from "./DiscoverPlayerCard";
 import { formatMatchesPlayedLabel } from "../../lib/matches-played-label";
 import { publicPlayerLevelChip } from "../../lib/player-level-label";
 import { discoverPlayerAvailabilityTags } from "../../lib/discover-availability-tag";
-import { beginCreateMatchForPlayer } from "../../lib/begin-create-match-for-player";
+import { openAskToPlayFlow } from "../../lib/create-match-guard";
 import { clubNamesFromList } from "../../lib/match-clubs";
-import { CREATE_MATCH_ROUTE } from "../../lib/routes";
+import { supabase } from "../../lib/supabase";
 import { zoneLabelFromList } from "../../lib/zones";
 
 /**
@@ -32,6 +33,13 @@ export function DiscoverPlayerCardRow({
   showOverlapAvailability: boolean;
 }) {
   const { t } = useTranslation();
+
+  // Shares the tab bar's cache entry, so this costs no extra request. Needed
+  // because "Ask to play" always creates, and creating has a limit.
+  const myMatchesQuery = useQuery({
+    queryKey: ["my-matches"],
+    queryFn: () => listMyMatches(supabase),
+  });
 
   return (
     <DiscoverPlayerCard
@@ -61,10 +69,7 @@ export function DiscoverPlayerCardRow({
           params: { id: player.user_id },
         })
       }
-      onPrimaryPress={() => {
-        beginCreateMatchForPlayer(player);
-        router.push(CREATE_MATCH_ROUTE);
-      }}
+      onPrimaryPress={() => openAskToPlayFlow(player, myMatchesQuery.data, t)}
     />
   );
 }
