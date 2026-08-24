@@ -1,4 +1,5 @@
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../../src/theme/create-live-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -80,36 +81,38 @@ export default function MatchChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  header: {
-    gap: 12,
-    paddingBottom: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: tennisColors.border,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 24,
-    lineHeight: 30,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.4,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  notice: {
-    paddingHorizontal: tennisSpacing.screenX,
-    paddingTop: 16,
-  },
-  denied: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    header: {
+      gap: 12,
+      paddingBottom: 8,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: tennisColors.border,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 24,
+      lineHeight: 30,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.4,
+    },
+    centered: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    notice: {
+      paddingHorizontal: tennisSpacing.screenX,
+      paddingTop: 16,
+    },
+    denied: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

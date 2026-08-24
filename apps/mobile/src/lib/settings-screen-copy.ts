@@ -3,6 +3,7 @@ import type { TFunction } from "i18next";
 const FALLBACKS = {
   settingsScreenGeneral: "General",
   settingsScreenLanguage: "Language",
+  settingsScreenAppearance: "Appearance",
   settingsScreenSupport: "Support",
   settingsScreenAccount: "Account",
 } as const;
@@ -20,6 +21,10 @@ export function settingsScreenGeneralTitle(t: TFunction): string {
 
 export function settingsScreenLanguageTitle(t: TFunction): string {
   return tr(t, "settingsScreenLanguage");
+}
+
+export function settingsScreenAppearanceTitle(t: TFunction): string {
+  return tr(t, "settingsScreenAppearance");
 }
 
 export function settingsScreenSupportTitle(t: TFunction): string {

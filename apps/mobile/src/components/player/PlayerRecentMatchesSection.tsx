@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import type { PublicPlayerRecentMatch } from "@tennis-lebanon/api";
 import { formatMatchScore, matchScoreSchema } from "@tennis-lebanon/domain";
 import { useTranslation } from "react-i18next";
@@ -97,65 +98,67 @@ export function PlayerRecentMatchesSection({
   );
 }
 
-const styles = StyleSheet.create({
-  emptyHint: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-  },
-  row: {
-    alignItems: "center",
-    gap: 12,
-    paddingBottom: 12,
-  },
-  rowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: tennisColors.border,
-    marginBottom: 12,
-  },
-  resultBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  resultBadgeWin: {
-    backgroundColor: "#E8F5E9",
-  },
-  resultBadgeLoss: {
-    backgroundColor: "#FEF0E7",
-  },
-  resultBadgeText: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 13,
-  },
-  resultBadgeTextWin: {
-    color: "#4CAF50",
-  },
-  resultBadgeTextLoss: {
-    color: tennisColors.accent,
-  },
-  rowBody: {
-    flex: 1,
-    minWidth: 0,
-    gap: 1,
-  },
-  opponent: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-  },
-  score: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    color: tennisColors.mutedForeground,
-  },
-  date: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    color: tennisColors.mutedForeground,
-    flexShrink: 0,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    emptyHint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    row: {
+      alignItems: "center",
+      gap: 12,
+      paddingBottom: 12,
+    },
+    rowBorder: {
+      borderBottomWidth: 1,
+      borderBottomColor: tennisColors.border,
+      marginBottom: 12,
+    },
+    resultBadge: {
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    resultBadgeWin: {
+      backgroundColor: "#E8F5E9",
+    },
+    resultBadgeLoss: {
+      backgroundColor: "#FEF0E7",
+    },
+    resultBadgeText: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 13,
+    },
+    resultBadgeTextWin: {
+      color: "#4CAF50",
+    },
+    resultBadgeTextLoss: {
+      color: tennisColors.accent,
+    },
+    rowBody: {
+      flex: 1,
+      minWidth: 0,
+      gap: 1,
+    },
+    opponent: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.primaryDark,
+    },
+    score: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 11,
+      color: tennisColors.mutedForeground,
+    },
+    date: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 11,
+      color: tennisColors.mutedForeground,
+      flexShrink: 0,
+    },
+  }),
+);

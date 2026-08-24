@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { FlatList, Modal, Pressable, StyleSheet } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { Icon } from "../Icon";
@@ -146,72 +147,74 @@ export function OnboardingYearField({
   );
 }
 
-const styles = StyleSheet.create({
-  trigger: {
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    borderRadius: 12,
-    backgroundColor: tennisColors.card,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    minHeight: minTouchTargetPx,
-  },
-  triggerPressed: {
-    borderColor: tennisColors.primary,
-  },
-  triggerValue: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-  },
-  triggerPlaceholder: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 15,
-    color: tennisColors.mutedForeground,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(13,28,20,0.45)",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-  },
-  sheet: {
-    maxHeight: "70%",
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.xl,
-    paddingVertical: 8,
-    overflow: "hidden",
-  },
-  sheetTitle: {
-    fontFamily: tennisFontFamily.heading,
-    fontSize: 16,
-    color: tennisColors.primaryDark,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  row: {
-    height: ROW_HEIGHT,
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-  },
-  rowSelected: {
-    backgroundColor: tennisColors.secondary,
-  },
-  rowPressed: {
-    backgroundColor: tennisColors.muted,
-  },
-  rowLabel: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 16,
-    color: tennisColors.primaryDark,
-  },
-  rowLabelSelected: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 16,
-    color: tennisColors.primary,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    trigger: {
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderRadius: 12,
+      backgroundColor: tennisColors.card,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      minHeight: minTouchTargetPx,
+    },
+    triggerPressed: {
+      borderColor: tennisColors.primary,
+    },
+    triggerValue: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+    },
+    triggerPlaceholder: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 15,
+      color: tennisColors.mutedForeground,
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: "rgba(13,28,20,0.45)",
+      justifyContent: "center",
+      paddingHorizontal: 32,
+    },
+    sheet: {
+      maxHeight: "70%",
+      backgroundColor: tennisColors.card,
+      borderRadius: tennisRadii.xl,
+      paddingVertical: 8,
+      overflow: "hidden",
+    },
+    sheetTitle: {
+      fontFamily: tennisFontFamily.heading,
+      fontSize: 16,
+      color: tennisColors.primaryDark,
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 8,
+    },
+    row: {
+      height: ROW_HEIGHT,
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 20,
+    },
+    rowSelected: {
+      backgroundColor: tennisColors.secondary,
+    },
+    rowPressed: {
+      backgroundColor: tennisColors.muted,
+    },
+    rowLabel: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 16,
+      color: tennisColors.primaryDark,
+    },
+    rowLabelSelected: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 16,
+      color: tennisColors.primary,
+    },
+  }),
+);

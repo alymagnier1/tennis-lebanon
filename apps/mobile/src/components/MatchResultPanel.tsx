@@ -1,5 +1,6 @@
 import { useMemo, useState, type PropsWithChildren } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
@@ -714,182 +715,184 @@ function ResultShell({
   return <PlayerProfileSection title={title}>{children}</PlayerProfileSection>;
 }
 
-const styles = StyleSheet.create({
-  plainShell: {
-    gap: tennisSpacing.section,
-  },
-  declineRow: {
-    alignSelf: "flex-start",
-    paddingVertical: 10,
-  },
-  declinePressed: {
-    opacity: 0.6,
-  },
-  declineLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primary,
-    textDecorationLine: "underline",
-  },
-  section: {
-    gap: 14,
-  },
-  intro: {
-    gap: 6,
-  },
-  prompt: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 16,
-    lineHeight: 22,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.2,
-  },
-  hint: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 19,
-    color: tennisColors.mutedForeground,
-  },
-  scoreBlock: {
-    width: "100%",
-    gap: 10,
-  },
-  scoreHeaderRow: {
-    width: "100%",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    gap: 10,
-  },
-  scoreColumnLabel: {
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    minWidth: 0,
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    lineHeight: 16,
-    color: tennisColors.mutedForeground,
-    textAlign: "center",
-  },
-  scoreDashSpacer: {
-    flexShrink: 0,
-    width: 18,
-  },
-  setCard: {
-    width: "100%",
-    gap: 10,
-    padding: 14,
-    borderRadius: tennisRadii.lg,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.muted,
-    overflow: "hidden",
-  },
-  setLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-  },
-  scoreInputRow: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  scoreInputWrap: {
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    minWidth: 0,
-  },
-  scoreInput: {
-    width: "100%",
-    minHeight: 52,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-    textAlign: "center",
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 22,
-    color: tennisColors.primaryDark,
-    paddingHorizontal: 8,
-  },
-  scoreInputDisabled: {
-    opacity: 0.55,
-  },
-  scoreDash: {
-    flexShrink: 0,
-    width: 18,
-    textAlign: "center",
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 18,
-    color: tennisColors.mutedForeground,
-  },
-  setActions: {
-    flexWrap: "wrap",
-    gap: 8,
-    justifyContent: "center",
-  },
-  setAction: {
-    minHeight: 40,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: tennisRadii.md,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  setActionPressed: {
-    opacity: 0.8,
-  },
-  setActionDisabled: {
-    opacity: 0.45,
-  },
-  setActionLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.primary,
-  },
-  setActionLabelMuted: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-  },
-  winnerPreview: {
-    alignSelf: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.secondary,
-  },
-  winnerPreviewText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.primary,
-  },
-  error: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.danger,
-    lineHeight: 18,
-    textAlign: "center",
-  },
-  subheading: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-  },
-  muted: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-    lineHeight: 20,
-  },
-  chips: {
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  stack: {
-    gap: 12,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    plainShell: {
+      gap: tennisSpacing.section,
+    },
+    declineRow: {
+      alignSelf: "flex-start",
+      paddingVertical: 10,
+    },
+    declinePressed: {
+      opacity: 0.6,
+    },
+    declineLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.primary,
+      textDecorationLine: "underline",
+    },
+    section: {
+      gap: 14,
+    },
+    intro: {
+      gap: 6,
+    },
+    prompt: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 16,
+      lineHeight: 22,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+    },
+    hint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 19,
+      color: tennisColors.mutedForeground,
+    },
+    scoreBlock: {
+      width: "100%",
+      gap: 10,
+    },
+    scoreHeaderRow: {
+      width: "100%",
+      alignItems: "center",
+      paddingHorizontal: 14,
+      gap: 10,
+    },
+    scoreColumnLabel: {
+      flexGrow: 1,
+      flexShrink: 1,
+      flexBasis: 0,
+      minWidth: 0,
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+      textAlign: "center",
+    },
+    scoreDashSpacer: {
+      flexShrink: 0,
+      width: 18,
+    },
+    setCard: {
+      width: "100%",
+      gap: 10,
+      padding: 14,
+      borderRadius: tennisRadii.lg,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.muted,
+      overflow: "hidden",
+    },
+    setLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.primaryDark,
+    },
+    scoreInputRow: {
+      width: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+    },
+    scoreInputWrap: {
+      flexGrow: 1,
+      flexShrink: 1,
+      flexBasis: 0,
+      minWidth: 0,
+    },
+    scoreInput: {
+      width: "100%",
+      minHeight: 52,
+      borderRadius: tennisRadii.md,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+      textAlign: "center",
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 22,
+      color: tennisColors.primaryDark,
+      paddingHorizontal: 8,
+    },
+    scoreInputDisabled: {
+      opacity: 0.55,
+    },
+    scoreDash: {
+      flexShrink: 0,
+      width: 18,
+      textAlign: "center",
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 18,
+      color: tennisColors.mutedForeground,
+    },
+    setActions: {
+      flexWrap: "wrap",
+      gap: 8,
+      justifyContent: "center",
+    },
+    setAction: {
+      minHeight: 40,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: tennisRadii.md,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    setActionPressed: {
+      opacity: 0.8,
+    },
+    setActionDisabled: {
+      opacity: 0.45,
+    },
+    setActionLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.primary,
+    },
+    setActionLabelMuted: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    winnerPreview: {
+      alignSelf: "center",
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.secondary,
+    },
+    winnerPreviewText: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.primary,
+    },
+    error: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.danger,
+      lineHeight: 18,
+      textAlign: "center",
+    },
+    subheading: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.primaryDark,
+    },
+    muted: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+      lineHeight: 20,
+    },
+    chips: {
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    stack: {
+      gap: 12,
+    },
+  }),
+);

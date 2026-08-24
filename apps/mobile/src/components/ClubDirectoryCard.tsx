@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import type { ClubDirectoryRow } from "@tennis-lebanon/api";
 import {
@@ -204,199 +205,201 @@ export function ClubDirectoryCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    borderWidth: 2,
-    borderColor: tennisColors.border,
-    borderRadius: 18,
-    overflow: "hidden",
-    backgroundColor: tennisColors.card,
-  },
-  cardCompact: {
-    borderRadius: tennisRadii.lg,
-  },
-  cardSelected: {
-    borderColor: tennisColors.primary,
-    backgroundColor: tennisColors.secondary,
-    shadowColor: tennisColors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardPressed: {
-    opacity: 0.92,
-  },
-  hero: {
-    height: 160,
-    backgroundColor: tennisColors.muted,
-    position: "relative",
-    overflow: "hidden",
-  },
-  heroCompact: {
-    height: 72,
-  },
-  heroOverlay: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 80,
-    backgroundColor: "rgba(0,0,0,0.35)",
-    zIndex: 2,
-  },
-  heroPattern: {
-    ...StyleSheet.absoluteFill,
-    alignItems: "center",
-    justifyContent: "center",
-    opacity: 0.35,
-  },
-  selectMark: {
-    position: "absolute",
-    top: 10,
-    left: 10,
-    zIndex: 4,
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: tennisColors.white,
-    backgroundColor: "rgba(255,255,255,0.35)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  selectMarkSelected: {
-    backgroundColor: tennisColors.primary,
-    borderColor: tennisColors.primary,
-  },
-  selectCheck: {
-    color: tennisColors.lime,
-    fontSize: 13,
-    fontFamily: tennisFontFamily.bodySemi,
-    lineHeight: 16,
-  },
-  favoriteBadge: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    zIndex: 3,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: tennisRadii.pill,
-    backgroundColor: tennisColors.lime,
-  },
-  favoriteBadgeText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 11,
-    color: tennisColors.limeText,
-  },
-  bookingBadge: {
-    position: "absolute",
-    right: 12,
-    bottom: 12,
-    zIndex: 3,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: tennisRadii.pill,
-  },
-  bookingBadgeText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 11,
-  },
-  body: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
-  },
-  bodyCompact: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 8,
-  },
-  titleRow: {
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  titleBlock: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  name: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 17,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.3,
-  },
-  nameCompact: {
-    fontSize: 15,
-    lineHeight: 20,
-  },
-  zone: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-  priceBlock: {
-    alignItems: "flex-end",
-    flexShrink: 0,
-  },
-  price: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 18,
-    color: tennisColors.primary,
-    letterSpacing: -0.3,
-  },
-  priceCompact: {
-    fontSize: 15,
-    lineHeight: 18,
-  },
-  priceHint: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    color: tennisColors.mutedForeground,
-  },
-  metaRow: {
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  metaChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: tennisColors.muted,
-  },
-  metaChipText: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 11,
-    color: tennisColors.mutedForeground,
-  },
-  tagRow: {
-    flexWrap: "wrap",
-    gap: 6,
-  },
-  tag: {
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-    borderRadius: tennisRadii.pill,
-    backgroundColor: tennisColors.secondary,
-    maxWidth: "100%",
-  },
-  tagText: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 11,
-    color: tennisColors.primary,
-  },
-  cta: {
-    paddingVertical: 12,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.primary,
-    alignItems: "center",
-  },
-  ctaLabel: {
-    fontFamily: tennisFontFamily.heading,
-    fontSize: 14,
-    color: tennisColors.white,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    card: {
+      borderWidth: 2,
+      borderColor: tennisColors.border,
+      borderRadius: 18,
+      overflow: "hidden",
+      backgroundColor: tennisColors.card,
+    },
+    cardCompact: {
+      borderRadius: tennisRadii.lg,
+    },
+    cardSelected: {
+      borderColor: tennisColors.primary,
+      backgroundColor: tennisColors.secondary,
+      shadowColor: tennisColors.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.12,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    cardPressed: {
+      opacity: 0.92,
+    },
+    hero: {
+      height: 160,
+      backgroundColor: tennisColors.muted,
+      position: "relative",
+      overflow: "hidden",
+    },
+    heroCompact: {
+      height: 72,
+    },
+    heroOverlay: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: 80,
+      backgroundColor: "rgba(0,0,0,0.35)",
+      zIndex: 2,
+    },
+    heroPattern: {
+      ...StyleSheet.absoluteFill,
+      alignItems: "center",
+      justifyContent: "center",
+      opacity: 0.35,
+    },
+    selectMark: {
+      position: "absolute",
+      top: 10,
+      left: 10,
+      zIndex: 4,
+      width: 24,
+      height: 24,
+      borderRadius: 8,
+      borderWidth: 2,
+      borderColor: tennisColors.white,
+      backgroundColor: "rgba(255,255,255,0.35)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    selectMarkSelected: {
+      backgroundColor: tennisColors.primary,
+      borderColor: tennisColors.primary,
+    },
+    selectCheck: {
+      color: tennisColors.lime,
+      fontSize: 13,
+      fontFamily: tennisFontFamily.bodySemi,
+      lineHeight: 16,
+    },
+    favoriteBadge: {
+      position: "absolute",
+      top: 12,
+      right: 12,
+      zIndex: 3,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: tennisRadii.pill,
+      backgroundColor: tennisColors.lime,
+    },
+    favoriteBadgeText: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 11,
+      color: tennisColors.limeText,
+    },
+    bookingBadge: {
+      position: "absolute",
+      right: 12,
+      bottom: 12,
+      zIndex: 3,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: tennisRadii.pill,
+    },
+    bookingBadgeText: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 11,
+    },
+    body: {
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      gap: 12,
+    },
+    bodyCompact: {
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      gap: 8,
+    },
+    titleRow: {
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    titleBlock: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2,
+    },
+    name: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 17,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.3,
+    },
+    nameCompact: {
+      fontSize: 15,
+      lineHeight: 20,
+    },
+    zone: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+    priceBlock: {
+      alignItems: "flex-end",
+      flexShrink: 0,
+    },
+    price: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 18,
+      color: tennisColors.primary,
+      letterSpacing: -0.3,
+    },
+    priceCompact: {
+      fontSize: 15,
+      lineHeight: 18,
+    },
+    priceHint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 11,
+      color: tennisColors.mutedForeground,
+    },
+    metaRow: {
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    metaChip: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+      backgroundColor: tennisColors.muted,
+    },
+    metaChipText: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 11,
+      color: tennisColors.mutedForeground,
+    },
+    tagRow: {
+      flexWrap: "wrap",
+      gap: 6,
+    },
+    tag: {
+      paddingHorizontal: 9,
+      paddingVertical: 3,
+      borderRadius: tennisRadii.pill,
+      backgroundColor: tennisColors.secondary,
+      maxWidth: "100%",
+    },
+    tagText: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 11,
+      color: tennisColors.primary,
+    },
+    cta: {
+      paddingVertical: 12,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.primary,
+      alignItems: "center",
+    },
+    ctaLabel: {
+      fontFamily: tennisFontFamily.heading,
+      fontSize: 14,
+      color: tennisColors.white,
+    },
+  }),
+);

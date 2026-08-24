@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import type {
   CompatiblePlayerCard,
   PublicPlayerAvailabilitySummary,
@@ -11,24 +12,40 @@ import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import {
   formatAvailabilityDayPartsLabel,
+  formatWeeklyDaysLabel,
   hasPublicAvailabilitySummary,
-  publicAvailabilityByWeekday,
 } from "../../lib/public-availability-summary";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { formatTodayAvailabilityTime } from "../../lib/beirut-time";
+import { tennisColors } from "../../theme/tennis-tokens";
 
-/**
- * Icon plus text rather than an emoji prefix: emoji render differently on every
- * platform, do not follow the text colour, and get read aloud by screen readers
- * as their own name before the line they decorate.
- */
-function DetailLine({ icon, text }: { icon: IconName; text: string }) {
+function FactRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: IconName;
+  label: string;
+  value: string;
+}) {
   const { rowDirection, writingDirection } = useLayoutDirection();
 
   return (
-    <View style={[styles.detailRow, { flexDirection: rowDirection }]}>
+    <View style={[styles.factRow, { flexDirection: rowDirection }]}>
       <Icon name={icon} size={14} color={tennisColors.mutedForeground} />
-      <AppText style={[styles.detailLine, { writingDirection }]}>
-        {text}
+      <AppText style={[styles.factLabel, { writingDirection }]}>
+        {label}
+      </AppText>
+      <AppText
+        style={[
+          styles.factValue,
+          {
+            writingDirection,
+            textAlign: writingDirection === "rtl" ? "left" : "right",
+          },
+        ]}
+        maxLines={1}
+      >
+        {value}
       </AppText>
     </View>
   );
@@ -42,88 +59,79 @@ export function PlayerAvailabilitySection({
   summary: PublicPlayerAvailabilitySummary | undefined;
 }) {
   const { t } = useTranslation();
-  const { rowDirection, writingDirection } = useLayoutDirection();
-  const weekdayEntries = publicAvailabilityByWeekday(summary);
-  const intentLabel = t(`playIntent.${player.play_intent}`);
+  const { writingDirection } = useLayoutDirection();
   const hasSummary = hasPublicAvailabilitySummary(summary);
+  const preferredTime = summary
+    ? formatAvailabilityDayPartsLabel(summary.day_parts, t)
+    : "";
+  const weeklyDays = summary ? formatWeeklyDaysLabel(summary.weekdays, t) : "";
+  const todayTime = formatTodayAvailabilityTime(player.near_term_slots);
 
   return (
-    <PlayerProfileSection title={t("playerProfile.availabilityTitle")}>
-      {hasSummary && weekdayEntries.length > 0 ? (
-        <View style={[styles.weekdayRow, { flexDirection: rowDirection }]}>
-          {weekdayEntries.map((entry) => {
-            const dayLabel = t(`availability.weekdaysShort.${entry.weekday}`);
-            const partsLabel = formatAvailabilityDayPartsLabel(
-              entry.day_parts,
-              t,
-            );
-
-            return (
-              <View key={entry.weekday} style={styles.weekdayChip}>
-                <AppText style={styles.weekdayChipText}>{dayLabel}</AppText>
-                {partsLabel ? (
-                  <AppText style={styles.weekdayPartsText} maxLines={2}>
-                    {partsLabel}
-                  </AppText>
-                ) : null}
-              </View>
-            );
-          })}
+    <PlayerProfileSection dense title={t("playerProfile.availabilityTitle")}>
+      {hasSummary ? (
+        <View style={styles.list}>
+          {preferredTime ? (
+            <FactRow
+              icon="clock"
+              label={t("playerProfile.preferredTimeLabel")}
+              value={preferredTime}
+            />
+          ) : null}
+          {todayTime ? (
+            <FactRow
+              icon="calendar"
+              label={t("playerProfile.availableTodayLabel")}
+              value={todayTime}
+            />
+          ) : null}
+          {weeklyDays ? (
+            <FactRow
+              icon="calendar"
+              label={t("playerProfile.weeklyLabel")}
+              value={weeklyDays}
+            />
+          ) : null}
         </View>
-      ) : null}
-      <DetailLine
-        icon="playIntent"
-        text={t("playerProfile.intentPreference", { intent: intentLabel })}
-      />
-      {!hasSummary ? (
+      ) : (
         <AppText style={[styles.emptyHint, { writingDirection }]}>
           {t("playerProfile.noAvailability")}
         </AppText>
-      ) : null}
+      )}
     </PlayerProfileSection>
   );
 }
 
-const styles = StyleSheet.create({
-  weekdayRow: {
-    flexWrap: "wrap",
-    gap: 6,
-  },
-  weekdayChip: {
-    backgroundColor: tennisColors.secondary,
-    borderRadius: tennisRadii.sm,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    alignItems: "center",
-    gap: 2,
-    maxWidth: 120,
-  },
-  weekdayChipText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 12,
-    color: tennisColors.primary,
-  },
-  weekdayPartsText: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 10,
-    color: tennisColors.mutedForeground,
-    textAlign: "center",
-    lineHeight: 14,
-  },
-  detailRow: {
-    alignItems: "center",
-    gap: 6,
-  },
-  detailLine: {
-    flexShrink: 1,
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-    lineHeight: 20,
-  },
-  emptyHint: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    list: {
+      gap: 0,
+    },
+    factRow: {
+      alignItems: "center",
+      gap: 8,
+      paddingVertical: 3,
+    },
+    factLabel: {
+      flexGrow: 0,
+      flexShrink: 0,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+    },
+    factValue: {
+      flex: 1,
+      minWidth: 0,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 18,
+      color: tennisColors.primaryDark,
+    },
+    emptyHint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

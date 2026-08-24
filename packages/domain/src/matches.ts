@@ -271,6 +271,33 @@ export function findActiveHostedMatch<T extends HostedMatchRef>(
   );
 }
 
+/**
+ * How many matches a player may have on the go at once.
+ *
+ * Mirrors `hosted_match_cap()` in `087`. Three, counting drafts, across both
+ * formats and both visibilities -- one number rather than the per-format,
+ * per-visibility rule it replaced, because Discover and player profiles now
+ * always create rather than sometimes inviting, which makes creating the
+ * common action and a count the right shape of limit for it.
+ */
+export const HOSTED_MATCH_CAP = 3;
+
+/** Matches counted against `HOSTED_MATCH_CAP`: yours, and still in flight. */
+export function activeHostedMatches<T extends HostedMatchRef>(
+  matches: readonly T[],
+): T[] {
+  return matches.filter(
+    (match) => match.is_creator && isActiveHostedMatchStatus(match.status),
+  );
+}
+
+/** True when the server would refuse another `create_match_draft`. */
+export function hasReachedHostedMatchCap<T extends HostedMatchRef>(
+  matches: readonly T[],
+): boolean {
+  return activeHostedMatches(matches).length >= HOSTED_MATCH_CAP;
+}
+
 export function canCreatorCancelBeforeBooking(status: string): boolean {
   return isActiveHostedMatchStatus(status);
 }

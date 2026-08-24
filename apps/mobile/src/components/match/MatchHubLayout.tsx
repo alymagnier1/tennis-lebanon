@@ -1,5 +1,6 @@
 import type { PropsWithChildren, RefObject } from "react";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
 import { FigmaBackButton } from "../onboarding-ui";
@@ -98,32 +99,34 @@ export function MatchHubLayout({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  header: {
-    gap: 16,
-    paddingBottom: 12,
-    backgroundColor: tennisColors.background,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 28,
-    lineHeight: 32,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.6,
-  },
-  statusSlot: {
-    alignSelf: "flex-start",
-    marginTop: 6,
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    gap: 16,
-    paddingTop: 4,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    header: {
+      gap: 16,
+      paddingBottom: 12,
+      backgroundColor: tennisColors.background,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 28,
+      lineHeight: 32,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.6,
+    },
+    statusSlot: {
+      alignSelf: "flex-start",
+      marginTop: 6,
+    },
+    scroll: {
+      flex: 1,
+    },
+    content: {
+      gap: 16,
+      paddingTop: 4,
+    },
+  }),
+);

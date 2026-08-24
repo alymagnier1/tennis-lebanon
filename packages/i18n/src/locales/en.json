@@ -841,7 +841,6 @@
       "formatDescription": "Choose format and play intent.",
       "detailsTitle": "Match preferences",
       "detailsDescription": "Set level range and join rules.",
-      "forPlayerHint": "You're setting up a match for {{name}}. We'll invite them after you publish.",
       "matchTypeSection": "Match type",
       "matchTypeDescription": "Singles or doubles, and how competitive you want to play.",
       "joinSettingsSection": "Who can join",
@@ -886,8 +885,6 @@
       "publishError": "We could not publish this match.",
       "reviewValidationError": "Some match details are invalid. Go back and check your areas and time.",
       "reviewTimeInPast": "Proposed time must be in the future. Go back and pick a later slot.",
-      "activeHostedTitle": "You already have an open match",
-      "activeHostedBody": "You already have an open {{format}} match. Invite players or cancel it before creating another.",
       "continueInviting": "Continue inviting players",
       "incomplete": "This draft is incomplete. Start again.",
       "loadProfileError": "We could not load your match settings. Pull to refresh or try again.",
@@ -912,7 +909,14 @@
       },
       "publishActionsHint": "Publish makes the match visible on Discover. Invite players keeps it as a draft you send to specific people.",
       "notesAdd": "Add a note",
-      "notesHide": "Hide note"
+      "notesHide": "Hide note",
+      "sendRequest": "Send request to {{name}}",
+      "sendRequestHint": "Only {{name}} sees this. They can accept or decline.",
+      "forPlayerHint": "You're setting up a match for {{name}}. Only they will see it.",
+      "publishPrivateHint": "This match will not appear on Discover. Publish it, then invite the players you want.",
+      "capReachedTitle": "You have {{count}} matches on the go",
+      "capReachedBody": "Cancel one to start another. To add players to a match you already have, open it and invite from there.",
+      "seeMyMatches": "See your matches"
     },
     "visibility": {
       "public": "Public",
@@ -1258,10 +1262,7 @@
       "acceptError": "We could not accept this invite.",
       "declineError": "We could not decline this invite.",
       "sent": "Invite sent. They will see it in Matches → Invites.",
-      "pickMatch": "Invite to one of your open matches",
-      "pickMatchHint": "Add them to a match you already host — or challenge them to a new one below.",
       "inviteToMatch": "Invite to {{format}} match",
-      "noTimeYet": "Time to be confirmed",
       "invitePlayer": "Invite",
       "invitePlayers": "Invite players",
       "invited": "Invited",
@@ -1289,9 +1290,7 @@
       "autoSendOnPublish": "They will receive an in-app invite when you publish.",
       "rateLimited": "You have sent a lot of invites today. Try again tomorrow.",
       "notSentTitle": "Match created, invite not sent",
-      "createInstead": "Create a new match",
-      "yourMatch": "Your match",
-      "joinedMatch": "You joined this one"
+      "askToPlay": "Ask to play"
     },
     "policy": {
       "leaveBeforeBooking": "You can leave freely while no court is booked. Repeated late changes may affect your reliability.",

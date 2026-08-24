@@ -6,6 +6,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WizardProgress } from "../AppUi";
 import { AppText } from "../AppText";
@@ -98,53 +99,57 @@ export function OnboardingFormField({
   );
 }
 
-export const onboardingInputStyle = StyleSheet.create({
-  input: {
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    borderRadius: 12,
-    backgroundColor: tennisColors.card,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontFamily: tennisFontFamily.body,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-  },
-});
+export const onboardingInputStyle = createLiveSheet(() =>
+  StyleSheet.create({
+    input: {
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderRadius: 12,
+      backgroundColor: tennisColors.card,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+    },
+  }),
+);
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  scrollContent: {
-    paddingHorizontal: tennisSpacing.screenX,
-    paddingBottom: 24,
-    flexGrow: 1,
-  },
-  header: {
-    marginTop: 24,
-    marginBottom: 24,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 28,
-    lineHeight: 32,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.6,
-  },
-  footer: {
-    paddingHorizontal: tennisSpacing.screenX,
-    paddingBottom: 8,
-    gap: 10,
-  },
-  field: {
-    marginBottom: 18,
-  },
-  fieldError: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.danger,
-    marginTop: 6,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    scrollContent: {
+      paddingHorizontal: tennisSpacing.screenX,
+      paddingBottom: 24,
+      flexGrow: 1,
+    },
+    header: {
+      marginTop: 24,
+      marginBottom: 24,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 28,
+      lineHeight: 32,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.6,
+    },
+    footer: {
+      paddingHorizontal: tennisSpacing.screenX,
+      paddingBottom: 8,
+      gap: 10,
+    },
+    field: {
+      marginBottom: 18,
+    },
+    fieldError: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.danger,
+      marginTop: 6,
+    },
+  }),
+);

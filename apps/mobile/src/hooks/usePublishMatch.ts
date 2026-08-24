@@ -7,7 +7,10 @@ import {
   publishMatch,
   setClubFavorite,
 } from "@tennis-lebanon/api";
-import type { CreateMatchInput } from "@tennis-lebanon/domain";
+import {
+  HOSTED_MATCH_CAP,
+  type CreateMatchInput,
+} from "@tennis-lebanon/domain";
 import {
   buildCreateMatchInput,
   getCreateMatchDraft,
@@ -35,10 +38,10 @@ type PublishVariables = {
   seedFavoriteClubs: boolean;
 };
 
-function isActiveHostedMatchError(error: unknown): boolean {
+function isMatchCapError(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const message = "message" in error ? String(error.message) : "";
-  return message.includes("active_hosted_match_exists");
+  return message.includes("match_cap_reached");
 }
 
 function publishValidationMessage(
@@ -158,13 +161,10 @@ export function usePublishMatch(options?: {
       }
     },
     onError: (error) => {
-      if (isActiveHostedMatchError(error)) {
-        const draft = getCreateMatchDraft();
+      if (isMatchCapError(error)) {
         notify(
-          t("matches.create.activeHostedTitle"),
-          t("matches.create.activeHostedBody", {
-            format: draft.format ? t(`formats.${draft.format}`) : "",
-          }),
+          t("matches.create.capReachedTitle", { count: HOSTED_MATCH_CAP }),
+          t("matches.create.capReachedBody"),
         );
         return;
       }

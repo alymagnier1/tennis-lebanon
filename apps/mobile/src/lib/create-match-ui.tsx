@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import type { PropsWithChildren, ReactNode } from "react";
 import { AppText } from "../components/AppText";
 import { figmaFormStyles } from "../components/onboarding-ui/figma-form-styles";
@@ -132,72 +133,74 @@ export function CreateMatchSummaryValue({
   );
 }
 
-const createMatchPanelStyles = StyleSheet.create({
-  panel: {
-    backgroundColor: tennisColors.card,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    borderRadius: tennisRadii.xl,
-    padding: 16,
-  },
-  panelHeaderBlock: {
-    gap: tennisTypography.titleSubtitleGap,
-  },
-  panelHeader: {
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  panelTitle: {
-    flex: 1,
-    fontFamily: tennisFontFamily.heading,
-    fontSize: 17,
-    lineHeight: 20,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.3,
-  },
-  panelAction: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    lineHeight: 18,
-    color: tennisColors.primary,
-  },
-  panelBody: {
-    gap: 12,
-  },
-  panelBodyAfterTitle: {
-    marginTop: 8,
-  },
-  panelBodyAfterSubtitle: {
-    marginTop: 10,
-  },
-  subsection: {
-    gap: 4,
-  },
-  subsectionLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 11,
-    lineHeight: 15,
-    color: tennisColors.mutedForeground,
-  },
-  subsectionBody: {
-    gap: 8,
-  },
-  subsectionDivider: {
-    height: 1,
-    backgroundColor: tennisColors.border,
-  },
-  summaryValueWrap: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.muted,
-  },
-  summaryValueEmpty: {
-    backgroundColor: tennisColors.background,
-    borderWidth: 1,
-    borderColor: tennisColors.border,
-  },
-});
+const createMatchPanelStyles = createLiveSheet(() =>
+  StyleSheet.create({
+    panel: {
+      backgroundColor: tennisColors.card,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderRadius: tennisRadii.xl,
+      padding: 16,
+    },
+    panelHeaderBlock: {
+      gap: tennisTypography.titleSubtitleGap,
+    },
+    panelHeader: {
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    panelTitle: {
+      flex: 1,
+      fontFamily: tennisFontFamily.heading,
+      fontSize: 17,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.3,
+    },
+    panelAction: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      lineHeight: 18,
+      color: tennisColors.primary,
+    },
+    panelBody: {
+      gap: 12,
+    },
+    panelBodyAfterTitle: {
+      marginTop: 8,
+    },
+    panelBodyAfterSubtitle: {
+      marginTop: 10,
+    },
+    subsection: {
+      gap: 4,
+    },
+    subsectionLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 11,
+      lineHeight: 15,
+      color: tennisColors.mutedForeground,
+    },
+    subsectionBody: {
+      gap: 8,
+    },
+    subsectionDivider: {
+      height: 1,
+      backgroundColor: tennisColors.border,
+    },
+    summaryValueWrap: {
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.muted,
+    },
+    summaryValueEmpty: {
+      backgroundColor: tennisColors.background,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+    },
+  }),
+);
 
 export { createMatchStyles } from "./create-match-styles";

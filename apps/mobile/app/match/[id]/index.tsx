@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../../src/theme/create-live-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -966,73 +967,75 @@ export default function MatchHubScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  participantRow: {
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  participantText: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  participantName: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    color: tennisColors.primaryDark,
-    fontSize: typography.size.md,
-  },
-  participantMeta: {
-    fontFamily: tennisFontFamily.body,
-    color: tennisColors.mutedForeground,
-    fontSize: typography.size.sm,
-  },
-  timeCard: {
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    borderRadius: tennisRadii.md,
-    padding: spacing.md,
-    gap: spacing.sm,
-    backgroundColor: tennisColors.muted,
-  },
-  timeLabel: {
-    fontFamily: tennisFontFamily.headingSemi,
-    color: tennisColors.primaryDark,
-    fontSize: typography.size.sm,
-  },
-  timeMeta: {
-    fontFamily: tennisFontFamily.body,
-    color: tennisColors.mutedForeground,
-    fontSize: typography.size.xs,
-  },
-  voteRow: {
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  requestCard: {
-    gap: spacing.sm,
-    paddingBottom: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: tennisColors.border,
-  },
-  requestActions: {
-    gap: spacing.sm,
-  },
-  inlineActions: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  inlineAction: {
-    flex: 1,
-  },
-  bookingActions: {
-    gap: spacing.sm,
-  },
-  hubNotes: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: typography.size.sm,
-    lineHeight: 20,
-    color: tennisColors.primaryDark,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    participantRow: {
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: spacing.md,
+      paddingVertical: spacing.xs,
+    },
+    participantText: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2,
+    },
+    participantName: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      color: tennisColors.primaryDark,
+      fontSize: typography.size.md,
+    },
+    participantMeta: {
+      fontFamily: tennisFontFamily.body,
+      color: tennisColors.mutedForeground,
+      fontSize: typography.size.sm,
+    },
+    timeCard: {
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderRadius: tennisRadii.md,
+      padding: spacing.md,
+      gap: spacing.sm,
+      backgroundColor: tennisColors.muted,
+    },
+    timeLabel: {
+      fontFamily: tennisFontFamily.headingSemi,
+      color: tennisColors.primaryDark,
+      fontSize: typography.size.sm,
+    },
+    timeMeta: {
+      fontFamily: tennisFontFamily.body,
+      color: tennisColors.mutedForeground,
+      fontSize: typography.size.xs,
+    },
+    voteRow: {
+      flexWrap: "wrap",
+      gap: spacing.sm,
+    },
+    requestCard: {
+      gap: spacing.sm,
+      paddingBottom: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: tennisColors.border,
+    },
+    requestActions: {
+      gap: spacing.sm,
+    },
+    inlineActions: {
+      flexDirection: "row",
+      gap: spacing.sm,
+    },
+    inlineAction: {
+      flex: 1,
+    },
+    bookingActions: {
+      gap: spacing.sm,
+    },
+    hubNotes: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: typography.size.sm,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
+    },
+  }),
+);

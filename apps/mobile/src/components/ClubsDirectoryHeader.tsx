@@ -6,6 +6,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "./AppText";
 import { Icon } from "./Icon";
@@ -137,54 +138,56 @@ export function useClubsDirectoryFilters<
   };
 }
 
-const styles = StyleSheet.create({
-  searchWrap: {
-    position: "relative",
-    marginTop: 4,
-  },
-  searchIcon: {
-    position: "absolute",
-    left: 14,
-    top: 0,
-    bottom: 0,
-    justifyContent: "center",
-    zIndex: 1,
-  },
-  searchInput: {
-    paddingVertical: 12,
-    paddingLeft: 40,
-    paddingRight: 12,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.2)",
-    borderRadius: tennisRadii.md,
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.white,
-  },
-  filterRow: {
-    backgroundColor: tennisColors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: tennisColors.border,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderRadius: tennisRadii.pill,
-    backgroundColor: tennisColors.muted,
-  },
-  filterChipSelected: {
-    backgroundColor: tennisColors.primary,
-  },
-  filterChipLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-  },
-  filterChipLabelSelected: {
-    color: tennisColors.white,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    searchWrap: {
+      position: "relative",
+      marginTop: 4,
+    },
+    searchIcon: {
+      position: "absolute",
+      left: 14,
+      top: 0,
+      bottom: 0,
+      justifyContent: "center",
+      zIndex: 1,
+    },
+    searchInput: {
+      paddingVertical: 12,
+      paddingLeft: 40,
+      paddingRight: 12,
+      backgroundColor: "rgba(255,255,255,0.12)",
+      borderWidth: 1.5,
+      borderColor: "rgba(255,255,255,0.2)",
+      borderRadius: tennisRadii.md,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.white,
+    },
+    filterRow: {
+      backgroundColor: tennisColors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: tennisColors.border,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      gap: 8,
+    },
+    filterChip: {
+      paddingHorizontal: 16,
+      paddingVertical: 7,
+      borderRadius: tennisRadii.pill,
+      backgroundColor: tennisColors.muted,
+    },
+    filterChipSelected: {
+      backgroundColor: tennisColors.primary,
+    },
+    filterChipLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    filterChipLabelSelected: {
+      color: tennisColors.white,
+    },
+  }),
+);

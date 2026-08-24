@@ -4,6 +4,14 @@ import type { HomeNextActionKind } from "./home-next-actions";
 export const CREATE_MATCH_ROUTE = "/match/create" as Href;
 export const CLUBS_ROUTE = "/(tabs)/clubs" as Href;
 export const MATCHES_ROUTE = "/(tabs)/matches" as Href;
+export const DISCOVER_ROUTE = "/(tabs)/discover" as Href;
+
+export function discoverOpenMatchesRoute(): Href {
+  return {
+    pathname: "/(tabs)/discover",
+    params: { segment: "matches" },
+  } as Href;
+}
 
 export function matchInviteRoute(
   matchId: string,

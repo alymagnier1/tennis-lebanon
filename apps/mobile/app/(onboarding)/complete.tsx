@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -51,78 +52,80 @@ export default function OnboardingCompleteScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: tennisColors.primary,
-    paddingHorizontal: 32,
-    overflow: "hidden",
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  icon: {
-    width: 96,
-    height: 96,
-    borderRadius: 28,
-    backgroundColor: tennisColors.lime,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 24,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 36,
-    color: tennisColors.white,
-    textAlign: "center",
-    letterSpacing: -1,
-  },
-  titleAccent: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 36,
-    color: tennisColors.lime,
-    textAlign: "center",
-    letterSpacing: -1,
-    marginBottom: 12,
-  },
-  description: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 15,
-    lineHeight: 24,
-    color: "rgba(255,255,255,0.65)",
-    textAlign: "center",
-    marginBottom: 28,
-    maxWidth: 300,
-  },
-  statsRow: {
-    flexDirection: "row",
-    gap: 12,
-    width: "100%",
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: tennisColors.heroOverlay,
-    borderWidth: 1,
-    borderColor: tennisColors.heroBorder,
-    borderRadius: tennisRadii.lg,
-    padding: 16,
-    alignItems: "center",
-  },
-  statValue: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 28,
-    color: tennisColors.lime,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    color: "rgba(255,255,255,0.55)",
-    textAlign: "center",
-  },
-  cta: {
-    marginTop: 16,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: tennisColors.primary,
+      paddingHorizontal: 32,
+      overflow: "hidden",
+    },
+    content: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    icon: {
+      width: 96,
+      height: 96,
+      borderRadius: 28,
+      backgroundColor: tennisColors.lime,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 24,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 36,
+      color: tennisColors.white,
+      textAlign: "center",
+      letterSpacing: -1,
+    },
+    titleAccent: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 36,
+      color: tennisColors.lime,
+      textAlign: "center",
+      letterSpacing: -1,
+      marginBottom: 12,
+    },
+    description: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 15,
+      lineHeight: 24,
+      color: "rgba(255,255,255,0.65)",
+      textAlign: "center",
+      marginBottom: 28,
+      maxWidth: 300,
+    },
+    statsRow: {
+      flexDirection: "row",
+      gap: 12,
+      width: "100%",
+    },
+    statCard: {
+      flex: 1,
+      backgroundColor: tennisColors.heroOverlay,
+      borderWidth: 1,
+      borderColor: tennisColors.heroBorder,
+      borderRadius: tennisRadii.lg,
+      padding: 16,
+      alignItems: "center",
+    },
+    statValue: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 28,
+      color: tennisColors.lime,
+      marginBottom: 4,
+    },
+    statLabel: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 11,
+      color: "rgba(255,255,255,0.55)",
+      textAlign: "center",
+    },
+    cta: {
+      marginTop: 16,
+    },
+  }),
+);

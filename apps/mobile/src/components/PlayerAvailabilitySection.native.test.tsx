@@ -54,17 +54,16 @@ const summary: PublicPlayerAvailabilitySummary = {
 };
 
 describe("player profile availability lines", () => {
-  it("renders weekday chips and intent without emoji", async () => {
+  it("renders preferred time and weekly days without weekday chips", async () => {
     const view = await render(
       <PlayerAvailabilitySection player={player()} summary={summary} />,
     );
 
-    // The weekday chips come from the summary, so a rendered chip proves the
-    // section got past its own empty state.
-    expect(view.getByText("Fri")).toBeTruthy();
-    expect(view.getByText("Sat")).toBeTruthy();
-    expect(view.getByText("Evening")).toBeTruthy();
+    expect(view.getByText("Preferred time")).toBeTruthy();
+    expect(view.getByText("Weekly")).toBeTruthy();
     expect(view.getByText("Morning and Evening")).toBeTruthy();
+    expect(view.queryByText("Play style")).toBeNull();
+    expect(view.queryByText("Afternoon and Evening")).toBeNull();
   });
 
   it("uses icons rather than emoji", async () => {

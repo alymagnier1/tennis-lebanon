@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { notify } from "../../src/lib/confirm-action";
 
 import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { tabRootHeaderPaddingTop } from "../../src/lib/tab-root-header";
 
 import { router } from "expo-router";
 
@@ -19,7 +21,10 @@ import {
   type MyMatchRow,
 } from "@tennis-lebanon/api";
 
-import { formatMatchScore } from "@tennis-lebanon/domain";
+import {
+  canCreatorCancelBeforeBooking,
+  formatMatchScore,
+} from "@tennis-lebanon/domain";
 
 import {
   EmptyState,
@@ -28,7 +33,6 @@ import {
   SegmentTabs,
   appStyles,
 } from "../../src/components/AppUi";
-import { TabPageHeader } from "../../src/components/TabPageHeader";
 
 import {
   PrimaryButton,
@@ -48,6 +52,7 @@ import {
   resolveMatchCardOpponent,
 } from "../../src/lib/match-card-headline";
 import { buildMatchCardBadges } from "../../src/lib/match-card-badges";
+import { confirmCancelHostedMatch } from "../../src/lib/confirm-cancel-hosted-match";
 import {
   matchCardAreaLabel,
   matchCardClubLabel,
@@ -90,6 +95,7 @@ type MatchesSegment = "invites" | "active" | "completed";
 
 export default function MatchesScreen() {
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { profile, session } = useAuth();
   const viewerName = profile?.display_name ?? "";
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -323,6 +329,12 @@ export default function MatchesScreen() {
       viewerAttendance: match.viewer_attendance,
     });
 
+    // Only your own, and only while calling it off is still your call. Three
+    // matches is the cap, so the thing that frees a slot should not be four
+    // taps and a scroll away inside the match itself.
+    const canDismiss =
+      match.is_creator && canCreatorCancelBeforeBooking(match.status);
+
     return (
       <View key={match.match_id} style={formStyles.stack}>
         <MatchCard
@@ -347,6 +359,22 @@ export default function MatchesScreen() {
           areaChip={areaChip}
           badges={buildMatchCardBadges(t, match)}
           note={match.notes ?? undefined}
+          dismissLabel={t("matches.hub.cancel")}
+          onDismiss={
+            canDismiss
+              ? () =>
+                  confirmCancelHostedMatch(
+                    {
+                      matchId: match.match_id,
+                      status: match.status,
+                      participantCount: match.participant_count,
+                      bookingStartsAt: match.court_starts_at,
+                    },
+                    t,
+                    () => void matchesQuery.refetch(),
+                  )
+              : undefined
+          }
           onPress={() =>
             router.push({
               pathname: "/match/[id]",
@@ -378,11 +406,12 @@ export default function MatchesScreen() {
       refreshing={refreshing}
       onRefresh={() => void onRefresh()}
       fixedHeader={
-        <>
-          <TabPageHeader
-            title={t("matches.list.title")}
-            description={t("matches.list.description")}
-          />
+        <View
+          style={{
+            paddingTop: tabRootHeaderPaddingTop(insets.top),
+            gap: 16,
+          }}
+        >
           <SegmentTabs
             value={segment}
             options={[
@@ -419,7 +448,7 @@ export default function MatchesScreen() {
               onChange={setCompletedTimeFilter}
             />
           ) : null}
-        </>
+        </View>
       }
     >
       {segmentLoading ? <ListSkeleton rows={4} /> : null}

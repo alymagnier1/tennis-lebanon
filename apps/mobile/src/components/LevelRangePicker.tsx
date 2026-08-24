@@ -1,4 +1,5 @@
 import { ScrollView, Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { minTouchTargetPx, spacing } from "@tennis-lebanon/ui";
 import type { SkillBand } from "@tennis-lebanon/domain";
 import { isSkillBandSelected } from "@tennis-lebanon/domain";
@@ -79,47 +80,49 @@ export function LevelRangePicker({
   );
 }
 
-const styles = StyleSheet.create({
-  levelSection: {
-    overflow: "visible",
-  },
-  levelScroll: {
-    overflow: "visible",
-  },
-  levelRow: {
-    gap: 10,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xs,
-    paddingRight: spacing.sm,
-  },
-  levelChip: {
-    minHeight: minTouchTargetPx,
-    justifyContent: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderWidth: 2,
-    borderColor: tennisColors.border,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.card,
-  },
-  levelChipText: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-    textAlign: "center",
-  },
-  yourLevelBadge: {
-    position: "absolute",
-    top: -11,
-    alignSelf: "center",
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    borderRadius: tennisRadii.pill,
-    backgroundColor: tennisColors.primaryDark,
-  },
-  yourLevelBadgeText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    color: tennisColors.white,
-    fontSize: 10,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    levelSection: {
+      overflow: "visible",
+    },
+    levelScroll: {
+      overflow: "visible",
+    },
+    levelRow: {
+      gap: 10,
+      paddingTop: spacing.lg,
+      paddingBottom: spacing.xs,
+      paddingRight: spacing.sm,
+    },
+    levelChip: {
+      minHeight: minTouchTargetPx,
+      justifyContent: "center",
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderWidth: 2,
+      borderColor: tennisColors.border,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.card,
+    },
+    levelChipText: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 13,
+      color: tennisColors.primaryDark,
+      textAlign: "center",
+    },
+    yourLevelBadge: {
+      position: "absolute",
+      top: -11,
+      alignSelf: "center",
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 3,
+      borderRadius: tennisRadii.pill,
+      backgroundColor: tennisColors.primaryDark,
+    },
+    yourLevelBadgeText: {
+      fontFamily: tennisFontFamily.bodySemi,
+      color: tennisColors.white,
+      fontSize: 10,
+    },
+  }),
+);

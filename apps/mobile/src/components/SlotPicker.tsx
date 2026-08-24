@@ -6,6 +6,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import {
   colors,
@@ -301,93 +302,95 @@ export function SlotPicker({
   );
 }
 
-const styles = StyleSheet.create({
-  root: { gap: spacing.md },
-  label: figmaFormStyles.fieldLabel,
-  dayRow: { gap: 10, paddingVertical: spacing.xs },
-  dayChip: {
-    minWidth: 56,
-    minHeight: minTouchTargetPx + 12,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 2,
-    paddingHorizontal: spacing.md,
-    borderRadius: tennisRadii.md,
-    borderWidth: 2,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  dayWeekday: {
-    fontFamily: tennisFontFamily.body,
-    color: tennisColors.mutedForeground,
-    fontSize: typography.size.xs,
-  },
-  dayNumber: {
-    fontFamily: tennisFontFamily.headingSemi,
-    color: tennisColors.primaryDark,
-    fontSize: typography.size.md,
-  },
-  timeInputInvalid: {
-    borderColor: colors.danger[500],
-  },
-  timeRow: {
-    alignItems: "stretch",
-    gap: spacing.sm,
-  },
-  timeInput: {
-    flex: 1,
-    minWidth: 0,
-  },
-  meridiemRow: {
-    gap: 10,
-  },
-  meridiemChip: {
-    minWidth: 52,
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: spacing.md,
-    borderRadius: tennisRadii.md,
-    borderWidth: 2,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  meridiemText: {
-    fontFamily: tennisFontFamily.headingSemi,
-    color: tennisColors.primaryDark,
-    fontSize: 13,
-  },
-  timeHint: {
-    fontFamily: tennisFontFamily.body,
-    color: tennisColors.mutedForeground,
-    fontSize: typography.size.xs,
-  },
-  timeError: {
-    fontFamily: tennisFontFamily.body,
-    color: colors.danger[700],
-    fontSize: typography.size.xs,
-  },
-  timeAvailability: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    color: tennisColors.primary,
-    fontSize: typography.size.xs,
-  },
-  durationRow: { gap: 10 },
-  durationChip: {
-    flex: 1,
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: spacing.sm,
-    borderRadius: tennisRadii.md,
-    borderWidth: 2,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  durationText: {
-    fontFamily: tennisFontFamily.headingSemi,
-    color: tennisColors.primaryDark,
-    fontSize: 13,
-    textAlign: "center",
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: { gap: spacing.md },
+    label: figmaFormStyles.fieldLabel,
+    dayRow: { gap: 10, paddingVertical: spacing.xs },
+    dayChip: {
+      minWidth: 56,
+      minHeight: minTouchTargetPx + 12,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 2,
+      paddingHorizontal: spacing.md,
+      borderRadius: tennisRadii.md,
+      borderWidth: 2,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+    },
+    dayWeekday: {
+      fontFamily: tennisFontFamily.body,
+      color: tennisColors.mutedForeground,
+      fontSize: typography.size.xs,
+    },
+    dayNumber: {
+      fontFamily: tennisFontFamily.headingSemi,
+      color: tennisColors.primaryDark,
+      fontSize: typography.size.md,
+    },
+    timeInputInvalid: {
+      borderColor: colors.danger[500],
+    },
+    timeRow: {
+      alignItems: "stretch",
+      gap: spacing.sm,
+    },
+    timeInput: {
+      flex: 1,
+      minWidth: 0,
+    },
+    meridiemRow: {
+      gap: 10,
+    },
+    meridiemChip: {
+      minWidth: 52,
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: spacing.md,
+      borderRadius: tennisRadii.md,
+      borderWidth: 2,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+    },
+    meridiemText: {
+      fontFamily: tennisFontFamily.headingSemi,
+      color: tennisColors.primaryDark,
+      fontSize: 13,
+    },
+    timeHint: {
+      fontFamily: tennisFontFamily.body,
+      color: tennisColors.mutedForeground,
+      fontSize: typography.size.xs,
+    },
+    timeError: {
+      fontFamily: tennisFontFamily.body,
+      color: colors.danger[700],
+      fontSize: typography.size.xs,
+    },
+    timeAvailability: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      color: tennisColors.primary,
+      fontSize: typography.size.xs,
+    },
+    durationRow: { gap: 10 },
+    durationChip: {
+      flex: 1,
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: spacing.sm,
+      borderRadius: tennisRadii.md,
+      borderWidth: 2,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+    },
+    durationText: {
+      fontFamily: tennisFontFamily.headingSemi,
+      color: tennisColors.primaryDark,
+      fontSize: 13,
+      textAlign: "center",
+    },
+  }),
+);

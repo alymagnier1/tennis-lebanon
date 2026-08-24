@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { getRematchContext } from "@tennis-lebanon/api";
@@ -104,52 +105,54 @@ export function MatchRematchCard({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 14,
-    padding: 16,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  milestone: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 15,
-    lineHeight: 21,
-    color: tennisColors.primary,
-    letterSpacing: -0.2,
-  },
-  header: {
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.muted,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerText: {
-    flex: 1,
-    minWidth: 0,
-    gap: 4,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 16,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.2,
-  },
-  body: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 19,
-    color: tennisColors.mutedForeground,
-  },
-  actions: {
-    gap: 10,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      gap: 14,
+      padding: 16,
+      borderRadius: 18,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+    },
+    milestone: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 15,
+      lineHeight: 21,
+      color: tennisColors.primary,
+      letterSpacing: -0.2,
+    },
+    header: {
+      alignItems: "flex-start",
+      gap: 12,
+    },
+    iconWrap: {
+      width: 40,
+      height: 40,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.muted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    headerText: {
+      flex: 1,
+      minWidth: 0,
+      gap: 4,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 16,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+    },
+    body: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 19,
+      color: tennisColors.mutedForeground,
+    },
+    actions: {
+      gap: 10,
+    },
+  }),
+);

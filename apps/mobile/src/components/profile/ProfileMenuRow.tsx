@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { AppText } from "../AppText";
 import { Icon } from "../Icon";
 import { useLayoutDirection } from "../../lib/layout-direction";
@@ -76,48 +77,50 @@ export function ProfileMenuRow({
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    alignItems: "center",
-    gap: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-  },
-  rowPressed: {
-    opacity: 0.85,
-  },
-  rowDivider: {
-    borderTopWidth: 1,
-    borderTopColor: tennisColors.border,
-  },
-  iconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 11,
-    backgroundColor: tennisColors.secondary,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  iconCircleDanger: {
-    backgroundColor: "#FEF0E7",
-  },
-  labelBlock: {
-    flex: 1,
-    gap: 2,
-  },
-  label: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.primaryDark,
-  },
-  labelDanger: {
-    color: tennisColors.accent,
-  },
-  value: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    lineHeight: 16,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    row: {
+      alignItems: "center",
+      gap: 14,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+    },
+    rowPressed: {
+      opacity: 0.85,
+    },
+    rowDivider: {
+      borderTopWidth: 1,
+      borderTopColor: tennisColors.border,
+    },
+    iconCircle: {
+      width: 38,
+      height: 38,
+      borderRadius: 11,
+      backgroundColor: tennisColors.secondary,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    iconCircleDanger: {
+      backgroundColor: "#FEF0E7",
+    },
+    labelBlock: {
+      flex: 1,
+      gap: 2,
+    },
+    label: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.primaryDark,
+    },
+    labelDanger: {
+      color: tennisColors.accent,
+    },
+    value: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

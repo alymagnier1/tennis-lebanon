@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
@@ -109,41 +110,43 @@ export function MatchHubParticipants({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 8,
-  },
-  sectionLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-    textTransform: "uppercase",
-    letterSpacing: 0.4,
-  },
-  list: {
-    gap: 10,
-  },
-  row: {
-    alignItems: "center",
-    gap: 12,
-    minHeight: minTouchTargetPx,
-  },
-  rowPressed: {
-    opacity: 0.6,
-  },
-  text: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  name: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-  },
-  meta: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      gap: 8,
+    },
+    sectionLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
+    list: {
+      gap: 10,
+    },
+    row: {
+      alignItems: "center",
+      gap: 12,
+      minHeight: minTouchTargetPx,
+    },
+    rowPressed: {
+      opacity: 0.6,
+    },
+    text: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2,
+    },
+    name: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+    },
+    meta: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

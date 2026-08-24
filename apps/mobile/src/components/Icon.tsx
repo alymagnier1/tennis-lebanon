@@ -34,6 +34,7 @@ const ICONS = {
   notifications: "notifications-outline",
   info: "information-circle-outline",
   camera: "camera-outline",
+  star: "star",
 } as const;
 
 export type IconName = keyof typeof ICONS;

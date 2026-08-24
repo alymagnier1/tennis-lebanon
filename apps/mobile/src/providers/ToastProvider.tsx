@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
@@ -70,27 +71,29 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
-  host: {
-    position: "absolute",
-    left: 20,
-    right: 20,
-    alignItems: "center",
-    zIndex: 10000,
-    elevation: 10000,
-  },
-  toast: {
-    maxWidth: 420,
-    width: "100%",
-    backgroundColor: tennisColors.primaryDark,
-    borderRadius: tennisRadii.lg,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  toastText: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.white,
-    textAlign: "center",
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    host: {
+      position: "absolute",
+      left: 20,
+      right: 20,
+      alignItems: "center",
+      zIndex: 10000,
+      elevation: 10000,
+    },
+    toast: {
+      maxWidth: 420,
+      width: "100%",
+      backgroundColor: tennisColors.primaryDark,
+      borderRadius: tennisRadii.lg,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    toastText: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.white,
+      textAlign: "center",
+    },
+  }),
+);

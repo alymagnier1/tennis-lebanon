@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { getOwnChatLastRead, listMatchMessages } from "@tennis-lebanon/api";
@@ -111,64 +112,66 @@ export function MatchChatEntry({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    backgroundColor: tennisColors.card,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  locked: {
-    opacity: 0.72,
-  },
-  pressed: {
-    opacity: 0.92,
-  },
-  row: {
-    alignItems: "center",
-    gap: 12,
-  },
-  badge: {
-    minWidth: 22,
-    height: 22,
-    borderRadius: 11,
-    paddingHorizontal: 6,
-    backgroundColor: tennisColors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  badgeLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 12,
-    color: tennisColors.white,
-  },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.muted,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconWrapLocked: {
-    backgroundColor: tennisColors.border,
-  },
-  text: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.2,
-  },
-  preview: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      backgroundColor: tennisColors.card,
+      borderRadius: 18,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+    },
+    locked: {
+      opacity: 0.72,
+    },
+    pressed: {
+      opacity: 0.92,
+    },
+    row: {
+      alignItems: "center",
+      gap: 12,
+    },
+    badge: {
+      minWidth: 22,
+      height: 22,
+      borderRadius: 11,
+      paddingHorizontal: 6,
+      backgroundColor: tennisColors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    badgeLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 12,
+      color: tennisColors.white,
+    },
+    iconWrap: {
+      width: 40,
+      height: 40,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.muted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    iconWrapLocked: {
+      backgroundColor: tennisColors.border,
+    },
+    text: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+    },
+    preview: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

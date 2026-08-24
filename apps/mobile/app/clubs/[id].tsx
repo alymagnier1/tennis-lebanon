@@ -7,6 +7,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -424,143 +425,145 @@ export default function ClubDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  header: {
-    gap: 12,
-    paddingBottom: 8,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 24,
-    lineHeight: 30,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.4,
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    gap: 16,
-    paddingTop: 8,
-  },
-  body: {
-    gap: 16,
-  },
-  hero: {
-    height: 160,
-    borderRadius: tennisRadii.lg,
-    backgroundColor: PHOTO_PLACEHOLDER,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  details: {
-    gap: 6,
-  },
-  badgeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 4,
-  },
-  badge: {
-    borderRadius: tennisRadii.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  badgeWhatsApp: {
-    backgroundColor: tennisBrand.whatsappFill,
-  },
-  badgeDefault: {
-    backgroundColor: tennisSemantic.attention.fill,
-  },
-  badgeText: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 11,
-  },
-  badgeTextWhatsApp: {
-    color: tennisBrand.whatsappText,
-  },
-  badgeTextDefault: {
-    color: tennisSemantic.attention.text,
-  },
-  payHint: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-  metaLine: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 18,
-    color: tennisColors.mutedForeground,
-  },
-  description: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 18,
-    color: tennisColors.mutedForeground,
-    marginTop: 2,
-  },
-  bookingCard: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.lg,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    padding: 16,
-    gap: 12,
-  },
-  bookingTitle: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 17,
-    lineHeight: 22,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.2,
-  },
-  favoriteRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    minHeight: 44,
-    alignSelf: "flex-start",
-  },
-  favoriteLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primary,
-  },
-  amenities: {
-    gap: 8,
-  },
-  amenitiesLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-    textTransform: "uppercase",
-    letterSpacing: 0.4,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    backgroundColor: tennisColors.muted,
-    borderRadius: tennisRadii.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  chipText: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.primaryDark,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    header: {
+      gap: 12,
+      paddingBottom: 8,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 24,
+      lineHeight: 30,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.4,
+    },
+    scroll: {
+      flex: 1,
+    },
+    content: {
+      gap: 16,
+      paddingTop: 8,
+    },
+    body: {
+      gap: 16,
+    },
+    hero: {
+      height: 160,
+      borderRadius: tennisRadii.lg,
+      backgroundColor: PHOTO_PLACEHOLDER,
+      alignItems: "center",
+      justifyContent: "center",
+      overflow: "hidden",
+    },
+    details: {
+      gap: 6,
+    },
+    badgeRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: 8,
+      marginTop: 4,
+    },
+    badge: {
+      borderRadius: tennisRadii.pill,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    badgeWhatsApp: {
+      backgroundColor: tennisBrand.whatsappFill,
+    },
+    badgeDefault: {
+      backgroundColor: tennisSemantic.attention.fill,
+    },
+    badgeText: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 11,
+    },
+    badgeTextWhatsApp: {
+      color: tennisBrand.whatsappText,
+    },
+    badgeTextDefault: {
+      color: tennisSemantic.attention.text,
+    },
+    payHint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+    metaLine: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+    },
+    description: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+      marginTop: 2,
+    },
+    bookingCard: {
+      backgroundColor: tennisColors.card,
+      borderRadius: tennisRadii.lg,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      padding: 16,
+      gap: 12,
+    },
+    bookingTitle: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 17,
+      lineHeight: 22,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+    },
+    favoriteRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      minHeight: 44,
+      alignSelf: "flex-start",
+    },
+    favoriteLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.primary,
+    },
+    amenities: {
+      gap: 8,
+    },
+    amenitiesLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
+    chipRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    chip: {
+      backgroundColor: tennisColors.muted,
+      borderRadius: tennisRadii.pill,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+    },
+    chipText: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.primaryDark,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+  }),
+);

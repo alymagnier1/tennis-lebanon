@@ -1,4 +1,5 @@
 import { StyleSheet, View, type ViewStyle } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { tennisColors } from "../../theme/tennis-tokens";
 
 export function CourtPattern({ style }: { style?: ViewStyle }) {
@@ -12,14 +13,16 @@ export function CourtPattern({ style }: { style?: ViewStyle }) {
 
 const GRID = 38;
 
-const styles = StyleSheet.create({
-  grid: {
-    opacity: 1,
-    // Simulated court grid via overlapping borders (RN has no repeating-linear-gradient)
-    backgroundColor: "transparent",
-    borderWidth: 0,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    grid: {
+      opacity: 1,
+      // Simulated court grid via overlapping borders (RN has no repeating-linear-gradient)
+      backgroundColor: "transparent",
+      borderWidth: 0,
+    },
+  }),
+);
 
 /** Semi-transparent overlay blocks mimicking Figma court grid on hero screens */
 export function CourtGridOverlay() {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -24,7 +25,11 @@ import {
 } from "../lib/tab-bar-metrics";
 import { supabase } from "../lib/supabase";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
-import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import {
+  getActiveTennisScheme,
+  tennisColors,
+  tennisRadii,
+} from "../theme/tennis-tokens";
 
 const TAB_ICONS: Record<string, IconName> = {
   index: "home",
@@ -66,6 +71,7 @@ export function TennisTabBar({
 }: TennisTabBarProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const isDark = getActiveTennisScheme() === "dark";
   const queryClient = useQueryClient();
   const [openingCreate, setOpeningCreate] = useState(false);
   const matchesQuery = useQuery({
@@ -131,7 +137,9 @@ export function TennisTabBar({
     const isFocused = state.index === routeIndex;
     const iconName = TAB_ICONS[route.name] ?? "home";
     const iconColor = isFocused
-      ? tennisColors.primary
+      ? isDark
+        ? tennisColors.onViolet
+        : tennisColors.primary
       : tennisColors.mutedForeground;
     const badgeLabel = route.name === "matches" ? matchesBadgeLabel : null;
 
@@ -153,7 +161,13 @@ export function TennisTabBar({
         }}
         style={styles.tab}
       >
-        <View style={[styles.iconWell, isFocused && styles.iconWellActive]}>
+        <View
+          style={[
+            styles.iconWell,
+            isFocused &&
+              (isDark ? styles.iconWellActiveDark : styles.iconWellActive),
+          ]}
+        >
           <Icon name={iconName} size={TAB_ICON_SIZE} color={iconColor} />
           {badgeLabel ? (
             <View style={styles.tabBadge} accessibilityElementsHidden>
@@ -162,7 +176,10 @@ export function TennisTabBar({
           ) : null}
         </View>
         <AppText
-          style={[styles.label, isFocused && styles.labelActive]}
+          style={[
+            styles.label,
+            isFocused && (isDark ? styles.labelActiveDark : styles.labelActive),
+          ]}
           maxLines={1}
         >
           {label}
@@ -190,12 +207,12 @@ export function TennisTabBar({
             style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
           >
             {openingCreate ? (
-              <ActivityIndicator color={tennisColors.white} />
+              <ActivityIndicator color={tennisColors.onPrimary} />
             ) : (
               <Icon
                 name="add"
                 size={FAB_ICON_SIZE}
-                color={tennisColors.white}
+                color={tennisColors.onPrimary}
               />
             )}
           </Pressable>
@@ -207,92 +224,107 @@ export function TennisTabBar({
   );
 }
 
-const styles = StyleSheet.create({
-  bar: {
-    backgroundColor: tennisColors.background,
-    borderTopWidth: 1,
-    borderTopColor: tennisColors.border,
-    paddingTop: TAB_BAR_TOP_PADDING,
-    minHeight: 88,
-    shadowColor: tennisColors.primaryDark,
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    elevation: 12,
-    overflow: "visible",
-  },
-  barRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    overflow: "visible",
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    gap: TAB_BAR_LABEL_GAP,
-    paddingTop: 0,
-  },
-  iconWell: {
-    width: 48,
-    height: TAB_BAR_ICON_WELL_HEIGHT,
-    borderRadius: tennisRadii.md,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconWellActive: {
-    backgroundColor: tennisColors.secondary,
-  },
-  tabBadge: {
-    position: "absolute",
-    top: 2,
-    end: 2,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    backgroundColor: tennisColors.accent,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  tabBadgeText: {
-    color: tennisColors.white,
-    fontSize: 9,
-    lineHeight: 11,
-    fontFamily: tennisFontFamily.bodySemi,
-  },
-  label: {
-    fontSize: 11,
-    lineHeight: TAB_BAR_LABEL_HEIGHT,
-    fontFamily: tennisFontFamily.body,
-    color: tennisColors.mutedForeground,
-  },
-  labelActive: {
-    color: tennisColors.primary,
-    fontFamily: tennisFontFamily.bodySemi,
-  },
-  fabSlot: {
-    flex: 1,
-    alignItems: "center",
-    overflow: "visible",
-  },
-  fab: {
-    width: FAB_SIZE,
-    height: FAB_SIZE,
-    marginTop: -FAB_LIFT,
-    borderRadius: FAB_RADIUS,
-    borderWidth: 3,
-    borderColor: tennisColors.background,
-    backgroundColor: tennisColors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: tennisColors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  fabPressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.97 }],
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    bar: {
+      backgroundColor:
+        getActiveTennisScheme() === "dark"
+          ? "#2A2A2A"
+          : tennisColors.background,
+      borderTopWidth: 1,
+      borderTopColor: tennisColors.border,
+      paddingTop: TAB_BAR_TOP_PADDING,
+      minHeight: 88,
+      shadowColor: tennisColors.primaryDark,
+      shadowOffset: { width: 0, height: -3 },
+      shadowOpacity: 0.06,
+      shadowRadius: 16,
+      elevation: 12,
+      overflow: "visible",
+    },
+    barRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      overflow: "visible",
+    },
+    tab: {
+      flex: 1,
+      alignItems: "center",
+      gap: TAB_BAR_LABEL_GAP,
+      paddingTop: 0,
+    },
+    iconWell: {
+      width: 48,
+      height: TAB_BAR_ICON_WELL_HEIGHT,
+      borderRadius: tennisRadii.md,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    iconWellActive: {
+      backgroundColor: tennisColors.secondary,
+    },
+    iconWellActiveDark: {
+      backgroundColor: tennisColors.violet,
+    },
+    tabBadge: {
+      position: "absolute",
+      top: 2,
+      end: 2,
+      minWidth: 16,
+      height: 16,
+      borderRadius: 8,
+      paddingHorizontal: 4,
+      backgroundColor: tennisColors.accent,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    tabBadgeText: {
+      color: tennisColors.white,
+      fontSize: 9,
+      lineHeight: 11,
+      fontFamily: tennisFontFamily.bodySemi,
+    },
+    label: {
+      fontSize: 11,
+      lineHeight: TAB_BAR_LABEL_HEIGHT,
+      fontFamily: tennisFontFamily.body,
+      color: tennisColors.mutedForeground,
+    },
+    labelActive: {
+      color: tennisColors.primary,
+      fontFamily: tennisFontFamily.bodySemi,
+    },
+    labelActiveDark: {
+      color: tennisColors.primaryDark,
+      fontFamily: tennisFontFamily.bodySemi,
+    },
+    fabSlot: {
+      flex: 1,
+      alignItems: "center",
+      overflow: "visible",
+    },
+    fab: {
+      width: FAB_SIZE,
+      height: FAB_SIZE,
+      marginTop: -FAB_LIFT,
+      borderRadius: FAB_RADIUS,
+      borderWidth: 3,
+      borderColor:
+        getActiveTennisScheme() === "dark"
+          ? "#2A2A2A"
+          : tennisColors.background,
+      backgroundColor: tennisColors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: tennisColors.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.35,
+      shadowRadius: 20,
+      elevation: 10,
+    },
+    fabPressed: {
+      opacity: 0.92,
+      transform: [{ scale: 0.97 }],
+    },
+  }),
+);

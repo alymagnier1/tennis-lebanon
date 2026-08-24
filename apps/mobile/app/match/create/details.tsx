@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listMyMatches } from "@tennis-lebanon/api";
 import { skillBandsForPlayer } from "@tennis-lebanon/domain";
 import {
-  findActiveHostedMatch,
+  hasReachedHostedMatchCap,
   ORDERED_SKILL_BANDS,
   skillBandsInRange,
   skillRangeFromSelection,
@@ -31,8 +31,7 @@ import {
   CreateMatchPanel,
   CreateMatchSection,
 } from "../../../src/lib/create-match-ui";
-import { activeHostedContinueRoute } from "../../../src/lib/create-match-guard";
-import { confirmCancelHostedMatch } from "../../../src/lib/confirm-cancel-hosted-match";
+import { MATCHES_ROUTE } from "../../../src/lib/routes";
 import { useAuth } from "../../../src/providers/AuthProvider";
 import { supabase } from "../../../src/lib/supabase";
 
@@ -101,9 +100,9 @@ export default function CreateMatchDetailsScreen() {
     queryFn: () => listMyMatches(supabase),
   });
 
-  const activeHostedMatch = useMemo(
-    () => findActiveHostedMatch(myMatchesQuery.data ?? [], format),
-    [format, myMatchesQuery.data],
+  const capReached = useMemo(
+    () => hasReachedHostedMatchCap(myMatchesQuery.data ?? []),
+    [myMatchesQuery.data],
   );
 
   const levelOptions = useMemo(
@@ -133,17 +132,6 @@ export default function CreateMatchDetailsScreen() {
     });
   }, [format, intent, effectiveBands]);
 
-  function goToActiveHostedMatch() {
-    if (!activeHostedMatch) return;
-    router.replace(
-      activeHostedContinueRoute({
-        matchId: activeHostedMatch.match_id,
-        format: activeHostedMatch.format as "singles" | "doubles",
-        status: activeHostedMatch.status,
-      }),
-    );
-  }
-
   function handleDone() {
     router.back();
   }
@@ -168,33 +156,14 @@ export default function CreateMatchDetailsScreen() {
         />
       ) : null}
 
-      {activeHostedMatch ? (
+      {capReached ? (
         <StatusBanner
-          body={t("matches.create.activeHostedBody", {
-            format: t(`formats.${format}`),
-          })}
+          body={t("matches.create.capReachedBody")}
           actions={
-            <>
-              <FigmaPrimaryButton
-                label={t("matches.create.continueInviting")}
-                onPress={goToActiveHostedMatch}
-              />
-              <FigmaSecondaryButton
-                label={t("matches.hub.cancel")}
-                onPress={() =>
-                  confirmCancelHostedMatch(
-                    {
-                      matchId: activeHostedMatch.match_id,
-                      status: activeHostedMatch.status,
-                      participantCount: activeHostedMatch.participant_count,
-                      bookingStartsAt: activeHostedMatch.court_starts_at,
-                    },
-                    t,
-                    () => myMatchesQuery.refetch(),
-                  )
-                }
-              />
-            </>
+            <FigmaSecondaryButton
+              label={t("matches.create.seeMyMatches")}
+              onPress={() => router.push(MATCHES_ROUTE)}
+            />
           }
         />
       ) : null}

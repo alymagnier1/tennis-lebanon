@@ -6,6 +6,7 @@ import {
   View,
   type View as RNView,
 } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { Icon } from "../Icon";
@@ -143,76 +144,78 @@ export function CompletedTimeFilterControl({
   );
 }
 
-const styles = StyleSheet.create({
-  trigger: {
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    minHeight: 44,
-    borderRadius: tennisRadii.lg,
-    backgroundColor: tennisColors.card,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-  },
-  triggerOpen: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-  triggerPressed: {
-    opacity: 0.88,
-  },
-  triggerLabel: {
-    flexShrink: 1,
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primaryDark,
-    textAlign: "center",
-  },
-  chevronOpen: {
-    transform: [{ rotate: "180deg" }],
-  },
-  modalRoot: {
-    flex: 1,
-  },
-  menu: {
-    position: "absolute",
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    borderBottomLeftRadius: tennisRadii.lg,
-    borderBottomRightRadius: tennisRadii.lg,
-    backgroundColor: tennisColors.card,
-    overflow: "hidden",
-    shadowColor: "#0D1117",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 12,
-  },
-  option: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    minHeight: 44,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: tennisColors.border,
-  },
-  optionSelected: {
-    backgroundColor: tennisColors.secondary,
-  },
-  optionPressed: {
-    opacity: 0.88,
-  },
-  optionLabel: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.primaryDark,
-    textAlign: "center",
-  },
-  optionLabelSelected: {
-    fontFamily: tennisFontFamily.bodySemi,
-    color: tennisColors.primary,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    trigger: {
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      minHeight: 44,
+      borderRadius: tennisRadii.lg,
+      backgroundColor: tennisColors.card,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+    },
+    triggerOpen: {
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+    },
+    triggerPressed: {
+      opacity: 0.88,
+    },
+    triggerLabel: {
+      flexShrink: 1,
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.primaryDark,
+      textAlign: "center",
+    },
+    chevronOpen: {
+      transform: [{ rotate: "180deg" }],
+    },
+    modalRoot: {
+      flex: 1,
+    },
+    menu: {
+      position: "absolute",
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderBottomLeftRadius: tennisRadii.lg,
+      borderBottomRightRadius: tennisRadii.lg,
+      backgroundColor: tennisColors.card,
+      overflow: "hidden",
+      shadowColor: "#0D1117",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      elevation: 12,
+    },
+    option: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      minHeight: 44,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: tennisColors.border,
+    },
+    optionSelected: {
+      backgroundColor: tennisColors.secondary,
+    },
+    optionPressed: {
+      opacity: 0.88,
+    },
+    optionLabel: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.primaryDark,
+      textAlign: "center",
+    },
+    optionLabelSelected: {
+      fontFamily: tennisFontFamily.bodySemi,
+      color: tennisColors.primary,
+    },
+  }),
+);

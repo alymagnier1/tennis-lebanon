@@ -6,6 +6,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WizardProgress } from "../AppUi";
 import { AppText } from "../AppText";
@@ -76,34 +77,36 @@ export function CreateMatchStepLayout({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  scrollContent: {
-    paddingHorizontal: CREATE_MATCH_SCREEN_X,
-    paddingBottom: 24,
-    flexGrow: 1,
-    gap: 0,
-  },
-  wizardWrap: {
-    marginTop: 16,
-  },
-  header: {
-    marginTop: 24,
-    marginBottom: 20,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 24,
-    lineHeight: 28,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.5,
-  },
-  footer: {
-    paddingHorizontal: CREATE_MATCH_SCREEN_X,
-    paddingBottom: 8,
-    gap: 10,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    scrollContent: {
+      paddingHorizontal: CREATE_MATCH_SCREEN_X,
+      paddingBottom: 24,
+      flexGrow: 1,
+      gap: 0,
+    },
+    wizardWrap: {
+      marginTop: 16,
+    },
+    header: {
+      marginTop: 24,
+      marginBottom: 20,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 24,
+      lineHeight: 28,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.5,
+    },
+    footer: {
+      paddingHorizontal: CREATE_MATCH_SCREEN_X,
+      paddingBottom: 8,
+      gap: 10,
+    },
+  }),
+);

@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "./AppText";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
@@ -39,15 +40,17 @@ export function TabPageHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    paddingBottom: 12,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 28,
-    lineHeight: 32,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.6,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      paddingBottom: 12,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 28,
+      lineHeight: 32,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.6,
+    },
+  }),
+);

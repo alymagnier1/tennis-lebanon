@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   compactJoinedLabel,
+  joinedListTypeSize,
   matchCardAreaLabel,
   matchCardClubLabel,
   preferredClubLocationLabel,
@@ -51,6 +52,20 @@ describe("compactJoinedLabel", () => {
     expect(compactJoinedLabel(["Hoops", "Movempic", "Riyadi"])).toBe(
       "Hoops +2",
     );
+  });
+
+  it("can keep two names before the overflow count", () => {
+    expect(compactJoinedLabel(["Hoops", "Movempic", "Riyadi"], 2)).toBe(
+      "Hoops · Movempic +1",
+    );
+  });
+});
+
+describe("joinedListTypeSize", () => {
+  it("shrinks type as more names share the line", () => {
+    expect(joinedListTypeSize(1).fontSize).toBe(14);
+    expect(joinedListTypeSize(2).fontSize).toBe(12);
+    expect(joinedListTypeSize(3).fontSize).toBe(10);
   });
 });
 

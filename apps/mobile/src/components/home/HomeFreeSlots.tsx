@@ -4,7 +4,6 @@ import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { getAvailabilityLiquidity } from "@tennis-lebanon/api";
-import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { HomeFreePlayersCarousel } from "./HomeFreePlayersCarousel";
 import { trackLiquiditySignalViewed } from "../../lib/analytics";
@@ -17,7 +16,7 @@ import { type PingSlot } from "../../lib/availability-ping";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { weekdayIndexFromBeirutDateKey } from "../../lib/near-term-availability";
 import { supabase } from "../../lib/supabase";
-import { tennisColors } from "../../theme/tennis-tokens";
+import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 /** How far ahead the counts look, and how many blocks to offer. */
@@ -108,13 +107,11 @@ export function HomeFreeSlots() {
       <AppText style={[styles.title, { writingDirection }]}>
         {t("home.free.busiestTitle")}
       </AppText>
-      <AppText style={[styles.subtitle, { writingDirection }]}>
-        {t("home.free.busiestSubtitle")}
-      </AppText>
 
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.chipScroll}
         contentContainerStyle={[
           styles.chipRow,
           { flexDirection: rowDirection },
@@ -137,6 +134,7 @@ export function HomeFreeSlots() {
                   : t("home.free.chipLabel", { slot: label })
               }
               onPress={() => setSelectedStartsAt(offer.startsAt)}
+              hitSlop={{ top: 8, bottom: 8 }}
               style={({ pressed }) => [
                 styles.chip,
                 isSelected && styles.chipSelected,
@@ -171,32 +169,30 @@ export function HomeFreeSlots() {
 const styles = createLiveSheet(() =>
   StyleSheet.create({
     root: {
-      gap: 6,
+      gap: tennisSpacing.sectionTitleContent,
     },
     title: {
       fontFamily: tennisFontFamily.headingSemi,
       fontSize: 18,
       color: tennisColors.primaryDark,
     },
-    subtitle: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 13,
-      lineHeight: 18,
-      color: tennisColors.mutedForeground,
-    },
     // Text tabs rather than filled pills. Three of them sit directly above the
     // cards they switch, so a filled chip would carry more weight than the
     // players it is selecting between; the accent alone marks the active one.
+    // flexGrow: 0 stops a horizontal ScrollView on web from taking a full
+    // line-box of leftover height between the title and the cards.
+    chipScroll: {
+      flexGrow: 0,
+      flexShrink: 0,
+    },
     chipRow: {
       gap: 16,
-      paddingVertical: 0,
-      marginBottom: 4,
+      alignItems: "center",
     },
     chip: {
-      minHeight: minTouchTargetPx,
       justifyContent: "center",
       paddingHorizontal: 2,
-      paddingVertical: 8,
+      paddingVertical: 0,
       backgroundColor: "transparent",
     },
     chipSelected: {

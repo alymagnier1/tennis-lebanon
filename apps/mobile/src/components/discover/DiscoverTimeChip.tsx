@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { Icon } from "../Icon";
@@ -49,26 +50,28 @@ export function DiscoverTimeChip({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 8,
-  },
-  chip: {
-    alignSelf: "flex-start",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: tennisRadii.lg,
-    backgroundColor: tennisColors.primary,
-  },
-  chipPressed: {
-    opacity: 0.85,
-  },
-  chipLabel: {
-    flexShrink: 1,
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.white,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      gap: 8,
+    },
+    chip: {
+      alignSelf: "flex-start",
+      alignItems: "center",
+      gap: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: tennisRadii.lg,
+      backgroundColor: tennisColors.primary,
+    },
+    chipPressed: {
+      opacity: 0.85,
+    },
+    chipLabel: {
+      flexShrink: 1,
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.white,
+    },
+  }),
+);

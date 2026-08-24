@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import type { MatchHubCard } from "@tennis-lebanon/api";
 import { useTranslation } from "react-i18next";
@@ -238,125 +239,127 @@ export function MatchHubReadyHero({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...hubSectionStyles.card,
-    gap: 14,
-  },
-  chipRow: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    justifyContent: "center",
-    gap: 8,
-  },
-  // Neutral, not accent. These are static facts about the match, and filling
-  // them with the attention colour made the three loudest things on the page
-  // non-interactive metadata -- while reading as buttons, which they are not.
-  chip: {
-    flex: 1,
-    minWidth: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: tennisSemantic.neutral.fill,
-    borderWidth: 1,
-    borderColor: tennisSemantic.neutral.border,
-  },
-  chipText: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 11,
-    lineHeight: 14,
-    color: tennisSemantic.neutral.text,
-    textAlign: "center",
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: tennisColors.border,
-    marginHorizontal: -16,
-  },
-  vsRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 8,
-    paddingTop: 2,
-  },
-  playerColumn: {
-    flex: 1,
-    alignItems: "center",
-    gap: 12,
-    minWidth: 0,
-  },
-  playerBlockPressed: {
-    opacity: 0.6,
-  },
-  playerBlock: {
-    alignItems: "center",
-    gap: 6,
-    width: "100%",
-  },
-  playerName: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primaryDark,
-    textAlign: "center",
-    width: "100%",
-  },
-  playerMeta: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    lineHeight: 16,
-    minHeight: 16,
-    color: tennisColors.mutedForeground,
-    textAlign: "center",
-  },
-  openSlot: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderStyle: "dashed",
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.muted,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  openSlotMark: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 28,
-    lineHeight: 32,
-    color: tennisColors.mutedForeground,
-  },
-  centerColumn: {
-    width: 108,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    flexShrink: 0,
-    paddingTop: AVATAR_SIZE / 2 - 9,
-  },
-  connector: {
-    width: 16,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: tennisColors.border,
-  },
-  timeLabel: {
-    flexShrink: 1,
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 14,
-    lineHeight: 18,
-    color: tennisColors.primaryDark,
-    textAlign: "center",
-    letterSpacing: -0.2,
-  },
-  rescheduleRow: {
-    alignItems: "center",
-  },
-  primaryButton: {
-    width: "100%",
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    card: {
+      ...hubSectionStyles.card,
+      gap: 14,
+    },
+    chipRow: {
+      flexDirection: "row",
+      alignItems: "stretch",
+      justifyContent: "center",
+      gap: 8,
+    },
+    // Neutral, not accent. These are static facts about the match, and filling
+    // them with the attention colour made the three loudest things on the page
+    // non-interactive metadata -- while reading as buttons, which they are not.
+    chip: {
+      flex: 1,
+      minWidth: 0,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 8,
+      paddingVertical: 8,
+      borderRadius: 8,
+      backgroundColor: tennisSemantic.neutral.fill,
+      borderWidth: 1,
+      borderColor: tennisSemantic.neutral.border,
+    },
+    chipText: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 11,
+      lineHeight: 14,
+      color: tennisSemantic.neutral.text,
+      textAlign: "center",
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: tennisColors.border,
+      marginHorizontal: -16,
+    },
+    vsRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      gap: 8,
+      paddingTop: 2,
+    },
+    playerColumn: {
+      flex: 1,
+      alignItems: "center",
+      gap: 12,
+      minWidth: 0,
+    },
+    playerBlockPressed: {
+      opacity: 0.6,
+    },
+    playerBlock: {
+      alignItems: "center",
+      gap: 6,
+      width: "100%",
+    },
+    playerName: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.primaryDark,
+      textAlign: "center",
+      width: "100%",
+    },
+    playerMeta: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      minHeight: 16,
+      color: tennisColors.mutedForeground,
+      textAlign: "center",
+    },
+    openSlot: {
+      width: AVATAR_SIZE,
+      height: AVATAR_SIZE,
+      borderRadius: 16,
+      borderWidth: 1.5,
+      borderStyle: "dashed",
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.muted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    openSlotMark: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 28,
+      lineHeight: 32,
+      color: tennisColors.mutedForeground,
+    },
+    centerColumn: {
+      width: 108,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      flexShrink: 0,
+      paddingTop: AVATAR_SIZE / 2 - 9,
+    },
+    connector: {
+      width: 16,
+      height: 2,
+      borderRadius: 1,
+      backgroundColor: tennisColors.border,
+    },
+    timeLabel: {
+      flexShrink: 1,
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 14,
+      lineHeight: 18,
+      color: tennisColors.primaryDark,
+      textAlign: "center",
+      letterSpacing: -0.2,
+    },
+    rescheduleRow: {
+      alignItems: "center",
+    },
+    primaryButton: {
+      width: "100%",
+    },
+  }),
+);

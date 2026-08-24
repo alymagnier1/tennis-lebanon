@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
@@ -10,6 +11,7 @@ import {
 import { homeNextActionRoute } from "../../lib/routes";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import {
+  tennisColors,
   tennisSemantic,
   type SemanticTone,
   tennisRadii,
@@ -88,7 +90,7 @@ export function HomeNextActionCard({
         }}
         style={({ pressed }) => [
           styles.button,
-          { backgroundColor: tennisSemantic.actionable.fill },
+          { backgroundColor: tennisColors.violet },
           pressed && styles.buttonPressed,
         ]}
       >
@@ -100,60 +102,62 @@ export function HomeNextActionCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    borderWidth: 1.5,
-    borderRadius: tennisRadii.md,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    alignItems: "center",
-    gap: 10,
-  },
-  leading: {
-    flex: 1,
-    minWidth: 0,
-    alignItems: "center",
-    gap: 10,
-  },
-  iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  textBlock: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  title: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  body: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    lineHeight: 16,
-    opacity: 0.9,
-  },
-  button: {
-    minHeight: minTouchTargetPx,
-    minWidth: 72,
-    paddingHorizontal: 14,
-    borderRadius: tennisRadii.md,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  buttonPressed: {
-    opacity: 0.9,
-  },
-  buttonLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisSemantic.actionable.text,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    card: {
+      borderWidth: 1.5,
+      borderRadius: tennisRadii.md,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      alignItems: "center",
+      gap: 10,
+    },
+    leading: {
+      flex: 1,
+      minWidth: 0,
+      alignItems: "center",
+      gap: 10,
+    },
+    iconWrap: {
+      width: 32,
+      height: 32,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    textBlock: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2,
+    },
+    title: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 14,
+      lineHeight: 18,
+    },
+    body: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      opacity: 0.9,
+    },
+    button: {
+      minHeight: minTouchTargetPx,
+      minWidth: 72,
+      paddingHorizontal: 14,
+      borderRadius: tennisRadii.md,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    buttonPressed: {
+      opacity: 0.9,
+    },
+    buttonLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.onViolet,
+    },
+  }),
+);

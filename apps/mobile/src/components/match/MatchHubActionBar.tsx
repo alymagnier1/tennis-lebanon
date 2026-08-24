@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
@@ -71,51 +72,53 @@ export function MatchHubActionBar({
   );
 }
 
-const styles = StyleSheet.create({
-  bar: {
-    borderTopWidth: 1,
-    borderTopColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-  },
-  row: {
-    alignItems: "center",
-    gap: 10,
-  },
-  cancelButton: {
-    minHeight: minTouchTargetPx,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1.5,
-    borderColor: tennisColors.danger,
-    backgroundColor: tennisColors.card,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 14,
-  },
-  cancelBesidePrimary: {
-    flexShrink: 0,
-  },
-  cancelAlone: {
-    flex: 1,
-  },
-  cancelPressed: {
-    opacity: 0.88,
-    backgroundColor: "#FCECEC",
-  },
-  cancelLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 15,
-    color: tennisColors.danger,
-  },
-  primaryWrap: {
-    flex: 1,
-    minWidth: 0,
-  },
-  primaryAlone: {
-    flex: 1,
-  },
-  primaryButton: {
-    width: "100%",
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    bar: {
+      borderTopWidth: 1,
+      borderTopColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+      paddingHorizontal: 20,
+      paddingTop: 12,
+    },
+    row: {
+      alignItems: "center",
+      gap: 10,
+    },
+    cancelButton: {
+      minHeight: minTouchTargetPx,
+      borderRadius: tennisRadii.md,
+      borderWidth: 1.5,
+      borderColor: tennisColors.danger,
+      backgroundColor: tennisColors.card,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 14,
+    },
+    cancelBesidePrimary: {
+      flexShrink: 0,
+    },
+    cancelAlone: {
+      flex: 1,
+    },
+    cancelPressed: {
+      opacity: 0.88,
+      backgroundColor: "#FCECEC",
+    },
+    cancelLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 15,
+      color: tennisColors.danger,
+    },
+    primaryWrap: {
+      flex: 1,
+      minWidth: 0,
+    },
+    primaryAlone: {
+      flex: 1,
+    },
+    primaryButton: {
+      width: "100%",
+    },
+  }),
+);

@@ -1,4 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import type { DiscoverMatchToggles } from "@tennis-lebanon/domain";
 import { AppText } from "../AppText";
@@ -67,29 +68,31 @@ export function DiscoverMatchChips({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 8,
-  },
-  chipRow: {
-    gap: 8,
-    paddingVertical: 2,
-  },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: tennisRadii.lg,
-    backgroundColor: tennisColors.muted,
-  },
-  chipSelected: {
-    backgroundColor: tennisColors.primary,
-  },
-  chipLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-  },
-  chipLabelSelected: {
-    color: tennisColors.white,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      gap: 8,
+    },
+    chipRow: {
+      gap: 8,
+      paddingVertical: 2,
+    },
+    chip: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: tennisRadii.lg,
+      backgroundColor: tennisColors.muted,
+    },
+    chipSelected: {
+      backgroundColor: tennisColors.primary,
+    },
+    chipLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.primaryDark,
+    },
+    chipLabelSelected: {
+      color: tennisColors.white,
+    },
+  }),
+);

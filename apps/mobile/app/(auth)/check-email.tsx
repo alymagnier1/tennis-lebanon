@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -39,23 +40,25 @@ export default function CheckEmailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  iconBox: {
-    width: 56,
-    height: 56,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.secondary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  icon: {
-    fontSize: 28,
-  },
-  hint: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 22,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    iconBox: {
+      width: 56,
+      height: 56,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.secondary,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 20,
+    },
+    icon: {
+      fontSize: 28,
+    },
+    hint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 22,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

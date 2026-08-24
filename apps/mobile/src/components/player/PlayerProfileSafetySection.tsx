@@ -1,10 +1,9 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { confirmAction } from "../../lib/confirm-action";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
-import { FigmaSecondaryButton } from "../onboarding-ui";
-import { PlayerProfileSection } from "./PlayerProfileSection";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { playerReportRoute } from "../../lib/routes";
@@ -20,7 +19,7 @@ export function PlayerProfileSafetySection({
   blockLoading?: boolean;
 }) {
   const { t } = useTranslation();
-  const { writingDirection } = useLayoutDirection();
+  const { rowDirection, writingDirection } = useLayoutDirection();
 
   const confirmBlock = () => {
     confirmAction({
@@ -33,34 +32,71 @@ export function PlayerProfileSafetySection({
   };
 
   return (
-    <PlayerProfileSection title={t("playerProfile.safetyTitle")}>
-      <AppText style={[styles.description, { writingDirection }]}>
-        {t("playerProfile.safetyDescription")}
+    <View
+      accessibilityHint={t("playerProfile.safetyDescription")}
+      style={[styles.row, { flexDirection: rowDirection }]}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("discover.reportPlayer")}
+        onPress={() => router.push(playerReportRoute(playerId))}
+        style={({ pressed }) => [styles.link, pressed && styles.linkPressed]}
+      >
+        <AppText style={[styles.linkText, { writingDirection }]}>
+          {t("discover.reportPlayer")}
+        </AppText>
+      </Pressable>
+      <AppText style={styles.separator} accessible={false}>
+        ·
       </AppText>
-      <View style={styles.actions}>
-        <FigmaSecondaryButton
-          label={t("discover.reportPlayer")}
-          onPress={() => router.push(playerReportRoute(playerId))}
-        />
-        <FigmaSecondaryButton
-          label={t("discover.blockPlayer")}
-          loading={blockLoading}
-          onPress={confirmBlock}
-        />
-      </View>
-    </PlayerProfileSection>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("discover.blockPlayer")}
+        accessibilityState={{ disabled: blockLoading }}
+        disabled={blockLoading}
+        onPress={confirmBlock}
+        style={({ pressed }) => [
+          styles.link,
+          pressed && styles.linkPressed,
+          blockLoading && styles.linkDisabled,
+        ]}
+      >
+        <AppText style={[styles.linkText, { writingDirection }]}>
+          {t("discover.blockPlayer")}
+        </AppText>
+      </Pressable>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  description: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 20,
-    color: tennisColors.mutedForeground,
-  },
-  actions: {
-    gap: 10,
-    marginTop: 4,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    row: {
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      paddingVertical: 8,
+    },
+    link: {
+      minHeight: 44,
+      justifyContent: "center",
+      paddingHorizontal: 8,
+    },
+    linkPressed: {
+      opacity: 0.7,
+    },
+    linkDisabled: {
+      opacity: 0.5,
+    },
+    linkText: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    separator: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

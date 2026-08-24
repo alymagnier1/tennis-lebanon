@@ -12,6 +12,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -403,202 +404,204 @@ export function MatchChatPanel({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  dock: {
-    backgroundColor: tennisColors.card,
-    borderTopWidth: 1,
-    borderTopColor: tennisColors.border,
-    paddingTop: 12,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.2,
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-  loading: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  loadingDocked: {
-    height: HUB_MESSAGE_LIST_HEIGHT,
-    flex: 0,
-  },
-  list: {
-    flex: 1,
-  },
-  listDocked: {
-    height: HUB_MESSAGE_LIST_HEIGHT,
-    flexGrow: 0,
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 16,
-  },
-  listContentDocked: {
-    paddingHorizontal: 16,
-    paddingTop: 4,
-    paddingBottom: 8,
-    flexGrow: 1,
-  },
-  separator: {
-    height: 8,
-  },
-  listContentEmpty: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
-  empty: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.mutedForeground,
-    textAlign: "center",
-  },
-  reconnecting: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-  },
-  bubbleRow: {
-    width: "100%",
-  },
-  bubbleRowOwn: {
-    alignItems: "flex-end",
-  },
-  bubbleRowOther: {
-    alignItems: "flex-start",
-  },
-  bubble: {
-    maxWidth: "85%",
-    borderRadius: tennisRadii.lg,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 4,
-  },
-  bubbleOwn: {
-    backgroundColor: tennisColors.primary,
-    borderBottomRightRadius: 4,
-  },
-  bubbleOther: {
-    backgroundColor: tennisColors.muted,
-    borderBottomLeftRadius: 4,
-  },
-  sender: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 11,
-    color: tennisColors.mutedForeground,
-  },
-  body: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  bodyEmojiOnly: {
-    fontSize: 28,
-    lineHeight: 34,
-  },
-  bodyOwn: {
-    color: tennisColors.white,
-  },
-  bodyOther: {
-    color: tennisColors.primaryDark,
-  },
-  time: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 10,
-    alignSelf: "flex-end",
-  },
-  timeOwn: {
-    color: tennisColors.white,
-    opacity: 0.85,
-  },
-  timeOther: {
-    color: tennisColors.mutedForeground,
-  },
-  composerWrap: {
-    borderTopWidth: 1,
-    borderTopColor: tennisColors.border,
-    backgroundColor: tennisColors.background,
-    paddingTop: 8,
-  },
-  composerDocked: {
-    backgroundColor: tennisColors.card,
-    paddingBottom: 10,
-  },
-  emojiTray: {
-    paddingHorizontal: 12,
-    paddingBottom: 8,
-    gap: 4,
-    alignItems: "center",
-  },
-  emojiChip: {
-    minWidth: 40,
-    minHeight: 40,
-    borderRadius: tennisRadii.md,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emojiChipPressed: {
-    backgroundColor: tennisColors.muted,
-  },
-  emojiGlyph: {
-    fontSize: 24,
-    lineHeight: 30,
-  },
-  composer: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 8,
-    paddingHorizontal: 16,
-  },
-  emojiToggle: {
-    width: 44,
-    height: 44,
-    borderRadius: tennisRadii.md,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  emojiToggleOpen: {
-    borderColor: tennisColors.primary,
-    backgroundColor: tennisColors.secondary,
-  },
-  emojiTogglePressed: {
-    opacity: 0.88,
-  },
-  input: {
-    flex: 1,
-    maxHeight: 100,
-  },
-  sendButton: {
-    minHeight: 44,
-    minWidth: 64,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 12,
-  },
-  sendDisabled: {
-    opacity: 0.5,
-  },
-  sendPressed: {
-    opacity: 0.9,
-  },
-  sendLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.white,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+    },
+    dock: {
+      backgroundColor: tennisColors.card,
+      borderTopWidth: 1,
+      borderTopColor: tennisColors.border,
+      paddingTop: 12,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+      paddingHorizontal: 16,
+      marginBottom: 8,
+    },
+    loading: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    loadingDocked: {
+      height: HUB_MESSAGE_LIST_HEIGHT,
+      flex: 0,
+    },
+    list: {
+      flex: 1,
+    },
+    listDocked: {
+      height: HUB_MESSAGE_LIST_HEIGHT,
+      flexGrow: 0,
+    },
+    listContent: {
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      paddingBottom: 16,
+    },
+    listContentDocked: {
+      paddingHorizontal: 16,
+      paddingTop: 4,
+      paddingBottom: 8,
+      flexGrow: 1,
+    },
+    separator: {
+      height: 8,
+    },
+    listContentEmpty: {
+      flexGrow: 1,
+      justifyContent: "center",
+    },
+    empty: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.mutedForeground,
+      textAlign: "center",
+    },
+    reconnecting: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+      paddingHorizontal: 16,
+      paddingVertical: 6,
+    },
+    bubbleRow: {
+      width: "100%",
+    },
+    bubbleRowOwn: {
+      alignItems: "flex-end",
+    },
+    bubbleRowOther: {
+      alignItems: "flex-start",
+    },
+    bubble: {
+      maxWidth: "85%",
+      borderRadius: tennisRadii.lg,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      gap: 4,
+    },
+    bubbleOwn: {
+      backgroundColor: tennisColors.primary,
+      borderBottomRightRadius: 4,
+    },
+    bubbleOther: {
+      backgroundColor: tennisColors.muted,
+      borderBottomLeftRadius: 4,
+    },
+    sender: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 11,
+      color: tennisColors.mutedForeground,
+    },
+    body: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    bodyEmojiOnly: {
+      fontSize: 28,
+      lineHeight: 34,
+    },
+    bodyOwn: {
+      color: tennisColors.white,
+    },
+    bodyOther: {
+      color: tennisColors.primaryDark,
+    },
+    time: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 10,
+      alignSelf: "flex-end",
+    },
+    timeOwn: {
+      color: tennisColors.white,
+      opacity: 0.85,
+    },
+    timeOther: {
+      color: tennisColors.mutedForeground,
+    },
+    composerWrap: {
+      borderTopWidth: 1,
+      borderTopColor: tennisColors.border,
+      backgroundColor: tennisColors.background,
+      paddingTop: 8,
+    },
+    composerDocked: {
+      backgroundColor: tennisColors.card,
+      paddingBottom: 10,
+    },
+    emojiTray: {
+      paddingHorizontal: 12,
+      paddingBottom: 8,
+      gap: 4,
+      alignItems: "center",
+    },
+    emojiChip: {
+      minWidth: 40,
+      minHeight: 40,
+      borderRadius: tennisRadii.md,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    emojiChipPressed: {
+      backgroundColor: tennisColors.muted,
+    },
+    emojiGlyph: {
+      fontSize: 24,
+      lineHeight: 30,
+    },
+    composer: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      gap: 8,
+      paddingHorizontal: 16,
+    },
+    emojiToggle: {
+      width: 44,
+      height: 44,
+      borderRadius: tennisRadii.md,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+    },
+    emojiToggleOpen: {
+      borderColor: tennisColors.primary,
+      backgroundColor: tennisColors.secondary,
+    },
+    emojiTogglePressed: {
+      opacity: 0.88,
+    },
+    input: {
+      flex: 1,
+      maxHeight: 100,
+    },
+    sendButton: {
+      minHeight: 44,
+      minWidth: 64,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 12,
+    },
+    sendDisabled: {
+      opacity: 0.5,
+    },
+    sendPressed: {
+      opacity: 0.9,
+    },
+    sendLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.white,
+    },
+  }),
+);

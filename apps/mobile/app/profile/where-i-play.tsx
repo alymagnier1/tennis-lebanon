@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { notify } from "../../src/lib/confirm-action";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -238,32 +239,34 @@ export default function WhereIPlayScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  content: {
-    gap: 12,
-    paddingBottom: 24,
-  },
-  summary: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.primary,
-  },
-  chips: {
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  muted: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 20,
-    color: tennisColors.mutedForeground,
-  },
-  error: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.accent,
-  },
-  browseRow: {
-    alignItems: "center",
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    content: {
+      gap: 12,
+      paddingBottom: 24,
+    },
+    summary: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.primary,
+    },
+    chips: {
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    muted: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+    },
+    error: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.accent,
+    },
+    browseRow: {
+      alignItems: "center",
+    },
+  }),
+);

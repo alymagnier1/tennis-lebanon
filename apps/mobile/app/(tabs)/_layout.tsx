@@ -3,12 +3,13 @@ import { ActivityIndicator, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { TennisTabBar } from "../../src/components/TennisTabBar";
 import { authRouteForState } from "../../src/lib/auth-routing";
-import { tennisColors } from "../../src/theme/tennis-tokens";
+import { useTennisTheme } from "../../src/providers/ThemeProvider";
 import { useAuth } from "../../src/providers/AuthProvider";
 
 export default function TabsLayout() {
   const { t } = useTranslation();
   const { state } = useAuth();
+  const { colors } = useTennisTheme();
 
   if (state === "loading") {
     return (
@@ -17,10 +18,10 @@ export default function TabsLayout() {
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: tennisColors.background,
+          backgroundColor: colors.background,
         }}
       >
-        <ActivityIndicator color={tennisColors.primary} />
+        <ActivityIndicator color={colors.primary} />
       </View>
     );
   }
@@ -33,10 +34,10 @@ export default function TabsLayout() {
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: tennisColors.background,
+          backgroundColor: colors.background,
         }}
       >
-        <ActivityIndicator color={tennisColors.primary} />
+        <ActivityIndicator color={colors.primary} />
       </View>
     );
   }
@@ -46,10 +47,10 @@ export default function TabsLayout() {
       tabBar={(props) => <TennisTabBar {...props} />}
       screenOptions={{
         headerShown: true,
-        headerStyle: { backgroundColor: tennisColors.background },
-        headerTintColor: tennisColors.primaryDark,
-        tabBarActiveTintColor: tennisColors.primary,
-        tabBarInactiveTintColor: tennisColors.mutedForeground,
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.primaryDark,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.mutedForeground,
         tabBarStyle: {
           overflow: "visible",
           backgroundColor: "transparent",

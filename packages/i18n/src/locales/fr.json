@@ -723,7 +723,6 @@
       "formatDescription": "Choisissez le format et l'intention de jeu.",
       "detailsTitle": "Préférences du match",
       "detailsDescription": "Définissez le niveau et les règles d'adhésion.",
-      "forPlayerHint": "Vous préparez un match pour {{name}}. Nous l'inviterons après publication.",
       "matchTypeSection": "Type de match",
       "matchTypeDescription": "Simple ou double, et niveau de compétitivité souhaité.",
       "joinSettingsSection": "Qui peut rejoindre",
@@ -761,8 +760,6 @@
       "publishError": "Impossible de publier ce match.",
       "reviewValidationError": "Certains détails du match sont invalides. Revenez en arrière et vérifiez les zones et l'horaire.",
       "reviewTimeInPast": "L'horaire proposé doit être dans le futur. Revenez en arrière et choisissez un créneau plus tard.",
-      "activeHostedTitle": "Vous avez déjà un match ouvert",
-      "activeHostedBody": "Vous avez déjà un match {{format}} ouvert. Invitez des joueurs ou annulez-le avant d'en créer un autre.",
       "continueInviting": "Continuer à inviter des joueurs",
       "incomplete": "Ce brouillon est incomplet. Recommencez.",
       "restart": "Recommencer",
@@ -794,7 +791,14 @@
       },
       "publishActionsHint": "Publier rend le match visible sur Découvrir. Inviter des joueurs le garde en brouillon envoyé à des personnes précises.",
       "notesAdd": "Ajouter une note",
-      "notesHide": "Masquer la note"
+      "notesHide": "Masquer la note",
+      "sendRequest": "Envoyer la demande à {{name}}",
+      "sendRequestHint": "Seul {{name}} voit cette demande. Il peut accepter ou refuser.",
+      "forPlayerHint": "Vous préparez un match pour {{name}}. Seul lui le verra.",
+      "publishPrivateHint": "Ce match n’apparaîtra pas sur Discover. Publiez-le, puis invitez les joueurs de votre choix.",
+      "capReachedTitle": "Vous avez {{count}} matchs en cours",
+      "capReachedBody": "Annulez-en un pour en créer un autre. Pour ajouter des joueurs à un match existant, ouvrez-le et invitez depuis là.",
+      "seeMyMatches": "Voir mes matchs"
     },
     "visibility": {
       "public": "Public",
@@ -1140,10 +1144,7 @@
       "acceptError": "Impossible d'accepter cette invitation.",
       "declineError": "Impossible de refuser cette invitation.",
       "sent": "Invitation envoyée. Elle apparaît dans Matchs → Invitations.",
-      "pickMatch": "Inviter à l'un de vos matchs ouverts",
-      "pickMatchHint": "Ajoutez-les à un match que vous organisez déjà — ou défiez-les pour un nouveau match ci-dessous.",
       "inviteToMatch": "Inviter au match {{format}}",
-      "noTimeYet": "Horaire à confirmer",
       "invitePlayer": "Inviter",
       "invitePlayers": "Inviter des joueurs",
       "invited": "Invité",
@@ -1171,9 +1172,7 @@
       "autoSendOnPublish": "Ils recevront une invitation dans l'app à la publication.",
       "rateLimited": "Vous avez envoyé beaucoup d’invitations aujourd’hui. Réessayez demain.",
       "notSentTitle": "Match créé, invitation non envoyée",
-      "createInstead": "Créer un nouveau match",
-      "yourMatch": "Votre match",
-      "joinedMatch": "Vous l'avez rejoint"
+      "askToPlay": "Proposer un match"
     },
     "policy": {
       "leaveBeforeBooking": "Vous pouvez quitter librement tant qu'aucun court n'est réservé. Les changements tardifs répétés peuvent affecter votre fiabilité.",

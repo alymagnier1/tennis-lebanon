@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { BottomSheet, SheetOption } from "../AppUi";
 import { AppText } from "../AppText";
@@ -72,28 +73,30 @@ export function DiscoverSortControl({
   );
 }
 
-const styles = StyleSheet.create({
-  trigger: {
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    minHeight: 44,
-    borderRadius: tennisRadii.lg,
-    backgroundColor: tennisColors.card,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    flexShrink: 0,
-  },
-  triggerPressed: {
-    opacity: 0.88,
-  },
-  triggerLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-  },
-  options: {
-    gap: 8,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    trigger: {
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      minHeight: 44,
+      borderRadius: tennisRadii.lg,
+      backgroundColor: tennisColors.card,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      flexShrink: 0,
+    },
+    triggerPressed: {
+      opacity: 0.88,
+    },
+    triggerLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.primaryDark,
+    },
+    options: {
+      gap: 8,
+    },
+  }),
+);

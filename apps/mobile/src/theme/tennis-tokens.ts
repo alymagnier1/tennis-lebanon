@@ -37,23 +37,23 @@ export const tennisColorsLight = {
 } as const;
 
 /**
- * Dark surfaces follow the olive-black canvas. CTAs use violet so lime is not
- * a full-bleed fill; lime remains on skill-band chips only.
+ * Dark surfaces follow the olive-charcoal canvas (green-black, not yellow-black).
+ * CTAs and selected chrome use the mock lavender so lime stays on skill chips.
  */
 export const tennisColorsDark = {
-  primary: "#7C3AED",
-  primaryDark: "#F4F1E8",
+  primary: "#8B6DFF",
+  primaryDark: "#F3F4F0",
   onPrimary: "#FFFFFF",
   lime: "#C8E63B",
   limeText: "#0D1C14",
-  background: "#0F0E04",
-  card: "#22221A",
-  secondary: "#2C2B22",
-  muted: "#1A1912",
-  mutedForeground: "#B5B3A8",
-  border: "#3D3C32",
+  background: "#101408",
+  card: "#1C1E19",
+  secondary: "#252722",
+  muted: "#161814",
+  mutedForeground: "#A8AAA4",
+  border: "#2E322C",
   accent: "#E07A3D",
-  violet: "#7C3AED",
+  violet: "#8B6DFF",
   onViolet: "#FFFFFF",
   danger: "#F87171",
   white: "#FFFFFF",
@@ -128,12 +128,12 @@ export const tennisSemanticLight: Record<SemanticTone, SemanticToneTokens> = {
 };
 
 export const tennisSemanticDark: Record<SemanticTone, SemanticToneTokens> = {
-  neutral: { fill: "#2C2B22", text: "#D8D6CC", border: "#3D3C32" },
+  neutral: { fill: "#252722", text: "#D4D6D0", border: "#2E322C" },
   info: { fill: "#1A2E28", text: "#C8E63B", border: "#2A4A40" },
   positive: { fill: "#143328", text: "#86EFAC", border: "#1A4A32" },
   attention: { fill: "#3A2418", text: "#F4C7A8", border: "#5A3828" },
   critical: { fill: "#3A1818", text: "#FECACA", border: "#5A2828" },
-  actionable: { fill: "#7C3AED", text: "#FFFFFF", border: "#6D28D9" },
+  actionable: { fill: "#8B6DFF", text: "#FFFFFF", border: "#7A5CF0" },
 };
 
 const DANGER_TEXT_LIGHT = "#B91C1C";
@@ -243,6 +243,8 @@ export const tennisSpacing = {
   screenX: 28,
   screenBottom: 48,
   section: 20,
+  /** Home (and similar) title row → first content, not card-to-card. */
+  sectionTitleContent: 8,
 } as const;
 
 export const tennisType = {

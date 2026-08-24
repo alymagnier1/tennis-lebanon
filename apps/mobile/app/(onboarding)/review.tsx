@@ -17,6 +17,7 @@ import { useOnboarding } from "../../src/providers/OnboardingProvider";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import { tennisColors } from "../../src/theme/tennis-tokens";
 import { StyleSheet } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 
 export default function ReviewScreen() {
   const { t } = useTranslation();
@@ -97,19 +98,21 @@ export default function ReviewScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    marginBottom: 12,
-  },
-  label: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-    marginBottom: 4,
-  },
-  value: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    card: {
+      marginBottom: 12,
+    },
+    label: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+      marginBottom: 4,
+    },
+    value: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+    },
+  }),
+);

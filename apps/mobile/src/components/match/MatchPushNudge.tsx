@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { Icon } from "../Icon";
@@ -145,42 +146,44 @@ export function MatchPushNudge({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 10,
-    padding: 16,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  header: {
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.muted,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerText: {
-    flex: 1,
-    minWidth: 0,
-    gap: 4,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 16,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.2,
-  },
-  body: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 19,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      gap: 10,
+      padding: 16,
+      borderRadius: 18,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+    },
+    header: {
+      alignItems: "flex-start",
+      gap: 12,
+    },
+    iconWrap: {
+      width: 40,
+      height: 40,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.muted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    headerText: {
+      flex: 1,
+      minWidth: 0,
+      gap: 4,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 16,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+    },
+    body: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 19,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

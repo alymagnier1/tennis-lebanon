@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { AppText } from "../AppText";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors } from "../../theme/tennis-tokens";
@@ -51,38 +52,40 @@ export function HubDestructiveLink({
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  label: {
-    flex: 1,
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-  },
-  value: {
-    flex: 1.2,
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-    textAlign: "right",
-  },
-  destructive: {
-    alignSelf: "flex-start",
-    paddingVertical: 6,
-  },
-  destructivePressed: {
-    opacity: 0.85,
-  },
-  destructiveDisabled: {
-    opacity: 0.5,
-  },
-  destructiveLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.danger,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    row: {
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    label: {
+      flex: 1,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    value: {
+      flex: 1.2,
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.primaryDark,
+      textAlign: "right",
+    },
+    destructive: {
+      alignSelf: "flex-start",
+      paddingVertical: 6,
+    },
+    destructivePressed: {
+      opacity: 0.85,
+    },
+    destructiveDisabled: {
+      opacity: 0.5,
+    },
+    destructiveLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.danger,
+    },
+  }),
+);

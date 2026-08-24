@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -258,33 +259,35 @@ export default function IdentityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  photoBlock: {
-    alignItems: "center",
-    marginBottom: 28,
-  },
-  photoTarget: {
-    alignItems: "center",
-    gap: 10,
-  },
-  photoTargetPressed: {
-    opacity: 0.7,
-  },
-  photoAction: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 15,
-    color: tennisColors.primary,
-  },
-  photoHint: {
-    marginTop: 8,
-    textAlign: "center",
-  },
-  fieldHint: {
-    marginTop: 6,
-  },
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    photoBlock: {
+      alignItems: "center",
+      marginBottom: 28,
+    },
+    photoTarget: {
+      alignItems: "center",
+      gap: 10,
+    },
+    photoTargetPressed: {
+      opacity: 0.7,
+    },
+    photoAction: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 15,
+      color: tennisColors.primary,
+    },
+    photoHint: {
+      marginTop: 8,
+      textAlign: "center",
+    },
+    fieldHint: {
+      marginTop: 6,
+    },
+    chips: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+  }),
+);

@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from "react";
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { AppText } from "../AppText";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
@@ -8,10 +9,12 @@ import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 export function PlayerProfileSection({
   title,
   variant = "card",
+  dense = false,
   children,
 }: PropsWithChildren<{
   title: string;
   variant?: "card" | "grouped";
+  dense?: boolean;
 }>) {
   const { writingDirection } = useLayoutDirection();
 
@@ -20,53 +23,69 @@ export function PlayerProfileSection({
       <AppText
         style={[
           variant === "grouped" ? styles.groupedTitle : styles.title,
+          dense && styles.titleDense,
           { writingDirection },
         ]}
       >
         {title}
       </AppText>
-      <View style={variant === "grouped" ? styles.groupedBody : styles.body}>
+      <View
+        style={[
+          variant === "grouped" ? styles.groupedBody : styles.body,
+          dense && styles.bodyDense,
+        ]}
+      >
         {children}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.lg,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    overflow: "hidden",
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.2,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 0,
-  },
-  groupedTitle: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-    letterSpacing: 0.3,
-    textTransform: "uppercase",
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 10,
-  },
-  body: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 16,
-    gap: 10,
-  },
-  groupedBody: {
-    borderTopWidth: 1,
-    borderTopColor: tennisColors.border,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: tennisColors.card,
+      borderRadius: tennisRadii.lg,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      overflow: "hidden",
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+      paddingHorizontal: 16,
+      paddingTop: 16,
+      paddingBottom: 0,
+    },
+    titleDense: {
+      paddingTop: 12,
+    },
+    groupedTitle: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+      letterSpacing: 0.3,
+      textTransform: "uppercase",
+      paddingHorizontal: 16,
+      paddingTop: 14,
+      paddingBottom: 10,
+    },
+    body: {
+      paddingHorizontal: 16,
+      paddingTop: 10,
+      paddingBottom: 16,
+      gap: 10,
+    },
+    bodyDense: {
+      paddingTop: 4,
+      paddingBottom: 10,
+      gap: 0,
+    },
+    groupedBody: {
+      borderTopWidth: 1,
+      borderTopColor: tennisColors.border,
+    },
+  }),
+);

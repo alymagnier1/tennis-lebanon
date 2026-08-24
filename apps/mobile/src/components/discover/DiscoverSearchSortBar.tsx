@@ -1,4 +1,5 @@
 import { StyleSheet, TextInput, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { Icon } from "../Icon";
 import { DiscoverSortControl } from "./DiscoverSortControl";
@@ -47,29 +48,31 @@ export function DiscoverSearchSortBar({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    alignItems: "center",
-    gap: 8,
-  },
-  searchField: {
-    flex: 1,
-    minWidth: 0,
-    alignItems: "center",
-    gap: 8,
-    minHeight: 44,
-    paddingHorizontal: 12,
-    borderRadius: tennisRadii.lg,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.background,
-  },
-  searchInput: {
-    flex: 1,
-    minWidth: 0,
-    paddingVertical: 10,
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.primaryDark,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      alignItems: "center",
+      gap: 8,
+    },
+    searchField: {
+      flex: 1,
+      minWidth: 0,
+      alignItems: "center",
+      gap: 8,
+      minHeight: 44,
+      paddingHorizontal: 12,
+      borderRadius: tennisRadii.lg,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.background,
+    },
+    searchInput: {
+      flex: 1,
+      minWidth: 0,
+      paddingVertical: 10,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.primaryDark,
+    },
+  }),
+);

@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../src/theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -152,78 +153,80 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  markAll: {
-    alignSelf: "flex-start",
-    minHeight: 36,
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  markAllLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.primary,
-  },
-  list: {
-    gap: 10,
-  },
-  row: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.lg,
-    borderWidth: 1,
-    borderColor: tennisColors.border,
-    padding: 14,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  rowUnread: {
-    borderColor: tennisColors.primary,
-    backgroundColor: tennisColors.secondary,
-  },
-  rowPressed: {
-    opacity: 0.92,
-  },
-  iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: tennisColors.muted,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rowContent: {
-    flex: 1,
-    gap: 4,
-  },
-  rowTitle: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-  },
-  rowBody: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-    lineHeight: 18,
-  },
-  rowTime: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    color: tennisColors.mutedForeground,
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: tennisColors.lime,
-    marginTop: 6,
-  },
-  empty: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.mutedForeground,
-    textAlign: "center",
-    paddingVertical: 24,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    markAll: {
+      alignSelf: "flex-start",
+      minHeight: 36,
+      justifyContent: "center",
+      marginBottom: 8,
+    },
+    markAllLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.primary,
+    },
+    list: {
+      gap: 10,
+    },
+    row: {
+      backgroundColor: tennisColors.card,
+      borderRadius: tennisRadii.lg,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+      padding: 14,
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 12,
+    },
+    rowUnread: {
+      borderColor: tennisColors.primary,
+      backgroundColor: tennisColors.secondary,
+    },
+    rowPressed: {
+      opacity: 0.92,
+    },
+    iconWrap: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: tennisColors.muted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    rowContent: {
+      flex: 1,
+      gap: 4,
+    },
+    rowTitle: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+    },
+    rowBody: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+      lineHeight: 18,
+    },
+    rowTime: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 11,
+      color: tennisColors.mutedForeground,
+    },
+    unreadDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: tennisColors.lime,
+      marginTop: 6,
+    },
+    empty: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.mutedForeground,
+      textAlign: "center",
+      paddingVertical: 24,
+    },
+  }),
+);

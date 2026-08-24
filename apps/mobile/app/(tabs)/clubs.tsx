@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import {
   ClubsDirectoryHeader,
@@ -66,20 +67,22 @@ export default function ClubsTabScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  listSection: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 100,
-    gap: 16,
-  },
-  resultCount: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    listSection: {
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 100,
+      gap: 16,
+    },
+    resultCount: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import type { MatchHubCard } from "@tennis-lebanon/api";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
@@ -80,47 +81,49 @@ export function MatchHubOverviewDetails({ hub }: { hub: MatchHubCard }) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 14,
-  },
-  badgeRow: {
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chipRow: {
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  detailChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: tennisRadii.pill,
-    backgroundColor: tennisColors.muted,
-    borderWidth: 1,
-    borderColor: tennisColors.border,
-    maxWidth: "100%",
-  },
-  detailChipText: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    color: tennisColors.primaryDark,
-  },
-  sectionLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-    textTransform: "uppercase",
-    letterSpacing: 0.4,
-    marginBottom: 8,
-  },
-  notesBlock: {
-    gap: 4,
-  },
-  notes: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 20,
-    color: tennisColors.primaryDark,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      gap: 14,
+    },
+    badgeRow: {
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    chipRow: {
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    detailChip: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: tennisRadii.pill,
+      backgroundColor: tennisColors.muted,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+      maxWidth: "100%",
+    },
+    detailChipText: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      color: tennisColors.primaryDark,
+    },
+    sectionLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+      marginBottom: 8,
+    },
+    notesBlock: {
+      gap: 4,
+    },
+    notes: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
+    },
+  }),
+);

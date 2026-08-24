@@ -1,5 +1,6 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router, useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -330,24 +331,26 @@ export default function MatchDefaultsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  content: {
-    gap: 12,
-    paddingBottom: 24,
-  },
-  savingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  savingLabel: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-  },
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    content: {
+      gap: 12,
+      paddingBottom: 24,
+    },
+    savingRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    savingLabel: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    chips: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+  }),
+);

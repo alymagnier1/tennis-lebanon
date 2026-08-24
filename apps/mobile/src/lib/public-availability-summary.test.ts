@@ -3,6 +3,7 @@ import type { TFunction } from "i18next";
 import {
   formatAvailabilityDayPartsLabel,
   formatDiscoverPlayerAvailabilityLabel,
+  formatWeeklyDaysLabel,
   publicAvailabilityByWeekday,
   sortAvailabilityDayParts,
   weekdayShortLabels,
@@ -13,6 +14,7 @@ describe("public availability summary labels", () => {
     if (key === "availability.blocks.morning") return "Morning";
     if (key === "availability.blocks.afternoon") return "Afternoon";
     if (key === "availability.blocks.evening") return "Evening";
+    if (key === "availability.blocks.allDay") return "All day";
     if (key === "playerProfile.availabilityPartsTwo") {
       return `${options?.first} and ${options?.second}`;
     }
@@ -29,15 +31,38 @@ describe("public availability summary labels", () => {
     ]);
   });
 
-  it("formats one or two day parts", () => {
+  it("formats one or two day parts, and all three as all day", () => {
     expect(formatAvailabilityDayPartsLabel(["morning"], t)).toBe("Morning");
     expect(formatAvailabilityDayPartsLabel(["evening", "morning"], t)).toBe(
       "Morning and Evening",
     );
+    expect(
+      formatAvailabilityDayPartsLabel(["evening", "afternoon", "morning"], t),
+    ).toBe("All day");
   });
 
   it("maps weekday numbers to short labels", () => {
     expect(weekdayShortLabels([4, 1], t)).toEqual(["1", "4"]);
+  });
+
+  it("joins weekly days for the profile fact row", () => {
+    const translate = vi.fn((key: string, options?: Record<string, string>) => {
+      if (key.startsWith("availability.weekdaysShort.")) {
+        const names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        return names[Number(key.split(".").pop())] ?? "";
+      }
+      if (key === "playerProfile.weeklyDaysTwo") {
+        return `${options?.first} & ${options?.second}`;
+      }
+      if (key === "playerProfile.weeklyDaysMany") {
+        return `${options?.list} & ${options?.last}`;
+      }
+      return key;
+    }) as unknown as TFunction;
+
+    expect(formatWeeklyDaysLabel([6], translate)).toBe("Sat");
+    expect(formatWeeklyDaysLabel([5, 6], translate)).toBe("Fri & Sat");
+    expect(formatWeeklyDaysLabel([0, 5, 6], translate)).toBe("Sun, Fri & Sat");
   });
 
   it("returns per-weekday blocks from by_weekday", () => {

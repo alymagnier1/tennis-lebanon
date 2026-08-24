@@ -116,6 +116,32 @@ export function formatUtcInBeirut(iso: string): string {
   }).format(new Date(iso));
 }
 
+/** Clock time only in Beirut, for "available today" on a public profile. */
+export function formatUtcTimeInBeirut(iso: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    timeZone: BEIRUT_TIME_ZONE,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(iso));
+}
+
+export function formatTodayAvailabilityTime(
+  slots: Array<{ starts_at: string }>,
+  now: Date = new Date(),
+): string | null {
+  const today = beirutDateKey(now.toISOString());
+  const todays = slots.filter(
+    (slot) => beirutDateKey(slot.starts_at) === today,
+  );
+  if (todays.length === 0) {
+    return null;
+  }
+  const earliest = todays.reduce((soonest, slot) =>
+    slot.starts_at < soonest.starts_at ? slot : soonest,
+  );
+  return formatUtcTimeInBeirut(earliest.starts_at);
+}
+
 export function formatShortUtcDateInBeirut(iso: string): string {
   return new Intl.DateTimeFormat(undefined, {
     timeZone: BEIRUT_TIME_ZONE,

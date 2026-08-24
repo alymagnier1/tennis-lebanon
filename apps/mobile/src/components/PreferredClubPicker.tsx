@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import type { ClubDirectoryRow } from "@tennis-lebanon/api";
 import { AppText } from "./AppText";
@@ -106,75 +107,77 @@ export function PreferredClubPicker({
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    gap: 8,
-  },
-  row: {
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  rowSelected: {
-    borderColor: tennisColors.primary,
-    backgroundColor: tennisColors.secondary,
-  },
-  rowDisabled: {
-    opacity: 0.55,
-  },
-  rowPressed: {
-    opacity: 0.9,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: tennisColors.card,
-  },
-  checkboxSelected: {
-    borderColor: tennisColors.primary,
-    backgroundColor: tennisColors.primary,
-  },
-  checkboxDisabled: {
-    borderColor: tennisColors.muted,
-  },
-  textBlock: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  nameRow: {
-    alignItems: "center",
-    gap: 8,
-  },
-  name: {
-    flex: 1,
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-  },
-  favorite: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    color: tennisColors.primary,
-  },
-  zone: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-  },
-  empty: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    list: {
+      gap: 8,
+    },
+    row: {
+      alignItems: "center",
+      gap: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderRadius: tennisRadii.md,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+    },
+    rowSelected: {
+      borderColor: tennisColors.primary,
+      backgroundColor: tennisColors.secondary,
+    },
+    rowDisabled: {
+      opacity: 0.55,
+    },
+    rowPressed: {
+      opacity: 0.9,
+    },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: 6,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: tennisColors.card,
+    },
+    checkboxSelected: {
+      borderColor: tennisColors.primary,
+      backgroundColor: tennisColors.primary,
+    },
+    checkboxDisabled: {
+      borderColor: tennisColors.muted,
+    },
+    textBlock: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2,
+    },
+    nameRow: {
+      alignItems: "center",
+      gap: 8,
+    },
+    name: {
+      flex: 1,
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+    },
+    favorite: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 11,
+      color: tennisColors.primary,
+    },
+    zone: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    empty: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

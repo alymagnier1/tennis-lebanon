@@ -9,6 +9,7 @@ import {
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 
 export function FigmaPrimaryButton({
@@ -43,7 +44,7 @@ export function FigmaPrimaryButton({
     >
       {loading ? (
         <ActivityIndicator
-          color={lime ? tennisColors.limeText : tennisColors.white}
+          color={lime ? tennisColors.limeText : tennisColors.onPrimary}
         />
       ) : (
         <AppText
@@ -160,103 +161,105 @@ export function FigmaCard({
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
-const styles = StyleSheet.create({
-  primary: {
-    minHeight: minTouchTargetPx + 10,
-    borderRadius: tennisRadii.lg,
-    backgroundColor: tennisColors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 17,
-  },
-  primaryLime: {
-    backgroundColor: tennisColors.lime,
-  },
-  primaryDisabled: {
-    backgroundColor: tennisColors.muted,
-  },
-  primaryLabel: {
-    fontFamily: tennisFontFamily.heading,
-    fontSize: 16,
-    color: tennisColors.white,
-    letterSpacing: -0.2,
-  },
-  primaryLabelLime: {
-    color: tennisColors.limeText,
-  },
-  primaryLabelDisabled: {
-    color: tennisColors.mutedForeground,
-  },
-  secondary: {
-    minHeight: minTouchTargetPx,
-    borderRadius: tennisRadii.lg,
-    backgroundColor: tennisColors.card,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 15,
-  },
-  secondaryGhost: {
-    backgroundColor: tennisColors.heroOverlay,
-    borderColor: tennisColors.heroBorder,
-  },
-  secondaryDisabled: {
-    opacity: 0.55,
-  },
-  secondaryLabel: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 16,
-    color: tennisColors.primaryDark,
-  },
-  secondaryLabelGhost: {
-    color: tennisColors.white,
-  },
-  secondaryLabelDisabled: {
-    color: tennisColors.mutedForeground,
-  },
-  textBtn: {
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  textBtnLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primary,
-  },
-  textBtnLabelDark: {
-    color: "rgba(255,255,255,0.4)",
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: tennisRadii.sm,
-    backgroundColor: tennisColors.card,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backBtnDark: {
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderWidth: 0,
-  },
-  backChevron: {
-    fontSize: 24,
-    lineHeight: 28,
-    color: tennisColors.primaryDark,
-    marginTop: -2,
-  },
-  backChevronDark: {
-    color: tennisColors.white,
-  },
-  card: {
-    backgroundColor: tennisColors.card,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    borderRadius: tennisRadii.xl,
-    padding: 16,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    primary: {
+      minHeight: minTouchTargetPx + 10,
+      borderRadius: tennisRadii.lg,
+      backgroundColor: tennisColors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 24,
+      paddingVertical: 17,
+    },
+    primaryLime: {
+      backgroundColor: tennisColors.lime,
+    },
+    primaryDisabled: {
+      backgroundColor: tennisColors.muted,
+    },
+    primaryLabel: {
+      fontFamily: tennisFontFamily.heading,
+      fontSize: 16,
+      color: tennisColors.onPrimary,
+      letterSpacing: -0.2,
+    },
+    primaryLabelLime: {
+      color: tennisColors.limeText,
+    },
+    primaryLabelDisabled: {
+      color: tennisColors.mutedForeground,
+    },
+    secondary: {
+      minHeight: minTouchTargetPx,
+      borderRadius: tennisRadii.lg,
+      backgroundColor: tennisColors.card,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 24,
+      paddingVertical: 15,
+    },
+    secondaryGhost: {
+      backgroundColor: tennisColors.heroOverlay,
+      borderColor: tennisColors.heroBorder,
+    },
+    secondaryDisabled: {
+      opacity: 0.55,
+    },
+    secondaryLabel: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 16,
+      color: tennisColors.primaryDark,
+    },
+    secondaryLabelGhost: {
+      color: tennisColors.white,
+    },
+    secondaryLabelDisabled: {
+      color: tennisColors.mutedForeground,
+    },
+    textBtn: {
+      alignItems: "center",
+      paddingVertical: 12,
+    },
+    textBtnLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.primary,
+    },
+    textBtnLabelDark: {
+      color: "rgba(255,255,255,0.4)",
+    },
+    backBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: tennisRadii.sm,
+      backgroundColor: tennisColors.card,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    backBtnDark: {
+      backgroundColor: "rgba(255,255,255,0.15)",
+      borderWidth: 0,
+    },
+    backChevron: {
+      fontSize: 24,
+      lineHeight: 28,
+      color: tennisColors.primaryDark,
+      marginTop: -2,
+    },
+    backChevronDark: {
+      color: tennisColors.white,
+    },
+    card: {
+      backgroundColor: tennisColors.card,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderRadius: tennisRadii.xl,
+      padding: 16,
+    },
+  }),
+);

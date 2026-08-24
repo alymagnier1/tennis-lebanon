@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { getMatchHub } from "@tennis-lebanon/api";
@@ -71,24 +72,26 @@ export function MatchResultSheet({
   );
 }
 
-const styles = StyleSheet.create({
-  centered: {
-    minHeight: 120,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  stack: {
-    gap: 12,
-  },
-  error: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.mutedForeground,
-    lineHeight: 20,
-  },
-  retry: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 14,
-    color: tennisColors.primary,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    centered: {
+      minHeight: 120,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    stack: {
+      gap: 12,
+    },
+    error: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.mutedForeground,
+      lineHeight: 20,
+    },
+    retry: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 14,
+      color: tennisColors.primary,
+    },
+  }),
+);

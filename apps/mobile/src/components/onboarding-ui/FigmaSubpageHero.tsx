@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
 import { CourtGridOverlay } from "./CourtPattern";
@@ -57,28 +58,30 @@ export function FigmaSubpageHero({
   );
 }
 
-const styles = StyleSheet.create({
-  hero: {
-    backgroundColor: tennisColors.primary,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    overflow: "hidden",
-  },
-  content: {
-    position: "relative",
-    zIndex: 1,
-    gap: 0,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingExtra,
-    fontSize: 28,
-    lineHeight: 31,
-    color: tennisColors.white,
-    letterSpacing: -0.6,
-    marginTop: 16,
-    marginBottom: 0,
-  },
-  titleWithoutBack: {
-    marginTop: 0,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    hero: {
+      backgroundColor: tennisColors.primary,
+      paddingHorizontal: 20,
+      paddingBottom: 24,
+      overflow: "hidden",
+    },
+    content: {
+      position: "relative",
+      zIndex: 1,
+      gap: 0,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 28,
+      lineHeight: 31,
+      color: tennisColors.white,
+      letterSpacing: -0.6,
+      marginTop: 16,
+      marginBottom: 0,
+    },
+    titleWithoutBack: {
+      marginTop: 0,
+    },
+  }),
+);

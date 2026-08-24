@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useResponsiveLayout } from "../../lib/responsive";
 import { tennisColors } from "../../theme/tennis-tokens";
+import { tabRootHeaderPaddingTop } from "../../lib/tab-root-header";
 
 /**
  * Full-bleed white header block with a bottom border — matches Figma Discover
@@ -20,6 +22,7 @@ export function DiscoverHeaderShell({ children }: { children: ReactNode }) {
         {
           marginHorizontal: -edgePadding,
           paddingHorizontal: edgePadding,
+          paddingTop: tabRootHeaderPaddingTop(insets.top),
         },
       ]}
     >
@@ -28,12 +31,14 @@ export function DiscoverHeaderShell({ children }: { children: ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
-  shell: {
-    backgroundColor: tennisColors.card,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: tennisColors.border,
-    paddingBottom: 16,
-    gap: 16,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    shell: {
+      backgroundColor: tennisColors.card,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: tennisColors.border,
+      paddingBottom: 16,
+      gap: 16,
+    },
+  }),
+);

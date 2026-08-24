@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { Modal, Pressable, StyleSheet, View, Platform } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import {
@@ -189,55 +190,57 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(13, 28, 20, 0.45)",
-    justifyContent: "center",
-    paddingHorizontal: 28,
-  },
-  backdropWeb: {
-    // Above BottomSheet / other RN-web Modals that default near 9999.
-    zIndex: 10050,
-    elevation: 10050,
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-  },
-  card: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.xl,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    paddingHorizontal: 20,
-    paddingTop: 22,
-    paddingBottom: 20,
-    gap: 12,
-    maxWidth: 400,
-    width: "100%",
-    alignSelf: "center",
-    zIndex: 1,
-    elevation: 12,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 17,
-    lineHeight: 22,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.3,
-  },
-  message: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 20,
-    color: tennisColors.mutedForeground,
-  },
-  actions: {
-    gap: 10,
-    marginTop: 4,
-  },
-  singleAction: {
-    marginTop: 4,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: "rgba(13, 28, 20, 0.45)",
+      justifyContent: "center",
+      paddingHorizontal: 28,
+    },
+    backdropWeb: {
+      // Above BottomSheet / other RN-web Modals that default near 9999.
+      zIndex: 10050,
+      elevation: 10050,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    },
+    card: {
+      backgroundColor: tennisColors.card,
+      borderRadius: tennisRadii.xl,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      paddingHorizontal: 20,
+      paddingTop: 22,
+      paddingBottom: 20,
+      gap: 12,
+      maxWidth: 400,
+      width: "100%",
+      alignSelf: "center",
+      zIndex: 1,
+      elevation: 12,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 17,
+      lineHeight: 22,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.3,
+    },
+    message: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+    },
+    actions: {
+      gap: 10,
+      marginTop: 4,
+    },
+    singleAction: {
+      marginTop: 4,
+    },
+  }),
+);

@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
@@ -361,57 +362,59 @@ export default function AvailabilityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    gap: 10,
-  },
-  headerRow: {
-    alignItems: "center",
-    gap: 6,
-  },
-  gridRow: {
-    alignItems: "center",
-    gap: 6,
-  },
-  dayLabelCell: {
-    width: 36,
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-  blockHeading: {
-    flex: 1,
-    textAlign: "center",
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 11,
-    color: tennisColors.mutedForeground,
-  },
-  cell: {
-    flex: 1,
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    borderRadius: tennisRadii.md,
-    backgroundColor: tennisColors.muted,
-  },
-  cellSelected: {
-    borderColor: tennisColors.primary,
-    backgroundColor: tennisColors.primary,
-  },
-  oneOffStack: {
-    gap: 12,
-  },
-  oneOffRow: {
-    gap: 10,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: tennisColors.border,
-  },
-  oneOffLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primaryDark,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    card: {
+      gap: 10,
+    },
+    headerRow: {
+      alignItems: "center",
+      gap: 6,
+    },
+    gridRow: {
+      alignItems: "center",
+      gap: 6,
+    },
+    dayLabelCell: {
+      width: 36,
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+    blockHeading: {
+      flex: 1,
+      textAlign: "center",
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 11,
+      color: tennisColors.mutedForeground,
+    },
+    cell: {
+      flex: 1,
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.muted,
+    },
+    cellSelected: {
+      borderColor: tennisColors.primary,
+      backgroundColor: tennisColors.primary,
+    },
+    oneOffStack: {
+      gap: 12,
+    },
+    oneOffRow: {
+      gap: 10,
+      paddingBottom: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: tennisColors.border,
+    },
+    oneOffLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.primaryDark,
+    },
+  }),
+);

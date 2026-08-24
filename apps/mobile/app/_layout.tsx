@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-query";
 import { initSentry } from "../src/lib/sentry";
 import { AuthProvider } from "../src/providers/AuthProvider";
+import { ThemeProvider } from "../src/providers/ThemeProvider";
 import { OnboardingProvider } from "../src/providers/OnboardingProvider";
 import { PushTokenRegistration } from "../src/components/PushTokenRegistration";
 import { NotificationLocaleSync } from "../src/components/NotificationLocaleSync";
@@ -64,44 +65,46 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      {/* Inside the safe area so the fallback respects the notch, but outside
+      <ThemeProvider>
+        {/* Inside the safe area so the fallback respects the notch, but outside
           every other provider: a throw in AuthProvider or OnboardingProvider is
           exactly the case that used to blank the screen. */}
-      <AppErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <ToastProvider>
-            <ConfirmDialogProvider>
-              <AuthProvider>
-                <PushTokenRegistration />
-                <NotificationLocaleSync />
-                <NotificationDeepLinkHandler />
-                <OnboardingProvider>
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="(public)" />
-                    <Stack.Screen name="(auth)" />
-                    <Stack.Screen name="(onboarding)" />
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="player/[id]" />
-                    <Stack.Screen name="profile/availability" />
-                    <Stack.Screen name="profile/edit" />
-                    <Stack.Screen name="profile/match-defaults" />
-                    <Stack.Screen name="profile/notifications" />
-                    <Stack.Screen name="profile/where-i-play" />
-                    <Stack.Screen name="profile/tennis-preferences" />
-                    <Stack.Screen name="notifications" />
-                    <Stack.Screen name="match/[id]" />
-                    <Stack.Screen name="match/create" />
-                    <Stack.Screen name="clubs/[id]" />
-                    <Stack.Screen name="invite/[token]" />
-                    <Stack.Screen name="policies" />
-                  </Stack>
-                </OnboardingProvider>
-              </AuthProvider>
-            </ConfirmDialogProvider>
-          </ToastProvider>
-        </QueryClientProvider>
-      </AppErrorBoundary>
+        <AppErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <ToastProvider>
+              <ConfirmDialogProvider>
+                <AuthProvider>
+                  <PushTokenRegistration />
+                  <NotificationLocaleSync />
+                  <NotificationDeepLinkHandler />
+                  <OnboardingProvider>
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="index" />
+                      <Stack.Screen name="(public)" />
+                      <Stack.Screen name="(auth)" />
+                      <Stack.Screen name="(onboarding)" />
+                      <Stack.Screen name="(tabs)" />
+                      <Stack.Screen name="player/[id]" />
+                      <Stack.Screen name="profile/availability" />
+                      <Stack.Screen name="profile/edit" />
+                      <Stack.Screen name="profile/match-defaults" />
+                      <Stack.Screen name="profile/notifications" />
+                      <Stack.Screen name="profile/where-i-play" />
+                      <Stack.Screen name="profile/tennis-preferences" />
+                      <Stack.Screen name="notifications" />
+                      <Stack.Screen name="match/[id]" />
+                      <Stack.Screen name="match/create" />
+                      <Stack.Screen name="clubs/[id]" />
+                      <Stack.Screen name="invite/[token]" />
+                      <Stack.Screen name="policies" />
+                    </Stack>
+                  </OnboardingProvider>
+                </AuthProvider>
+              </ConfirmDialogProvider>
+            </ToastProvider>
+          </QueryClientProvider>
+        </AppErrorBoundary>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

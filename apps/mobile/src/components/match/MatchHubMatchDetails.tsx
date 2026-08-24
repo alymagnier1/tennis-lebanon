@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import type { MatchHubCard } from "@tennis-lebanon/api";
 import { useTranslation } from "react-i18next";
 import { AnimatedCollapse } from "../AppUi";
@@ -67,67 +68,69 @@ export function MatchHubMatchDetails({ hub }: { hub: MatchHubCard }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: tennisColors.card,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    overflow: "hidden",
-  },
-  header: {
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  headerPressed: {
-    opacity: 0.9,
-  },
-  headerLabel: {
-    flex: 1,
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.2,
-  },
-  chevronWrap: {
-    transform: [{ rotate: "90deg" }],
-  },
-  chevronWrapOpen: {
-    transform: [{ rotate: "270deg" }],
-  },
-  chevronWrapRtl: {
-    transform: [{ rotate: "-90deg" }],
-  },
-  body: {
-    borderTopWidth: 1,
-    borderTopColor: tennisColors.border,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
-  },
-  metaLine: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 20,
-    color: tennisColors.primaryDark,
-  },
-  notesBlock: {
-    gap: 4,
-  },
-  notesLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-    textTransform: "uppercase",
-    letterSpacing: 0.3,
-  },
-  notes: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 20,
-    color: tennisColors.primaryDark,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: tennisColors.card,
+      borderRadius: 18,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      overflow: "hidden",
+    },
+    header: {
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
+    headerPressed: {
+      opacity: 0.9,
+    },
+    headerLabel: {
+      flex: 1,
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+    },
+    chevronWrap: {
+      transform: [{ rotate: "90deg" }],
+    },
+    chevronWrapOpen: {
+      transform: [{ rotate: "270deg" }],
+    },
+    chevronWrapRtl: {
+      transform: [{ rotate: "-90deg" }],
+    },
+    body: {
+      borderTopWidth: 1,
+      borderTopColor: tennisColors.border,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      gap: 12,
+    },
+    metaLine: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
+    },
+    notesBlock: {
+      gap: 4,
+    },
+    notesLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+      textTransform: "uppercase",
+      letterSpacing: 0.3,
+    },
+    notes: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
+    },
+  }),
+);

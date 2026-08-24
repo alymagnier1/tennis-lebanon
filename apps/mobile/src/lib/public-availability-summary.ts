@@ -21,17 +21,15 @@ export function formatAvailabilityDayPartsLabel(
   const sorted = sortAvailabilityDayParts(parts);
   if (sorted.length === 0) return "";
 
+  if (sorted.length === DAY_PART_ORDER.length) {
+    return t("availability.blocks.allDay");
+  }
+
   const labels = sorted.map((part) => t(`availability.blocks.${part}`));
   if (labels.length === 1) return labels[0]!;
-  if (labels.length === 2) {
-    return t("playerProfile.availabilityPartsTwo", {
-      first: labels[0],
-      second: labels[1],
-    });
-  }
-  return t("playerProfile.availabilityPartsMany", {
-    first: labels.slice(0, -1).join(", "),
-    last: labels[labels.length - 1],
+  return t("playerProfile.availabilityPartsTwo", {
+    first: labels[0],
+    second: labels[1],
   });
 }
 
@@ -39,6 +37,26 @@ export function weekdayShortLabels(weekdays: number[], t: TFunction): string[] {
   return [...weekdays]
     .sort((a, b) => a - b)
     .map((weekday) => t(`availability.weekdaysShort.${weekday}`));
+}
+
+/** Compact weekly list for the profile fact row: "Sat", "Fri & Sat", "Sun, Fri & Sat". */
+export function formatWeeklyDaysLabel(
+  weekdays: number[],
+  t: TFunction,
+): string {
+  const days = weekdayShortLabels(weekdays, t);
+  if (days.length === 0) return "";
+  if (days.length === 1) return days[0]!;
+  if (days.length === 2) {
+    return t("playerProfile.weeklyDaysTwo", {
+      first: days[0],
+      second: days[1],
+    });
+  }
+  return t("playerProfile.weeklyDaysMany", {
+    list: days.slice(0, -1).join(", "),
+    last: days[days.length - 1],
+  });
 }
 
 /** Ultra-short weekday chips for Discover cards (M, T, Th, …). */
@@ -90,14 +108,7 @@ export function formatDiscoverPlayerAvailabilityLabel(
   const sortedParts = sortAvailabilityDayParts(dayParts);
   if (sortedParts.length === 0) return null;
 
-  // Three weekdays spelled out against all three blocks is the one combination
-  // that overruns the card's single line, and it describes the most available
-  // players — the ones worth surfacing. "All day" is both shorter and plainer
-  // than enumerating every block. The profile keeps the explicit breakdown.
-  const blocks =
-    sortedParts.length === DAY_PART_ORDER.length
-      ? t("availability.blocks.allDay")
-      : formatAvailabilityDayPartsLabel(sortedParts, t);
+  const blocks = formatAvailabilityDayPartsLabel(sortedParts, t);
   const days = weekdayShortLabels(weekdays, t);
 
   if (days.length === 0) {

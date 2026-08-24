@@ -1,68 +1,43 @@
 import { memo } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
 import { Avatar } from "../AppUi";
 import { AppText } from "../AppText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
+import { joinedListTypeSize } from "../../lib/match-clubs";
 import { skillBandColor, skillBandFill } from "../../lib/skill-band-theme";
-import {
-  tennisBrand,
-  tennisColors,
-  tennisRadii,
-  tennisSemantic,
-} from "../../theme/tennis-tokens";
+import { useTennisTheme } from "../../providers/ThemeProvider";
+import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 
-type DiscoverTagVariant = "format" | "intent" | "availability" | "clubs";
-
-const TAG_THEMES: Record<
-  DiscoverTagVariant,
-  { fill: string; text: string; icon: string }
-> = {
-  format: {
-    fill: tennisSemantic.info.fill,
-    text: tennisSemantic.info.text,
-    icon: tennisColors.primary,
-  },
-  intent: {
-    fill: tennisSemantic.attention.fill,
-    text: tennisSemantic.attention.text,
-    icon: tennisColors.accent,
-  },
-  availability: {
-    fill: tennisSemantic.positive.fill,
-    text: tennisSemantic.positive.text,
-    icon: tennisSemantic.positive.text,
-  },
-  clubs: {
-    fill: tennisBrand.whatsappFill,
-    text: tennisBrand.whatsappText,
-    icon: tennisBrand.whatsappText,
-  },
-};
-
-function Tag({
+function FooterMetaItem({
   icon,
   label,
-  variant,
+  writingDirection,
+  rowDirection,
+  fontSize,
+  lineHeight,
 }: {
-  icon?: IconName;
+  icon: IconName;
   label: string;
-  variant: DiscoverTagVariant;
+  writingDirection: "ltr" | "rtl";
+  rowDirection: "row" | "row-reverse";
+  fontSize?: number;
+  lineHeight?: number;
 }) {
-  const { rowDirection } = useLayoutDirection();
-  const theme = TAG_THEMES[variant];
-
   return (
-    <View
-      style={[
-        styles.tag,
-        { flexDirection: rowDirection, backgroundColor: theme.fill },
-      ]}
-    >
-      {icon ? <Icon name={icon} size={12} color={theme.icon} /> : null}
-      <AppText style={[styles.tagText, { color: theme.text }]} maxLines={1}>
+    <View style={[styles.footerMetaItem, { flexDirection: rowDirection }]}>
+      <Icon name={icon} size={16} color={tennisColors.mutedForeground} />
+      <AppText
+        style={[
+          styles.footerMetaText,
+          { writingDirection },
+          fontSize != null ? { fontSize, lineHeight } : null,
+        ]}
+        maxLines={1}
+      >
         {label}
       </AppText>
     </View>
@@ -76,7 +51,6 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   levelBadgeLabel,
   matchesPlayedLabel,
   formatTag,
-  intentTag,
   availabilityTags,
   clubsTag,
   profileAccessibilityLabel,
@@ -91,7 +65,6 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   levelBadgeLabel: string;
   matchesPlayedLabel: string;
   formatTag?: string | null;
-  intentTag: string;
   availabilityTags: string[];
   clubsTag?: string | null;
   profileAccessibilityLabel: string;
@@ -101,8 +74,12 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   onPrimaryPress: () => void;
 }) {
   const { rowDirection, writingDirection } = useLayoutDirection();
+  const { scheme } = useTennisTheme();
+  const isDark = scheme === "dark";
   const bandColor = skillBandColor(player.skill_band);
   const bandFill = skillBandFill(player.skill_band);
+  const availabilityLabel = availabilityTags.filter(Boolean).join(" · ");
+  const clubCount = clubsTag ? clubsTag.split(" · ").filter(Boolean).length : 0;
 
   return (
     <View style={styles.card}>
@@ -110,205 +87,219 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
         accessibilityRole="button"
         accessibilityLabel={profileAccessibilityLabel}
         onPress={onProfilePress}
-        style={({ pressed }) => [
-          styles.profileTap,
-          pressed && styles.profileTapPressed,
-        ]}
+        style={({ pressed }) => [pressed && styles.bodyPressed]}
       >
-        <View style={[styles.header, { flexDirection: rowDirection }]}>
-          <View style={styles.avatarWrap}>
+        <View style={styles.body}>
+          <View style={[styles.header, { flexDirection: rowDirection }]}>
             <Avatar
               name={name}
               avatarPath={player.avatar_path}
-              size={72}
-              borderRadius={16}
+              size={64}
+              borderRadius={14}
             />
-          </View>
-
-          <View style={styles.headerBody}>
-            <View style={[styles.titleRow, { flexDirection: rowDirection }]}>
-              <View style={styles.identity}>
+            <View style={styles.identity}>
+              <AppText style={[styles.name, { writingDirection }]} maxLines={1}>
+                {name}
+              </AppText>
+              <AppText
+                style={[styles.matchesPlayed, { writingDirection }]}
+                maxLines={1}
+              >
+                {matchesPlayedLabel}
+              </AppText>
+              {locationLabel ? (
                 <AppText
-                  style={[styles.name, { writingDirection }]}
+                  style={[styles.area, { writingDirection }]}
                   maxLines={1}
                 >
-                  {name}
+                  {locationLabel}
                 </AppText>
-                {locationLabel ? (
-                  <View
-                    style={[
-                      styles.locationRow,
-                      { flexDirection: rowDirection },
-                    ]}
-                  >
-                    <Icon name="place" size={12} color={tennisColors.accent} />
-                    <AppText
-                      style={[styles.location, { writingDirection }]}
-                      maxLines={1}
-                    >
-                      {locationLabel}
-                    </AppText>
-                  </View>
-                ) : null}
-                <AppText
-                  style={[styles.matchesPlayed, { writingDirection }]}
-                  maxLines={1}
-                >
-                  {matchesPlayedLabel}
-                </AppText>
-              </View>
-              <View style={[styles.levelBadge, { backgroundColor: bandFill }]}>
-                <AppText style={[styles.levelBadgeText, { color: bandColor }]}>
-                  {levelBadgeLabel}
-                </AppText>
-              </View>
+              ) : null}
+            </View>
+            <View style={[styles.levelBadge, { backgroundColor: bandFill }]}>
+              <AppText style={[styles.levelBadgeText, { color: bandColor }]}>
+                {levelBadgeLabel}
+              </AppText>
             </View>
           </View>
         </View>
+      </Pressable>
 
-        <View style={[styles.tagRow, { flexDirection: rowDirection }]}>
+      <View style={[styles.actionFooter, { flexDirection: rowDirection }]}>
+        <View style={styles.footerMeta}>
           {formatTag ? (
-            <Tag icon="court" label={formatTag} variant="format" />
-          ) : null}
-          <Tag icon="playIntent" label={intentTag} variant="intent" />
-          {availabilityTags.map((label, index) => (
-            <Tag
-              key={`${label}-${index}`}
-              icon={index === 0 ? "clock" : undefined}
-              label={label}
-              variant="availability"
+            <FooterMetaItem
+              icon="court"
+              label={formatTag}
+              writingDirection={writingDirection}
+              rowDirection={rowDirection}
             />
-          ))}
+          ) : null}
+          {availabilityLabel ? (
+            <FooterMetaItem
+              icon="clock"
+              label={availabilityLabel}
+              writingDirection={writingDirection}
+              rowDirection={rowDirection}
+            />
+          ) : null}
           {clubsTag ? (
-            <Tag icon="clubs" label={clubsTag} variant="clubs" />
+            <FooterMetaItem
+              icon="court"
+              label={clubsTag}
+              writingDirection={writingDirection}
+              rowDirection={rowDirection}
+              {...joinedListTypeSize(clubCount)}
+            />
           ) : null}
         </View>
-      </Pressable>
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={primaryLabel}
-        disabled={primaryLoading}
-        onPress={onPrimaryPress}
-        style={({ pressed }) => [
-          styles.primaryButton,
-          pressed && styles.primaryButtonPressed,
-          primaryLoading && styles.primaryButtonDisabled,
-        ]}
-      >
-        {primaryLoading ? (
-          <ActivityIndicator color={tennisColors.white} />
-        ) : (
-          <AppText style={styles.primaryButtonText} maxLines={1}>
-            {primaryLabel}
-          </AppText>
-        )}
-      </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={primaryLabel}
+          disabled={primaryLoading}
+          onPress={onPrimaryPress}
+          hitSlop={{ top: 6, bottom: 6 }}
+          style={({ pressed }) => [
+            styles.actionPill,
+            isDark && styles.actionPillDark,
+            pressed && !primaryLoading && styles.actionPillPressed,
+            primaryLoading && styles.actionPillDisabled,
+          ]}
+        >
+          {primaryLoading ? (
+            <ActivityIndicator
+              color={isDark ? tennisColors.onViolet : tennisColors.limeText}
+            />
+          ) : (
+            <AppText
+              style={[
+                styles.actionPillText,
+                { writingDirection },
+                isDark && styles.actionPillTextDark,
+              ]}
+              maxLines={1}
+            >
+              {primaryLabel}
+            </AppText>
+          )}
+        </Pressable>
+      </View>
     </View>
   );
 });
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.xl,
-    borderWidth: 1,
-    borderColor: tennisColors.border,
-    padding: 16,
-    gap: 12,
-  },
-  profileTap: {
-    gap: 12,
-  },
-  profileTapPressed: {
-    opacity: 0.92,
-  },
-  header: {
-    alignItems: "center",
-    gap: 12,
-  },
-  avatarWrap: {
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  headerBody: {
-    flex: 1,
-    minWidth: 0,
-  },
-  titleRow: {
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  identity: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  name: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 16,
-    color: tennisColors.primaryDark,
-  },
-  locationRow: {
-    alignItems: "center",
-    gap: 4,
-    minWidth: 0,
-  },
-  location: {
-    flexShrink: 1,
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-  levelBadge: {
-    borderRadius: tennisRadii.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    flexShrink: 0,
-  },
-  levelBadgeText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 11,
-  },
-  matchesPlayed: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    color: tennisColors.mutedForeground,
-  },
-  tagRow: {
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  tag: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    maxWidth: "100%",
-    alignItems: "center",
-    gap: 4,
-  },
-  tagText: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 11,
-  },
-  primaryButton: {
-    minHeight: 44,
-    borderRadius: 10,
-    backgroundColor: tennisColors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 12,
-  },
-  primaryButtonPressed: {
-    opacity: 0.9,
-  },
-  primaryButtonDisabled: {
-    opacity: 0.7,
-  },
-  primaryButtonText: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 13,
-    color: tennisColors.white,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    card: {
+      borderRadius: 20,
+      backgroundColor: tennisColors.card,
+      overflow: "hidden",
+      shadowColor: "#0D1117",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.07,
+      shadowRadius: 12,
+      elevation: 3,
+    },
+    body: {
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
+    bodyPressed: {
+      opacity: 0.94,
+    },
+    header: {
+      alignItems: "flex-start",
+      gap: 12,
+    },
+    identity: {
+      flex: 1,
+      minWidth: 0,
+      paddingTop: 2,
+      gap: 2,
+    },
+    name: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 16,
+      color: tennisColors.primaryDark,
+    },
+    matchesPlayed: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+    area: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 11,
+      color: tennisColors.mutedForeground,
+    },
+    levelBadge: {
+      alignSelf: "flex-start",
+      borderRadius: tennisRadii.pill,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      flexShrink: 0,
+    },
+    levelBadgeText: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 11,
+    },
+    actionFooter: {
+      alignItems: "center",
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: tennisColors.muted,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: tennisColors.border,
+    },
+    footerMeta: {
+      flex: 1,
+      minWidth: 0,
+      gap: 6,
+    },
+    footerMetaItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      flexShrink: 1,
+      maxWidth: "100%",
+    },
+    footerMetaText: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+      flexShrink: 1,
+    },
+    actionPill: {
+      flexShrink: 0,
+      minHeight: 36,
+      minWidth: 120,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 999,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: tennisColors.white,
+    },
+    actionPillDark: {
+      backgroundColor: tennisColors.violet,
+    },
+    actionPillPressed: {
+      opacity: 0.88,
+    },
+    actionPillDisabled: {
+      opacity: 0.7,
+    },
+    actionPillText: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 13,
+      letterSpacing: -0.1,
+      color: tennisColors.limeText,
+      textAlign: "center",
+    },
+    actionPillTextDark: {
+      color: tennisColors.onViolet,
+    },
+  }),
+);

@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import type { SemanticTone } from "../theme/tennis-tokens";
 import { tennisSemantic } from "../theme/tennis-tokens";
 import { AppText } from "./AppText";
@@ -47,18 +48,20 @@ export function SemanticBadge({
   );
 }
 
-const styles = StyleSheet.create({
-  badge: {
-    alignSelf: "flex-start",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  label: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 11,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    badge: {
+      alignSelf: "flex-start",
+      alignItems: "center",
+      gap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 20,
+      borderWidth: 1,
+    },
+    label: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 11,
+    },
+  }),
+);

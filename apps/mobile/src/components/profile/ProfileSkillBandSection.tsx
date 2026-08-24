@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { OwnPlayerProfile } from "@tennis-lebanon/api";
@@ -196,40 +197,42 @@ export function ProfileSkillBandSection({
   );
 }
 
-const styles = StyleSheet.create({
-  carousel: {
-    alignItems: "center",
-    gap: 6,
-  },
-  carouselLocked: {
-    opacity: 0.55,
-  },
-  arrow: {
-    width: minTouchTargetPx,
-    height: minTouchTargetPx,
-    borderRadius: tennisRadii.md,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: tennisColors.muted,
-  },
-  arrowDisabled: {
-    opacity: 0.45,
-  },
-  arrowPressed: {
-    opacity: 0.85,
-  },
-  chipRow: {
-    flex: 1,
-    gap: 6,
-    minWidth: 0,
-  },
-  chipCell: {
-    flex: 1,
-    minWidth: 0,
-  },
-  error: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.accent,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    carousel: {
+      alignItems: "center",
+      gap: 6,
+    },
+    carouselLocked: {
+      opacity: 0.55,
+    },
+    arrow: {
+      width: minTouchTargetPx,
+      height: minTouchTargetPx,
+      borderRadius: tennisRadii.md,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: tennisColors.muted,
+    },
+    arrowDisabled: {
+      opacity: 0.45,
+    },
+    arrowPressed: {
+      opacity: 0.85,
+    },
+    chipRow: {
+      flex: 1,
+      gap: 6,
+      minWidth: 0,
+    },
+    chipCell: {
+      flex: 1,
+      minWidth: 0,
+    },
+    error: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.accent,
+    },
+  }),
+);

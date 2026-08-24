@@ -10,7 +10,7 @@ import {
   listOwnPreferredZoneIds,
 } from "@tennis-lebanon/api";
 import {
-  findActiveHostedMatch,
+  hasReachedHostedMatchCap,
   listOnDiscoverFromVisibility,
   visibilityFromListOnDiscover,
 } from "@tennis-lebanon/domain";
@@ -70,11 +70,8 @@ import {
 } from "../../../src/lib/schedule-prefill";
 import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
 import { usePublishMatch } from "../../../src/hooks/usePublishMatch";
-import {
-  activeHostedContinueRoute,
-  showActiveHostedMatchAlert,
-} from "../../../src/lib/create-match-guard";
-import { confirmCancelHostedMatch } from "../../../src/lib/confirm-cancel-hosted-match";
+import { showMatchCapAlert } from "../../../src/lib/create-match-guard";
+import { MATCHES_ROUTE } from "../../../src/lib/routes";
 import { supabase } from "../../../src/lib/supabase";
 import { tennisColors } from "../../../src/theme/tennis-tokens";
 
@@ -161,6 +158,13 @@ export default function CreateMatchScheduleScreen() {
   );
   const [publishError, setPublishError] = useState<string | null>(null);
 
+  // Set only when this draft exists to ask one named player. Publishing is the
+  // wrong word for it: the draft is invite_only, so nobody else ever sees it.
+  const requestForName =
+    draft.inviteForPlayer && draft.targetPlayerName
+      ? draft.targetPlayerName
+      : null;
+
   const clubsRequired = listOnDiscover;
 
   const myMatchesQuery = useQuery({
@@ -168,12 +172,11 @@ export default function CreateMatchScheduleScreen() {
     queryFn: () => listMyMatches(supabase),
   });
 
-  const activeHostedMatch = useMemo(
-    () =>
-      draft.format
-        ? findActiveHostedMatch(myMatchesQuery.data ?? [], draft.format)
-        : undefined,
-    [draft.format, myMatchesQuery.data],
+  // A count now, not a collision: three matches on the go is the whole rule,
+  // whatever their format or visibility.
+  const capReached = useMemo(
+    () => hasReachedHostedMatchCap(myMatchesQuery.data ?? []),
+    [myMatchesQuery.data],
   );
 
   const { publish, isPublishing } = usePublishMatch({
@@ -420,17 +423,6 @@ export default function CreateMatchScheduleScreen() {
     setSlots((current) => [...current, defaultSlot()]);
   }
 
-  function goToActiveHostedMatch() {
-    if (!activeHostedMatch) return;
-    router.replace(
-      activeHostedContinueRoute({
-        matchId: activeHostedMatch.match_id,
-        format: activeHostedMatch.format as "singles" | "doubles",
-        status: activeHostedMatch.status,
-      }),
-    );
-  }
-
   function handlePublish(destination: "invite" | "hub") {
     setPublishError(null);
 
@@ -444,15 +436,8 @@ export default function CreateMatchScheduleScreen() {
       return;
     }
 
-    if (activeHostedMatch) {
-      showActiveHostedMatchAlert(
-        {
-          matchId: activeHostedMatch.match_id,
-          format: activeHostedMatch.format as "singles" | "doubles",
-          status: activeHostedMatch.status,
-        },
-        t,
-      );
+    if (capReached) {
+      showMatchCapAlert(t);
       return;
     }
 
@@ -476,57 +461,43 @@ export default function CreateMatchScheduleScreen() {
         <>
           {publishError ? <ErrorNotice>{publishError}</ErrorNotice> : null}
           <AppText style={createMatchStyles.hint}>
-            {t("matches.create.publishActionsHint")}
+            {requestForName
+              ? t("matches.create.sendRequestHint", { name: requestForName })
+              : listOnDiscover
+                ? t("matches.create.publishActionsHint")
+                : t("matches.create.publishPrivateHint")}
           </AppText>
           <FigmaPrimaryButton
-            label={t("matches.create.publish")}
+            label={
+              requestForName
+                ? t("matches.create.sendRequest", { name: requestForName })
+                : t("matches.create.publish")
+            }
             loading={isPublishing}
-            disabled={Boolean(activeHostedMatch)}
+            disabled={capReached}
             onPress={() => handlePublish("hub")}
           />
-          <FigmaSecondaryButton
-            label={t("matches.invite.invitePlayers")}
-            disabled={isPublishing || Boolean(activeHostedMatch)}
-            onPress={() => handlePublish("invite")}
-          />
+          {/* Hidden when a specific player is being asked. "invite" skips both
+              publishMatch and createMatchInvite, so on that path the button
+              named after the goal was the one button that never reached it. */}
+          {requestForName ? null : (
+            <FigmaSecondaryButton
+              label={t("matches.invite.invitePlayers")}
+              disabled={isPublishing || capReached}
+              onPress={() => handlePublish("invite")}
+            />
+          )}
         </>
       }
     >
-      {draft.inviteForPlayer && draft.targetPlayerName ? (
+      {capReached ? (
         <StatusBanner
-          body={t("matches.create.forPlayerHint", {
-            name: draft.targetPlayerName,
-          })}
-        />
-      ) : null}
-
-      {activeHostedMatch ? (
-        <StatusBanner
-          body={t("matches.create.activeHostedBody", {
-            format: t(`formats.${draft.format}`),
-          })}
+          body={t("matches.create.capReachedBody")}
           actions={
-            <>
-              <FigmaPrimaryButton
-                label={t("matches.create.continueInviting")}
-                onPress={goToActiveHostedMatch}
-              />
-              <FigmaSecondaryButton
-                label={t("matches.hub.cancel")}
-                onPress={() =>
-                  confirmCancelHostedMatch(
-                    {
-                      matchId: activeHostedMatch.match_id,
-                      status: activeHostedMatch.status,
-                      participantCount: activeHostedMatch.participant_count,
-                      bookingStartsAt: activeHostedMatch.court_starts_at,
-                    },
-                    t,
-                    () => myMatchesQuery.refetch(),
-                  )
-                }
-              />
-            </>
+            <FigmaSecondaryButton
+              label={t("matches.create.seeMyMatches")}
+              onPress={() => router.push(MATCHES_ROUTE)}
+            />
           }
         />
       ) : null}

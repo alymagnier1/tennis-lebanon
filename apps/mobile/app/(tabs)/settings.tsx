@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { confirmAction } from "../../src/lib/confirm-action";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import * as Linking from "expo-linking";
 import Constants from "expo-constants";
 import { router } from "expo-router";
@@ -22,6 +23,7 @@ import { applyLocale } from "../../src/lib/locale-sync";
 import { goBackOrReplace, PROFILE_TAB_ROUTE } from "../../src/lib/navigation";
 import {
   settingsScreenAccountTitle,
+  settingsScreenAppearanceTitle,
   settingsScreenGeneralTitle,
   settingsScreenLanguageTitle,
   settingsScreenSupportTitle,
@@ -29,12 +31,14 @@ import {
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
+import { useTennisTheme } from "../../src/providers/ThemeProvider";
 import { tennisColors } from "../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const { refreshProfile, signOut } = useAuth();
+  const { preference, setPreference } = useTennisTheme();
   const { rowDirection } = useLayoutDirection();
   const [signOutError, setSignOutError] = useState(false);
 
@@ -105,6 +109,26 @@ export default function SettingsScreen() {
                   onPress={() => void applyLocale(locale)}
                 />
               ))}
+            </View>
+          </PlayerProfileSection>
+
+          <PlayerProfileSection title={settingsScreenAppearanceTitle(t)}>
+            <View style={[styles.chips, { flexDirection: rowDirection }]}>
+              <ChipButton
+                label={t("settingsAppearanceSystem")}
+                selected={preference === "system"}
+                onPress={() => setPreference("system")}
+              />
+              <ChipButton
+                label={t("settingsAppearanceLight")}
+                selected={preference === "light"}
+                onPress={() => setPreference("light")}
+              />
+              <ChipButton
+                label={t("settingsAppearanceDark")}
+                selected={preference === "dark"}
+                onPress={() => setPreference("dark")}
+              />
             </View>
           </PlayerProfileSection>
 
@@ -206,44 +230,46 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  scrollContent: {
-    paddingBottom: 48,
-  },
-  body: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    gap: 16,
-  },
-  chips: {
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  deleteButton: {
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-  deleteButtonPressed: {
-    opacity: 0.85,
-  },
-  deleteButtonDisabled: {
-    opacity: 0.5,
-  },
-  deleteLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.danger,
-    letterSpacing: -0.1,
-  },
-  version: {
-    textAlign: "center",
-    fontFamily: tennisFontFamily.body,
-    fontSize: 11,
-    color: tennisColors.mutedForeground,
-    marginTop: 4,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    scrollContent: {
+      paddingBottom: 48,
+    },
+    body: {
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      gap: 16,
+    },
+    chips: {
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    deleteButton: {
+      alignItems: "center",
+      paddingVertical: 8,
+    },
+    deleteButtonPressed: {
+      opacity: 0.85,
+    },
+    deleteButtonDisabled: {
+      opacity: 0.5,
+    },
+    deleteLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.danger,
+      letterSpacing: -0.1,
+    },
+    version: {
+      textAlign: "center",
+      fontFamily: tennisFontFamily.body,
+      fontSize: 11,
+      color: tennisColors.mutedForeground,
+      marginTop: 4,
+    },
+  }),
+);

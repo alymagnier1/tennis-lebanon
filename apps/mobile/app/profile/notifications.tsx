@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router, useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../../src/components/AppText";
@@ -154,26 +155,28 @@ export default function NotificationSettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  scrollContent: {
-    paddingBottom: 48,
-  },
-  body: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    gap: 16,
-  },
-  statusRow: {
-    alignSelf: "flex-start",
-  },
-  detail: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 19,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    scrollContent: {
+      paddingBottom: 48,
+    },
+    body: {
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      gap: 16,
+    },
+    statusRow: {
+      alignSelf: "flex-start",
+    },
+    detail: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 19,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

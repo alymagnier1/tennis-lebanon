@@ -16,6 +16,7 @@ import {
   type ListRenderItem,
   type TextInputProps,
 } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   colors,
@@ -453,263 +454,267 @@ export function SummaryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export const formStyles = StyleSheet.create({
-  stack: { gap: spacing.md },
-  actions: { gap: spacing.sm, marginTop: spacing.md },
-  row: { flexDirection: "row", gap: spacing.sm },
-  flex: { flex: 1 },
-  summary: {
-    backgroundColor: colors.neutral[50],
-    borderRadius: radii.md,
-    padding: spacing.lg,
-    gap: spacing.sm,
-  },
-  summaryLabel: {
-    color: colors.neutral[500],
-    fontSize: typography.size.sm,
-  },
-  summaryValue: {
-    color: colors.neutral[900],
-    fontSize: typography.size.md,
-  },
-  description: {
-    color: colors.neutral[700],
-    fontSize: typography.size.md,
-    lineHeight: 24,
-  },
-  title: {
-    color: colors.neutral[900],
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold,
-  },
-  hintText: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: tennisTypography.fieldHint.fontSize,
-    lineHeight: tennisTypography.fieldHint.lineHeight,
-    color: colors.neutral[700],
-  },
-  errorText: {
-    color: colors.danger[700],
-    fontSize: typography.size.sm,
-  },
-  card: {
-    borderRadius: radii.lg,
-    padding: spacing.lg,
-    gap: spacing.xs,
-    backgroundColor: semantic.surface,
-    ...elevation.sm,
-  },
-  compactCard: {
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
-    borderRadius: radii.md,
-    padding: spacing.md,
-    gap: 6,
-    backgroundColor: colors.neutral[0],
-  },
-  compactCardTitle: {
-    color: colors.neutral[900],
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
-    marginBottom: 2,
-  },
-  summaryRow: {
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: spacing.sm,
-  },
-  summaryRowLabel: {
-    color: colors.neutral[500],
-    fontSize: typography.size.xs,
-    flexShrink: 0,
-    minWidth: 56,
-  },
-  summaryRowValue: {
-    color: colors.neutral[900],
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-    flex: 1,
-  },
-  segmentRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  segmentButton: {
-    flex: 1,
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radii.full,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.neutral[50],
-  },
-  segmentButtonActive: {
-    backgroundColor: colors.neutral[0],
-    shadowColor: colors.neutral[900],
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
-  },
-  segmentButtonText: {
-    color: colors.neutral[700],
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
-  },
-  segmentButtonTextActive: {
-    color: mobileBrand[600],
-  },
-});
+export const formStyles = createLiveSheet(() =>
+  StyleSheet.create({
+    stack: { gap: spacing.md },
+    actions: { gap: spacing.sm, marginTop: spacing.md },
+    row: { flexDirection: "row", gap: spacing.sm },
+    flex: { flex: 1 },
+    summary: {
+      backgroundColor: colors.neutral[50],
+      borderRadius: radii.md,
+      padding: spacing.lg,
+      gap: spacing.sm,
+    },
+    summaryLabel: {
+      color: colors.neutral[500],
+      fontSize: typography.size.sm,
+    },
+    summaryValue: {
+      color: colors.neutral[900],
+      fontSize: typography.size.md,
+    },
+    description: {
+      color: colors.neutral[700],
+      fontSize: typography.size.md,
+      lineHeight: 24,
+    },
+    title: {
+      color: colors.neutral[900],
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.semibold,
+    },
+    hintText: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: tennisTypography.fieldHint.fontSize,
+      lineHeight: tennisTypography.fieldHint.lineHeight,
+      color: colors.neutral[700],
+    },
+    errorText: {
+      color: colors.danger[700],
+      fontSize: typography.size.sm,
+    },
+    card: {
+      borderRadius: radii.lg,
+      padding: spacing.lg,
+      gap: spacing.xs,
+      backgroundColor: semantic.surface,
+      ...elevation.sm,
+    },
+    compactCard: {
+      borderWidth: 1,
+      borderColor: colors.neutral[100],
+      borderRadius: radii.md,
+      padding: spacing.md,
+      gap: 6,
+      backgroundColor: colors.neutral[0],
+    },
+    compactCardTitle: {
+      color: colors.neutral[900],
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.semibold,
+      marginBottom: 2,
+    },
+    summaryRow: {
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      gap: spacing.sm,
+    },
+    summaryRowLabel: {
+      color: colors.neutral[500],
+      fontSize: typography.size.xs,
+      flexShrink: 0,
+      minWidth: 56,
+    },
+    summaryRowValue: {
+      color: colors.neutral[900],
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.medium,
+      flex: 1,
+    },
+    segmentRow: {
+      flexDirection: "row",
+      gap: spacing.sm,
+    },
+    segmentButton: {
+      flex: 1,
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: radii.full,
+      paddingHorizontal: spacing.md,
+      backgroundColor: colors.neutral[50],
+    },
+    segmentButtonActive: {
+      backgroundColor: colors.neutral[0],
+      shadowColor: colors.neutral[900],
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 1,
+    },
+    segmentButtonText: {
+      color: colors.neutral[700],
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.semibold,
+    },
+    segmentButtonTextActive: {
+      color: mobileBrand[600],
+    },
+  }),
+);
 
-const styles = StyleSheet.create({
-  screenRoot: {
-    flex: 1,
-    backgroundColor: tennisColors.background,
-  },
-  scroll: {
-    flex: 1,
-  },
-  fixedHeader: {
-    gap: spacing.sm,
-    backgroundColor: tennisColors.background,
-  },
-  screen: {
-    flexGrow: 1,
-    paddingTop: spacing.lg,
-    gap: spacing.lg,
-    backgroundColor: tennisColors.background,
-  },
-  screenBelowFixedHeader: {
-    paddingTop: spacing.sm,
-  },
-  screenCompact: {
-    flexGrow: 0,
-  },
-  listItemSeparator: {
-    height: spacing.md,
-  },
-  title: {
-    color: tennisColors.primaryDark,
-    fontFamily: tennisFontFamily.headingExtra,
-    fontWeight: typography.weight.bold,
-  },
-  primaryButton: {
-    minHeight: 52,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-    // brand[500] gave white text only 2.4:1 and read as disabled.
-    backgroundColor: tennisColors.primary,
-    borderRadius: radii.full,
-    ...elevation.sm,
-  },
-  primaryButtonText: {
-    color: colors.neutral[0],
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    textAlign: "center",
-  },
-  secondaryButton: {
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderWidth: 1,
-    borderColor: mobileBrand[500],
-    borderRadius: radii.full,
-    backgroundColor: colors.neutral[0],
-  },
-  secondaryButtonText: {
-    color: mobileBrand[700],
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    textAlign: "center",
-  },
-  destructiveButton: {
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.danger[500],
-    borderRadius: radii.full,
-    backgroundColor: colors.neutral[0],
-  },
-  destructiveButtonText: {
-    color: colors.danger[700],
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    textAlign: "center",
-  },
-  disabled: { opacity: 0.5 },
-  pressed: { opacity: 0.8 },
-  field: { gap: spacing.xs },
-  label: {
-    color: colors.neutral[900],
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-  },
-  input: {
-    minHeight: minTouchTargetPx,
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-    borderRadius: radii.md,
-    paddingHorizontal: spacing.md,
-    color: colors.neutral[900],
-    fontSize: typography.size.md,
-  },
-  inputError: { borderColor: colors.danger[500] },
-  error: { color: colors.danger[700], fontSize: typography.size.sm },
-  errorNotice: {
-    padding: spacing.md,
-    color: colors.danger[700],
-    backgroundColor: colors.danger[100],
-    borderRadius: radii.md,
-  },
-  screenError: {
-    gap: spacing.sm,
-    padding: spacing.md,
-  },
-  screenErrorRetry: {
-    alignSelf: "flex-start",
-    minHeight: minTouchTargetPx,
-    justifyContent: "center",
-  },
-  screenErrorRetryLabel: {
-    color: colors.brand[700],
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-  },
-  choice: {
-    minHeight: minTouchTargetPx,
-    alignItems: "center",
-    gap: spacing.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-    borderRadius: radii.lg,
-    backgroundColor: colors.neutral[0],
-  },
-  choiceSelected: {
-    borderColor: mobileBrand[500],
-    backgroundColor: mobileBrand[50],
-  },
-  choiceText: { flex: 1, gap: spacing.xs, minWidth: 0 },
-  choiceLabel: {
-    color: colors.neutral[900],
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.medium,
-  },
-  choiceDescription: {
-    color: colors.neutral[700],
-    fontSize: typography.size.sm,
-  },
-  checkmark: {
-    color: mobileBrand[700],
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.bold,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    screenRoot: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    scroll: {
+      flex: 1,
+    },
+    fixedHeader: {
+      gap: spacing.sm,
+      backgroundColor: tennisColors.background,
+    },
+    screen: {
+      flexGrow: 1,
+      paddingTop: spacing.lg,
+      gap: spacing.lg,
+      backgroundColor: tennisColors.background,
+    },
+    screenBelowFixedHeader: {
+      paddingTop: spacing.sm,
+    },
+    screenCompact: {
+      flexGrow: 0,
+    },
+    listItemSeparator: {
+      height: spacing.md,
+    },
+    title: {
+      color: tennisColors.primaryDark,
+      fontFamily: tennisFontFamily.headingExtra,
+      fontWeight: typography.weight.bold,
+    },
+    primaryButton: {
+      minHeight: 52,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+      // brand[500] gave white text only 2.4:1 and read as disabled.
+      backgroundColor: tennisColors.primary,
+      borderRadius: radii.full,
+      ...elevation.sm,
+    },
+    primaryButtonText: {
+      color: colors.neutral[0],
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.semibold,
+      textAlign: "center",
+    },
+    secondaryButton: {
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      borderWidth: 1,
+      borderColor: mobileBrand[500],
+      borderRadius: radii.full,
+      backgroundColor: colors.neutral[0],
+    },
+    secondaryButtonText: {
+      color: mobileBrand[700],
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.semibold,
+      textAlign: "center",
+    },
+    destructiveButton: {
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.danger[500],
+      borderRadius: radii.full,
+      backgroundColor: colors.neutral[0],
+    },
+    destructiveButtonText: {
+      color: colors.danger[700],
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.semibold,
+      textAlign: "center",
+    },
+    disabled: { opacity: 0.5 },
+    pressed: { opacity: 0.8 },
+    field: { gap: spacing.xs },
+    label: {
+      color: colors.neutral[900],
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.medium,
+    },
+    input: {
+      minHeight: minTouchTargetPx,
+      borderWidth: 1,
+      borderColor: colors.neutral[300],
+      borderRadius: radii.md,
+      paddingHorizontal: spacing.md,
+      color: colors.neutral[900],
+      fontSize: typography.size.md,
+    },
+    inputError: { borderColor: colors.danger[500] },
+    error: { color: colors.danger[700], fontSize: typography.size.sm },
+    errorNotice: {
+      padding: spacing.md,
+      color: colors.danger[700],
+      backgroundColor: colors.danger[100],
+      borderRadius: radii.md,
+    },
+    screenError: {
+      gap: spacing.sm,
+      padding: spacing.md,
+    },
+    screenErrorRetry: {
+      alignSelf: "flex-start",
+      minHeight: minTouchTargetPx,
+      justifyContent: "center",
+    },
+    screenErrorRetryLabel: {
+      color: colors.brand[700],
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.semibold,
+    },
+    choice: {
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      gap: spacing.md,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.neutral[300],
+      borderRadius: radii.lg,
+      backgroundColor: colors.neutral[0],
+    },
+    choiceSelected: {
+      borderColor: mobileBrand[500],
+      backgroundColor: mobileBrand[50],
+    },
+    choiceText: { flex: 1, gap: spacing.xs, minWidth: 0 },
+    choiceLabel: {
+      color: colors.neutral[900],
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.medium,
+    },
+    choiceDescription: {
+      color: colors.neutral[700],
+      fontSize: typography.size.sm,
+    },
+    checkmark: {
+      color: mobileBrand[700],
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.bold,
+    },
+  }),
+);

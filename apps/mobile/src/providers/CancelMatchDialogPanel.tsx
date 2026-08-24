@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import { AppText } from "../components/AppText";
 import { FormField } from "../components/FormUi";
 import {
@@ -87,25 +88,27 @@ export function CancelMatchDialogPanel({
   );
 }
 
-const styles = StyleSheet.create({
-  panel: {
-    gap: 12,
-  },
-  title: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 17,
-    lineHeight: 22,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.3,
-  },
-  message: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    lineHeight: 20,
-    color: tennisColors.mutedForeground,
-  },
-  actions: {
-    gap: 10,
-    marginTop: 4,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    panel: {
+      gap: 12,
+    },
+    title: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 17,
+      lineHeight: 22,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.3,
+    },
+    message: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+    },
+    actions: {
+      gap: 10,
+      marginTop: 4,
+    },
+  }),
+);

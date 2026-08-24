@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import type { ClubDirectoryRow } from "@tennis-lebanon/api";
 import { AppText } from "../AppText";
@@ -101,65 +102,67 @@ export function FavoriteClubToggleList({
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    gap: 8,
-  },
-  row: {
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.card,
-  },
-  textBlock: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  name: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 15,
-    color: tennisColors.primaryDark,
-  },
-  zone: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 13,
-    color: tennisColors.mutedForeground,
-  },
-  favoriteButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.background,
-  },
-  favoriteButtonActive: {
-    borderColor: tennisColors.primary,
-    backgroundColor: tennisColors.secondary,
-  },
-  favoriteButtonPressed: {
-    opacity: 0.9,
-  },
-  favoriteButtonPending: {
-    opacity: 0.55,
-  },
-  favoriteButtonLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-  favoriteButtonLabelActive: {
-    color: tennisColors.primary,
-  },
-  empty: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 20,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    list: {
+      gap: 8,
+    },
+    row: {
+      alignItems: "center",
+      gap: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderRadius: tennisRadii.md,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+    },
+    textBlock: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2,
+    },
+    name: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 15,
+      color: tennisColors.primaryDark,
+    },
+    zone: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    favoriteButton: {
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.background,
+    },
+    favoriteButtonActive: {
+      borderColor: tennisColors.primary,
+      backgroundColor: tennisColors.secondary,
+    },
+    favoriteButtonPressed: {
+      opacity: 0.9,
+    },
+    favoriteButtonPending: {
+      opacity: 0.55,
+    },
+    favoriteButtonLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+    favoriteButtonLabelActive: {
+      color: tennisColors.primary,
+    },
+    empty: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

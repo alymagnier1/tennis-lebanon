@@ -35,6 +35,16 @@ export function compactJoinedLabel(
   return `${shown} +${clean.length - maxVisible}`;
 }
 
+/** Smaller type when several names must share one footer line. */
+export function joinedListTypeSize(count: number): {
+  fontSize: number;
+  lineHeight: number;
+} {
+  if (count >= 3) return { fontSize: 10, lineHeight: 13 };
+  if (count === 2) return { fontSize: 12, lineHeight: 16 };
+  return { fontSize: 14, lineHeight: 18 };
+}
+
 export function clubIdsFromList(clubs: unknown): string[] {
   if (!Array.isArray(clubs)) return [];
   return clubs

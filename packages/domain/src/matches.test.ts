@@ -9,6 +9,8 @@ import {
   capacityForFormat,
   createMatchInputSchema,
   findActiveHostedMatch,
+  hasReachedHostedMatchCap,
+  HOSTED_MATCH_CAP,
   hasUnanimousTimeYes,
   isInviteableMatch,
   isParticipantStatusActive,
@@ -326,6 +328,60 @@ describe("matches domain rules", () => {
     expect(isInviteableMatch(matches[1]!)).toBe(true);
     expect(canCreatorCancelBeforeBooking("ready_to_book")).toBe(true);
     expect(canCreatorCancelBeforeBooking("confirmed")).toBe(false);
+  });
+
+  it("counts every match you host, whatever its format or visibility", () => {
+    // One number, not a per-format collision: 087 replaced both earlier rules
+    // because Discover and profiles now always create, so a count is the right
+    // shape of limit. Drafts count -- an unfinished one still occupies a slot.
+    const hosted = (
+      match_id: string,
+      format: string,
+      status: string,
+      visibility: string,
+    ) => ({ match_id, format, status, visibility, is_creator: true });
+
+    const atCap = [
+      hosted("a", "singles", "draft", "invite_only"),
+      hosted("b", "singles", "open", "public"),
+      hosted("c", "doubles", "ready_to_book", "invite_only"),
+    ];
+
+    expect(atCap).toHaveLength(HOSTED_MATCH_CAP);
+    expect(hasReachedHostedMatchCap(atCap)).toBe(true);
+    expect(hasReachedHostedMatchCap(atCap.slice(0, 2))).toBe(false);
+
+    // The plainer question is unchanged: a draft is still in flight, which is
+    // what the resume-an-abandoned-draft path asks about.
+    expect(findActiveHostedMatch(atCap, "singles")?.match_id).toBe("a");
+  });
+
+  it("ignores matches somebody else hosts, and ones already finished", () => {
+    expect(
+      hasReachedHostedMatchCap([
+        {
+          match_id: "theirs",
+          format: "singles",
+          status: "open",
+          visibility: "public",
+          is_creator: false,
+        },
+        {
+          match_id: "done",
+          format: "singles",
+          status: "completed",
+          visibility: "public",
+          is_creator: true,
+        },
+        {
+          match_id: "gone",
+          format: "doubles",
+          status: "cancelled",
+          visibility: "public",
+          is_creator: true,
+        },
+      ]),
+    ).toBe(false);
   });
 
   it("counts a match you joined, not only one you host", () => {

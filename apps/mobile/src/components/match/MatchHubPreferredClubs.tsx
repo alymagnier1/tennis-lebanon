@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import {
   useMutation,
@@ -605,192 +606,194 @@ export function MatchHubPreferredClubs({
 
 const PHOTO_PLACEHOLDER = "#E09A5C";
 
-const styles = StyleSheet.create({
-  list: {
-    gap: 10,
-  },
-  clubCard: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.lg,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    overflow: "hidden",
-  },
-  clubCardSelected: {
-    borderColor: tennisColors.primary,
-    borderWidth: 2,
-  },
-  cardBody: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    minHeight: 88,
-    position: "relative",
-  },
-  infoColumn: {
-    flex: 1,
-    minWidth: 0,
-    justifyContent: "flex-start",
-    paddingTop: 12,
-    paddingBottom: 36,
-    paddingStart: 12,
-    paddingEnd: 16,
-    backgroundColor: tennisColors.background,
-  },
-  infoColumnSelected: {
-    backgroundColor: tennisColors.secondary,
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-  },
-  titleBlock: {
-    flex: 1,
-    minWidth: 0,
-    gap: 1,
-  },
-  radio: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 2,
-    borderColor: tennisColors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 1,
-  },
-  radioSelected: {
-    borderColor: tennisColors.primary,
-  },
-  radioDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: tennisColors.primary,
-  },
-  name: {
-    fontFamily: tennisFontFamily.headingSemi,
-    fontSize: 14,
-    lineHeight: 18,
-    color: tennisColors.primaryDark,
-    letterSpacing: -0.2,
-  },
-  courtName: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 13,
-    lineHeight: 17,
-    color: tennisColors.primaryDark,
-  },
-  actionRail: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-    height: 34,
-  },
-  actionLink: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    minHeight: 34,
-  },
-  messageLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    color: tennisColors.primary,
-  },
-  photoHalf: {
-    flex: 1,
-    minWidth: 0,
-    overflow: "hidden",
-    backgroundColor: PHOTO_PLACEHOLDER,
-  },
-  photoSkew: {
-    flex: 1,
-    marginLeft: -16,
-    paddingLeft: 16,
-    backgroundColor: PHOTO_PLACEHOLDER,
-    transform: [{ skewX: "10deg" }],
-  },
-  photoInner: {
-    flex: 1,
-    transform: [{ skewX: "-10deg" }],
-  },
-  photoPlaceholder: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingBottom: 24,
-  },
-  viewClubLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    color: tennisColors.white,
-  },
-  pressed: {
-    opacity: 0.88,
-  },
-  askedLine: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    lineHeight: 16,
-    color: tennisColors.mutedForeground,
-  },
-  askPrompt: {
-    gap: 10,
-    padding: 12,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.muted,
-  },
-  askPromptText: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 13,
-    lineHeight: 18,
-    color: tennisColors.primaryDark,
-  },
-  askPromptActions: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  askPromptAction: {
-    flex: 1,
-  },
-  confirmFooter: {
-    gap: 10,
-    marginTop: 4,
-  },
-  blocker: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    lineHeight: 16,
-    color: tennisColors.mutedForeground,
-  },
-  escapeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    gap: 6,
-  },
-  escape: {
-    minHeight: 32,
-    justifyContent: "center",
-  },
-  escapeLabel: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-    textDecorationLine: "underline",
-  },
-  escapeDot: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    list: {
+      gap: 10,
+    },
+    clubCard: {
+      backgroundColor: tennisColors.card,
+      borderRadius: tennisRadii.lg,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      overflow: "hidden",
+    },
+    clubCardSelected: {
+      borderColor: tennisColors.primary,
+      borderWidth: 2,
+    },
+    cardBody: {
+      flexDirection: "row",
+      alignItems: "stretch",
+      minHeight: 88,
+      position: "relative",
+    },
+    infoColumn: {
+      flex: 1,
+      minWidth: 0,
+      justifyContent: "flex-start",
+      paddingTop: 12,
+      paddingBottom: 36,
+      paddingStart: 12,
+      paddingEnd: 16,
+      backgroundColor: tennisColors.background,
+    },
+    infoColumnSelected: {
+      backgroundColor: tennisColors.secondary,
+    },
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 8,
+    },
+    titleBlock: {
+      flex: 1,
+      minWidth: 0,
+      gap: 1,
+    },
+    radio: {
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      borderWidth: 2,
+      borderColor: tennisColors.border,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 1,
+    },
+    radioSelected: {
+      borderColor: tennisColors.primary,
+    },
+    radioDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: tennisColors.primary,
+    },
+    name: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 14,
+      lineHeight: 18,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+    },
+    courtName: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 13,
+      lineHeight: 17,
+      color: tennisColors.primaryDark,
+    },
+    actionRail: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 12,
+      height: 34,
+    },
+    actionLink: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      minHeight: 34,
+    },
+    messageLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: tennisColors.primary,
+    },
+    photoHalf: {
+      flex: 1,
+      minWidth: 0,
+      overflow: "hidden",
+      backgroundColor: PHOTO_PLACEHOLDER,
+    },
+    photoSkew: {
+      flex: 1,
+      marginLeft: -16,
+      paddingLeft: 16,
+      backgroundColor: PHOTO_PLACEHOLDER,
+      transform: [{ skewX: "10deg" }],
+    },
+    photoInner: {
+      flex: 1,
+      transform: [{ skewX: "-10deg" }],
+    },
+    photoPlaceholder: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingBottom: 24,
+    },
+    viewClubLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: tennisColors.white,
+    },
+    pressed: {
+      opacity: 0.88,
+    },
+    askedLine: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+    },
+    askPrompt: {
+      gap: 10,
+      padding: 12,
+      borderRadius: tennisRadii.md,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.muted,
+    },
+    askPromptText: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      lineHeight: 18,
+      color: tennisColors.primaryDark,
+    },
+    askPromptActions: {
+      flexDirection: "row",
+      gap: 8,
+    },
+    askPromptAction: {
+      flex: 1,
+    },
+    confirmFooter: {
+      gap: 10,
+      marginTop: 4,
+    },
+    blocker: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+    },
+    escapeRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      gap: 6,
+    },
+    escape: {
+      minHeight: 32,
+      justifyContent: "center",
+    },
+    escapeLabel: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+      textDecorationLine: "underline",
+    },
+    escapeDot: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import {
   formatSkillBandSelection,
@@ -113,61 +114,63 @@ export function CreateMatchSummaryBar({ onPress }: { onPress: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    backgroundColor: tennisColors.card,
-    borderRadius: tennisRadii.xl,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 10,
-  },
-  rootPressed: {
-    opacity: 0.94,
-  },
-  headerRow: {
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  title: {
-    flex: 1,
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-  },
-  editLabel: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 12,
-    lineHeight: 16,
-    color: SUMMARY_CHIP_BG,
-  },
-  chipsRow: {
-    flexWrap: "wrap",
-    gap: 6,
-  },
-  chip: {
-    flexGrow: 1,
-    flexShrink: 1,
-    minWidth: 0,
-    maxWidth: "100%",
-    gap: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: tennisRadii.sm,
-    backgroundColor: SUMMARY_CHIP_BG,
-  },
-  chipLabel: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 9,
-    lineHeight: 12,
-    color: "rgba(255,255,255,0.82)",
-  },
-  chipValue: {
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 11,
-    lineHeight: 14,
-    color: tennisColors.white,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      backgroundColor: tennisColors.card,
+      borderRadius: tennisRadii.xl,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      gap: 10,
+    },
+    rootPressed: {
+      opacity: 0.94,
+    },
+    headerRow: {
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+    },
+    title: {
+      flex: 1,
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+    editLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 12,
+      lineHeight: 16,
+      color: SUMMARY_CHIP_BG,
+    },
+    chipsRow: {
+      flexWrap: "wrap",
+      gap: 6,
+    },
+    chip: {
+      flexGrow: 1,
+      flexShrink: 1,
+      minWidth: 0,
+      maxWidth: "100%",
+      gap: 1,
+      paddingHorizontal: 8,
+      paddingVertical: 5,
+      borderRadius: tennisRadii.sm,
+      backgroundColor: SUMMARY_CHIP_BG,
+    },
+    chipLabel: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 9,
+      lineHeight: 12,
+      color: "rgba(255,255,255,0.82)",
+    },
+    chipValue: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 11,
+      lineHeight: 14,
+      color: tennisColors.white,
+    },
+  }),
+);

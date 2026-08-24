@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Redirect, router } from "expo-router";
@@ -168,24 +169,26 @@ export default function SignInScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  rateLimit: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 12,
-    color: tennisColors.mutedForeground,
-    textAlign: "center",
-    marginTop: 8,
-  },
-  switchRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 16,
-  },
-  switchText: {
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    rateLimit: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+      textAlign: "center",
+      marginTop: 8,
+    },
+    switchRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 16,
+    },
+    switchText: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

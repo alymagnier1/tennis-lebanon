@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
@@ -7,12 +8,11 @@ import { Icon } from "../Icon";
 import { PlayerProfileSection } from "./PlayerProfileSection";
 import { clubDetailRoute } from "../../lib/routes";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { tennisColors } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 /**
- * Public preferred clubs under Availability — venue preference before Recent
- * matches / invite actions.
+ * Public preferred clubs — listed after About, before Availability.
  */
 export function PlayerPreferredClubsSection({
   player,
@@ -28,7 +28,7 @@ export function PlayerPreferredClubsSection({
   }
 
   return (
-    <PlayerProfileSection title={t("playerProfile.favoriteClubsTitle")}>
+    <PlayerProfileSection dense title={t("playerProfile.favoriteClubsTitle")}>
       <View style={styles.list}>
         {clubs.map((club) => (
           <Pressable
@@ -38,27 +38,20 @@ export function PlayerPreferredClubsSection({
               club: club.name,
             })}
             onPress={() => router.push(clubDetailRoute(club.club_id))}
+            hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
             style={({ pressed }) => [
               styles.clubRow,
               { flexDirection: rowDirection },
               pressed && styles.clubRowPressed,
             ]}
           >
-            <View style={styles.clubIcon}>
-              <Icon name="place" size={16} color={tennisColors.white} />
-            </View>
+            <Icon name="place" size={14} color={tennisColors.mutedForeground} />
             <AppText
               style={[styles.clubName, { writingDirection }]}
-              maxLines={2}
+              maxLines={1}
             >
               {club.name}
             </AppText>
-            <View style={[styles.viewTrail, { flexDirection: rowDirection }]}>
-              <AppText style={styles.viewLabel} maxLines={1}>
-                {t("clubs.viewDetails")}
-              </AppText>
-              <Icon name="chevron" size={14} color={tennisColors.primary} />
-            </View>
           </Pressable>
         ))}
       </View>
@@ -66,48 +59,26 @@ export function PlayerPreferredClubsSection({
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    gap: 8,
-  },
-  clubRow: {
-    alignItems: "center",
-    gap: 10,
-    minHeight: 48,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: tennisRadii.md,
-    borderWidth: 1.5,
-    borderColor: tennisColors.border,
-    backgroundColor: tennisColors.background,
-  },
-  clubRowPressed: {
-    opacity: 0.88,
-  },
-  clubIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: tennisRadii.sm,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#E09A5C",
-  },
-  clubName: {
-    flex: 1,
-    minWidth: 0,
-    fontFamily: tennisFontFamily.bodySemi,
-    fontSize: 14,
-    lineHeight: 18,
-    color: tennisColors.primaryDark,
-  },
-  viewTrail: {
-    alignItems: "center",
-    gap: 2,
-    flexShrink: 0,
-  },
-  viewLabel: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    color: tennisColors.primary,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    list: {
+      gap: 0,
+    },
+    clubRow: {
+      alignItems: "center",
+      gap: 8,
+      paddingVertical: 3,
+    },
+    clubRowPressed: {
+      opacity: 0.88,
+    },
+    clubName: {
+      flex: 1,
+      minWidth: 0,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

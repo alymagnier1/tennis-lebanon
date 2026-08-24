@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import type { PlayIntent, SkillBand } from "@tennis-lebanon/domain";
@@ -103,17 +104,19 @@ export default function TennisProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  section: {
-    fontFamily: tennisFontFamily.heading,
-    fontSize: 16,
-    color: tennisColors.primaryDark,
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 8,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    section: {
+      fontFamily: tennisFontFamily.heading,
+      fontSize: 16,
+      color: tennisColors.primaryDark,
+      marginBottom: 12,
+      marginTop: 8,
+    },
+    chips: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      marginBottom: 8,
+    },
+  }),
+);

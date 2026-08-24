@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../theme/create-live-sheet";
 import type { PropsWithChildren } from "react";
 import { spacing } from "@tennis-lebanon/ui";
 import { AppText } from "./AppText";
@@ -36,24 +37,26 @@ export function SplitSection({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 10,
-    paddingTop: 4,
-    paddingBottom: 10,
-  },
-  rule: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: tennisColors.border,
-  },
-  section: {
-    gap: spacing.sm,
-  },
-  label: {
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 12,
-    letterSpacing: 0.4,
-    textTransform: "uppercase",
-    color: tennisColors.mutedForeground,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      gap: 10,
+      paddingTop: 4,
+      paddingBottom: 10,
+    },
+    rule: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: tennisColors.border,
+    },
+    section: {
+      gap: spacing.sm,
+    },
+    label: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      letterSpacing: 0.4,
+      textTransform: "uppercase",
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

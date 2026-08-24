@@ -12,14 +12,12 @@ import {
   discoverOpenMatches,
   listOwnPreferredZoneIds,
   getOwnPlayerProfile,
-  listMyMatches,
   type CompatiblePlayerCard,
   type OpenMatchCard,
 } from "@tennis-lebanon/api";
 import {
   DEFAULT_DISCOVER_MATCH_TOGGLES,
   type DiscoverMatchToggles,
-  isInviteableMatch,
   canShowJoinAction,
   resolveDiscoverFiltersFromProfile,
   type PlayIntent,
@@ -308,17 +306,6 @@ export default function DiscoverScreen() {
     });
   };
 
-  const inviteableMatchesQuery = useQuery({
-    queryKey: ["my-matches"],
-    queryFn: () => listMyMatches(supabase),
-    enabled: segment === "players",
-  });
-
-  const inviteableMatches = useMemo(
-    () => (inviteableMatchesQuery.data ?? []).filter(isInviteableMatch),
-    [inviteableMatchesQuery.data],
-  );
-
   const virtualizedList = useMemo(():
     ScreenVirtualizedListProps | undefined => {
     if (segment === "players") {
@@ -330,7 +317,6 @@ export default function DiscoverScreen() {
           return (
             <DiscoverPlayerCardRow
               player={player}
-              inviteableMatches={inviteableMatches}
               locale={locale}
               showOverlapAvailability={matchToggles.matchAvailability}
             />
@@ -396,7 +382,6 @@ export default function DiscoverScreen() {
     return undefined;
   }, [
     filteredPlayers,
-    inviteableMatches,
     locale,
     matchToggles.matchAvailability,
     sortedMatches,

@@ -1,4 +1,11 @@
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  type ViewStyle,
+} from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -11,17 +18,32 @@ import {
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { Avatar } from "../AppUi";
-import { beginCreateMatchForPlayer } from "../../lib/begin-create-match-for-player";
+import { Icon } from "../Icon";
+import {
+  HOME_FREE_PLAYER_CARD_GAP,
+  HOME_FREE_PLAYER_CARD_WIDTH,
+  HOME_FREE_PLAYER_SNAP_INTERVAL,
+  homeFreePlayerSnapOffsets,
+} from "../../lib/home-free-players-carousel";
+import { compactJoinedLabel, clubNamesFromList } from "../../lib/match-clubs";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { publicPlayerLevelChip } from "../../lib/player-level-label";
-import { CREATE_MATCH_ROUTE } from "../../lib/routes";
-import { skillBandColor, skillBandFill } from "../../lib/skill-band-theme";
+import { zoneLabelFromList } from "../../lib/zones";
 import { supabase } from "../../lib/supabase";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 /** Enough to feel like a choice, few enough that the rest is worth a tap through. */
 const CARD_LIMIT = 5;
+const CARD_AVATAR = 48;
+
+const webStripSnap: ViewStyle | undefined =
+  Platform.OS === "web"
+    ? ({ scrollSnapType: "x mandatory" } as ViewStyle)
+    : undefined;
+const webItemSnap: ViewStyle | undefined =
+  Platform.OS === "web"
+    ? ({ scrollSnapAlign: "start", scrollSnapStop: "always" } as ViewStyle)
+    : undefined;
 
 type FreeBlock = {
   startsAt: string;
@@ -31,23 +53,16 @@ type FreeBlock = {
 };
 
 /**
- * The people behind the busiest block, one tap from a match.
+ * The people behind the busiest block.
  *
- * This replaced a whole screen. `/free-block` ran the same query against the
- * same RPC with the same zone scoping and drew the same player cards as the
- * Discover tab, so it was a second discovery surface reachable only from here.
- *
- * The card's primary action carries **both halves of the decision**: the player
- * and the time. `prefillCreateMatchDraftForPlayer` reads `overlap_starts_at`,
- * and `075` computes that overlap inside the requested window, so the create
- * flow opens already knowing when. A CTA carrying only "who" would make this a
- * worse Discover rather than a shortcut past it.
- *
- * No heading of its own: the selected chip above already names the block, and
- * repeating it here would be the same words twice in ten vertical pixels.
+ * Cards match the nearby-player reference: a wide row with avatar beside the
+ * name, area and preferred club as meta, and bio as a one-line hint. There is
+ * no in-card Create — the whole card opens the profile so Home stays a browse
+ * surface. Discover still gets the time window through "View all".
  */
 export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage ?? i18n.language;
   const { rowDirection, writingDirection } = useLayoutDirection();
 
   const ownZonesQuery = useQuery({
@@ -65,8 +80,6 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
     ],
     queryFn: () =>
       discoverCompatiblePlayers(supabase, {
-        // Zone-scoped to match the count that named this block. Level is left
-        // wide: the count does not filter on it either.
         zoneIds: ownZonesQuery.data?.length ? ownZonesQuery.data : undefined,
         levelWindow: 4,
         limit: CARD_LIMIT,
@@ -79,8 +92,6 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
 
   const players = playersQuery.data ?? [];
 
-  // Nothing to scroll through. The chips stay either way, so a player can pick
-  // another block rather than being left with a dead strip.
   if (players.length === 0) {
     return null;
   }
@@ -88,71 +99,114 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
   const openProfile = (player: CompatiblePlayerCard) =>
     router.push({ pathname: "/player/[id]", params: { id: player.user_id } });
 
-  const startMatch = (player: CompatiblePlayerCard) => {
-    beginCreateMatchForPlayer(player);
-    router.push(CREATE_MATCH_ROUTE);
-  };
-
   return (
     <View style={styles.root}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        decelerationRate="fast"
+        snapToAlignment="start"
+        snapToInterval={HOME_FREE_PLAYER_SNAP_INTERVAL}
+        snapToOffsets={homeFreePlayerSnapOffsets(players.length)}
+        disableIntervalMomentum
+        style={[
+          styles.scroll,
+          webStripSnap,
+          Platform.OS === "web" ? { direction: writingDirection } : null,
+        ]}
         contentContainerStyle={styles.strip}
       >
-        {players.map((player) => (
-          <View key={player.user_id} style={styles.card}>
+        {players.map((player) => {
+          const areaLabel = firstZoneLabel(player.zones, locale);
+          const clubLabel = compactJoinedLabel(
+            clubNamesFromList(player.favorite_clubs),
+          );
+          const about = player.bio?.replace(/\s+/g, " ").trim() ?? "";
+
+          return (
             <Pressable
+              key={player.user_id}
               accessibilityRole="button"
               accessibilityLabel={t("discover.openPlayerProfile", {
                 name: player.display_name,
               })}
               onPress={() => openProfile(player)}
               style={({ pressed }) => [
-                styles.identity,
+                styles.card,
+                webItemSnap,
                 pressed && styles.pressed,
               ]}
             >
-              <Avatar
-                name={player.display_name}
-                avatarPath={player.avatar_path}
-                size={48}
-              />
-              <AppText style={[styles.name, { writingDirection }]} maxLines={1}>
-                {player.display_name}
-              </AppText>
-              <View
-                style={[
-                  styles.levelBadge,
-                  { backgroundColor: skillBandFill(player.skill_band) },
-                ]}
-              >
+              <View style={[styles.header, { flexDirection: rowDirection }]}>
+                <Avatar
+                  name={player.display_name}
+                  avatarPath={player.avatar_path}
+                  size={CARD_AVATAR}
+                />
+                <View style={styles.identity}>
+                  <AppText
+                    style={[styles.name, { writingDirection }]}
+                    maxLines={1}
+                  >
+                    {player.display_name}
+                  </AppText>
+                  <AppText
+                    style={[styles.level, { writingDirection }]}
+                    maxLines={1}
+                  >
+                    {t(`skillBandsShort.${player.skill_band}`)}
+                  </AppText>
+                </View>
+              </View>
+
+              <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
+                {areaLabel ? (
+                  <View
+                    style={[styles.metaItem, { flexDirection: rowDirection }]}
+                  >
+                    <Icon
+                      name="place"
+                      size={13}
+                      color={tennisColors.mutedForeground}
+                    />
+                    <AppText
+                      style={[styles.metaText, { writingDirection }]}
+                      maxLines={1}
+                    >
+                      {areaLabel}
+                    </AppText>
+                  </View>
+                ) : null}
+                {clubLabel ? (
+                  <View
+                    style={[styles.metaItem, { flexDirection: rowDirection }]}
+                  >
+                    <Icon
+                      name="court"
+                      size={13}
+                      color={tennisColors.mutedForeground}
+                    />
+                    <AppText
+                      style={[styles.metaText, { writingDirection }]}
+                      maxLines={1}
+                    >
+                      {clubLabel}
+                    </AppText>
+                  </View>
+                ) : null}
+              </View>
+
+              {about ? (
                 <AppText
-                  style={[
-                    styles.levelBadgeText,
-                    { color: skillBandColor(player.skill_band) },
-                  ]}
+                  style={[styles.about, { writingDirection }]}
                   maxLines={1}
                 >
-                  {publicPlayerLevelChip(player, t)}
+                  {about}
                 </AppText>
-              </View>
+              ) : null}
             </Pressable>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("discover.createMatchWith", {
-                name: player.display_name,
-              })}
-              onPress={() => startMatch(player)}
-              style={({ pressed }) => [styles.cta, pressed && styles.pressed]}
-            >
-              <AppText style={styles.ctaLabel} maxLines={1}>
-                {t("matches.create.cta")}
-              </AppText>
-            </Pressable>
-          </View>
-        ))}
+          );
+        })}
 
         <Pressable
           accessibilityRole="button"
@@ -167,6 +221,7 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
           }
           style={({ pressed }) => [
             styles.seeAll,
+            webItemSnap,
             { flexDirection: rowDirection },
             pressed && styles.pressed,
           ]}
@@ -180,76 +235,98 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
   );
 }
 
+function firstZoneLabel(zones: unknown, locale: string): string {
+  const full = zoneLabelFromList(zones, locale);
+  if (!full) return "";
+  return full.split(" · ")[0] ?? full;
+}
+
 const styles = createLiveSheet(() =>
   StyleSheet.create({
     root: {
       gap: 0,
     },
-    strip: {
-      gap: 8,
-      paddingVertical: 2,
+    scroll: {
+      flexGrow: 0,
+      flexShrink: 0,
     },
-    // Bordered card on the section's own surface, so the strip reads as part of
-    // Home rather than a widget dropped into it.
+    strip: {
+      gap: HOME_FREE_PLAYER_CARD_GAP,
+      alignItems: "stretch",
+    },
     card: {
-      width: 148,
-      gap: 10,
-      padding: 12,
-      borderRadius: tennisRadii.md,
-      borderWidth: 1.5,
+      width: HOME_FREE_PLAYER_CARD_WIDTH,
+      gap: 6,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      borderRadius: tennisRadii.lg,
+      borderWidth: 1,
       borderColor: tennisColors.border,
       backgroundColor: tennisColors.card,
     },
-    identity: {
+    header: {
       alignItems: "center",
-      gap: 6,
+      gap: 10,
+    },
+    identity: {
+      flex: 1,
+      minWidth: 0,
+      gap: 1,
+    },
+    name: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 16,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
+    },
+    level: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+    },
+    metaRow: {
+      alignItems: "center",
+      gap: 10,
+      flexWrap: "nowrap",
+    },
+    metaItem: {
+      alignItems: "center",
+      gap: 4,
+      minHeight: 16,
+      maxWidth: "50%",
+      flexShrink: 1,
+    },
+    metaText: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+      flexShrink: 1,
+    },
+    about: {
+      width: "100%",
+      overflow: "hidden",
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
     },
     pressed: {
       opacity: 0.9,
     },
-    name: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 14,
-      color: tennisColors.primaryDark,
-      textAlign: "center",
-    },
-    levelBadge: {
-      borderRadius: tennisRadii.pill,
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      flexShrink: 0,
-    },
-    levelBadgeText: {
-      fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 11,
-    },
-    cta: {
-      minHeight: minTouchTargetPx,
-      alignItems: "center",
-      justifyContent: "center",
-      paddingHorizontal: 10,
-      borderRadius: tennisRadii.sm,
-      backgroundColor: tennisColors.violet,
-    },
-    ctaLabel: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 13,
-      color: tennisColors.onViolet,
-    },
     seeAll: {
-      width: 132,
+      width: 156,
       minHeight: minTouchTargetPx,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 12,
-      borderRadius: tennisRadii.md,
-      borderWidth: 1.5,
-      borderColor: tennisColors.border,
+      borderRadius: tennisRadii.lg,
       backgroundColor: tennisColors.muted,
     },
     seeAllLabel: {
       fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 13,
+      fontSize: 14,
       color: tennisColors.violet,
       textAlign: "center",
     },
