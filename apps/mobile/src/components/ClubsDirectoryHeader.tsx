@@ -41,12 +41,12 @@ export function ClubsDirectoryHeader({
       >
         <View style={styles.searchWrap}>
           <View style={styles.searchIcon}>
-            <Icon name="discover" size={16} color="rgba(255,255,255,0.6)" />
+            <Icon name="discover" size={16} color={tennisColors.mutedForeground} />
           </View>
           <TextInput
             accessibilityLabel={t("clubs.searchPlaceholder")}
             placeholder={t("clubs.searchPlaceholder")}
-            placeholderTextColor="rgba(255,255,255,0.45)"
+            placeholderTextColor={tennisColors.mutedForeground}
             value={search}
             onChangeText={onSearchChange}
             style={[
@@ -156,13 +156,13 @@ const styles = createLiveSheet(() =>
       paddingVertical: 12,
       paddingLeft: 40,
       paddingRight: 12,
-      backgroundColor: "rgba(255,255,255,0.12)",
+      backgroundColor: tennisColors.card,
       borderWidth: 1.5,
-      borderColor: "rgba(255,255,255,0.2)",
+      borderColor: tennisColors.border,
       borderRadius: tennisRadii.md,
       fontFamily: tennisFontFamily.body,
       fontSize: 14,
-      color: tennisColors.white,
+      color: tennisColors.primaryDark,
     },
     filterRow: {
       backgroundColor: tennisColors.card,

@@ -218,6 +218,22 @@ export function matchListAction(input: {
   }
 }
 
+/**
+ * The pill names a job. "Invite players" / "Finish setup" live on the invite
+ * screen, not the hub — falling through to the card's hub `onPress` is what
+ * made tapping that pill feel like a broken label.
+ */
+export function matchListActionOpensInvite(input: {
+  status: string;
+  isCreator?: boolean;
+}): boolean {
+  const action = matchListAction(input);
+  return (
+    action?.labelKey === "matches.list.action.invitePlayers" ||
+    action?.labelKey === "matches.list.action.finishSetup"
+  );
+}
+
 /** Pending-submission cards open the result sheet instead of navigating. */
 export function matchListOpensResultSheet(match: ActiveListMatch): boolean {
   if (match.status !== "in_progress") return false;

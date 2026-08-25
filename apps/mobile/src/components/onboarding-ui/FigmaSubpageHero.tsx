@@ -3,7 +3,6 @@ import { StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
-import { CourtGridOverlay } from "./CourtPattern";
 import { FigmaBackButton } from "./FigmaButtons";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
@@ -27,9 +26,8 @@ export function FigmaSubpageHero({
 
   return (
     <View style={[styles.hero, { paddingTop: heroTopPadding }]}>
-      <CourtGridOverlay />
       <View style={styles.content}>
-        {onBack ? <FigmaBackButton onPress={onBack} onDark /> : null}
+        {onBack ? <FigmaBackButton onPress={onBack} /> : null}
         <View style={tennisTextStyles.titleSubtitleBlock}>
           <AppText
             accessibilityRole="header"
@@ -44,7 +42,7 @@ export function FigmaSubpageHero({
           {description ? (
             <AppText
               style={[
-                tennisTextStyles.sectionSubtitleOnDark,
+                tennisTextStyles.sectionSubtitle,
                 { writingDirection },
               ]}
             >
@@ -61,7 +59,7 @@ export function FigmaSubpageHero({
 const styles = createLiveSheet(() =>
   StyleSheet.create({
     hero: {
-      backgroundColor: tennisColors.primary,
+      backgroundColor: tennisColors.background,
       paddingHorizontal: 20,
       paddingBottom: 24,
       overflow: "hidden",
@@ -75,7 +73,7 @@ const styles = createLiveSheet(() =>
       fontFamily: tennisFontFamily.headingExtra,
       fontSize: 28,
       lineHeight: 31,
-      color: tennisColors.white,
+      color: tennisColors.primaryDark,
       letterSpacing: -0.6,
       marginTop: 16,
       marginBottom: 0,

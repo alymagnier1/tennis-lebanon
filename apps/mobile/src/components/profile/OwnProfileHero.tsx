@@ -5,10 +5,9 @@ import { useTranslation } from "react-i18next";
 import { Avatar } from "../AppUi";
 import { AppText } from "../AppText";
 import { Icon } from "../Icon";
-import { CourtGridOverlay } from "../onboarding-ui/CourtPattern";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { skillBandColor } from "../../lib/skill-band-theme";
+import { skillBandColor, skillBandFill } from "../../lib/skill-band-theme";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 
 const AVATAR_SIZE = 96;
@@ -48,11 +47,11 @@ export function OwnProfileHero({
   const insets = useSafeAreaInsets();
   const { rowDirection, writingDirection } = useLayoutDirection();
   const bandColor = skillBandColor(skillBand);
+  const bandFill = skillBandFill(skillBand);
   const heroTopPadding = Math.max(insets.top + 28, 52);
 
   return (
     <View style={[styles.hero, { paddingTop: heroTopPadding }]}>
-      <CourtGridOverlay />
       <View style={styles.heroContent}>
         <View style={[styles.identityRow, { flexDirection: rowDirection }]}>
           <Pressable
@@ -85,7 +84,11 @@ export function OwnProfileHero({
             </AppText>
             {locationLabel ? (
               <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
-                <Icon name="place" size={12} color="rgba(255,255,255,0.65)" />
+                <Icon
+                  name="place"
+                  size={12}
+                  color={tennisColors.mutedForeground}
+                />
                 <AppText
                   style={[styles.metaText, { writingDirection }]}
                   maxLines={1}
@@ -95,8 +98,10 @@ export function OwnProfileHero({
               </View>
             ) : null}
             <View style={[styles.badgeRow, { flexDirection: rowDirection }]}>
-              <View style={[styles.levelBadge, { backgroundColor: bandColor }]}>
-                <AppText style={styles.levelBadgeText}>
+              <View style={[styles.levelBadge, { backgroundColor: bandFill }]}>
+                <AppText
+                  style={[styles.levelBadgeText, { color: bandColor }]}
+                >
                   {t(`skillBands.${skillBand}`)}
                 </AppText>
               </View>
@@ -132,7 +137,7 @@ export function OwnProfileHero({
               style={[styles.ratingValueRow, { flexDirection: rowDirection }]}
             >
               <AppText style={styles.statValue}>{ratingValue}</AppText>
-              <Icon name="info" size={14} color="rgba(255,255,255,0.65)" />
+              <Icon name="info" size={14} color={tennisColors.mutedForeground} />
             </View>
             <AppText style={styles.statLabel}>{ratingLabel}</AppText>
           </Pressable>
@@ -145,7 +150,7 @@ export function OwnProfileHero({
 const styles = createLiveSheet(() =>
   StyleSheet.create({
     hero: {
-      backgroundColor: tennisColors.primary,
+      backgroundColor: tennisColors.background,
       paddingHorizontal: 20,
       paddingBottom: 24,
       overflow: "hidden",
@@ -162,7 +167,7 @@ const styles = createLiveSheet(() =>
     avatarWrap: {
       borderRadius: tennisRadii.hero,
       borderWidth: 3,
-      borderColor: tennisColors.heroBorder,
+      borderColor: tennisColors.lime,
       overflow: "hidden",
       flexShrink: 0,
       position: "relative",
@@ -193,7 +198,7 @@ const styles = createLiveSheet(() =>
     name: {
       fontFamily: tennisFontFamily.headingExtra,
       fontSize: 22,
-      color: tennisColors.white,
+      color: tennisColors.primaryDark,
       letterSpacing: -0.4,
     },
     metaRow: {
@@ -204,7 +209,7 @@ const styles = createLiveSheet(() =>
       flexShrink: 1,
       fontFamily: tennisFontFamily.body,
       fontSize: 12,
-      color: "rgba(255,255,255,0.65)",
+      color: tennisColors.mutedForeground,
     },
     badgeRow: {
       flexWrap: "wrap",
@@ -219,13 +224,12 @@ const styles = createLiveSheet(() =>
     levelBadgeText: {
       fontFamily: tennisFontFamily.bodySemi,
       fontSize: 11,
-      color: tennisColors.white,
     },
     editButton: {
       borderRadius: tennisRadii.sm,
       borderWidth: 1,
-      borderColor: tennisColors.heroBorder,
-      backgroundColor: tennisColors.heroOverlay,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
       paddingHorizontal: 12,
       paddingVertical: 8,
       flexShrink: 0,
@@ -238,11 +242,13 @@ const styles = createLiveSheet(() =>
     editButtonText: {
       fontFamily: tennisFontFamily.bodySemi,
       fontSize: 12,
-      color: tennisColors.white,
+      color: tennisColors.primaryDark,
     },
     statsBar: {
-      backgroundColor: tennisColors.heroOverlay,
+      backgroundColor: tennisColors.card,
       borderRadius: tennisRadii.lg,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
       overflow: "hidden",
     },
     statCell: {
@@ -253,7 +259,7 @@ const styles = createLiveSheet(() =>
     },
     statDivider: {
       width: 1,
-      backgroundColor: tennisColors.heroBorder,
+      backgroundColor: tennisColors.border,
       marginVertical: 8,
     },
     ratingValueRow: {
@@ -264,14 +270,14 @@ const styles = createLiveSheet(() =>
     statValue: {
       fontFamily: tennisFontFamily.headingExtra,
       fontSize: 16,
-      color: tennisColors.white,
+      color: tennisColors.primaryDark,
       letterSpacing: -0.3,
       textAlign: "center",
     },
     statLabel: {
       fontFamily: tennisFontFamily.body,
       fontSize: 10,
-      color: "rgba(255,255,255,0.55)",
+      color: tennisColors.mutedForeground,
       marginTop: 2,
       textAlign: "center",
     },

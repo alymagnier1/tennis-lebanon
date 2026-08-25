@@ -66,6 +66,7 @@ import {
   defaultActiveMatchGroup,
   groupActiveMatches,
   matchListAction,
+  matchListActionOpensInvite,
   matchListOpensResultSheet,
   matchListStartsAt,
   matchTabBadgeCounts,
@@ -85,7 +86,11 @@ import { supabase } from "../../src/lib/supabase";
 import { trackRematch } from "../../src/lib/analytics";
 import { beginRematch } from "../../src/lib/rematch-draft";
 import { resolveRematchTarget } from "../../src/lib/start-rematch";
-import { CREATE_MATCH_ROUTE, matchHubRoute } from "../../src/lib/routes";
+import {
+  CREATE_MATCH_ROUTE,
+  matchHubRoute,
+  matchInviteRoute,
+} from "../../src/lib/routes";
 
 import { startNewMatchCreate } from "../../src/lib/create-match-guard";
 import { MatchResultSheet } from "../../src/components/MatchResultSheet";
@@ -328,6 +333,10 @@ export default function MatchesScreen() {
       isCreator: match.is_creator,
       viewerAttendance: match.viewer_attendance,
     });
+    const opensInvite = matchListActionOpensInvite({
+      status: match.status,
+      isCreator: match.is_creator,
+    });
 
     // Only your own, and only while calling it off is still your call. Three
     // matches is the cap, so the thing that frees a slot should not be four
@@ -384,7 +393,9 @@ export default function MatchesScreen() {
           onActionPress={
             matchListOpensResultSheet(match)
               ? () => setResultMatchId(match.match_id)
-              : undefined
+              : opensInvite
+                ? () => router.push(matchInviteRoute(match.match_id))
+                : undefined
           }
         />
 

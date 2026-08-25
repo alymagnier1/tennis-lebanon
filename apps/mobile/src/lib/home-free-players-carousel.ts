@@ -1,3 +1,5 @@
+import { compactJoinedLabel } from "./match-clubs";
+
 /** Wide enough to read, still peeks the next card on ~390px with 28px screen gutters. */
 export const HOME_FREE_PLAYER_CARD_WIDTH = 300;
 export const HOME_FREE_PLAYER_CARD_GAP = 12;
@@ -16,3 +18,38 @@ export function homeFreePlayerSnapOffsets(playerCount: number): number[] {
   }
   return offsets;
 }
+
+/**
+ * Zone row + reserved one-line slot under it.
+ *
+ * Bio takes the slot when the player wrote one; clubs then sit next to the
+ * area as a compact "Hoops +2" chip, same as before. With no bio, the slot
+ * lists every preferred club so the card stays the same height.
+ */
+export function homeFreePlayerDetailLine(input: {
+  about: string;
+  clubNames: string[];
+}): {
+  text: string;
+  kind: "about" | "clubs" | "empty";
+  metaClubLabel: string | undefined;
+} {
+  const about = input.about.replace(/\s+/g, " ").trim();
+  const names = input.clubNames.map((name) => name.trim()).filter(Boolean);
+  if (about) {
+    return {
+      text: about,
+      kind: "about",
+      metaClubLabel: compactJoinedLabel(names),
+    };
+  }
+  if (names.length > 0) {
+    return {
+      text: names.join(" · "),
+      kind: "clubs",
+      metaClubLabel: undefined,
+    };
+  }
+  return { text: "", kind: "empty", metaClubLabel: undefined };
+}
+

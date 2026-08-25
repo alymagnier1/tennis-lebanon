@@ -28,6 +28,8 @@ export const tennisColorsLight = {
   mutedForeground: "#627068",
   border: "#E9EBE8",
   accent: "#C4521A",
+  /** Club photo stand-in (clay court) until real images exist. */
+  photoPlaceholder: "#E09A5C",
   violet: "#7C3AED",
   onViolet: "#FFFFFF",
   danger: "#B91C1C",
@@ -53,6 +55,8 @@ export const tennisColorsDark = {
   mutedForeground: "#A8AAA4",
   border: "#2E322C",
   accent: "#E07A3D",
+  /** Warm olive charcoal — same role as light clay, without a glowing orange slab. */
+  photoPlaceholder: "#2C2E26",
   violet: "#8B6DFF",
   onViolet: "#FFFFFF",
   danger: "#F87171",

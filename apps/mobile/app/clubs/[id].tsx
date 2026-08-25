@@ -54,8 +54,6 @@ import {
 } from "../../src/theme/tennis-tokens";
 import { tennisTextStyles } from "../../src/theme/tennis-text-styles";
 
-const PHOTO_PLACEHOLDER = "#E09A5C";
-
 /**
  * Club detail: image + essentials, then one booking path when opened from a match.
  *
@@ -455,7 +453,7 @@ const styles = createLiveSheet(() =>
     hero: {
       height: 160,
       borderRadius: tennisRadii.lg,
-      backgroundColor: PHOTO_PLACEHOLDER,
+      backgroundColor: tennisColors.photoPlaceholder,
       alignItems: "center",
       justifyContent: "center",
       overflow: "hidden",

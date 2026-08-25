@@ -383,9 +383,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
   );
 
   const actionHandler = onActionPress ?? onPress;
-  const hasFooterMeta = Boolean(
-    dateTimeLabel || locationChip || (!showHostOnly && areaChip),
-  );
+  const hasFooterMeta = Boolean(dateTimeLabel || locationChip);
   const actionBar =
     actionLabel || hasFooterMeta || onDismiss ? (
       <View style={[styles.actionFooter, { flexDirection: rowDirection }]}>
@@ -410,18 +408,6 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
                 <FooterMetaItem
                   icon="court"
                   label={locationChip}
-                  writingDirection={writingDirection}
-                  rowDirection={rowDirection}
-                />
-              </View>
-            ) : null}
-            {!showHostOnly && areaChip ? (
-              <View
-                style={[styles.footerMetaRow, { flexDirection: rowDirection }]}
-              >
-                <FooterMetaItem
-                  icon="place"
-                  label={areaChip}
                   writingDirection={writingDirection}
                   rowDirection={rowDirection}
                 />

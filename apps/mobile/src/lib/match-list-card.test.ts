@@ -7,6 +7,7 @@ import {
   formatTabBadgeCount,
   groupActiveMatches,
   matchListAction,
+  matchListActionOpensInvite,
   matchListOpensResultSheet,
   matchListStartsAt,
   matchTabBadgeCounts,
@@ -227,6 +228,17 @@ describe("matchListAction", () => {
       labelKey: "matches.list.action.waitingPlayers",
       tone: "info",
     });
+  });
+
+  it("opens the invite screen for a host filling an open or draft match", () => {
+    expect(
+      matchListActionOpensInvite({ status: "open", isCreator: true }),
+    ).toBe(true);
+    expect(matchListActionOpensInvite({ status: "draft" })).toBe(true);
+    expect(
+      matchListActionOpensInvite({ status: "open", isCreator: false }),
+    ).toBe(false);
+    expect(matchListActionOpensInvite({ status: "confirmed" })).toBe(false);
   });
 
   it("leaves unknown statuses to the lifecycle chip", () => {

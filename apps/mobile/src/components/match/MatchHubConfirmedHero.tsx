@@ -14,8 +14,6 @@ import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { hubSectionStyles } from "./hub-section-styles";
 
-const PHOTO_PLACEHOLDER = "#E09A5C";
-
 type MatchHubConfirmedHeroProps = {
   booking: MatchHubBooking;
   matchId: string;
@@ -171,13 +169,13 @@ const styles = createLiveSheet(() =>
       flex: 1,
       minWidth: 0,
       overflow: "hidden",
-      backgroundColor: PHOTO_PLACEHOLDER,
+      backgroundColor: tennisColors.photoPlaceholder,
     },
     photoSkew: {
       flex: 1,
       marginLeft: -16,
       paddingLeft: 16,
-      backgroundColor: PHOTO_PLACEHOLDER,
+      backgroundColor: tennisColors.photoPlaceholder,
       transform: [{ skewX: "10deg" }],
     },
     photoInner: {

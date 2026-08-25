@@ -604,8 +604,6 @@ export function MatchHubPreferredClubs({
   );
 }
 
-const PHOTO_PLACEHOLDER = "#E09A5C";
-
 const styles = createLiveSheet(() =>
   StyleSheet.create({
     list: {
@@ -709,13 +707,13 @@ const styles = createLiveSheet(() =>
       flex: 1,
       minWidth: 0,
       overflow: "hidden",
-      backgroundColor: PHOTO_PLACEHOLDER,
+      backgroundColor: tennisColors.photoPlaceholder,
     },
     photoSkew: {
       flex: 1,
       marginLeft: -16,
       paddingLeft: 16,
-      backgroundColor: PHOTO_PLACEHOLDER,
+      backgroundColor: tennisColors.photoPlaceholder,
       transform: [{ skewX: "10deg" }],
     },
     photoInner: {

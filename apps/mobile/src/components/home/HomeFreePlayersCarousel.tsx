@@ -23,9 +23,10 @@ import {
   HOME_FREE_PLAYER_CARD_GAP,
   HOME_FREE_PLAYER_CARD_WIDTH,
   HOME_FREE_PLAYER_SNAP_INTERVAL,
+  homeFreePlayerDetailLine,
   homeFreePlayerSnapOffsets,
 } from "../../lib/home-free-players-carousel";
-import { compactJoinedLabel, clubNamesFromList } from "../../lib/match-clubs";
+import { clubNamesFromList } from "../../lib/match-clubs";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { zoneLabelFromList } from "../../lib/zones";
 import { supabase } from "../../lib/supabase";
@@ -56,9 +57,11 @@ type FreeBlock = {
  * The people behind the busiest block.
  *
  * Cards match the nearby-player reference: a wide row with avatar beside the
- * name, area and preferred club as meta, and bio as a one-line hint. There is
- * no in-card Create — the whole card opens the profile so Home stays a browse
- * surface. Discover still gets the time window through "View all".
+ * name, area as meta, and a reserved one-line slot for bio. Clubs sit next to
+ * the area when there is a bio; otherwise the slot lists every preferred club
+ * so cards stay the same height. There is no in-card Create — the whole card
+ * opens the profile so Home stays a browse surface. Discover still gets the
+ * time window through "View all".
  */
 export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
   const { t, i18n } = useTranslation();
@@ -118,10 +121,10 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
       >
         {players.map((player) => {
           const areaLabel = firstZoneLabel(player.zones, locale);
-          const clubLabel = compactJoinedLabel(
-            clubNamesFromList(player.favorite_clubs),
-          );
-          const about = player.bio?.replace(/\s+/g, " ").trim() ?? "";
+          const detail = homeFreePlayerDetailLine({
+            about: player.bio ?? "",
+            clubNames: clubNamesFromList(player.favorite_clubs),
+          });
 
           return (
             <Pressable
@@ -177,7 +180,7 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
                     </AppText>
                   </View>
                 ) : null}
-                {clubLabel ? (
+                {detail.metaClubLabel ? (
                   <View
                     style={[styles.metaItem, { flexDirection: rowDirection }]}
                   >
@@ -190,20 +193,34 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
                       style={[styles.metaText, { writingDirection }]}
                       maxLines={1}
                     >
-                      {clubLabel}
+                      {detail.metaClubLabel}
                     </AppText>
                   </View>
                 ) : null}
               </View>
 
-              {about ? (
-                <AppText
-                  style={[styles.about, { writingDirection }]}
-                  maxLines={1}
-                >
-                  {about}
-                </AppText>
-              ) : null}
+              <View
+                style={[
+                  styles.detailSlot,
+                  { flexDirection: rowDirection },
+                ]}
+              >
+                {detail.kind === "clubs" ? (
+                  <Icon
+                    name="court"
+                    size={13}
+                    color={tennisColors.mutedForeground}
+                  />
+                ) : null}
+                {detail.text ? (
+                  <AppText
+                    style={[styles.detailText, { writingDirection }]}
+                    maxLines={1}
+                  >
+                    {detail.text}
+                  </AppText>
+                ) : null}
+              </View>
             </Pressable>
           );
         })}
@@ -289,6 +306,7 @@ const styles = createLiveSheet(() =>
       alignItems: "center",
       gap: 10,
       flexWrap: "nowrap",
+      minHeight: 16,
     },
     metaItem: {
       alignItems: "center",
@@ -296,6 +314,7 @@ const styles = createLiveSheet(() =>
       minHeight: 16,
       maxWidth: "50%",
       flexShrink: 1,
+      minWidth: 0,
     },
     metaText: {
       fontFamily: tennisFontFamily.body,
@@ -304,8 +323,15 @@ const styles = createLiveSheet(() =>
       color: tennisColors.mutedForeground,
       flexShrink: 1,
     },
-    about: {
+    detailSlot: {
       width: "100%",
+      minHeight: 16,
+      alignItems: "center",
+      gap: 4,
+    },
+    detailText: {
+      flex: 1,
+      minWidth: 0,
       overflow: "hidden",
       fontFamily: tennisFontFamily.body,
       fontSize: 12,

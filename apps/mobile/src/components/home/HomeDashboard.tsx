@@ -39,7 +39,11 @@ import {
 } from "../../lib/match-card-headline";
 import { matchCardAreaLabel, matchCardClubLabel } from "../../lib/match-clubs";
 import { opponentAvatarColor } from "../../lib/match-card-status";
-import { matchListAction, matchListStartsAt } from "../../lib/match-list-card";
+import {
+  matchListAction,
+  matchListActionOpensInvite,
+  matchListStartsAt,
+} from "../../lib/match-list-card";
 import {
   deriveHomeNextActions,
   sortUpcomingMatches,
@@ -52,6 +56,7 @@ import {
   CREATE_MATCH_ROUTE,
   MATCHES_ROUTE,
   matchHubRoute,
+  matchInviteRoute,
 } from "../../lib/routes";
 import { completedMatchNeedsScore } from "../../lib/match-list-card";
 import { useLayoutDirection } from "../../lib/layout-direction";
@@ -493,6 +498,15 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
                           : undefined
                       }
                       onPress={() => router.push(matchHubRoute(match.match_id))}
+                      onActionPress={
+                        matchListActionOpensInvite({
+                          status: match.status,
+                          isCreator: match.is_creator,
+                        })
+                          ? () =>
+                              router.push(matchInviteRoute(match.match_id))
+                          : undefined
+                      }
                     />
                   );
                 })}
