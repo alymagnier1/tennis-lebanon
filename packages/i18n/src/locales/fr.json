@@ -1172,7 +1172,12 @@
       "autoSendOnPublish": "Ils recevront une invitation dans l'app à la publication.",
       "rateLimited": "Vous avez envoyé beaucoup d’invitations aujourd’hui. Réessayez demain.",
       "notSentTitle": "Match créé, invitation non envoyée",
-      "askToPlay": "Proposer un match"
+      "askToPlay": "Proposer un match",
+      "filteredToTime": "Joueurs disponibles {{time}}",
+      "showAllTimes": "Afficher les joueurs hors de ce créneau",
+      "onlyMatchTime": "Uniquement ceux disponibles alors",
+      "noPlayersAtTime": "Personne ne s’est déclaré disponible {{time}}. Élargissez ci-dessous, ou changez l’heure du match.",
+      "noPlayersHere": "Aucun joueur compatible pour ce match. Essayez d’élargir ci-dessous."
     },
     "policy": {
       "leaveBeforeBooking": "Vous pouvez quitter librement tant qu'aucun court n'est réservé. Les changements tardifs répétés peuvent affecter votre fiabilité.",

@@ -78,7 +78,12 @@ describe("discovery domain rules", () => {
     ).toEqual({
       format: "singles",
       intent: undefined,
-      requireAvailabilityOverlap: true,
+      // False on purpose: this gate is viewer-vs-candidate, and the match's own
+      // window replaces it rather than stacking with it.
+      requireAvailabilityOverlap: false,
+      zoneIds: undefined,
+      freeFrom: undefined,
+      freeTo: undefined,
       levelWindow: DEFAULT_LEVEL_WINDOW,
       horizonDays: 14,
       limit: 20,
@@ -90,5 +95,35 @@ describe("discovery domain rules", () => {
         intent: "social",
       }).intent,
     ).toBe("social");
+  });
+
+  it("carries the match's own window, zones and level reach", () => {
+    expect(
+      discoveryFiltersForMatchInvite({
+        format: "doubles",
+        intent: "social",
+        zoneIds: ["11111111-1111-1111-1111-111111111111"],
+        freeFrom: "2026-03-17T16:00:00.000Z",
+        freeTo: "2026-03-17T18:00:00.000Z",
+        levelWindow: 3,
+      }),
+    ).toMatchObject({
+      zoneIds: ["11111111-1111-1111-1111-111111111111"],
+      freeFrom: "2026-03-17T16:00:00.000Z",
+      freeTo: "2026-03-17T18:00:00.000Z",
+      levelWindow: 3,
+    });
+  });
+
+  it("drops an empty zone list rather than passing it", () => {
+    // The RPC reads an empty array the same as null and falls back to the
+    // viewer's own zones, which is the bug this screen is fixing.
+    expect(
+      discoveryFiltersForMatchInvite({
+        format: "singles",
+        intent: "either",
+        zoneIds: [],
+      }).zoneIds,
+    ).toBeUndefined();
   });
 });

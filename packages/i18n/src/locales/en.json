@@ -1290,7 +1290,12 @@
       "autoSendOnPublish": "They will receive an in-app invite when you publish.",
       "rateLimited": "You have sent a lot of invites today. Try again tomorrow.",
       "notSentTitle": "Match created, invite not sent",
-      "askToPlay": "Ask to play"
+      "askToPlay": "Ask to play",
+      "filteredToTime": "Showing players free {{time}}",
+      "showAllTimes": "Show players outside this time",
+      "onlyMatchTime": "Only players free then",
+      "noPlayersAtTime": "No one has said they are free {{time}}. Widen below, or change the match time.",
+      "noPlayersHere": "No compatible players for this match yet. Try widening below."
     },
     "policy": {
       "leaveBeforeBooking": "You can leave freely while no court is booked. Repeated late changes may affect your reliability.",

@@ -149,16 +149,39 @@ export function resolveDiscoverFiltersFromProfile(input: {
   };
 }
 
+/**
+ * Candidates for one specific match.
+ *
+ * Every scoring term in `discover_compatible_players` is measured against the
+ * viewer, which is the wrong subject here: this screen fills a match with a
+ * time, an area and a declared level range of its own. Passing them turns
+ * "who suits me" into "who can play this".
+ *
+ * `requireAvailabilityOverlap` is deliberately false. It gates on viewer-vs-
+ * candidate overlap, which `freeFrom`/`freeTo` replaces rather than
+ * supplements -- they are independent branches in the SQL, and leaving both on
+ * would demand a player be free at the match's hour *and* share a slot with
+ * the host at some unrelated time.
+ */
 export function discoveryFiltersForMatchInvite(input: {
   format: string;
   intent: string;
+  zoneIds?: string[];
+  freeFrom?: string;
+  freeTo?: string;
+  levelWindow?: number;
 }): DiscoveryFiltersInput {
   return {
     format: input.format as "singles" | "doubles",
     intent:
       input.intent === "either" ? undefined : (input.intent as PlayIntent),
-    requireAvailabilityOverlap: true,
-    levelWindow: DEFAULT_LEVEL_WINDOW,
+    requireAvailabilityOverlap: false,
+    // Empty means "no zone filter"; passing it would fall back to the viewer's
+    // own zones inside the RPC, which is the bug this exists to avoid.
+    zoneIds: input.zoneIds?.length ? input.zoneIds : undefined,
+    freeFrom: input.freeFrom,
+    freeTo: input.freeTo,
+    levelWindow: input.levelWindow ?? DEFAULT_LEVEL_WINDOW,
     horizonDays: DEFAULT_DISCOVERY_HORIZON_DAYS,
     limit: 20,
   };

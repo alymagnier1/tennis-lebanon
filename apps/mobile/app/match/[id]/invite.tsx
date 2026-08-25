@@ -11,6 +11,7 @@ import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import {
   createMatchInvite,
   discoverCompatiblePlayers,
@@ -21,17 +22,23 @@ import {
 import {
   discoveryFiltersForMatchInvite,
   viewerMayInvite,
-  widenLevelWindow,
 } from "@tennis-lebanon/domain";
-import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
-import { PlayerCard, PlayerInviteAction } from "../../../src/components/AppUi";
 import { AppText } from "../../../src/components/AppText";
+import { DiscoverPlayerCard } from "../../../src/components/discover/DiscoverPlayerCard";
+import { Icon } from "../../../src/components/Icon";
 import {
-  PrimaryButton,
-  ScreenError,
-  SecondaryButton,
-  formStyles,
-} from "../../../src/components/FormUi";
+  FigmaPrimaryButton,
+  FigmaSecondaryButton,
+  FigmaSubpageHero,
+} from "../../../src/components/onboarding-ui";
+import { clubNamesFromList } from "../../../src/lib/match-clubs";
+import { formatMatchesPlayedLabel } from "../../../src/lib/matches-played-label";
+import { publicPlayerLevelChip } from "../../../src/lib/player-level-label";
+import { discoverPlayerAvailabilityTags } from "../../../src/lib/discover-availability-tag";
+import {
+  goBackOrReplace,
+  MATCHES_TAB_ROUTE,
+} from "../../../src/lib/navigation";
 import { matchHubRoute } from "../../../src/lib/routes";
 import {
   buildMatchInviteUrl,
@@ -40,9 +47,14 @@ import {
 } from "../../../src/lib/invite-link";
 import { useToast } from "../../../src/providers/ToastProvider";
 import { useLayoutDirection } from "../../../src/lib/layout-direction";
-import { useResponsiveLayout } from "../../../src/lib/responsive";
 import { supabase } from "../../../src/lib/supabase";
+import { matchTimeWindow } from "../../../src/lib/match-invite-filters";
+import { zoneIdsFromPlayerZones } from "../../../src/lib/prefill-create-match-for-player";
+import { formatCompactUtcInBeirut } from "../../../src/lib/beirut-time";
 import { zoneLabelFromList } from "../../../src/lib/zones";
+import { tennisFontFamily } from "../../../src/hooks/useTennisFonts";
+import { createLiveSheet } from "../../../src/theme/create-live-sheet";
+import { tennisColors, tennisRadii } from "../../../src/theme/tennis-tokens";
 
 type HubParticipant = {
   user_id: string;
@@ -81,12 +93,13 @@ export default function MatchInvitePlayersScreen() {
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
-  const { horizontalPadding, titleFontSize } = useResponsiveLayout();
-  const { writingDirection } = useLayoutDirection();
+  const { writingDirection, isRtl, rowDirection } = useLayoutDirection();
   const [invitedIds, setInvitedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [requireOverlap, setRequireOverlap] = useState(true);
-  const [levelWindow, setLevelWindow] = useState(1);
+  // Derived from here down; nothing syncs async data into state through an
+  // effect, which the compiler's cascading render rule has already forced out
+  // of this codebase twice.
+  const [showAllTimes, setShowAllTimes] = useState(false);
   const autoInviteStarted = useRef(false);
 
   const hubQuery = useQuery({
@@ -100,17 +113,19 @@ export default function MatchInvitePlayersScreen() {
     (hub?.participants as HubParticipant[] | undefined) ?? [];
   const matchFull = Boolean(hub && hub.participant_count >= hub.capacity);
 
+  const timeWindow = useMemo(() => (hub ? matchTimeWindow(hub) : null), [hub]);
+  const activeWindow = showAllTimes ? null : timeWindow;
+
   const playerFilters = useMemo(() => {
     if (!hub) return null;
-    return {
-      ...discoveryFiltersForMatchInvite({
-        format: hub.format,
-        intent: hub.intent,
-      }),
-      requireAvailabilityOverlap: requireOverlap,
-      levelWindow,
-    };
-  }, [hub, levelWindow, requireOverlap]);
+    return discoveryFiltersForMatchInvite({
+      format: hub.format,
+      intent: hub.intent,
+      zoneIds: zoneIdsFromPlayerZones(hub.zones),
+      freeFrom: activeWindow?.freeFrom,
+      freeTo: activeWindow?.freeTo,
+    });
+  }, [activeWindow, hub]);
 
   const playersQuery = useQuery({
     queryKey: ["match-invite-players", id, playerFilters],
@@ -182,6 +197,8 @@ export default function MatchInvitePlayersScreen() {
   });
 
   const isDraft = hub?.status === "draft";
+  const handleBack = () =>
+    goBackOrReplace(id ? matchHubRoute(id) : MATCHES_TAB_ROUTE);
 
   function playerInviteState(
     player: CompatiblePlayerCard,
@@ -197,25 +214,47 @@ export default function MatchInvitePlayersScreen() {
 
   function renderPlayerRow({ item: player }: { item: CompatiblePlayerCard }) {
     const state = playerInviteState(player);
+    const invited = state === "invited";
+    const locale = i18n.resolvedLanguage ?? i18n.language;
 
     return (
-      <PlayerCard
+      <DiscoverPlayerCard
+        player={player}
         name={player.display_name}
-        avatarPath={player.avatar_path}
-        levelLabel={t(`skillBands.${player.skill_band}`)}
-        locationLabel={zoneLabelFromList(
-          player.zones,
-          i18n.resolvedLanguage ?? i18n.language,
+        locationLabel={zoneLabelFromList(player.zones, locale)}
+        levelBadgeLabel={publicPlayerLevelChip(player, t)}
+        matchesPlayedLabel={formatMatchesPlayedLabel(
+          player.completed_match_count,
+          t,
         )}
-        trailing={
-          <PlayerInviteAction
-            label={t("matches.invite.invitePlayer")}
-            invitedLabel={t("matches.invite.invited")}
-            invited={state === "invited"}
-            disabled={inviteMutation.isPending}
-            onPress={() => inviteMutation.mutate(player.user_id)}
-          />
+        availabilityTags={discoverPlayerAvailabilityTags(player, false, t)}
+        clubsTag={
+          clubNamesFromList(player.favorite_clubs).slice(0, 2).join(" · ") ||
+          null
         }
+        profileAccessibilityLabel={t("discover.openPlayerProfile", {
+          name: player.display_name,
+        })}
+        primaryLabel={
+          invited
+            ? t("matches.invite.invited")
+            : t("matches.invite.invitePlayer")
+        }
+        primaryLoading={
+          inviteMutation.isPending &&
+          inviteMutation.variables === player.user_id
+        }
+        primaryDisabled={invited || inviteMutation.isPending}
+        onProfilePress={() =>
+          router.push({
+            pathname: "/player/[id]",
+            params: { id: player.user_id },
+          })
+        }
+        onPrimaryPress={() => {
+          if (invited) return;
+          inviteMutation.mutate(player.user_id);
+        }}
       />
     );
   }
@@ -225,38 +264,36 @@ export default function MatchInvitePlayersScreen() {
       return (
         <ActivityIndicator
           accessibilityLabel={t("common.loading")}
+          color={tennisColors.primary}
           style={styles.listLoader}
         />
       );
     }
 
     if (playersQuery.isError) {
-      return (
-        <AppText style={formStyles.errorText}>{t("discover.error")}</AppText>
-      );
+      return <AppText style={styles.errorText}>{t("discover.error")}</AppText>;
     }
 
     if ((playersQuery.data?.length ?? 0) === 0) {
+      // Name the filter that emptied it. The old copy sent the host to Discover
+      // to "widen filters" that were never there, and never said the match's
+      // own hour was what had excluded everybody.
       return (
         <View style={styles.emptyState}>
-          <AppText style={formStyles.description}>
-            {t("matches.invite.noPlayers")}
+          <AppText style={styles.emptyText}>
+            {activeWindow
+              ? t("matches.invite.noPlayersAtTime", {
+                  time: formatCompactUtcInBeirut(activeWindow.freeFrom),
+                })
+              : t("matches.invite.noPlayersHere")}
           </AppText>
-          <SecondaryButton
-            label={t("discover.widenLevel")}
-            onPress={() => setLevelWindow(widenLevelWindow(levelWindow))}
-          />
-          <SecondaryButton
-            label={t("discover.toggleOverlap")}
-            onPress={() => setRequireOverlap(false)}
-          />
         </View>
       );
     }
 
     if (searchQuery.trim()) {
       return (
-        <AppText style={formStyles.hintText}>
+        <AppText style={styles.emptyText}>
           {t("matches.invite.searchEmpty")}
         </AppText>
       );
@@ -265,39 +302,96 @@ export default function MatchInvitePlayersScreen() {
     return null;
   }
 
-  const screenPadding = Math.max(horizontalPadding, insets.left, insets.right);
+  const searchField = (
+    <View style={styles.searchWrap}>
+      <View
+        style={[
+          styles.searchIcon,
+          isRtl ? { right: 14, left: undefined } : null,
+        ]}
+      >
+        <Icon name="discover" size={16} color={tennisColors.mutedForeground} />
+      </View>
+      <TextInput
+        accessibilityLabel={t("matches.invite.searchPlaceholder")}
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        placeholder={t("matches.invite.searchPlaceholder")}
+        placeholderTextColor={tennisColors.mutedForeground}
+        style={[
+          styles.searchInput,
+          { writingDirection, textAlign: isRtl ? "right" : "left" },
+          isRtl ? { paddingLeft: 12, paddingRight: 40 } : null,
+        ]}
+        autoCapitalize="none"
+        autoCorrect={false}
+        clearButtonMode="while-editing"
+      />
+    </View>
+  );
+
+  // Always rendered, not only when the list is empty. The controls used to
+  // live inside the empty state, so a host looking at twenty mediocre
+  // candidates had none at all and only a host with zero results got any --
+  // backwards, and the reason a narrowing filter could not be trusted on by
+  // default.
+  const filterBar = (
+    <View style={styles.filterBar}>
+      {activeWindow ? (
+        <AppText style={[styles.filterSummary, { writingDirection }]}>
+          {t("matches.invite.filteredToTime", {
+            time: formatCompactUtcInBeirut(activeWindow.freeFrom),
+          })}
+        </AppText>
+      ) : null}
+      <View style={[styles.filterActions, { flexDirection: rowDirection }]}>
+        {timeWindow ? (
+          <FigmaSecondaryButton
+            label={
+              showAllTimes
+                ? t("matches.invite.onlyMatchTime")
+                : t("matches.invite.showAllTimes")
+            }
+            onPress={() => setShowAllTimes((current) => !current)}
+          />
+        ) : null}
+      </View>
+    </View>
+  );
 
   if (hubQuery.isError) {
     return (
-      <View
-        style={[
-          styles.screen,
-          { paddingTop: insets.top, paddingHorizontal: screenPadding },
-        ]}
-      >
-        <SecondaryButton
-          label={t("common.back")}
-          onPress={() => router.back()}
+      <View style={styles.screen}>
+        <FigmaSubpageHero
+          title={t("matches.invite.playersTitle")}
+          onBack={handleBack}
         />
-        <ScreenError
-          message={t("matches.hub.loadError")}
-          retryLabel={t("common.retry")}
-          onRetry={() => void hubQuery.refetch()}
-        />
+        <View style={styles.paddedBody}>
+          <AppText style={styles.errorText}>
+            {t("matches.hub.loadError")}
+          </AppText>
+          <FigmaSecondaryButton
+            label={t("common.retry")}
+            onPress={() => void hubQuery.refetch()}
+          />
+        </View>
       </View>
     );
   }
 
   if (hubQuery.isLoading || !hub) {
     return (
-      <View
-        style={[
-          styles.screen,
-          styles.centered,
-          { paddingTop: insets.top, paddingHorizontal: screenPadding },
-        ]}
-      >
-        <ActivityIndicator accessibilityLabel={t("common.loading")} />
+      <View style={styles.screen}>
+        <FigmaSubpageHero
+          title={t("matches.invite.playersTitle")}
+          onBack={handleBack}
+        />
+        <View style={styles.centered}>
+          <ActivityIndicator
+            accessibilityLabel={t("common.loading")}
+            color={tennisColors.primary}
+          />
+        </View>
       </View>
     );
   }
@@ -311,36 +405,19 @@ export default function MatchInvitePlayersScreen() {
   }
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
-      <View style={[styles.header, { paddingHorizontal: screenPadding }]}>
-        <AppText
-          accessibilityRole="header"
-          style={[styles.title, { fontSize: titleFontSize, writingDirection }]}
-          maxLines={2}
-        >
-          {t("matches.invite.playersTitle")}
-        </AppText>
-        <AppText style={[styles.description, { writingDirection }]}>
-          {t("matches.invite.playersDescription")}
-        </AppText>
-        <TextInput
-          accessibilityLabel={t("matches.invite.searchPlaceholder")}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder={t("matches.invite.searchPlaceholder")}
-          placeholderTextColor={colors.neutral[500]}
-          style={[styles.searchInput, { writingDirection }]}
-          autoCapitalize="none"
-          autoCorrect={false}
-          clearButtonMode="while-editing"
-        />
-      </View>
+    <View style={styles.screen}>
+      <FigmaSubpageHero
+        title={t("matches.invite.playersTitle")}
+        description={t("matches.invite.playersDescription")}
+        onBack={handleBack}
+      >
+        {searchField}
+        {filterBar}
+      </FigmaSubpageHero>
 
       {matchFull ? (
-        <View
-          style={[styles.matchFullBody, { paddingHorizontal: screenPadding }]}
-        >
-          <AppText style={formStyles.hintText}>
+        <View style={styles.paddedBody}>
+          <AppText style={styles.emptyText}>
             {t("matches.invite.matchFull")}
           </AppText>
         </View>
@@ -350,16 +427,14 @@ export default function MatchInvitePlayersScreen() {
           data={filteredPlayers}
           keyExtractor={(player) => player.user_id}
           renderItem={renderPlayerRow}
-          contentContainerStyle={[
-            styles.listContent,
-            { paddingHorizontal: screenPadding },
-          ]}
+          contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={styles.listSeparator} />}
           ListEmptyComponent={renderListEmpty}
           keyboardShouldPersistTaps="handled"
           refreshControl={
             <RefreshControl
               refreshing={playersQuery.isRefetching || hubQuery.isRefetching}
+              tintColor={tennisColors.primary}
               onRefresh={async () => {
                 await hubQuery.refetch();
                 await playersQuery.refetch();
@@ -370,20 +445,14 @@ export default function MatchInvitePlayersScreen() {
       )}
 
       <View
-        style={[
-          styles.footer,
-          {
-            paddingHorizontal: screenPadding,
-            paddingBottom: Math.max(insets.bottom, spacing.lg),
-          },
-        ]}
+        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}
       >
         <AppText style={[styles.footerHint, { writingDirection }]}>
           {isDraft
             ? t("matches.invite.matchDraftHint")
             : t("matches.invite.matchLiveHint")}
         </AppText>
-        <PrimaryButton
+        <FigmaPrimaryButton
           label={
             isDraft
               ? t("matches.invite.publishMatch")
@@ -391,75 +460,121 @@ export default function MatchInvitePlayersScreen() {
           }
           loading={finishMutation.isPending}
           onPress={() => finishMutation.mutate()}
+          style={styles.footerButton}
         />
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.neutral[0],
-  },
-  centered: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  header: {
-    gap: spacing.sm,
-    paddingBottom: spacing.md,
-  },
-  title: {
-    color: colors.neutral[900],
-    fontWeight: typography.weight.bold,
-  },
-  description: {
-    color: colors.neutral[700],
-    fontSize: typography.size.md,
-    lineHeight: 24,
-  },
-  searchInput: {
-    minHeight: 44,
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-    borderRadius: radii.md,
-    paddingHorizontal: spacing.md,
-    color: colors.neutral[900],
-    fontSize: typography.size.md,
-    backgroundColor: colors.neutral[0],
-  },
-  list: {
-    flex: 1,
-  },
-  matchFullBody: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  listContent: {
-    paddingBottom: spacing.md,
-    flexGrow: 1,
-  },
-  listSeparator: {
-    height: spacing.md,
-  },
-  listLoader: {
-    marginTop: spacing.xl,
-  },
-  emptyState: {
-    gap: spacing.sm,
-    paddingTop: spacing.md,
-  },
-  footer: {
-    gap: spacing.sm,
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.neutral[100],
-    backgroundColor: colors.neutral[0],
-  },
-  footerHint: {
-    color: colors.neutral[500],
-    fontSize: typography.size.sm,
-    textAlign: "center",
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: tennisColors.background,
+    },
+    centered: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    paddedBody: {
+      flex: 1,
+      paddingHorizontal: 20,
+      paddingTop: 8,
+      gap: 12,
+    },
+    filterBar: {
+      gap: 8,
+      paddingBottom: 4,
+    },
+    filterSummary: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+    },
+    filterActions: {
+      gap: 8,
+      flexWrap: "wrap",
+    },
+    searchWrap: {
+      position: "relative",
+      marginTop: 16,
+    },
+    searchIcon: {
+      position: "absolute",
+      left: 14,
+      top: 0,
+      bottom: 0,
+      justifyContent: "center",
+      zIndex: 1,
+    },
+    searchInput: {
+      minHeight: 44,
+      paddingVertical: 12,
+      paddingLeft: 40,
+      paddingRight: 12,
+      backgroundColor: tennisColors.card,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderRadius: tennisRadii.md,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.primaryDark,
+    },
+    list: {
+      flex: 1,
+    },
+    listContent: {
+      paddingHorizontal: 20,
+      paddingBottom: 16,
+      flexGrow: 1,
+    },
+    listSeparator: {
+      height: 12,
+    },
+    listLoader: {
+      marginTop: 32,
+    },
+    emptyState: {
+      gap: 12,
+      paddingTop: 16,
+    },
+    emptyText: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+    },
+    errorText: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.danger,
+    },
+    footer: {
+      gap: 8,
+      paddingTop: 10,
+      paddingHorizontal: 20,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: tennisColors.border,
+      backgroundColor: tennisColors.background,
+    },
+    footerHint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+      textAlign: "center",
+    },
+    footerButton: {
+      alignSelf: "center",
+      minHeight: minTouchTargetPx,
+      minWidth: 168,
+      paddingVertical: 10,
+      paddingHorizontal: 28,
+      borderRadius: tennisRadii.md,
+    },
+  }),
+);

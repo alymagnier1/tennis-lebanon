@@ -56,6 +56,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   profileAccessibilityLabel,
   primaryLabel,
   primaryLoading = false,
+  primaryDisabled = false,
   onProfilePress,
   onPrimaryPress,
 }: {
@@ -70,6 +71,8 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   profileAccessibilityLabel: string;
   primaryLabel: string;
   primaryLoading?: boolean;
+  /** Invited / already in the match — keep the layout, drop the tap. */
+  primaryDisabled?: boolean;
   onProfilePress: () => void;
   onPrimaryPress: () => void;
 }) {
@@ -153,36 +156,54 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
             />
           ) : null}
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={primaryLabel}
-          disabled={primaryLoading}
-          onPress={onPrimaryPress}
-          hitSlop={{ top: 6, bottom: 6 }}
-          style={({ pressed }) => [
-            styles.actionPill,
-            isDark && styles.actionPillDark,
-            pressed && !primaryLoading && styles.actionPillPressed,
-            primaryLoading && styles.actionPillDisabled,
-          ]}
-        >
-          {primaryLoading ? (
-            <ActivityIndicator
-              color={isDark ? tennisColors.onViolet : tennisColors.limeText}
-            />
-          ) : (
+        {primaryDisabled && !primaryLoading ? (
+          <View
+            accessibilityRole="text"
+            style={[styles.actionPill, styles.actionPillDisabledStatic]}
+          >
             <AppText
               style={[
                 styles.actionPillText,
+                styles.actionPillTextDisabled,
                 { writingDirection },
-                isDark && styles.actionPillTextDark,
               ]}
               maxLines={1}
             >
               {primaryLabel}
             </AppText>
-          )}
-        </Pressable>
+          </View>
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={primaryLabel}
+            disabled={primaryLoading || primaryDisabled}
+            onPress={onPrimaryPress}
+            hitSlop={{ top: 6, bottom: 6 }}
+            style={({ pressed }) => [
+              styles.actionPill,
+              isDark && styles.actionPillDark,
+              pressed && !primaryLoading && styles.actionPillPressed,
+              primaryLoading && styles.actionPillDisabled,
+            ]}
+          >
+            {primaryLoading ? (
+              <ActivityIndicator
+                color={isDark ? tennisColors.onViolet : tennisColors.limeText}
+              />
+            ) : (
+              <AppText
+                style={[
+                  styles.actionPillText,
+                  { writingDirection },
+                  isDark && styles.actionPillTextDark,
+                ]}
+                maxLines={1}
+              >
+                {primaryLabel}
+              </AppText>
+            )}
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -291,6 +312,11 @@ const styles = createLiveSheet(() =>
     actionPillDisabled: {
       opacity: 0.7,
     },
+    actionPillDisabledStatic: {
+      backgroundColor: tennisColors.card,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+    },
     actionPillText: {
       fontFamily: tennisFontFamily.headingSemi,
       fontSize: 13,
@@ -300,6 +326,9 @@ const styles = createLiveSheet(() =>
     },
     actionPillTextDark: {
       color: tennisColors.onViolet,
+    },
+    actionPillTextDisabled: {
+      color: tennisColors.mutedForeground,
     },
   }),
 );
