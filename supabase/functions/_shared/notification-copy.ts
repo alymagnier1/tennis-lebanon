@@ -43,6 +43,10 @@ export const NOTIFICATION_COPY: Record<
       title: "Your match expired",
       body: "Nobody locked a time in. Create a new one when you are ready to play.",
     },
+    match_cancelled: {
+      title: "Your match was cancelled",
+      body: "Open the match to see the reason.",
+    },
     booking_pending_club: {
       title: "The club replied about your court",
       body: "Open the match to see whether your court is confirmed.",
@@ -125,6 +129,10 @@ export const NOTIFICATION_COPY: Record<
       title: "انتهت مباراتك",
       body: "لم يُثبَّت أي موعد. أنشئ مباراة جديدة عندما تكون مستعدًا للعب.",
     },
+    match_cancelled: {
+      title: "أُلغيت مباراتك",
+      body: "افتح المباراة لمعرفة السبب.",
+    },
     booking_pending_club: {
       title: "ردّ النادي بشأن ملعبك",
       body: "افتح المباراة لمعرفة إن تم تأكيد الملعب.",
@@ -206,6 +214,10 @@ export const NOTIFICATION_COPY: Record<
     match_expired: {
       title: "Votre match a expiré",
       body: "Aucun créneau n'a été fixé. Créez-en un nouveau quand vous voulez jouer.",
+    },
+    match_cancelled: {
+      title: "Votre match a été annulé",
+      body: "Ouvrez le match pour voir la raison.",
     },
     booking_pending_club: {
       title: "Le club a répondu pour votre court",

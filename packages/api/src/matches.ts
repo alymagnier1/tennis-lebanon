@@ -98,6 +98,8 @@ export type MatchHubCard = {
   max_skill: string;
   requires_creator_approval: boolean;
   notes: string | null;
+  /** Host's reason, required once the match was full. Null unless cancelled. */
+  cancellation_reason: string | null;
   creator_id: string;
   creator_display_name: string;
   /** 'fixed' (host names the time) or 'flexible' (participants vote). */

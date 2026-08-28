@@ -58,6 +58,7 @@ import {
   updateCreateMatchDraft,
 } from "../../../src/lib/create-match-draft";
 import { notify } from "../../../src/lib/confirm-action";
+import { zonesWithoutPreferredClub } from "../../../src/lib/match-clubs";
 import { zoneNameFromJson } from "../../../src/lib/zones";
 import {
   favoriteClubIdsFromDirectory,
@@ -282,6 +283,20 @@ export default function CreateMatchScheduleScreen() {
         .filter((zone) => selectedZoneIds.includes(zone.value))
         .map((zone) => zone.label),
     [selectedZoneIds, zoneOptions],
+  );
+
+  // Zones cap at nothing while clubs cap at three, so an advertised area can
+  // end up with no club in it. Say so here rather than narrowing the areas on
+  // the card, which would rewrite the host's choice without telling them.
+  const zonesMissingClub = useMemo(
+    () =>
+      zonesWithoutPreferredClub({
+        zoneOptions,
+        selectedZoneIds,
+        clubs: clubsQuery.data ?? [],
+        selectedClubIds: effectiveClubIds,
+      }),
+    [clubsQuery.data, effectiveClubIds, selectedZoneIds, zoneOptions],
   );
 
   const whereSummaryReady =
@@ -621,6 +636,13 @@ export default function CreateMatchScheduleScreen() {
                       selectedClubIds={effectiveClubIds}
                       onToggle={toggleClub}
                     />
+                    {zonesMissingClub.length > 0 ? (
+                      <AppText style={createMatchStyles.hintAttention}>
+                        {t("matches.create.zonesWithoutClubWarning", {
+                          zones: zonesMissingClub.join(" · "),
+                        })}
+                      </AppText>
+                    ) : null}
                   </>
                 )}
               </CreateMatchSubsection>

@@ -2850,6 +2850,7 @@ export type Database = {
         preferred_clubs: Json | null;
         agreed_starts_at: string | null;
         agreed_ends_at: string | null;
+        cancellation_reason: string | null;
       };
       match_invite_inbox_row: {
         invitation_id: string | null;

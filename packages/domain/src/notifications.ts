@@ -10,6 +10,7 @@ export const NOTIFICATION_KINDS = [
   "match_invitation",
   "stale_match_reminder",
   "match_expired",
+  "match_cancelled",
   "booking_pending_club",
   "booking_stale_participant",
   "attendance_prompt",

@@ -781,6 +781,7 @@
       "zoneRequired": "Sélectionnez au moins une zone.",
       "preferredClubsRequiredHelp": "Choisissez jusqu'à 3 clubs où vous accepteriez de jouer. Les joueurs les voient avant de rejoindre. Aucun court n'est encore réservé.",
       "preferredClubsOptionalHelp": "Choisissez jusqu'à 3 clubs où vous accepteriez de jouer. Aucun court n'est encore réservé.",
+      "zonesWithoutClubWarning": "Aucun de vos clubs ne se trouve à {{zones}}. Les joueurs qui rejoignent pour cette zone devront se déplacer.",
       "preferredClubsPickZoneFirst": "Choisissez d'abord une zone pour voir ses clubs.",
       "preferredClubsEmpty": "Aucun club dans les zones sélectionnées pour le moment.",
       "clubRequired": "Choisissez au moins un club pour que les joueurs sachent où ils joueraient.",
@@ -997,6 +998,8 @@
       "addTime": "Ajouter un créneau",
       "addAnotherTime": "Ajouter",
       "draftBanner": "Ce match est encore un brouillon. Invitez des joueurs et publiez quand vous êtes prêt.",
+      "cancelledBanner": "Ce match a été annulé.",
+      "cancelledBannerWithReason": "Ce match a été annulé : {{reason}}",
       "continueSetup": "Continuer la configuration",
       "hostBadge": "Hôte",
       "participantRoster": "{{current}}/{{capacity}} joueurs",
@@ -1423,6 +1426,10 @@
       "match_expired": {
         "title": "Votre match a expiré",
         "body": "Aucun créneau n'a été fixé. Créez-en un nouveau quand vous voulez jouer."
+      },
+      "match_cancelled": {
+        "title": "Votre match a été annulé",
+        "body": "Ouvrez le match pour voir la raison."
       },
       "booking_pending_club": {
         "title": "Le club a répondu pour votre court",

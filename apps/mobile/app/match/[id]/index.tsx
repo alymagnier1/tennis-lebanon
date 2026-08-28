@@ -112,7 +112,11 @@ import {
 import { supabase } from "../../../src/lib/supabase";
 import { useMatchActivity } from "../../../src/hooks/useMatchActivity";
 import { useAuth } from "../../../src/providers/AuthProvider";
-import { tennisColors, tennisRadii } from "../../../src/theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisRadii,
+  type SemanticTone,
+} from "../../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../../src/hooks/useTennisFonts";
 
 /** Court-first matches hold a court before they fill, so `confirmed` is not the
@@ -494,16 +498,35 @@ export default function MatchHubScreen() {
     return messages.length > 0 ? messages.join("\n") : null;
   }, [booking, hasAgreedTime, hub, t]);
 
-  const primaryBannerBody = useMemo(() => {
+  const primaryBanner = useMemo<{
+    body: string;
+    tone: SemanticTone;
+  } | null>(() => {
     if (!hub) return null;
+    // First, and critical rather than actionable: the match is over, and the
+    // hub is reachable now only through the cancellation notification. Nothing
+    // else it could say comes before telling the player why they are here.
+    if (hub.status === "cancelled") {
+      return {
+        body: hub.cancellation_reason
+          ? t("matches.hub.cancelledBannerWithReason", {
+              reason: hub.cancellation_reason,
+            })
+          : t("matches.hub.cancelledBanner"),
+        tone: "critical",
+      };
+    }
     if (hub.status === "draft" && hub.viewer_is_creator) {
-      return t("matches.hub.draftBanner");
+      return { body: t("matches.hub.draftBanner"), tone: "actionable" };
     }
     // Vs-hero already shows open slots; skip the duplicate awaiting banner.
     if (hub.next_action === "awaiting_players" && !vsHeroStage) {
-      return hasAcceptedBooking
-        ? t("matches.hub.awaitingPlayersCourtSecured")
-        : t("matches.hub.awaitingPlayers");
+      return {
+        body: hasAcceptedBooking
+          ? t("matches.hub.awaitingPlayersCourtSecured")
+          : t("matches.hub.awaitingPlayers"),
+        tone: "actionable",
+      };
     }
     return null;
   }, [hasAcceptedBooking, hub, t, vsHeroStage]);
@@ -654,8 +677,8 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      {primaryBannerBody ? (
-        <StatusBanner body={primaryBannerBody} tone="actionable" />
+      {primaryBanner ? (
+        <StatusBanner body={primaryBanner.body} tone={primaryBanner.tone} />
       ) : null}
 
       {secondaryBannerBody ? (

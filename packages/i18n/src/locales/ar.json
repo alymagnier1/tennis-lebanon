@@ -781,6 +781,7 @@
       "zoneRequired": "اختر منطقة واحدة على الأقل.",
       "preferredClubsRequiredHelp": "اختر حتى ٣ نوادٍ يسعدك اللعب فيها. يراها اللاعبون قبل الانضمام. لم يُحجز أي ملعب بعد.",
       "preferredClubsOptionalHelp": "اختر حتى ٣ نوادٍ يسعدك اللعب فيها. لم يُحجز أي ملعب بعد.",
+      "zonesWithoutClubWarning": "لا يوجد أي من أنديتك في {{zones}}. من ينضم من تلك المنطقة سيضطر إلى التنقل.",
       "preferredClubsPickZoneFirst": "اختر منطقة أولًا لعرض نواديها.",
       "preferredClubsEmpty": "لا توجد نوادٍ في المناطق التي اخترتها بعد.",
       "clubRequired": "اختر ناديًا واحدًا على الأقل ليعرف اللاعبون أين سيلعبون.",
@@ -997,6 +998,8 @@
       "addTime": "إضافة وقت مقترح",
       "addAnotherTime": "إضافة وقت",
       "draftBanner": "المباراة ما زالت مسودة. ادعُ اللاعبين وانشر عندما تكون جاهزًا.",
+      "cancelledBanner": "أُلغيت هذه المباراة.",
+      "cancelledBannerWithReason": "أُلغيت هذه المباراة: {{reason}}",
       "continueSetup": "متابعة الإعداد",
       "hostBadge": "المضيف",
       "participantRoster": "{{current}}/{{capacity}} لاعبين",
@@ -1423,6 +1426,10 @@
       "match_expired": {
         "title": "انتهت مباراتك",
         "body": "لم يُثبَّت أي موعد. أنشئ مباراة جديدة عندما تكون مستعدًا للعب."
+      },
+      "match_cancelled": {
+        "title": "أُلغيت مباراتك",
+        "body": "افتح المباراة لمعرفة السبب."
       },
       "booking_pending_club": {
         "title": "ردّ النادي بشأن ملعبك",

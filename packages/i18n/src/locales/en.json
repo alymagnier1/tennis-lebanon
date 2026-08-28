@@ -583,6 +583,10 @@
         "title": "Your match expired",
         "body": "Nobody locked a time in. Create a new one when you are ready to play."
       },
+      "match_cancelled": {
+        "title": "Your match was cancelled",
+        "body": "Open the match to see the reason."
+      },
       "booking_pending_club": {
         "title": "The club replied about your court",
         "body": "Open the match to see whether your court is confirmed."
@@ -906,6 +910,7 @@
       "zoneRequired": "Select at least one area.",
       "preferredClubsRequiredHelp": "Choose up to 3 clubs you would be happy to play at. Players see these before they join. No court is booked yet.",
       "preferredClubsOptionalHelp": "Choose up to 3 clubs you would be happy to play at. No court is booked yet.",
+      "zonesWithoutClubWarning": "None of your clubs are in {{zones}}. Anyone joining for that area will have to travel.",
       "preferredClubsPickZoneFirst": "Choose an area first to see its clubs.",
       "preferredClubsEmpty": "No clubs in the areas you selected yet.",
       "clubRequired": "Choose at least one club so players know where they would play.",
@@ -1124,6 +1129,8 @@
       "addTime": "Add proposed time",
       "addAnotherTime": "Add time",
       "draftBanner": "This match is still a draft. Invite players and publish when you are ready.",
+      "cancelledBanner": "This match was cancelled.",
+      "cancelledBannerWithReason": "This match was cancelled: {{reason}}",
       "continueSetup": "Continue setup",
       "hostBadge": "Host",
       "participantRoster": "{{current}}/{{capacity}} players",

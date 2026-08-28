@@ -116,3 +116,43 @@ export function matchCardAreaLabel(
   if (options?.compact) return compactJoinedLabel(labels);
   return labels.join(" · ");
 }
+
+/**
+ * Zones the host advertised that none of their chosen clubs sit in.
+ *
+ * `zoneIds` has `min(1)` and no maximum while `preferredClubIds` caps at three,
+ * so a host can list three areas with every club in one of them — and a player
+ * joining on the strength of an area finds the venue is somewhere else. Warn at
+ * creation rather than narrowing the zone list on cards: narrowing would
+ * silently rewrite what the host chose, and would also change how matches
+ * published before this read.
+ *
+ * Empty when no club is chosen at all. That is the ordinary state of an
+ * `invite_only` match — clubs are only required for `public` ones — and
+ * flagging every zone there would be a warning the host cannot act on.
+ */
+export function zonesWithoutPreferredClub(input: {
+  zoneOptions: { value: string; label: string }[];
+  selectedZoneIds: string[];
+  clubs: { club_id: string; zone_id: string }[];
+  selectedClubIds: string[];
+}): string[] {
+  if (input.selectedClubIds.length === 0) return [];
+
+  const chosen = new Set(input.selectedClubIds);
+  const coveredZoneIds = new Set(
+    input.clubs
+      .filter((club) => chosen.has(club.club_id))
+      .map((club) => club.zone_id),
+  );
+
+  return input.selectedZoneIds
+    .filter((zoneId) => !coveredZoneIds.has(zoneId))
+    .map(
+      (zoneId) =>
+        input.zoneOptions.find((option) => option.value === zoneId)?.label ??
+        "",
+    )
+    .map((label) => label.trim())
+    .filter(Boolean);
+}

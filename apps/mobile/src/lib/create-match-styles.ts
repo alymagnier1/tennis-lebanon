@@ -2,7 +2,11 @@ import { StyleSheet } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { spacing } from "@tennis-lebanon/ui";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
-import { tennisColors, tennisTypography } from "../theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisSemantic,
+  tennisTypography,
+} from "../theme/tennis-tokens";
 
 export const createMatchStyles = createLiveSheet(() =>
   StyleSheet.create({
@@ -28,6 +32,13 @@ export const createMatchStyles = createLiveSheet(() =>
       fontSize: tennisTypography.fieldHint.fontSize,
       lineHeight: tennisTypography.fieldHint.lineHeight,
       color: tennisColors.mutedForeground,
+    },
+    /** A hint the host should act on, not just read past. */
+    hintAttention: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: tennisTypography.fieldHint.fontSize,
+      lineHeight: tennisTypography.fieldHint.lineHeight,
+      color: tennisSemantic.attention.text,
     },
     summaryValue: {
       fontFamily: tennisFontFamily.bodySemi,

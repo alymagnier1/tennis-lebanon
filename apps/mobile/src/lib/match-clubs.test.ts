@@ -5,6 +5,7 @@ import {
   matchCardAreaLabel,
   matchCardClubLabel,
   preferredClubLocationLabel,
+  zonesWithoutPreferredClub,
 } from "./match-clubs";
 
 describe("preferredClubLocationLabel", () => {
@@ -146,5 +147,65 @@ describe("matchCardAreaLabel", () => {
   it("is undefined when empty", () => {
     expect(matchCardAreaLabel([], "en")).toBeUndefined();
     expect(matchCardAreaLabel(null, "en")).toBeUndefined();
+  });
+});
+
+describe("zonesWithoutPreferredClub", () => {
+  const zoneOptions = [
+    { value: "z-hamra", label: "Hamra" },
+    { value: "z-achrafieh", label: "Achrafieh" },
+    { value: "z-jounieh", label: "Jounieh" },
+  ];
+
+  const clubs = [
+    { club_id: "c-1", zone_id: "z-hamra" },
+    { club_id: "c-2", zone_id: "z-hamra" },
+    { club_id: "c-3", zone_id: "z-achrafieh" },
+  ];
+
+  it("names the advertised zones no chosen club sits in", () => {
+    expect(
+      zonesWithoutPreferredClub({
+        zoneOptions,
+        selectedZoneIds: ["z-hamra", "z-achrafieh", "z-jounieh"],
+        clubs,
+        selectedClubIds: ["c-1"],
+      }),
+    ).toEqual(["Achrafieh", "Jounieh"]);
+  });
+
+  it("stays quiet when every zone has a chosen club", () => {
+    expect(
+      zonesWithoutPreferredClub({
+        zoneOptions,
+        selectedZoneIds: ["z-hamra", "z-achrafieh"],
+        clubs,
+        selectedClubIds: ["c-2", "c-3"],
+      }),
+    ).toEqual([]);
+  });
+
+  // Clubs are required for public matches only, so an invite-only host with no
+  // club has made no mistake — warning on every zone would be noise.
+  it("stays quiet when no club is chosen at all", () => {
+    expect(
+      zonesWithoutPreferredClub({
+        zoneOptions,
+        selectedZoneIds: ["z-hamra", "z-jounieh"],
+        clubs,
+        selectedClubIds: [],
+      }),
+    ).toEqual([]);
+  });
+
+  it("skips a zone it cannot label rather than emitting a blank", () => {
+    expect(
+      zonesWithoutPreferredClub({
+        zoneOptions,
+        selectedZoneIds: ["z-hamra", "z-unknown"],
+        clubs,
+        selectedClubIds: ["c-3"],
+      }),
+    ).toEqual(["Hamra"]);
   });
 });
