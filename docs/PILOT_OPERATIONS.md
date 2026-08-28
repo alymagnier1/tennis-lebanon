@@ -46,7 +46,7 @@ No club takes part in any of these. Cohort 1 has **no partner clubs**: players f
 | 3   | **Result and rating** (Flow D)         | Both players                      | Attendance prompt → result submit → confirm → completed history; provisional rating rules respected                                                                                               |
 | 4   | **Safety escalation**                  | Player A reports; platform admin  | Report in `/admin/reports`; dismiss or resolve with audit; no direct DB edits                                                                                                                     |
 
-Workflow 3 is the awkward one to reach by hand: a match only turns `in_progress` once its agreed hour has passed, the auto-confirm and grace windows are measured in days, and the rating itself is only visible in the database. Drive those from outside with `node scripts/rating-sandbox.mjs setup player-a player-b`, which refuses to run against anything but `127.0.0.1`.
+Workflow 3 is the awkward one to reach by hand: a match only turns `in_progress` once its agreed hour has passed, the auto-confirm and grace windows are measured in days, and the rating itself is only visible in the database. Drive those from outside with `node scripts/rating-sandbox.mjs setup`, which refuses to run against anything but `127.0.0.1`.
 
 What to record is not "it worked" but **where you hesitated**. Every pause over what to tap next, and every screen that left you unsure whether something had happened, is a Phase 0.4 fix — far cheaper to find now than with fifty strangers.
 

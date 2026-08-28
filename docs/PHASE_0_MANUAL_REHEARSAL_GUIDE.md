@@ -57,7 +57,7 @@ Can't reach by tapping alone. Match turns `in_progress` after agreed hour passes
 Drive from outside (refuses non-localhost):
 
 ```bash
-node scripts/rating-sandbox.mjs setup player-a player-b
+node scripts/rating-sandbox.mjs setup
 node scripts/rating-sandbox.mjs fastforward <matchId>
 node scripts/rating-sandbox.mjs state <matchId>
 ```
