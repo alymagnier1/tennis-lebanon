@@ -4,7 +4,7 @@
 **Source:** Manual Phase 0.3 walkthrough (founder notes from chat)  
 **Fix plan:** [`COHORT_A_REHEARSAL_FIXES.md`](COHORT_A_REHEARSAL_FIXES.md)
 
-Seventeen findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, and 12-15 from a third the same day, each after the previous round of fixes landed.
+Eighteen findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, and 12-15 from a third the same day, each after the previous round of fixes landed.
 
 ---
 
@@ -160,6 +160,30 @@ This is the same conflation as finding 2, which was fixed by separating the stat
 
 Both kinds now act in place. **The note is the cost, taken deliberately:** `join_match` has always treated it as optional and the hub still collects one for anyone who opens the match before asking, but the card is the common path, so most requests will now arrive with no reason attached. If hosts start declining requests they cannot judge, the note needs a sheet on the button rather than a screen behind it. Worth watching in cohort A.
 
+---
+
+## 18. A host cannot see who they invited
+
+**Observed:** After inviting players, the match hub shows an open match with no sign of who was invited — pending, declined or otherwise.
+
+**Cause, in three parts:**
+
+1. `pickHubVsSides` builds the hero from `acceptedHubParticipants`, which filters `status === "accepted"`. Invited and requested players are dropped.
+2. `MatchHubParticipants` — the one component that _does_ render a status label per player — only renders when `!vsHeroStage`, and `HUB_VS_HERO_STATUSES` covers `open`, `full`, `ready_to_book`, `booking_pending`, `confirmed` and `in_progress`. So for every live match the roster is the hero, and the list that would answer the question is hidden.
+3. `get_match_hub` returns participants with `status in ('accepted','requested','invited')`. **`declined` is not among them**, so "did they say no?" cannot be answered anywhere in the app, at any layer.
+
+The host sees an open slot and no way to tell it apart from one nobody was ever asked to fill — so the rational move is to invite the same people again.
+
+**Fixed**, and the cause was deeper than the three parts above. Two schema facts had to be dealt with first:
+
+- **An invite is not a participant.** `create_match_invite` writes to `match_invitations`; no `match_participants` row exists until the invite is accepted. Any fix reading the roster to answer "who did I invite" reads the wrong table.
+- **A decline was indistinguishable from a withdrawal.** `decline_match_invitation` set `revoked_at`, and so does the host's own `revoke_pending_targeted_invites`. One column recorded two opposite events, so "did they say no?" was not unexposed — it was never recorded.
+
+Migration `093` adds `declined_at`, sets it when the player refuses, and adds a host-only `invited_players` to the hub card carrying pending invitations and declines. Invitations revoked before this migration keep a null `declined_at` and read as withdrawals, which is the safer reading — claiming somebody declined when they may not have is worse than staying quiet.
+
+Host-only, matching the 2026-08-21 call on pending requests: a decline is the inviter's business, not the roster's.
+
+---
 
 ## Summary table
 

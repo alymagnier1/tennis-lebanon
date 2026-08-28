@@ -720,6 +720,7 @@ export type Database = {
           accepted_at: string | null;
           created_at: string;
           created_by: string;
+          declined_at: string | null;
           expires_at: string;
           id: string;
           invited_user_id: string | null;
@@ -732,6 +733,7 @@ export type Database = {
           accepted_at?: string | null;
           created_at?: string;
           created_by: string;
+          declined_at?: string | null;
           expires_at: string;
           id?: string;
           invited_user_id?: string | null;
@@ -744,6 +746,7 @@ export type Database = {
           accepted_at?: string | null;
           created_at?: string;
           created_by?: string;
+          declined_at?: string | null;
           expires_at?: string;
           id?: string;
           invited_user_id?: string | null;
@@ -2887,6 +2890,7 @@ export type Database = {
         agreed_starts_at: string | null;
         agreed_ends_at: string | null;
         cancellation_reason: string | null;
+        invited_players: Json | null;
       };
       match_invite_inbox_row: {
         invitation_id: string | null;

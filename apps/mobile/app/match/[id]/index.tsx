@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, StyleSheet, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { createLiveSheet } from "../../../src/theme/create-live-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -38,7 +44,7 @@ import {
   viewerMayInvite,
 } from "@tennis-lebanon/domain";
 import { spacing, typography } from "@tennis-lebanon/ui";
-import { StatusBanner } from "../../../src/components/AppUi";
+import { Avatar, StatusBanner } from "../../../src/components/AppUi";
 import { MatchChatEntry } from "../../../src/components/MatchChatEntry";
 import { MatchResultPanel } from "../../../src/components/MatchResultPanel";
 import { AppText } from "../../../src/components/AppText";
@@ -139,11 +145,19 @@ type HubParticipant = {
   avatar_path?: string | null;
 };
 
+type HubInvited = {
+  user_id: string;
+  display_name: string;
+  status: string;
+  avatar_path?: string | null;
+};
+
 type HubRequest = {
   user_id: string;
   display_name: string;
   status: string;
   join_note?: string | null;
+  avatar_path?: string | null;
 };
 
 export default function MatchHubScreen() {
@@ -297,6 +311,8 @@ export default function MatchHubScreen() {
     (hub?.participants as HubParticipant[] | undefined) ?? [];
   const pendingRequests =
     (hub?.pending_requests as HubRequest[] | undefined) ?? [];
+  const invitedPlayers =
+    (hub?.invited_players as HubInvited[] | undefined) ?? [];
   const proposedTimes = useMemo(
     () => hub?.proposed_times ?? [],
     [hub?.proposed_times],
@@ -815,13 +831,85 @@ export default function MatchHubScreen() {
         </PlayerProfileSection>
       ) : null}
 
+      {/*
+        The hero shows accepted players and open slots, so an invited player and
+        a slot nobody was asked to fill look the same. Host-only: a decline is
+        the inviter's business, not the roster's.
+      */}
+      {hub?.viewer_is_creator && invitedPlayers.length > 0 ? (
+        <PlayerProfileSection title={t("matches.hub.invitedTitle")}>
+          {invitedPlayers.map((invited) => (
+            <View
+              key={invited.user_id}
+              style={[styles.invitedRow, { flexDirection: rowDirection }]}
+            >
+              <View
+                style={[
+                  styles.invitedIdentity,
+                  { flexDirection: rowDirection },
+                ]}
+              >
+                <Avatar
+                  name={invited.display_name}
+                  avatarPath={invited.avatar_path}
+                  size={32}
+                />
+                <AppText style={styles.participantName} maxLines={1}>
+                  {invited.display_name}
+                </AppText>
+              </View>
+              <SemanticBadge
+                label={
+                  invited.status === "declined"
+                    ? t("matches.hub.invitedDeclined")
+                    : t("matches.hub.invitedWaiting")
+                }
+                tone={invited.status === "declined" ? "neutral" : "info"}
+              />
+            </View>
+          ))}
+        </PlayerProfileSection>
+      ) : null}
+
       {hub?.viewer_is_creator && pendingRequests.length > 0 ? (
         <PlayerProfileSection title={t("matches.hub.pendingRequests")}>
           {pendingRequests.map((request) => (
             <View key={request.user_id} style={styles.requestCard}>
-              <AppText style={styles.participantName} maxLines={1}>
-                {request.display_name}
-              </AppText>
+              {/*
+                Accepting a stranger is a decision about a person, and a name is
+                thin grounds for it — the profile behind this carries level,
+                areas and matches played. Avatar and name are one target rather
+                than the avatar alone: a 40px circle is under the touch minimum,
+                the same reasoning as the roster rows. The accept and decline
+                buttons stay outside it, so opening a profile cannot be
+                mistaken for answering.
+              */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("discover.openPlayerProfile", {
+                  name: request.display_name,
+                })}
+                onPress={() =>
+                  router.push({
+                    pathname: "/player/[id]",
+                    params: { id: request.user_id },
+                  })
+                }
+                style={({ pressed }) => [
+                  styles.requestIdentity,
+                  { flexDirection: rowDirection },
+                  pressed && styles.requestIdentityPressed,
+                ]}
+              >
+                <Avatar
+                  name={request.display_name}
+                  avatarPath={request.avatar_path}
+                  size={40}
+                />
+                <AppText style={styles.participantName} maxLines={1}>
+                  {request.display_name}
+                </AppText>
+              </Pressable>
               {request.join_note ? (
                 <AppText
                   style={[styles.requestNote, { writingDirection }]}
@@ -1141,6 +1229,24 @@ const styles = createLiveSheet(() =>
     voteRow: {
       flexWrap: "wrap",
       gap: spacing.sm,
+    },
+    requestIdentity: {
+      alignItems: "center",
+      gap: spacing.sm,
+    },
+    requestIdentityPressed: {
+      opacity: 0.7,
+    },
+    invitedIdentity: {
+      alignItems: "center",
+      gap: spacing.sm,
+      flexShrink: 1,
+    },
+    invitedRow: {
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: spacing.sm,
+      paddingVertical: spacing.xs,
     },
     requestCard: {
       gap: spacing.sm,

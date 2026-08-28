@@ -115,6 +115,8 @@ export type MatchHubCard = {
   proposed_times: MatchHubTimeOption[];
   participants: unknown;
   pending_requests: unknown;
+  /** Host-only: who was invited and has not accepted, plus who declined. */
+  invited_players: unknown;
   viewer_status: string | null;
   viewer_is_creator: boolean;
   next_action: string;

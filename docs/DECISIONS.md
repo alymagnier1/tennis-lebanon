@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-28 — A decline is recorded, and the host can see who they asked
+
+- Status: accepted
+- Context: A host who invited players saw a hub with open slots and no sign of anyone. `pickHubVsSides` builds the hero from accepted participants, and `MatchHubParticipants` — the only component rendering a per-player status — shows only when the hero does not, which is never for a live match. So an invited player and a slot nobody was asked to fill looked identical, and the rational move was to invite the same person twice. Two schema facts sat underneath: an invite writes to `match_invitations` and creates no participant row until accepted, so anything reading the roster reads the wrong table; and `decline_match_invitation` set `revoked_at`, which is also what `revoke_pending_targeted_invites` sets when the host withdraws the offer. One column recorded two opposite events, so "did they say no?" was not merely unexposed — it was never recorded. Finding 18.
+- Decision: `093_hub_invited_players.sql` adds `match_invitations.declined_at`, set when the player refuses, alongside the `revoked_at` that every existing query already reads. The hub card gains a host-only `invited_players` carrying pending invitations and declines, read from `match_invitations` rather than the roster, and rendered as an "Invited" section above pending requests.
+- Alternatives considered: widening the `participants` filter to include invited and declined rows (rejected — that list feeds the vs-hero, the ready-hero and the roster section, so declines would appear on the team sheet, and it would still read the wrong table); inferring a decline from `revoked_at` plus the absence of a host action (rejected — unknowable after the fact, and a wrong guess accuses somebody of refusing an invitation they never saw); showing invited players inside the hero's open slots (rejected — the hero is the roster, and an invitation is not a roster place; it also has no room for a status); exposing the list to every participant (rejected — the 2026-08-21 entry made the same call for pending requests: only the person who can act on a row should see it).
+- Consequences: Invitations revoked before this migration keep a null `declined_at` and read as withdrawals rather than declines. That under-reports historical declines, which is the right direction: claiming somebody refused when they may not have is worse than staying quiet. An expired invitation is not listed either — it is neither waiting nor refused, and a host who wants that player back can simply invite again. pgTAP asserts the host sees both states, that a host's own withdrawal is not reported as a decline, and that no other viewer sees the list at all.
+- Owner: Founder
+
 ## 2026-08-28 — A join request can be taken back
 
 - Status: accepted
