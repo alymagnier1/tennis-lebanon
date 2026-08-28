@@ -2274,6 +2274,7 @@ export type Database = {
           opponent_names: string;
           participant_count: number;
           participant_status: Database["public"]["Enums"]["participant_status"];
+          pending_request_count: number;
           preferred_clubs: Json;
           soonest_time: string;
           status: Database["public"]["Enums"]["match_status"];
@@ -2332,6 +2333,10 @@ export type Database = {
           slug: string;
         }[];
       };
+      live_commitment_statuses: {
+        Args: never;
+        Returns: Database["public"]["Enums"]["match_status"][];
+      };
       mark_all_notifications_read: { Args: never; Returns: number };
       mark_match_chat_read: { Args: { p_match_id: string }; Returns: string };
       mark_notification_failed: {
@@ -2384,6 +2389,8 @@ export type Database = {
         Args: { p_match_id: string };
         Returns: number;
       };
+      match_agreed_ends_at: { Args: { p_match_id: string }; Returns: string };
+      match_agreed_starts_at: { Args: { p_match_id: string }; Returns: string };
       match_all_times_passed_grace: {
         Args: { p_match_id: string };
         Returns: boolean;
@@ -2685,6 +2692,31 @@ export type Database = {
         Returns: string;
       };
       validate_match_score: { Args: { p_score: Json }; Returns: number[] };
+      viewer_agreed_time_conflicts: {
+        Args: {
+          p_ends_at: string;
+          p_exclude_match_id?: string;
+          p_starts_at: string;
+        };
+        Returns: {
+          ends_at: string;
+          match_id: string;
+          starts_at: string;
+        }[];
+      };
+      viewer_agreed_time_conflicts_for: {
+        Args: {
+          p_ends_at: string;
+          p_exclude_match_id?: string;
+          p_starts_at: string;
+          p_user_id: string;
+        };
+        Returns: {
+          ends_at: string;
+          match_id: string;
+          starts_at: string;
+        }[];
+      };
       viewer_is_platform_operator: { Args: never; Returns: boolean };
       viewer_match_time_overlap: {
         Args: {

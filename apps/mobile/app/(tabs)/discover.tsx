@@ -4,12 +4,14 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
   keepPreviousData,
+  useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import {
   discoverCompatiblePlayers,
   discoverOpenMatches,
+  joinMatch,
   listOwnPreferredZoneIds,
   getOwnPlayerProfile,
   type CompatiblePlayerCard,
@@ -63,6 +65,8 @@ import {
   sortDiscoverPlayers,
 } from "../../src/lib/discover-sort";
 import { useAuth } from "../../src/providers/AuthProvider";
+import { notify } from "../../src/lib/confirm-action";
+import { joinErrorKey } from "../../src/lib/join-error";
 import { supabase } from "../../src/lib/supabase";
 import {
   compactJoinedLabel,
@@ -80,6 +84,22 @@ export default function DiscoverScreen() {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+
+  /**
+   * The card's action button used to inherit the card's own press handler and
+   * open the hub, so "Join" navigated instead of joining. Instant joins now
+   * happen in place. Approval-gated matches still open the hub, because that is
+   * where the join note lives, and their label says so.
+   */
+  const joinMutation = useMutation({
+    mutationFn: (matchId: string) => joinMatch(supabase, matchId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["discover-matches"] });
+      await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
+      notify(t("matches.hub.joinSuccess"));
+    },
+    onError: (error: unknown) => notify(t(joinErrorKey(error))),
+  });
   const userId = session?.user.id;
   const [chosenSegment, setChosenSegment] = useState<DiscoverSegment | null>(
     null,
@@ -350,13 +370,18 @@ export default function DiscoverScreen() {
             joinAction === "join"
               ? t("matches.list.action.join")
               : joinAction === "request"
-                ? t("matches.list.action.requestJoin")
+                ? t("matches.list.action.requestJoinOpens")
                 : undefined;
           return (
             <MatchCard
               status={match.status}
               statusLabel={t(`matches.status.${match.status}`)}
               actionLabel={joinLabel}
+              onActionPress={
+                joinAction === "join"
+                  ? () => joinMutation.mutate(match.match_id)
+                  : undefined
+              }
               actionTone="actionable"
               dateTimeLabel={dateTimeLabel}
               headline={match.creator_display_name}

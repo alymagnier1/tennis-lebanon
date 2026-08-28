@@ -6,6 +6,7 @@ type Translate = (key: string, options?: Record<string, unknown>) => string;
 type BadgeInput = {
   is_stale_warning: boolean;
   unread_message_count: number;
+  pending_request_count?: number;
 };
 
 /**
@@ -24,6 +25,18 @@ export function buildMatchCardBadges(
   match: BadgeInput,
 ): MatchListBadge[] | undefined {
   const badges: MatchListBadge[] = [];
+
+  // First, ahead of unread chat: somebody is waiting on a yes or no that only
+  // this host can give, and until `060`'s Vault secrets exist there is no push
+  // and no bell to find it by. The count is host-only, so a joiner never sees a
+  // badge for a decision that is not theirs.
+  const pending = match.pending_request_count ?? 0;
+  if (pending > 0) {
+    badges.push({
+      label: t("matches.list.pendingRequestsBadge", { count: pending }),
+      tone: "actionable",
+    });
+  }
 
   const unread = formatUnreadBadge(match.unread_message_count);
   if (unread) {

@@ -3,6 +3,13 @@
 begin;
 
 create extension if not exists pgtap;
+
+-- Every fixture match gets its own hour. `090` refuses a join that overlaps an
+-- hour the player already agreed to, and these fixtures shared one slot across
+-- every match, so the same joiner was double-booked from the second match on.
+create sequence pg_temp.fixture_slot;
+-- The fixtures call it while impersonating `authenticated`.
+grant usage on sequence pg_temp.fixture_slot to authenticated;
 select plan(1);
 
 create or replace function pg_temp.assert_true(
@@ -72,6 +79,9 @@ language plpgsql
 as $$
 declare
   v_match_id uuid;
+  v_slot timestamptz := date_trunc('hour', now())
+    + interval '2 days'
+    + nextval('pg_temp.fixture_slot') * interval '3 hours';
   v_existing_id uuid;
 begin
   perform pg_temp.set_caller(p_creator_id);
@@ -97,8 +107,8 @@ begin
     array['aaaaaaaa-0001-0001-0001-000000000002']::uuid[],
     jsonb_build_array(
       jsonb_build_object(
-        'starts_at', (now() + interval '3 days')::text,
-        'ends_at', (now() + interval '3 days 90 minutes')::text
+        'starts_at', v_slot::text,
+        'ends_at', (v_slot + interval '90 minutes')::text
       )
     ),
     p_preferred_club_ids => array['bbbbbbbb-0001-0001-0001-000000000001']::uuid[]

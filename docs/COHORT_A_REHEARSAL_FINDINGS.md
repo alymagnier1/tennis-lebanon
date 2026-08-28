@@ -4,7 +4,7 @@
 **Source:** Manual Phase 0.3 walkthrough (founder notes from chat)  
 **Fix plan:** [`COHORT_A_REHEARSAL_FIXES.md`](COHORT_A_REHEARSAL_FIXES.md)
 
-Eight findings from walking the app with two seeded players. Ordered by severity in the fix plan.
+Eleven findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, after the first round of fixes landed.
 
 ---
 
@@ -76,15 +76,46 @@ Eight findings from walking the app with two seeded players. Ordered by severity
 
 ---
 
+## 9. "Request to join" on a Discover card opens the hub instead of sending
+
+**Observed:** Tapping the action button on an open match card navigates to the match hub rather than joining or sending the request.
+
+**Resolution:** `discover.tsx` passed `actionLabel` but never `onActionPress`, and `FigmaMatchCard` falls back to `onActionPress ?? onPress` — so the button inherited the card's navigate handler. Split by case: an instant join now happens in place; an approval-gated match still opens the hub, because that is where the join note from `088` is written, and its label is now `requestJoinOpens` ("Request to join…") so it promises a screen rather than a send. Fixed.
+
+---
+
+## 10. Nothing stops a player being in two matches at the same hour
+
+**Observed:** The same time and venue can be used for more than one match.
+
+**Resolution:** There was no time-conflict rule anywhere — `hosted_match_cap` counts hosted matches and stops at three, and `032_discovery_overlap` is about availability in discovery. The gap was wider than reported: a player could also **join** several matches that overlap each other, which is a no-show waiting to happen.
+
+Migration `090` blocks joining an hour already agreed to, and adds `viewer_agreed_time_conflicts` so the client can warn before the RPC refuses. Venue is deliberately not part of the rule: two hosts wanting courts at the same club at the same hour is ordinary demand, and the booking overlap constraint already protects the court itself. Time alone is the invariant.
+
+Hosting is warned about rather than blocked, and only **agreed** times count — a host offering the same three evenings across two listings is recruiting, not double-booking. See the 2026-08-28 decision. Fixed for joining; the create-side warning is still to build.
+
+---
+
+## 11. A host cannot see join requests without opening each match
+
+**Observed:** The only way to find out somebody asked to join is to open that specific match's hub.
+
+**Resolution:** Same finding as 8, hit again on a second pass, which is the evidence that settles it. `pending_requests` was returned by `get_match_hub` and nowhere else. Migration `091` adds `pending_request_count` to `list_my_matches` beside the existing `unread_message_count`, and the Matches tab badges it with the pattern already shipped for unread chat — rather than the new Home next-action kind the fix plan had scoped, which was a migration plus nine files. Counted for the creator only: nobody else can accept or decline. Fixed.
+
+---
+
 ## Summary table
 
-| #   | Finding                                     | Severity       | Fix phase      | Status     |
-| --- | ------------------------------------------- | -------------- | -------------- | ---------- |
-| 1   | Club rule differs + vs Ask to play          | UX confusion   | 1c explain     | Done       |
-| 2   | "Waiting for players" while request pending | P1             | 1b             | Done       |
-| 3   | "You joined" on request sent                | P1             | 1a             | Done       |
-| 4   | Joiner not notified on accept               | P1             | Staging verify | Open       |
-| 5   | Host no push/toast locally                  | Expected local | Staging verify | Documented |
-| 6   | Cancellation reason dead-end                | P0             | 2              | Pending    |
-| 7   | Multi-zone / single-club mismatch           | P2             | 1d             | Pending    |
-| 8   | Host alert UX pattern                       | Design         | 3 optional     | Open       |
+| #   | Finding                                     | Severity       | Fix phase      | Status           |
+| --- | ------------------------------------------- | -------------- | -------------- | ---------------- |
+| 1   | Club rule differs + vs Ask to play          | UX confusion   | 1c explain     | Done             |
+| 2   | "Waiting for players" while request pending | P1             | 1b             | Done             |
+| 3   | "You joined" on request sent                | P1             | 1a             | Done             |
+| 4   | Joiner not notified on accept               | P1             | Staging verify | Open             |
+| 5   | Host no push/toast locally                  | Expected local | Staging verify | Documented       |
+| 6   | Cancellation reason dead-end                | P0             | 2              | Done             |
+| 7   | Multi-zone / single-club mismatch           | P2             | 1d             | Done             |
+| 8   | Host alert UX pattern                       | Design         | 3 optional     | Superseded by 11 |
+| 9   | Card action navigates instead of joining    | P1             | —              | Done             |
+| 10  | No time-conflict rule on join or host       | P0             | `090`          | Done (join)      |
+| 11  | Join requests invisible outside the hub     | P1             | `091`          | Done             |

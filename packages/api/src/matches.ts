@@ -155,6 +155,8 @@ export type MyMatchRow = {
   zones: unknown;
   /** Chat messages from others since this viewer last opened the thread. */
   unread_message_count: number;
+  /** Players waiting on this host's answer. Always 0 for a non-creator. */
+  pending_request_count: number;
 };
 
 /**

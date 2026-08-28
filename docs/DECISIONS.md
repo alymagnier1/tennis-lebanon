@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-28 — A player cannot join an hour they have already agreed to
+
+- Status: accepted
+- Context: Nothing anywhere checked for a time conflict. `hosted_match_cap` counts hosted matches and stops at three; `032_discovery_overlap` is about availability in discovery. So one player could hold three matches at 19:00 on Thursday, and — not noticed until a second Phase 0.3 pass — could also **join** several matches that overlap each other. Every one of those is a no-show waiting to happen, and no-show rate is this pilot's counter-metric. Recorded as finding 10 in `docs/COHORT_A_REHEARSAL_FINDINGS.md`.
+- Decision: `090_match_time_conflicts.sql` refuses a join whose agreed hour overlaps one the player has already agreed to, raising the stable error `match_time_conflict`. Hosting is warned about in the client rather than blocked. Only **agreed** times count — `selected_time_option_id`, which a fixed match carries from publish and a flexible one gets when a slot goes unanimous. Only `accepted` participations in live matches count as commitments. Overlap is half-open, so a match ending at 20:00 and one starting at 20:00 do not collide. `viewer_agreed_time_conflicts` exposes the same rule to the client, so the thing that blocks and the thing that explains cannot drift.
+- Alternatives considered: blocking hosting too (rejected — a host offering the same evening across two listings is recruiting, not double-booking; they will play at most one and which one is not decided yet); counting proposed times as well as agreed ones (rejected — that is exactly the recruiting pattern above, and would block it); keying the rule on venue as well as time, which is how the problem was first described (rejected — two hosts wanting courts at the same club at the same hour is ordinary demand, the booking overlap constraint already protects the court itself, and a player cannot be in two places at once regardless of where those places are); warning on both paths and blocking neither (rejected — it leaves the no-show path fully open, which is the thing worth preventing).
+- Consequences: Three existing pgTAP fixtures (`007`, `014`, `022`) started failing, because they created every fixture match in one shared slot and had the same joiner join several of them — the rule caught its first genuine double-booking inside the test suite. Each now draws a distinct hour from a temp sequence. **Two gaps remain open by design.** The create-side warning is not built, so hosting is currently neither blocked nor warned about; and a `requested` row is not a commitment, so two pending requests at the same hour are both allowed until one is accepted — the second join then fails at accept time rather than at ask time, which is the right trade but is not nothing.
+- Owner: Founder
+
 ## 2026-08-28 — A superseded decision outranked its replacement for three weeks
 
 - Status: accepted

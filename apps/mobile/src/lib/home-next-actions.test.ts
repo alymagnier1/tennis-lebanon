@@ -30,6 +30,7 @@ function match(overrides: Partial<MyMatchRow> = {}): MyMatchRow {
     is_stale_warning: false,
     can_extend_listing: false,
     unread_message_count: 0,
+    pending_request_count: 0,
     has_court: false,
     court_starts_at: null,
     opponent_names: null,

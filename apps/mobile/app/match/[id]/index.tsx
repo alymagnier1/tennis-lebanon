@@ -68,6 +68,7 @@ import {
 import { formatUtcSlotInBeirut } from "../../../src/lib/beirut-time";
 import { confirmAction, notify } from "../../../src/lib/confirm-action";
 import { confirmCancelHostedMatch } from "../../../src/lib/confirm-cancel-hosted-match";
+import { joinErrorKey } from "../../../src/lib/join-error";
 import { useLayoutDirection } from "../../../src/lib/layout-direction";
 import { exitMatchHub } from "../../../src/lib/navigation";
 import {
@@ -202,7 +203,7 @@ export default function MatchHubScreen() {
           : t("matches.hub.joinSuccess"),
       );
     },
-    onError: () => notify(t("matches.hub.joinError")),
+    onError: (error: unknown) => notify(t(joinErrorKey(error))),
   });
 
   const respondMutation = useMutation({
