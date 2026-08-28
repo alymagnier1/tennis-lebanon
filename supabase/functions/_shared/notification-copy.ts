@@ -95,6 +95,10 @@ export const NOTIFICATION_COPY: Record<
       title: "Your request was not accepted",
       body: "The host went with someone else this time. Other matches are still looking for players.",
     },
+    match_request_withdrawn: {
+      title: "A join request was withdrawn",
+      body: "Someone who asked to join your match has changed their mind.",
+    },
     match_participant_joined: {
       title: "Your match gained a player",
       body: "Someone joined. Open it to see the roster and keep it moving.",
@@ -181,6 +185,10 @@ export const NOTIFICATION_COPY: Record<
       title: "لم يُقبل طلبك",
       body: "اختار المضيف لاعبًا آخر هذه المرة. هناك مباريات أخرى تبحث عن لاعبين.",
     },
+    match_request_withdrawn: {
+      title: "تم سحب طلب انضمام",
+      body: "غيّر أحد من طلب الانضمام إلى مباراتك رأيه.",
+    },
     match_participant_joined: {
       title: "انضم لاعب إلى مباراتك",
       body: "انضم أحدهم. افتح المباراة لرؤية القائمة ومتابعة التحضير.",
@@ -266,6 +274,10 @@ export const NOTIFICATION_COPY: Record<
     match_request_declined: {
       title: "Votre demande n'a pas été retenue",
       body: "L'hôte a choisi quelqu'un d'autre cette fois. D'autres matchs cherchent encore des joueurs.",
+    },
+    match_request_withdrawn: {
+      title: "Une demande a été retirée",
+      body: "Un joueur qui voulait rejoindre votre match a changé d'avis.",
     },
     match_participant_joined: {
       title: "Un joueur a rejoint votre match",

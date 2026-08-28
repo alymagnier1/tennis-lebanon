@@ -635,6 +635,10 @@
         "title": "Your request was not accepted",
         "body": "The host went with someone else this time. Other matches are still looking for players."
       },
+      "match_request_withdrawn": {
+        "title": "A join request was withdrawn",
+        "body": "Someone who asked to join your match has changed their mind."
+      },
       "match_participant_joined": {
         "title": "Your match gained a player",
         "body": "Someone joined. Open it to see the roster and keep it moving."
@@ -1109,6 +1113,9 @@
       "leave": "Leave match",
       "leaveError": "We could not leave this match.",
       "withdraw": "Withdraw from match",
+      "withdrawRequest": "Cancel my request",
+      "withdrawRequestConfirm": "The host will be told you are no longer waiting. You can ask again later.",
+      "withdrawRequestError": "We could not cancel your request.",
       "withdrawSuccess": "You withdrew from this match.",
       "withdrawError": "We could not withdraw from this match.",
       "withdrawReasonLabel": "Reason for withdrawing",

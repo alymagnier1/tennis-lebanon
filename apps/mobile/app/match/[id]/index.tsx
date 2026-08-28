@@ -14,6 +14,7 @@ import {
   releaseExternalCourt,
   respondBookingAlternative,
   respondToJoinRequest,
+  withdrawJoinRequest,
   withdrawMatchTimeOption,
   type MatchHubTimeOption,
 } from "@tennis-lebanon/api";
@@ -213,6 +214,18 @@ export default function MatchHubScreen() {
     onError: () => notify(t("matches.hub.respondError")),
   });
 
+  // A pending request had no way out: `leave_match` refuses anything that is
+  // not `accepted`, so the asker was stuck waiting for an answer they could no
+  // longer decline to wait for.
+  const withdrawRequestMutation = useMutation({
+    mutationFn: () => withdrawJoinRequest(supabase, id!),
+    onSuccess: async () => {
+      await invalidate();
+      exitMatchHub();
+    },
+    onError: () => notify(t("matches.hub.withdrawRequestError")),
+  });
+
   const leaveMutation = useMutation({
     mutationFn: () => leaveMatch(supabase, id!),
     onSuccess: async () => {
@@ -391,6 +404,8 @@ export default function MatchHubScreen() {
 
   const showCancel =
     hub?.viewer_is_creator && canCreatorCancelMatch(hub.status);
+
+  const showWithdrawRequest = hub?.viewer_status === "requested";
 
   // Gated on match status rather than comparing the slot to the clock: reading
   // the clock during render is impure, and the lifecycle already moves a started
@@ -1027,6 +1042,21 @@ export default function MatchHubScreen() {
           <HubDestructiveLink
             label={t("matches.hub.withdraw")}
             onPress={() => router.push(matchWithdrawRoute(id!))}
+          />
+        ) : null}
+
+        {showWithdrawRequest ? (
+          <HubDestructiveLink
+            label={t("matches.hub.withdrawRequest")}
+            onPress={() =>
+              confirmAction({
+                title: t("matches.hub.withdrawRequest"),
+                message: t("matches.hub.withdrawRequestConfirm"),
+                confirmLabel: t("matches.hub.withdrawRequest"),
+                cancelLabel: t("common.cancel"),
+                onConfirm: () => withdrawRequestMutation.mutate(),
+              })
+            }
           />
         ) : null}
 

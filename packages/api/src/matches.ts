@@ -259,6 +259,20 @@ export async function respondToJoinRequest(
   if (error) throw error;
 }
 
+/**
+ * Takes back a pending join request. The row becomes `left`, never `declined` —
+ * that status records the host's answer, not the asker's change of mind.
+ */
+export async function withdrawJoinRequest(
+  client: TennisSupabaseClient,
+  matchId: string,
+): Promise<void> {
+  const { error } = await client.rpc("withdraw_join_request", {
+    p_match_id: matchId,
+  });
+  if (error) throw error;
+}
+
 export async function leaveMatch(
   client: TennisSupabaseClient,
   matchId: string,

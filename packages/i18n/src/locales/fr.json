@@ -978,6 +978,9 @@
       "leave": "Quitter le match",
       "leaveError": "Impossible de quitter ce match.",
       "withdraw": "Se retirer du match",
+      "withdrawRequest": "Annuler ma demande",
+      "withdrawRequestConfirm": "L'hôte saura que vous n'attendez plus. Vous pourrez redemander plus tard.",
+      "withdrawRequestError": "Nous n'avons pas pu annuler votre demande.",
       "withdrawSuccess": "Vous vous êtes retiré de ce match.",
       "withdrawError": "Impossible de se retirer de ce match.",
       "withdrawReasonLabel": "Motif du retrait",
@@ -1486,6 +1489,10 @@
       "match_request_declined": {
         "title": "Votre demande n'a pas été retenue",
         "body": "L'hôte a choisi quelqu'un d'autre cette fois. D'autres matchs cherchent encore des joueurs."
+      },
+      "match_request_withdrawn": {
+        "title": "Une demande a été retirée",
+        "body": "Un joueur qui voulait rejoindre votre match a changé d'avis."
       },
       "match_participant_joined": {
         "title": "Un joueur a rejoint votre match",

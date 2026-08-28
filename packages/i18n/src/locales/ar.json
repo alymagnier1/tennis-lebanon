@@ -978,6 +978,9 @@
       "leave": "مغادرة المباراة",
       "leaveError": "تعذّر مغادرة هذه المباراة.",
       "withdraw": "الانسحاب من المباراة",
+      "withdrawRequest": "ألغِ طلبي",
+      "withdrawRequestConfirm": "سيُبلَّغ المضيف بأنك لم تعد بانتظار الرد. يمكنك الطلب مجددًا لاحقًا.",
+      "withdrawRequestError": "تعذّر إلغاء طلبك.",
       "withdrawSuccess": "انسحبت من هذه المباراة.",
       "withdrawError": "تعذّر الانسحاب من هذه المباراة.",
       "withdrawReasonLabel": "سبب الانسحاب",
@@ -1486,6 +1489,10 @@
       "match_request_declined": {
         "title": "لم يُقبل طلبك",
         "body": "اختار المضيف لاعبًا آخر هذه المرة. هناك مباريات أخرى تبحث عن لاعبين."
+      },
+      "match_request_withdrawn": {
+        "title": "تم سحب طلب انضمام",
+        "body": "غيّر أحد من طلب الانضمام إلى مباراتك رأيه."
       },
       "match_participant_joined": {
         "title": "انضم لاعب إلى مباراتك",

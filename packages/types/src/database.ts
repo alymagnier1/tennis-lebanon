@@ -2735,6 +2735,10 @@ export type Database = {
         Args: { p_match_id: string; p_reason: string };
         Returns: undefined;
       };
+      withdraw_join_request: {
+        Args: { p_match_id: string };
+        Returns: undefined;
+      };
       withdraw_match_time_option: {
         Args: { p_time_option_id: string };
         Returns: undefined;

@@ -23,6 +23,7 @@ export const NOTIFICATION_KINDS = [
   "match_join_request",
   "match_request_accepted",
   "match_request_declined",
+  "match_request_withdrawn",
   "match_participant_joined",
   "match_participant_left",
   "match_message",

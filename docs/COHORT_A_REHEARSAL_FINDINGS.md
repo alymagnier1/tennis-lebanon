@@ -4,7 +4,7 @@
 **Source:** Manual Phase 0.3 walkthrough (founder notes from chat)  
 **Fix plan:** [`COHORT_A_REHEARSAL_FIXES.md`](COHORT_A_REHEARSAL_FIXES.md)
 
-Eleven findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, after the first round of fixes landed.
+Fifteen findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, and 12-15 from a third the same day, each after the previous round of fixes landed.
 
 ---
 
@@ -101,6 +101,40 @@ Hosting is warned about rather than blocked, and only **agreed** times count —
 **Observed:** The only way to find out somebody asked to join is to open that specific match's hub.
 
 **Resolution:** Same finding as 8, hit again on a second pass, which is the evidence that settles it. `pending_requests` was returned by `get_match_hub` and nowhere else. Migration `091` adds `pending_request_count` to `list_my_matches` beside the existing `unread_message_count`, and the Matches tab badges it with the pattern already shipped for unread chat — rather than the new Home next-action kind the fix plan had scoped, which was a migration plus nine files. Counted for the creator only: nobody else can accept or decline. Fixed.
+
+---
+
+## 12. A requester shows as "Invited" on the host's invite screen
+
+**Observed:** After a player sends a join request, the host's invite screen labels them **Invited**.
+
+**Resolution:** `isAlreadyInMatch` collapsed `accepted`, `invited` and `requested` into one state and `playerInviteState` returned only two, so a player who had asked _you_ read as one you had asked — and the row most needing an answer looked like one already dealt with. Now four states through `invite-player-state.ts`, with `requested` tappable and routing to the hub where accept and decline live. Fixed.
+
+---
+
+## 13. A join request cannot be taken back
+
+**Observed:** After sending a request, there is no way to cancel it.
+
+**Resolution:** `leave_match` requires `status = 'accepted'` and otherwise raises "Not an active participant"; nothing covered a `requested` row. Migration `092` adds `withdraw_join_request`, setting the row to `left` — never `declined`, which records the host's answer — and telling the host through a new `match_request_withdrawn` kind. Surfaced as a destructive link on the hub. `left` already reactivates on rejoin, so asking again works. Fixed.
+
+---
+
+## 14. No notification when a host declines a request
+
+**Observed:** The requester hears nothing when their request is declined.
+
+**Resolution:** **Not a missing notification.** Verified against the database: `077` enqueues `match_request_declined` to the requester, correctly addressed. It did not appear because the notification centre filtered `sent_at is not null`, and nothing sets `sent_at` locally — the same root cause as finding 5.
+
+But the filter was wrong beyond local dev: in production a failed push, a stale token or notifications switched off would leave the centre empty too, so the one screen that exists to recover a missed message was gated on having received it. Both the list and the unread badge now gate on `scheduled_at <= now()`. See the 2026-08-28 decision. Fixed.
+
+---
+
+## 15. Inviting a player also opens the share sheet
+
+**Observed:** The invite button sends the invitation and opens a share box at the same time.
+
+**Resolution:** `inviteMutation.onSuccess` called `shareMatchInvite` alongside the toast, and that was the only call site — so the only way to get a shareable link was to send a targeted invite to a named player. Two intents fused: a targeted invite already reaches that player by push, while a link is for someone not on Tennis Lebanon at all. `create_match_invite` has always accepted a null recipient, so the split was client-side only. Fixed.
 
 ---
 
