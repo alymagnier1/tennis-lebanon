@@ -84,10 +84,6 @@ export function HomeNextActionsCarousel({
           setContentWidth(width);
         }
       }}
-      accessibilityLabel={t("home.nextAction.carouselA11y", {
-        current: pageIndex + 1,
-        total: actions.length,
-      })}
     >
       {cardWidth > 0 ? (
         <ScrollView
@@ -123,9 +119,21 @@ export function HomeNextActionsCarousel({
           onPress={actions[0]!.kind === "rematch" ? rematchPress : undefined}
         />
       )}
+      {/*
+        The page count belongs here rather than on the wrapper. A label on the
+        wrapper needs `accessible`, and that collapses the whole subtree into
+        one element — the cards and their buttons would stop being reachable.
+        The dots are non-interactive and already the visual page indicator, so
+        grouping them into a single labelled element announces "1 of 3" without
+        taking anything away.
+      */}
       <View
         style={[styles.dots, { flexDirection: rowDirection }]}
-        accessible={false}
+        accessible
+        accessibilityLabel={t("home.nextAction.carouselA11y", {
+          current: pageIndex + 1,
+          total: actions.length,
+        })}
       >
         {actions.map((action, index) => (
           <View
