@@ -351,24 +351,40 @@ export function FormField({
   );
 }
 
+/**
+ * One option in a set.
+ *
+ * Announced as a radio by default, because that is what a set of these almost
+ * always is: picking one clears the last. It used to announce "checkbox"
+ * unconditionally, which told a screen-reader user they could select several —
+ * and its only caller, the player report screen, is single-select, so the
+ * previous answer vanished without explanation on the one flow where a
+ * confused reporter matters most.
+ *
+ * Pass `multiple` where several answers really are allowed; wrap either kind in
+ * a `radiogroup` so the set is announced as one question.
+ */
 export function Choice({
   label,
   selected,
   onPress,
   description,
+  multiple = false,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
   description?: string;
+  /** Several options may be chosen at once. */
+  multiple?: boolean;
 }) {
   const { rowDirection } = useLayoutDirection();
 
   return (
     <Pressable
-      accessibilityRole="checkbox"
+      accessibilityRole={multiple ? "checkbox" : "radio"}
       accessibilityLabel={label}
-      accessibilityState={{ checked: selected }}
+      accessibilityState={{ checked: selected, selected }}
       onPress={onPress}
       style={[
         styles.choice,

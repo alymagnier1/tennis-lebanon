@@ -4,7 +4,7 @@
 **Source:** Manual Phase 0.3 walkthrough (founder notes from chat)  
 **Fix plan:** [`COHORT_A_REHEARSAL_FIXES.md`](COHORT_A_REHEARSAL_FIXES.md)
 
-Eighteen findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, and 12-15 from a third the same day, each after the previous round of fixes landed.
+Nineteen findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, and 12-15 from a third the same day, each after the previous round of fixes landed.
 
 ---
 
@@ -184,6 +184,17 @@ Migration `093` adds `declined_at`, sets it when the player refuses, and adds a 
 Host-only, matching the 2026-08-21 call on pending requests: a decline is the inviter's business, not the roster's.
 
 ---
+
+## 19. The report screen offers a single choice as checkboxes
+
+**Observed:** Walking workflow 4, the six report categories expose themselves to assistive technology as checkboxes.
+
+**Cause:** `Choice` in `FormUi.tsx` sets `accessibilityRole="checkbox"` with `accessibilityState={{ checked }}`. The report screen uses it for a mutually exclusive choice — `selected={category === value}` with `onPress={() => setCategory(value)}` — so picking one silently clears another.
+
+A screen-reader user is told they may select several and finds their previous answer gone. The correct semantics are `radio` inside a `radiogroup`. `Choice` has exactly one call site, so the fix is contained, and it lands on the safety path, which is the flow where a confused reporter matters most.
+
+**Fixed.** `Choice` now announces `radio` by default and takes a `multiple` prop for the sets where several answers really are allowed — so a future multi-select caller has to say so rather than inheriting the wrong role silently. `accessibilityState` carries both `checked` and `selected`, since assistive technologies differ on which they read for a radio. The category set is wrapped in a `radiogroup` with its own label, so it is announced as one question rather than six loose controls. Regression tests in `FormUi.native.test.tsx` cover both roles and the checked state.
+
 
 ## Summary table
 

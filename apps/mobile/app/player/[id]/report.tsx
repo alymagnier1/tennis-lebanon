@@ -49,7 +49,12 @@ export default function ReportPlayerScreen() {
       title={t("reports.title")}
       description={t("reports.playerDescription")}
     >
-      <View style={formStyles.stack}>
+      {/* One question, so the set is announced as one group. */}
+      <View
+        accessibilityRole="radiogroup"
+        accessibilityLabel={t("reports.categoryGroupLabel")}
+        style={formStyles.stack}
+      >
         {REPORT_CATEGORIES.map((value) => (
           <Choice
             key={value}

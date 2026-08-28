@@ -859,6 +859,7 @@
     "submitSuccess": "Report submitted. Our team will review it.",
     "submitError": "We could not submit this report.",
     "rateLimited": "You already reported this player today. Try again tomorrow if needed.",
+    "categoryGroupLabel": "Why are you reporting this player?",
     "categories": {
       "harassment": "Harassment or abuse",
       "unsafe_conduct": "Unsafe or threatening behavior",

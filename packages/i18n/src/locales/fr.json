@@ -733,6 +733,7 @@
     "submitSuccess": "Signalement envoyé. Notre équipe va l'examiner.",
     "submitError": "Impossible d'envoyer ce signalement.",
     "rateLimited": "Vous avez déjà signalé ce joueur aujourd'hui. Réessayez demain si nécessaire.",
+    "categoryGroupLabel": "Pourquoi signalez-vous ce joueur ?",
     "categories": {
       "harassment": "Harcèlement ou abus",
       "unsafe_conduct": "Comportement dangereux ou menaçant",
