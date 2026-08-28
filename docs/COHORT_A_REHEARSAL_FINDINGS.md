@@ -4,7 +4,7 @@
 **Source:** Manual Phase 0.3 walkthrough (founder notes from chat)  
 **Fix plan:** [`COHORT_A_REHEARSAL_FIXES.md`](COHORT_A_REHEARSAL_FIXES.md)
 
-Nineteen findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, and 12-15 from a third the same day, each after the previous round of fixes landed.
+Twenty findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, and 12-15 from a third the same day, each after the previous round of fixes landed.
 
 ---
 
@@ -195,6 +195,17 @@ A screen-reader user is told they may select several and finds their previous an
 
 **Fixed.** `Choice` now announces `radio` by default and takes a `multiple` prop for the sets where several answers really are allowed — so a future multi-select caller has to say so rather than inheriting the wrong role silently. `accessibilityState` carries both `checked` and `selected`, since assistive technologies differ on which they read for a radio. The category set is wrapped in a `radiogroup` with its own label, so it is announced as one question rather than six loose controls. Regression tests in `FormUi.native.test.tsx` cover both roles and the checked state.
 
+---
+
+## 20. The dashboard sign-in hints the wrong account for the admin queue
+
+**Observed:** `/admin/reports` redirects to the club sign-in, which reads _"Local dev: club-staff@tennis-lebanon.test / password"_. That account is not a platform operator, so following the hint leaves you unable to reach the queue you were sent to.
+
+**Resolution:** The login page is shared by club staff and platform operators, and the hint names only the first. `docs/PILOT_OPERATIONS.md` and the Phase 0 guide both send you here as `platform-admin@tennis-lebanon.test`. A rehearsal hint that contradicts the runbook costs the reader the time it takes to work out which one is wrong.
+
+**Fixed.** The hint now names both accounts and what each one reaches — club staff for the booking queue, platform admin for reports and disputes — rather than leaving the reader to discover that the account it suggested is the wrong one.
+
+---
 
 ## Summary table
 

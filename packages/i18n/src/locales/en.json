@@ -39,7 +39,7 @@
       "submitting": "Signing in…",
       "error": "We could not sign you in. Check your email and password.",
       "invalidCredentials": "Invalid email or password. If you just changed the dev password, run pnpm db:reset.",
-      "devHint": "Local dev: club-staff@tennis-lebanon.test / password"
+      "devHint": "Local dev — club staff: club-staff@tennis-lebanon.test · reports and disputes: platform-admin@tennis-lebanon.test · password for both: password"
     },
     "nav": {
       "bookings": "Booking requests",

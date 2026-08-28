@@ -39,7 +39,7 @@
       "submitting": "جارٍ تسجيل الدخول…",
       "error": "تعذر تسجيل الدخول. تحقق من البريد وكلمة المرور.",
       "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة. إذا غيّرت كلمة مرور التطوير للتو، شغّل pnpm db:reset.",
-      "devHint": "التطوير المحلي: club-staff@tennis-lebanon.test / password"
+      "devHint": "التطوير المحلي — طاقم النادي: club-staff@tennis-lebanon.test · البلاغات والنزاعات: platform-admin@tennis-lebanon.test · كلمة المرور للاثنين: password"
     },
     "nav": {
       "bookings": "طلبات الحجز",
