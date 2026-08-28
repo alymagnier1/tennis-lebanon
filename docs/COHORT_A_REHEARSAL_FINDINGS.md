@@ -4,7 +4,7 @@
 **Source:** Manual Phase 0.3 walkthrough (founder notes from chat)  
 **Fix plan:** [`COHORT_A_REHEARSAL_FIXES.md`](COHORT_A_REHEARSAL_FIXES.md)
 
-Fifteen findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, and 12-15 from a third the same day, each after the previous round of fixes landed.
+Seventeen findings from walking the app with two seeded players. Ordered by severity in the fix plan. Findings 9-11 came from a second pass on 2026-08-28, and 12-15 from a third the same day, each after the previous round of fixes landed.
 
 ---
 
@@ -137,6 +137,29 @@ But the filter was wrong beyond local dev: in production a failed push, a stale 
 **Resolution:** `inviteMutation.onSuccess` called `shareMatchInvite` alongside the toast, and that was the only call site — so the only way to get a shareable link was to send a targeted invite to a named player. Two intents fused: a targeted invite already reaches that player by push, while a link is for someone not on Tennis Lebanon at all. `create_match_invite` has always accepted a null recipient, so the split was client-side only. Fixed.
 
 ---
+
+## 16. `in_progress` has an instruction where every other status has a state
+
+**Observed:** Walking workflow 3, the match header read **"Confirm you played"** — before confirming, after confirming, and after a full reload.
+
+**Resolution:** Not a stale render. `matches.status.in_progress` is literally `"Confirm you played"`, while every sibling in that map is a state: Draft, Open for players, Full, Ready to book, Confirmed, Completed, Cancelled, Expired. The one imperative in a list of nouns.
+
+Match status is viewer-independent; "confirm you played" is viewer-relative. So it keeps telling a player to do a thing they have already done, and it renders on seven surfaces — Home, Discover, the Matches tab, invites and the hub — meaning a stranger browsing Discover can be told to confirm a match they are not in. All three locales carry the imperative.
+
+This is the same conflation as finding 2, which was fixed by separating the status pill from the viewer-relative action pill. The pills were separated; this copy was not.
+
+**Recommended:** `"In progress"`, matching the shape of its siblings. The instruction already exists where it belongs — the result panel's own prompt, and `matches.list.action.confirmPlayed` on the action pill.
+
+---
+
+## 17. The join-request card button still navigated (finding 9, reopened)
+
+**Observed:** After finding 9 was fixed, "Request to join" on a Discover card still opened the match hub.
+
+**Resolution:** The first fix was too conservative. It made instant joins act in place but deliberately kept navigation for approval-gated matches, because the hub is where the join note from `088` is written, and relabelled the button "Request to join…" to promise a screen. That preserved the note at the cost of the thing the button says it does — and it was reported again, which settles it.
+
+Both kinds now act in place. **The note is the cost, taken deliberately:** `join_match` has always treated it as optional and the hub still collects one for anyone who opens the match before asking, but the card is the common path, so most requests will now arrive with no reason attached. If hosts start declining requests they cannot judge, the note needs a sheet on the button rather than a screen behind it. Worth watching in cohort A.
+
 
 ## Summary table
 

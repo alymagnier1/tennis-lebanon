@@ -86,17 +86,31 @@ export default function DiscoverScreen() {
   const queryClient = useQueryClient();
 
   /**
-   * The card's action button used to inherit the card's own press handler and
-   * open the hub, so "Join" navigated instead of joining. Instant joins now
-   * happen in place. Approval-gated matches still open the hub, because that is
-   * where the join note lives, and their label says so.
+   * The card's action button used to inherit the card's own press handler, so
+   * it opened the hub instead of doing what it said. Both kinds now act in
+   * place: a join joins, and a request is sent.
+   *
+   * The cost, taken deliberately: a request sent from here carries no note.
+   * `join_match` has always taken the note as optional, and the hub still
+   * collects one for anyone who opens the match before asking — but the card
+   * is the common path, so most requests will now arrive without a reason
+   * attached. Worth watching in cohort A: if hosts start declining requests
+   * they cannot judge, the note needs a sheet on this button rather than a
+   * screen behind it.
    */
   const joinMutation = useMutation({
     mutationFn: (matchId: string) => joinMatch(supabase, matchId),
-    onSuccess: async () => {
+    // `join_match` answers with the row it wrote, so an approval-gated match
+    // reports `requested`. Saying "you joined" to someone still waiting on the
+    // host is the bug finding 3 was about; it must not come back here.
+    onSuccess: async (participantStatus) => {
       await queryClient.invalidateQueries({ queryKey: ["discover-matches"] });
       await queryClient.invalidateQueries({ queryKey: ["my-matches"] });
-      notify(t("matches.hub.joinSuccess"));
+      notify(
+        participantStatus === "requested"
+          ? t("matches.hub.requestSentSuccess")
+          : t("matches.hub.joinSuccess"),
+      );
     },
     onError: (error: unknown) => notify(t(joinErrorKey(error))),
   });
@@ -370,7 +384,7 @@ export default function DiscoverScreen() {
             joinAction === "join"
               ? t("matches.list.action.join")
               : joinAction === "request"
-                ? t("matches.list.action.requestJoinOpens")
+                ? t("matches.list.action.requestJoin")
                 : undefined;
           return (
             <MatchCard
@@ -378,9 +392,9 @@ export default function DiscoverScreen() {
               statusLabel={t(`matches.status.${match.status}`)}
               actionLabel={joinLabel}
               onActionPress={
-                joinAction === "join"
-                  ? () => joinMutation.mutate(match.match_id)
-                  : undefined
+                joinAction === "none"
+                  ? undefined
+                  : () => joinMutation.mutate(match.match_id)
               }
               actionTone="actionable"
               dateTimeLabel={dateTimeLabel}
