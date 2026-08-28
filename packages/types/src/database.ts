@@ -724,6 +724,7 @@ export type Database = {
           id: string;
           invited_user_id: string | null;
           match_id: string;
+          note: string | null;
           revoked_at: string | null;
           token_hash: string | null;
         };
@@ -735,6 +736,7 @@ export type Database = {
           id?: string;
           invited_user_id?: string | null;
           match_id: string;
+          note?: string | null;
           revoked_at?: string | null;
           token_hash?: string | null;
         };
@@ -746,6 +748,7 @@ export type Database = {
           id?: string;
           invited_user_id?: string | null;
           match_id?: string;
+          note?: string | null;
           revoked_at?: string | null;
           token_hash?: string | null;
         };
@@ -824,6 +827,7 @@ export type Database = {
           chat_last_read_at: string | null;
           created_at: string;
           is_creator: boolean;
+          join_note: string | null;
           joined_at: string | null;
           left_at: string | null;
           match_id: string;
@@ -836,6 +840,7 @@ export type Database = {
           chat_last_read_at?: string | null;
           created_at?: string;
           is_creator?: boolean;
+          join_note?: string | null;
           joined_at?: string | null;
           left_at?: string | null;
           match_id: string;
@@ -848,6 +853,7 @@ export type Database = {
           chat_last_read_at?: string | null;
           created_at?: string;
           is_creator?: boolean;
+          join_note?: string | null;
           joined_at?: string | null;
           left_at?: string | null;
           match_id?: string;
@@ -1923,7 +1929,11 @@ export type Database = {
         Returns: string;
       };
       create_match_invite: {
-        Args: { p_invited_user_id?: string; p_match_id: string };
+        Args: {
+          p_invited_user_id?: string;
+          p_match_id: string;
+          p_note?: string;
+        };
         Returns: string;
       };
       deactivate_club: {
@@ -2093,6 +2103,7 @@ export type Database = {
         Returns: boolean;
       };
       hash_invite_token: { Args: { p_token: string }; Returns: string };
+      hosted_match_cap: { Args: never; Returns: number };
       invoke_process_notifications: { Args: never; Returns: number };
       is_blocked: {
         Args: { p_user_a: string; p_user_b: string };
@@ -2128,7 +2139,7 @@ export type Database = {
         Returns: boolean;
       };
       join_match: {
-        Args: { p_match_id: string };
+        Args: { p_match_id: string; p_note?: string };
         Returns: Database["public"]["Enums"]["participant_status"];
       };
       late_cancel_window_hours: { Args: never; Returns: number };
@@ -2556,6 +2567,7 @@ export type Database = {
         Returns: undefined;
       };
       run_notification_jobs: { Args: never; Returns: Json };
+      sanitize_player_note: { Args: { p_note: string }; Returns: string };
       schedule_attendance_prompts: { Args: never; Returns: number };
       schedule_stale_match_reminders: { Args: never; Returns: number };
       send_match_message: {
@@ -2851,6 +2863,7 @@ export type Database = {
         soonest_time: string | null;
         expires_at: string | null;
         created_at: string | null;
+        note: string | null;
       };
       user_report_queue_row: {
         report_id: string | null;

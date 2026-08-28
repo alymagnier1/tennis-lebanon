@@ -200,10 +200,7 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
               </View>
 
               <View
-                style={[
-                  styles.detailSlot,
-                  { flexDirection: rowDirection },
-                ]}
+                style={[styles.detailSlot, { flexDirection: rowDirection }]}
               >
                 {detail.kind === "clubs" ? (
                   <Icon

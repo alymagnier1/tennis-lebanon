@@ -13,7 +13,9 @@ Tennis Lebanon is a cross-platform mobile marketplace that coordinates a compati
 
 ### Launch geography
 
-Launch in one dense Lebanese area with 5–8 partner clubs and approximately 300 verified pilot players. Geography is modeled as configurable zones so another city or country can be added without schema changes.
+Launch in one dense Lebanese area with approximately 300 verified pilot players and 5–8 partner clubs. Geography is modeled as configurable zones so another city or country can be added without schema changes.
+
+**Partner clubs are a full-pilot ambition, not a cohort-1 bar.** The 5–8 target is not achievable in Beirut alone — four venues there take bookings from non-members, the academies do not rent outside lesson hours, and the rest are members-only — so reaching it means more than one city. Cohort 1 partners with no club at all: venues are listed, and players book on the club's own public WhatsApp. See the two 2026-08-19 decisions in `docs/DECISIONS.md`.
 
 ### North-star metric
 
@@ -26,7 +28,7 @@ Launch in one dense Lebanese area with 5–8 partner clubs and approximately 300
 - Confirmed-to-played rate
 - Cancellation and no-show rate
 - 30-day repeat play after a first completed match
-- Club request response time
+- Court-request conversion: WhatsApp handoff opened to court confirmed. Club response time itself sits outside the product and cannot be read from inside it (2026-08-19 decision)
 - Safety reports per 100 matches
 
 ## 2. Roles and permissions
@@ -217,9 +219,11 @@ Payments, wallets, refunds, coaches, lesson scheduling, tournaments, leagues, la
 These are decision thresholds, not forecasts:
 
 - 300 verified players
-- 5–8 operational partner clubs
-- 40%+ public-match fill rate
+- 5–8 operational partner clubs, across more than one city — see the launch-geography note above; this is not a cohort-1 bar
+- 40%+ public-match fill rate, with 50%+ as the healthy line (below roughly 50% filled, the hosting side stops hosting)
 - 80%+ confirmed-to-played rate
 - 30%+ 30-day repeat play after first completion
-- Median club response under 30 minutes during stated operating hours
+- Court-request conversion — WhatsApp handoff opened to court confirmed — trending up, with the bar set from the first cohort's baseline. Replaces the former median-club-response threshold, which is unmeasurable while booking runs on the club's own public WhatsApp
 - Less than 5% no-show rate after the initial learning period
+
+Cohort 1 runs against a reduced set of these; see the cohort-1 block in `docs/PILOT_50_PLAYER_LAUNCH.md`.

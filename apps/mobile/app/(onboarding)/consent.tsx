@@ -43,7 +43,7 @@ export default function ConsentScreen() {
       title={t("onboarding.consent.title")}
       description={t("onboarding.consent.description")}
       step={1}
-      totalSteps={6}
+      totalSteps={3}
       onBack={leaveOnboarding}
       footer={
         <FigmaPrimaryButton

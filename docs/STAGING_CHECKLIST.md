@@ -74,7 +74,7 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 - [ ] `docs/legal/*` reviewed by founder/legal counsel — dev drafts are **not** production-ready
 - [ ] Production privacy policy, terms, and community rules published at stable URLs
 - [ ] Account deletion and support contact documented in-app and in store listings
-- [ ] Club data-processing terms signed with partner clubs (out of band)
+- [ ] Club data-processing terms signed with partner clubs (out of band) — **not applicable to cohort 1**, which shares no player data with any club: players message the club themselves on its public WhatsApp
 
 ## 7. Observability and incident response
 
@@ -150,16 +150,16 @@ enqueued for them and can never be delivered by push. Those rows are now parked
 as `no_delivery_channel` rather than retried and marked failed, so the backlog
 is measurable — but the message still does not arrive.
 
-Reaching club staff out of band needs a decision before pilot. The options:
+Reaching club staff out of band needs a decision **before any club depends on a nudge** — which is not before cohort 1. Cohort 1 creates no club staff accounts and sends nothing to a club dashboard (2026-08-19 decision), so nothing is waiting on this. The options:
 
 | Option                     | Needs                                               |
 | -------------------------- | --------------------------------------------------- |
 | Transactional email        | Provider account and API key (none in the repo yet) |
 | WhatsApp Business sender   | Meta business verification; matches how clubs work  |
-| Dashboard-only, ops-driven | A human pings clubs; only viable at 5–8 clubs       |
+| Dashboard-only, ops-driven | A human pings clubs; viable only at single digits   |
 
-- [ ] Channel chosen and recorded in `docs/DECISIONS.md`
-- [ ] If ops-driven: named owner and expected response time agreed with clubs
+- [ ] Channel chosen and recorded in `docs/DECISIONS.md` — **not applicable to cohort 1**
+- [ ] If ops-driven: named owner and expected response time agreed with clubs — **not applicable to cohort 1**
 
 ## 8. Promotion sign-off
 

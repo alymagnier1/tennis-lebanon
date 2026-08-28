@@ -15,3 +15,4 @@ export * from "./reports";
 export * from "./critical-flows";
 export * from "./pilot-workflows";
 export * from "./cancellation-policy";
+export * from "./invites";

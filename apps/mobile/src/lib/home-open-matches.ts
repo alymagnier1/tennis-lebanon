@@ -2,6 +2,7 @@ import type { OpenMatchCard } from "@tennis-lebanon/api";
 import { clubIdsFromList } from "./match-clubs";
 
 export const HOME_OPEN_MATCHES_LIMIT = 2;
+export const HOME_OPEN_MATCHES_FETCH_LIMIT = 20;
 
 export function matchOverlapsHomePreferences(
   match: OpenMatchCard,

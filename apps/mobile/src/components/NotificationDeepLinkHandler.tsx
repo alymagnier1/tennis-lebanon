@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
-import * as Notifications from "expo-notifications";
+import type { NotificationResponse } from "expo-notifications";
 import { router } from "expo-router";
 import { useAuth } from "../providers/AuthProvider";
+import { getNativeNotifications } from "../lib/native-notifications";
 import { resolveNotificationHref } from "../lib/notification-deep-link";
 
 function navigateFromNotificationData(
@@ -23,9 +24,12 @@ export function NotificationDeepLinkHandler() {
       return;
     }
 
-    const handleResponse = (
-      response: Notifications.NotificationResponse | null,
-    ) => {
+    const Notifications = getNativeNotifications();
+    if (!Notifications) {
+      return;
+    }
+
+    const handleResponse = (response: NotificationResponse | null) => {
       const data = response?.notification.request.content.data;
       navigateFromNotificationData(
         data && typeof data === "object"

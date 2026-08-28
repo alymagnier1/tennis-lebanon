@@ -6,6 +6,7 @@ import {
 } from "./notification-copy.ts";
 
 export type NotificationParams = {
+  name?: string;
   clubName?: string;
   startsAt?: string;
   spotsLeft?: number;
@@ -24,6 +25,7 @@ function parseParams(value: unknown): NotificationParams | undefined {
   }
 
   const record = value as Record<string, unknown>;
+  const name = typeof record.name === "string" ? record.name.trim() : undefined;
   const clubName =
     typeof record.clubName === "string" ? record.clubName.trim() : undefined;
   const startsAt =
@@ -32,6 +34,7 @@ function parseParams(value: unknown): NotificationParams | undefined {
     typeof record.spotsLeft === "number" ? record.spotsLeft : undefined;
 
   if (
+    name === undefined &&
     clubName === undefined &&
     startsAt === undefined &&
     spotsLeft === undefined
@@ -39,7 +42,7 @@ function parseParams(value: unknown): NotificationParams | undefined {
     return undefined;
   }
 
-  return { clubName, startsAt, spotsLeft };
+  return { name, clubName, startsAt, spotsLeft };
 }
 
 export function parseNotificationPayload(
@@ -111,6 +114,7 @@ function displayParams(
   }
 
   return {
+    name: params.name,
     clubName: params.clubName,
     startsAt: params.startsAt
       ? formatStartsAt(params.startsAt, locale)

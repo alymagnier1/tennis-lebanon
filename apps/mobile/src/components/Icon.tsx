@@ -32,6 +32,7 @@ const ICONS = {
   filter: "options-outline",
   sort: "swap-vertical-outline",
   notifications: "notifications-outline",
+  mail: "mail-outline",
   info: "information-circle-outline",
   camera: "camera-outline",
   star: "star",

@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 import * as Device from "expo-device";
-import * as Notifications from "expo-notifications";
+import type { NotificationPermissionsStatus } from "expo-notifications";
 import { Linking, Platform } from "react-native";
 import {
   deactivateDevicePushToken,
@@ -12,6 +12,7 @@ import {
   type PushPlatform,
 } from "@tennis-lebanon/domain";
 import { getStableDeviceId } from "./device-id";
+import { getNativeNotifications } from "./native-notifications";
 import { reportError } from "./sentry";
 import { supabase } from "./supabase";
 
@@ -41,22 +42,28 @@ export type PushPermissionState = {
   canAskAgain: boolean;
 };
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
+const nativeNotifications = getNativeNotifications();
+
+if (nativeNotifications) {
+  nativeNotifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 function getPushPlatform(): PushPlatform | null {
   return normalizePushPlatform(Platform.OS);
 }
 
 function supportsPush(): boolean {
-  return Platform.OS !== "web" && Device.isDevice;
+  return (
+    Platform.OS !== "web" && Device.isDevice && nativeNotifications !== null
+  );
 }
 
 function getExpoProjectId(): string | undefined {
@@ -88,21 +95,24 @@ function reportMissingProjectId(): void {
 }
 
 /** True for a full grant and for iOS provisional (quiet) authorization. */
-function isGranted(
-  permissions: Notifications.NotificationPermissionsStatus,
-): boolean {
+function isGranted(permissions: NotificationPermissionsStatus): boolean {
+  if (!nativeNotifications) {
+    return false;
+  }
+
   return (
     permissions.granted ||
-    permissions.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
+    permissions.ios?.status ===
+      nativeNotifications.IosAuthorizationStatus.PROVISIONAL
   );
 }
 
 export async function getPushPermissionState(): Promise<PushPermissionState> {
-  if (!supportsPush()) {
+  if (!supportsPush() || !nativeNotifications) {
     return { status: "unsupported", canAskAgain: false };
   }
 
-  const current = await Notifications.getPermissionsAsync();
+  const current = await nativeNotifications.getPermissionsAsync();
   if (isGranted(current)) {
     return { status: "granted", canAskAgain: false };
   }
@@ -114,21 +124,21 @@ export async function getPushPermissionState(): Promise<PushPermissionState> {
 }
 
 export async function requestPushPermission(): Promise<boolean> {
-  if (!supportsPush()) {
+  if (!supportsPush() || !nativeNotifications) {
     return false;
   }
 
-  const current = await Notifications.getPermissionsAsync();
+  const current = await nativeNotifications.getPermissionsAsync();
   if (isGranted(current)) {
     return true;
   }
 
-  const requested = await Notifications.requestPermissionsAsync();
+  const requested = await nativeNotifications.requestPermissionsAsync();
   return isGranted(requested);
 }
 
 export async function getExpoPushTokenValue(): Promise<string | null> {
-  if (!supportsPush()) {
+  if (!supportsPush() || !nativeNotifications) {
     return null;
   }
 
@@ -138,7 +148,7 @@ export async function getExpoPushTokenValue(): Promise<string | null> {
     return null;
   }
 
-  const token = await Notifications.getExpoPushTokenAsync({ projectId });
+  const token = await nativeNotifications.getExpoPushTokenAsync({ projectId });
   const value = token.data?.trim();
   return isValidExpoPushToken(value) ? value : null;
 }

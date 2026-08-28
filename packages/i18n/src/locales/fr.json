@@ -242,14 +242,14 @@
   },
   "welcome": {
     "title": "Trouvez votre prochain match",
-    "description": "Rencontrez des joueurs compatibles, convenez d’un horaire et organisez un terrain au Liban.",
+    "description": "Pour les joueurs adultes au Liban qui veulent un match au bon niveau — pas un fil d’actualité. Pas d’UTR ni de NTRP : vous choisissez une bande.",
     "continue": "Commencer",
-    "headline1": "Find Your",
-    "headline2": "Match.",
-    "headline3": "Play Today.",
-    "createAccount": "Create Account",
-    "signIn": "Sign In",
-    "termsFooter": "By continuing you agree to our Terms & Privacy Policy"
+    "headline1": "Trouvez",
+    "headline2": "votre match.",
+    "headline3": "Jouez aujourd’hui.",
+    "createAccount": "Créer un compte",
+    "signIn": "Se connecter",
+    "termsFooter": "En continuant, vous acceptez nos conditions et notre politique de confidentialité"
   },
   "auth": {
     "signInTitle": "Se connecter ou créer un compte",
@@ -284,7 +284,7 @@
   "onboarding": {
     "consent": {
       "title": "Avant de continuer",
-      "description": "Lisez-les, puis acceptez pour continuer. Ce sont des brouillons de développement pour le pilote.",
+      "description": "Lisez chaque document, puis acceptez pour continuer. Ils s’appliquent au pilote Tennis Lebanon.",
       "acceptAll": "J'accepte les conditions d'utilisation, l'avis de confidentialité et les règles de la communauté",
       "terms": "J’accepte le projet de conditions d’utilisation",
       "readTerms": "Lire les conditions d’utilisation",
@@ -324,13 +324,16 @@
         "competitive": "Je m'entraîne et je joue en compétition"
       },
       "provisional": "Choisissez votre style de jeu et vos formats préférés.",
-      "formatError": "Choisissez le simple, le double ou les deux."
+      "formatError": "Choisissez le simple, le double ou les deux.",
+      "skillError": "Choisissez la phrase qui vous ressemble le plus.",
+      "commitmentEcho": "Nous chercherons des matchs {{band}}. Vous pourrez modifier ce choix tant que votre classement est provisoire."
     },
     "zones": {
       "title": "Où jouez-vous habituellement ?",
       "description": "Choisissez une ou plusieurs zones générales. Nous ne demandons jamais votre adresse personnelle.",
       "loadError": "Impossible de charger les zones disponibles.",
-      "empty": "Aucune zone pilote n’est disponible pour le moment."
+      "empty": "Aucune zone pilote n’est disponible pour le moment.",
+      "commitmentEcho": "Nous chercherons des matchs {{band}} à {{areas}}."
     },
     "notifications": {
       "title": "Restez informé",
@@ -355,12 +358,15 @@
       "finish": "Terminer la configuration"
     },
     "complete": {
-      "title": "You're all set,",
+      "title": "Tout est prêt,",
       "titleAccent": "{{name}}!",
-      "description": "Your profile is ready. Start discovering players and booking courts across Lebanon.",
-      "playersNearby": "Players nearby",
-      "courtsAvailable": "Courts available",
-      "cta": "Start Playing"
+      "description": "Votre profil est prêt. Trouvez un match ouvert, ou organisez-en un pour ce soir.",
+      "cta": "Commencer à jouer",
+      "giftTitle": "Matchs ouverts dans vos zones",
+      "giftEmptyTitle": "Soyez le premier à publier dans vos zones",
+      "giftEmptyBody": "Organisez un match pour ce soir. Les joueurs proches le verront.",
+      "giftErrorBody": "Nous n'avons pas pu charger les matchs ouverts dans vos zones. Votre profil est enregistré malgré tout.",
+      "giftOpenCta": "Ouvrir"
     }
   },
   "languages": {
@@ -456,7 +462,7 @@
       "bookingTitle": "Booking in progress",
       "bookingBody": "A club is reviewing your court request.",
       "courtTitle": "Ready to book a court",
-      "courtBody": "Tout le monde a convenu d’un horaire. Contactez un club préféré, puis confirmez le court.",
+      "courtBody": "Tout le monde a convenu d’un horaire. Réservez le court sur WhatsApp, puis confirmez-le ici.",
       "playedTitle": "Avez-vous joué ?",
       "playedBody": "Aucun court n'a été enregistré pour ce match. Dites-nous s'il a eu lieu.",
       "playersTitle": "En attente de joueurs",
@@ -471,7 +477,18 @@
       "actionBooking": "Voir la réservation",
       "actionCourt": "Réserver un court",
       "actionPlayed": "Confirmer",
-      "actionPlayers": "Inviter"
+      "actionPlayers": "Inviter",
+      "playersOneSpotTitle": "1 place restante",
+      "playersOneSpotBody": "Invitez quelqu’un avant que cette annonce ne se remplisse.",
+      "playersCourtOneSpotTitle": "Court réservé — 1 place restante",
+      "playersCourtOneSpotBody": "Votre court est retenu et il reste une place. Invitez quelqu’un avant l’heure.",
+      "availabilityTitle": "Ajoutez quand vous jouez",
+      "availabilityBody": "Vos créneaux aident les joueurs compatibles à vous trouver.",
+      "actionAvailability": "Ajouter",
+      "favoriteClubsTitle": "Choisissez vos clubs",
+      "favoriteClubsBody": "Ils préremplissent quand vous organisez un match.",
+      "actionFavoriteClubs": "Choisir",
+      "carouselA11y": "Action suivante {{current}} sur {{total}}"
     },
     "liquidityTitle": "Jouer sur le court",
     "liquidityCreate": "Créer un match",
@@ -483,21 +500,40 @@
       "chipLabel": "Joueurs libres {{slot}}",
       "chipSelectedLabel": "Affichage des joueurs libres {{slot}}",
       "viewAll": "Voir tout dans Découvrir",
-      "viewAllForSlot": "Voir tous les joueurs libres {{slot}} dans Découvrir"
+      "viewAllForSlot": "Voir tous les joueurs libres {{slot}} dans Découvrir",
+      "emptyTitle": "Ajoutez vos disponibilités",
+      "emptyBody": "Indiquez vos heures libres pour que des joueurs compatibles vous trouvent, ou parcourez les matchs ouverts.",
+      "emptyCta": "Voir les matchs ouverts"
     },
     "openMatches": {
       "title": "Matchs ouverts",
       "viewAll": "Tout voir",
-      "viewAllA11y": "Voir tous les matchs ouverts dans Découvrir"
+      "viewAllA11y": "Voir tous les matchs ouverts dans Découvrir",
+      "emptyTitle": "Organisez un match dans vos zones",
+      "emptyBody": "Publiez un horaire pour que d’autres proches puissent rejoindre. Vous pouvez aussi élargir la recherche dans Découvrir.",
+      "organise": "Organiser un match",
+      "retry": "Réessayer",
+      "titleCount_one": "{{count}} match ouvert dans vos zones",
+      "titleCount_other": "{{count}} matchs ouverts dans vos zones"
     },
     "quickActionsTitle": "Actions rapides",
     "quickActionFindPlayers": "Trouver des joueurs",
     "quickActionBookCourt": "Réserver un court",
     "loadError": "Impossible de charger votre tableau de bord. Tirez pour actualiser ou réessayez.",
     "upcomingTitle": "Upcoming matches",
-    "upcomingEmpty": "No upcoming matches yet. Create one or join an open game.",
+    "upcomingEmpty": "Organisez un match ou rejoignez une annonce ouverte pour jouer.",
     "noTimeYet": "Time not set yet",
-    "players": "players"
+    "players": "players",
+    "upcomingEmptyCta": "Organiser un match",
+    "firstPlay": {
+      "setupTitle": "Quand et où vous jouez",
+      "setupBody": "Ajoutez vos créneaux pour qu'on vous trouve. Vos clubs favoris préremplissent quand vous organisez.",
+      "addHours": "Ajouter mes horaires",
+      "addClubs": "Choisir des clubs",
+      "skipOrganise": "Organiser un match quand même",
+      "title": "Jouez votre premier match",
+      "body": "Organisez une annonce dans vos zones, ou rejoignez-en une dans Découvrir."
+    }
   },
   "profile": {
     "title": "Profil",
@@ -624,17 +660,16 @@
     "openPlayerProfile": "Voir le profil de {{name}}",
     "loading": "Recherche de joueurs et de matchs…",
     "error": "Impossible de charger les résultats.",
-    "emptyPlayersTitle": "Aucun joueur compatible pour le moment",
-    "emptyPlayersBody": "Élargissez le niveau, désactivez le chevauchement ou ajoutez plus de zones.",
-    "emptyMatchesTitle": "Aucun match ouvert pour le moment",
-    "emptyMatchesBody": "Élargissez les filtres ou créez un match pour lancer la liquidité.",
+    "emptyPlayersTitle": "Élargissez la recherche pour trouver des joueurs",
+    "emptyPlayersBody": "Essayez une plage de niveaux plus large, désactivez le chevauchement, ou ajoutez des zones.",
+    "emptyMatchesTitle": "Organisez un match pour apparaître",
+    "emptyMatchesBody": "Créez une annonce que d’autres peuvent rejoindre, ou élargissez les filtres.",
     "widenLevel": "Afficher les niveaux proches",
     "widenLevelBanner": "Affichage des joueurs sur deux bandes de niveau.",
     "widenZones": "Chercher dans toutes les zones",
     "widenZonesBanner": "Recherche dans toutes les zones pilotes.",
     "toggleOverlap": "Inclure sans chevauchement",
     "createMatchSoon": "Créer un match (bientôt à l'étape 3)",
-    "spotsRemaining": "{{count}} places restantes",
     "courtSecuredBadge": "Court réservé",
     "overlapHint": "Créneaux qui se chevauchent cette semaine",
     "zoneHint": "Joue dans vos zones",
@@ -655,7 +690,9 @@
     "playStyleTags": "Play style",
     "usualAvailability": "Habituellement {{schedule}}",
     "createMatchWith": "Créer un match avec {{name}}",
-    "clearTimeFilter": "Joueurs libres {{slot}}. Appuyez pour effacer."
+    "clearTimeFilter": "Joueurs libres {{slot}}. Appuyez pour effacer.",
+    "spotsRemaining_one": "1 place restante",
+    "spotsRemaining_other": "{{count}} places restantes"
   },
   "playerProfile": {
     "aboutTitle": "À propos",
@@ -789,7 +826,7 @@
         "edit": "Modifier",
         "a11y": "Paramètres du match : {{summary}}. Modifier pour ce match."
       },
-      "publishActionsHint": "Publier rend le match visible sur Découvrir. Inviter des joueurs le garde en brouillon envoyé à des personnes précises.",
+      "publishActionsHint": "Publier affiche le match dans Découvrir. Invitez ensuite depuis le hub du match.",
       "notesAdd": "Ajouter une note",
       "notesHide": "Masquer la note",
       "sendRequest": "Envoyer la demande à {{name}}",
@@ -875,6 +912,7 @@
         "join": "Rejoindre",
         "requestJoin": "Demander à rejoindre",
         "waitingPlayers": "En attente de joueurs",
+        "requestSent": "Demande envoyée",
         "finishSetup": "Terminer la configuration",
         "agreeTime": "Convenir d’un horaire",
         "bookCourt": "Réserver un court",
@@ -926,6 +964,7 @@
       "join": "Rejoindre le match",
       "requestJoin": "Demander à rejoindre",
       "joinSuccess": "Vous avez rejoint ce match.",
+      "requestSentSuccess": "Demande envoyée. L’hôte vous répondra.",
       "joinError": "Impossible de rejoindre ce match.",
       "approve": "Approuver",
       "reject": "Refuser",
@@ -1018,7 +1057,11 @@
         "vote": "Vote",
         "chat": "Chat",
         "book": "Book"
-      }
+      },
+      "joinNoteLabel": "Ajouter une note pour l’hôte (facultatif)",
+      "joinNotePlaceholder": "Partie conviviale — libre après 18 h.",
+      "joinNoteHint": "L’hôte la voit avec votre demande.",
+      "moreTitle": "Plus"
     },
     "rematch": {
       "milestone": "C'est votre match numéro {{total}}.",
@@ -1177,7 +1220,12 @@
       "showAllTimes": "Afficher les joueurs hors de ce créneau",
       "onlyMatchTime": "Uniquement ceux disponibles alors",
       "noPlayersAtTime": "Personne ne s’est déclaré disponible {{time}}. Élargissez ci-dessous, ou changez l’heure du match.",
-      "noPlayersHere": "Aucun joueur compatible pour ce match. Essayez d’élargir ci-dessous."
+      "noPlayersHere": "Aucun joueur compatible pour ce match. Essayez d’élargir ci-dessous.",
+      "noteLabel": "Ajouter une note (facultatif)",
+      "notePlaceholder": "On joue samedi matin ?",
+      "noteHint": "Affichée avec chaque invitation envoyée depuis cet écran. Absente de la notification push.",
+      "noteCounter": "{{count}}/{{max}}",
+      "noteQuote": "« {{note}} »"
     },
     "policy": {
       "leaveBeforeBooking": "Vous pouvez quitter librement tant qu'aucun court n'est réservé. Les changements tardifs répétés peuvent affecter votre fiabilité.",
@@ -1365,8 +1413,8 @@
     },
     "kinds": {
       "match_invitation": {
-        "title": "Vous êtes invité à jouer",
-        "body": "Un joueur vous a choisi pour son match. Ouvrez-le pour accepter ou refuser."
+        "title": "{{name}} vous invite à jouer",
+        "body": "Ouvrez pour accepter ou refuser."
       },
       "stale_match_reminder": {
         "title": "Votre match expire bientôt",

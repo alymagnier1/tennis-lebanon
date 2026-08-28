@@ -33,6 +33,7 @@ import {
   SegmentTabs,
   appStyles,
 } from "../../src/components/AppUi";
+import { AppText } from "../../src/components/AppText";
 
 import {
   PrimaryButton,
@@ -272,14 +273,20 @@ export default function MatchesScreen() {
     ]);
   };
 
+  // Every empty below is guarded on the query having succeeded. A failed list
+  // resolves to `data ?? []`, so without the guard "nothing here yet" renders
+  // on top of the error and reads as a verdict on the pilot rather than a fetch
+  // that failed.
   const showEmptyInvites =
     segment === "invites" &&
     invitesQuery.data?.length === 0 &&
-    !invitesQuery.isLoading;
+    !invitesQuery.isLoading &&
+    !invitesQuery.isError;
 
   const showEmptyActive =
     segment === "active" &&
     !matchesQuery.isLoading &&
+    !matchesQuery.isError &&
     groupedActive.now.length === 0 &&
     groupedActive.upcoming.length === 0;
 
@@ -287,12 +294,14 @@ export default function MatchesScreen() {
     segment === "active" &&
     !showEmptyActive &&
     !matchesQuery.isLoading &&
+    !matchesQuery.isError &&
     activeGroupMatches.length === 0;
 
   const showEmptyCompleted =
     segment === "completed" &&
     filteredCompletedMatches.length === 0 &&
-    !completedQuery.isLoading;
+    !completedQuery.isLoading &&
+    !completedQuery.isError;
 
   const segmentLoading =
     (segment === "invites" && invitesQuery.isLoading) ||
@@ -332,6 +341,7 @@ export default function MatchesScreen() {
       status: match.status,
       isCreator: match.is_creator,
       viewerAttendance: match.viewer_attendance,
+      participantStatus: match.participant_status,
     });
     const opensInvite = matchListActionOpensInvite({
       status: match.status,
@@ -521,6 +531,12 @@ export default function MatchesScreen() {
                       formatChip={t(`formats.${invite.format}`)}
                       locationChip={`${invite.participant_count}/${invite.capacity}`}
                     />
+
+                    {invite.note ? (
+                      <AppText style={appStyles.inviteNote}>
+                        {t("matches.invite.noteQuote", { note: invite.note })}
+                      </AppText>
+                    ) : null}
 
                     <PrimaryButton
                       label={t("matches.invite.accept")}

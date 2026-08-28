@@ -8,6 +8,8 @@ import {
   isAdultBirthYear,
   normalizeDisplayName,
   type Gender,
+  type PlayIntent,
+  type SkillBand,
   type SupportedLanguage,
 } from "@tennis-lebanon/domain";
 import { ErrorNotice } from "../../src/components/FormUi";
@@ -18,6 +20,7 @@ import {
   OnboardingStepLayout,
   OnboardingYearField,
   PolicyToggleCard,
+  SelectionCard,
   onboardingInputStyle,
 } from "../../src/components/onboarding-ui";
 import { Avatar } from "../../src/components/AppUi";
@@ -31,15 +34,15 @@ import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
 const languages: SupportedLanguage[] = ["en", "ar", "fr"];
 const genders: Gender[] = ["female", "male"];
+const bands: SkillBand[] = [
+  "beginner",
+  "improving",
+  "intermediate",
+  "advanced",
+  "competitive",
+];
+const intents: PlayIntent[] = ["social", "competitive", "either"];
 
-/**
- * Only the year is collected, and the field says so.
- *
- * `profiles.birth_year` is a `smallint` and the only thing the product asks of
- * it is adult eligibility, so a full date of birth would be more personal data
- * than anything downstream uses. The list starts at the youngest year that can
- * join, which makes the rule visible instead of enforcing it after submission.
- */
 const currentYear = new Date().getUTCFullYear();
 const youngestEligibleYear = currentYear - 18;
 const oldestOfferedYear = currentYear - 90;
@@ -48,6 +51,7 @@ type FieldErrors = {
   displayName?: string;
   birthYear?: string;
   languages?: string;
+  skillBand?: string;
 };
 
 export default function IdentityScreen() {
@@ -59,12 +63,11 @@ export default function IdentityScreen() {
   const [adultConfirmed, setAdultConfirmed] = useState(draft.isAdultConfirmed);
   const [selectedLanguages, setSelectedLanguages] = useState(draft.languages);
   const [gender, setGender] = useState<Gender | null>(draft.gender);
+  const [skillBand, setSkillBand] = useState(draft.skillBand);
+  const [playIntent, setPlayIntent] = useState(draft.playIntent);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [photoError, setPhotoError] = useState<string | null>(null);
 
-  // The profile row exists from signup (trigger in 002), and `set_own_avatar`
-  // no longer demands a completed onboarding, so the upload can happen right
-  // here rather than being held in memory until the end.
   const avatarMutation = useMutation({
     mutationFn: pickAndUploadOwnAvatar,
     onSuccess: async (result) => {
@@ -101,8 +104,6 @@ export default function IdentityScreen() {
       nextErrors.displayName = t("onboarding.identity.nameError");
     }
 
-    // The list cannot offer an ineligible year, so the only failures left are
-    // choosing nothing and not ticking the attestation.
     if (!hasYear || !isAdultBirthYear(numericYear, currentYear)) {
       nextErrors.birthYear = t("onboarding.identity.birthYearError");
     } else if (!adultConfirmed) {
@@ -111,6 +112,10 @@ export default function IdentityScreen() {
 
     if (selectedLanguages.length === 0) {
       nextErrors.languages = t("onboarding.identity.languageError");
+    }
+
+    if (!skillBand) {
+      nextErrors.skillBand = t("onboarding.tennis.skillError");
     }
 
     if (Object.values(nextErrors).some(Boolean)) {
@@ -125,8 +130,12 @@ export default function IdentityScreen() {
       gender,
       isAdultConfirmed: adultConfirmed,
       languages: selectedLanguages,
+      skillBand,
+      playIntent,
+      prefersSingles: true,
+      prefersDoubles: true,
     });
-    router.push("/(onboarding)/tennis-profile");
+    router.push("/(onboarding)/zones");
   };
 
   const photoLabel = profile?.avatar_path
@@ -138,14 +147,12 @@ export default function IdentityScreen() {
       title={t("onboarding.identity.title")}
       description={t("onboarding.identity.description")}
       step={2}
-      totalSteps={6}
+      totalSteps={3}
       onBack={() => router.back()}
       footer={
         <FigmaPrimaryButton label={t("common.continue")} onPress={next} />
       }
     >
-      {/* The avatar leads: it anchors the page and stops the step reading as an
-          undifferentiated stack of inputs. Optional, and labelled as such. */}
       <View style={styles.photoBlock}>
         <Pressable
           accessibilityRole="button"
@@ -219,8 +226,6 @@ export default function IdentityScreen() {
               key={option}
               label={t(`gender.${option}`)}
               selected={gender === option}
-              // Tapping the chosen chip clears it. Not stating a gender is a
-              // valid answer, so it has to stay reachable after answering.
               onPress={() =>
                 setGender((current) => (current === option ? null : option))
               }
@@ -245,8 +250,6 @@ export default function IdentityScreen() {
         </View>
       </OnboardingFormField>
 
-      {/* Last, next to the commitment it is: an attestation rather than another
-          detail about you. */}
       <PolicyToggleCard
         label={t("onboarding.identity.adultConfirm")}
         selected={adultConfirmed}
@@ -255,6 +258,44 @@ export default function IdentityScreen() {
           setErrors((current) => ({ ...current, birthYear: undefined }));
         }}
       />
+
+      <AppText style={styles.section}>{t("onboarding.tennis.title")}</AppText>
+      <AppText style={styles.sectionHint}>
+        {t("onboarding.tennis.description")}
+      </AppText>
+      {errors.skillBand ? <ErrorNotice>{errors.skillBand}</ErrorNotice> : null}
+      {bands.map((band) => (
+        <SelectionCard
+          key={band}
+          label={t(`onboarding.tennis.bands.${band}`)}
+          description={t(`skillBands.${band}`)}
+          selected={skillBand === band}
+          onPress={() => {
+            setSkillBand(band);
+            setErrors((current) => ({ ...current, skillBand: undefined }));
+          }}
+        />
+      ))}
+      {skillBand ? (
+        <AppText style={styles.commitmentEcho}>
+          {t("onboarding.tennis.commitmentEcho", {
+            band: t(`skillBands.${skillBand}`),
+          })}
+        </AppText>
+      ) : null}
+      <AppText style={styles.section}>
+        {t("onboarding.tennis.provisional")}
+      </AppText>
+      <View style={styles.chips}>
+        {intents.map((intent) => (
+          <ChipButton
+            key={intent}
+            label={t(`playIntent.${intent}`)}
+            selected={playIntent === intent}
+            onPress={() => setPlayIntent(intent)}
+          />
+        ))}
+      </View>
     </OnboardingStepLayout>
   );
 }
@@ -288,6 +329,28 @@ const styles = createLiveSheet(() =>
       flexDirection: "row",
       flexWrap: "wrap",
       gap: 8,
+    },
+    section: {
+      fontFamily: tennisFontFamily.heading,
+      fontSize: 16,
+      color: tennisColors.primaryDark,
+      marginBottom: 8,
+      marginTop: 16,
+    },
+    sectionHint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+      marginBottom: 12,
+    },
+    commitmentEcho: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
+      marginTop: 8,
+      marginBottom: 4,
     },
   }),
 );

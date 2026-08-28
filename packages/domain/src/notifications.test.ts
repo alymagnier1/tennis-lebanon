@@ -34,6 +34,7 @@ describe("notifications", () => {
         params: { clubName: "Hippodrome", startsAt: "2026-08-20T15:00:00Z" },
       })?.params,
     ).toEqual({
+      name: undefined,
       clubName: "Hippodrome",
       startsAt: "2026-08-20T15:00:00Z",
       spotsLeft: undefined,

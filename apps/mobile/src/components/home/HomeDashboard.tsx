@@ -16,6 +16,7 @@ import {
   listMyCompletedMatches,
   listMyMatchInvites,
   listMyMatches,
+  listOwnAvailability,
   listUserNotifications,
   countUnreadNotifications,
 } from "@tennis-lebanon/api";
@@ -27,10 +28,11 @@ import {
 } from "@tennis-lebanon/domain";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
-import { ListSkeleton, MatchCard, Avatar } from "../AppUi";
+import { EmptyState, ListSkeleton, MatchCard, Avatar } from "../AppUi";
 import { HomeFreeSlots } from "./HomeFreeSlots";
 import { HomeOpenMatches } from "./HomeOpenMatches";
-import { HomeNextActionCard } from "./HomeNextActionCard";
+import { HomeNextActionsCarousel } from "./HomeNextActionsCarousel";
+import { FigmaPrimaryButton, FigmaSecondaryButton } from "../onboarding-ui";
 import { Icon } from "../Icon";
 import { formatCompactUtcInBeirut } from "../../lib/beirut-time";
 import {
@@ -43,6 +45,7 @@ import {
   matchListAction,
   matchListActionOpensInvite,
   matchListStartsAt,
+  completedMatchNeedsScore,
 } from "../../lib/match-list-card";
 import {
   deriveHomeNextActions,
@@ -55,10 +58,11 @@ import { resolveRematchTarget } from "../../lib/start-rematch";
 import {
   CREATE_MATCH_ROUTE,
   MATCHES_ROUTE,
+  discoverOpenMatchesRoute,
   matchHubRoute,
   matchInviteRoute,
 } from "../../lib/routes";
-import { completedMatchNeedsScore } from "../../lib/match-list-card";
+import { startNewMatchCreate } from "../../lib/create-match-guard";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { PROFILE_TAB_ROUTE } from "../../lib/navigation";
 import { supabase } from "../../lib/supabase";
@@ -75,9 +79,9 @@ import {
   tennisSpacing,
 } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
-
-/** Home currently leads with browse + upcoming. Next-action cards duplicate those. */
-const SHOW_HOME_NEXT_ACTIONS = false;
+import { useHomeOpenMatchPicks } from "../../hooks/useHomeOpenMatchPicks";
+import { useHomeLiquidityOffers } from "../../hooks/useHomeLiquidityOffers";
+import { homeFirstPlayKind } from "../../lib/home-first-play";
 
 export function HomeDashboard({ displayName }: { displayName: string }) {
   const { t, i18n } = useTranslation();
@@ -128,12 +132,49 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
   });
   const unreadCount = unreadQuery.data ?? 0;
 
+  const upcomingMatches = sortUpcomingMatches(matchesQuery.data ?? []);
+  const openMatchPicks = useHomeOpenMatchPicks();
+  const liquidityOffers = useHomeLiquidityOffers();
+  const availabilityQuery = useQuery({
+    queryKey: ["own-availability", session?.user.id],
+    queryFn: () => listOwnAvailability(supabase),
+    enabled: Boolean(session?.user.id),
+    staleTime: 60_000,
+  });
+  const setupReady =
+    (!availabilityQuery.isEnabled || !availabilityQuery.isPending) &&
+    !openMatchPicks.clubsQuery.isPending &&
+    !availabilityQuery.isError &&
+    !openMatchPicks.clubsQuery.isError;
   const nextActions = deriveHomeNextActions(
     invitesQuery.data ?? [],
     matchesQuery.data ?? [],
     completedQuery.data ?? [],
-  ).slice(0, 2);
-  const upcomingMatches = sortUpcomingMatches(matchesQuery.data ?? []);
+    new Date().toISOString(),
+    setupReady
+      ? {
+          hasAvailability: (availabilityQuery.data?.length ?? 0) > 0,
+          hasFavoriteClubs: (openMatchPicks.clubsQuery.data?.length ?? 0) > 0,
+        }
+      : undefined,
+  );
+  const firstPlayKind = homeFirstPlayKind({
+    hasHeroAction: nextActions.length > 0,
+    upcomingCount: upcomingMatches.length,
+    openMatchCount: openMatchPicks.matches.length,
+    freeSlotCount: liquidityOffers.offers.length,
+    openMatchesReady:
+      !openMatchPicks.matchesQuery.isPending &&
+      !openMatchPicks.clubsQuery.isPending,
+    freeSlotsReady: !liquidityOffers.query.isPending,
+    availabilityReady:
+      !availabilityQuery.isEnabled || !availabilityQuery.isPending,
+    openMatchesFailed:
+      openMatchPicks.matchesQuery.isError || openMatchPicks.clubsQuery.isError,
+    freeSlotsFailed: liquidityOffers.query.isError,
+    availabilityFailed: availabilityQuery.isError,
+  });
+  const showFirstPlay = firstPlayKind !== null;
   const playerProfile = profileQuery.data;
   const matchesPlayed = completedQuery.data?.length ?? 0;
 
@@ -175,7 +216,7 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
   const [rematchPending, setRematchPending] = useState(false);
   const startRematch = async (action: HomeNextAction) => {
     const viewerUserId = session?.user.id;
-    if (!viewerUserId || rematchPending) {
+    if (!viewerUserId || rematchPending || !action.matchId) {
       return;
     }
 
@@ -222,6 +263,7 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
     void queryClient.invalidateQueries({
       queryKey: ["own-favorite-club-ids"],
     });
+    void queryClient.invalidateQueries({ queryKey: ["own-availability"] });
   };
 
   const isRefreshing =
@@ -397,121 +439,123 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
 
         {bodyLoading ? <ListSkeleton rows={3} /> : null}
 
-        {SHOW_HOME_NEXT_ACTIONS &&
-        !bodyLoading &&
-        !bodyError &&
-        nextActions.length > 0 ? (
+        {!bodyLoading && !bodyError && nextActions.length > 0 ? (
           <View style={styles.section}>
-            <AppText style={styles.sectionTitle}>
-              {t("home.nextActionsTitle")}
-            </AppText>
-            {nextActions.map((action) => (
-              <HomeNextActionCard
-                key={action.id}
-                action={action}
-                onPress={
-                  action.kind === "rematch"
-                    ? (pressed) => void startRematch(pressed)
-                    : undefined
-                }
-              />
-            ))}
+            <HomeNextActionsCarousel
+              actions={nextActions}
+              onRematch={(pressed) => void startRematch(pressed)}
+            />
           </View>
         ) : null}
 
-        {/* Above Quick actions on purpose: this is the one thing on Home that
-            costs a single tap, and it is what turns a free evening into a match
-            instead of losing it. */}
-        {!bodyLoading && !bodyError ? (
+        {!bodyLoading && !bodyError && firstPlayKind === "play" ? (
+          <View style={styles.section}>
+            <EmptyState
+              icon="court"
+              title={t("home.firstPlay.title")}
+              body={t("home.firstPlay.body")}
+              action={
+                <View style={styles.emptyUpcoming}>
+                  <FigmaPrimaryButton
+                    label={t("home.openMatches.organise")}
+                    onPress={() => startNewMatchCreate()}
+                  />
+                  <FigmaSecondaryButton
+                    label={t("home.free.emptyCta")}
+                    onPress={() => router.push(discoverOpenMatchesRoute())}
+                  />
+                </View>
+              }
+            />
+          </View>
+        ) : null}
+
+        {!bodyLoading && !bodyError && !showFirstPlay ? (
           <View style={styles.section}>
             <HomeFreeSlots />
           </View>
         ) : null}
 
-        {!bodyLoading && !bodyError ? <HomeOpenMatches /> : null}
+        {!bodyLoading && !bodyError && !showFirstPlay ? (
+          <HomeOpenMatches />
+        ) : null}
 
-        {!bodyLoading && !bodyError ? (
+        {!bodyLoading && !bodyError && upcomingMatches.length > 0 ? (
           <View style={styles.section}>
             <AppText style={styles.sectionTitle}>
               {t("home.upcomingTitle")}
             </AppText>
-            {upcomingMatches.length === 0 ? (
-              <AppText style={styles.emptyText}>
-                {t("home.upcomingEmpty")}
-              </AppText>
-            ) : (
-              <View style={styles.sectionStack}>
-                {upcomingMatches.slice(0, 2).map((match) => {
-                  const headlineInput = {
-                    opponentNames: match.opponent_names,
-                    status: match.status,
-                    participantCount: match.participant_count,
-                    capacity: match.capacity,
-                  };
-                  const opponent = resolveMatchCardOpponent(t, headlineInput);
-                  const locationChip = matchCardClubLabel({
-                    clubName: match.club_name,
-                    preferredClubs: match.preferred_clubs,
-                    hasCourt: match.has_court,
-                    courtSecuredFallback: t("matches.list.courtSecuredBadge"),
-                    compact: true,
-                  });
-                  const areaChip = matchCardAreaLabel(match.zones, locale, {
-                    compact: true,
-                  });
-                  const action = matchListAction({
-                    status: match.status,
-                    isCreator: match.is_creator,
-                  });
+            <View style={styles.sectionStack}>
+              {upcomingMatches.slice(0, 2).map((match) => {
+                const headlineInput = {
+                  opponentNames: match.opponent_names,
+                  status: match.status,
+                  participantCount: match.participant_count,
+                  capacity: match.capacity,
+                };
+                const opponent = resolveMatchCardOpponent(t, headlineInput);
+                const locationChip = matchCardClubLabel({
+                  clubName: match.club_name,
+                  preferredClubs: match.preferred_clubs,
+                  hasCourt: match.has_court,
+                  courtSecuredFallback: t("matches.list.courtSecuredBadge"),
+                  compact: true,
+                });
+                const areaChip = matchCardAreaLabel(match.zones, locale, {
+                  compact: true,
+                });
+                const action = matchListAction({
+                  status: match.status,
+                  isCreator: match.is_creator,
+                  participantStatus: match.participant_status,
+                });
 
-                  return (
-                    <MatchCard
-                      key={match.match_id}
-                      status={match.status}
-                      statusLabel={t(`matches.status.${match.status}`)}
-                      actionLabel={action ? t(action.labelKey) : undefined}
-                      actionTone={action?.tone}
-                      dateTimeLabel={(() => {
-                        const startsAt = matchListStartsAt(match);
-                        return startsAt
-                          ? formatCompactUtcInBeirut(startsAt)
-                          : undefined;
-                      })()}
-                      headline={buildMatchCardHeadline(t, headlineInput)}
-                      viewerName={displayName}
-                      viewerAvatarPath={profile?.avatar_path}
-                      opponentName={opponent}
-                      opponentAvatarColor={
-                        opponent ? opponentAvatarColor(opponent) : undefined
-                      }
-                      formatChip={t(`formats.${match.format}`)}
-                      locationChip={locationChip}
-                      areaChip={areaChip}
-                      badges={
-                        match.is_stale_warning
-                          ? [
-                              {
-                                label: t("matches.lifecycle.staleBadge"),
-                                tone: "attention" as const,
-                              },
-                            ]
-                          : undefined
-                      }
-                      onPress={() => router.push(matchHubRoute(match.match_id))}
-                      onActionPress={
-                        matchListActionOpensInvite({
-                          status: match.status,
-                          isCreator: match.is_creator,
-                        })
-                          ? () =>
-                              router.push(matchInviteRoute(match.match_id))
-                          : undefined
-                      }
-                    />
-                  );
-                })}
-              </View>
-            )}
+                return (
+                  <MatchCard
+                    key={match.match_id}
+                    status={match.status}
+                    statusLabel={t(`matches.status.${match.status}`)}
+                    actionLabel={action ? t(action.labelKey) : undefined}
+                    actionTone={action?.tone}
+                    dateTimeLabel={(() => {
+                      const startsAt = matchListStartsAt(match);
+                      return startsAt
+                        ? formatCompactUtcInBeirut(startsAt)
+                        : undefined;
+                    })()}
+                    headline={buildMatchCardHeadline(t, headlineInput)}
+                    viewerName={displayName}
+                    viewerAvatarPath={profile?.avatar_path}
+                    opponentName={opponent}
+                    opponentAvatarColor={
+                      opponent ? opponentAvatarColor(opponent) : undefined
+                    }
+                    formatChip={t(`formats.${match.format}`)}
+                    locationChip={locationChip}
+                    areaChip={areaChip}
+                    badges={
+                      match.is_stale_warning
+                        ? [
+                            {
+                              label: t("matches.lifecycle.staleBadge"),
+                              tone: "attention" as const,
+                            },
+                          ]
+                        : undefined
+                    }
+                    onPress={() => router.push(matchHubRoute(match.match_id))}
+                    onActionPress={
+                      matchListActionOpensInvite({
+                        status: match.status,
+                        isCreator: match.is_creator,
+                      })
+                        ? () => router.push(matchInviteRoute(match.match_id))
+                        : undefined
+                    }
+                  />
+                );
+              })}
+            </View>
           </View>
         ) : null}
       </View>
@@ -678,14 +722,13 @@ const styles = createLiveSheet(() =>
       fontSize: 18,
       color: tennisColors.primaryDark,
     },
+    emptyUpcoming: {
+      gap: 12,
+    },
     emptyText: {
       fontFamily: tennisFontFamily.body,
       fontSize: 14,
       color: tennisColors.mutedForeground,
-    },
-    loadingBody: {
-      paddingVertical: 32,
-      alignItems: "center",
     },
     errorCard: {
       gap: 12,

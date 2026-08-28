@@ -6,7 +6,6 @@ import {
   AuthHeroHeadline,
   AuthHeroLayout,
   FigmaPrimaryButton,
-  FigmaSecondaryButton,
   FigmaTextButton,
 } from "../../src/components/onboarding-ui";
 
@@ -18,14 +17,14 @@ export default function WelcomeScreen() {
       footer={
         <View style={{ gap: 12 }}>
           <FigmaPrimaryButton
-            label={t("welcome.createAccount")}
+            label={t("welcome.continue")}
             lime
             onPress={() => router.push("/(public)/sign-in")}
           />
-          <FigmaSecondaryButton
+          <FigmaTextButton
             label={t("welcome.signIn")}
-            ghostOnDark
             onPress={() => router.push("/(public)/sign-in")}
+            onDark
           />
           <FigmaTextButton
             label={t("welcome.termsFooter")}

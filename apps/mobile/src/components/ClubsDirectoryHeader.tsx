@@ -41,7 +41,11 @@ export function ClubsDirectoryHeader({
       >
         <View style={styles.searchWrap}>
           <View style={styles.searchIcon}>
-            <Icon name="discover" size={16} color={tennisColors.mutedForeground} />
+            <Icon
+              name="discover"
+              size={16}
+              color={tennisColors.mutedForeground}
+            />
           </View>
           <TextInput
             accessibilityLabel={t("clubs.searchPlaceholder")}

@@ -477,16 +477,6 @@ export default function CreateMatchScheduleScreen() {
             disabled={capReached}
             onPress={() => handlePublish("hub")}
           />
-          {/* Hidden when a specific player is being asked. "invite" skips both
-              publishMatch and createMatchInvite, so on that path the button
-              named after the goal was the one button that never reached it. */}
-          {requestForName ? null : (
-            <FigmaSecondaryButton
-              label={t("matches.invite.invitePlayers")}
-              disabled={isPublishing || capReached}
-              onPress={() => handlePublish("invite")}
-            />
-          )}
         </>
       }
     >
@@ -620,7 +610,11 @@ export default function CreateMatchScheduleScreen() {
                 ) : (
                   <>
                     <AppText style={createMatchStyles.hint}>
-                      {t("matches.create.preferredClubsListingOnly")}
+                      {t(
+                        clubsRequired
+                          ? "matches.create.preferredClubsRequiredHelp"
+                          : "matches.create.preferredClubsOptionalHelp",
+                      )}
                     </AppText>
                     <PreferredClubPicker
                       clubs={clubsQuery.data ?? []}
@@ -686,6 +680,7 @@ export default function CreateMatchScheduleScreen() {
               <SettingToggle
                 variant="card"
                 label={t("matches.create.listOnDiscover")}
+                description={t("matches.create.listOnDiscoverHint")}
                 value={listOnDiscover}
                 onValueChange={(value) => {
                   setListOnDiscover(value);

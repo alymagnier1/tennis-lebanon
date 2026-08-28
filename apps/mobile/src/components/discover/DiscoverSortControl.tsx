@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { BottomSheet, SheetOption } from "../AppUi";
-import { AppText } from "../AppText";
 import { Icon } from "../Icon";
 import {
   DISCOVER_SORT_MODES,
@@ -11,7 +10,6 @@ import {
 } from "../../lib/discover-sort";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
-import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 const SORT_LABEL_KEYS: Record<DiscoverSortMode, string> = {
   recommended: "discover.sortRecommended",
@@ -45,9 +43,6 @@ export function DiscoverSortControl({
         ]}
       >
         <Icon name="sort" size={16} color={tennisColors.primary} />
-        <AppText style={styles.triggerLabel} maxLines={1}>
-          {t(SORT_LABEL_KEYS[value])}
-        </AppText>
       </Pressable>
 
       <BottomSheet
@@ -89,11 +84,6 @@ const styles = createLiveSheet(() =>
     },
     triggerPressed: {
       opacity: 0.88,
-    },
-    triggerLabel: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 13,
-      color: tennisColors.primaryDark,
     },
     options: {
       gap: 8,

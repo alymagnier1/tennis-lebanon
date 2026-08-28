@@ -2,15 +2,12 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import {
-  discoverOpenMatches,
-  listOwnFavoriteClubIds,
-  type OpenMatchCard,
-} from "@tennis-lebanon/api";
+import { type OpenMatchCard } from "@tennis-lebanon/api";
 import { canShowJoinAction } from "@tennis-lebanon/domain";
 import { AppText } from "../AppText";
-import { MatchCard } from "../AppUi";
+import { ListSkeleton, MatchCard } from "../AppUi";
+import { ErrorNotice } from "../FormUi";
+import { FigmaSecondaryButton } from "../onboarding-ui";
 import {
   compactJoinedLabel,
   clubNamesFromList,
@@ -19,14 +16,12 @@ import {
 import { opponentAvatarColor } from "../../lib/match-card-status";
 import { matchHubLevelSummary } from "../../lib/match-hub-summaries";
 import { openMatchCardDateTimeLabel } from "../../lib/open-match-card-time";
-import { pickHomeOpenMatches } from "../../lib/home-open-matches";
+import { openMatchScarcityBadges } from "../../lib/open-match-scarcity";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { discoverOpenMatchesRoute, matchHubRoute } from "../../lib/routes";
-import { supabase } from "../../lib/supabase";
+import { useHomeOpenMatchPicks } from "../../hooks/useHomeOpenMatchPicks";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
-
-const FETCH_LIMIT = 20;
 
 function OpenMatchHomeCard({
   match,
@@ -71,6 +66,10 @@ function OpenMatchHomeCard({
         { min_skill: match.min_skill, max_skill: match.max_skill },
         t,
       )}
+      badges={openMatchScarcityBadges(match, {
+        oneSpotLeft: t("discover.spotsRemaining", { count: 1 }),
+        courtSecured: t("discover.courtSecuredBadge"),
+      })}
       note={match.notes ?? undefined}
       onPress={() => router.push(matchHubRoute(match.match_id))}
     />
@@ -81,30 +80,35 @@ export function HomeOpenMatches() {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const { rowDirection, writingDirection } = useLayoutDirection();
-
-  const clubsQuery = useQuery({
-    queryKey: ["own-favorite-club-ids"],
-    queryFn: () => listOwnFavoriteClubIds(supabase),
-    staleTime: 60_000,
-  });
-
-  const matchesQuery = useQuery({
-    queryKey: ["home-open-matches"],
-    queryFn: () => discoverOpenMatches(supabase, { limit: FETCH_LIMIT }),
-    staleTime: 60_000,
-  });
-
-  const matches = pickHomeOpenMatches(
-    matchesQuery.data ?? [],
-    clubsQuery.data ?? [],
-  );
+  const { clubsQuery, matchesQuery, matches } = useHomeOpenMatchPicks();
 
   if (matchesQuery.isError || clubsQuery.isError) {
-    return null;
+    return (
+      <View style={styles.root}>
+        <AppText style={[styles.title, { writingDirection }]}>
+          {t("home.openMatches.title")}
+        </AppText>
+        <ErrorNotice>{t("home.loadError")}</ErrorNotice>
+        <FigmaSecondaryButton
+          label={t("home.openMatches.retry")}
+          onPress={() => {
+            void matchesQuery.refetch();
+            void clubsQuery.refetch();
+          }}
+        />
+      </View>
+    );
   }
 
   if (matchesQuery.isPending || clubsQuery.isPending) {
-    return null;
+    return (
+      <View style={styles.root}>
+        <AppText style={[styles.title, { writingDirection }]}>
+          {t("home.openMatches.title")}
+        </AppText>
+        <ListSkeleton rows={2} />
+      </View>
+    );
   }
 
   if (matches.length === 0) {
@@ -118,7 +122,7 @@ export function HomeOpenMatches() {
           style={[styles.title, { writingDirection, flex: 1 }]}
           maxLines={1}
         >
-          {t("home.openMatches.title")}
+          {t("home.openMatches.titleCount", { count: matches.length })}
         </AppText>
         <Pressable
           accessibilityRole="button"

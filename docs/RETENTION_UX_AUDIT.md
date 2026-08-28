@@ -301,7 +301,7 @@ One decision visible: when. If host-guard blocks, explain and offer open existin
 
 - **North star:** Completed matches per week
 - **Retention guardrail:** 30-day repeat play after first completed match
-- **Liquidity / trust:** Fill rate, time-to-full, no-show rate, club response time
+- **Liquidity / trust:** Fill rate, time-to-full, no-show rate, court-request conversion (club response time itself sits outside the product)
 
 **Reject vanity metrics:** DAU, session length, notification volume, badge unlock counts.
 

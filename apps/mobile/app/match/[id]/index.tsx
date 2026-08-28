@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, TextInput, View } from "react-native";
 import { createLiveSheet } from "../../../src/theme/create-live-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -32,6 +32,8 @@ import {
   leavePolicyMessageKey,
   formatPriceMinor,
   hasUnanimousTimeYes,
+  PLAYER_NOTE_MAX,
+  sanitizePlayerNote,
   viewerMayInvite,
 } from "@tennis-lebanon/domain";
 import { spacing, typography } from "@tennis-lebanon/ui";
@@ -40,7 +42,7 @@ import { MatchChatEntry } from "../../../src/components/MatchChatEntry";
 import { MatchResultPanel } from "../../../src/components/MatchResultPanel";
 import { AppText } from "../../../src/components/AppText";
 import { SemanticBadge } from "../../../src/components/SemanticBadge";
-import { ErrorNotice } from "../../../src/components/FormUi";
+import { ScreenError } from "../../../src/components/FormUi";
 import {
   HubDestructiveLink,
   HubSummaryRow,
@@ -53,6 +55,7 @@ import { MatchHubPreferredClubs } from "../../../src/components/match/MatchHubPr
 import { MatchHubPendingBookingSection } from "../../../src/components/match/MatchHubPendingBookingSection";
 import { MatchHubParticipants } from "../../../src/components/match/MatchHubParticipants";
 import { MatchHubMatchDetails } from "../../../src/components/match/MatchHubMatchDetails";
+import { MatchHubMoreSection } from "../../../src/components/match/MatchHubMoreSection";
 import { MatchHubLayout } from "../../../src/components/match/MatchHubLayout";
 import { MatchPushNudge } from "../../../src/components/match/MatchPushNudge";
 import { MatchRematchCard } from "../../../src/components/match/MatchRematchCard";
@@ -134,6 +137,7 @@ type HubRequest = {
   user_id: string;
   display_name: string;
   status: string;
+  join_note?: string | null;
 };
 
 export default function MatchHubScreen() {
@@ -143,6 +147,7 @@ export default function MatchHubScreen() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const [joinNote, setJoinNote] = useState("");
 
   const hubQuery = useQuery({
     queryKey: ["match-hub", id],
@@ -169,10 +174,29 @@ export default function MatchHubScreen() {
   };
 
   const joinMutation = useMutation({
-    mutationFn: () => joinMatch(supabase, id!),
-    onSuccess: async () => {
+    mutationFn: () => {
+      const card = hubQuery.data;
+      const wantsNote =
+        card?.requires_creator_approval === true ||
+        card?.next_action === "request_to_join";
+      return joinMatch(
+        supabase,
+        id!,
+        wantsNote ? sanitizePlayerNote(joinNote) : null,
+      );
+    },
+    // `join_match` answers with the row it wrote, so an approval-gated match
+    // reports `requested` rather than `accepted`. Saying "you joined" to
+    // someone still waiting on the host is what made the pending state read as
+    // a confirmed one.
+    onSuccess: async (participantStatus) => {
+      setJoinNote("");
       await invalidate();
-      notify(t("matches.hub.joinSuccess"));
+      notify(
+        participantStatus === "requested"
+          ? t("matches.hub.requestSentSuccess")
+          : t("matches.hub.joinSuccess"),
+      );
     },
     onError: () => notify(t("matches.hub.joinError")),
   });
@@ -503,7 +527,7 @@ export default function MatchHubScreen() {
             yes: slot.yes_count,
             required: slot.required_count,
           })}
-          {unanimous ? ` Â· ${t("matches.hub.agreedTime")}` : ""}
+          {unanimous ? ` · ${t("matches.hub.agreedTime")}` : ""}
         </AppText>
         {showVoteUi ? (
           <View style={[styles.voteRow, { flexDirection: rowDirection }]}>
@@ -588,7 +612,7 @@ export default function MatchHubScreen() {
       />
     ) : undefined,
     onBack: exitMatchHub,
-    // Only user pull-to-refresh â€” background invalidate after confirm was
+    // Only user pull-to-refresh — background invalidate after confirm was
     // flashing RefreshControl and reading as a full-screen flicker.
     refreshing: pullRefreshing,
     onRefresh: () => {
@@ -623,7 +647,11 @@ export default function MatchHubScreen() {
   return (
     <MatchHubLayout {...hubLayoutProps}>
       {hubQuery.isError ? (
-        <ErrorNotice>{t("matches.hub.loadError")}</ErrorNotice>
+        <ScreenError
+          message={t("matches.hub.loadError")}
+          retryLabel={t("common.retry")}
+          onRetry={() => void hubQuery.refetch()}
+        />
       ) : null}
 
       {primaryBannerBody ? (
@@ -634,19 +662,33 @@ export default function MatchHubScreen() {
         <StatusBanner body={secondaryBannerBody} tone="info" />
       ) : null}
 
-      {/* Asked here rather than in onboarding: this is the first screen where
-          "we'll tell you when they reply" is about a real named opponent. */}
-      <MatchPushNudge
-        userId={session?.user.id}
-        viewerIsParticipant={hub?.viewer_status === "accepted"}
-      />
-
-      {hub?.can_extend_listing ? (
-        <FigmaSecondaryButton
-          label={t("matches.lifecycle.extendListing")}
-          disabled={extendMutation.isPending}
-          onPress={() => extendMutation.mutate()}
-        />
+      {primaryActionKind === "request_join" ? (
+        <View style={styles.joinNoteWrap}>
+          <AppText style={[styles.joinNoteLabel, { writingDirection }]}>
+            {t("matches.hub.joinNoteLabel")}
+          </AppText>
+          <TextInput
+            accessibilityLabel={t("matches.hub.joinNoteLabel")}
+            value={joinNote}
+            onChangeText={(value) =>
+              setJoinNote(value.slice(0, PLAYER_NOTE_MAX))
+            }
+            placeholder={t("matches.hub.joinNotePlaceholder")}
+            placeholderTextColor={tennisColors.mutedForeground}
+            style={[
+              styles.joinNoteInput,
+              {
+                writingDirection,
+                textAlign: writingDirection === "rtl" ? "right" : "left",
+              },
+            ]}
+            multiline
+            maxLength={PLAYER_NOTE_MAX}
+          />
+          <AppText style={[styles.joinNoteHint, { writingDirection }]}>
+            {t("matches.hub.joinNoteHint")}
+          </AppText>
+        </View>
       ) : null}
 
       {vsHeroStage && hub ? (
@@ -694,12 +736,6 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      {hub?.notes && polishedLayout ? (
-        <AppText style={[styles.hubNotes, { writingDirection }]}>
-          {hub.notes}
-        </AppText>
-      ) : null}
-
       {booking && !courtLocked && polishedLayout ? (
         <MatchHubPendingBookingSection
           booking={booking}
@@ -723,119 +759,13 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      {booking && !courtLocked && !polishedLayout ? (
-        <PlayerProfileSection title={t("matches.hub.bookingTitle")}>
-          <HubSummaryRow
-            label={t("clubs.title")}
-            value={`${booking.club_name} Â· ${booking.court_name}`}
-          />
-          <HubSummaryRow
-            label={t("matches.booking.confirmTime")}
-            value={formatUtcSlotInBeirut(booking.starts_at, booking.ends_at)}
-          />
-          <HubSummaryRow
-            label={t("matches.hub.bookingStatus")}
-            value={
-              booking.status === "requested"
-                ? t("matches.hub.bookingRequested")
-                : booking.status === "accepted"
-                  ? t("matches.hub.bookingAccepted")
-                  : booking.status === "alternative_proposed"
-                    ? t("matches.hub.bookingAlternative")
-                    : booking.status
-            }
-          />
-          {formatPriceMinor(booking.price_minor, booking.currency) ? (
-            <HubSummaryRow
-              label={t("clubs.payAtClub")}
-              value={formatPriceMinor(booking.price_minor, booking.currency)!}
-            />
-          ) : null}
-          {booking.status === "alternative_proposed" &&
-          booking.proposed_start_at &&
-          booking.proposed_end_at ? (
-            <HubSummaryRow
-              label={t("matches.hub.bookingAlternative")}
-              value={`${booking.proposed_court_name ?? ""} Â· ${formatUtcSlotInBeirut(
-                booking.proposed_start_at,
-                booking.proposed_end_at,
-              )}`}
-            />
-          ) : null}
-          {booking.club_note ? (
-            <AppText style={styles.timeMeta}>{booking.club_note}</AppText>
-          ) : null}
-
-          {hub &&
-          canCancelBookingRequest({
-            viewerIsCreator: hub.viewer_is_creator,
-            bookingStatus: booking.status,
-          }) ? (
-            <HubDestructiveLink
-              label={t("matches.hub.cancelBooking")}
-              onPress={() => cancelBookingMutation.mutate(booking.booking_id)}
-            />
-          ) : null}
-
-          {hub &&
-          canRespondToBookingAlternative({
-            viewerIsCreator: hub.viewer_is_creator,
-            bookingStatus: booking.status,
-          }) ? (
-            <View style={styles.inlineActions}>
-              <View style={styles.inlineAction}>
-                <FigmaPrimaryButton
-                  label={t("matches.hub.acceptAlternative")}
-                  onPress={() =>
-                    alternativeMutation.mutate({
-                      bookingId: booking.booking_id,
-                      accept: true,
-                    })
-                  }
-                />
-              </View>
-              <View style={styles.inlineAction}>
-                <FigmaSecondaryButton
-                  label={t("matches.hub.declineAlternative")}
-                  disabled={alternativeMutation.isPending}
-                  onPress={() =>
-                    alternativeMutation.mutate({
-                      bookingId: booking.booking_id,
-                      accept: false,
-                    })
-                  }
-                />
-              </View>
-            </View>
-          ) : null}
-        </PlayerProfileSection>
-      ) : null}
-
-      {hub && shouldShowDiscoveryOverview(hub, booking, hasAgreedTime) ? (
-        <MatchHubOverviewDetails hub={hub} />
-      ) : null}
-
-      {participants.length > 0 && !vsHeroStage ? (
-        <MatchHubParticipants
-          participants={participants}
-          viewerUserId={session?.user.id}
-        />
-      ) : null}
-
-      {canInvite && !actionsInReadyHero ? (
-        <FigmaSecondaryButton
-          label={t("matches.invite.invitePlayers")}
-          onPress={() => router.push(matchInviteRoute(String(id)))}
-        />
-      ) : null}
-
-      {!isFixedTimingMode(hub?.timing_mode) && proposedTimes.length > 0 ? (
+      {showVoteUi &&
+      !isFixedTimingMode(hub?.timing_mode) &&
+      proposedTimes.length > 0 ? (
         <PlayerProfileSection title={t("matches.hub.proposedTimes")}>
-          {showVoteUi ? (
-            <AppText style={styles.timeMeta}>
-              {t("matches.hub.votePrompt")}
-            </AppText>
-          ) : null}
+          <AppText style={styles.timeMeta}>
+            {t("matches.hub.votePrompt")}
+          </AppText>
           {showManageTimes && proposedTimes.length < 3 ? (
             <FigmaSecondaryButton
               label={t("matches.hub.addAnotherTime")}
@@ -853,6 +783,14 @@ export default function MatchHubScreen() {
               <AppText style={styles.participantName} maxLines={1}>
                 {request.display_name}
               </AppText>
+              {request.join_note ? (
+                <AppText
+                  style={[styles.requestNote, { writingDirection }]}
+                  maxLines={4}
+                >
+                  {t("matches.invite.noteQuote", { note: request.join_note })}
+                </AppText>
+              ) : null}
               <View
                 style={[styles.requestActions, { flexDirection: rowDirection }]}
               >
@@ -884,57 +822,6 @@ export default function MatchHubScreen() {
         </PlayerProfileSection>
       ) : null}
 
-      {hub && shouldShowAgreedTimeSection(Boolean(agreedSlot), hub, booking) ? (
-        <PlayerProfileSection title={t("matches.hub.agreedTime")}>
-          <AppText style={styles.timeLabel}>
-            {formatUtcSlotInBeirut(agreedSlot!.starts_at, agreedSlot!.ends_at)}
-          </AppText>
-          {showReschedule ? (
-            <FigmaSecondaryButton
-              label={t("matches.hub.reschedule")}
-              onPress={() => router.push(`/match/${id}/reschedule`)}
-            />
-          ) : null}
-        </PlayerProfileSection>
-      ) : null}
-
-      {courtLocked && hub && !vsHeroStage ? (
-        <MatchHubMatchDetails hub={hub} />
-      ) : null}
-
-      <MatchChatEntry
-        matchId={id!}
-        enabled={chatAvailable}
-        locked={chatLocked}
-        viewerUserId={session?.user.id}
-        onPress={() => router.push(matchChatRoute(id!))}
-      />
-
-      {showWithdraw ? (
-        <HubDestructiveLink
-          label={t("matches.hub.withdraw")}
-          onPress={() => router.push(matchWithdrawRoute(id!))}
-        />
-      ) : null}
-
-      {showLeave ? (
-        <HubDestructiveLink
-          label={t("matches.hub.leave")}
-          onPress={() =>
-            confirmAction({
-              title: t("matches.hub.leave"),
-              message: t(
-                leavePolicyMessageKey(hub!.status, hasAcceptedBooking),
-                { hours: 24 },
-              ),
-              confirmLabel: t("matches.hub.leave"),
-              cancelLabel: t("common.cancel"),
-              onConfirm: () => leaveMutation.mutate(),
-            })
-          }
-        />
-      ) : null}
-
       {hub && session?.user.id ? (
         <MatchResultPanel
           matchId={id!}
@@ -943,8 +830,6 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      {/* Last on the hub on purpose: everything above a completed match is
-          paperwork, and this is the only thing that leads to another match. */}
       {showRematch ? (
         <MatchRematchCard
           opponents={rematchOpponents}
@@ -952,17 +837,208 @@ export default function MatchHubScreen() {
         />
       ) : null}
 
-      {/*
-        Cancelling used to sit beside the primary action in the ready hero, at
-        equal weight. In the other stages the footer action bar still carries
-        it, so this covers the hero stage only.
-      */}
-      {showCancel && actionsInReadyHero ? (
-        <HubDestructiveLink
-          label={t("matches.hub.cancel")}
-          onPress={handleCancelMatch}
+      <MatchHubMoreSection>
+        <MatchPushNudge
+          userId={session?.user.id}
+          viewerIsParticipant={hub?.viewer_status === "accepted"}
         />
-      ) : null}
+
+        {hub?.can_extend_listing ? (
+          <FigmaSecondaryButton
+            label={t("matches.lifecycle.extendListing")}
+            disabled={extendMutation.isPending}
+            onPress={() => extendMutation.mutate()}
+          />
+        ) : null}
+
+        {hub?.notes && polishedLayout ? (
+          <AppText style={[styles.hubNotes, { writingDirection }]}>
+            {hub.notes}
+          </AppText>
+        ) : null}
+
+        {booking && !courtLocked && !polishedLayout ? (
+          <PlayerProfileSection title={t("matches.hub.bookingTitle")}>
+            <HubSummaryRow
+              label={t("clubs.title")}
+              value={`${booking.club_name} · ${booking.court_name}`}
+            />
+            <HubSummaryRow
+              label={t("matches.booking.confirmTime")}
+              value={formatUtcSlotInBeirut(booking.starts_at, booking.ends_at)}
+            />
+            <HubSummaryRow
+              label={t("matches.hub.bookingStatus")}
+              value={
+                booking.status === "requested"
+                  ? t("matches.hub.bookingRequested")
+                  : booking.status === "accepted"
+                    ? t("matches.hub.bookingAccepted")
+                    : booking.status === "alternative_proposed"
+                      ? t("matches.hub.bookingAlternative")
+                      : booking.status
+              }
+            />
+            {formatPriceMinor(booking.price_minor, booking.currency) ? (
+              <HubSummaryRow
+                label={t("clubs.payAtClub")}
+                value={formatPriceMinor(booking.price_minor, booking.currency)!}
+              />
+            ) : null}
+            {booking.status === "alternative_proposed" &&
+            booking.proposed_start_at &&
+            booking.proposed_end_at ? (
+              <HubSummaryRow
+                label={t("matches.hub.bookingAlternative")}
+                value={`${booking.proposed_court_name ?? ""} · ${formatUtcSlotInBeirut(
+                  booking.proposed_start_at,
+                  booking.proposed_end_at,
+                )}`}
+              />
+            ) : null}
+            {booking.club_note ? (
+              <AppText style={styles.timeMeta}>{booking.club_note}</AppText>
+            ) : null}
+
+            {hub &&
+            canCancelBookingRequest({
+              viewerIsCreator: hub.viewer_is_creator,
+              bookingStatus: booking.status,
+            }) ? (
+              <HubDestructiveLink
+                label={t("matches.hub.cancelBooking")}
+                onPress={() => cancelBookingMutation.mutate(booking.booking_id)}
+              />
+            ) : null}
+
+            {hub &&
+            canRespondToBookingAlternative({
+              viewerIsCreator: hub.viewer_is_creator,
+              bookingStatus: booking.status,
+            }) ? (
+              <View style={styles.inlineActions}>
+                <View style={styles.inlineAction}>
+                  <FigmaPrimaryButton
+                    label={t("matches.hub.acceptAlternative")}
+                    onPress={() =>
+                      alternativeMutation.mutate({
+                        bookingId: booking.booking_id,
+                        accept: true,
+                      })
+                    }
+                  />
+                </View>
+                <View style={styles.inlineAction}>
+                  <FigmaSecondaryButton
+                    label={t("matches.hub.declineAlternative")}
+                    disabled={alternativeMutation.isPending}
+                    onPress={() =>
+                      alternativeMutation.mutate({
+                        bookingId: booking.booking_id,
+                        accept: false,
+                      })
+                    }
+                  />
+                </View>
+              </View>
+            ) : null}
+          </PlayerProfileSection>
+        ) : null}
+
+        {hub && shouldShowDiscoveryOverview(hub, booking, hasAgreedTime) ? (
+          <MatchHubOverviewDetails hub={hub} />
+        ) : null}
+
+        {participants.length > 0 && !vsHeroStage ? (
+          <MatchHubParticipants
+            participants={participants}
+            viewerUserId={session?.user.id}
+          />
+        ) : null}
+
+        {canInvite && !actionsInReadyHero ? (
+          <FigmaSecondaryButton
+            label={t("matches.invite.invitePlayers")}
+            onPress={() => router.push(matchInviteRoute(String(id)))}
+          />
+        ) : null}
+
+        {!showVoteUi &&
+        !isFixedTimingMode(hub?.timing_mode) &&
+        proposedTimes.length > 0 ? (
+          <PlayerProfileSection title={t("matches.hub.proposedTimes")}>
+            {showManageTimes && proposedTimes.length < 3 ? (
+              <FigmaSecondaryButton
+                label={t("matches.hub.addAnotherTime")}
+                onPress={() => router.push(`/match/${id}/add-time`)}
+              />
+            ) : null}
+            {proposedTimes.map((slot) => renderTimeSlot(slot))}
+          </PlayerProfileSection>
+        ) : null}
+
+        {hub &&
+        shouldShowAgreedTimeSection(Boolean(agreedSlot), hub, booking) ? (
+          <PlayerProfileSection title={t("matches.hub.agreedTime")}>
+            <AppText style={styles.timeLabel}>
+              {formatUtcSlotInBeirut(
+                agreedSlot!.starts_at,
+                agreedSlot!.ends_at,
+              )}
+            </AppText>
+            {showReschedule ? (
+              <FigmaSecondaryButton
+                label={t("matches.hub.reschedule")}
+                onPress={() => router.push(`/match/${id}/reschedule`)}
+              />
+            ) : null}
+          </PlayerProfileSection>
+        ) : null}
+
+        {courtLocked && hub && !vsHeroStage ? (
+          <MatchHubMatchDetails hub={hub} />
+        ) : null}
+
+        {showWithdraw ? (
+          <HubDestructiveLink
+            label={t("matches.hub.withdraw")}
+            onPress={() => router.push(matchWithdrawRoute(id!))}
+          />
+        ) : null}
+
+        {showLeave ? (
+          <HubDestructiveLink
+            label={t("matches.hub.leave")}
+            onPress={() =>
+              confirmAction({
+                title: t("matches.hub.leave"),
+                message: t(
+                  leavePolicyMessageKey(hub!.status, hasAcceptedBooking),
+                  { hours: 24 },
+                ),
+                confirmLabel: t("matches.hub.leave"),
+                cancelLabel: t("common.cancel"),
+                onConfirm: () => leaveMutation.mutate(),
+              })
+            }
+          />
+        ) : null}
+
+        {showCancel && actionsInReadyHero ? (
+          <HubDestructiveLink
+            label={t("matches.hub.cancel")}
+            onPress={handleCancelMatch}
+          />
+        ) : null}
+      </MatchHubMoreSection>
+
+      <MatchChatEntry
+        matchId={id!}
+        enabled={chatAvailable}
+        locked={chatLocked}
+        viewerUserId={session?.user.id}
+        onPress={() => router.push(matchChatRoute(id!))}
+      />
     </MatchHubLayout>
   );
 }
@@ -1017,6 +1093,41 @@ const styles = createLiveSheet(() =>
       paddingBottom: spacing.sm,
       borderBottomWidth: 1,
       borderBottomColor: tennisColors.border,
+    },
+    requestNote: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: typography.size.sm,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+      fontStyle: "italic",
+    },
+    joinNoteWrap: {
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    joinNoteLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: typography.size.sm,
+      color: tennisColors.primaryDark,
+    },
+    joinNoteInput: {
+      minHeight: 64,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      backgroundColor: tennisColors.card,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderRadius: tennisRadii.md,
+      fontFamily: tennisFontFamily.body,
+      fontSize: typography.size.sm,
+      color: tennisColors.primaryDark,
+      textAlignVertical: "top",
+    },
+    joinNoteHint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: typography.size.xs,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
     },
     requestActions: {
       gap: spacing.sm,

@@ -118,6 +118,19 @@ describe("matches API wrappers", () => {
     expect(rpc).toHaveBeenCalledWith("join_match", { p_match_id: "match-id" });
   });
 
+  it("joins a match with an optional note", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: "requested", error: null });
+
+    await expect(joinMatch(client, "match-id", "Happy to play")).resolves.toBe(
+      "requested",
+    );
+    expect(rpc).toHaveBeenCalledWith("join_match", {
+      p_match_id: "match-id",
+      p_note: "Happy to play",
+    });
+  });
+
   it("responds to join requests", async () => {
     const { client, rpc } = createMockClient();
     rpc.mockResolvedValue({ data: null, error: null });
@@ -137,8 +150,13 @@ describe("matches API wrappers", () => {
       .mockResolvedValueOnce({ data: "match-id", error: null });
 
     await expect(
-      createMatchInvite(client, "match-id", "user-id"),
+      createMatchInvite(client, "match-id", "user-id", "Fancy a hit"),
     ).resolves.toBe("token");
+    expect(rpc).toHaveBeenCalledWith("create_match_invite", {
+      p_match_id: "match-id",
+      p_invited_user_id: "user-id",
+      p_note: "Fancy a hit",
+    });
     await expect(acceptMatchInvite(client, "token")).resolves.toBe("match-id");
   });
 

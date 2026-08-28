@@ -28,6 +28,8 @@ const ACTION_ICONS: Record<HomeNextAction["kind"], IconName> = {
   played: "check",
   players: "discover",
   rematch: "court",
+  availability: "clock",
+  favoriteClubs: "clubs",
 };
 
 export function HomeNextActionCard({
@@ -105,6 +107,7 @@ export function HomeNextActionCard({
 const styles = createLiveSheet(() =>
   StyleSheet.create({
     card: {
+      width: "100%",
       borderWidth: 1.5,
       borderRadius: tennisRadii.md,
       paddingVertical: 10,

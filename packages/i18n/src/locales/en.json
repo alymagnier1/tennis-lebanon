@@ -245,7 +245,7 @@
     "headline1": "Find Your",
     "headline2": "Match.",
     "headline3": "Play Today.",
-    "description": "Connect with tennis players across Lebanon. Book courts, schedule matches, track your game.",
+    "description": "For adult players in Lebanon who want a match at the right level — not a feed. We don’t use UTR or NTRP; you pick a band.",
     "createAccount": "Create Account",
     "signIn": "Sign In",
     "termsFooter": "By continuing you agree to our Terms & Privacy Policy",
@@ -284,7 +284,7 @@
   "onboarding": {
     "consent": {
       "title": "Before you continue",
-      "description": "Read each one, then accept to continue. These are development drafts for the pilot.",
+      "description": "Read each one, then accept to continue. These apply to the Tennis Lebanon pilot.",
       "acceptAll": "I accept the Terms of Use, Privacy Notice and Community Rules",
       "terms": "I accept the Terms of Use draft",
       "readTerms": "Read Terms of Use",
@@ -324,13 +324,16 @@
         "competitive": "I train and compete"
       },
       "provisional": "Choose your play style and preferred formats.",
-      "formatError": "Choose singles, doubles, or both."
+      "formatError": "Choose singles, doubles, or both.",
+      "skillError": "Choose the line that sounds most like you.",
+      "commitmentEcho": "We’ll look for {{band}} matches. You can change this while your rating is provisional."
     },
     "zones": {
       "title": "Where do you usually play?",
       "description": "Choose one or more broad areas. We never ask for your home address.",
       "loadError": "We could not load the available areas.",
-      "empty": "No pilot areas are available yet."
+      "empty": "No pilot areas are available yet.",
+      "commitmentEcho": "We’ll look for {{band}} in {{areas}}."
     },
     "notifications": {
       "title": "Stay in the loop",
@@ -357,9 +360,12 @@
     "complete": {
       "title": "You're all set,",
       "titleAccent": "{{name}}!",
-      "description": "Your profile is ready. Start discovering players and booking courts across Lebanon.",
-      "playersNearby": "Players nearby",
-      "courtsAvailable": "Courts available",
+      "description": "Your profile is ready. Find an open match, or organise one for tonight.",
+      "giftTitle": "Open matches in your areas",
+      "giftEmptyTitle": "Be the first listing in your areas",
+      "giftEmptyBody": "Organise a match for tonight. Others nearby will see it.",
+      "giftErrorBody": "We could not load open matches in your areas. Your profile is saved either way.",
+      "giftOpenCta": "Open",
       "cta": "Start Playing"
     }
   },
@@ -447,6 +453,7 @@
       "awaitingScore": "A match counts once its score is confirmed. Yours waiting: {{pending}}.",
       "awaitingScoreAction": "See matches waiting for a score"
     },
+    "upcomingEmptyCta": "Organise a match",
     "nextActionsTitle": "Next actions",
     "nextAction": {
       "inviteTitle": "Match invite waiting",
@@ -456,13 +463,17 @@
       "bookingTitle": "Booking in progress",
       "bookingBody": "A club is reviewing your court request.",
       "courtTitle": "Ready to book a court",
-      "courtBody": "Everyone agreed on a time. Contact a preferred club, then confirm the court.",
+      "courtBody": "Everyone agreed on a time. Book the court on WhatsApp, then confirm it here.",
       "playedTitle": "Did you play?",
       "playedBody": "This match never got a court in the app. Tell us if it happened.",
       "playersTitle": "Waiting for players",
       "playersBody": "Invite someone or share your match so it can fill.",
+      "playersOneSpotTitle": "1 spot left",
+      "playersOneSpotBody": "Invite someone before this listing fills.",
       "playersCourtSecuredTitle": "Court booked, players missing",
       "playersCourtSecuredBody": "Your court is held. Invite someone before the hour comes round.",
+      "playersCourtOneSpotTitle": "Court booked — 1 spot left",
+      "playersCourtOneSpotBody": "Your court is held and one seat remains. Invite someone before the hour.",
       "rematchTitle": "Play {{name}} again",
       "rematchBody": "You played {{name}} recently. Set up the next one.",
       "actionRematch": "Play again",
@@ -471,7 +482,14 @@
       "actionBooking": "View booking",
       "actionCourt": "Book court",
       "actionPlayed": "Confirm",
-      "actionPlayers": "Invite"
+      "actionPlayers": "Invite",
+      "availabilityTitle": "Add when you play",
+      "availabilityBody": "Free hours help compatible players find you.",
+      "actionAvailability": "Add hours",
+      "favoriteClubsTitle": "Set preferred clubs",
+      "favoriteClubsBody": "They pre-fill when you host a match.",
+      "actionFavoriteClubs": "Choose clubs",
+      "carouselA11y": "Next action {{current}} of {{total}}"
     },
     "liquidityTitle": "Get on court",
     "liquidityCreate": "Create match",
@@ -483,21 +501,39 @@
       "chipLabel": "Players free {{slot}}",
       "chipSelectedLabel": "Showing players free {{slot}}",
       "viewAll": "View all in Discover",
-      "viewAllForSlot": "View everyone free {{slot}} in Discover"
+      "viewAllForSlot": "View everyone free {{slot}} in Discover",
+      "emptyTitle": "Add when you play",
+      "emptyBody": "Share your free hours so compatible players can find you, or browse open matches.",
+      "emptyCta": "See open matches"
     },
     "openMatches": {
       "title": "Open matches",
       "viewAll": "View all",
-      "viewAllA11y": "View all open matches in Discover"
+      "viewAllA11y": "View all open matches in Discover",
+      "emptyTitle": "Organise a match in your areas",
+      "emptyBody": "List a time and others nearby can join. You can also widen the search in Discover.",
+      "organise": "Organise a match",
+      "retry": "Try again",
+      "titleCount_one": "{{count}} open match in your areas",
+      "titleCount_other": "{{count}} open matches in your areas"
     },
     "quickActionsTitle": "Quick actions",
     "quickActionFindPlayers": "Find players",
     "quickActionBookCourt": "Book a court",
     "loadError": "We could not load your dashboard. Pull to refresh or try again.",
     "upcomingTitle": "Upcoming matches",
-    "upcomingEmpty": "No upcoming matches yet. Create one or join an open game.",
+    "upcomingEmpty": "Organise a match or join an open listing to get on court.",
     "noTimeYet": "Time not set yet",
-    "players": "players"
+    "players": "players",
+    "firstPlay": {
+      "setupTitle": "When and where you play",
+      "setupBody": "Add free hours so others can find you. Favourite clubs pre-fill when you host.",
+      "addHours": "Add your hours",
+      "addClubs": "Choose clubs",
+      "skipOrganise": "Organise a match anyway",
+      "title": "Play your first match",
+      "body": "Organise a listing in your areas, or join one on Discover."
+    }
   },
   "notifications": {
     "centerTitle": "Notifications",
@@ -536,8 +572,8 @@
     },
     "kinds": {
       "match_invitation": {
-        "title": "You have been invited to play",
-        "body": "A player picked you for their match. Open it to accept or decline."
+        "title": "{{name}} invited you to play",
+        "body": "Open it to accept or decline."
       },
       "stale_match_reminder": {
         "title": "Your match expires soon",
@@ -742,10 +778,10 @@
     "openPlayerProfile": "View {{name}}'s profile",
     "loading": "Searching for matches and players…",
     "error": "We could not load discovery results.",
-    "emptyPlayersTitle": "No compatible players yet",
-    "emptyPlayersBody": "Try widening your level range, turning off availability overlap, or adding more areas.",
-    "emptyMatchesTitle": "No open matches yet",
-    "emptyMatchesBody": "Try widening your filters or create a match to start liquidity.",
+    "emptyPlayersTitle": "Widen your search to find players",
+    "emptyPlayersBody": "Try a broader level range, turn off availability overlap, or add more areas.",
+    "emptyMatchesTitle": "Organise a match to get listed",
+    "emptyMatchesBody": "Create a listing others can join, or widen your filters.",
     "playerBio": "About",
     "playStyleTags": "Play style",
     "widenLevel": "Show nearby levels",
@@ -754,7 +790,8 @@
     "widenZonesBanner": "Searching across all pilot areas.",
     "toggleOverlap": "Include players without overlap",
     "createMatchSoon": "Create a match (coming in Milestone 3)",
-    "spotsRemaining": "{{count}} spots left",
+    "spotsRemaining_one": "1 spot left",
+    "spotsRemaining_other": "{{count}} spots left",
     "courtSecuredBadge": "Court secured",
     "overlapHint": "Times overlap this week",
     "zoneHint": "Plays in your areas",
@@ -907,7 +944,7 @@
         "edit": "Edit",
         "a11y": "Match settings: {{summary}}. Edit for this match."
       },
-      "publishActionsHint": "Publish makes the match visible on Discover. Invite players keeps it as a draft you send to specific people.",
+      "publishActionsHint": "Publishing lists the match on Discover. Invite players from the match hub next.",
       "notesAdd": "Add a note",
       "notesHide": "Hide note",
       "sendRequest": "Send request to {{name}}",
@@ -993,6 +1030,7 @@
         "join": "Join",
         "requestJoin": "Request to join",
         "waitingPlayers": "Waiting for players",
+        "requestSent": "Request sent",
         "finishSetup": "Finish setup",
         "agreeTime": "Agree a time",
         "bookCourt": "Book a court",
@@ -1049,7 +1087,11 @@
       "pendingRequests": "Join requests",
       "join": "Join match",
       "requestJoin": "Request to join",
+      "joinNoteLabel": "Add a note for the host (optional)",
+      "joinNotePlaceholder": "Happy to play social — free after 6.",
+      "joinNoteHint": "The host sees this with your request.",
       "joinSuccess": "You joined this match.",
+      "requestSentSuccess": "Request sent. The host will let you know.",
       "joinError": "We could not join this match.",
       "approve": "Approve",
       "reject": "Reject",
@@ -1136,7 +1178,8 @@
       "courtReleased": "Court released. The match needs a court again.",
       "courtReleaseError": "Could not release this court.",
       "expandMatchDetails": "Show match details",
-      "collapseMatchDetails": "Hide match details"
+      "collapseMatchDetails": "Hide match details",
+      "moreTitle": "More"
     },
     "rematch": {
       "milestone": "That is match number {{total}} for you.",
@@ -1295,7 +1338,12 @@
       "showAllTimes": "Show players outside this time",
       "onlyMatchTime": "Only players free then",
       "noPlayersAtTime": "No one has said they are free {{time}}. Widen below, or change the match time.",
-      "noPlayersHere": "No compatible players for this match yet. Try widening below."
+      "noPlayersHere": "No compatible players for this match yet. Try widening below.",
+      "noteLabel": "Add a note (optional)",
+      "notePlaceholder": "Fancy a hit Saturday morning?",
+      "noteHint": "Shown with every invite you send from this screen. Not included in the push notification.",
+      "noteCounter": "{{count}}/{{max}}",
+      "noteQuote": "\"{{note}}\""
     },
     "policy": {
       "leaveBeforeBooking": "You can leave freely while no court is booked. Repeated late changes may affect your reliability.",

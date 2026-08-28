@@ -527,7 +527,11 @@ export function EmptyState({
   return (
     <View style={styles.emptyState}>
       <View accessibilityElementsHidden style={styles.emptyIcon}>
-        <Icon name={icon ?? "court"} size={56} color={colors.neutral[300]} />
+        <Icon
+          name={icon ?? "court"}
+          size={56}
+          color={tennisColors.mutedForeground}
+        />
       </View>
       <AppText style={[styles.emptyTitle, { writingDirection }]} maxLines={3}>
         {title}
@@ -981,6 +985,13 @@ export const appStyles = createLiveSheet(() =>
   StyleSheet.create({
     screenGap: { gap: spacing.lg },
     cardList: { gap: spacing.md },
+    inviteNote: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: typography.size.sm,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+      fontStyle: "italic",
+    },
   }),
 );
 
@@ -1299,14 +1310,15 @@ const styles = createLiveSheet(() =>
     },
     emptyIcon: { alignItems: "center", justifyContent: "center" },
     emptyTitle: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.lg,
-      fontWeight: typography.weight.bold,
+      fontFamily: tennisFontFamily.headingSemi,
       textAlign: "center",
     },
     emptyBody: {
-      color: colors.neutral[700],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.md,
+      fontFamily: tennisFontFamily.body,
       lineHeight: 22,
       textAlign: "center",
     },

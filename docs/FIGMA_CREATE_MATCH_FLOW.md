@@ -107,12 +107,13 @@ Reuse and spec: summary cards, panels, toggles, slot picker, club picker, footer
 
 ---
 
-### CM / 01 — First-run “Where I play” (`/profile/where-i-play?firstRun=1`) — **once**
+### CM / 01 — “Where I play” (`/profile/where-i-play`) — **Profile only**
 
-Reached from the onboarding completion CTA, not from create. It is what makes
-areas and clubs pre-fill later, so it belongs to this flow even though it sits
-on a profile route. It cannot be an onboarding step: the club RPCs reject
-callers whose `onboarding_completed_at` is null.
+Retired as a required first-run gate. Onboarding already collects preferred
+areas; those pre-fill create. Favourite clubs remain optional in Profile.
+Hosts who skip clubs pick them on the first create; those clubs can still be
+saved as favourites so the next create is pre-filled.
+The `?firstRun=1` query is unused. Club RPCs still require a completed profile.
 
 **Title:** Where do you play?  
 **Body:** Areas plus favourite clubs; both pre-fill every hosted match.

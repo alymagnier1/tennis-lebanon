@@ -52,4 +52,3 @@ export function homeFreePlayerDetailLine(input: {
   }
   return { text: "", kind: "empty", metaClubLabel: undefined };
 }
-

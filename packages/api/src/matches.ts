@@ -188,6 +188,8 @@ export type MatchInviteInboxRow = {
   soonest_time: string | null;
   expires_at: string;
   created_at: string;
+  /** Optional one-way note from the inviter; null when none was sent. */
+  note: string | null;
 };
 
 export async function createMatchDraft(
@@ -229,9 +231,11 @@ export async function createAndPublishMatch(
 export async function joinMatch(
   client: TennisSupabaseClient,
   matchId: string,
+  note?: string | null,
 ): Promise<string> {
   const { data, error } = await client.rpc("join_match", {
     p_match_id: matchId,
+    ...(note != null && note !== "" ? { p_note: note } : {}),
   });
   if (error) throw error;
   return data as string;
@@ -311,10 +315,12 @@ export async function createMatchInvite(
   client: TennisSupabaseClient,
   matchId: string,
   invitedUserId?: string,
+  note?: string | null,
 ): Promise<string> {
   const { data, error } = await client.rpc("create_match_invite", {
     p_match_id: matchId,
     p_invited_user_id: invitedUserId ?? undefined,
+    ...(note != null && note !== "" ? { p_note: note } : {}),
   });
   if (error) throw error;
   return data as string;

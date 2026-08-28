@@ -35,10 +35,22 @@ export function matchHubRoute(matchId: string): Href {
   } as Href;
 }
 
+export const PROFILE_AVAILABILITY_ROUTE = "/profile/availability" as Href;
+export const PROFILE_WHERE_I_PLAY_ROUTE = "/profile/where-i-play" as Href;
+
 export function homeNextActionRoute(
   kind: HomeNextActionKind,
-  matchId: string,
+  matchId?: string,
 ): Href {
+  if (kind === "availability") {
+    return PROFILE_AVAILABILITY_ROUTE;
+  }
+  if (kind === "favoriteClubs") {
+    return PROFILE_WHERE_I_PLAY_ROUTE;
+  }
+  if (!matchId) {
+    return MATCHES_ROUTE;
+  }
   if (kind === "players") {
     return matchInviteRoute(matchId);
   }

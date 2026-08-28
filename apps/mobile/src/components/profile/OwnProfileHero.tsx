@@ -99,9 +99,7 @@ export function OwnProfileHero({
             ) : null}
             <View style={[styles.badgeRow, { flexDirection: rowDirection }]}>
               <View style={[styles.levelBadge, { backgroundColor: bandFill }]}>
-                <AppText
-                  style={[styles.levelBadgeText, { color: bandColor }]}
-                >
+                <AppText style={[styles.levelBadgeText, { color: bandColor }]}>
                   {t(`skillBands.${skillBand}`)}
                 </AppText>
               </View>
@@ -137,7 +135,11 @@ export function OwnProfileHero({
               style={[styles.ratingValueRow, { flexDirection: rowDirection }]}
             >
               <AppText style={styles.statValue}>{ratingValue}</AppText>
-              <Icon name="info" size={14} color={tennisColors.mutedForeground} />
+              <Icon
+                name="info"
+                size={14}
+                color={tennisColors.mutedForeground}
+              />
             </View>
             <AppText style={styles.statLabel}>{ratingLabel}</AppText>
           </Pressable>

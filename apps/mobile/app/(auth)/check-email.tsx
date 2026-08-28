@@ -8,6 +8,7 @@ import {
   OnboardingStepLayout,
 } from "../../src/components/onboarding-ui";
 import { AppText } from "../../src/components/AppText";
+import { Icon } from "../../src/components/Icon";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import { tennisColors, tennisRadii } from "../../src/theme/tennis-tokens";
 
@@ -33,7 +34,7 @@ export default function CheckEmailScreen() {
       }
     >
       <View style={styles.iconBox}>
-        <AppText style={styles.icon}>✉</AppText>
+        <Icon name="mail" size={28} color={tennisColors.primary} />
       </View>
       <AppText style={styles.hint}>{t("auth.checkEmailHint")}</AppText>
     </OnboardingStepLayout>
@@ -50,9 +51,6 @@ const styles = createLiveSheet(() =>
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 20,
-    },
-    icon: {
-      fontSize: 28,
     },
     hint: {
       fontFamily: tennisFontFamily.body,

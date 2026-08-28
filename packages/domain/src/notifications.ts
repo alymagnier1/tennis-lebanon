@@ -37,6 +37,8 @@ export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
  * timezone: `startsAt` is a UTC ISO timestamp, displayed in `Asia/Beirut`.
  */
 export type NotificationParams = {
+  /** Inviter or other person named in the copy (e.g. match_invitation). */
+  name?: string;
   clubName?: string;
   startsAt?: string;
   spotsLeft?: number;
@@ -83,6 +85,7 @@ function parseNotificationParams(
   }
 
   const record = value as Record<string, unknown>;
+  const name = typeof record.name === "string" ? record.name.trim() : undefined;
   const clubName =
     typeof record.clubName === "string" ? record.clubName.trim() : undefined;
   const startsAt =
@@ -91,6 +94,7 @@ function parseNotificationParams(
     typeof record.spotsLeft === "number" ? record.spotsLeft : undefined;
 
   if (
+    name === undefined &&
     clubName === undefined &&
     startsAt === undefined &&
     spotsLeft === undefined
@@ -98,7 +102,7 @@ function parseNotificationParams(
     return undefined;
   }
 
-  return { clubName, startsAt, spotsLeft };
+  return { name, clubName, startsAt, spotsLeft };
 }
 
 export function normalizeNotificationDeepLink(

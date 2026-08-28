@@ -11,6 +11,69 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-27 — Cohort-1 ops owner, support inbox, and escalation SLA
+
+- Status: accepted
+- Context: Phase 0.7 of the launch checklist asks for a named ops owner and a single support inbox, and had never been answered. Nothing in the repo held a real address: the legal drafts point at "the official in-app support path" without naming one, and `.env.example` carried the placeholder `support@tennis-lebanon.invalid`. The gap was not visible locally because `packages/config/src/env.ts` only rejects a `.invalid` address once `APP_ENV` is not `local` — so it would have surfaced as a failed staging build at Phase 6.3 rather than as a missing decision.
+- Decision: Ali Moghnieh is the cohort-1 ops owner, covering `/admin/reports`, `/admin/disputes`, and matches that agreed a time but never recorded a court. The support inbox is `aly.magnier@gmail.com`, **explicitly temporary**. Escalation splits the previously uniform 48h suggestion: open reports clear within 24h because they are a safety path, disputed results within 48h. Club operations sign-off in the go-live table is marked not-applicable for cohort 1, since no club takes part.
+- Alternatives considered: buying a domain for a `support@` address now (rejected — the product name is still an open founder decision per `README.md`, so the domain could be the wrong one, and the address is a config value that costs one env var to change); a shared team inbox (rejected — no team at 50 players); keeping the uniform 48h SLA (rejected — a safety report and a scoring disagreement do not deserve the same clock).
+- Consequences: `.env.example` deliberately keeps `support@tennis-lebanon.invalid`. Local development never needs a real support address, and the `.invalid` default is a working tripwire that makes a misconfigured non-local build fail loudly. The real value belongs in EAS and Vercel environment settings at Phases 1 and 6, not in the repository. Because the address ships inside the app binary and on the store listing, replacing it after cohort B requires a rebuild — cheap at 50 players, so the temporary address is acceptable for cohort 1 but should be settled before any public release. Phase 0.7 is now answered; Phase 0 still waits on the 0.3 workflow rehearsals.
+- Owner: Ali Moghnieh
+
+## 2026-08-27 — Cohort-1 pilot bar is separate from the full-pilot bar
+
+- Status: accepted
+- Context: `CLAUDE.md` ranks `docs/PRD.md` above the launch checklist, so PRD section 7 outranked the accepted 2026-08-19 decisions that no club is a partner in cohort 1 and that club response time is unmeasurable while booking runs on the club's own WhatsApp. Those decisions corrected the launch checklist and propagated nowhere else, leaving eight documents asserting a stale bar. `PILOT_OPERATIONS.md` also contradicted itself: line 40 says no club takes part, and the pre-pilot blocker list demanded founder sign-off with real club staff.
+- Decision: PRD section 7 is the full-pilot bar; `PILOT_50_PLAYER_LAUNCH.md` now carries a cohort-1 bar for 50 players in the single `beirut` zone. The club-response guardrail is replaced everywhere with court-request conversion (WhatsApp handoff opened to court confirmed), the proxy migration `070` already records, with its own threshold left to a baseline rather than guessed. The 5–8 partner-club target is annotated as a multi-city, post-cohort ambition rather than deleted. Fill rate resolves to 40% pass and 50% healthy. The liquidity-signal empty rate is recorded with the threshold deliberately unset until cohort A produces a baseline. Cohort A recruiting weights to Improving / Intermediate / Advanced with Intermediate largest, because `DEFAULT_LEVEL_WINDOW` is 1 and the edge bands cannot reach each other.
+- Alternatives considered: leaving PRD untouched and overriding only in the launch doc (rejected — precedence keeps the stale bar winning); deleting the 5–8 target outright (rejected — unproven outside Beirut, and the full pilot may add Keserwan); setting a liquidity-empty threshold now (rejected — no baseline exists, so any number is a guess wearing a threshold's clothes); restricting cohort A to two adjacent bands (rejected — the plus-or-minus-one window already makes a centred three-band mix workable); promoting the "~5 matches per weekday evening" projection to a threshold (rejected — conflates thin liquidity with players simply playing fortnightly).
+- Consequences: Documentation only, no code or schema change. Eight documents updated: PRD, APP_SUMMARY, README, RETENTION_UX_AUDIT, STAGING_CHECKLIST, PILOT_OPERATIONS, PILOT_50_PLAYER_LAUNCH, and this log. Club data-processing terms and the club-staff push-channel decision are marked not-applicable to cohort 1 rather than blocking it. Two gaps are now recorded rather than silently carried: no document states a pilot duration, though the 30-day repeat-play bar implies roughly 30 days past first completions; and the liquidity threshold must be set after cohort A. Phase 7 also gains a throttled-network rehearsal and three past-behaviour questions for signups who never created or joined, the first qualitative instrument in the pilot.
+- Owner: Founder
+
+## 2026-08-26 — Hours and clubs are Home next actions in a carousel
+
+- Status: accepted
+- Context: First-open Home asked for hours and clubs as a stacked empty under (or instead of) listings. The founder wanted those reminders as next actions, but not a vertical stack of full cards.
+- Decision: Missing hours and favourite clubs are derived Home next actions, ranked after live match work and before rematch. Home shows a horizontal snap carousel (one card, peek of the next, dots when there are two or more). A single action stays a plain card. Onboarding stays three screens; Profile still owns the editors. Play is not blocked.
+- Alternatives considered: stacked next-action cards (rejected — repeats the first-open empty mess); a combined “when and where” card with two buttons (rejected — hides the second ask); restoring Where I play as an onboarding step (already rejected).
+- Consequences: The first-play empty is only organise / Discover when nothing else is queued. Open matches and free players can still list under the carousel.
+- Owner: Founder
+
+## 2026-08-26 — First Home asks for hours and clubs, skippable
+
+- Status: superseded
+- Context: Hours and favourite clubs help others find you and pre-fill hosting, but a 6-step onboarding that collected them before Home was rejected as setup theater. First-open Home then only asked to organise or Discover, so new players were never called to fill the two profile facts that make them findable.
+- Decision: Onboarding stays three screens. When Home has nothing to list, the first empty asks for free hours (primary) and favourite clubs (secondary). Organise remains a text skip. After both exist, the empty becomes organise / Discover. Not a gate: play stays possible immediately.
+- Alternatives considered: restoring Where I play as an onboarding step (rejected — already cut); a blocking wizard before Home (rejected — delays the first match); stacking a setup card on top of open-match listings (rejected — repeats the three-empty first-open mess).
+- Consequences: Profile still owns the editors (`/profile/availability`, `/profile/where-i-play`). Home open-match ranking keeps using saved hours and clubs when they exist.
+- Owner: Founder
+
+## 2026-08-26 — Ethical influence: truthful counts, agency empties, no Welcome crowd number
+
+- Status: accepted
+- Context: A Cialdini audit scored the player app 6/10: Welcome had no tribe or honesty about rankings, Complete asked before giving listings, empty states taught “nobody is here,” and Home claimed matches were waiting even when the overlapping list was empty.
+- Decision: Welcome stays copy-only (Lebanon + level, no UTR/NTRP). Live counts appear only after sign-in, from `discover_open_matches` overlap and `capacity - participant_count`. Empty states lead with what the player can do. Last-seat and court-held copy are shown only when those facts are true. Complete may gift overlapping open matches before Home.
+- Alternatives considered: a public unauthenticated match-count RPC (rejected — extra surface, and Welcome has no zones yet); inventing crowd numbers for a ~300-player pilot (rejected — fake social proof).
+- Consequences: Home does not add a second “find tonight” card. Open matches is the listing surface when listings exist. On first open with nothing to list, Home shows organise / Discover only when the next-action carousel is empty. Hours and clubs are carousel pages, not that empty. Discover/Home cards show “1 spot left” only for the last seat.
+- Owner: Founder
+
+## 2026-08-26 — Home next action, three-step onboarding, WhatsApp court climax
+
+- Status: accepted
+- Context: A Jobs-style review scored the player app 6/10: Home led with rating chrome, first-run detoured through clubs, Discover defaulted to players, and the hub stacked ops around the next action. Pilot court booking stays WhatsApp + `confirm_external_court`.
+- Decision: Home shows one derived next action (or “find a match for tonight”). Onboarding is consent → you (identity + tennis) → areas, then Home. Notifications and Where I play stay in Profile. Discover defaults to open matches. Create publishes to the hub (invite from there). Hub above-the-fold is status, roster, the WhatsApp court ritual when ready, and one primary CTA; secondary ops sit in More.
+- Alternatives considered: restoring the in-app club queue (rejected for cohort 1); keeping flexible timing on the default create path (left buried in more options); a 6-step onboarding with clubs first-run (rejected — setup theater before liquidity).
+- Consequences: Favourite clubs are no longer collected before the first Home. Create still lets a host pick clubs per listing. Rating progress lives on Profile only.
+- Owner: Founder
+
+## 2026-08-26 — Invite and join notes, not open DMs
+
+- Status: accepted
+- Context: Open DMs from a profile would let players arrange games off the match lifecycle and contradict the participant-only chat rule. Invites and approval-gated join requests still arrived cold — a bare name with no reason.
+- Decision: Optional note (≤140 chars) on targeted invites and on approval-gated join requests only. Notes stay out of push notifications; the invite push interpolates the inviter’s display name instead. Instant join stays one tap with no note field. Share-link invites carry no note.
+- Alternatives considered: open DMs (rejected — social inbox leak); note in push body (rejected — stranger text on the lock screen); note on every join (rejected — slows the one-tap path).
+- Consequences: Migration `088_invite_and_join_notes.sql`. Acceptance lift can be measured by comparing invites/requests with and without notes. Post-pilot, DMs between players who already completed a match remain a separate question.
+- Owner: Founder
+
 ## 2026-08-23 — Public player profile: challenge in header, safety as text links
 
 - Status: accepted

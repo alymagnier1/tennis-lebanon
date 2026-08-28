@@ -1,27 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import { getAvailabilityLiquidity } from "@tennis-lebanon/api";
 import { AppText } from "../AppText";
+import { ErrorNotice } from "../FormUi";
+import { FigmaSecondaryButton } from "../onboarding-ui";
 import { HomeFreePlayersCarousel } from "./HomeFreePlayersCarousel";
 import { trackLiquiditySignalViewed } from "../../lib/analytics";
-import {
-  peakLiquidity,
-  pickUpcomingBlocks,
-  toLiquidityRows,
-} from "../../lib/availability-liquidity";
+import { peakLiquidity } from "../../lib/availability-liquidity";
 import { type PingSlot } from "../../lib/availability-ping";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { weekdayIndexFromBeirutDateKey } from "../../lib/near-term-availability";
-import { supabase } from "../../lib/supabase";
+import { useHomeLiquidityOffers } from "../../hooks/useHomeLiquidityOffers";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
-
-/** How far ahead the counts look, and how many blocks to offer. */
-const OFFER_HORIZON_DAYS = 7;
-const OFFER_LIMIT = 3;
 
 /**
  * The next few hours anyone is free, and the people behind the one you pick.
@@ -36,30 +28,19 @@ const OFFER_LIMIT = 3;
  * actual faces, the number competes with the thing it stood in for. Whoever
  * wants the full list taps through to Discover, where the count is the length
  * of the list.
+ *
+ * An empty week is not rendered here. First-run Home already has one play CTA;
+ * stacking "add when you play" on top of it taught emptiness twice.
  */
 export function HomeFreeSlots() {
   const { t } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
-
-  // One clock read per mount, so every block in one paint agrees about "now".
-  const nowIso = useMemo(() => new Date().toISOString(), []);
   const [selectedStartsAt, setSelectedStartsAt] = useState<string | null>(null);
-
-  const liquidityQuery = useQuery({
-    queryKey: ["availability-liquidity"],
-    queryFn: () => getAvailabilityLiquidity(supabase, OFFER_HORIZON_DAYS),
-    staleTime: 60_000,
-  });
-
-  const liquidityRows = useMemo(
-    () => toLiquidityRows(liquidityQuery.data ?? [], nowIso),
-    [liquidityQuery.data, nowIso],
-  );
-
-  const offers = useMemo(
-    () => pickUpcomingBlocks(liquidityRows, OFFER_LIMIT),
-    [liquidityRows],
-  );
+  const {
+    query: liquidityQuery,
+    rows: liquidityRows,
+    offers,
+  } = useHomeLiquidityOffers();
 
   // Fired once per mount, and deliberately fired when empty too: a tap-through
   // rate is meaningless without knowing how often a player was shown any demand.
@@ -92,7 +73,25 @@ export function HomeFreeSlots() {
     return `${dayLabel} · ${t(`availability.blocks.${slot.part}`)}`;
   }
 
-  // No block in the week has anyone free in it, so there is nothing to offer.
+  if (liquidityQuery.isPending) {
+    return null;
+  }
+
+  if (liquidityQuery.isError) {
+    return (
+      <View style={styles.root}>
+        <AppText style={[styles.title, { writingDirection }]}>
+          {t("home.free.busiestTitle")}
+        </AppText>
+        <ErrorNotice>{t("home.loadError")}</ErrorNotice>
+        <FigmaSecondaryButton
+          label={t("common.retry")}
+          onPress={() => void liquidityQuery.refetch()}
+        />
+      </View>
+    );
+  }
+
   if (offers.length === 0) {
     return null;
   }

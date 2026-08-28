@@ -72,6 +72,7 @@ import {
 import { opponentAvatarColor } from "../../src/lib/match-card-status";
 import { matchHubLevelSummary } from "../../src/lib/match-hub-summaries";
 import { openMatchCardDateTimeLabel } from "../../src/lib/open-match-card-time";
+import { openMatchScarcityBadges } from "../../src/lib/open-match-scarcity";
 
 type DiscoverSegment = "players" | "matches";
 
@@ -120,7 +121,7 @@ export default function DiscoverScreen() {
   // be rewritten the same way.
   const paramSegment: DiscoverSegment | null =
     timeParams.segment === "matches" ? "matches" : null;
-  const segment: DiscoverSegment = chosenSegment ?? paramSegment ?? "players";
+  const segment: DiscoverSegment = chosenSegment ?? paramSegment ?? "matches";
   const paramWindow = useMemo(
     () => parseDiscoverTimeWindow(timeParams),
     [timeParams],
@@ -366,6 +367,10 @@ export default function DiscoverScreen() {
               locationChip={preferredClubLabel}
               areaChip={areaLabel}
               levelChip={matchHubLevelSummary(match, t)}
+              badges={openMatchScarcityBadges(match, {
+                oneSpotLeft: t("discover.spotsRemaining", { count: 1 }),
+                courtSecured: t("discover.courtSecuredBadge"),
+              })}
               note={match.notes ?? undefined}
               onPress={() =>
                 router.push({
@@ -454,7 +459,7 @@ export default function DiscoverScreen() {
 
       {segment === "players" &&
       filteredPlayers.length === 0 &&
-      !showListSkeleton &&
+      resultsSettled &&
       !playersQuery.isFetching ? (
         <EmptyState
           title={
@@ -491,7 +496,7 @@ export default function DiscoverScreen() {
 
       {segment === "matches" &&
       sortedMatches.length === 0 &&
-      !showListSkeleton &&
+      resultsSettled &&
       !matchesQuery.isFetching ? (
         <EmptyState
           title={

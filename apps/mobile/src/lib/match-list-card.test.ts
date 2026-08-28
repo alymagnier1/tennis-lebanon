@@ -230,6 +230,37 @@ describe("matchListAction", () => {
     });
   });
 
+  it("tells a pending requester they are waiting on the host, not on players", () => {
+    expect(
+      matchListAction({
+        status: "open",
+        isCreator: false,
+        participantStatus: "requested",
+      }),
+    ).toEqual({
+      labelKey: "matches.list.action.requestSent",
+      tone: "info",
+    });
+  });
+
+  it("keeps the request pill while the match fills around the requester", () => {
+    expect(
+      matchListAction({ status: "full", participantStatus: "requested" }),
+    ).toEqual({
+      labelKey: "matches.list.action.requestSent",
+      tone: "info",
+    });
+  });
+
+  it("returns to the match job once the request is accepted", () => {
+    expect(
+      matchListAction({ status: "full", participantStatus: "accepted" }),
+    ).toEqual({
+      labelKey: "matches.list.action.agreeTime",
+      tone: "attention",
+    });
+  });
+
   it("opens the invite screen for a host filling an open or draft match", () => {
     expect(
       matchListActionOpensInvite({ status: "open", isCreator: true }),

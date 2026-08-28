@@ -63,9 +63,8 @@ Do not pin framework versions until project initialization. Use mutually compati
 - Final product name and brand
 - Pilot geography: recommended starting point is one dense corridor, not all Lebanon (placeholder zones in `supabase/seed.sql` until chosen)
 - Exact skill labels used in onboarding
-- First 5–8 partner clubs and their booking workflow
-  - Validate the PRD pilot guardrail of median club response under 30 minutes during stated operating hours with those clubs before treating it as an SLA in dashboard UX (urgency indicators, escalation)
-- Cancellation and no-show rules agreed with those clubs
+- Whether to pursue 5–8 partner clubs at all, and when. Cohort 1 partners with none: venues are listed and players book on the club's own public WhatsApp (2026-08-19 decision). The in-app booking queue and any club-response SLA in dashboard UX stay parked until a real club depends on them, and club response time is not measurable from inside the product in the meantime
+- Cancellation and no-show rules, agreed with clubs only if partnerships are pursued
 - Arabic launch requirement: interface-ready from day one; full Arabic copy review is Milestone 8 (RTL scaffolding is Milestone 0)
 - Transactional notifications: v1 architecture is push-only; decide whether WhatsApp Business API should supplement push for match reminders and booking-status updates (invite sharing via user-initiated WhatsApp share sheet is already in scope; this is a separate notification-channel decision)
 - If OTP/SMS is added post-pilot: confirm carrier delivery reliability and per-message cost with a local aggregator; evaluate WhatsApp OTP as a fallback

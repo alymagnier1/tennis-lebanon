@@ -78,6 +78,9 @@ export function homeNextActionTone(kind: HomeNextActionKind): SemanticTone {
       return "info";
     case "players":
       return "attention";
+    case "availability":
+    case "favoriteClubs":
+      return "info";
     // Positive rather than actionable: nobody is waiting on a rematch, so it
     // should not wear the same urgency as a vote somebody is blocked on.
     case "rematch":
@@ -103,6 +106,10 @@ export function homeNextActionLabelKey(kind: HomeNextActionKind): string {
       return "home.nextAction.actionPlayers";
     case "rematch":
       return "home.nextAction.actionRematch";
+    case "availability":
+      return "home.nextAction.actionAvailability";
+    case "favoriteClubs":
+      return "home.nextAction.actionFavoriteClubs";
     default:
       return "common.continue";
   }

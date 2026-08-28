@@ -172,7 +172,17 @@ export function matchListAction(input: {
   status: string;
   isCreator?: boolean;
   viewerAttendance?: string | null;
+  participantStatus?: string | null;
 }): MatchListAction | null {
+  // A pending request outranks whatever the match itself is doing. The roster
+  // can fill and the time can be agreed while the host has still not answered,
+  // and none of that is the requester's to act on -- reading the match status
+  // here is what told them "waiting for players" when they were the one
+  // waiting.
+  if (input.participantStatus === "requested") {
+    return { labelKey: "matches.list.action.requestSent", tone: "info" };
+  }
+
   switch (input.status) {
     case "in_progress":
       if (viewerDeclinedToPlay(input.viewerAttendance)) {

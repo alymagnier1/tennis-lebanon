@@ -6,7 +6,7 @@ One-page overview of the product. For scope and acceptance criteria see [`PRD.md
 
 ## What it is
 
-**Tennis Lebanon** is a mobile-first marketplace that helps recreational players in Lebanon find a compatible opponent, agree a time, book a court through a partner club, and play the match. A lightweight web dashboard lets club staff approve booking requests; platform tools support moderation and operations.
+**Tennis Lebanon** is a mobile-first marketplace that helps recreational players in Lebanon find a compatible opponent, agree a time, get a court, and play the match. In cohort 1 the court is booked on the club's own public WhatsApp and recorded back in the app; the in-app club booking queue exists in the schema and dashboard but is out of scope for the pilot. A lightweight web dashboard supports operator club listing and platform moderation.
 
 It is **matchmaking-first**, not a club management suite or a social network.
 
@@ -21,7 +21,7 @@ It is **matchmaking-first**, not a club management suite or a social network.
 | **Club staff**         | Extra court bookings without replacing their existing ops                            |
 | **Platform operators** | Safe pilot in one geography with audit and moderation                                |
 
-**Launch:** One dense Lebanese corridor, ~5–8 partner clubs, ~300 verified adult players. Geography is modeled as **zones** (areas), not street addresses.
+**Launch:** Cohort 1 is Beirut as a single zone, four listed venues and 50 players, with no club partnerships. The full pilot targets ~300 verified adult players and 5–8 partner clubs across more than one city. Geography is modeled as **zones** (areas), not street addresses.
 
 ---
 

@@ -1,6 +1,6 @@
 # 50-Player Pilot Launch Checklist
 
-Ordered runbook to go from **local dev** to a **50+ player closed pilot** in one Lebanese corridor. Full pilot target per `docs/PRD.md` is ~300 verified players and 5–8 partner clubs; treat 50 as **cohort 1** before scaling.
+Ordered runbook to go from **local dev** to a **50+ player closed pilot** in one Lebanese corridor. Full pilot target per `docs/PRD.md` is ~300 verified players, with 5–8 partner clubs as a later, multi-city ambition rather than a cohort-1 bar; treat 50 as **cohort 1** before scaling. Cohort 1 partners with no club.
 
 Pair with:
 
@@ -172,19 +172,47 @@ Required before **50+ strangers**, not optional polish.
 
 **Goal:** prove the full loop with trusted players before scaling.
 
-| #   | Task                     | Success criterion                                                                  |
-| --- | ------------------------ | ---------------------------------------------------------------------------------- |
-| 7.1 | Recruit 10–20 players    | Same corridor; mix of skill levels; at least 4 who can play weekly                 |
-| 7.2 | Distribute builds        | TestFlight + Play internal links sent                                              |
-| 7.3 | Onboarding pass          | ≥80% complete onboarding without ops help                                          |
-| 7.4 | Liquidity pass           | ≥3 public matches created; ≥2 joins without manual DB fixes                        |
-| 7.5 | WhatsApp booking pass    | ≥1 match records court via WhatsApp + in-app confirm                               |
-| 7.6 | Result pass              | ≥1 match reaches mutually confirmed result                                         |
-| 7.7 | Arabic device spot-check | Settings → RTL layout check; note issues (Arabic locale hidden per pilot decision) |
-| 7.8 | Collect feedback         | Structured form or WhatsApp group; tag bugs P0/P1/P2                               |
-| 7.9 | Fix P0/P1                | No blockers for cohort B                                                           |
+| #   | Task                     | Success criterion                                                                                                                                         |
+| --- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 7.1 | Recruit 10–20 players    | Same corridor; weight to Improving / Intermediate / Advanced with Intermediate the largest group; at least 4 who can play weekly. See the band note below |
+| 7.2 | Distribute builds        | TestFlight + Play internal links sent                                                                                                                     |
+| 7.3 | Onboarding pass          | ≥80% complete onboarding without ops help                                                                                                                 |
+| 7.4 | Liquidity pass           | ≥3 public matches created; ≥2 joins without manual DB fixes                                                                                               |
+| 7.5 | WhatsApp booking pass    | ≥1 match records court via WhatsApp + in-app confirm                                                                                                      |
+| 7.6 | Result pass              | ≥1 match reaches mutually confirmed result                                                                                                                |
+| 7.7 | Arabic device spot-check | Settings → RTL layout check; note issues (Arabic locale hidden per pilot decision)                                                                        |
+| 7.8 | Collect feedback         | Structured form or WhatsApp group; tag bugs P0/P1/P2. Ask anyone who never created or joined the three questions below                                    |
+| 7.9 | Fix P0/P1                | No blockers for cohort B                                                                                                                                  |
 
 **Cohort A go/no-go:** if fewer than 2 completed match attempts (booking + show intent), fix discovery/liquidity before inviting 50.
+
+### 7.1 — why the mix is weighted, not spread
+
+Discovery matches **plus or minus one band**, not exact band. `DEFAULT_LEVEL_WINDOW` is `1` in `packages/domain/src/discovery.ts`, and `skillBandsForPlayer` applies the same window to a host's default level range — so it governs who a player sees _and_ who can join the matches they create.
+
+| Viewer band  | Can see                             |
+| ------------ | ----------------------------------- |
+| Beginner     | Beginner, Improving                 |
+| Improving    | Beginner, Improving, Intermediate   |
+| Intermediate | Improving, Intermediate, Advanced   |
+| Advanced     | Intermediate, Advanced, Competitive |
+| Competitive  | Advanced, Competitive               |
+
+Improving and Advanced are two ranks apart and **cannot see each other**; Intermediate is the only bridge between them. Beginner and Competitive each see two bands where the middle three see three.
+
+So at 10–20 players, a "mix of skill levels" spread evenly across all five bands strands its own edges. A token Beginner or Competitive recruit gets the narrowest slice of an already small pool, finds nobody at a workable time, and leaves before the network is worth joining — and their absence is invisible in the completed-match count. Centre cohort A on the three middle bands and every player stays mutually reachable. Add the edges in cohort B, when there is enough depth behind them for someone to actually play.
+
+### 7.8 — three questions for anyone who never created or joined
+
+The signup who never started is the most informative player in the cohort and the one who volunteers nothing. Every metric in this doc counts people who acted; nothing measures the ones who opened the app once and stopped, and no other doc collects anything qualitative.
+
+Ask these three, in person or on a call rather than in a form. All three ask about **what already happened**, not what someone thinks of the app — an opinion ("would you use this?") from a friend is worthless, a story about last Tuesday is not:
+
+1. Tell me about the last game of tennis you arranged. How did it happen?
+2. The week after you signed up, when you wanted to play, what did you do?
+3. What happened when you first opened the app?
+
+Do not pitch, defend, or explain a feature during these. If the answer to (1) is "my usual four have a WhatsApp group", that is the competitor, and it is worth knowing before scaling to 50.
 
 ---
 
@@ -206,20 +234,47 @@ Only after cohort A passes and staging checklist is green.
 
 ---
 
+## Cohort-1 success bar
+
+`docs/PRD.md` §7 is the **full-pilot** bar: ~300 players across more than one city. This is the **cohort-1** bar. Report it beside the north star — completed matches per week — and beside the abandonment counter-metric in `docs/PILOT_OPERATIONS.md` § "Counter-metric — abandonment". A rising completed-match count with a rising abandonment rate is not progress.
+
+| Measure                     | Cohort-1 bar                                                             | Query in `PILOT_OPERATIONS.md`      |
+| --------------------------- | ------------------------------------------------------------------------ | ----------------------------------- |
+| Onboarded players           | 50, in the single `beirut` zone                                          | —                                   |
+| Bookable venues             | 4 listed and confirmed to take non-member WhatsApp bookings (Phase 2.6)  | —                                   |
+| Public-match fill rate      | 40%+ to pass, 50%+ healthy                                               | § Liquidity and coordination health |
+| Confirmed-to-played         | 80%+, unchanged from the full pilot since the ratio is scale-independent | § Read the funnel in two halves     |
+| 30-day repeat play          | 30%+ — see the duration note below                                       | § Repeat play                       |
+| No-show / late-cancel       | Under 5% after the learning period                                       | § Counter-metric — abandonment      |
+| Liquidity-signal empty rate | **Unset** — record the cohort-A baseline first                           | § Latent intent                     |
+
+Two notes on reading this honestly.
+
+**No doc states a pilot duration, and one bar implies a minimum.** The 30-day repeat-play clock starts at each player's _first_ completed match, not at their invite. Reading it needs roughly 30 days past the first completions, which is well past the 2–4 week estimate in the header — that estimate covers reaching the pilot, not running it.
+
+**The empty-rate threshold is deliberately blank.** The query exists and reports `pct_empty`, but nothing has produced a baseline to set a bar against, and a number invented now would be a guess wearing a threshold's clothes. Set it after cohort A. It is the cold-start canary: a signal that is mostly empty is a liquidity problem, and no copy change will fix it.
+
+The roughly five matches per weekday evening in Phase 2 stays a **supply projection, not a bar**. Missing it can mean thin liquidity or simply that players play fortnightly rather than weekly, and those two need opposite responses.
+
+Two PRD §7 thresholds do not apply to cohort 1 at all: partner-club count and club response time. Cohort 1 partners with no club, and the club's WhatsApp response time is unmeasurable from inside the product. Court-request conversion — handoff opened to court confirmed — is the measurable stand-in.
+
+---
+
 ## What to measure (weekly during pilot)
 
-From `docs/PRD.md` §7 — decision thresholds, not forecasts:
+Tracked weekly; graded against the cohort-1 bar above rather than the full-pilot numbers in `docs/PRD.md` §7:
 
-| Metric                         | Why it matters                |
-| ------------------------------ | ----------------------------- |
-| Verified sign-ups vs invites   | Funnel health                 |
-| Public-match fill rate         | Discovery liquidity           |
-| Median time to full roster     | Matching works                |
-| Confirmed-to-played rate       | WhatsApp + show-up loop works |
-| 30-day repeat play             | Retention signal              |
-| No-show / late-cancel rate     | Policy tuning                 |
-| Safety reports per 100 matches | Trust                         |
-| Crash-free sessions            | ≥99.5% target                 |
+| Metric                         | Why it matters                                                                    |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| Verified sign-ups vs invites   | Funnel health                                                                     |
+| Public-match fill rate         | Discovery liquidity                                                               |
+| Median time to full roster     | Matching works                                                                    |
+| Confirmed-to-played rate       | WhatsApp + show-up loop works                                                     |
+| Court-request conversion       | Handoff opened → court confirmed; the closest read available on the WhatsApp step |
+| 30-day repeat play             | Retention signal                                                                  |
+| No-show / late-cancel rate     | Policy tuning                                                                     |
+| Safety reports per 100 matches | Trust                                                                             |
+| Crash-free sessions            | ≥99.5% target                                                                     |
 
 ---
 
@@ -236,8 +291,11 @@ Manual smoke in **English and French** on a **physical device**:
 7. Clubs directory + detail
 8. Report/block (if testing safety)
 9. Settings + support link
+10. **Throttled mobile data:** create → hub → WhatsApp handoff → confirm court, with the app backgrounded during the WhatsApp step
 
 Registry: `PILOT_CRITICAL_FLOWS` in `@tennis-lebanon/domain`.
+
+Item 10 covers two PRD requirements nothing else in this plan verifies: screens staying useful on intermittent connections, and P95 interaction under 2 seconds on Lebanese mobile networks (`docs/PRD.md` §6). The WhatsApp handoff is the one point in the loop that deliberately leaves the app, so it is where a slow network and a cold resume can lose a court that was actually booked. Throttle to 3G or worse rather than testing on office wifi.
 
 ---
 
@@ -266,17 +324,17 @@ Do not promise these until post-pilot evidence:
 
 ## Sign-off
 
-| Phase                   | Owner | Target date | Done |
-| ----------------------- | ----- | ----------- | ---- |
-| 0 Engineering gates     |       |             | ☐    |
-| 1 Staging backend       |       |             | ☐    |
-| 2 Clubs + content       |       |             | ☐    |
-| 3 Dashboard deploy      |       |             | ☐    |
-| 4 Mobile distribution   |       |             | ☐    |
-| 5 Notifications         |       |             | ☐    |
-| 6 Legal + observability |       |             | ☐    |
-| 7 Cohort A (10–20)      |       |             | ☐    |
-| 8 Cohort B (50+)        |       |             | ☐    |
+| Phase                   | Owner        | Target date | Done |
+| ----------------------- | ------------ | ----------- | ---- |
+| 0 Engineering gates     | Ali Moghnieh |             | ☐    |
+| 1 Staging backend       |              |             | ☐    |
+| 2 Clubs + content       |              |             | ☐    |
+| 3 Dashboard deploy      |              |             | ☐    |
+| 4 Mobile distribution   |              |             | ☐    |
+| 5 Notifications         |              |             | ☐    |
+| 6 Legal + observability |              |             | ☐    |
+| 7 Cohort A (10–20)      |              |             | ☐    |
+| 8 Cohort B (50+)        |              |             | ☐    |
 
 **Notification invoker (required):**
 
@@ -288,11 +346,11 @@ Do not promise these until post-pilot evidence:
 
 **Go-live approval:**
 
-| Role              | Name | Date |
-| ----------------- | ---- | ---- |
-| Engineering       |      |      |
-| Product / founder |      |      |
-| Club operations   |      |      |
+| Role              | Name         | Date |
+| ----------------- | ------------ | ---- |
+| Engineering       |              |      |
+| Product / founder | Ali Moghnieh |      |
+| Club operations   | n/a cohort 1 | —    |
 
 ---
 

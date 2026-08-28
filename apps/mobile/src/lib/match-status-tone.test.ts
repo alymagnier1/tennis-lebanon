@@ -54,4 +54,9 @@ describe("homeNextActionTone", () => {
   it("marks invite as actionable", () => {
     expect(homeNextActionTone("invite")).toBe("actionable");
   });
+
+  it("marks hours and clubs reminders as info, not match urgency", () => {
+    expect(homeNextActionTone("availability")).toBe("info");
+    expect(homeNextActionTone("favoriteClubs")).toBe("info");
+  });
 });

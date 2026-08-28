@@ -21,6 +21,8 @@ import {
 } from "@tennis-lebanon/api";
 import {
   discoveryFiltersForMatchInvite,
+  PLAYER_NOTE_MAX,
+  sanitizePlayerNote,
   viewerMayInvite,
 } from "@tennis-lebanon/domain";
 import { AppText } from "../../../src/components/AppText";
@@ -100,6 +102,7 @@ export default function MatchInvitePlayersScreen() {
   // effect, which the compiler's cascading render rule has already forced out
   // of this codebase twice.
   const [showAllTimes, setShowAllTimes] = useState(false);
+  const [inviteNote, setInviteNote] = useState("");
   const autoInviteStarted = useRef(false);
 
   const hubQuery = useQuery({
@@ -143,7 +146,12 @@ export default function MatchInvitePlayersScreen() {
 
   const inviteMutation = useMutation({
     mutationFn: (playerId: string) =>
-      createMatchInvite(supabase, id!, playerId),
+      createMatchInvite(
+        supabase,
+        id!,
+        playerId,
+        sanitizePlayerNote(inviteNote),
+      ),
     onSuccess: async (token, playerId) => {
       setInvitedIds((current) =>
         current.includes(playerId) ? current : [...current, playerId],
@@ -415,6 +423,40 @@ export default function MatchInvitePlayersScreen() {
         {filterBar}
       </FigmaSubpageHero>
 
+      {!matchFull ? (
+        <View style={styles.noteWrap}>
+          <AppText style={[styles.noteLabel, { writingDirection }]}>
+            {t("matches.invite.noteLabel")}
+          </AppText>
+          <TextInput
+            accessibilityLabel={t("matches.invite.noteLabel")}
+            value={inviteNote}
+            onChangeText={(value) =>
+              setInviteNote(value.slice(0, PLAYER_NOTE_MAX))
+            }
+            placeholder={t("matches.invite.notePlaceholder")}
+            placeholderTextColor={tennisColors.mutedForeground}
+            style={[
+              styles.noteInput,
+              { writingDirection, textAlign: isRtl ? "right" : "left" },
+            ]}
+            multiline
+            maxLength={PLAYER_NOTE_MAX}
+          />
+          <View style={[styles.noteMetaRow, { flexDirection: rowDirection }]}>
+            <AppText style={[styles.noteHint, { writingDirection, flex: 1 }]}>
+              {t("matches.invite.noteHint")}
+            </AppText>
+            <AppText style={styles.noteCounter}>
+              {t("matches.invite.noteCounter", {
+                count: inviteNote.length,
+                max: PLAYER_NOTE_MAX,
+              })}
+            </AppText>
+          </View>
+        </View>
+      ) : null}
+
       {matchFull ? (
         <View style={styles.paddedBody}>
           <AppText style={styles.emptyText}>
@@ -522,6 +564,47 @@ const styles = createLiveSheet(() =>
       fontFamily: tennisFontFamily.body,
       fontSize: 14,
       color: tennisColors.primaryDark,
+    },
+    noteWrap: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 8,
+      gap: 6,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: tennisColors.border,
+    },
+    noteLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.primaryDark,
+    },
+    noteInput: {
+      minHeight: 64,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      backgroundColor: tennisColors.card,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      borderRadius: tennisRadii.md,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      color: tennisColors.primaryDark,
+      textAlignVertical: "top",
+    },
+    noteMetaRow: {
+      gap: 8,
+      alignItems: "flex-start",
+    },
+    noteHint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+    },
+    noteCounter: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
     },
     list: {
       flex: 1,

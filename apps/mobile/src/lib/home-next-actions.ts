@@ -4,6 +4,7 @@ import type {
   MyMatchRow,
 } from "@tennis-lebanon/api";
 import { canReportMatchPlayed } from "@tennis-lebanon/domain";
+import { isLastOpenMatchSpot } from "./open-match-scarcity";
 
 /**
  * Exported so `homeNextActionTone`, `homeNextActionLabelKey` and
@@ -12,7 +13,15 @@ import { canReportMatchPlayed } from "@tennis-lebanon/domain";
  * silently defaulted in the others.
  */
 export type HomeNextActionKind =
-  "invite" | "players" | "vote" | "booking" | "court" | "played" | "rematch";
+  | "invite"
+  | "players"
+  | "vote"
+  | "booking"
+  | "court"
+  | "played"
+  | "rematch"
+  | "availability"
+  | "favoriteClubs";
 
 export type HomeNextAction = {
   id: string;
@@ -24,7 +33,14 @@ export type HomeNextAction = {
    * silently rendered a raw `{{name}}` the moment a title needed one.
    */
   params?: Record<string, string>;
-  matchId: string;
+  /** Present for match-lifecycle actions; omitted for profile reminders. */
+  matchId?: string;
+};
+
+/** Hours and clubs Home should remind about. Omit while those queries are pending. */
+export type HomeSetupReminders = {
+  hasAvailability: boolean;
+  hasFavoriteClubs: boolean;
 };
 
 /**
@@ -60,6 +76,11 @@ export function deriveHomeNextActions(
   completed: CompletedMatchRow[] = [],
   /** Injected rather than read here, so the function stays pure and testable. */
   nowIso: string = new Date().toISOString(),
+  /**
+   * Profile reminders. Ranked after live match work and before rematch.
+   * Home shows them in a horizontal carousel, not a vertical stack.
+   */
+  setup?: HomeSetupReminders,
 ): HomeNextAction[] {
   const actions: HomeNextAction[] = [];
 
@@ -119,16 +140,14 @@ export function deriveHomeNextActions(
       // either — an open match needs players first.
       //
       // A court-first match is the same ask with more urgency: the court is
-      // already held, so an empty seat costs something.
+      // already held, so an empty seat costs something. Last seat is the same
+      // ask with a true remaining-count, never a fabricated countdown.
+      const copy = playersNextActionCopy(match);
       actions.push({
         id: `players-${match.match_id}`,
         kind: "players",
-        titleKey: match.has_court
-          ? "home.nextAction.playersCourtSecuredTitle"
-          : "home.nextAction.playersTitle",
-        bodyKey: match.has_court
-          ? "home.nextAction.playersCourtSecuredBody"
-          : "home.nextAction.playersBody",
+        titleKey: copy.titleKey,
+        bodyKey: copy.bodyKey,
         matchId: match.match_id,
       });
     } else if (match.status === "full") {
@@ -145,6 +164,27 @@ export function deriveHomeNextActions(
 
     if (actions.length >= 3) {
       break;
+    }
+  }
+
+  // Hours and clubs after anyone waiting on a match, before a rematch.
+  // They are skippable Profile editors, not a first-run gate.
+  if (setup && actions.length < 3) {
+    if (!setup.hasAvailability) {
+      actions.push({
+        id: "setup-availability",
+        kind: "availability",
+        titleKey: "home.nextAction.availabilityTitle",
+        bodyKey: "home.nextAction.availabilityBody",
+      });
+    }
+    if (!setup.hasFavoriteClubs && actions.length < 3) {
+      actions.push({
+        id: "setup-favorite-clubs",
+        kind: "favoriteClubs",
+        titleKey: "home.nextAction.favoriteClubsTitle",
+        bodyKey: "home.nextAction.favoriteClubsBody",
+      });
     }
   }
 
@@ -166,6 +206,44 @@ export function deriveHomeNextActions(
   }
 
   return actions.slice(0, 3);
+}
+
+/** First page of the Home carousel. Match work still ranks ahead of setup. */
+export function pickHomeHeroAction(
+  actions: HomeNextAction[],
+): HomeNextAction | null {
+  return actions[0] ?? null;
+}
+
+export function playersNextActionCopy(match: {
+  has_court: boolean;
+  participant_count: number;
+  capacity: number;
+}): { titleKey: string; bodyKey: string } {
+  const lastSpot = isLastOpenMatchSpot(match.participant_count, match.capacity);
+
+  if (match.has_court && lastSpot) {
+    return {
+      titleKey: "home.nextAction.playersCourtOneSpotTitle",
+      bodyKey: "home.nextAction.playersCourtOneSpotBody",
+    };
+  }
+  if (match.has_court) {
+    return {
+      titleKey: "home.nextAction.playersCourtSecuredTitle",
+      bodyKey: "home.nextAction.playersCourtSecuredBody",
+    };
+  }
+  if (lastSpot) {
+    return {
+      titleKey: "home.nextAction.playersOneSpotTitle",
+      bodyKey: "home.nextAction.playersOneSpotBody",
+    };
+  }
+  return {
+    titleKey: "home.nextAction.playersTitle",
+    bodyKey: "home.nextAction.playersBody",
+  };
 }
 
 /**

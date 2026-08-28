@@ -32,8 +32,8 @@ export const NOTIFICATION_COPY: Record<
 > = {
   en: {
     match_invitation: {
-      title: "You have been invited to play",
-      body: "A player picked you for their match. Open it to accept or decline.",
+      title: "{{name}} invited you to play",
+      body: "Open it to accept or decline.",
     },
     stale_match_reminder: {
       title: "Your match expires soon",
@@ -114,8 +114,8 @@ export const NOTIFICATION_COPY: Record<
   },
   ar: {
     match_invitation: {
-      title: "تمت دعوتك للعب",
-      body: "اختارك لاعب لمباراته. افتحها لقبول الدعوة أو رفضها.",
+      title: "دعاك {{name}} للعب",
+      body: "افتح الدعوة لقبولها أو رفضها.",
     },
     stale_match_reminder: {
       title: "مباراتك تنتهي قريبًا",
@@ -196,8 +196,8 @@ export const NOTIFICATION_COPY: Record<
   },
   fr: {
     match_invitation: {
-      title: "Vous êtes invité à jouer",
-      body: "Un joueur vous a choisi pour son match. Ouvrez-le pour accepter ou refuser.",
+      title: "{{name}} vous invite à jouer",
+      body: "Ouvrez pour accepter ou refuser.",
     },
     stale_match_reminder: {
       title: "Votre match expire bientôt",

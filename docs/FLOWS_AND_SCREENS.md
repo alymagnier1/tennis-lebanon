@@ -14,19 +14,19 @@ Primary tabs after onboarding:
 
 ### Entry and onboarding
 
-- Welcome / value proposition
+- Welcome / value proposition (Lebanon tennis at your level, not a feed; no crowd count)
 - Sign in / create account
 - Contact verification
 - Terms, privacy, community rules consent
-- Basic identity: display name, adult confirmation/birth year, languages
-- Tennis profile: provisional skill questionnaire, play intent, format preference
-- Area and availability setup
-- Notification permission primer
-- Onboarding complete
+- You: display name, adult confirmation/birth year, languages, skill band, play intent (skill choice is echoed back)
+- Areas you play (band + areas echoed back)
+- Onboarding complete may show overlapping open matches, then Home
+
+Notification permission lives in Profile, not the first-run funnel. Favourite clubs stay optional in Profile → Where I play (not an onboarding gate). Missing hours and clubs appear as Home next-action carousel pages, ranked after live match work.
 
 ### Home and discovery
 
-- Home dashboard
+- Home dashboard (next-action carousel: match work, then hours/clubs if missing; organise empty only when the carousel is empty)
 - Open-match discovery with filters
 - Compatible-player discovery with filters
 - Public player profile
@@ -60,7 +60,7 @@ Primary tabs after onboarding:
 - Availability editor
 - Profile editor
 - Match defaults (format, intent, level range, Discover, approval)
-- Where I play (areas and favourite clubs; shown once after onboarding, then in Profile)
+- Where I play (areas and favourite clubs; Profile editor, also linked from first Home; not an onboarding gate)
 - Language, privacy, and notification settings
 - Support and account deletion request
 

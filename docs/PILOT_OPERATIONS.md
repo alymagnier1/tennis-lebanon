@@ -477,7 +477,7 @@ requests the pilot sent them before they ever joined the project.
 | Disputed result | `/admin/disputes` | Confirm (apply rating) or void                               |
 | Booking stuck   | Club `/bookings`  | Staff accept/reject; check lifecycle jobs if reminders stale |
 
-Platform admin role is enforced in the database; dashboard checks session + `platform_operators`.
+Platform admin role is enforced in the database. The dashboard checks the session, then calls the `viewer_is_platform_operator` RPC; access requires a `public.platform_roles` row for that user with role `support` or `admin` (migration `026`).
 
 ## Critical mobile flows (regression checklist)
 
@@ -515,10 +515,11 @@ Confirm primary actions remain visible at largest dynamic type setting (iOS/Andr
 - Staging promotion: `docs/STAGING_CHECKLIST.md` and `pnpm verify:pilot`
 - Backup/restore drill: `docs/BACKUP_RESTORE.md` and `pnpm drill:backup` (local) or hosted quarterly drill
 - TestFlight / Play internal build submission (≥1–2 weeks before go-live)
-- Founder sign-off on five workflow rows above with real partner club staff
+- Founder sign-off on the four workflow rehearsals above. No club staff take part: cohort 1 lists venues and players book on the club's own public WhatsApp (2026-08-19 decision)
 
 ## Support and incidents
 
-- **Pilot support:** designate a single ops inbox (not seeded). Do not log message bodies, phone numbers, or tokens in analytics.
+- **Pilot support:** single ops inbox, not seeded. Cohort 1 owner is **Ali Moghnieh**, inbox `aly.magnier@gmail.com` — temporary, to be replaced before public release (see the 2026-08-27 decision). Do not log message bodies, phone numbers, or tokens in analytics.
+- **Daily ops pass:** clear `/admin/reports` and `/admin/disputes`, then look for matches that reached an agreed time but never recorded a court. That last one has no queue and has to be looked for.
 - **Account deletion:** owner-initiated request path must be documented in production privacy notice before public pilot.
-- **Escalation:** disputed results and open reports should clear within an agreed SLA (suggest 48h during pilot).
+- **Escalation:** open reports clear within **24h** (safety), disputed results within **48h**.

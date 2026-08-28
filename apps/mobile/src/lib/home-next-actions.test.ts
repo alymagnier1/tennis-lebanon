@@ -6,6 +6,7 @@ import type {
 } from "@tennis-lebanon/api";
 import {
   deriveHomeNextActions,
+  pickHomeHeroAction,
   sortUpcomingMatches,
 } from "./home-next-actions";
 import { homeNextActionRoute } from "./routes";
@@ -54,6 +55,7 @@ function inboxInvite(
     soonest_time: null,
     expires_at: "2026-08-15T12:00:00.000Z",
     created_at: "2026-08-01T10:00:00.000Z",
+    note: null,
     ...overrides,
   };
 }
@@ -195,11 +197,27 @@ describe("deriveHomeNextActions", () => {
   it("tells a court-first host the court is already secured", () => {
     const withCourt = deriveHomeNextActions(
       [],
-      [match({ status: "open", is_creator: true, has_court: true })],
+      [
+        match({
+          status: "open",
+          is_creator: true,
+          has_court: true,
+          participant_count: 1,
+          capacity: 4,
+        }),
+      ],
     );
     const withoutCourt = deriveHomeNextActions(
       [],
-      [match({ status: "open", is_creator: true, has_court: false })],
+      [
+        match({
+          status: "open",
+          is_creator: true,
+          has_court: false,
+          participant_count: 1,
+          capacity: 4,
+        }),
+      ],
     );
 
     expect(withCourt[0]?.kind).toBe("players");
@@ -207,6 +225,38 @@ describe("deriveHomeNextActions", () => {
       "home.nextAction.playersCourtSecuredTitle",
     );
     expect(withoutCourt[0]?.titleKey).toBe("home.nextAction.playersTitle");
+  });
+
+  it("uses last-seat copy when one roster spot remains", () => {
+    const lastSeat = deriveHomeNextActions(
+      [],
+      [
+        match({
+          status: "open",
+          is_creator: true,
+          has_court: false,
+          participant_count: 1,
+          capacity: 2,
+        }),
+      ],
+    );
+    const courtAndLastSeat = deriveHomeNextActions(
+      [],
+      [
+        match({
+          status: "open",
+          is_creator: true,
+          has_court: true,
+          participant_count: 1,
+          capacity: 2,
+        }),
+      ],
+    );
+
+    expect(lastSeat[0]?.titleKey).toBe("home.nextAction.playersOneSpotTitle");
+    expect(courtAndLastSeat[0]?.titleKey).toBe(
+      "home.nextAction.playersCourtOneSpotTitle",
+    );
   });
 
   it("shows vote on time for a full flexible match", () => {
@@ -263,6 +313,77 @@ describe("deriveHomeNextActions", () => {
   });
 });
 
+describe("setup reminders", () => {
+  it("asks for hours and clubs when the profile is empty", () => {
+    const actions = deriveHomeNextActions([], [], [], NOW, {
+      hasAvailability: false,
+      hasFavoriteClubs: false,
+    });
+
+    expect(actions.map((row) => row.kind)).toEqual([
+      "availability",
+      "favoriteClubs",
+    ]);
+    expect(actions[0]?.matchId).toBeUndefined();
+  });
+
+  it("drops a reminder once that fact is saved", () => {
+    expect(
+      deriveHomeNextActions([], [], [], NOW, {
+        hasAvailability: true,
+        hasFavoriteClubs: false,
+      }).map((row) => row.kind),
+    ).toEqual(["favoriteClubs"]);
+  });
+
+  it("yields to match work and still fills remaining carousel pages", () => {
+    const actions = deriveHomeNextActions(
+      [inboxInvite()],
+      [],
+      [completedMatch()],
+      NOW,
+      { hasAvailability: false, hasFavoriteClubs: false },
+    );
+
+    expect(actions.map((row) => row.kind)).toEqual([
+      "invite",
+      "availability",
+      "favoriteClubs",
+    ]);
+  });
+
+  it("does not displace a full match-work queue", () => {
+    const actions = deriveHomeNextActions(
+      [inboxInvite()],
+      [
+        match({ match_id: "m1", status: "booking_pending" }),
+        match({ match_id: "m2", status: "booking_pending" }),
+      ],
+      [],
+      NOW,
+      { hasAvailability: false, hasFavoriteClubs: false },
+    );
+
+    expect(actions.map((row) => row.kind)).toEqual([
+      "invite",
+      "booking",
+      "booking",
+    ]);
+  });
+});
+
+describe("pickHomeHeroAction", () => {
+  it("returns the first action so the carousel opens on match work", () => {
+    const actions = deriveHomeNextActions(
+      [inboxInvite()],
+      [match({ match_id: "m1", status: "booking_pending" })],
+    );
+
+    expect(pickHomeHeroAction(actions)?.kind).toBe("invite");
+    expect(pickHomeHeroAction([])).toBeNull();
+  });
+});
+
 describe("sortUpcomingMatches", () => {
   it("excludes in_progress matches waiting on a result", () => {
     const upcoming = sortUpcomingMatches([
@@ -300,5 +421,14 @@ describe("homeNextActionRoute", () => {
       pathname: "/match/[id]",
       params: { id: "abc" },
     });
+  });
+
+  it("routes hours and clubs to Profile editors", () => {
+    expect(homeNextActionRoute("availability")).toEqual(
+      "/profile/availability",
+    );
+    expect(homeNextActionRoute("favoriteClubs")).toEqual(
+      "/profile/where-i-play",
+    );
   });
 });
