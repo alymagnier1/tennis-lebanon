@@ -6,11 +6,27 @@ export type UserNotificationRow = {
   entity_type: string | null;
   entity_id: string | null;
   payload: Record<string, unknown>;
+  /** When the event became due. Always set; what the centre orders by. */
+  scheduled_at: string;
+  /** When push actually went out. Null while it is still in the outbox. */
   sent_at: string | null;
   read_at: string | null;
   created_at: string;
 };
 
+/**
+ * The viewer's notification centre.
+ *
+ * Gated on `scheduled_at`, not `sent_at`. The old rule listed only what had
+ * been pushed, which made this screen a record of successful delivery rather
+ * than of things that happened — so a failed push, a stale device token or
+ * notifications switched off left the centre empty too, and "open the app and
+ * check" could never recover a missed message. That is the one job it has.
+ *
+ * `scheduled_at` rather than dropping the filter outright: reminders are
+ * enqueued ahead of time, and a match reminder due tomorrow should not appear
+ * today.
+ */
 export async function listUserNotifications(
   client: TennisSupabaseClient,
   limit = 50,
@@ -18,10 +34,10 @@ export async function listUserNotifications(
   const { data, error } = await client
     .from("notifications")
     .select(
-      "id, kind, entity_type, entity_id, payload, sent_at, read_at, created_at",
+      "id, kind, entity_type, entity_id, payload, scheduled_at, sent_at, read_at, created_at",
     )
-    .not("sent_at", "is", null)
-    .order("sent_at", { ascending: false })
+    .lte("scheduled_at", new Date().toISOString())
+    .order("scheduled_at", { ascending: false })
     .limit(limit);
 
   if (error) throw error;
@@ -37,9 +53,8 @@ export async function listUserNotifications(
  * unread -- after that the badge quietly undercounts, or reads zero while the
  * notification centre still shows unread rows.
  *
- * `sent_at` must be set for the same reason the list requires it: a
- * notification still sitting in the outbox has not reached anyone, so badging
- * it would point at something the centre does not show.
+ * Gated on `scheduled_at`, not `sent_at`, for the same reason the list is: an
+ * event that happened is worth badging whether or not the push got out.
  */
 export async function countUnreadNotifications(
   client: TennisSupabaseClient,
@@ -47,7 +62,7 @@ export async function countUnreadNotifications(
   const { count, error } = await client
     .from("notifications")
     .select("id", { count: "exact", head: true })
-    .not("sent_at", "is", null)
+    .lte("scheduled_at", new Date().toISOString())
     .is("read_at", null);
 
   if (error) throw error;

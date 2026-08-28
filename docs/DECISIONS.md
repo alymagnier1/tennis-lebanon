@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-28 — The notification centre lists what happened, not what was delivered
+
+- Status: accepted
+- Context: A rehearsal reported that a declined join request told the player nothing. It was verified against the database that `077` enqueues `match_request_declined` to the requester correctly — the row existed, addressed to the right person. It never appeared because `listUserNotifications` and `countUnreadNotifications` both filtered `sent_at is not null`, and locally nothing sets `sent_at` (the `060` Vault secrets are absent). That much is expected locally. The part that is not: the same filter applies in production, so a failed push, a stale Expo token, or a player who declined notification permission also leaves the centre empty. The one thing an in-app notification list exists for — recovering a message you did not receive — was gated on having received it.
+- Decision: Both the list and the unread badge now gate on `scheduled_at <= now()` instead of `sent_at is not null`. An event that has come due is shown whether or not push got out. `scheduled_at` rather than no filter at all, because reminders are enqueued ahead of time and a match reminder due tomorrow must not appear today. The list orders by `scheduled_at`, which is always set, rather than by `sent_at`, which is now often null.
+- Alternatives considered: leaving the filter and treating the empty centre as a local-only artefact (rejected — it is a production failure mode wearing local clothes, and the rehearsal found it precisely because the local case makes it visible); dropping the filter entirely (rejected — future-dated reminders would surface early, which is worse than a missing one); showing undelivered rows with a "not sent" marker (rejected for now — the player does not care why it did not buzz, and the distinction invites explaining an implementation detail in the UI).
+- Consequences: The centre and the badge can now show something the player was never pushed, which is the intent. `sent_at` is still selected and still means what it meant, so a delivery view remains possible later. This makes the local rehearsal honest: findings 4 and 5 in `docs/COHORT_A_REHEARSAL_FINDINGS.md` were both "correct locally, verify on staging", and the first of those is now simply visible. The §7b staging gate is unchanged — that one physical push still has to be proved.
+- Owner: Founder
+
 ## 2026-08-28 — A player cannot join an hour they have already agreed to
 
 - Status: accepted
