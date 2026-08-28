@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-28 — Inviting a player is not sharing a link
+
+- Status: accepted
+- Context: Two findings on the invite screen. It showed anyone holding a `requested` row as **Invited**: `isAlreadyInMatch` collapsed `accepted`, `invited` and `requested` into one state and the resolver returned only two, so a player who had asked *you* read as one you had asked, and the row most needing an answer looked like one already dealt with. Separately the invite button both sent a targeted invite and opened the OS share sheet, so a host sent the same match to one player twice — once by push, once by whatever they picked in the sheet. Findings 12 and 15.
+- Decision: The screen resolves four states through `invite-player-state.ts` — `invite`, `invited`, `requested`, `joined` — with `requested` the one tappable non-invite state, routing the host to the hub where accept and decline already live. The share sheet becomes its own footer action; `create_match_invite` has always accepted a null recipient for link invites, so only the client had fused the two.
+- Alternatives considered: keeping two states and relabelling `invited` (rejected — an accepted player and a pending requester need different words and different affordances, and the collapse is what caused the inversion); accepting or declining from the invite screen itself (rejected — the hub already has both buttons, the note the requester wrote, and the roster context to judge it; a second decision surface would have to be kept in step with the first); keeping the share sheet on targeted invites as a convenience (rejected — it is the same match sent twice, and the host cannot tell which copy the player will act on).
+- Consequences: `isAlreadyInMatch` is gone; the auto-invite effect arriving from create-for-player now guards on the same shared resolver, so the screen and the effect cannot disagree about who is invitable. A link invite carries no note, which `088` already established, and now that the two actions are separate the note field belongs unambiguously to the targeted path.
+- Owner: Founder
+
 ## 2026-08-28 — The notification centre lists what happened, not what was delivered
 
 - Status: accepted

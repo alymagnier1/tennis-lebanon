@@ -49,6 +49,11 @@ import {
 } from "../../../src/lib/invite-link";
 import { useToast } from "../../../src/providers/ToastProvider";
 import { useLayoutDirection } from "../../../src/lib/layout-direction";
+import {
+  canInviteFromState,
+  invitePlayerState,
+  type InvitePlayerState,
+} from "../../../src/lib/invite-player-state";
 import { supabase } from "../../../src/lib/supabase";
 import { matchTimeWindow } from "../../../src/lib/match-invite-filters";
 import { zoneIdsFromPlayerZones } from "../../../src/lib/prefill-create-match-for-player";
@@ -63,17 +68,6 @@ type HubParticipant = {
   display_name: string;
   status: string;
 };
-
-function isAlreadyInMatch(
-  participants: HubParticipant[],
-  userId: string,
-): boolean {
-  return participants.some(
-    (participant) =>
-      participant.user_id === userId &&
-      ["accepted", "invited", "requested"].includes(participant.status),
-  );
-}
 
 function filterPlayersBySearch(
   players: CompatiblePlayerCard[],
@@ -152,18 +146,29 @@ export default function MatchInvitePlayersScreen() {
         playerId,
         sanitizePlayerNote(inviteNote),
       ),
-    onSuccess: async (token, playerId) => {
+    onSuccess: async (_token, playerId) => {
       setInvitedIds((current) =>
         current.includes(playerId) ? current : [...current, playerId],
       );
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
       showToast(t("matches.invite.sent"));
-      await shareMatchInvite(
-        t("matches.invite.shareMessage", {
-          url: buildMatchInviteUrl(token),
-        }),
-      );
     },
+    onError: (error: unknown) => showToast(t(matchInviteErrorKey(error))),
+  });
+
+  /**
+   * Separate from inviting a named player, which it used to run alongside.
+   * A targeted invite already reaches that player by push, so opening a share
+   * sheet on top of it asked the host to send the same thing twice. A link is
+   * for somebody who is not on Tennis Lebanon at all, and `create_match_invite`
+   * has always accepted a null recipient for exactly that.
+   */
+  const shareLinkMutation = useMutation({
+    mutationFn: () => createMatchInvite(supabase, id!),
+    onSuccess: (token) =>
+      shareMatchInvite(
+        t("matches.invite.shareMessage", { url: buildMatchInviteUrl(token) }),
+      ),
     onError: (error: unknown) => showToast(t(matchInviteErrorKey(error))),
   });
 
@@ -180,7 +185,15 @@ export default function MatchInvitePlayersScreen() {
     // No state to set: the row already renders as invited when the player is
     // in the match, so pushing them into invitedIds only added a second
     // render pass for the same result.
-    if (isAlreadyInMatch(participants, invitePlayerId)) {
+    if (
+      !canInviteFromState(
+        invitePlayerState({
+          participants,
+          locallyInvitedIds: invitedIds,
+          userId: invitePlayerId,
+        }),
+      )
+    ) {
       return;
     }
 
@@ -208,21 +221,17 @@ export default function MatchInvitePlayersScreen() {
   const handleBack = () =>
     goBackOrReplace(id ? matchHubRoute(id) : MATCHES_TAB_ROUTE);
 
-  function playerInviteState(
-    player: CompatiblePlayerCard,
-  ): "invite" | "invited" {
-    if (
-      invitedIds.includes(player.user_id) ||
-      isAlreadyInMatch(participants, player.user_id)
-    ) {
-      return "invited";
-    }
-    return "invite";
+  function playerInviteState(player: CompatiblePlayerCard): InvitePlayerState {
+    return invitePlayerState({
+      participants,
+      locallyInvitedIds: invitedIds,
+      userId: player.user_id,
+    });
   }
 
   function renderPlayerRow({ item: player }: { item: CompatiblePlayerCard }) {
     const state = playerInviteState(player);
-    const invited = state === "invited";
+    const canInvite = canInviteFromState(state);
     const locale = i18n.resolvedLanguage ?? i18n.language;
 
     return (
@@ -244,15 +253,23 @@ export default function MatchInvitePlayersScreen() {
           name: player.display_name,
         })}
         primaryLabel={
-          invited
-            ? t("matches.invite.invited")
-            : t("matches.invite.invitePlayer")
+          state === "requested"
+            ? t("matches.invite.requestedLabel")
+            : state === "joined"
+              ? t("matches.invite.joinedLabel")
+              : state === "invited"
+                ? t("matches.invite.invited")
+                : t("matches.invite.invitePlayer")
         }
         primaryLoading={
           inviteMutation.isPending &&
           inviteMutation.variables === player.user_id
         }
-        primaryDisabled={invited || inviteMutation.isPending}
+        // A pending request is the one non-invite state worth tapping: it
+        // sends the host to the hub, where accept and decline already live.
+        primaryDisabled={
+          (!canInvite && state !== "requested") || inviteMutation.isPending
+        }
         onProfilePress={() =>
           router.push({
             pathname: "/player/[id]",
@@ -260,7 +277,11 @@ export default function MatchInvitePlayersScreen() {
           })
         }
         onPrimaryPress={() => {
-          if (invited) return;
+          if (state === "requested") {
+            if (id) router.push(matchHubRoute(id));
+            return;
+          }
+          if (!canInvite) return;
           inviteMutation.mutate(player.user_id);
         }}
       />
@@ -493,6 +514,19 @@ export default function MatchInvitePlayersScreen() {
           {isDraft
             ? t("matches.invite.matchDraftHint")
             : t("matches.invite.matchLiveHint")}
+        </AppText>
+        {/*
+          The link is its own action now. It used to fire alongside every
+          targeted invite, which sent the same match to one player twice --
+          once by push, once by whatever they picked in the share sheet.
+        */}
+        <FigmaSecondaryButton
+          label={t("matches.invite.shareLink")}
+          loading={shareLinkMutation.isPending}
+          onPress={() => shareLinkMutation.mutate()}
+        />
+        <AppText style={[styles.footerHint, { writingDirection }]}>
+          {t("matches.invite.shareLinkHint")}
         </AppText>
         <FigmaPrimaryButton
           label={
