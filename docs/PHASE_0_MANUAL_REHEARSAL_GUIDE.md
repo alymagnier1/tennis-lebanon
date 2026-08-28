@@ -97,9 +97,11 @@ A confused stranger doesn't file a bug — they stop.
 
 ---
 
-## Known doc inconsistency (ignore during rehearsal)
+## Locales during rehearsal
 
-`PILOT_OPERATIONS.md` line 484 says smoke-test in English and Arabic; cohort 1 ships English and French with Arabic hidden (decision 0.6, Phase 7.7).
+Cohort 1 ships **English, French and Arabic**. `PILOT_LOCALES` carries all three, and switching locale calls `syncNativeLayoutDirection`, which flips native RTL and reloads the app.
+
+An earlier version of this guide claimed Arabic was hidden and told you to ignore the "English and Arabic" line in `PILOT_OPERATIONS.md`. That was wrong, and backwards: it read the 2026-07-28 decision without noticing the 2026-08-06 entry that supersedes it, once `I18nManager.forceRTL` was wired. Rehearse in English; the full Arabic RTL pass is Phase 7.7.
 
 ---
 

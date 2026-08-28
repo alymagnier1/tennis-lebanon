@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-28 — A superseded decision outranked its replacement for three weeks
+
+- Status: accepted
+- Context: The 2026-07-28 entry shipped the pilot in English and French only, because `I18nManager.forceRTL` was not wired and Arabic strings would have rendered inside an LTR layout. Nine days later the 2026-08-06 entry wired `syncNativeLayoutDirection`, re-added `ar` to `PILOT_LOCALES`, and superseded it. The older entry kept `Status: accepted`, and nothing swept the documents that cited it. Three weeks on, four documents still asserted EN/FR-only: Phase 0.6 and two other rows in the launch checklist, and — worst — `PHASE_0_MANUAL_REHEARSAL_GUIDE.md`, which flagged the one correct line in `PILOT_OPERATIONS.md` as a "known doc inconsistency" and told the reader to ignore it. `CLAUDE.md` precedence ranks documents against each other but says nothing about how two entries in this log rank, so a reader searching for "Arabic" stopped at the first hit and got the reversed answer. This is the same failure the 2026-08-27 cohort-1 audit caught with PRD §7, one level down.
+- Decision: A superseded entry gets `Status: superseded by <entry>` at the moment its replacement is accepted, naming the replacement rather than only the date. The propagation sweep — every document citing the old decision — belongs to the superseding change, not to a later cleanup. Corrected here: `PILOT_OPERATIONS.md` critical-flow smoke now names all three of `PILOT_LOCALES`; launch checklist 0.6, 7.7 and the physical-device smoke now say English, French and Arabic; the rehearsal guide's inverted note is replaced with what is actually true.
+- Alternatives considered: deleting the superseded entry (rejected — it loses why the constraint was real, and a future reader wondering why Arabic was ever withheld would have to reconstruct it); relying on entry dates alone to signal precedence (rejected — that is exactly what failed, because readers grep for a topic and stop at the first match rather than reading the log in order); a single locale constant the docs could cite instead of restating (rejected — Markdown cannot import `PILOT_LOCALES`, so the duplication is unavoidable and the fix has to be process).
+- Consequences: Phase 7.7 changes from a spot-check of a locale believed hidden into a real Arabic RTL device pass. That is a gate, not a formality: the 2026-08-06 entry re-enabled Arabic on the strength of critical flows and says in its own consequences that secondary screens may still need a device pass. Nobody has walked Arabic on a device since, and while four documents claimed Arabic was out of scope for cohort 1, nobody was going to. The 2026-07-28 entry keeps its body; only its status changed.
+- Owner: Founder
+
 ## 2026-08-28 — Cancelling a match tells the other players, and the reason lives on the hub
 
 - Status: accepted
@@ -364,7 +373,7 @@ Record decisions using this template:
 
 ## 2026-07-28 — Ship the pilot in English and French only
 
-- Status: accepted
+- Status: superseded by the 2026-08-06 entry "Arabic RTL enabled in pilot locales", which re-added `ar` to `PILOT_LOCALES` once `forceRTL` was wired. This entry stood for nine days; several docs kept asserting EN/FR-only for weeks afterwards, so cite the 2026-08-06 entry rather than this one.
 - Context: Arabic translations are complete and guarded in CI for key parity, stale placeholders, and real Arabic script. But the app never calls `I18nManager.forceRTL`, so Arabic strings render inside a left-to-right layout: rows, alignment and directional affordances stay LTR on nearly every screen. Only two screens use the manual direction hook. Enabling native RTL is a few days of work plus a device pass, which does not fit before the pilot.
 - Decision: Offer only English and French in the language picker (`PILOT_LOCALES`). Keep the Arabic locale files, the `SUPPORTED_LOCALES` list, and every CI guard intact so the translations stay honest and nothing rots.
 - Alternatives considered: ship Arabic strings inside an LTR layout (worse than not offering it — it looks broken rather than absent); delete the Arabic locale (loses finished translation work and the CI guard); enable `forceRTL` and accept rough edges on secondary screens (still needs a device pass nobody has run).

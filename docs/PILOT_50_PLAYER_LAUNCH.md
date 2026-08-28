@@ -26,15 +26,15 @@ Pair with:
 
 Do this before spending money on hosted infra.
 
-| #   | Task                              | Success criterion                                                                                     |
-| --- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| 0.1 | Run automated gates               | `pnpm verify:pilot` passes                                                                            |
-| 0.2 | Run database authorization matrix | `pnpm db:test` passes (Docker + local Supabase)                                                       |
-| 0.3 | Rehearse four workflows locally   | All rows in `docs/PILOT_OPERATIONS.md` § “Four workflow rehearsals” pass on a fresh `pnpm db:reset`   |
-| 0.4 | Fix P0 bugs from rehearsal        | No crashers or dead-ends on auth, onboarding, discover, create/join, hub, WhatsApp handoff, result    |
-| 0.5 | Decide pilot geography            | **Done** — Beirut, one zone. See `docs/DECISIONS.md` 2026-08-19 and `supabase/pilot/beirut-zones.sql` |
-| 0.6 | Decide pilot locales              | English + French only for cohort 1 (`docs/DECISIONS.md` 2026-07-28)                                   |
-| 0.7 | Name ops owner                    | Single inbox + on-call for reports, disputes, and stuck matches                                       |
+| #   | Task                              | Success criterion                                                                                                                           |
+| --- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.1 | Run automated gates               | `pnpm verify:pilot` passes                                                                                                                  |
+| 0.2 | Run database authorization matrix | `pnpm db:test` passes (Docker + local Supabase)                                                                                             |
+| 0.3 | Rehearse four workflows locally   | All rows in `docs/PILOT_OPERATIONS.md` § “Four workflow rehearsals” pass on a fresh `pnpm db:reset`                                         |
+| 0.4 | Fix P0 bugs from rehearsal        | No crashers or dead-ends on auth, onboarding, discover, create/join, hub, WhatsApp handoff, result                                          |
+| 0.5 | Decide pilot geography            | **Done** — Beirut, one zone. See `docs/DECISIONS.md` 2026-08-19 and `supabase/pilot/beirut-zones.sql`                                       |
+| 0.6 | Decide pilot locales              | **Done** — English, French and Arabic. Arabic re-enabled once `forceRTL` was wired (`docs/DECISIONS.md` 2026-08-06, superseding 2026-07-28) |
+| 0.7 | Name ops owner                    | Single inbox + on-call for reports, disputes, and stuck matches                                                                             |
 
 ```powershell
 pnpm verify:pilot
@@ -172,17 +172,17 @@ Required before **50+ strangers**, not optional polish.
 
 **Goal:** prove the full loop with trusted players before scaling.
 
-| #   | Task                     | Success criterion                                                                                                                                         |
-| --- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 7.1 | Recruit 10–20 players    | Same corridor; weight to Improving / Intermediate / Advanced with Intermediate the largest group; at least 4 who can play weekly. See the band note below |
-| 7.2 | Distribute builds        | TestFlight + Play internal links sent                                                                                                                     |
-| 7.3 | Onboarding pass          | ≥80% complete onboarding without ops help                                                                                                                 |
-| 7.4 | Liquidity pass           | ≥3 public matches created; ≥2 joins without manual DB fixes                                                                                               |
-| 7.5 | WhatsApp booking pass    | ≥1 match records court via WhatsApp + in-app confirm                                                                                                      |
-| 7.6 | Result pass              | ≥1 match reaches mutually confirmed result                                                                                                                |
-| 7.7 | Arabic device spot-check | Settings → RTL layout check; note issues (Arabic locale hidden per pilot decision)                                                                        |
-| 7.8 | Collect feedback         | Structured form or WhatsApp group; tag bugs P0/P1/P2. Ask anyone who never created or joined the three questions below                                    |
-| 7.9 | Fix P0/P1                | No blockers for cohort B                                                                                                                                  |
+| #   | Task                   | Success criterion                                                                                                                                                     |
+| --- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 7.1 | Recruit 10–20 players  | Same corridor; weight to Improving / Intermediate / Advanced with Intermediate the largest group; at least 4 who can play weekly. See the band note below             |
+| 7.2 | Distribute builds      | TestFlight + Play internal links sent                                                                                                                                 |
+| 7.3 | Onboarding pass        | ≥80% complete onboarding without ops help                                                                                                                             |
+| 7.4 | Liquidity pass         | ≥3 public matches created; ≥2 joins without manual DB fixes                                                                                                           |
+| 7.5 | WhatsApp booking pass  | ≥1 match records court via WhatsApp + in-app confirm                                                                                                                  |
+| 7.6 | Result pass            | ≥1 match reaches mutually confirmed result                                                                                                                            |
+| 7.7 | Arabic RTL device pass | Switch to Arabic in Settings, walk the critical flows, then **Settings → RTL layout check**. Arabic ships in cohort 1; secondary screens have never had a device pass |
+| 7.8 | Collect feedback       | Structured form or WhatsApp group; tag bugs P0/P1/P2. Ask anyone who never created or joined the three questions below                                                |
+| 7.9 | Fix P0/P1              | No blockers for cohort B                                                                                                                                              |
 
 **Cohort A go/no-go:** if fewer than 2 completed match attempts (booking + show intent), fix discovery/liquidity before inviting 50.
 
@@ -280,7 +280,7 @@ Tracked weekly; graded against the cohort-1 bar above rather than the full-pilot
 
 ## Player flows to rehearse before each wave
 
-Manual smoke in **English and French** on a **physical device**:
+Manual smoke in **English, French and Arabic** on a **physical device**:
 
 1. Magic link sign-in → onboarding → Discover (players + matches)
 2. Create match → hub → invite/join → time vote

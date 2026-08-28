@@ -481,7 +481,7 @@ Platform admin role is enforced in the database. The dashboard checks the sessio
 
 ## Critical mobile flows (regression checklist)
 
-Automated registry: `PILOT_CRITICAL_FLOWS` in `@tennis-lebanon/domain`. Manually smoke in **English and Arabic** before release:
+Automated registry: `PILOT_CRITICAL_FLOWS` in `@tennis-lebanon/domain`. Manually smoke in **English, French and Arabic** — all three of `PILOT_LOCALES` — before release:
 
 - Auth magic link → onboarding → discover (players + matches)
 - Match create → hub → book → chat → result
