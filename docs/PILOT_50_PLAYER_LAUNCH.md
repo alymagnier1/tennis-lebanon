@@ -47,19 +47,21 @@ pnpm db:test
 
 Create a **dedicated staging** Supabase project (Frankfurt `eu-central-1` per `docs/ARCHITECTURE.md`). Do **not** use local `127.0.0.1` for real testers.
 
-| #    | Task                               | Success criterion                                                                          |
-| ---- | ---------------------------------- | ------------------------------------------------------------------------------------------ |
-| 1.1  | Create Supabase staging project    | Project ref recorded; separate from any future production project                          |
-| 1.2  | Link CLI                           | `supabase link --project-ref <staging-ref>`                                                |
-| 1.3  | Push migrations                    | `supabase db push` — all migrations applied, no errors                                     |
-| 1.4  | Regenerate types                   | `pnpm db:types` committed if schema changed                                                |
-| 1.5  | **Do not run seed.sql on staging** | No `@tennis-lebanon.test` accounts, no fictional clubs in staging/production               |
-| 1.6  | Insert real pilot zones            | Run `supabase/pilot/beirut-zones.sql`; its final query must report exactly one active zone |
-| 1.7  | Create platform operator           | Your admin user in `platform_roles`; can access `/admin/reports` on dashboard              |
-| 1.8  | Configure Auth redirect URLs       | `tennislebanon://auth/callback` added in Supabase Auth → URL configuration                 |
-| 1.9  | Configure Auth email               | Supabase built-in email works for magic links **or** custom SMTP configured and tested     |
-| 1.10 | Enable RLS spot-check              | Run `pnpm db:test` against linked staging if supported, or manual smoke as two users       |
-| 1.11 | Backup drill                       | Follow `docs/BACKUP_RESTORE.md`; record date in sign-off table                             |
+Command-level order in [`PHASE_1_STAGING_SETUP.md`](PHASE_1_STAGING_SETUP.md), which also carries the account clock — Apple, Google Play, Expo, Supabase and an email provider all take days and every later phase blocks on one of them.
+
+| #    | Task                               | Success criterion                                                                                                                                                            |
+| ---- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1  | Create Supabase staging project    | Project ref recorded; separate from any future production project                                                                                                            |
+| 1.2  | Link CLI                           | `supabase link --project-ref <staging-ref>`                                                                                                                                  |
+| 1.3  | Push migrations                    | `supabase db push` — all migrations applied, no errors                                                                                                                       |
+| 1.4  | Regenerate types                   | `pnpm db:types` committed if schema changed                                                                                                                                  |
+| 1.5  | **Do not run seed.sql on staging** | No `@tennis-lebanon.test` accounts, no fictional clubs in staging/production                                                                                                 |
+| 1.6  | Insert real pilot zones            | Run `supabase/pilot/beirut-zones.sql`; its final query must report exactly one active zone                                                                                   |
+| 1.7  | Create platform operator           | Your admin user in `platform_roles`; can access `/admin/reports` on dashboard                                                                                                |
+| 1.8  | Configure Auth redirect URLs       | `tennislebanon://auth/callback` added in Supabase Auth → URL configuration                                                                                                   |
+| 1.9  | Configure custom SMTP              | **Mandatory.** The built-in sender is rate-limited to a handful an hour; sign-in is a magic link, so at 50 testers most never get in. A link must arrive and work on a phone |
+| 1.10 | Enable RLS spot-check              | Run `pnpm db:test` against linked staging if supported, or manual smoke as two users                                                                                         |
+| 1.11 | Backup drill                       | Follow `docs/BACKUP_RESTORE.md`; record date in sign-off table                                                                                                               |
 
 **Staging env vars (dashboard + mobile builds):**
 
@@ -141,14 +143,14 @@ Local Expo (`pnpm dev:mobile`) is **not** usable for 50 testers. You need instal
 
 Without this, reminders and stale-match nudges are written to the outbox and **never delivered**.
 
-| #   | Task                        | Success criterion                                                                                 |
-| --- | --------------------------- | ------------------------------------------------------------------------------------------------- |
-| 5.1 | Deploy edge function        | `supabase functions deploy process-notifications` to staging                                      |
-| 5.2 | Choose invoker              | Cron (GitHub Actions, Vercel cron, or Supabase scheduled trigger) documented                      |
-| 5.3 | Schedule invoker            | POST to `process-notifications` every 1–5 minutes with `Authorization: Bearer <service_role_key>` |
-| 5.4 | Verify pg_cron enqueue      | Staging DB has scheduled lifecycle jobs (`expire_stale_matches`, etc.)                            |
-| 5.5 | **Physical push test**      | One notification arrives on a real device after a test event — not just HTTP 200                  |
-| 5.6 | Record invoker in checklist | Fill table in `docs/STAGING_CHECKLIST.md` §7b                                                     |
+| #   | Task                        | Success criterion                                                                                                                                                                                 |
+| --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 5.1 | Deploy edge function        | `supabase functions deploy process-notifications` to staging                                                                                                                                      |
+| 5.2 | Create the Vault secrets    | `process_notifications_url` and `process_notifications_token` — migration `060` already built the invoker and runs it on `pg_cron` every five minutes, but is a deliberate no-op until both exist |
+| 5.3 | Confirm the cron is running | `select * from cron.job` shows `tennis_process_notifications`; `sent_at` starts being set on outbox rows                                                                                          |
+| 5.4 | Verify pg_cron enqueue      | Staging DB has scheduled lifecycle jobs (`expire_stale_matches`, etc.)                                                                                                                            |
+| 5.5 | **Physical push test**      | One notification arrives on a real device after a test event — not just HTTP 200                                                                                                                  |
+| 5.6 | Record invoker in checklist | Fill table in `docs/STAGING_CHECKLIST.md` §7b                                                                                                                                                     |
 
 ---
 
