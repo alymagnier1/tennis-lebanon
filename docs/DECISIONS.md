@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-29 — Internal `security definer` helpers are revoked, not left at the default grant
+
+- Status: accepted
+- Context: A pre-Phase-1 audit of the schema found eight `security definer` functions in `public` sitting at the default grant, which makes them callable by `anon` and `authenticated` through PostgREST while running with RLS bypassed — an internal helper published as an API with no authorization of its own. The worst is `append_booking_event`: it takes `p_actor_id` as a parameter, inserts unconditionally, and checks nothing about its caller, so an authenticated user holding a booking id — which `get_match_hub` hands every participant — could write booking audit rows attributed to anyone, including club staff. The foreign key rejects invented booking ids and nothing else. `match_agreed_starts_at` and `match_agreed_ends_at`, added the previous day in `090`, leaked a match's agreed hour to `anon` straight past the authorization `get_match_hub` applies. The remaining five return booleans about matches and courts: a thinner leak, the same mistake.
+- Decision: `095_revoke_internal_definer_helpers.sql` revokes all eight from `public`, `anon` and `authenticated`. None has a caller outside the database, and every RPC that uses them is itself `security definer`, so all of them keep working. Trigger functions keep the default grant — `notify_match_cancelled` and `notify_match_roster_change` cannot be usefully invoked without OLD and NEW. This makes explicit the pattern `notify_match_participants` already followed alone.
+- Alternatives considered: adding `assert_marketplace_caller` to each helper (rejected — they are called from inside definer RPCs that have already authorized the caller, so re-checking would duplicate the rule and, for the read helpers, be wrong: `join_match` legitimately reads a match the joiner cannot yet see); making them `security invoker` so RLS applies (rejected for the writers, where the calling RPC genuinely needs the bypass, and inconsistent to apply to only half); leaving the boolean readers alone as low-value (rejected — the sweep is only useful if it ends at none, and a rule with exceptions nobody can restate is not a rule).
+- Consequences: `pnpm db:test` is unchanged at 250 tests, which is the evidence the callers were all definer as claimed. The audit trail this protects is what `docs/PILOT_OPERATIONS.md` sends an operator to read when a booking is disputed, so a forgeable `booking_events` would have undermined the dispute path rather than merely leaking. The sweep query — definer, non-trigger, `proacl is null` — belongs in the pre-promotion checks; it now returns none and should be re-run whenever migrations add a definer function. Migration `091` also shipped a host-only `pending_request_count` with no pgTAP coverage; that gap is closed in the same change.
+- Owner: Founder
+
 ## 2026-08-28 — A decline is recorded, and the host can see who they asked
 
 - Status: accepted

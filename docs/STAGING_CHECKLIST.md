@@ -42,6 +42,22 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 
 - [ ] Staging and production use **separate** Supabase projects (Frankfurt `eu-central-1` per `docs/ARCHITECTURE.md`)
 - [ ] No service-role key in mobile or browser bundles
+- [ ] No `security definer` function left at the default grant. A function in
+      `public` with no explicit ACL is callable by `anon` through PostgREST, and
+      `security definer` runs it with RLS bypassed — that combination publishes
+      an internal helper as an API with no authorization of its own. Re-run
+      whenever a migration adds one (2026-08-29 decision):
+
+  ```sql
+  select p.proname
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public' and p.prosecdef and p.proacl is null
+    and p.prorettype <> 'trigger'::regtype::oid;
+  ```
+
+  Must return no rows. Trigger functions are excluded: they cannot be invoked
+  without OLD and NEW.
+
 - [ ] Production env vars set in host dashboards only (EAS, Vercel) — not committed to git
 - [ ] `EXPO_PUBLIC_*` / `NEXT_PUBLIC_*` reviewed for accidental secrets
 
