@@ -29,7 +29,75 @@ if (files.length === 0) {
 
 const seenPrefixes = new Map();
 
-for (const file of files) {
+/**
+ * Function names already defined by an earlier migration.
+ *
+ * `create or replace function` preserves the existing ACL, so only the
+ * migration that *introduces* a function has to grant it. Without this,
+ * every redefinition — `get_match_hub` has seven — would be flagged.
+ */
+const definedFunctions = new Set();
+
+/**
+ * Every `create [or replace] function public.name(` in a file, with the body
+ * that follows it, so each can be inspected for `security definer` and
+ * `returns trigger` independently.
+ */
+function functionBlocks(sql) {
+  const header =
+    /create\s+(?:or\s+replace\s+)?function\s+public\.([a-z0-9_]+)\s*\(/gi;
+  const starts = [];
+  let match;
+  while ((match = header.exec(sql)) !== null) {
+    starts.push({ name: match[1].toLowerCase(), at: match.index });
+  }
+
+  return starts.map((start, index) => ({
+    name: start.name,
+    body: sql.slice(start.at, starts[index + 1]?.at ?? sql.length),
+  }));
+}
+
+/** Definer, non-trigger functions and the migration that introduced each. */
+const definerFunctions = new Map();
+/** Function names that any migration revokes or grants. */
+const grantedFunctions = new Set();
+
+/**
+ * A `security definer` function runs with RLS bypassed, and one left at the
+ * default grant is reachable by `anon` through PostgREST — an internal helper
+ * published as an unauthorized public endpoint. Eight sat that way until
+ * migration 095; see .claude/skills/supabase-conventions/SKILL.md.
+ *
+ * Collected across the whole set rather than per file, for two reasons:
+ * `create or replace` preserves the existing ACL, so only the migration that
+ * introduces a function has to grant it; and a grant may legitimately arrive in
+ * a later migration, which is how the 095 backfill works without rewriting the
+ * applied migrations that introduced the problem.
+ *
+ * Trigger functions are exempt: they cannot be invoked without OLD and NEW.
+ */
+function collectDefinerGrants(file, contents) {
+  for (const block of functionBlocks(contents)) {
+    const isNew = !definedFunctions.has(block.name);
+    definedFunctions.add(block.name);
+
+    if (!isNew) continue;
+    if (!/security\s+definer/i.test(block.body)) continue;
+    if (/returns\s+trigger/i.test(block.body)) continue;
+
+    definerFunctions.set(block.name, file);
+  }
+
+  const grants =
+    /(?:revoke|grant)[\s\S]{0,200}?function\s+public\.([a-z0-9_]+)\s*\(/gi;
+  let match;
+  while ((match = grants.exec(contents)) !== null) {
+    grantedFunctions.add(match[1].toLowerCase());
+  }
+}
+
+for (const file of files.slice().sort()) {
   const path = join(migrationsDir, file);
 
   if (!NAME_PATTERN.test(file)) {
@@ -63,6 +131,25 @@ for (const file of files) {
         `Confirm RLS is enabled in a companion statement per docs/DATABASE.md.`,
     );
   }
+
+  collectDefinerGrants(file, contents);
+}
+
+for (const [name, file] of definerFunctions) {
+  if (grantedFunctions.has(name)) continue;
+
+  fail(
+    [
+      `${file}: public.${name} is a "security definer" function that no migration`,
+      `  revokes or grants. At the default grant it is callable by anon through`,
+      `  PostgREST with RLS bypassed. Add one of:`,
+      `    revoke all on function public.${name}(...) from public, anon;`,
+      `    grant execute on function public.${name}(...) to authenticated;`,
+      `  ...for a caller-facing RPC, or revoke from "public, anon, authenticated"`,
+      `  for an internal helper. Never edit an applied migration — add a new one,`,
+      `  as 095 did. See .claude/skills/supabase-conventions/SKILL.md.`,
+    ].join("\n"),
+  );
 }
 
 if (process.exitCode === 1) {
