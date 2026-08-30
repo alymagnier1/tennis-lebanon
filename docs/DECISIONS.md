@@ -11,6 +11,24 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-29 — Naming `anon` in the revoke, and a sweep that asks the right question
+
+- Status: accepted
+- Context: Staging was stood up and `get_advisors` run against it — the one security check that cannot run locally. It found two `security definer` functions still executable by `anon`: `set_own_skill_band` and `set_player_preferred_zones`. Both were written `revoke all on function … from public;`, omitting `anon`. Supabase grants EXECUTE on public functions to `anon` and `authenticated` by default, so revoking from `public` alone leaves the explicit `anon` grant standing — the endpoints had been open since `038` and `042`. Neither was exploitable: one calls `assert_marketplace_caller()`, the other raises `42501` when `auth.uid()` is null, so an anonymous caller is refused in the body. The sweep added to `STAGING_CHECKLIST.md` §2 the day before could not have caught them, because it tested `proacl is null` and these had an explicit ACL that happened to include `anon`.
+- Decision: `096_revoke_anon_from_profile_setters.sql` revokes both from `public, anon`. The checklist sweep now asks `has_function_privilege('anon', p.oid, 'EXECUTE')` — whether `anon` can actually execute, rather than whether the ACL looks empty. `validate-migrations.mjs` gains a matching static check: a new definer function whose revoke does not name `anon` fails the build. The conventions skill records why omitting `anon` is a silent no-op rather than a shorter way of writing the same thing.
+- Alternatives considered: treating this as low severity and leaving it, since both functions reject anonymous callers anyway (rejected — the body check is the only thing closing the door, and a later edit relaxing it would open the endpoint without anyone touching a grant; defence in depth is the whole reason for the convention); keeping `proacl is null` in the sweep and relying on `get_advisors` to catch the rest (rejected — the advisor only runs against a hosted project, so the gap would reappear on every branch and every future migration before staging saw it).
+- Consequences: The static check cannot parse argument lists — `upsert_club_court(..., char(3), ...)` has parentheses inside its signature, which broke a first attempt and produced a false positive on a correctly-revoked function. It now matches from `revoke` to the statement's semicolon and reads any function names inside, which handles nested parentheses at the cost of being looser. Three probes cover it: a revoke omitting `anon` fails, a nested-parenthesis signature with a correct revoke passes, and a function with no grant at all still fails. This is a static heuristic; `get_advisors` on staging remains the authority, because it sees grants as they end up rather than as migrations describe them.
+- Owner: Founder
+
+## 2026-08-29 — A test that only passed on a fresh database now says so
+
+- Status: accepted
+- Context: `007_matches_test.sql` began failing with `match_cap_reached` after a manual browser rehearsal left matches on the local database. Its `clear_hosted` helper cancelled only matches of the same format in `open`, `full` or `ready_to_book` — the rule as it stood when the helper was written. Migration `087` had since made the hosted cap a count of **three across every format and every live status**, including `booking_pending`, `confirmed` and `in_progress`. So any match the helper did not clear still counted toward the cap, and the test passed only against a pristine `pnpm db:reset` without declaring that dependency.
+- Decision: The helper clears every status the cap counts, in any format, and tolerates a cancel that refuses. Fixed rather than resolved by resetting the database: a reset would have hidden a test that silently depends on being run first.
+- Alternatives considered: running `pnpm db:reset` and moving on (rejected — it destroys local rehearsal state and leaves the same failure waiting for the next person whose database is not empty); asserting the cap in the test rather than clearing around it (rejected — this helper exists so the test can create matches, not to test the cap, which `087_hosted_match_cap_test.sql` already does).
+- Consequences: `007` now passes against a database carrying unrelated matches, which is the stronger guarantee and was verified that way before the suite was re-run. This is the third fixture in this file to assume a clean database — the earlier two assumed a free hour, fixed when `090` landed. Worth suspecting the same shape elsewhere when a test fails only for one person.
+- Owner: Founder
+
 ## 2026-08-29 — Internal `security definer` helpers are revoked, not left at the default grant
 
 - Status: accepted

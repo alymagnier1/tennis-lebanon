@@ -62,6 +62,8 @@ function functionBlocks(sql) {
 const definerFunctions = new Map();
 /** Function names that any migration revokes or grants. */
 const grantedFunctions = new Set();
+/** Function names some migration explicitly revokes from `anon`. */
+const revokedFromAnon = new Set();
 
 /**
  * A `security definer` function runs with RLS bypassed, and one left at the
@@ -94,6 +96,27 @@ function collectDefinerGrants(file, contents) {
   let match;
   while ((match = grants.exec(contents)) !== null) {
     grantedFunctions.add(match[1].toLowerCase());
+  }
+
+  // Supabase grants EXECUTE to `anon` and `authenticated` by default, so
+  // `revoke ... from public` alone leaves the explicit anon grant standing.
+  // `038` and `042` did exactly that; get_advisors caught it on staging, and
+  // `096` fixed it. The revoke has to name anon.
+  //
+  // Matched from the function name to the statement's semicolon rather than by
+  // parsing the argument list: a signature can contain parentheses of its own
+  // — `upsert_club_court(..., char(3), ...)` — which a naive `\([^)]*\)` cuts
+  // in half, and the resulting miss reads as a violation.
+  const revokes = /revoke\b([\s\S]*?);/gi;
+  while ((match = revokes.exec(contents)) !== null) {
+    const statement = match[1];
+    if (!/\banon\b/i.test(statement)) continue;
+
+    const named = /function\s+public\.([a-z0-9_]+)\s*\(/gi;
+    let fn;
+    while ((fn = named.exec(statement)) !== null) {
+      revokedFromAnon.add(fn[1].toLowerCase());
+    }
   }
 }
 
@@ -136,6 +159,19 @@ for (const file of files.slice().sort()) {
 }
 
 for (const [name, file] of definerFunctions) {
+  if (grantedFunctions.has(name) && !revokedFromAnon.has(name)) {
+    fail(
+      [
+        `${file}: public.${name} is a "security definer" function that is granted`,
+        `  but never revoked from anon. Supabase grants EXECUTE to anon by default,`,
+        `  so "revoke ... from public" alone leaves anon able to call it. Use:`,
+        `    revoke all on function public.${name}(...) from public, anon;`,
+        `  ...naming anon explicitly. See .claude/skills/supabase-conventions/SKILL.md.`,
+      ].join("\n"),
+    );
+    continue;
+  }
+
   if (grantedFunctions.has(name)) continue;
 
   fail(

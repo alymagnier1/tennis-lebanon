@@ -86,14 +86,32 @@ declare
 begin
   perform pg_temp.set_caller(p_creator_id);
 
+  -- Every status and format the cap counts, not just this format's open ones.
+  -- `087` made the hosted cap a count of three across all formats and every
+  -- live status; this helper still cleared one format and three statuses, so a
+  -- match left in `confirmed` or `in_progress` by anything else on the database
+  -- counted toward the cap and tipped the test into `match_cap_reached`. It
+  -- passed only on a pristine `db:reset` and did not say so.
   for v_existing_id in
     select lm.match_id
     from public.list_my_matches() as lm
     where lm.is_creator
-      and lm.format = p_format
-      and lm.status in ('open', 'full', 'ready_to_book')
+      and lm.status in (
+        'draft',
+        'open',
+        'full',
+        'ready_to_book',
+        'booking_pending',
+        'confirmed',
+        'in_progress'
+      )
   loop
-    perform public.cancel_match(v_existing_id, 'test cleanup');
+    begin
+      perform public.cancel_match(v_existing_id, 'test cleanup');
+    exception
+      when others then
+        null;
+    end;
   end loop;
 
   select public.create_and_publish_match(

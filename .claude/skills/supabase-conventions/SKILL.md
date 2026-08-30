@@ -31,13 +31,17 @@ revoke all on function public.notify_match_participants(uuid, text, uuid, text)
 
 An internal helper stays callable from a definer RPC regardless, because inside one the current role is the definer. Revoking costs nothing and closes the endpoint.
 
+**`anon` must be named in the revoke.** Supabase grants EXECUTE on public functions to both `anon` and `authenticated` by default, so `revoke ... from public` alone leaves the explicit `anon` grant standing and the endpoint open. `038` and `042` did exactly that; the functions stayed anon-reachable for fifty-odd migrations. Both defended themselves in the body, so nothing was exploitable — but the door was open, and a later edit relaxing a body check would have opened it for real.
+
 **Trigger functions are the exception.** They keep the default grant — a trigger function cannot be usefully invoked without `OLD` and `NEW`. `notify_match_roster_change` and `notify_match_cancelled` both do.
 
 ### What happens when this is missed
 
 `append_booking_event` sat at the default grant from migration `014` until `095`. It takes `p_actor_id` as a parameter, inserts unconditionally, and checks nothing about its caller — so any authenticated user holding a booking id, which `get_match_hub` hands to every participant, could write booking audit rows attributed to anyone including club staff. The foreign key rejected invented booking ids and nothing else. That audit trail is what `PILOT_OPERATIONS.md` sends an operator to read when a booking is disputed.
 
-`scripts/validate-migrations.mjs` now fails a migration that adds a non-trigger definer function with no revoke beside it. The runtime sweep in `STAGING_CHECKLIST.md` §2 is the backstop for what static matching misses.
+`scripts/validate-migrations.mjs` now fails a migration that adds a non-trigger definer function with no grant statement, and one whose revoke does not name `anon`.
+
+The runtime sweep in `STAGING_CHECKLIST.md` §2 is the backstop, and it asks `has_function_privilege('anon', ...)` rather than testing for an empty ACL. An earlier version checked `proacl is null`, which only ever caught functions at the _default_ grant — the two revoked `from public` without `anon` had an explicit ACL and passed it. Supabase's own `get_advisors` found them on the staging project, which is the argument for running it there: it sees the grants as they end up, not as the migrations describe them.
 
 ## `set search_path = ''` on every definer function
 

@@ -49,14 +49,24 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
       whenever a migration adds one (2026-08-29 decision):
 
   ```sql
-  select p.proname
+  select p.proname,
+         coalesce(array_to_string(p.proacl::text[], ' '), '(default grant)') as acl
   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-  where n.nspname = 'public' and p.prosecdef and p.proacl is null
-    and p.prorettype <> 'trigger'::regtype::oid;
+  where n.nspname = 'public'
+    and p.prosecdef
+    and p.prorettype <> 'trigger'::regtype::oid
+    and has_function_privilege('anon', p.oid, 'EXECUTE');
   ```
 
   Must return no rows. Trigger functions are excluded: they cannot be invoked
   without OLD and NEW.
+
+  Asks whether `anon` can actually execute, rather than whether the ACL is
+  empty. An earlier version tested `proacl is null` and so only caught
+  functions left at the _default_ grant — `set_own_skill_band` and
+  `set_player_preferred_zones` were revoked `from public` without `anon`, kept
+  their explicit `anon` grant, and passed it. Supabase's own `get_advisors`
+  caught them on staging; migration `096` fixed them.
 
 - [ ] Production env vars set in host dashboards only (EAS, Vercel) — not committed to git
 - [ ] `EXPO_PUBLIC_*` / `NEXT_PUBLIC_*` reviewed for accidental secrets
