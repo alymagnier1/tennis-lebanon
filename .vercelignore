@@ -1,0 +1,16 @@
+# Keep CLI uploads small; Git deploys still use the full repo via Root Directory.
+node_modules
+**/node_modules
+.next
+**/.next
+dist
+**/dist
+.git
+apps/mobile
+e2e
+coverage
+**/*.apk
+**/*.log
+supabase/.temp
+.turbo
+**/.turbo

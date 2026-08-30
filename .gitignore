@@ -17,6 +17,13 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Never commit local secret dumps
+APIS and secrets/
+**/APIS-secrets.txt
+
+# Vercel CLI link metadata (project is linked in the dashboard)
+.vercel/
+
 # Supabase local runtime state (not the committed config/migrations)
 supabase/.branches/
 supabase/.temp/

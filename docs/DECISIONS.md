@@ -11,6 +11,24 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-08-30 — Support inbox is aly.moghnieh@gmail.com
+
+- Status: accepted
+- Context: The 2026-08-27 ops-owner entry recorded `aly.magnier@gmail.com`. Staging operator and the Supabase account are `aly.moghnieh@gmail.com`. One of those was a typo. The address ships in the app binary and on the store listing.
+- Decision: Cohort-1 support inbox is `aly.moghnieh@gmail.com`. That supersedes the address in the 2026-08-27 entry; the rest of that entry (ops owner, 24h/48h SLA, no club ops sign-off) stands. Value still belongs in EAS and Vercel, not in git.
+- Alternatives considered: leaving both addresses in circulation (rejected — a tester would not know which inbox to write); waiting for a `support@` domain (already rejected on 2026-08-27).
+- Consequences: `PILOT_OPERATIONS.md` updated. A staging/production build still fails if `SUPPORT_EMAIL` is left at `*.invalid`.
+- Owner: Ali Moghnieh
+
+## 2026-08-30 — Operators can register clubs without player onboarding
+
+- Status: accepted
+- Context: `register_pilot_club(..., p_as_operator := true)` still called `assert_marketplace_caller()` first. Staging operator `aly.moghnieh@gmail.com` is a dashboard password user with `platform_roles` and an incomplete profile (`onboarding_completed_at` null), so `/onboarding` refused the only person who can add the four Beirut venues.
+- Decision: `097_operator_register_without_onboarding.sql` — the operator path authenticates with `auth.uid()` + `viewer_is_platform_operator()`. Self-service registration still requires marketplace eligibility.
+- Alternatives considered: completing player onboarding on the ops account (rejected — would put the operator in Discover); inserting clubs as postgres and bypassing the RPC (rejected — skips the audit action the dashboard already writes).
+- Consequences: Dashboard `/onboarding` as operator works on staging after `supabase db push`. pgTAP in `097_operator_register_without_onboarding_test.sql`.
+- Owner: Founder
+
 ## 2026-08-29 — Naming `anon` in the revoke, and a sweep that asks the right question
 
 - Status: accepted

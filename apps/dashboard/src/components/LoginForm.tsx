@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { listStaffClubs } from "@tennis-lebanon/api";
@@ -164,6 +165,25 @@ export function LoginForm() {
           {t("dashboard.login.devHint")}
         </p>
       </form>
+      <p
+        style={{
+          marginTop: spacing.lg,
+          fontSize: typography.size.xs,
+          color: colors.neutral[500],
+        }}
+      >
+        <Link href="/legal/terms" style={{ color: colors.brand[600] }}>
+          {t("policies.terms.title")}
+        </Link>
+        {" · "}
+        <Link href="/legal/privacy" style={{ color: colors.brand[600] }}>
+          {t("policies.privacy.title")}
+        </Link>
+        {" · "}
+        <Link href="/legal/community" style={{ color: colors.brand[600] }}>
+          {t("policies.community.title")}
+        </Link>
+      </p>
     </main>
   );
 }

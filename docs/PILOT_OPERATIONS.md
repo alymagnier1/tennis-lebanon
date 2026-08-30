@@ -519,7 +519,7 @@ Confirm primary actions remain visible at largest dynamic type setting (iOS/Andr
 
 ## Support and incidents
 
-- **Pilot support:** single ops inbox, not seeded. Cohort 1 owner is **Ali Moghnieh**, inbox `aly.magnier@gmail.com` — temporary, to be replaced before public release (see the 2026-08-27 decision). Do not log message bodies, phone numbers, or tokens in analytics.
+- **Pilot support:** single ops inbox, not seeded. Cohort 1 owner is **Ali Moghnieh**, inbox `aly.moghnieh@gmail.com` — temporary, to be replaced before public release (see the 2026-08-30 decision, which supersedes the 2026-08-27 address). Do not log message bodies, phone numbers, or tokens in analytics.
 - **Daily ops pass:** clear `/admin/reports` and `/admin/disputes`, then look for matches that reached an agreed time but never recorded a court. That last one has no queue and has to be looked for.
 - **Account deletion:** owner-initiated request path must be documented in production privacy notice before public pilot.
 - **Escalation:** open reports clear within **24h** (safety), disputed results within **48h**.

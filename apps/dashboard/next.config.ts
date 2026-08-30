@@ -18,6 +18,9 @@ if (existsSync(localEnvPath)) {
 const nextConfig: NextConfig = {
   // Required when opening the dev server via 127.0.0.1.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  outputFileTracingIncludes: {
+    "/legal/[slug]": ["../../docs/legal/**/*"],
+  },
 };
 
 export default nextConfig;

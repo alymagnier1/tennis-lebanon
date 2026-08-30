@@ -105,7 +105,8 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 ## 7. Observability and incident response
 
 - [ ] Sentry receiving events from staging build (scrub PII per `docs/TESTING_SECURITY.md`)
-- [ ] On-call / ops owner named for booking disputes and moderation queue
+- [x] PostHog stays off until consent copy is approved (not in the client today)
+- [x] On-call / ops owner named for booking disputes and moderation queue (Ali Moghnieh)
 - [ ] Rollback plan documented: previous mobile build + dashboard promotion + migration revert policy
 
 ## 7b. Notification delivery (hard gate)
@@ -139,10 +140,10 @@ select * from net._http_response order by created desc limit 5;
 
 - [x] Named invoker for `process-notifications` recorded below, with schedule
       and which secret it authenticates with
+- [x] `select * from cron.job where jobname = 'tennis_process_notifications';`
+      shows the job active on staging (`*/5 * * * *`, verified 2026-08-30)
 - [ ] Both Vault secrets created in the target environment, and
       `select public.invoke_process_notifications();` returned a request id
-- [ ] `select * from cron.job where jobname = 'tennis_process_notifications';`
-      shows the job active in the target environment
 - [ ] Verified on staging that **one push notification physically arrives** on a
       real device, not merely that the function returned 200
 - [ ] `select * from public.unreachable_notification_summary();` reviewed after

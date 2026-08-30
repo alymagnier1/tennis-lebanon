@@ -55,14 +55,16 @@ Idempotent — the unique constraint on `(country_code, city_code, slug)` makes 
 
 ## 6. Create yourself as platform operator
 
-Sign up through the app first so `auth.users` has your row, then:
+Do **not** sign up through the mobile app. Mobile auth is a magic link and creates a passwordless user; the dashboard (`/admin/reports`, `/admin/disputes`) uses `signInWithPassword`. A magic-link user cannot log in there.
+
+Create a **password user** in the Supabase dashboard (Authentication → Users → Add user → auto-confirm), then grant admin:
 
 ```sql
 insert into public.platform_roles (user_id, role)
 values ('<your-auth-uid>', 'admin');
 ```
 
-Without this, `/admin/reports` and `/admin/disputes` are closed to everyone, and `list_open_user_reports` refuses every caller with `42501`. Workflow 4 proved that refusal works; this is what makes it stop applying to you.
+`is_platform_operator` needs only that `platform_roles` row — no player profile, no onboarding. Without it, `/admin/reports` and `/admin/disputes` are closed to everyone, and `list_open_user_reports` refuses every caller with `42501`. Workflow 4 proved that refusal works; this is what makes it stop applying to you.
 
 ## 7. Configure the auth redirect
 
@@ -76,13 +78,25 @@ Sign-in is a magic link ([`sign-in.tsx`](<../apps/mobile/app/(public)/sign-in.ts
 
 Configure a real provider, then send yourself a magic link and open it on a phone. Not "the API returned 200" — a link that arrives and works.
 
+**Resend (chosen for cohort 1):** create a Resend account, verify a sending domain or use Resend’s onboarding sender for the first test, then in Supabase Auth → SMTP Settings:
+
+| Field | Value |
+| ----- | ----- |
+| Host | `smtp.resend.com` |
+| Port | `465` (SSL) or `587` |
+| Username | `resend` |
+| Password | Resend API key |
+| Sender email | A verified Resend from-address |
+
+Success = the link arrives in the inbox and opens the app on a phone.
+
 ## 9. Create the notification Vault secrets
 
 Migration `060` already built the invoker: `invoke_process_notifications` posts to the Edge Function and `pg_cron` runs it every five minutes. It is a deliberate no-op until these two secrets exist, which is why applying the migration to an unconfigured project is safe.
 
 ```sql
 select vault.create_secret(
-  'https://<staging-ref>.supabase.co/functions/v1/process-notifications',
+  'https://rvdzalxavpcijbiikkjz.supabase.co/functions/v1/process-notifications',
   'process_notifications_url',
   'Edge Function endpoint invoked by tennis_process_notifications'
 );
@@ -120,9 +134,9 @@ Follow [`BACKUP_RESTORE.md`](BACKUP_RESTORE.md) and record the date in the launc
 | Variable                                                          | Staging value                                                    |
 | ----------------------------------------------------------------- | ---------------------------------------------------------------- |
 | `EXPO_PUBLIC_APP_ENV` / `NEXT_PUBLIC_APP_ENV`                     | `staging`                                                        |
-| `EXPO_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`           | `https://<ref>.supabase.co`                                      |
+| `EXPO_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`           | `https://rvdzalxavpcijbiikkjz.supabase.co`                       |
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Staging anon key                                                 |
-| `EXPO_PUBLIC_SUPPORT_EMAIL` / `NEXT_PUBLIC_SUPPORT_EMAIL`         | A real monitored inbox                                           |
+| `EXPO_PUBLIC_SUPPORT_EMAIL` / `NEXT_PUBLIC_SUPPORT_EMAIL`         | `aly.moghnieh@gmail.com`                                         |
 | `EXPO_PUBLIC_AUTH_REDIRECT_URL`                                   | `tennislebanon://auth/callback`                                  |
 | `EAS_PROJECT_ID`                                                  | From `eas init`                                                  |
 | `SUPABASE_SERVICE_ROLE_KEY`                                       | Dashboard server only — a Vercel secret, never in a mobile build |

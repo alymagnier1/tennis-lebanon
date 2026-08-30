@@ -51,39 +51,35 @@ pnpm drill:backup
 ### What the script does
 
 1. Verifies local Supabase is running (`supabase status`).
-2. `supabase db reset` — baseline schema + seed.
+2. `supabase db reset --yes` — baseline schema + seed.
 3. `supabase db dump --local --data-only` → `.tmp/pilot-backup-drill.sql`.
-4. `supabase db reset` again — schema only, empty data tables.
-5. Restores data via `psql` to `postgresql://postgres:postgres@127.0.0.1:54322/postgres`.
+4. `supabase db reset --yes --no-seed` — schema only, empty data tables.
+5. Restores data via `psql` (or `docker exec` into `supabase_db_*` if `psql` is not installed) to `postgresql://postgres:postgres@127.0.0.1:54322/postgres`, after clearing migration-seeded rows (`platform_policy_settings`) so the dump can re-insert them.
 6. Runs `pnpm db:test` to confirm authorization tests still pass.
+
+The script refuses any `PILOT_DRILL_DATABASE_URL` that is not localhost — this restore includes seed data and must never touch a hosted project.
 
 ### Prerequisites
 
 - Docker Desktop running
 - `supabase start` (or `pnpm db:reset` once)
-- `psql` on PATH (PostgreSQL client tools), **or** set `PILOT_DRILL_PSQL` to the full path
+- `psql` on PATH, **or** `PILOT_DRILL_PSQL` set to the client binary, **or** a running `supabase_db_*` container (the script falls back to `docker exec`)
 
 ### Troubleshooting
 
 | Symptom                       | Action                                                     |
 | ----------------------------- | ---------------------------------------------------------- |
 | `connection refused` on 54322 | Run `supabase start`                                       |
-| `psql` not found              | Install PostgreSQL client or set `PILOT_DRILL_PSQL`        |
+| `psql` not found              | Not required if the local `supabase_db_*` container is up  |
 | Restore FK errors             | Re-run from clean `db reset`; do not partial-restore       |
 | `db:test` fails after restore | Compare migration version; re-run drill from latest `main` |
+| `db reset` 502 on Windows | Kong often 502s while postgres already finished. The drill continues if postgres is reachable. |
+| `db reset` pulls new Docker images | `supabase link` writes staging service versions into `supabase/.temp/`. Local reset then tries to match them. If a pull hangs, the images are already cached after the first successful start — re-run. |
 
 ## Record-keeping
 
-After each drill, log:
+After each drill, log a row. Keep the last successful **staging** drill date in `docs/STAGING_CHECKLIST.md` §3.
 
-| Field                  | Value                          |
-| ---------------------- | ------------------------------ |
-| Date                   |                                |
-| Environment            | local / staging / production   |
-| Method                 | PITR / snapshot / logical dump |
-| Recovery time (RTO)    |                                |
-| Data loss window (RPO) |                                |
-| Tester                 |                                |
-| Pass / fail            |                                |
-
-Keep the last successful staging drill date in your promotion checklist (`docs/STAGING_CHECKLIST.md` §3).
+| Date       | Environment | Method                            | RTO   | RPO | Tester         | Pass / fail |
+| ---------- | ----------- | --------------------------------- | ----- | --- | -------------- | ----------- |
+| 2026-08-30 | local       | logical dump → `--no-seed` restore | ~2 min | 0   | Cursor session | pass        |

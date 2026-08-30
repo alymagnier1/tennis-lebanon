@@ -68,9 +68,9 @@ Command-level order in [`PHASE_1_STAGING_SETUP.md`](PHASE_1_STAGING_SETUP.md), w
 | Variable                                                          | Staging value                                          |
 | ----------------------------------------------------------------- | ------------------------------------------------------ |
 | `EXPO_PUBLIC_APP_ENV` / `NEXT_PUBLIC_APP_ENV`                     | `staging`                                              |
-| `EXPO_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`           | `https://<ref>.supabase.co`                            |
+| `EXPO_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`           | `https://rvdzalxavpcijbiikkjz.supabase.co`             |
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Staging anon key                                       |
-| `EXPO_PUBLIC_SUPPORT_EMAIL` / `NEXT_PUBLIC_SUPPORT_EMAIL`         | Real monitored inbox (not `*.invalid`)                 |
+| `EXPO_PUBLIC_SUPPORT_EMAIL` / `NEXT_PUBLIC_SUPPORT_EMAIL`         | `aly.moghnieh@gmail.com`                               |
 | `EXPO_PUBLIC_AUTH_REDIRECT_URL`                                   | `tennislebanon://auth/callback`                        |
 | `SUPABASE_SERVICE_ROLE_KEY`                                       | Dashboard server only (Vercel secret, never in mobile) |
 
@@ -94,7 +94,7 @@ Supply is adequate rather than tight: roughly 6+ courts across the Manara cluste
 | 2.6 | Confirm each club takes WhatsApp bookings from non-members | A booking request from a stranger is normal business for them. This is the one fact the pilot depends on                                                                                |
 | 2.7 | Record each club's public WhatsApp number                  | Published number only. Never a personal mobile, and never shown raw in the directory                                                                                                    |
 
-**Dashboard path:** log in as platform operator → `/onboarding` → add club (`asOperator` = live immediately, no approval queue).
+**Dashboard path:** log in as platform operator → `/onboarding` → add club (`asOperator` = live immediately, no approval queue). Or run `supabase/pilot/beirut-clubs.sql` with the four public WhatsApp psql vars (never invent numbers). Migration `097` lets an un-onboarded operator use the RPC.
 
 **No club is a partner.** Cohort 1 asks nothing of any venue: players find a club in the directory, tap through to the club's own public WhatsApp, and book exactly as they would have without the app. Nothing lands in a club dashboard and no staff account is created, so there is no relationship to negotiate before launch, and no club can block it. What the app adds is the part that was hard — finding an opponent at your level who is free at the same hour — not the booking.
 
@@ -113,6 +113,8 @@ Club ops and platform moderation run in the Next.js dashboard. Players do **not*
 | 3.3 | Smoke login                          | Platform admin can log in and open `/admin/reports`, `/onboarding`    |
 | 3.4 | Smoke club settings                  | Courts and hours editable for a pilot club                            |
 | 3.5 | Document ops URLs                    | Team knows staging dashboard URL and login method                     |
+
+**In repo:** `apps/dashboard/vercel.json` installs from the monorepo root and builds with `pnpm --filter dashboard build`. Legal drafts are at `/legal/terms`, `/legal/privacy`, `/legal/community` once deployed (DEV banner until counsel signs off). Set the Vercel env vars from the Phase 1 table; `SUPABASE_SERVICE_ROLE_KEY` is a Vercel secret only.
 
 ---
 
@@ -135,7 +137,7 @@ Local Expo (`pnpm dev:mobile`) is **not** usable for 50 testers. You need instal
 | 4.11 | Magic link on device         | Real phone: request link → email arrives → tap opens app → signed in |
 | 4.12 | Deep links                   | Match hub / invite links open correct screen from cold start         |
 
-**Not in repo yet:** `eas.json` must be added before first build. Plan ~half a day to scaffold profiles and run first builds.
+**In repo:** `apps/mobile/eas.json` has `development`, `preview`, and `staging` profiles. Set staging `EXPO_PUBLIC_*` as **EAS secrets**, not in git. First build still needs `eas init` (project id) plus Apple / Play accounts.
 
 ---
 
@@ -167,6 +169,8 @@ Required before **50+ strangers**, not optional polish.
 | 6.5 | Sentry staging        | `EXPO_PUBLIC_SENTRY_DSN` set; test crash appears in Sentry project             |
 | 6.6 | PostHog               | Off or staging-only until consent copy approved                                |
 | 6.7 | Incident contacts     | Named owner for outages, safety reports, disputed results                      |
+
+**In repo:** Dashboard serves legal drafts at `/legal/*` (DEV banner). Mobile Settings already opens in-app policies + account deletion + `mailto:` support. Support inbox decision: `aly.moghnieh@gmail.com`. PostHog is **not** in the client (6.6 satisfied until consent copy). Sentry no-ops without a DSN — set staging DSN in EAS/Vercel when the Sentry project exists.
 
 ---
 
@@ -328,8 +332,8 @@ Do not promise these until post-pilot evidence:
 
 | Phase                   | Owner        | Target date | Done |
 | ----------------------- | ------------ | ----------- | ---- |
-| 0 Engineering gates     | Ali Moghnieh |             | ☐    |
-| 1 Staging backend       |              |             | ☐    |
+| 0 Engineering gates     | Ali Moghnieh | 2026-08-29  | ☑    |
+| 1 Staging backend       | Ali Moghnieh |             | ☐    |
 | 2 Clubs + content       |              |             | ☐    |
 | 3 Dashboard deploy      |              |             | ☐    |
 | 4 Mobile distribution   |              |             | ☐    |
@@ -342,8 +346,8 @@ Do not promise these until post-pilot evidence:
 
 | Setting  | Value                      |
 | -------- | -------------------------- |
-| Invoker  |                            |
-| Schedule |                            |
+| Invoker  | `pg_cron` job `tennis_process_notifications` → `invoke_process_notifications` |
+| Schedule | `*/5 * * * *`                  |
 | Secret   | service role (server only) |
 
 **Go-live approval:**
@@ -353,6 +357,22 @@ Do not promise these until post-pilot evidence:
 | Engineering       |              |      |
 | Product / founder | Ali Moghnieh |      |
 | Club operations   | n/a cohort 1 | —    |
+
+### Cohort A recruitment sheet (fill before invites)
+
+| # | Name | Skill band | Weekly? | Contact (out of band) | Invited | Onboarded | Notes |
+| - | ---- | ---------- | ------- | --------------------- | ------- | --------- | ----- |
+| 1 |      | Intermediate |        |                       |         |           |       |
+| 2 |      | Intermediate |        |                       |         |           |       |
+| 3 |      | Intermediate |        |                       |         |           |       |
+| 4 |      | Intermediate |        |                       |         |           |       |
+| 5 |      | Improving |           |                       |         |           |       |
+| 6 |      | Improving |           |                       |         |           |       |
+| 7 |      | Advanced |            |                       |         |           |       |
+| 8 |      | Advanced |            |                       |         |           |       |
+| … |      |            |        |                       |         |           | Aim 10–20; Intermediate largest |
+
+Do not start Phase 7 until Phase 4.11 (magic link on phone) and Phase 5.5 (one real push) pass. Pass bars: onboarding ≥80%, ≥3 public matches, ≥2 joins, ≥1 WhatsApp court confirm, ≥1 confirmed result, Arabic RTL device walk (7.7), then go/no-go for 50.
 
 ---
 
