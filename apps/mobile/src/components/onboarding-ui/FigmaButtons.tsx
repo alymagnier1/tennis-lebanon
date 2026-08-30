@@ -4,6 +4,7 @@ import {
   Pressable,
   StyleSheet,
   View,
+  type StyleProp,
   type ViewStyle,
 } from "react-native";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
@@ -154,10 +155,16 @@ export function FigmaBackButton({
   );
 }
 
+/**
+ * `StyleProp<ViewStyle>` rather than a bare `ViewStyle`, because the `View`
+ * underneath already accepts an array with conditional entries and callers
+ * write them — `[styles.card, isRtl && styles.cardRtl]` on the RTL check
+ * screen. Narrowing the prop was the artificial constraint, not the caller.
+ */
 export function FigmaCard({
   children,
   style,
-}: PropsWithChildren<{ style?: ViewStyle }>) {
+}: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
