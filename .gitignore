@@ -43,4 +43,7 @@ Figma designs/
 Figma-Design-2/
 
 # Agent scratch: plan files written by editor tooling, same category as .vscode.
-.cursor/
+# Narrowed from `.cursor/` — that also hid rules and skills, which are project
+# knowledge rather than scratch and belong in history for the same reason
+# `.claude/skills/` does. Only the plans are per-session.
+.cursor/plans/

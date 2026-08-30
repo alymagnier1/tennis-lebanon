@@ -1,0 +1,58 @@
+---
+description: Database conventions for Tennis Lebanon — grants, search_path, RLS, migrations
+globs: supabase/**
+alwaysApply: false
+---
+
+# Supabase conventions
+
+Full reasoning and worked examples in `.claude/skills/supabase-conventions/SKILL.md`. Read it before writing a migration.
+
+## Grants are the security boundary
+
+Twenty tables have RLS enabled with **no policies** — deny-all by design. Every access path is a `security definer` RPC, so there is no RLS backstop under them. A definer function left at the default grant is a public PostgREST endpoint with RLS bypassed.
+
+Every new function ends with a grant. Two idioms, no third:
+
+```sql
+-- caller-facing RPC
+revoke all on function public.foo(uuid) from public, anon;
+grant execute on function public.foo(uuid) to authenticated;
+
+-- internal helper
+revoke all on function public.bar(uuid) from public, anon, authenticated;
+```
+
+**Name `anon` explicitly.** Supabase grants EXECUTE to `anon` by default, so `revoke ... from public` alone is a silent no-op. Migrations `038` and `042` made exactly that mistake.
+
+Trigger functions are exempt — they cannot be invoked without `OLD` and `NEW`.
+
+## Every definer function pins `set search_path = ''`
+
+Universal, zero exceptions. Schema-qualify everything, `auth.uid()` included.
+
+## Authorization inside the function
+
+Start with `assert_marketplace_caller()`, then check the specific right. Raise stable messages clients can map: `42501` authorization, `P0002` not-found, `P0001` rule violation.
+
+Show a row only to whoever can act on it — `pending_requests` and `invited_players` are host-only.
+
+## Migrations
+
+- Schema only. Environment data goes in `supabase/pilot/`; `seed.sql` is **local only** and must never reach a hosted project.
+- **Never rewrite an applied migration.** Add a new one.
+- `create or replace` preserves the existing ACL — only the migration introducing a function must grant it.
+- No dynamic SQL. There is no injection surface in this schema; keep it that way.
+- Behaviour gets a pgTAP test. Assert authorization, never assume it.
+
+## Do not apply migrations through the Supabase MCP
+
+`apply_migration` records a timestamp version; this repo uses `001`–`096`. Mixing them makes `supabase db push` treat every migration as unapplied. Use the CLI. The MCP is for reading — `get_advisors` after any migration adding a definer function.
+
+## Before you finish
+
+```bash
+node scripts/validate-migrations.mjs   # fails a definer function with no grant, or a revoke omitting anon
+pnpm db:test                           # pgTAP, needs Docker
+pnpm verify:pilot                      # lint, types, unit, migrations, format
+```
