@@ -1,0 +1,27 @@
+---
+description: Mobile UI/UX constraints for Tennis Lebanon — actions, colour, states, i18n
+globs: apps/mobile/**/*
+alwaysApply: false
+---
+
+# Mobile UI/UX
+
+Read `docs/FLOWS_AND_SCREENS.md` before reskinning or adding screens.
+
+## Primary action
+
+- One obvious next step per screen. Use server `next_action` on match hub; use `deriveHomeNextActions` on Home.
+- One primary CTA per view. Global create uses tab-bar `+`.
+
+## Colour = information
+
+- Use `tennisSemantic` tones from `tennis-tokens.ts`. Pair colour with glyph via `SemanticBadge`.
+- No attendance/reliability badges on public player profiles.
+
+## Async states
+
+Every list or hub: loading, empty with liquidity CTA, error + retry. Never show empty when a query failed.
+
+## Out of scope
+
+Payments, leaderboards, social feed, public shame scores.
