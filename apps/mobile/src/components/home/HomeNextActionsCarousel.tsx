@@ -15,20 +15,25 @@ import {
   HOME_NEXT_ACTION_GAP,
   homeNextActionCardWidth,
   homeNextActionPageIndex,
-  homeNextActionSnapInterval,
   homeNextActionSnapOffsets,
 } from "../../lib/home-next-action-carousel";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors } from "../../theme/tennis-tokens";
 import { HomeNextActionCard } from "./HomeNextActionCard";
 
+/** Between RN's "fast" (0.99) and "normal" (0.998) — coasts into the snap. */
+const CAROUSEL_DECELERATION = 0.994;
+
 const webStripSnap: ViewStyle | undefined =
   Platform.OS === "web"
-    ? ({ scrollSnapType: "x mandatory" } as ViewStyle)
+    ? ({
+        scrollSnapType: "x mandatory",
+        scrollBehavior: "smooth",
+      } as ViewStyle)
     : undefined;
 const webItemSnap: ViewStyle | undefined =
   Platform.OS === "web"
-    ? ({ scrollSnapAlign: "start", scrollSnapStop: "always" } as ViewStyle)
+    ? ({ scrollSnapAlign: "start" } as ViewStyle)
     : undefined;
 
 export function HomeNextActionsCarousel({
@@ -64,16 +69,16 @@ export function HomeNextActionsCarousel({
   }
 
   const cardWidth = homeNextActionCardWidth(contentWidth);
-  const snapInterval = homeNextActionSnapInterval(cardWidth);
 
-  const onScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    setPageIndex(
-      homeNextActionPageIndex(
-        event.nativeEvent.contentOffset.x,
-        cardWidth,
-        actions.length,
-      ),
+  const syncPageFromScroll = (
+    event: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    const next = homeNextActionPageIndex(
+      event.nativeEvent.contentOffset.x,
+      cardWidth,
+      actions.length,
     );
+    setPageIndex((current) => (current === next ? current : next));
   };
 
   return (
@@ -89,14 +94,15 @@ export function HomeNextActionsCarousel({
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          decelerationRate="fast"
+          decelerationRate={CAROUSEL_DECELERATION}
           snapToAlignment="start"
-          snapToInterval={snapInterval}
           snapToOffsets={homeNextActionSnapOffsets(actions.length, cardWidth)}
           nestedScrollEnabled
           disableIntervalMomentum
-          onMomentumScrollEnd={onScrollEnd}
-          onScrollEndDrag={onScrollEnd}
+          onScroll={syncPageFromScroll}
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={syncPageFromScroll}
+          onScrollEndDrag={syncPageFromScroll}
           style={[
             styles.scroll,
             webStripSnap,
@@ -159,7 +165,7 @@ const styles = createLiveSheet(() =>
       marginTop: 10,
       alignItems: "center",
       justifyContent: "center",
-      gap: 8,
+      gap: 6,
     },
     dot: {
       width: 8,
@@ -168,6 +174,7 @@ const styles = createLiveSheet(() =>
       backgroundColor: tennisColors.border,
     },
     dotActive: {
+      width: 18,
       backgroundColor: tennisColors.violet,
     },
   }),

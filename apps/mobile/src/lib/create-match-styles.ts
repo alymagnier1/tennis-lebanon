@@ -46,6 +46,19 @@ export const createMatchStyles = createLiveSheet(() =>
       lineHeight: 20,
       color: tennisColors.primaryDark,
     },
+    placeRow: {
+      alignItems: "center",
+      gap: 8,
+      paddingVertical: 3,
+    },
+    placeLabel: {
+      flex: 1,
+      minWidth: 0,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+    },
     profileLink: {
       fontFamily: tennisFontFamily.body,
       fontSize: 13,

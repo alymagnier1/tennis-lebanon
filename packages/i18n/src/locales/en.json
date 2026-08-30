@@ -413,6 +413,7 @@
   "policies": {
     "developmentWarning": "DEVELOPMENT DRAFT — not legally approved and not for public release.",
     "version": "Version: {{version}}",
+    "otherDocuments": "Other policies",
     "terms": {
       "title": "Terms of Use",
       "body": "Adult-only pilot. Use the service lawfully and respectfully. Match and court arrangements are not guaranteed."
@@ -897,7 +898,7 @@
       "listOnDiscoverOff": "Invite only",
       "requiresApprovalShort": "Approve join requests",
       "requiresApprovalHint": "Review each player before they join. Only applies when listed on Discover.",
-      "scheduleTitle": "When and where",
+      "scheduleTitle": "Create new match",
       "scheduleDescription": "Pick areas and propose one time slot.",
       "timingModeTitle": "How should timing work?",
       "timingFixed": "I have a fixed time",

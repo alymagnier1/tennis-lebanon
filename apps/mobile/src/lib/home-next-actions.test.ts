@@ -312,6 +312,62 @@ describe("deriveHomeNextActions", () => {
 
     expect(actions).toHaveLength(3);
   });
+
+  it("emits at most one invite-players card across open host listings", () => {
+    const actions = deriveHomeNextActions(
+      [],
+      [
+        match({
+          match_id: "open-a",
+          status: "open",
+          is_creator: true,
+          participant_count: 1,
+          capacity: 2,
+          soonest_time: "2026-08-20T15:00:00.000Z",
+        }),
+        match({
+          match_id: "open-b",
+          status: "open",
+          is_creator: true,
+          participant_count: 1,
+          capacity: 2,
+          soonest_time: "2026-08-18T15:00:00.000Z",
+        }),
+      ],
+    );
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]?.kind).toBe("players");
+    // Soonest start wins when both are last-seat singles.
+    expect(actions[0]?.matchId).toBe("open-b");
+  });
+
+  it("picks the last-seat open listing over a roomier one", () => {
+    const actions = deriveHomeNextActions(
+      [],
+      [
+        match({
+          match_id: "roomy",
+          status: "open",
+          is_creator: true,
+          participant_count: 1,
+          capacity: 4,
+          soonest_time: "2026-08-17T15:00:00.000Z",
+        }),
+        match({
+          match_id: "last-seat",
+          status: "open",
+          is_creator: true,
+          participant_count: 1,
+          capacity: 2,
+          soonest_time: "2026-08-20T15:00:00.000Z",
+        }),
+      ],
+    );
+
+    expect(actions[0]?.matchId).toBe("last-seat");
+    expect(actions[0]?.titleKey).toBe("home.nextAction.playersOneSpotTitle");
+  });
 });
 
 describe("setup reminders", () => {
@@ -335,6 +391,26 @@ describe("setup reminders", () => {
         hasFavoriteClubs: false,
       }).map((row) => row.kind),
     ).toEqual(["favoriteClubs"]);
+  });
+
+  it("ranks hours and clubs ahead of recruiting open listings", () => {
+    const actions = deriveHomeNextActions(
+      [],
+      [
+        match({ match_id: "open-a", status: "open", is_creator: true }),
+        match({ match_id: "open-b", status: "open", is_creator: true }),
+      ],
+      [completedMatch()],
+      NOW,
+      { hasAvailability: false, hasFavoriteClubs: false },
+    );
+
+    expect(actions.map((row) => row.kind)).toEqual([
+      "availability",
+      "favoriteClubs",
+      "players",
+    ]);
+    expect(actions.filter((row) => row.kind === "players")).toHaveLength(1);
   });
 
   it("yields to match work and still fills remaining carousel pages", () => {

@@ -43,10 +43,7 @@ import {
   formStyles,
 } from "../../src/components/FormUi";
 
-import {
-  formatCompactUtcInBeirut,
-  formatUtcInBeirut,
-} from "../../src/lib/beirut-time";
+import { formatCompactUtcInBeirut } from "../../src/lib/beirut-time";
 import {
   buildMatchCardHeadline,
   matchCardOpponentLabel,
@@ -59,6 +56,7 @@ import {
   matchCardClubLabel,
 } from "../../src/lib/match-clubs";
 import { opponentAvatarColor } from "../../src/lib/match-card-status";
+import type { MatchListBadge } from "../../src/lib/match-status-tone";
 import {
   ACTIVE_MATCH_GROUPS,
   activeMatchGroupEmptyBodyKey,
@@ -624,15 +622,21 @@ export default function MatchesScreen() {
                         ? t("matches.list.won")
                         : t("matches.list.lost");
 
+                  const outcomeTone =
+                    match.viewer_won === null
+                      ? "info"
+                      : match.viewer_won
+                        ? "positive"
+                        : "critical";
+
                   const opponentLabel = match.opponent_names
                     ? t("matches.list.vsOpponent", {
                         name: match.opponent_names,
                       })
                     : undefined;
 
-                  const playedLabel = match.played_at
-                    ? formatUtcInBeirut(match.played_at)
-                    : formatUtcInBeirut(match.completed_at);
+                  const playedAt = match.played_at ?? match.completed_at;
+                  const playedLabel = formatCompactUtcInBeirut(playedAt);
 
                   const opponent = matchCardOpponentLabel(match.opponent_names);
                   const headlineInput = {
@@ -646,6 +650,27 @@ export default function MatchesScreen() {
                     headlineInput,
                   );
                   const needsScore = completedMatchNeedsScore(match);
+                  const canRematch = Boolean(match.opponent_names);
+
+                  // Submit score keeps the action slot when present — rematch
+                  // must sit beside it in the footer, never replace it.
+                  const actionLabel = needsScore
+                    ? t("matches.list.action.submitScore")
+                    : canRematch
+                      ? t("matches.list.action.rematch")
+                      : undefined;
+
+                  // Same chrome as Active: next job in the footer action pill.
+                  // Outcome lives in the status chip when there is no action,
+                  // and as a badge when the action pill takes that slot.
+                  // No red/green score banner.
+                  const badges: MatchListBadge[] = [];
+                  if (actionLabel) {
+                    badges.push({ label: outcomeLabel, tone: outcomeTone });
+                  }
+                  if (scoreLabel) {
+                    badges.push({ label: scoreLabel, tone: "info" });
+                  }
 
                   return (
                     <MatchCard
@@ -653,11 +678,7 @@ export default function MatchesScreen() {
                       accentBorder
                       status="completed"
                       statusLabel={outcomeLabel}
-                      actionLabel={
-                        needsScore
-                          ? t("matches.list.action.submitScore")
-                          : undefined
-                      }
+                      actionLabel={actionLabel}
                       actionTone="actionable"
                       dateTimeLabel={playedLabel}
                       headline={
@@ -680,32 +701,26 @@ export default function MatchesScreen() {
                       }
                       formatChip={t(`formats.${match.format}`)}
                       locationChip={match.club_name ?? undefined}
-                      scoreBanner={
-                        scoreLabel
-                          ? {
-                              won: match.viewer_won === true,
-                              score: scoreLabel,
-                              title: outcomeLabel,
-                            }
-                          : undefined
-                      }
+                      badges={badges}
                       onPress={() =>
                         router.push({
                           pathname: "/match/[id]",
-
                           params: { id: match.match_id },
                         })
                       }
                       onActionPress={
                         needsScore
                           ? () => setResultMatchId(match.match_id)
-                          : undefined
+                          : canRematch
+                            ? () => {
+                                if (!rematchPending) {
+                                  void startRematch(match.match_id);
+                                }
+                              }
+                            : undefined
                       }
-                      // Footer rather than the action slot: "Submit score" is
-                      // what makes a match count towards a rating, so a rematch
-                      // must sit beside it, never replace it.
                       footer={
-                        match.opponent_names ? (
+                        needsScore && canRematch ? (
                           <SecondaryButton
                             label={t("matches.list.action.rematch")}
                             disabled={rematchPending}

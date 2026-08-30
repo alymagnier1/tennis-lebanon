@@ -69,6 +69,15 @@ const UPCOMING_LIST_STATUSES = new Set([
   "confirmed",
 ]);
 
+/**
+ * Carousel order (cap 3):
+ * 1. Work another human is waiting on — inbox invite, played?, booking, court, vote
+ * 2. Profile setup — hours, then preferred clubs (liquidity ingredients)
+ * 3. At most one open-listing invite card (hottest open host match)
+ * 4. Rematch
+ *
+ * Open recruit cards used to emit one slide per listing and crowd out setup.
+ */
 export function deriveHomeNextActions(
   invites: MatchInviteInboxRow[],
   matches: MyMatchRow[],
@@ -77,16 +86,17 @@ export function deriveHomeNextActions(
   /** Injected rather than read here, so the function stays pure and testable. */
   nowIso: string = new Date().toISOString(),
   /**
-   * Profile reminders. Ranked after live match work and before rematch.
-   * Home shows them in a horizontal carousel, not a vertical stack.
+   * Profile reminders. Ranked after deadline match work, ahead of recruiting
+   * and rematch. Home shows them in a horizontal carousel, not a vertical stack.
    */
   setup?: HomeSetupReminders,
 ): HomeNextAction[] {
-  const actions: HomeNextAction[] = [];
+  const urgent: HomeNextAction[] = [];
+  const openHostMatches: MyMatchRow[] = [];
 
   if (invites.length > 0) {
     const invite = invites[0]!;
-    actions.push({
+    urgent.push({
       id: `invite-${invite.invitation_id}`,
       kind: "invite",
       titleKey: "home.nextAction.inviteTitle",
@@ -112,7 +122,7 @@ export function deriveHomeNextActions(
         hasUpcomingTime: Boolean(match.soonest_time),
       })
     ) {
-      actions.push({
+      urgent.push({
         id: `played-${match.match_id}`,
         kind: "played",
         titleKey: "home.nextAction.playedTitle",
@@ -120,7 +130,7 @@ export function deriveHomeNextActions(
         matchId: match.match_id,
       });
     } else if (match.status === "booking_pending") {
-      actions.push({
+      urgent.push({
         id: `booking-${match.match_id}`,
         kind: "booking",
         titleKey: "home.nextAction.bookingTitle",
@@ -128,7 +138,7 @@ export function deriveHomeNextActions(
         matchId: match.match_id,
       });
     } else if (match.status === "ready_to_book" && match.is_creator) {
-      actions.push({
+      urgent.push({
         id: `court-${match.match_id}`,
         kind: "court",
         titleKey: "home.nextAction.courtTitle",
@@ -136,24 +146,12 @@ export function deriveHomeNextActions(
         matchId: match.match_id,
       });
     } else if (match.status === "open" && match.is_creator) {
-      // Host-only: joining players cannot invite others. Not "vote on a time"
-      // either — an open match needs players first.
-      //
-      // A court-first match is the same ask with more urgency: the court is
-      // already held, so an empty seat costs something. Last seat is the same
-      // ask with a true remaining-count, never a fabricated countdown.
-      const copy = playersNextActionCopy(match);
-      actions.push({
-        id: `players-${match.match_id}`,
-        kind: "players",
-        titleKey: copy.titleKey,
-        bodyKey: copy.bodyKey,
-        matchId: match.match_id,
-      });
+      // Collected below — at most one recruit card, after setup.
+      openHostMatches.push(match);
     } else if (match.status === "full") {
       // Only a flexible match sits at full — a fixed one goes straight to
       // ready_to_book once it fills, because its time is already agreed.
-      actions.push({
+      urgent.push({
         id: `vote-${match.match_id}`,
         kind: "vote",
         titleKey: "home.nextAction.voteTitle",
@@ -161,14 +159,12 @@ export function deriveHomeNextActions(
         matchId: match.match_id,
       });
     }
-
-    if (actions.length >= 3) {
-      break;
-    }
   }
 
-  // Hours and clubs after anyone waiting on a match, before a rematch.
-  // They are skippable Profile editors, not a first-run gate.
+  const actions: HomeNextAction[] = [...urgent];
+
+  // Hours and clubs before "invite someone": two open listings should not
+  // bury the liquidity ingredients that fill Discover for everyone.
   if (setup && actions.length < 3) {
     if (!setup.hasAvailability) {
       actions.push({
@@ -188,9 +184,22 @@ export function deriveHomeNextActions(
     }
   }
 
+  if (actions.length < 3) {
+    const hottest = pickHottestOpenHostMatch(openHostMatches);
+    if (hottest) {
+      const copy = playersNextActionCopy(hottest);
+      actions.push({
+        id: `players-${hottest.match_id}`,
+        kind: "players",
+        titleKey: copy.titleKey,
+        bodyKey: copy.bodyKey,
+        matchId: hottest.match_id,
+      });
+    }
+  }
+
   // Ranked last on purpose: an outstanding vote, court request or "did you
   // play?" is something another human is waiting on, and a fresh game is not.
-  // The rematch only appears when nothing more urgent fills the three slots.
   if (actions.length < 3) {
     const rematch = mostRecentRematchCandidate(completed, nowIso);
     if (rematch) {
@@ -208,7 +217,7 @@ export function deriveHomeNextActions(
   return actions.slice(0, 3);
 }
 
-/** First page of the Home carousel. Match work still ranks ahead of setup. */
+/** First page of the Home carousel. */
 export function pickHomeHeroAction(
   actions: HomeNextAction[],
 ): HomeNextAction | null {
@@ -244,6 +253,43 @@ export function playersNextActionCopy(match: {
     titleKey: "home.nextAction.playersTitle",
     bodyKey: "home.nextAction.playersBody",
   };
+}
+
+/**
+ * One open listing for the carousel: last seat > court held > soonest start.
+ * Other open matches stay on the Active list.
+ */
+export function pickHottestOpenHostMatch(
+  matches: MyMatchRow[],
+): MyMatchRow | null {
+  if (matches.length === 0) return null;
+
+  return [...matches].sort((left, right) => {
+    const leftLast = isLastOpenMatchSpot(
+      left.participant_count,
+      left.capacity,
+    )
+      ? 1
+      : 0;
+    const rightLast = isLastOpenMatchSpot(
+      right.participant_count,
+      right.capacity,
+    )
+      ? 1
+      : 0;
+    if (leftLast !== rightLast) return rightLast - leftLast;
+
+    const leftCourt = left.has_court ? 1 : 0;
+    const rightCourt = right.has_court ? 1 : 0;
+    if (leftCourt !== rightCourt) return rightCourt - leftCourt;
+
+    if (!left.soonest_time && !right.soonest_time) {
+      return right.updated_at.localeCompare(left.updated_at);
+    }
+    if (!left.soonest_time) return 1;
+    if (!right.soonest_time) return -1;
+    return left.soonest_time.localeCompare(right.soonest_time);
+  })[0]!;
 }
 
 /**

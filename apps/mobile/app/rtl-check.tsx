@@ -1,12 +1,21 @@
 import { useState } from "react";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
   SUPPORTED_LOCALES,
   getTextDirection,
   type SupportedLocale,
 } from "@tennis-lebanon/i18n";
-import { colors, radii, spacing, typography } from "@tennis-lebanon/ui";
+import { AppText } from "../src/components/AppText";
+import {
+  FigmaCard,
+  FigmaChipRow,
+  OnboardingStepLayout,
+} from "../src/components/onboarding-ui";
+import { createLiveSheet } from "../src/theme/create-live-sheet";
+import { tennisFontFamily } from "../src/hooks/useTennisFonts";
+import { tennisColors } from "../src/theme/tennis-tokens";
 
 /**
  * Milestone 0 visual RTL check. Switches locale/text-direction on this
@@ -25,117 +34,79 @@ export default function RtlCheckScreen() {
 
   const selectLocale = (next: SupportedLocale) => {
     setLocale(next);
-    i18n.changeLanguage(next);
+    void i18n.changeLanguage(next);
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={[styles.switcher, isRtl && styles.switcherRtl]}>
-        {SUPPORTED_LOCALES.map((code) => (
-          <Pressable
-            key={code}
-            onPress={() => selectLocale(code)}
-            style={[styles.chip, locale === code && styles.chipActive]}
-          >
-            <Text
-              style={[
-                styles.chipLabel,
-                locale === code && styles.chipLabelActive,
-              ]}
-            >
-              {code.toUpperCase()}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+  const localeOptions = SUPPORTED_LOCALES.map((code) => ({
+    value: code,
+    label: code.toUpperCase(),
+  }));
 
-      <View style={[styles.card, isRtl && styles.cardRtl]}>
-        <Text
-          style={[styles.title, { writingDirection: direction }]}
-          accessibilityLanguage={locale}
-        >
-          {t("rtlCheck.title")}
-        </Text>
-        <Text
-          style={[styles.description, { writingDirection: direction }]}
-          accessibilityLanguage={locale}
-        >
-          {t("rtlCheck.description")}
-        </Text>
-        <Text
-          style={[styles.sample, { writingDirection: direction }]}
-          accessibilityLanguage={locale}
-        >
-          {t("rtlCheck.sampleSentence")}
-        </Text>
-        <Text style={styles.meta}>
-          {t("rtlCheck.directionLabel")}: {direction}
-        </Text>
+  return (
+    <OnboardingStepLayout
+      title={t("rtlCheck.title")}
+      description={t("rtlCheck.switchLanguage")}
+      onBack={() => router.back()}
+    >
+      <View style={styles.stack}>
+        <FigmaChipRow
+          options={localeOptions}
+          value={locale}
+          onChange={selectLocale}
+        />
+
+        <FigmaCard style={[styles.card, isRtl && styles.cardRtl]}>
+          <AppText
+            style={[styles.description, { writingDirection: direction }]}
+            accessibilityLanguage={locale}
+          >
+            {t("rtlCheck.description")}
+          </AppText>
+          <AppText
+            style={[styles.sample, { writingDirection: direction }]}
+            accessibilityLanguage={locale}
+          >
+            {t("rtlCheck.sampleSentence")}
+          </AppText>
+          <AppText style={styles.meta}>
+            {t("rtlCheck.directionLabel")}: {direction}
+          </AppText>
+        </FigmaCard>
       </View>
-    </View>
+    </OnboardingStepLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: spacing.xl,
-    gap: spacing.lg,
-    backgroundColor: colors.neutral[0],
-  },
-  switcher: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  switcherRtl: {
-    flexDirection: "row-reverse",
-  },
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.full,
-    backgroundColor: colors.neutral[100],
-    minWidth: 44,
-    alignItems: "center",
-  },
-  chipActive: {
-    backgroundColor: colors.brand[500],
-  },
-  chipLabel: {
-    color: colors.neutral[700],
-    fontWeight: typography.weight.medium,
-  },
-  chipLabelActive: {
-    color: colors.neutral[0],
-  },
-  card: {
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.neutral[100],
-    padding: spacing.lg,
-    gap: spacing.sm,
-  },
-  cardRtl: {
-    alignItems: "flex-end",
-  },
-  title: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.bold,
-    color: colors.neutral[900],
-    textAlign: "auto",
-  },
-  description: {
-    fontSize: typography.size.sm,
-    color: colors.neutral[700],
-    textAlign: "auto",
-  },
-  sample: {
-    fontSize: typography.size.md,
-    color: colors.brand[700],
-    textAlign: "auto",
-  },
-  meta: {
-    fontSize: typography.size.xs,
-    color: colors.neutral[500],
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    stack: {
+      gap: 20,
+    },
+    card: {
+      gap: 12,
+    },
+    cardRtl: {
+      alignItems: "flex-end",
+    },
+    description: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+      textAlign: "auto",
+    },
+    sample: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 16,
+      lineHeight: 22,
+      color: tennisColors.primaryDark,
+      textAlign: "auto",
+    },
+    meta: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+    },
+  }),
+);

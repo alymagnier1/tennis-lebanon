@@ -21,12 +21,12 @@ import {
   StatusBanner,
 } from "../../../src/components/AppUi";
 import { AppText } from "../../../src/components/AppText";
+import { Icon } from "../../../src/components/Icon";
 import { PreferredClubPicker } from "../../../src/components/PreferredClubPicker";
 import { CreateMatchSummaryBar } from "../../../src/components/match/CreateMatchSummaryBar";
 import {
   CreateMatchStepLayout,
   FigmaChipMulti,
-  FigmaChipRow,
   FigmaPrimaryButton,
   FigmaSecondaryButton,
   figmaFormStyles,
@@ -58,6 +58,7 @@ import {
   updateCreateMatchDraft,
 } from "../../../src/lib/create-match-draft";
 import { notify } from "../../../src/lib/confirm-action";
+import { useLayoutDirection } from "../../../src/lib/layout-direction";
 import { zonesWithoutPreferredClub } from "../../../src/lib/match-clubs";
 import { zoneNameFromJson } from "../../../src/lib/zones";
 import {
@@ -114,6 +115,7 @@ function slotsFromDraft(): SlotDraft[] {
 
 export default function CreateMatchScheduleScreen() {
   const { t, i18n } = useTranslation();
+  const { rowDirection, writingDirection } = useLayoutDirection();
   // The draft is module state with no subscription, so returning from the
   // per-match overrides screen would otherwise leave the summary bar, the
   // active-hosted guard and the time suggestions reading the old format.
@@ -128,10 +130,13 @@ export default function CreateMatchScheduleScreen() {
   const [selectedZoneIds, setSelectedZoneIds] = useState<string[]>(
     draft.zoneIds ?? [],
   );
-  const [timingMode, setTimingMode] = useState<TimingMode>(
-    draft.timingMode ?? "fixed",
-  );
-  const [slots, setSlots] = useState<SlotDraft[]>(slotsFromDraft);
+  const [timingMode] = useState<TimingMode>("fixed");
+  const [slots, setSlots] = useState<SlotDraft[]>(() => {
+    // Create publishes one fixed slot. Drop any leftover flexible options
+    // from an older draft so the draft and the UI stay in sync.
+    const fromDraft = slotsFromDraft();
+    return [fromDraft[0] ?? defaultSlot()];
+  });
   const [selectedClubIds, setSelectedClubIds] = useState<string[]>(
     draft.preferredClubIds ?? [],
   );
@@ -153,9 +158,6 @@ export default function CreateMatchScheduleScreen() {
   );
   const [defaultRequiresApproval] = useState(
     () => draft.requiresCreatorApproval ?? false,
-  );
-  const [showMoreOptions, setShowMoreOptions] = useState(
-    draft.timingMode === "flexible",
   );
   const [publishError, setPublishError] = useState<string | null>(null);
 
@@ -348,13 +350,6 @@ export default function CreateMatchScheduleScreen() {
       : []),
   ].join(" · ");
 
-  function selectTimingMode(next: TimingMode) {
-    setTimingMode(next);
-    if (next === "fixed") {
-      setSlots((current) => [current[0] ?? defaultSlot()]);
-    }
-  }
-
   useEffect(() => {
     const proposedTimes = slots.map((slot) => {
       const endTime = addMinutes(slot.startTime, slot.duration);
@@ -433,11 +428,6 @@ export default function CreateMatchScheduleScreen() {
     );
   }
 
-  function addSlot() {
-    if (slots.length >= 3) return;
-    setSlots((current) => [...current, defaultSlot()]);
-  }
-
   function handlePublish(destination: "invite" | "hub") {
     setPublishError(null);
 
@@ -513,8 +503,8 @@ export default function CreateMatchScheduleScreen() {
         />
 
         <CreateMatchPanel title={t("matches.create.summaryWhen")}>
-          {slots.map((slot, index) => {
-            const picker = (
+          {slots.map((slot, index) => (
+            <View key={`slot-${index}`}>
               <SlotPicker
                 selectedDay={slot.day}
                 onSelectDay={(day) => updateSlot(index, { day })}
@@ -523,57 +513,10 @@ export default function CreateMatchScheduleScreen() {
                 duration={slot.duration}
                 onSelectDuration={(duration) => updateSlot(index, { duration })}
                 availability={availability}
+                showDuration={false}
               />
-            );
-
-            if (timingMode === "flexible") {
-              return (
-                <CreateMatchSection
-                  key={`slot-${index}`}
-                  label={t("matches.create.slotLabel", { index: index + 1 })}
-                >
-                  {picker}
-                </CreateMatchSection>
-              );
-            }
-
-            return <View key={`slot-${index}`}>{picker}</View>;
-          })}
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setShowMoreOptions((value) => !value)}
-          >
-            <AppText style={createMatchStyles.addSlot}>
-              {showMoreOptions
-                ? t("matches.create.moreOptionsHide")
-                : t("matches.create.moreOptionsShow")}
-            </AppText>
-          </Pressable>
-
-          <AnimatedCollapse visible={showMoreOptions}>
-            <CreateMatchSection label={t("matches.create.timingModeTitle")}>
-              <FigmaChipRow
-                value={timingMode}
-                options={[
-                  { value: "fixed", label: t("matches.create.timingFixed") },
-                  {
-                    value: "flexible",
-                    label: t("matches.create.timingFlexible"),
-                  },
-                ]}
-                onChange={selectTimingMode}
-              />
-            </CreateMatchSection>
-
-            {timingMode === "flexible" && slots.length < 3 ? (
-              <Pressable accessibilityRole="button" onPress={addSlot}>
-                <AppText style={createMatchStyles.addSlot}>
-                  {t("matches.create.addSlot")}
-                </AppText>
-              </Pressable>
-            ) : null}
-          </AnimatedCollapse>
+            </View>
+          ))}
         </CreateMatchPanel>
 
         <CreateMatchPanel
@@ -649,33 +592,56 @@ export default function CreateMatchScheduleScreen() {
             </>
           ) : (
             <>
-              <CreateMatchSubsection label={t("discover.zonesFilter")}>
-                <CreateMatchSummaryValue>
-                  <AppText style={createMatchStyles.summaryValue}>
+              {/* Same quiet place-rows as a visitor profile: areas as one
+                  line, each club on its own — no pill bars or section labels. */}
+              {selectedAreaLabels.length > 0 ? (
+                <View
+                  style={[
+                    createMatchStyles.placeRow,
+                    { flexDirection: rowDirection },
+                  ]}
+                >
+                  <Icon
+                    name="place"
+                    size={14}
+                    color={tennisColors.mutedForeground}
+                  />
+                  <AppText
+                    style={[createMatchStyles.placeLabel, { writingDirection }]}
+                    maxLines={2}
+                  >
                     {selectedAreaLabels.join(" · ")}
                   </AppText>
-                </CreateMatchSummaryValue>
-              </CreateMatchSubsection>
+                </View>
+              ) : null}
 
-              <CreateMatchSubsectionDivider />
-
-              <CreateMatchSubsection
-                label={t("matches.create.preferredClubsForMatchTitle")}
-              >
-                <CreateMatchSummaryValue empty={effectiveClubIds.length === 0}>
+              {selectedClubLabels.map((name, index) => (
+                <View
+                  key={effectiveClubIds[index] ?? name}
+                  style={[
+                    createMatchStyles.placeRow,
+                    { flexDirection: rowDirection },
+                  ]}
+                >
+                  <Icon
+                    name="place"
+                    size={14}
+                    color={tennisColors.mutedForeground}
+                  />
                   <AppText
-                    style={
-                      effectiveClubIds.length > 0
-                        ? createMatchStyles.summaryValue
-                        : createMatchStyles.hint
-                    }
+                    style={[createMatchStyles.placeLabel, { writingDirection }]}
+                    maxLines={1}
                   >
-                    {effectiveClubIds.length > 0
-                      ? selectedClubLabels.join(" · ")
-                      : t("matches.create.preferredClubsNone")}
+                    {name}
                   </AppText>
-                </CreateMatchSummaryValue>
-              </CreateMatchSubsection>
+                </View>
+              ))}
+
+              {effectiveClubIds.length === 0 ? (
+                <AppText style={createMatchStyles.hint}>
+                  {t("matches.create.preferredClubsNone")}
+                </AppText>
+              ) : null}
 
               <Pressable
                 accessibilityRole="link"

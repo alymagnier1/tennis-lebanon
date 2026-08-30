@@ -87,6 +87,7 @@ export function SlotPicker({
   duration,
   onSelectDuration,
   availability,
+  showDuration = true,
 }: {
   dayCount?: number;
   selectedDay: string;
@@ -96,6 +97,8 @@ export function SlotPicker({
   duration: DurationMinutes;
   onSelectDuration: (duration: DurationMinutes) => void;
   availability?: SlotAvailability;
+  /** Create flow hides this — duration stays at the draft default (90). */
+  showDuration?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const { rowDirection } = useLayoutDirection();
@@ -269,35 +272,41 @@ export function SlotPicker({
         </AppText>
       ) : null}
 
-      <AppText style={styles.label}>{t("slotPicker.duration")}</AppText>
-      <View style={[styles.durationRow, { flexDirection: rowDirection }]}>
-        {DURATION_OPTIONS.map((option) => {
-          const selected = option === duration;
-          return (
-            <Pressable
-              key={option}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              accessibilityLabel={t("slotPicker.minutes", { count: option })}
-              onPress={() => onSelectDuration(option)}
-              style={[
-                styles.durationChip,
-                selected && figmaFormStyles.chipSelected,
-              ]}
-            >
-              <AppText
-                style={[
-                  styles.durationText,
-                  selected && figmaFormStyles.chipTextSelected,
-                ]}
-                maxLines={1}
-              >
-                {t("slotPicker.minutes", { count: option })}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </View>
+      {showDuration ? (
+        <>
+          <AppText style={styles.label}>{t("slotPicker.duration")}</AppText>
+          <View style={[styles.durationRow, { flexDirection: rowDirection }]}>
+            {DURATION_OPTIONS.map((option) => {
+              const selected = option === duration;
+              return (
+                <Pressable
+                  key={option}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={t("slotPicker.minutes", {
+                    count: option,
+                  })}
+                  onPress={() => onSelectDuration(option)}
+                  style={[
+                    styles.durationChip,
+                    selected && figmaFormStyles.chipSelected,
+                  ]}
+                >
+                  <AppText
+                    style={[
+                      styles.durationText,
+                      selected && figmaFormStyles.chipTextSelected,
+                    ]}
+                    maxLines={1}
+                  >
+                    {t("slotPicker.minutes", { count: option })}
+                  </AppText>
+                </Pressable>
+              );
+            })}
+          </View>
+        </>
+      ) : null}
     </View>
   );
 }

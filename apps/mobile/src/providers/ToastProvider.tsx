@@ -11,6 +11,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
+import { useTennisTheme } from "./ThemeProvider";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
@@ -30,6 +31,7 @@ export function useToast(): ToastContextValue {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const insets = useSafeAreaInsets();
+  const { scheme } = useTennisTheme();
   const [message, setMessage] = useState<string | null>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -61,9 +63,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <Pressable
             accessibilityRole="alert"
             onPress={hide}
-            style={styles.toast}
+            style={[styles.toast, scheme === "dark" && styles.toastDark]}
           >
-            <AppText style={styles.toastText}>{message}</AppText>
+            <AppText
+              style={[
+                styles.toastText,
+                scheme === "dark" && styles.toastTextDark,
+              ]}
+            >
+              {message}
+            </AppText>
           </Pressable>
         </View>
       ) : null}
@@ -89,11 +98,19 @@ const styles = createLiveSheet(() =>
       paddingHorizontal: 16,
       paddingVertical: 12,
     },
+    toastDark: {
+      backgroundColor: tennisColors.card,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+    },
     toastText: {
       fontFamily: tennisFontFamily.bodyMedium,
       fontSize: 14,
       color: tennisColors.white,
       textAlign: "center",
+    },
+    toastTextDark: {
+      color: tennisColors.primaryDark,
     },
   }),
 );

@@ -413,6 +413,7 @@
   "policies": {
     "developmentWarning": "PROJET DE DÉVELOPPEMENT — non approuvé juridiquement et non destiné à une diffusion publique.",
     "version": "Version : {{version}}",
+    "otherDocuments": "Autres politiques",
     "terms": {
       "title": "Conditions d’utilisation",
       "body": "Pilote réservé aux adultes. Utilisez le service légalement et respectueusement. Les matchs et les réservations de terrains ne sont pas garantis."
@@ -771,7 +772,7 @@
       "listOnDiscoverOff": "Sur invitation uniquement",
       "requiresApprovalShort": "Approuver les demandes",
       "requiresApprovalHint": "Examinez chaque joueur avant qu'il ne rejoigne. S'applique uniquement si affiché dans Découvrir.",
-      "scheduleTitle": "Quand et où",
+      "scheduleTitle": "Créer un nouveau match",
       "scheduleDescription": "Choisissez les zones et proposez un créneau.",
       "minSkill": "Niveau minimum",
       "maxSkill": "Niveau maximum",

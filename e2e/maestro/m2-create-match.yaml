@@ -4,4 +4,4 @@ name: M2 create match from tab FAB
 - launchApp
 - tapOn:
     id: "tab-create-match"
-- assertVisible: "When and where"
+- assertVisible: "Create new match"
