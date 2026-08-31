@@ -1,7 +1,10 @@
+import type { EmailOtpType } from "@supabase/supabase-js";
+
 export type AuthUrlPayload =
   | { kind: "code"; code: string }
   | { kind: "session"; accessToken: string; refreshToken: string }
-  | { kind: "error"; message: string };
+  | { kind: "tokenHash"; tokenHash: string; type: EmailOtpType }
+  | { kind: "error"; message: string; code?: string };
 
 /**
  * Expo Go encodes `tennislebanon://...#access_token=` as
@@ -17,12 +20,24 @@ export function rewriteExpoGoAuthPath(path: string): string {
   return next;
 }
 
+function normalizeCallbackPathname(pathname: string): string {
+  const trimmed = pathname.replace(/\/+$/, "") || "/";
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+function isStandaloneAuthCallback(parsed: URL): boolean {
+  if (parsed.protocol !== "tennislebanon:") return false;
+  const path = normalizeCallbackPathname(parsed.pathname);
+  if (parsed.hostname === "auth" && path === "/callback") return true;
+  // Some Android builds deliver `tennislebanon://callback?...` (host-only).
+  if (parsed.hostname === "callback" && (path === "/" || path === "")) {
+    return true;
+  }
+  return path === "/auth/callback" || path.endsWith("/auth/callback");
+}
+
 function isAllowedAuthCallbackUrl(parsed: URL): boolean {
-  if (
-    parsed.protocol === "tennislebanon:" &&
-    parsed.hostname === "auth" &&
-    parsed.pathname === "/callback"
-  ) {
+  if (isStandaloneAuthCallback(parsed)) {
     return true;
   }
 
@@ -53,11 +68,35 @@ export function parseAuthUrl(url: string): AuthUrlPayload {
       parsed.searchParams.get("error");
 
     if (error) {
-      return { kind: "error", message: error };
+      return {
+        kind: "error",
+        message: error,
+        code: parsed.searchParams.get("error_code") ?? undefined,
+      };
     }
 
     const code = parsed.searchParams.get("code");
     if (code) return { kind: "code", code };
+
+    const tokenHash = parsed.searchParams.get("token_hash");
+    const otpType = parsed.searchParams.get("type");
+    if (tokenHash && otpType) {
+      const allowed: EmailOtpType[] = [
+        "email",
+        "signup",
+        "invite",
+        "recovery",
+        "email_change",
+        "magiclink",
+      ];
+      if (allowed.includes(otpType as EmailOtpType)) {
+        return {
+          kind: "tokenHash",
+          tokenHash,
+          type: otpType as EmailOtpType,
+        };
+      }
+    }
 
     const accessToken = parsed.searchParams.get("access_token");
     const refreshToken = parsed.searchParams.get("refresh_token");

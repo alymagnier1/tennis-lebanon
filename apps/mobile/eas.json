@@ -24,7 +24,10 @@
       },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "staging",
-        "EXPO_PUBLIC_AUTH_REDIRECT_URL": "tennislebanon://auth/callback"
+        "EXPO_PUBLIC_AUTH_REDIRECT_URL": "tennislebanon://auth/callback",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://rvdzalxavpcijbiikkjz.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2ZHphbHhhdnBjaWpiaWlra2p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMTAwMDIsImV4cCI6MjEwMzU4NjAwMn0.LYADgwZWX3p8fCmb4azAgGeEFSjqq86AxhgUZINBHiQ",
+        "EXPO_PUBLIC_SUPPORT_EMAIL": "aly.moghnieh@gmail.com"
       }
     }
   },

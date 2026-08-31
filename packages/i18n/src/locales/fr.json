@@ -258,7 +258,7 @@
     "emailInvalid": "Saisissez une adresse e-mail valide.",
     "sendLink": "Envoyer le lien de connexion",
     "sendError": "Impossible d’envoyer le lien. Veuillez réessayer.",
-    "cooldownError": "Attendez une minute avant de demander un autre lien.",
+    "cooldownError": "Attendez une minute avant de demander un autre lien. Celui que nous avons déjà envoyé fonctionne toujours.",
     "rateLimitNotice": "Pour votre sécurité, les demandes répétées peuvent être temporairement limitées.",
     "checkEmailTitle": "Consultez vos e-mails",
     "checkEmailBody": "Ouvrez le lien de connexion sur cet appareil pour continuer.",
@@ -270,6 +270,7 @@
     "callbackTitle": "Connexion en cours",
     "callbackWorking": "Nous finalisons votre connexion de manière sécurisée.",
     "callbackError": "Ce lien de connexion est invalide ou expiré.",
+    "callbackExpired": "Ce lien n'est plus valide. Seul le lien le plus récent fonctionne : ouvrez le dernier e-mail ou demandez-en un nouveau.",
     "tryAgain": "Réessayer de se connecter",
     "restoring": "Restauration de votre session…",
     "sessionError": "Impossible de restaurer votre session.",
@@ -278,8 +279,8 @@
     "signOutConfirmBody": "Vous aurez besoin d'un nouveau lien de connexion pour revenir.",
     "signOutError": "Impossible de vous déconnecter. Veuillez réessayer.",
     "emailPlaceholder": "you@example.com",
-    "noAccount": "Don't have an account?",
-    "checkEmailHint": "The link expires after a short time. You can request a new one if needed."
+    "noAccount": "Vous n’avez pas de compte ?",
+    "checkEmailHint": "Le lien expire après un court délai. Si vous en demandez un autre, seul l'e-mail le plus récent fonctionnera."
   },
   "onboarding": {
     "consent": {

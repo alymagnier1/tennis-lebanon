@@ -6,7 +6,6 @@
     "version": "0.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tennislebanon.dev"
@@ -32,6 +31,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7e52c1bd-5a92-42a0-8b08-ace7d6a96542"
+      },
+      "router": {}
+    },
+    "owner": "alimogh"
   }
 }

@@ -54,3 +54,6 @@ Figma-Design-2/
 # knowledge rather than scratch and belong in history for the same reason
 # `.claude/skills/` does. Only the plans are per-session.
 .cursor/plans/
+
+# Cursor MCP config holds provider access tokens; keep it local.
+.cursor/mcp.json
