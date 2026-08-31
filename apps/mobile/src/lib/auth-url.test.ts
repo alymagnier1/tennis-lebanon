@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { parseAuthUrl, rewriteExpoGoAuthPath } from "./auth-url";
+import {
+  describeAuthUrl,
+  parseAuthUrl,
+  rewriteExpoGoAuthPath,
+} from "./auth-url";
 
 describe("parseAuthUrl", () => {
   it("accepts a PKCE callback code", () => {
@@ -99,5 +103,29 @@ describe("parseAuthUrl", () => {
       message: "Email link is invalid or has expired",
       code: "otp_expired",
     });
+  });
+});
+
+describe("describeAuthUrl", () => {
+  it("reports the URL shape and parameter names", () => {
+    expect(
+      describeAuthUrl("tennislebanon://auth/callback?code=abc&state=xyz"),
+    ).toBe("tennislebanon://auth/callback [code, state]");
+  });
+
+  it("never reveals a token value", () => {
+    const secret = "eyJhbGciOiJIUzI1NiJ9.SUPER_SECRET_PAYLOAD.sig";
+    const described = describeAuthUrl(
+      `tennislebanon://auth/callback#access_token=${secret}&refresh_token=${secret}`,
+    );
+
+    expect(described).not.toContain("SUPER_SECRET");
+    expect(described).toContain("access_token");
+    expect(described).toContain("refresh_token");
+  });
+
+  it("distinguishes no URL from an unusable one", () => {
+    expect(describeAuthUrl(null)).toBe("no url delivered");
+    expect(describeAuthUrl("::::?access_token=secret")).not.toContain("secret");
   });
 });

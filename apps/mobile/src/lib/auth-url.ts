@@ -109,3 +109,25 @@ export function parseAuthUrl(url: string): AuthUrlPayload {
 
   return { kind: "error", message: "invalid_auth_link" };
 }
+
+/**
+ * A redacted description of a callback URL, for the staging error screen.
+ *
+ * Reports the *shape* only -- scheme, host, path, and which parameter names are
+ * present. Never a parameter value: a magic-link callback carries access and
+ * refresh tokens, and `CLAUDE.md` forbids surfacing those anywhere.
+ *
+ * Exists because "this link is invalid" gives no way to tell a rejected URL
+ * shape apart from a spent token without a 40-minute rebuild.
+ */
+export function describeAuthUrl(url: string | null): string {
+  if (!url) return "no url delivered";
+  const beforeParams = url.split(/[?#]/)[0] ?? "";
+  try {
+    const parsed = new URL(rewriteExpoGoAuthPath(url).replace("#", "?"));
+    const names = [...parsed.searchParams.keys()].sort().join(", ");
+    return `${parsed.protocol}//${parsed.hostname}${parsed.pathname} [${names || "no params"}]`;
+  } catch {
+    return `unparseable: ${beforeParams}`;
+  }
+}
