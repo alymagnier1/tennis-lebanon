@@ -344,11 +344,11 @@ Do not promise these until post-pilot evidence:
 
 **Notification invoker (required):**
 
-| Setting  | Value                      |
-| -------- | -------------------------- |
+| Setting  | Value                                                                         |
+| -------- | ----------------------------------------------------------------------------- |
 | Invoker  | `pg_cron` job `tennis_process_notifications` → `invoke_process_notifications` |
-| Schedule | `*/5 * * * *`                  |
-| Secret   | service role (server only) |
+| Schedule | `*/5 * * * *`                                                                 |
+| Secret   | service role (server only)                                                    |
 
 **Go-live approval:**
 
@@ -360,17 +360,17 @@ Do not promise these until post-pilot evidence:
 
 ### Cohort A recruitment sheet (fill before invites)
 
-| # | Name | Skill band | Weekly? | Contact (out of band) | Invited | Onboarded | Notes |
-| - | ---- | ---------- | ------- | --------------------- | ------- | --------- | ----- |
-| 1 |      | Intermediate |        |                       |         |           |       |
-| 2 |      | Intermediate |        |                       |         |           |       |
-| 3 |      | Intermediate |        |                       |         |           |       |
-| 4 |      | Intermediate |        |                       |         |           |       |
-| 5 |      | Improving |           |                       |         |           |       |
-| 6 |      | Improving |           |                       |         |           |       |
-| 7 |      | Advanced |            |                       |         |           |       |
-| 8 |      | Advanced |            |                       |         |           |       |
-| … |      |            |        |                       |         |           | Aim 10–20; Intermediate largest |
+| #   | Name | Skill band   | Weekly? | Contact (out of band) | Invited | Onboarded | Notes                           |
+| --- | ---- | ------------ | ------- | --------------------- | ------- | --------- | ------------------------------- |
+| 1   |      | Intermediate |         |                       |         |           |                                 |
+| 2   |      | Intermediate |         |                       |         |           |                                 |
+| 3   |      | Intermediate |         |                       |         |           |                                 |
+| 4   |      | Intermediate |         |                       |         |           |                                 |
+| 5   |      | Improving    |         |                       |         |           |                                 |
+| 6   |      | Improving    |         |                       |         |           |                                 |
+| 7   |      | Advanced     |         |                       |         |           |                                 |
+| 8   |      | Advanced     |         |                       |         |           |                                 |
+| …   |      |              |         |                       |         |           | Aim 10–20; Intermediate largest |
 
 Do not start Phase 7 until Phase 4.11 (magic link on phone) and Phase 5.5 (one real push) pass. Pass bars: onboarding ≥80%, ≥3 public matches, ≥2 joins, ≥1 WhatsApp court confirm, ≥1 confirmed result, Arabic RTL device walk (7.7), then go/no-go for 50.
 

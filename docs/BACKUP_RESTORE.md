@@ -67,19 +67,19 @@ The script refuses any `PILOT_DRILL_DATABASE_URL` that is not localhost — this
 
 ### Troubleshooting
 
-| Symptom                       | Action                                                     |
-| ----------------------------- | ---------------------------------------------------------- |
-| `connection refused` on 54322 | Run `supabase start`                                       |
-| `psql` not found              | Not required if the local `supabase_db_*` container is up  |
-| Restore FK errors             | Re-run from clean `db reset`; do not partial-restore       |
-| `db:test` fails after restore | Compare migration version; re-run drill from latest `main` |
-| `db reset` 502 on Windows | Kong often 502s while postgres already finished. The drill continues if postgres is reachable. |
+| Symptom                            | Action                                                                                                                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `connection refused` on 54322      | Run `supabase start`                                                                                                                                                                                    |
+| `psql` not found                   | Not required if the local `supabase_db_*` container is up                                                                                                                                               |
+| Restore FK errors                  | Re-run from clean `db reset`; do not partial-restore                                                                                                                                                    |
+| `db:test` fails after restore      | Compare migration version; re-run drill from latest `main`                                                                                                                                              |
+| `db reset` 502 on Windows          | Kong often 502s while postgres already finished. The drill continues if postgres is reachable.                                                                                                          |
 | `db reset` pulls new Docker images | `supabase link` writes staging service versions into `supabase/.temp/`. Local reset then tries to match them. If a pull hangs, the images are already cached after the first successful start — re-run. |
 
 ## Record-keeping
 
 After each drill, log a row. Keep the last successful **staging** drill date in `docs/STAGING_CHECKLIST.md` §3.
 
-| Date       | Environment | Method                            | RTO   | RPO | Tester         | Pass / fail |
-| ---------- | ----------- | --------------------------------- | ----- | --- | -------------- | ----------- |
+| Date       | Environment | Method                             | RTO    | RPO | Tester         | Pass / fail |
+| ---------- | ----------- | ---------------------------------- | ------ | --- | -------------- | ----------- |
 | 2026-08-30 | local       | logical dump → `--no-seed` restore | ~2 min | 0   | Cursor session | pass        |

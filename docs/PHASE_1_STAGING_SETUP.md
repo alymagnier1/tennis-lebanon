@@ -80,12 +80,12 @@ Configure a real provider, then send yourself a magic link and open it on a phon
 
 **Resend (chosen for cohort 1):** create a Resend account, verify a sending domain or use Resend’s onboarding sender for the first test, then in Supabase Auth → SMTP Settings:
 
-| Field | Value |
-| ----- | ----- |
-| Host | `smtp.resend.com` |
-| Port | `465` (SSL) or `587` |
-| Username | `resend` |
-| Password | Resend API key |
+| Field        | Value                          |
+| ------------ | ------------------------------ |
+| Host         | `smtp.resend.com`              |
+| Port         | `465` (SSL) or `587`           |
+| Username     | `resend`                       |
+| Password     | Resend API key                 |
 | Sender email | A verified Resend from-address |
 
 Success = the link arrives in the inbox and opens the app on a phone.

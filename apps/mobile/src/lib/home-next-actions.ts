@@ -265,10 +265,7 @@ export function pickHottestOpenHostMatch(
   if (matches.length === 0) return null;
 
   return [...matches].sort((left, right) => {
-    const leftLast = isLastOpenMatchSpot(
-      left.participant_count,
-      left.capacity,
-    )
+    const leftLast = isLastOpenMatchSpot(left.participant_count, left.capacity)
       ? 1
       : 0;
     const rightLast = isLastOpenMatchSpot(

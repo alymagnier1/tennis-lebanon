@@ -52,7 +52,9 @@ export default async function LegalPage({
         signs off.
       </p>
       <h1 style={{ fontSize: typography.size["2xl"] }}>{TITLES[slug]}</h1>
-      <nav style={{ display: "flex", gap: spacing.md, margin: `${spacing.md} 0` }}>
+      <nav
+        style={{ display: "flex", gap: spacing.md, margin: `${spacing.md} 0` }}
+      >
         <Link href="/legal/terms" style={{ color: colors.brand[600] }}>
           Terms
         </Link>
