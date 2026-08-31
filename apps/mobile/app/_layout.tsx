@@ -1,6 +1,7 @@
 import "../src/lib/i18n";
 import { useEffect } from "react";
 import { ActivityIndicator, AppState, View } from "react-native";
+import * as Linking from "expo-linking";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useTennisFonts } from "../src/hooks/useTennisFonts";
@@ -19,7 +20,15 @@ import { NotificationDeepLinkHandler } from "../src/components/NotificationDeepL
 import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
 import { ToastProvider } from "../src/providers/ToastProvider";
 import { ConfirmDialogProvider } from "../src/providers/ConfirmDialogProvider";
+import { installDeepLinkCapture } from "../src/lib/deep-link-buffer";
 import { tennisColors } from "../src/theme/tennis-tokens";
+
+/*
+ * At module scope, not in an effect: a link that resumes a running app fires
+ * its `url` event before the destination screen mounts, so a listener owned by
+ * that screen never hears it. This is the earliest point the app can subscribe.
+ */
+installDeepLinkCapture(Linking);
 
 const queryClient = new QueryClient({
   defaultOptions: {

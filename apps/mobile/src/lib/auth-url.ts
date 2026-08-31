@@ -131,3 +131,38 @@ export function describeAuthUrl(url: string | null): string {
     return `unparseable: ${beforeParams}`;
   }
 }
+
+/**
+ * Rebuilds a callback URL from expo-router's parsed route params.
+ *
+ * A third source, for when the router consumed the link and handed the query
+ * on as params while the raw URL never reached `Linking`. Returns null unless
+ * something auth-shaped is present, so a plain visit to the screen does not
+ * look like a callback.
+ */
+export function authUrlFromParams(
+  params: Record<string, string | string[] | undefined>,
+): string | null {
+  const carried = [
+    "access_token",
+    "refresh_token",
+    "code",
+    "token_hash",
+    "type",
+    "error",
+    "error_code",
+    "error_description",
+  ];
+
+  const query = new URLSearchParams();
+  for (const key of carried) {
+    const raw = params[key];
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    if (typeof value === "string" && value.length > 0) query.set(key, value);
+  }
+
+  const meaningful = ["access_token", "code", "token_hash", "error"];
+  if (!meaningful.some((key) => query.has(key))) return null;
+
+  return `tennislebanon://auth/callback?${query.toString()}`;
+}

@@ -1,5 +1,6 @@
 import type { EmailOtpType, SupabaseClient } from "@supabase/supabase-js";
 import { parseAuthUrl, type AuthUrlPayload } from "./auth-url";
+import { peekCapturedDeepLink } from "./deep-link-buffer";
 
 /**
  * `expired` covers a link that timed out *and* one that was superseded:
@@ -95,14 +96,20 @@ export async function completeAuthFromUrl(
   return { ok: true };
 }
 
+/**
+ * `liveUrl` is a closed-over constant, so polling it alone can never see a link
+ * that arrives mid-wait. `peek` is re-read every attempt, which is what makes
+ * the startup capture reach a screen that mounted before the event landed.
+ */
 export async function waitForAuthCallbackUrl(
   liveUrl: string | null,
   getInitialUrl: () => Promise<string | null>,
   attempts = 8,
   delayMs = 250,
+  peek: () => string | null = peekCapturedDeepLink,
 ): Promise<string | null> {
   for (let i = 0; i < attempts; i += 1) {
-    const url = liveUrl ?? (await getInitialUrl());
+    const url = liveUrl ?? peek() ?? (await getInitialUrl());
     if (url) return url;
     await new Promise((resolve) => setTimeout(resolve, delayMs));
   }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  authUrlFromParams,
   describeAuthUrl,
   parseAuthUrl,
   rewriteExpoGoAuthPath,
@@ -127,5 +128,46 @@ describe("describeAuthUrl", () => {
   it("distinguishes no URL from an unusable one", () => {
     expect(describeAuthUrl(null)).toBe("no url delivered");
     expect(describeAuthUrl("::::?access_token=secret")).not.toContain("secret");
+  });
+});
+
+describe("authUrlFromParams", () => {
+  it("rebuilds an implicit-flow callback from router params", () => {
+    expect(
+      authUrlFromParams({
+        access_token: "at",
+        refresh_token: "rt",
+        type: "magiclink",
+      }),
+    ).toBe(
+      "tennislebanon://auth/callback?access_token=at&refresh_token=rt&type=magiclink",
+    );
+  });
+
+  it("rebuilds a PKCE callback", () => {
+    expect(authUrlFromParams({ code: "abc" })).toBe(
+      "tennislebanon://auth/callback?code=abc",
+    );
+  });
+
+  it("carries an error back so the reason survives", () => {
+    const url = authUrlFromParams({
+      error: "access_denied",
+      error_code: "otp_expired",
+    });
+    expect(parseAuthUrl(url ?? "")).toEqual({
+      kind: "error",
+      message: "access_denied",
+      code: "otp_expired",
+    });
+  });
+
+  it("ignores a plain visit with no auth params", () => {
+    expect(authUrlFromParams({})).toBeNull();
+    expect(authUrlFromParams({ unrelated: "x" })).toBeNull();
+  });
+
+  it("takes the first value when the router repeats a param", () => {
+    expect(authUrlFromParams({ code: ["first", "second"] })).toContain("first");
   });
 });

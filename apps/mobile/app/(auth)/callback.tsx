@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
 import * as Linking from "expo-linking";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../../src/components/AppText";
 import {
@@ -15,7 +15,12 @@ import {
   waitForAuthCallbackUrl,
   type AuthCallbackFailure,
 } from "../../src/lib/auth-callback";
-import { describeAuthUrl, parseAuthUrl } from "../../src/lib/auth-url";
+import {
+  authUrlFromParams,
+  describeAuthUrl,
+  parseAuthUrl,
+} from "../../src/lib/auth-url";
+import { peekCapturedDeepLink } from "../../src/lib/deep-link-buffer";
 import { env } from "../../src/lib/env";
 import { supabase } from "../../src/lib/supabase";
 
@@ -23,9 +28,18 @@ type CallbackState =
   | { kind: "working" }
   | { kind: "error"; reason: AuthCallbackFailure; shape: string };
 
+/** Which sources held a URL, for the staging diagnostic. Names only. */
+function describeSources(liveUrl: string | null, paramUrl: string | null) {
+  return `live=${liveUrl ? "y" : "n"} captured=${
+    peekCapturedDeepLink() ? "y" : "n"
+  } params=${paramUrl ? "y" : "n"}`;
+}
+
 export default function AuthCallbackScreen() {
   const { t } = useTranslation();
   const liveUrl = Linking.useURL();
+  const params = useLocalSearchParams();
+  const paramUrl = authUrlFromParams(params);
   const [state, setState] = useState<CallbackState>({ kind: "working" });
   const processedKeys = useRef(new Set<string>());
 
@@ -34,15 +48,18 @@ export default function AuthCallbackScreen() {
 
     void (async () => {
       setState({ kind: "working" });
-      const url = await waitForAuthCallbackUrl(liveUrl, () =>
-        Linking.getInitialURL(),
-      );
+
+      // The router's own params come first: if expo-router consumed the link,
+      // this is the only place the query survives.
+      const url =
+        paramUrl ??
+        (await waitForAuthCallbackUrl(liveUrl, () => Linking.getInitialURL()));
       if (!active) return;
       if (!url) {
         setState({
           kind: "error",
           reason: "generic",
-          shape: describeAuthUrl(null),
+          shape: `no url delivered (${describeSources(liveUrl, paramUrl)})`,
         });
         return;
       }
@@ -77,7 +94,7 @@ export default function AuthCallbackScreen() {
     return () => {
       active = false;
     };
-  }, [liveUrl]);
+  }, [liveUrl, paramUrl]);
 
   return (
     <Screen
