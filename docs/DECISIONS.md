@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-09-09 — App is RacketBound; bundle ID fixed before it becomes permanent
+
+- Status: accepted
+- Context: `app.json` shipped `name: "Tennis Lebanon (Dev)"` and `com.tennislebanon.dev` as the bundle ID on both platforms. A store package name can never be changed after first publish, so `.dev` would have been permanent, and testers would have seen "(Dev)" under the icon. Separately, the app is planned to cover padel as well as tennis, so "Tennis Lebanon" caps the brand on both sport and country — the reason a rename was worth doing before the pilot rather than after. "Tennis Lebanon" also reads as a national federation, which sits badly beside the rule against presenting ratings as official rankings.
+- Decision: Display name `RacketBound`; bundle ID `com.racketbound.app` on iOS and Android; `racketbound.com` and `racketbound.org` registered. "Racquet" spans tennis, padel, squash and pickleball and nothing else, which matches the intended scope. `slug` and `scheme` are deliberately unchanged — see consequences.
+- Alternatives considered: keeping "Tennis Lebanon" for the pilot and renaming later (rejected once padel entered the plan — the rename would land inside a year, and the bundle ID would already be permanent); the "racquet" spelling, which avoids French `racket` = extortion (rejected on balance — French uses `raquette`, so `racquet` reads as neither the sport nor the crime, and it costs spelling-by-ear, which matters when word of mouth is the only acquisition channel); a coined name (rejected — too far from the sport); `court`-based names (rejected — takes in basketball and volleyball, broader than intended).
+- Consequences: **A changed package name means the new build installs as a separate app.** The existing staging APK must be uninstalled from test devices; it will not upgrade in place, and EAS will issue fresh Android credentials for the new package. `slug` stays `tennis-lebanon` because it is bound to EAS project `7e52c1bd-…`; renaming it requires renaming the project in the Expo dashboard first. `scheme` stays `tennislebanon` because it is registered in the Supabase redirect allow-list, hard-coded in `auth-url.ts`, and set in `eas.json` as `EXPO_PUBLIC_AUTH_REDIRECT_URL` — no user ever sees it, and changing it would re-break the auth callback. The brand still appears in about twelve locale strings and five source files; until those are updated the icon says RacketBound and the screens say Tennis Lebanon. The French `racket` reading remains untested with real users; a quick unprompted-recall check during cohort recruitment would settle it.
+- Owner: Founder
+
 ## 2026-08-30 — Support inbox is aly.moghnieh@gmail.com
 
 - Status: accepted

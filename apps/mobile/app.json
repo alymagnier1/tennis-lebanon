@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Tennis Lebanon (Dev)",
+    "name": "RacketBound",
     "slug": "tennis-lebanon",
     "scheme": "tennislebanon",
     "version": "0.0.0",
@@ -8,10 +8,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tennislebanon.dev"
+      "bundleIdentifier": "com.racketbound.app"
     },
     "android": {
-      "package": "com.tennislebanon.dev",
+      "package": "com.racketbound.app",
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -25,7 +25,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Tennis Lebanon to access your photos so you can set a profile picture."
+          "photosPermission": "Allow RacketBound to access your photos so you can set a profile picture."
         }
       ]
     ],
