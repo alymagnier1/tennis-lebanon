@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Tennis Liban",
+    "appName": "RacketBound",
     "continue": "Continuer",
     "back": "Retour",
     "cancel": "Annuler",
@@ -285,7 +285,7 @@
   "onboarding": {
     "consent": {
       "title": "Avant de continuer",
-      "description": "Lisez chaque document, puis acceptez pour continuer. Ils s’appliquent au pilote Tennis Lebanon.",
+      "description": "Lisez chaque document, puis acceptez pour continuer. Ils s’appliquent au pilote RacketBound.",
       "acceptAll": "J'accepte les conditions d'utilisation, l'avis de confidentialité et les règles de la communauté",
       "terms": "J’accepte le projet de conditions d’utilisation",
       "readTerms": "Lire les conditions d’utilisation",
@@ -1208,7 +1208,7 @@
       "requestedLabel": "A demandé à rejoindre",
       "joinedLabel": "Dans le match",
       "shareLink": "Partager un lien",
-      "shareLinkHint": "Pour quelqu'un qui n'est pas encore sur Tennis Lebanon.",
+      "shareLinkHint": "Pour quelqu'un qui n'est pas encore sur RacketBound.",
       "invited": "Invité",
       "playersTitle": "Inviter des joueurs",
       "playersDescription": "Recherchez et invitez des joueurs compatibles à ce match.",
@@ -1370,7 +1370,7 @@
     "deleteTitle": "Demander la suppression du compte ?",
     "deleteDescription": "Cette action envoie une demande de suppression et peut limiter l’accès au compte pendant son examen.",
     "deleteError": "Impossible d’envoyer votre demande de suppression. Veuillez réessayer.",
-    "versionFooter": "Tennis Lebanon v{{version}} · Fabriqué au Liban 🇱🇧"
+    "versionFooter": "RacketBound v{{version}} · Fabriqué au Liban 🇱🇧"
   },
   "account": {
     "unavailableTitle": "Compte indisponible",
@@ -1409,7 +1409,7 @@
     "loadError": "We could not load your notifications.",
     "empty": "You are all caught up.",
     "markAllRead": "Mark all read",
-    "fallbackTitle": "Tennis Lebanon",
+    "fallbackTitle": "RacketBound",
     "fallbackBody": "Open the app for an update.",
     "settings": {
       "title": "Paramètres de notification",
@@ -1421,7 +1421,7 @@
       "statusUnsupported": "Indisponibles",
       "detailOn": "Cet appareil vous alertera des invitations, des votes, des réservations et des rappels.",
       "detailOff": "Activez-les pour suivre les invitations, les votes et les réservations de court sans ouvrir l'application.",
-      "detailBlocked": "Vous avez refusé les notifications de Tennis Lebanon. Autorisez-les dans les réglages de votre appareil pour les réactiver.",
+      "detailBlocked": "Vous avez refusé les notifications de RacketBound. Autorisez-les dans les réglages de votre appareil pour les réactiver.",
       "detailUnsupported": "Cet appareil ne peut pas recevoir de notifications push. Vous pouvez toujours tout consulter dans votre liste de notifications.",
       "detailUnconfigured": "Cette version ne peut pas encore envoyer de notifications push. Vous pouvez toujours tout consulter dans votre liste de notifications.",
       "enable": "Activer les notifications",

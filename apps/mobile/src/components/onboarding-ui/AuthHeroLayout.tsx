@@ -2,6 +2,7 @@ import type { PropsWithChildren, ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { CourtGridOverlay } from "./CourtPattern";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
@@ -12,6 +13,7 @@ export function AuthHeroLayout({
   footer,
 }: PropsWithChildren<{ footer?: ReactNode }>) {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
     <View
@@ -31,7 +33,7 @@ export function AuthHeroLayout({
         <View style={styles.logoMark}>
           <AppText style={styles.logoMarkText}>✕</AppText>
         </View>
-        <AppText style={styles.logoLabel}>Tennis Lebanon</AppText>
+        <AppText style={styles.logoLabel}>{t("common.appName")}</AppText>
       </View>
 
       <View style={styles.body}>{children}</View>

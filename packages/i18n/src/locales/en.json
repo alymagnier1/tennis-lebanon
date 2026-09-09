@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Tennis Lebanon",
+    "appName": "RacketBound",
     "continue": "Continue",
     "back": "Back",
     "cancel": "Cancel",
@@ -285,7 +285,7 @@
   "onboarding": {
     "consent": {
       "title": "Before you continue",
-      "description": "Read each one, then accept to continue. These apply to the Tennis Lebanon pilot.",
+      "description": "Read each one, then accept to continue. These apply to the RacketBound pilot.",
       "acceptAll": "I accept the Terms of Use, Privacy Notice and Community Rules",
       "terms": "I accept the Terms of Use draft",
       "readTerms": "Read Terms of Use",
@@ -551,7 +551,7 @@
     "loadError": "We could not load your notifications.",
     "empty": "You are all caught up.",
     "markAllRead": "Mark all read",
-    "fallbackTitle": "Tennis Lebanon",
+    "fallbackTitle": "RacketBound",
     "fallbackBody": "Open the app for an update.",
     "settings": {
       "title": "Notification settings",
@@ -563,7 +563,7 @@
       "statusUnsupported": "Unavailable",
       "detailOn": "This device will alert you about invites, votes, bookings, and reminders.",
       "detailOff": "Turn these on to hear about invites, votes, and court bookings without opening the app.",
-      "detailBlocked": "You declined notifications for Tennis Lebanon. Allow them in your device settings to switch them back on.",
+      "detailBlocked": "You declined notifications for RacketBound. Allow them in your device settings to switch them back on.",
       "detailUnsupported": "This device cannot receive push notifications. You can still read everything in your notification list.",
       "detailUnconfigured": "This build cannot send push notifications yet. You can still read everything in your notification list.",
       "enable": "Turn on notifications",
@@ -1334,7 +1334,7 @@
       "requestedLabel": "Asked to join",
       "joinedLabel": "In the match",
       "shareLink": "Share a link",
-      "shareLinkHint": "For someone who is not on Tennis Lebanon yet.",
+      "shareLinkHint": "For someone who is not on RacketBound yet.",
       "invited": "Invited",
       "playersTitle": "Invite players",
       "playersDescription": "Search and invite compatible players to this match.",
@@ -1496,7 +1496,7 @@
     "deleteTitle": "Request account deletion?",
     "deleteDescription": "This submits a deletion request and may restrict account access while it is reviewed.",
     "deleteError": "We could not submit your deletion request. Please try again.",
-    "versionFooter": "Tennis Lebanon v{{version}} · Made in Lebanon 🇱🇧"
+    "versionFooter": "RacketBound v{{version}} · Made in Lebanon 🇱🇧"
   },
   "account": {
     "unavailableTitle": "Account unavailable",

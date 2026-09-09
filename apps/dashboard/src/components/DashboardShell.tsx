@@ -35,7 +35,7 @@ export function DashboardShell({
           <strong
             style={{ fontSize: typography.size.md, color: colors.neutral[900] }}
           >
-            Tennis Lebanon
+            RacketBound
           </strong>
           <nav style={{ display: "flex", gap: spacing.md, flexWrap: "wrap" }}>
             <Link

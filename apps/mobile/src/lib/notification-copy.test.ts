@@ -13,7 +13,7 @@ const t = (key: string, params?: Record<string, unknown>): string => {
     "notifications.kinds.match_court_released.title": "Court no longer booked",
     "notifications.kinds.match_court_released.body":
       "{{clubName}} at {{startsAt}} fell through.",
-    "notifications.fallbackTitle": "Tennis Lebanon",
+    "notifications.fallbackTitle": "RacketBound",
     "notifications.fallbackBody": "Open the app for an update.",
   };
 
@@ -105,7 +105,7 @@ describe("resolveNotificationCopy", () => {
       t,
     );
 
-    expect(copy.title).toBe("Tennis Lebanon");
+    expect(copy.title).toBe("RacketBound");
     expect(copy.body).toBe("Open the app for an update.");
   });
 

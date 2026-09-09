@@ -4,7 +4,7 @@ import { AppProviders } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Tennis Lebanon Dashboard (Dev)",
+  title: "RacketBound Dashboard",
   description: "Club and platform operations dashboard.",
 };
 

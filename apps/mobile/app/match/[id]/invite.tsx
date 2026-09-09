@@ -160,7 +160,7 @@ export default function MatchInvitePlayersScreen() {
    * Separate from inviting a named player, which it used to run alongside.
    * A targeted invite already reaches that player by push, so opening a share
    * sheet on top of it asked the host to send the same thing twice. A link is
-   * for somebody who is not on Tennis Lebanon at all, and `create_match_invite`
+   * for somebody who is not on RacketBound at all, and `create_match_invite`
    * has always accepted a null recipient for exactly that.
    */
   const shareLinkMutation = useMutation({

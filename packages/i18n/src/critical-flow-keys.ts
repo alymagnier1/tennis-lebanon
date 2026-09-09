@@ -39,12 +39,17 @@ export const STALE_COPY_MARKERS = [
   "coming soon",
 ] as const;
 
-/** Keys where identical EN/AR text is acceptable (codes, acronyms). */
+/** Keys where identical EN/AR text is acceptable (codes, acronyms, the brand). */
 export const IDENTICAL_LOCALE_ALLOWLIST = new Set([
   "languages.en",
   "languages.ar",
   "languages.fr",
   "auth.emailPlaceholder",
+  // A brand is not translated. "Tennis Lebanon" was descriptive, so it had an
+  // Arabic and a French rendering; "RacketBound" is coined and stays itself in
+  // every locale, the way any product name does.
+  "common.appName",
+  "notifications.fallbackTitle",
 ]);
 
 const ARABIC_SCRIPT = /[\u0600-\u06FF]/;
