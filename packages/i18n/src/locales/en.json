@@ -260,6 +260,10 @@
     "noAccount": "Don't have an account?",
     "sendLink": "Send sign-in link",
     "sendError": "We could not send the link. Please try again.",
+    "googleButton": "Continue with Google",
+    "googleUnavailable": "Google sign-in is not available on this device. Use the email link instead.",
+    "googleError": "We could not sign you in with Google. Please try again.",
+    "orSeparator": "or",
     "cooldownError": "Please wait one minute before requesting another link. The link we already sent still works.",
     "rateLimitNotice": "For your security, repeated requests may be temporarily limited.",
     "checkEmailTitle": "Check your email",
@@ -312,7 +316,8 @@
       "languages": "Languages you speak",
       "nameError": "Enter a display name between 2 and 50 characters.",
       "adultError": "You must be 18 or older to join this pilot.",
-      "languageError": "Choose at least one language."
+      "languageError": "Choose at least one language.",
+      "formIncomplete": "Some required details are missing. Check the highlighted fields above, then try again."
     },
     "tennis": {
       "title": "Your tennis profile",

@@ -258,6 +258,10 @@
     "emailInvalid": "Saisissez une adresse e-mail valide.",
     "sendLink": "Envoyer le lien de connexion",
     "sendError": "Impossible d’envoyer le lien. Veuillez réessayer.",
+    "googleButton": "Continuer avec Google",
+    "googleUnavailable": "La connexion Google n’est pas disponible sur cet appareil. Utilisez plutôt le lien par e-mail.",
+    "googleError": "Impossible de vous connecter avec Google. Veuillez réessayer.",
+    "orSeparator": "ou",
     "cooldownError": "Attendez une minute avant de demander un autre lien. Celui que nous avons déjà envoyé fonctionne toujours.",
     "rateLimitNotice": "Pour votre sécurité, les demandes répétées peuvent être temporairement limitées.",
     "checkEmailTitle": "Consultez vos e-mails",
@@ -312,6 +316,7 @@
       "nameError": "Saisissez un nom d’affichage de 2 à 50 caractères.",
       "adultError": "Vous devez avoir au moins 18 ans pour participer à ce pilote.",
       "languageError": "Choisissez au moins une langue.",
+      "formIncomplete": "Il manque des informations obligatoires. Vérifiez les champs surlignés ci-dessus, puis réessayez.",
       "languages": "Languages you speak"
     },
     "tennis": {

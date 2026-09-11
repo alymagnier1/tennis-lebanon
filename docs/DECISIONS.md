@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-09-11 — Google sign-in, native flow, alongside the magic link
+
+- Status: accepted
+- Context: `CLAUDE.md` lists the authentication method among the things not to change without asking; the founder asked. Email in this app does exactly one job — deliver the magic link. The Edge Function sends no mail at all, and notifications ride Expo push. So the Resend sandbox, which delivers only to the account owner, is the single thing keeping a second person out of the pilot, and a provider that authenticates without email routes around it.
+- Decision: `@react-native-google-signin/google-signin` with `supabase.auth.signInWithIdToken`, as a second option beside the magic link rather than a replacement. Client ids are optional in the env schema, so an unconfigured build hides the button and still boots. Facebook was considered and declined.
+- Alternatives considered: `signInWithOAuth` (rejected — it returns through `tennislebanon://auth/callback`, the deep-link path that took three wrong diagnoses to fix in `9530cb0`; the native flow never leaves the app and touches none of it); replacing the magic link entirely (rejected — testers without a Google account, and Apple's guideline 4.8 leans on a first-party option being present); Facebook Login (rejected — Meta requires App Review plus often business verification for the `email` permission, needs a hosted data-deletion callback, and Facebook accounts may carry no email at all, which would create accounts that can never link and can never be reached); a 6-digit email OTP screen (rejected earlier — it still depends on the blocked email path).
+- Consequences: **Account linking is the risk to verify before cohort A.** A player who used a magic link and later taps Google with the same address must land on one account, not two — `players` is keyed on the auth user id, so a duplicate costs that player their rating and match history. Supabase links identities on a matching verified email; confirm it on staging with a real pair. Native module, so this cannot run in Expo Go and needs an EAS build. Android requires the signing certificate's SHA-1 registered against the package name; the package changed to `com.racketbound.app`, so EAS mints a fresh keystore and any earlier fingerprint is stale — a mismatch surfaces only as `DEVELOPER_ERROR`, which is why `googleSignInFailure` carries the raw code into a non-production diagnostic. Google returns the account's real name; onboarding still collects a display name and must keep doing so.
+- Owner: Founder
+
 ## 2026-09-09 — App is RacketBound; bundle ID fixed before it becomes permanent
 
 - Status: accepted

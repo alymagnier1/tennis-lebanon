@@ -11,6 +11,7 @@ import type { Session } from "@supabase/supabase-js";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOwnProfile } from "@tennis-lebanon/api";
 import { deriveAccessState, type AccessState } from "../lib/access-state";
+import { forgetGoogleAccount } from "../lib/google-native";
 import { unregisterDevicePushToken } from "../lib/push-notifications";
 import { supabase } from "../lib/supabase";
 
@@ -78,6 +79,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const signOut = useCallback(async () => {
     await unregisterDevicePushToken().catch(() => undefined);
+    // Without this the next attempt silently reuses the same Google account
+    // instead of offering the picker, so "use another email" cannot switch.
+    await forgetGoogleAccount();
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   }, []);

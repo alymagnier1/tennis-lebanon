@@ -12,6 +12,11 @@ const clientSchema = z
     APP_ENV: z.enum(["local", "staging", "production"]).default("local"),
     SUPPORT_EMAIL: z.string().email().default("support@tennis-lebanon.invalid"),
     AUTH_REDIRECT_URL: z.string().url(),
+    // OAuth client ids, not secrets: the web id is the audience of the Google
+    // ID token and ships in the bundle by design. Optional so the app still
+    // boots before the Google console work is done -- the button hides itself.
+    GOOGLE_WEB_CLIENT_ID: z.string().min(1).optional().or(z.literal("")),
+    GOOGLE_IOS_CLIENT_ID: z.string().min(1).optional().or(z.literal("")),
   })
   .superRefine((value, context) => {
     if (value.APP_ENV !== "local" && value.SUPPORT_EMAIL.endsWith(".invalid")) {
@@ -46,6 +51,8 @@ export function loadClientEnv(
     SENTRY_DSN: source[`${prefix}SENTRY_DSN`] ?? "",
     APP_ENV: source[`${prefix}APP_ENV`],
     SUPPORT_EMAIL: source[`${prefix}SUPPORT_EMAIL`],
+    GOOGLE_WEB_CLIENT_ID: source[`${prefix}GOOGLE_WEB_CLIENT_ID`] ?? "",
+    GOOGLE_IOS_CLIENT_ID: source[`${prefix}GOOGLE_IOS_CLIENT_ID`] ?? "",
     AUTH_REDIRECT_URL:
       source[`${prefix}AUTH_REDIRECT_URL`] ??
       (prefix === "EXPO_PUBLIC_"

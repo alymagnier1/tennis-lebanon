@@ -20,6 +20,13 @@ import {
   canRequestMagicLink,
   recordMagicLinkRequest,
 } from "../../src/lib/auth-cooldown";
+import { env } from "../../src/lib/env";
+import { nativeGoogleIdToken } from "../../src/lib/google-native";
+import {
+  completeGoogleSignIn,
+  isGoogleSignInConfigured,
+  type GoogleSignInFailure,
+} from "../../src/lib/google-sign-in";
 import { getAuthRedirectUrl } from "../../src/lib/auth-redirect";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
@@ -33,6 +40,11 @@ export default function SignInScreen() {
     null,
   );
   const [signOutError, setSignOutError] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [googleError, setGoogleError] = useState<{
+    reason: GoogleSignInFailure;
+    detail?: string;
+  } | null>(null);
   const {
     control,
     handleSubmit,
@@ -67,6 +79,26 @@ export default function SignInScreen() {
     }
     router.replace("/(auth)/check-email");
   });
+
+  const googleAvailable = isGoogleSignInConfigured(env.GOOGLE_WEB_CLIENT_ID);
+
+  const signInWithGoogle = async () => {
+    setGoogleError(null);
+    setGoogleBusy(true);
+    const result = await completeGoogleSignIn(supabase, nativeGoogleIdToken);
+    setGoogleBusy(false);
+
+    if (result.ok) {
+      // Same landing as the magic-link callback: the root routes on access
+      // state, so a new player continues into onboarding rather than seeing
+      // this screen's "already signed in" branch.
+      router.replace("/");
+      return;
+    }
+    // Backing out of the account sheet is a choice, not a failure.
+    if (result.reason === "cancelled") return;
+    setGoogleError({ reason: result.reason, detail: result.detail });
+  };
 
   const switchAccount = async () => {
     setSignOutError(false);
@@ -119,6 +151,18 @@ export default function SignInScreen() {
             onPress={() => void submit()}
             loading={isSubmitting}
           />
+          {googleAvailable ? (
+            <>
+              <AppText style={styles.separator}>
+                {t("auth.orSeparator")}
+              </AppText>
+              <FigmaSecondaryButton
+                label={t("auth.googleButton")}
+                onPress={() => void signInWithGoogle()}
+                loading={googleBusy}
+              />
+            </>
+          ) : null}
           <AppText style={styles.rateLimit}>
             {t("auth.rateLimitNotice")}
           </AppText>
@@ -158,6 +202,18 @@ export default function SignInScreen() {
             : t("auth.sendError")}
         </ErrorNotice>
       ) : null}
+      {googleError ? (
+        <>
+          <ErrorNotice>
+            {googleError.reason === "unavailable"
+              ? t("auth.googleUnavailable")
+              : t("auth.googleError")}
+          </ErrorNotice>
+          {env.APP_ENV !== "production" && googleError.detail ? (
+            <AppText style={styles.diagnostic}>{googleError.detail}</AppText>
+          ) : null}
+        </>
+      ) : null}
       <View style={styles.switchRow}>
         <AppText style={styles.switchText}>{t("auth.noAccount")} </AppText>
         <FigmaTextButton
@@ -171,6 +227,21 @@ export default function SignInScreen() {
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
+    separator: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+      textAlign: "center",
+      marginVertical: 8,
+    },
+    // DEVELOPER_ERROR says nothing about itself; outside production the raw
+    // code shows here so a SHA-1 mismatch is identifiable without a rebuild.
+    diagnostic: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 11,
+      opacity: 0.7,
+      marginTop: 6,
+    },
     rateLimit: {
       fontFamily: tennisFontFamily.body,
       fontSize: 12,
