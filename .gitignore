@@ -57,3 +57,7 @@ Figma-Design-2/
 
 # Cursor MCP config holds provider access tokens; keep it local.
 .cursor/mcp.json
+
+# Downloaded OAuth client-secret files. Never commit these.
+client_secret*.json
+Google Client secrets/
