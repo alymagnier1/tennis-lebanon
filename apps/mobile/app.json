@@ -22,7 +22,6 @@
       "expo-status-bar",
       "expo-secure-store",
       "expo-notifications",
-      "@react-native-google-signin/google-signin",
       [
         "expo-image-picker",
         {
