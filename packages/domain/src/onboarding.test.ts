@@ -5,6 +5,7 @@ import {
   normalizeDisplayName,
   newPasswordSchema,
   onboardingInputSchema,
+  passwordByteLength,
   passwordResetSchema,
   signInSchema,
   signUpSchema,
@@ -85,5 +86,41 @@ describe("password auth schemas", () => {
     expect(
       newPasswordSchema.safeParse({ password: "longenough" }).success,
     ).toBe(true);
+  });
+});
+
+describe("password byte limit", () => {
+  // Built from code points so this file stays pure ASCII.
+  const arabicKaf = String.fromCodePoint(0x0643);
+  const tennisBall = String.fromCodePoint(0x1f3be);
+
+  it("counts UTF-8 bytes, not characters", () => {
+    expect(passwordByteLength("secret12")).toBe(8);
+    expect(passwordByteLength(arabicKaf)).toBe(2);
+    // One code point above the BMP: four bytes, counted once not twice.
+    expect(passwordByteLength(tennisBall)).toBe(4);
+    expect(tennisBall.length).toBe(2);
+  });
+
+  /**
+   * bcrypt truncates at 72 bytes. 40 Arabic characters are 80 bytes, so a
+   * character-counted limit would accept a password whose tail protects
+   * nothing.
+   */
+  it("rejects a password short in characters but long in bytes", () => {
+    const arabic = arabicKaf.repeat(40);
+    expect(arabic.length).toBeLessThan(72);
+    expect(passwordByteLength(arabic)).toBeGreaterThan(72);
+    expect(newPasswordSchema.safeParse({ password: arabic }).success).toBe(
+      false,
+    );
+  });
+
+  it("accepts exactly 72 bytes and rejects 73", () => {
+    const ascii = "a".repeat(72);
+    expect(newPasswordSchema.safeParse({ password: ascii }).success).toBe(true);
+    expect(newPasswordSchema.safeParse({ password: ascii + "a" }).success).toBe(
+      false,
+    );
   });
 });

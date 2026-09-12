@@ -16,8 +16,42 @@ export const skillBandSchema = z.enum([
 ]);
 export const playIntentSchema = z.enum(["social", "competitive", "either"]);
 export const emailSchema = z.string().trim().toLowerCase().email();
-/** Supabase default is 6; 8 is the floor we show in the form. */
-export const passwordSchema = z.string().min(8).max(72);
+/**
+ * bcrypt hashes at most 72 **bytes** and silently drops the rest, so a limit
+ * counted in characters lets a password be accepted while part of it protects
+ * nothing. 50 Arabic characters are roughly 100 bytes, which makes this a real
+ * case here rather than a theoretical one.
+ *
+ * Computed rather than using TextEncoder: this package is plain TypeScript
+ * shared with the database layer and should not reach for a platform API.
+ */
+export const PASSWORD_MAX_BYTES = 72;
+
+export function passwordByteLength(value: string): number {
+  let bytes = 0;
+  // Iterating a string yields whole code points, so surrogate pairs count once.
+  for (const character of value) {
+    const codePoint = character.codePointAt(0) ?? 0;
+    if (codePoint <= 0x7f) bytes += 1;
+    else if (codePoint <= 0x7ff) bytes += 2;
+    else if (codePoint <= 0xffff) bytes += 3;
+    else bytes += 4;
+  }
+  return bytes;
+}
+
+/**
+ * Supabase default is 6; 8 is the floor we show in the form. The character cap
+ * is a cheap bound before the byte walk -- a string can never have fewer bytes
+ * than characters, so anything longer than 72 characters is already too long.
+ */
+export const passwordSchema = z
+  .string()
+  .min(8)
+  .max(PASSWORD_MAX_BYTES)
+  .refine((value) => passwordByteLength(value) <= PASSWORD_MAX_BYTES, {
+    message: `Password must be at most ${PASSWORD_MAX_BYTES} bytes.`,
+  });
 export const signInSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
