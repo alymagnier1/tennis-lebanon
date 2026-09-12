@@ -17,6 +17,7 @@ import { OnboardingProvider } from "../src/providers/OnboardingProvider";
 import { PushTokenRegistration } from "../src/components/PushTokenRegistration";
 import { NotificationLocaleSync } from "../src/components/NotificationLocaleSync";
 import { NotificationDeepLinkHandler } from "../src/components/NotificationDeepLinkHandler";
+import { UnreadMessagesWatcher } from "../src/components/UnreadMessagesWatcher";
 import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
 import { ToastProvider } from "../src/providers/ToastProvider";
 import { ConfirmDialogProvider } from "../src/providers/ConfirmDialogProvider";
@@ -86,6 +87,7 @@ export default function RootLayout() {
                   <PushTokenRegistration />
                   <NotificationLocaleSync />
                   <NotificationDeepLinkHandler />
+                  <UnreadMessagesWatcher />
                   <OnboardingProvider>
                     <Stack screenOptions={{ headerShown: false }}>
                       <Stack.Screen name="index" />
