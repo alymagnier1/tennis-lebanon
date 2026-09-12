@@ -6,7 +6,8 @@ import { resolveAppearance } from "../theme/tennis-tokens";
 
 export type { AppearancePreference };
 
-export const APPEARANCE_STORAGE_KEY = "tennis-lebanon:appearance";
+/** Must stay SecureStore-safe: alphanumeric, `.`, `-`, `_` only. */
+export const APPEARANCE_STORAGE_KEY = "tennis-lebanon.appearance";
 
 export function parseAppearancePreference(
   value: string | null,

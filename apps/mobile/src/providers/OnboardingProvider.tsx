@@ -7,14 +7,18 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import { Platform } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import type {
   Gender,
   PlayIntent,
   SkillBand,
   SupportedLanguage,
 } from "@tennis-lebanon/domain";
+import {
+  deviceStorageKey,
+  readDeviceValue,
+  removeDeviceValue,
+  writeDeviceValue,
+} from "../lib/device-storage";
 import { useAuth } from "./AuthProvider";
 
 export interface OnboardingDraft {
@@ -59,28 +63,7 @@ interface OnboardingContextValue {
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
 function draftKey(userId: string): string {
-  return `tennis-lebanon:onboarding:${userId}`;
-}
-
-async function readDraft(key: string): Promise<string | null> {
-  if (Platform.OS === "web") return localStorage.getItem(key);
-  return SecureStore.getItemAsync(key);
-}
-
-async function writeDraft(key: string, value: string): Promise<void> {
-  if (Platform.OS === "web") {
-    localStorage.setItem(key, value);
-    return;
-  }
-  await SecureStore.setItemAsync(key, value);
-}
-
-async function removeDraft(key: string): Promise<void> {
-  if (Platform.OS === "web") {
-    localStorage.removeItem(key);
-    return;
-  }
-  await SecureStore.deleteItemAsync(key);
+  return deviceStorageKey("onboarding", userId);
 }
 
 export function OnboardingProvider({ children }: PropsWithChildren) {
@@ -97,12 +80,12 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
         if (active) setHydrated(true);
         return;
       }
-      const stored = await readDraft(draftKey(userId));
+      const stored = await readDeviceValue(draftKey(userId));
       if (active && stored) {
         try {
           setDraft({ ...initialDraft, ...JSON.parse(stored) });
         } catch {
-          await removeDraft(draftKey(userId));
+          await removeDeviceValue(draftKey(userId));
         }
       }
       if (active) setHydrated(true);
@@ -115,7 +98,7 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (hydrated && userId) {
-      void writeDraft(draftKey(userId), JSON.stringify(draft));
+      void writeDeviceValue(draftKey(userId), JSON.stringify(draft));
     }
   }, [draft, hydrated, userId]);
 
@@ -125,7 +108,7 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
 
   const clearDraft = useCallback(async () => {
     setDraft(initialDraft);
-    if (userId) await removeDraft(draftKey(userId));
+    if (userId) await removeDeviceValue(draftKey(userId));
   }, [userId]);
 
   const value = useMemo(

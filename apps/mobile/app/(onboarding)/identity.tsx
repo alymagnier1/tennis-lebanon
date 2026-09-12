@@ -1,11 +1,16 @@
-import { useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { useRef, useState } from "react";
+import {
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+  type ScrollView,
+} from "react-native";
 import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
-  isAdultBirthYear,
   normalizeDisplayName,
   type Gender,
   type PlayIntent,
@@ -25,6 +30,10 @@ import {
 } from "../../src/components/onboarding-ui";
 import { Avatar } from "../../src/components/AppUi";
 import { pickAndUploadOwnAvatar } from "../../src/lib/pick-own-avatar";
+import {
+  validateOnboardingIdentity,
+  type OnboardingIdentityField,
+} from "../../src/lib/onboarding-identity-validation";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
 import { tennisColors } from "../../src/theme/tennis-tokens";
@@ -47,17 +56,31 @@ const currentYear = new Date().getUTCFullYear();
 const youngestEligibleYear = currentYear - 18;
 const oldestOfferedYear = currentYear - 90;
 
-type FieldErrors = {
-  displayName?: string;
-  birthYear?: string;
-  languages?: string;
-  skillBand?: string;
-};
+type FieldErrors = Partial<Record<OnboardingIdentityField, string>>;
+
+function fieldErrorMessage(
+  field: OnboardingIdentityField,
+  t: (key: string) => string,
+): string {
+  switch (field) {
+    case "displayName":
+      return t("onboarding.identity.nameError");
+    case "birthYear":
+      return t("onboarding.identity.birthYearError");
+    case "adultConfirm":
+      return t("onboarding.identity.adultError");
+    case "languages":
+      return t("onboarding.identity.languageError");
+    case "skillBand":
+      return t("onboarding.tennis.skillError");
+  }
+}
 
 export default function IdentityScreen() {
   const { t } = useTranslation();
   const { profile, refreshProfile } = useAuth();
   const { draft, updateDraft } = useOnboarding();
+  const scrollRef = useRef<ScrollView>(null);
   const [displayName, setDisplayName] = useState(draft.displayName);
   const [birthYear, setBirthYear] = useState(draft.birthYear);
   const [adultConfirmed, setAdultConfirmed] = useState(draft.isAdultConfirmed);
@@ -66,6 +89,7 @@ export default function IdentityScreen() {
   const [skillBand, setSkillBand] = useState(draft.skillBand);
   const [playIntent, setPlayIntent] = useState(draft.playIntent);
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [formIncomplete, setFormIncomplete] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
 
   const avatarMutation = useMutation({
@@ -87,8 +111,13 @@ export default function IdentityScreen() {
   const numericYear = Number(birthYear);
   const hasYear = birthYear.length === 4 && Number.isInteger(numericYear);
 
+  const clearFieldError = (field: OnboardingIdentityField) => {
+    setFormIncomplete(false);
+    setErrors((current) => ({ ...current, [field]: undefined }));
+  };
+
   const toggleLanguage = (language: SupportedLanguage) => {
-    setErrors((current) => ({ ...current, languages: undefined }));
+    clearFieldError("languages");
     setSelectedLanguages((current) =>
       current.includes(language)
         ? current.filter((item) => item !== language)
@@ -97,35 +126,32 @@ export default function IdentityScreen() {
   };
 
   const next = () => {
-    const normalizedName = normalizeDisplayName(displayName);
-    const nextErrors: FieldErrors = {};
+    const missing = validateOnboardingIdentity({
+      displayName,
+      birthYear,
+      isAdultConfirmed: adultConfirmed,
+      languages: selectedLanguages,
+      skillBand,
+      currentYear,
+    });
 
-    if (normalizedName.length < 2 || normalizedName.length > 50) {
-      nextErrors.displayName = t("onboarding.identity.nameError");
-    }
-
-    if (!hasYear || !isAdultBirthYear(numericYear, currentYear)) {
-      nextErrors.birthYear = t("onboarding.identity.birthYearError");
-    } else if (!adultConfirmed) {
-      nextErrors.birthYear = t("onboarding.identity.adultError");
-    }
-
-    if (selectedLanguages.length === 0) {
-      nextErrors.languages = t("onboarding.identity.languageError");
-    }
-
-    if (!skillBand) {
-      nextErrors.skillBand = t("onboarding.tennis.skillError");
-    }
-
-    if (Object.values(nextErrors).some(Boolean)) {
+    if (missing.length > 0) {
+      const nextErrors: FieldErrors = {};
+      for (const field of missing) {
+        nextErrors[field] = fieldErrorMessage(field, t);
+      }
       setErrors(nextErrors);
+      setFormIncomplete(true);
+      // Sticky Continue sits below the fold; field errors alone looked like a
+      // dead button. Scroll up and keep a footer notice next to Continue.
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
       return;
     }
 
     setErrors({});
+    setFormIncomplete(false);
     updateDraft({
-      displayName: normalizedName,
+      displayName: normalizeDisplayName(displayName),
       birthYear,
       gender,
       isAdultConfirmed: adultConfirmed,
@@ -149,8 +175,14 @@ export default function IdentityScreen() {
       step={2}
       totalSteps={3}
       onBack={() => router.back()}
+      scrollRef={scrollRef}
       footer={
-        <FigmaPrimaryButton label={t("common.continue")} onPress={next} />
+        <>
+          {formIncomplete ? (
+            <ErrorNotice>{t("onboarding.identity.formIncomplete")}</ErrorNotice>
+          ) : null}
+          <FigmaPrimaryButton label={t("common.continue")} onPress={next} />
+        </>
       }
     >
       <View style={styles.photoBlock}>
@@ -185,7 +217,7 @@ export default function IdentityScreen() {
           value={displayName}
           onChangeText={(value) => {
             setDisplayName(value);
-            setErrors((current) => ({ ...current, displayName: undefined }));
+            clearFieldError("displayName");
           }}
           autoCapitalize="words"
           textContentType="name"
@@ -203,7 +235,7 @@ export default function IdentityScreen() {
           value={birthYear}
           onChange={(year) => {
             setBirthYear(year);
-            setErrors((current) => ({ ...current, birthYear: undefined }));
+            clearFieldError("birthYear");
           }}
           minYear={oldestOfferedYear}
           maxYear={youngestEligibleYear}
@@ -255,9 +287,12 @@ export default function IdentityScreen() {
         selected={adultConfirmed}
         onPress={() => {
           setAdultConfirmed((value) => !value);
-          setErrors((current) => ({ ...current, birthYear: undefined }));
+          clearFieldError("adultConfirm");
         }}
       />
+      {errors.adultConfirm ? (
+        <ErrorNotice>{errors.adultConfirm}</ErrorNotice>
+      ) : null}
 
       <AppText style={styles.section}>{t("onboarding.tennis.title")}</AppText>
       <AppText style={styles.sectionHint}>
@@ -272,7 +307,7 @@ export default function IdentityScreen() {
           selected={skillBand === band}
           onPress={() => {
             setSkillBand(band);
-            setErrors((current) => ({ ...current, skillBand: undefined }));
+            clearFieldError("skillBand");
           }}
         />
       ))}

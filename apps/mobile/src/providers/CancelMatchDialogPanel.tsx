@@ -6,7 +6,7 @@ import { FormField } from "../components/FormUi";
 import {
   FigmaPrimaryButton,
   FigmaSecondaryButton,
-} from "../components/onboarding-ui";
+} from "../components/onboarding-ui/FigmaButtons";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 import type { CancelMatchDialogOptions } from "../lib/confirm-action";
 import { tennisColors } from "../theme/tennis-tokens";

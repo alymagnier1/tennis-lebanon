@@ -98,12 +98,17 @@ export default function ZonesScreen() {
       totalSteps={3}
       onBack={() => router.back()}
       footer={
-        <FigmaPrimaryButton
-          label={t("onboarding.review.finish")}
-          disabled={draft.zoneIds.length === 0}
-          loading={mutation.isPending}
-          onPress={() => mutation.mutate()}
-        />
+        <>
+          {mutation.isError ? (
+            <ErrorNotice>{t("onboarding.review.error")}</ErrorNotice>
+          ) : null}
+          <FigmaPrimaryButton
+            label={t("onboarding.review.finish")}
+            disabled={draft.zoneIds.length === 0}
+            loading={mutation.isPending}
+            onPress={() => mutation.mutate()}
+          />
+        </>
       }
     >
       {query.isLoading ? <ActivityIndicator /> : null}
@@ -129,9 +134,6 @@ export default function ZonesScreen() {
       ))}
       {commitmentEcho ? (
         <AppText style={tennisTextStyles.fieldHint}>{commitmentEcho}</AppText>
-      ) : null}
-      {mutation.isError ? (
-        <ErrorNotice>{t("onboarding.review.error")}</ErrorNotice>
       ) : null}
     </OnboardingStepLayout>
   );

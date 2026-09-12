@@ -115,9 +115,6 @@ export default function DiscoverScreen() {
     onError: (error: unknown) => notify(t(joinErrorKey(error))),
   });
   const userId = session?.user.id;
-  const [chosenSegment, setChosenSegment] = useState<DiscoverSegment | null>(
-    null,
-  );
   const [matchToggles, setMatchToggles] = useState<DiscoverMatchToggles>({
     ...DEFAULT_DISCOVER_MATCH_TOGGLES,
   });
@@ -148,14 +145,11 @@ export default function DiscoverScreen() {
     segment?: string;
   }>();
 
-  // Derived, not synced from an effect: a caller can open Discover straight on
-  // Matches, and tapping a tab afterwards wins. Setting state from an effect
-  // for something this plainly derivable is what the compiler's
-  // cascading-render rule objects to, and the time window above already had to
-  // be rewritten the same way.
-  const paramSegment: DiscoverSegment | null =
-    timeParams.segment === "matches" ? "matches" : null;
-  const segment: DiscoverSegment = chosenSegment ?? paramSegment ?? "matches";
+  // Segment lives in the route so Home "View all" (segment=players) wins even
+  // when the tab screen stayed mounted on Matches. Tab taps write the same
+  // param; default is Players because Home surfaces people first.
+  const segment: DiscoverSegment =
+    timeParams.segment === "matches" ? "matches" : "players";
   const paramWindow = useMemo(
     () => parseDiscoverTimeWindow(timeParams),
     [timeParams],
@@ -215,14 +209,25 @@ export default function DiscoverScreen() {
       return null;
     }
 
-    return {
-      ...resolveDiscoverFiltersFromProfile({
-        toggles: matchToggles,
-        playIntent: profile.play_intent as PlayIntent,
-        ownZoneIds: ownZonesQuery.data,
-      }),
-      ...(timeWindow ?? {}),
-    };
+    const base = resolveDiscoverFiltersFromProfile({
+      toggles: matchToggles,
+      playIntent: profile.play_intent as PlayIntent,
+      ownZoneIds: ownZonesQuery.data,
+    });
+
+    // A Home free-block window is the availability filter. Leaving the
+    // Availability toggle on as well would AND both SQL branches and hide
+    // people who are free in that block but do not overlap the viewer's
+    // other slots — the exact "on Home, missing in Discover" mismatch.
+    if (timeWindow) {
+      return {
+        ...base,
+        ...timeWindow,
+        requireAvailabilityOverlap: false,
+      };
+    }
+
+    return base;
   }, [matchToggles, ownProfileQuery.data, ownZonesQuery.data, timeWindow]);
 
   const playersQuery = useQuery({
@@ -450,7 +455,7 @@ export default function DiscoverScreen() {
               { value: "players", label: t("discover.playersTab") },
               { value: "matches", label: t("discover.matchesTab") },
             ]}
-            onChange={setChosenSegment}
+            onChange={(next) => router.setParams({ segment: next })}
           />
           <DiscoverMatchChips
             toggles={matchToggles}

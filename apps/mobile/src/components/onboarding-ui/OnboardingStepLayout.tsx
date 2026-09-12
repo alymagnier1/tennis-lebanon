@@ -1,10 +1,11 @@
-import type { PropsWithChildren, ReactNode } from "react";
+import type { PropsWithChildren, ReactNode, RefObject } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   View,
+  type ScrollView as ScrollViewType,
 } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -25,6 +26,7 @@ export function OnboardingStepLayout({
   children,
   footer,
   scroll = true,
+  scrollRef,
 }: PropsWithChildren<{
   title: string;
   description?: string;
@@ -33,6 +35,7 @@ export function OnboardingStepLayout({
   onBack?: () => void;
   footer?: ReactNode;
   scroll?: boolean;
+  scrollRef?: RefObject<ScrollViewType | null>;
 }>) {
   const insets = useSafeAreaInsets();
 
@@ -71,6 +74,7 @@ export function OnboardingStepLayout({
     >
       {scroll ? (
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}

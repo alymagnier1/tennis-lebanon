@@ -1,30 +1,23 @@
 import "react-native-url-polyfill/auto";
 import { AppState, Platform } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import { processLock } from "@supabase/supabase-js";
 import { createTennisClient } from "@tennis-lebanon/api";
+import {
+  readDeviceValue,
+  removeDeviceValue,
+  writeDeviceValue,
+} from "./device-storage";
 import { env } from "./env";
 
 const secureStorage = {
   async getItem(key: string): Promise<string | null> {
-    if (Platform.OS === "web") {
-      return globalThis.localStorage?.getItem(key) ?? null;
-    }
-    return SecureStore.getItemAsync(key);
+    return readDeviceValue(key);
   },
   async setItem(key: string, value: string): Promise<void> {
-    if (Platform.OS === "web") {
-      globalThis.localStorage?.setItem(key, value);
-      return;
-    }
-    await SecureStore.setItemAsync(key, value);
+    await writeDeviceValue(key, value);
   },
   async removeItem(key: string): Promise<void> {
-    if (Platform.OS === "web") {
-      globalThis.localStorage?.removeItem(key);
-      return;
-    }
-    await SecureStore.deleteItemAsync(key);
+    await removeDeviceValue(key);
   },
 };
 

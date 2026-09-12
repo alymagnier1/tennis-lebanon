@@ -15,6 +15,10 @@ import {
   listOwnPreferredZoneIds,
   type CompatiblePlayerCard,
 } from "@tennis-lebanon/api";
+import {
+  MAX_LEVEL_WINDOW,
+  resolveDiscoverFiltersFromProfile,
+} from "@tennis-lebanon/domain";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { Avatar } from "../AppUi";
@@ -82,9 +86,23 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
       ownZonesQuery.data,
     ],
     queryFn: () =>
+      // Same eligibility as Discover with Level/Intent/Availability off and
+      // Area matching the liquidity count (viewer's own zones). A hard-coded
+      // `levelWindow: 4` used to look wider than Discover's Level chip, which
+      // only sorts — but View-all still opened the Matches tab, so the same
+      // person looked absent. Keep the window at MAX and open Players.
       discoverCompatiblePlayers(supabase, {
-        zoneIds: ownZonesQuery.data?.length ? ownZonesQuery.data : undefined,
-        levelWindow: 4,
+        ...resolveDiscoverFiltersFromProfile({
+          toggles: {
+            matchLevel: false,
+            matchIntent: false,
+            matchArea: Boolean(ownZonesQuery.data?.length),
+            matchAvailability: false,
+          },
+          playIntent: "either",
+          ownZoneIds: ownZonesQuery.data,
+        }),
+        levelWindow: MAX_LEVEL_WINDOW,
         limit: CARD_LIMIT,
         freeFrom: block.startsAt,
         freeTo: block.endsAt,
@@ -230,7 +248,11 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
           onPress={() =>
             router.push({
               pathname: "/(tabs)/discover",
-              params: { freeFrom: block.startsAt, freeTo: block.endsAt },
+              params: {
+                segment: "players",
+                freeFrom: block.startsAt,
+                freeTo: block.endsAt,
+              },
             })
           }
           style={({ pressed }) => [

@@ -1,8 +1,6 @@
 import { useTranslation } from "react-i18next";
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -15,7 +13,7 @@ import { AppText } from "../components/AppText";
 import {
   FigmaPrimaryButton,
   FigmaSecondaryButton,
-} from "../components/onboarding-ui";
+} from "../components/onboarding-ui/FigmaButtons";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 import { useLayoutDirection } from "../lib/layout-direction";
 import {
@@ -24,6 +22,7 @@ import {
   type CancelMatchDialogOptions,
 } from "../lib/confirm-action";
 import { CancelMatchDialogPanel } from "./CancelMatchDialogPanel";
+import { ConfirmDialogVisibilityContext } from "./confirm-dialog-visibility";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 
 type NotifyState = {
@@ -44,12 +43,7 @@ type CancelMatchState = {
 
 type DialogState = NotifyState | ChooseState | CancelMatchState | null;
 
-const ConfirmDialogContext = createContext<{ visible: boolean } | null>(null);
-
-export function useConfirmDialogVisible(): boolean {
-  const ctx = useContext(ConfirmDialogContext);
-  return ctx?.visible ?? false;
-}
+export { useConfirmDialogVisible } from "./confirm-dialog-visibility";
 
 export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
@@ -86,7 +80,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({ visible: dialog !== null }), [dialog]);
 
   return (
-    <ConfirmDialogContext.Provider value={value}>
+    <ConfirmDialogVisibilityContext.Provider value={value}>
       {children}
       {/* Mount only while open so this portal stacks above any earlier Modal
           (e.g. BottomSheet). A always-mounted Modal stays under a later sheet. */}
@@ -186,7 +180,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
           </View>
         </Modal>
       ) : null}
-    </ConfirmDialogContext.Provider>
+    </ConfirmDialogVisibilityContext.Provider>
   );
 }
 
