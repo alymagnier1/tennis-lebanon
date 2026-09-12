@@ -22,11 +22,6 @@ export default function WelcomeScreen() {
             onPress={() => router.push("/(public)/sign-in")}
           />
           <FigmaTextButton
-            label={t("welcome.signIn")}
-            onPress={() => router.push("/(public)/sign-in")}
-            onDark
-          />
-          <FigmaTextButton
             label={t("welcome.termsFooter")}
             onPress={() => router.push("/policies")}
             onDark

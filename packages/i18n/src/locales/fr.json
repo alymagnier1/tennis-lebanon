@@ -247,16 +247,14 @@
     "headline1": "Trouvez",
     "headline2": "votre match.",
     "headline3": "Jouez aujourd’hui.",
-    "createAccount": "Créer un compte",
-    "signIn": "Se connecter",
     "termsFooter": "En continuant, vous acceptez nos conditions et notre politique de confidentialité"
   },
   "auth": {
-    "signInTitle": "Se connecter ou créer un compte",
-    "signInBody": "Saisissez votre adresse e-mail pour recevoir un lien de connexion sécurisé.",
+    "signInTitle": "Connexion ou inscription",
+    "signInBody": "Saisissez votre e-mail et nous vous enverrons un lien sécurisé. C’est le même lien que vous soyez nouveau ou de retour — aucun mot de passe.",
     "emailLabel": "Adresse e-mail",
     "emailInvalid": "Saisissez une adresse e-mail valide.",
-    "sendLink": "Envoyer le lien de connexion",
+    "sendLink": "Envoyez-moi un lien",
     "sendError": "Impossible d’envoyer le lien. Veuillez réessayer.",
     "googleButton": "Continuer avec Google",
     "googleUnavailable": "La connexion Google n’est pas disponible sur cet appareil. Utilisez plutôt le lien par e-mail.",
@@ -283,7 +281,6 @@
     "signOutConfirmBody": "Vous aurez besoin d'un nouveau lien de connexion pour revenir.",
     "signOutError": "Impossible de vous déconnecter. Veuillez réessayer.",
     "emailPlaceholder": "you@example.com",
-    "noAccount": "Vous n’avez pas de compte ?",
     "checkEmailHint": "Le lien expire après un court délai. Si vous en demandez un autre, seul l'e-mail le plus récent fonctionnera."
   },
   "onboarding": {

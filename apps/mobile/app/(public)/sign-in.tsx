@@ -11,7 +11,6 @@ import { ErrorNotice } from "../../src/components/FormUi";
 import {
   FigmaPrimaryButton,
   FigmaSecondaryButton,
-  FigmaTextButton,
   OnboardingFormField,
   OnboardingStepLayout,
   onboardingInputStyle,
@@ -214,13 +213,6 @@ export default function SignInScreen() {
           ) : null}
         </>
       ) : null}
-      <View style={styles.switchRow}>
-        <AppText style={styles.switchText}>{t("auth.noAccount")} </AppText>
-        <FigmaTextButton
-          label={t("welcome.createAccount")}
-          onPress={() => void submit()}
-        />
-      </View>
     </OnboardingStepLayout>
   );
 }
@@ -248,18 +240,6 @@ const styles = createLiveSheet(() =>
       color: tennisColors.mutedForeground,
       textAlign: "center",
       marginTop: 8,
-    },
-    switchRow: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      justifyContent: "center",
-      alignItems: "center",
-      marginTop: 16,
-    },
-    switchText: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 14,
-      color: tennisColors.mutedForeground,
     },
   }),
 );
