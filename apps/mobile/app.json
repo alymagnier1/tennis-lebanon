@@ -12,6 +12,7 @@
     },
     "android": {
       "package": "com.racketbound.app",
+      "googleServicesFile": "./google-services.json",
       "predictiveBackGestureEnabled": false
     },
     "web": {

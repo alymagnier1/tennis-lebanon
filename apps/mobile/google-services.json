@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "239822090796",
+    "project_id": "racketbound-f4b1d",
+    "storage_bucket": "racketbound-f4b1d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:239822090796:android:ee7d4bffaebdabc1f6d789",
+        "android_client_info": {
+          "package_name": "com.racketbound.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGsOlcfYOde7TU3isRCG6f6bdvqxOpikE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
