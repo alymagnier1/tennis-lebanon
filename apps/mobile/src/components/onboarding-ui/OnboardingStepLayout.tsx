@@ -26,6 +26,7 @@ export function OnboardingStepLayout({
   footer,
   scroll = true,
   scrollRef,
+  avoidKeyboard = true,
 }: PropsWithChildren<{
   title: string;
   description?: string;
@@ -35,6 +36,11 @@ export function OnboardingStepLayout({
   footer?: ReactNode;
   scroll?: boolean;
   scrollRef?: RefObject<ScrollViewType | null>;
+  /**
+   * Auth credential screens keep the action stack in the scroll and turn this
+   * off so focusing email does not lift the buttons above the keyboard.
+   */
+  avoidKeyboard?: boolean;
 }>) {
   const insets = useSafeAreaInsets();
 
@@ -60,21 +66,21 @@ export function OnboardingStepLayout({
     </>
   );
 
-  return (
-    <KeyboardAvoider
-      style={[
-        styles.root,
-        {
-          paddingTop: stackScreenTopPadding(insets.top),
-          paddingBottom: insets.bottom + 16,
-        },
-      ]}
-    >
+  const frameStyle = [
+    styles.root,
+    {
+      paddingTop: stackScreenTopPadding(insets.top),
+      paddingBottom: insets.bottom + 16,
+    },
+  ];
+  const content = (
+    <>
       {scroll ? (
         <ScrollView
           ref={scrollRef}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
           {body}
@@ -83,8 +89,14 @@ export function OnboardingStepLayout({
         <View style={styles.scrollContent}>{body}</View>
       )}
       {footer ? <View style={styles.footer}>{footer}</View> : null}
-    </KeyboardAvoider>
+    </>
   );
+
+  if (!avoidKeyboard) {
+    return <View style={frameStyle}>{content}</View>;
+  }
+
+  return <KeyboardAvoider style={frameStyle}>{content}</KeyboardAvoider>;
 }
 
 export function OnboardingFormField({

@@ -39,7 +39,7 @@ compatible player → agreed time → accepted court booking → played match
 
 ## How a match happens (player journey)
 
-1. **Sign up** — Email magic link, policies, provisional skill, play intent, formats, preferred **areas**.
+1. **Sign up** — Email+password or Google, policies, provisional skill, play intent, formats, preferred **areas**.
 2. **Discover** — Open matches and compatible players filtered by zone, level, format, intent, and optional availability overlap.
 3. **Create or join** — Host sets time and clubs; profile holds usual format, level, and Discover defaults. Joiners see **preferred clubs** before they commit.
 4. **Agree time** — Participants vote on proposed slots until everyone accepts one.
@@ -110,7 +110,7 @@ Reports, disputes, user/club operations, audit trail. No impersonation in v1.
 
 ## In scope for MVP
 
-- Account + verified contact (email magic link)
+- Account + verified contact (email+password or Google)
 - Player profile, zones, availability, discovery
 - Singles and doubles matches (public, invite-only, private)
 - Proposed times + voting

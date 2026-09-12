@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../src/theme/create-live-sheet";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
   FigmaPrimaryButton,
@@ -9,17 +9,26 @@ import {
 } from "../../src/components/onboarding-ui";
 import { AppText } from "../../src/components/AppText";
 import { Icon } from "../../src/components/Icon";
+import { parseCheckEmailReason } from "../../src/lib/check-email-reason";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import { tennisColors, tennisRadii } from "../../src/theme/tennis-tokens";
 
 export default function CheckEmailScreen() {
   const { t } = useTranslation();
+  const params = useLocalSearchParams<{ reason?: string }>();
+  const reason = parseCheckEmailReason(params.reason);
+  const backHref =
+    reason === "reset" ? "/(public)/forgot-password" : "/(public)/sign-up";
 
   return (
     <OnboardingStepLayout
       title={t("auth.checkEmailTitle")}
-      description={t("auth.checkEmailBody")}
-      onBack={() => router.replace("/(public)/sign-in")}
+      description={
+        reason === "reset"
+          ? t("auth.checkEmailResetBody")
+          : t("auth.checkEmailConfirmBody")
+      }
+      onBack={() => router.replace(backHref)}
       footer={
         <>
           <FigmaPrimaryButton
@@ -28,7 +37,7 @@ export default function CheckEmailScreen() {
           />
           <FigmaSecondaryButton
             label={t("auth.useAnotherEmail")}
-            onPress={() => router.replace("/(public)/sign-in")}
+            onPress={() => router.replace(backHref)}
           />
         </>
       }

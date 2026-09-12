@@ -11,9 +11,19 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
-## 2026-09-11 — Google sign-in, native flow, alongside the magic link
+## 2026-09-12 — Email+password and Google; magic-link login retired
 
 - Status: accepted
+- Context: `CLAUDE.md` treats the authentication method as a founder decision. Testers without a ready Google session still need a first-party path; a magic link on every visit was that path and also the SMTP bottleneck. The founder asked for Welcome → Create account / Log in, with password and Google as a choice, no Remember me, and display name still collected in onboarding.
+- Decision: Mobile auth is **email+password** plus the existing native Google ID-token flow. Sign-up sends a **one-time confirmation** email through `tennislebanon://auth/callback`. Later visits use the password. Forgot-password uses the same callback, then a set-new-password screen. Magic-link login (`signInWithOtp` as the everyday door) is removed. Dashboard/club password login is unchanged.
+- Alternatives considered: keeping magic-link login beside password (rejected — three doors, same SMTP pain on every return visit); replacing email with Google-only (rejected — Apple 4.8 and testers without Google); turning Confirm email off on staging (rejected — the confirmation mail is the remaining email-verification step); Facebook/Apple (already declined 2026-09-11).
+- Consequences: Staging Auth must have Email **password** sign-ups enabled and **Confirm email** on; the redirect allow-list still needs `tennislebanon://auth/callback`. SMTP is still required for confirm and reset, not for every login. This supersedes 2026-07-25 (magic link only) and revises 2026-09-11 (Google was “beside the magic link”).
+- Owner: Founder
+
+## 2026-09-11 — Google sign-in, native flow, alongside the magic link
+
+- Status: superseded
+- Superseded by: 2026-09-12 — Email+password and Google; magic-link login retired
 - Context: `CLAUDE.md` lists the authentication method among the things not to change without asking; the founder asked. Email in this app does exactly one job — deliver the magic link. The Edge Function sends no mail at all, and notifications ride Expo push. So the Resend sandbox, which delivers only to the account owner, is the single thing keeping a second person out of the pilot, and a provider that authenticates without email routes around it.
 - Decision: `@react-native-google-signin/google-signin` with `supabase.auth.signInWithIdToken`, as a second option beside the magic link rather than a replacement. Client ids are optional in the env schema, so an unconfigured build hides the button and still boots. Facebook was considered and declined.
 - Alternatives considered: `signInWithOAuth` (rejected — it returns through `tennislebanon://auth/callback`, the deep-link path that took three wrong diagnoses to fix in `9530cb0`; the native flow never leaves the app and touches none of it); replacing the magic link entirely (rejected — testers without a Google account, and Apple's guideline 4.8 leans on a first-party option being present); Facebook Login (rejected — Meta requires App Review plus often business verification for the `email` permission, needs a hosted data-deletion callback, and Facebook accounts may carry no email at all, which would create accounts that can never link and can never be reached); a 6-digit email OTP screen (rejected earlier — it still depends on the blocked email path).
@@ -544,7 +554,8 @@ Record decisions using this template:
 
 ## 2026-07-25 — Email magic link authentication for v1
 
-- Status: accepted
+- Status: superseded
+- Superseded by: 2026-09-12 — Email+password and Google; magic-link login retired
 - Context: Needed before Milestone 1; SMS OTP has per-message cost and deliverability risk in Lebanon, native social sign-in adds app-store scoping work.
 - Decision: Use Supabase Auth email magic link as the only sign-in method for the pilot.
 - Alternatives considered: Phone/SMS OTP; Apple/Google social sign-in in addition; combination of all three.

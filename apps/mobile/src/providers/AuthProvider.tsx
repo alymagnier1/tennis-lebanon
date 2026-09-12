@@ -12,6 +12,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOwnProfile } from "@tennis-lebanon/api";
 import { deriveAccessState, type AccessState } from "../lib/access-state";
 import { forgetGoogleAccount } from "../lib/google-native";
+import {
+  clearPasswordRecoveryPending,
+  markPasswordRecoveryPending,
+} from "../lib/password-recovery";
 import { unregisterDevicePushToken } from "../lib/push-notifications";
 import { supabase } from "../lib/supabase";
 
@@ -44,7 +48,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "PASSWORD_RECOVERY") {
+        markPasswordRecoveryPending();
+      }
+      if (event === "SIGNED_OUT") {
+        clearPasswordRecoveryPending();
+      }
       setSession(nextSession);
       setInitialized(true);
       if (!nextSession) {

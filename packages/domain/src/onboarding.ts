@@ -16,8 +16,19 @@ export const skillBandSchema = z.enum([
 ]);
 export const playIntentSchema = z.enum(["social", "competitive", "either"]);
 export const emailSchema = z.string().trim().toLowerCase().email();
-export const signInSchema = z.object({ email: emailSchema });
+/** Supabase default is 6; 8 is the floor we show in the form. */
+export const passwordSchema = z.string().min(8).max(72);
+export const signInSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+});
+export const signUpSchema = signInSchema;
+export const passwordResetSchema = z.object({ email: emailSchema });
+export const newPasswordSchema = z.object({ password: passwordSchema });
 export type SignInInput = z.infer<typeof signInSchema>;
+export type SignUpInput = z.infer<typeof signUpSchema>;
+export type PasswordResetInput = z.infer<typeof passwordResetSchema>;
+export type NewPasswordInput = z.infer<typeof newPasswordSchema>;
 export const databaseUuidSchema = z
   .string()
   .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);

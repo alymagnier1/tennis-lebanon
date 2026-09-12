@@ -48,7 +48,8 @@ src/app/
 
 ### Authentication and onboarding
 
-- Supabase Auth uses email magic links only. The mobile callback is
+- Supabase Auth uses email+password and native Google ID-token sign-in.
+  Confirmation and password-reset emails still use the mobile callback
   `tennislebanon://auth/callback`; callback parsing accepts only that exact
   scheme/host/path and never logs tokens or email addresses.
 - The mobile client persists the Supabase session through Expo SecureStore

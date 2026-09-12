@@ -1,10 +1,17 @@
 import type { Href } from "expo-router";
 import type { AccessState } from "./access-state";
+import { isPasswordRecoveryPending } from "./password-recovery";
+
+const SWITCH_ACCOUNT_ROUTES = new Set([
+  "sign-in",
+  "sign-up",
+  "forgot-password",
+]);
 
 /**
  * Public-stack guard: signed-in users are normally sent to their canonical route,
- * but sign-in stays reachable while onboarding is incomplete so they can switch
- * accounts instead of bouncing consent ↔ sign-in.
+ * but the auth forms stay reachable while onboarding is incomplete so they can
+ * switch accounts instead of bouncing consent ↔ sign-in.
  */
 export function publicRouteRedirect(
   state: AccessState,
@@ -13,7 +20,14 @@ export function publicRouteRedirect(
   if (state === "anonymous" || state === "error" || state === "loading") {
     return null;
   }
-  if (state === "needsOnboarding" && routeName === "sign-in") {
+  if (isPasswordRecoveryPending()) {
+    return "/(auth)/update-password";
+  }
+  if (
+    state === "needsOnboarding" &&
+    routeName &&
+    SWITCH_ACCOUNT_ROUTES.has(routeName)
+  ) {
     return null;
   }
   return authRouteForState(state);
@@ -21,6 +35,12 @@ export function publicRouteRedirect(
 
 /** Canonical post-auth destination for a resolved access state. */
 export function authRouteForState(state: AccessState): Href | null {
+  if (
+    isPasswordRecoveryPending() &&
+    (state === "ready" || state === "needsOnboarding")
+  ) {
+    return "/(auth)/update-password";
+  }
   switch (state) {
     case "anonymous":
       return "/(public)/welcome";

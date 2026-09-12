@@ -380,7 +380,7 @@ Items outside pure discovery that still affect M2 or adjacent milestones. Track 
 
 ### 8. Auth method undecided
 
-**Status:** **Resolved** — email magic link only for v1 per `docs/DECISIONS.md` (2026-07-25).
+**Status:** **Resolved** — email+password and Google for v1 per `docs/DECISIONS.md` (2026-09-12). Confirmation and reset still use email.
 
 ### 9. Juniors policy undecided
 

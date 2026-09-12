@@ -3,7 +3,11 @@ import {
   POLICY_VERSIONS,
   isAdultBirthYear,
   normalizeDisplayName,
+  newPasswordSchema,
   onboardingInputSchema,
+  passwordResetSchema,
+  signInSchema,
+  signUpSchema,
 } from "./onboarding";
 
 const validInput = {
@@ -56,5 +60,30 @@ describe("onboarding domain rules", () => {
     });
     expect(result.languages).toEqual(["en"]);
     expect(result.zoneIds).toHaveLength(1);
+  });
+});
+
+describe("password auth schemas", () => {
+  it("accepts a normalised email and an 8-character password", () => {
+    expect(
+      signInSchema.parse({
+        email: "  Player@Example.com ",
+        password: "secret12",
+      }),
+    ).toEqual({ email: "player@example.com", password: "secret12" });
+    expect(signUpSchema).toBe(signInSchema);
+  });
+
+  it("rejects a short password and a bad email", () => {
+    expect(
+      signInSchema.safeParse({ email: "player@example.com", password: "short" })
+        .success,
+    ).toBe(false);
+    expect(
+      passwordResetSchema.safeParse({ email: "not-an-email" }).success,
+    ).toBe(false);
+    expect(
+      newPasswordSchema.safeParse({ password: "longenough" }).success,
+    ).toBe(true);
   });
 });

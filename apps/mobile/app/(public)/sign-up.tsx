@@ -5,16 +5,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Redirect, router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { signInSchema, type SignInInput } from "@tennis-lebanon/domain";
+import { signUpSchema, type SignUpInput } from "@tennis-lebanon/domain";
 import { AuthAlreadySignedIn } from "../../src/components/auth/AuthAlreadySignedIn";
 import { AuthCredentialsActions } from "../../src/components/auth/AuthCredentialsActions";
 import { AuthEmailPasswordFields } from "../../src/components/auth/AuthEmailPasswordFields";
 import { ErrorNotice } from "../../src/components/FormUi";
-import {
-  FigmaTextButton,
-  OnboardingStepLayout,
-} from "../../src/components/onboarding-ui";
+import { OnboardingStepLayout } from "../../src/components/onboarding-ui";
 import { useGoogleAuthButton } from "../../src/hooks/useGoogleAuthButton";
+import {
+  canRequestMagicLink,
+  recordMagicLinkRequest,
+} from "../../src/lib/auth-cooldown";
+import { getAuthRedirectUrl } from "../../src/lib/auth-redirect";
 import {
   emailAuthFailure,
   type EmailAuthFailure,
@@ -22,17 +24,19 @@ import {
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
 
-export default function SignInScreen() {
+export default function SignUpScreen() {
   const { t } = useTranslation();
   const { session, state } = useAuth();
   const google = useGoogleAuthButton();
-  const [submitError, setSubmitError] = useState<EmailAuthFailure | null>(null);
+  const [submitError, setSubmitError] = useState<
+    EmailAuthFailure | "cooldown" | null
+  >(null);
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<SignInInput>({
-    resolver: zodResolver(signInSchema),
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: { email: "", password: "" },
   });
 
@@ -46,21 +50,41 @@ export default function SignInScreen() {
 
   const submit = handleSubmit(async ({ email, password }) => {
     setSubmitError(null);
-    const { error } = await supabase.auth.signInWithPassword({
+    if (!canRequestMagicLink()) {
+      setSubmitError("cooldown");
+      return;
+    }
+    recordMagicLinkRequest();
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: { emailRedirectTo: getAuthRedirectUrl() },
     });
     if (error) {
       setSubmitError(emailAuthFailure(error));
       return;
     }
-    router.replace("/");
+    // Confirm-email on can return 200 with an empty identities list when the
+    // address is already registered, so we do not send them to check-email.
+    if (data.user && data.user.identities?.length === 0) {
+      setSubmitError("exists");
+      return;
+    }
+    // Confirm-email off returns a session; confirm-email on sends mail.
+    if (data.session) {
+      router.replace("/");
+      return;
+    }
+    router.replace({
+      pathname: "/(auth)/check-email",
+      params: { reason: "confirm" },
+    });
   });
 
   return (
     <OnboardingStepLayout
-      title={t("auth.signInTitle")}
-      description={t("auth.signInBody")}
+      title={t("auth.signUpTitle")}
+      description={t("auth.signUpBody")}
       onBack={() => router.back()}
       avoidKeyboard={false}
     >
@@ -69,30 +93,26 @@ export default function SignInScreen() {
           control={control}
           onSubmitPassword={() => void submit()}
         />
-        <View style={styles.forgotRow}>
-          <FigmaTextButton
-            label={t("auth.forgotPassword")}
-            onPress={() => router.push("/(public)/forgot-password")}
-          />
-        </View>
         {submitError ? (
           <ErrorNotice>
-            {submitError === "invalid"
-              ? t("auth.invalidCredentials")
-              : submitError === "unconfirmed"
-                ? t("auth.emailUnconfirmed")
-                : t("auth.signInError")}
+            {submitError === "cooldown"
+              ? t("auth.cooldownError")
+              : submitError === "exists"
+                ? t("auth.emailExists")
+                : submitError === "weak"
+                  ? t("auth.passwordInvalid")
+                  : t("auth.signUpError")}
           </ErrorNotice>
         ) : null}
         <View style={styles.spacer} />
         <AuthCredentialsActions
-          primaryLabel={t("auth.logIn")}
+          primaryLabel={t("auth.createAccount")}
           onPrimary={() => void submit()}
           primaryLoading={isSubmitting}
           google={google}
-          mode="signIn"
-          switchLabel={t("auth.needAccount")}
-          onSwitch={() => router.replace("/(public)/sign-up")}
+          mode="signUp"
+          switchLabel={t("auth.haveAccount")}
+          onSwitch={() => router.replace("/(public)/sign-in")}
         />
       </View>
     </OnboardingStepLayout>
@@ -107,11 +127,6 @@ const styles = createLiveSheet(() =>
     spacer: {
       flexGrow: 1,
       minHeight: 24,
-    },
-    forgotRow: {
-      alignItems: "flex-end",
-      marginTop: -8,
-      marginBottom: 8,
     },
   }),
 );

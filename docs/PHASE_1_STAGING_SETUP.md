@@ -55,7 +55,7 @@ Idempotent — the unique constraint on `(country_code, city_code, slug)` makes 
 
 ## 6. Create yourself as platform operator
 
-Do **not** sign up through the mobile app. Mobile auth is a magic link and creates a passwordless user; the dashboard (`/admin/reports`, `/admin/disputes`) uses `signInWithPassword`. A magic-link user cannot log in there.
+Do **not** sign up through the mobile app for the operator account. Mobile email users can have passwords, but the dashboard (`/admin/reports`, `/admin/disputes`) is a separate password user you create here. Keep the operator on a dashboard password user with `platform_roles`, not a player session.
 
 Create a **password user** in the Supabase dashboard (Authentication → Users → Add user → auto-confirm), then grant admin:
 
@@ -68,15 +68,17 @@ values ('<your-auth-uid>', 'admin');
 
 ## 7. Configure the auth redirect
 
-Add `tennislebanon://auth/callback` under **Auth → URL configuration**. The magic link is the front door; if this is missing, every sign-in dead-ends in a browser.
+Add `tennislebanon://auth/callback` under **Auth → URL configuration**. Confirmation and password-reset emails use that callback; if it is missing, those links dead-end in a browser.
+
+Also enable Email **password** sign-ups and keep **Confirm email** on (Authentication → Providers → Email). Google remains the native ID-token path.
 
 ## 8. Configure custom SMTP — **mandatory, not optional**
 
 Supabase's built-in sender is rate-limited to a handful of messages an hour and is not intended for production. This project's own `config.toml` sets `email_sent = 2` locally, which is the same shape of limit.
 
-Sign-in is a magic link ([`sign-in.tsx`](<../apps/mobile/app/(public)/sign-in.tsx>) calls `signInWithOtp`), so **email delivery is the whole front door**. At 50 testers on the built-in sender, most of them never get in.
+Password login does not need mail, but **sign-up confirmation and password reset still do**. At 50 testers on the built-in sender, most confirmation mails never arrive.
 
-Configure a real provider, then send yourself a magic link and open it on a phone. Not "the API returned 200" — a link that arrives and works.
+Configure a real provider, then create an account and open the confirmation link on a phone. Not "the API returned 200" — a link that arrives and works.
 
 **Resend (chosen for cohort 1):** create a Resend account, verify a sending domain or use Resend’s onboarding sender for the first test, then in Supabase Auth → SMTP Settings:
 

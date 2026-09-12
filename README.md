@@ -52,7 +52,7 @@ Do not pin framework versions until project initialization. Use mutually compati
 ## Decisions already made (see `docs/DECISIONS.md`)
 
 - Matchmaking-first MVP with manual club approval
-- Email magic link as the only v1 sign-in method
+- Email+password and Google as the v1 sign-in methods (confirmation/reset still email)
 - Minors excluded from v1 matchmaking (`is_adult_confirmed` required)
 - Gender filtering excluded from v1 (no schema column until legal/product approval)
 - Discovery via Postgres RPCs with privacy-safe projections
@@ -96,13 +96,15 @@ development.
 
 ## Milestone 1 authentication
 
-The player app uses email magic links only. For a local sign-in:
+The player app signs in with email+password or Google. New email accounts
+still confirm once via the inbox. For a local email sign-up:
 
-1. Enter a test email in the mobile app.
+1. Create an account with a test email and password in the mobile app.
 2. Open the local email inbox at `http://127.0.0.1:54324`.
-3. Open the newest sign-in message and follow its link to
+3. Open the newest confirmation message and follow its link to
    `tennislebanon://auth/callback`.
 4. Complete consent, identity, provisional skill, format, and zone steps.
+5. Later visits use the same password (or Google).
 
 Hosted Supabase projects must allow the exact mobile redirect
 `tennislebanon://auth/callback`. The checked-in policy documents under
