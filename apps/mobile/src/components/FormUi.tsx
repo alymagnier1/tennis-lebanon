@@ -28,6 +28,7 @@ import {
   typography,
 } from "@tennis-lebanon/ui";
 import { AppText } from "./AppText";
+import { FigmaBackButton } from "./onboarding-ui/FigmaButtons";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { useResponsiveLayout } from "../lib/responsive";
 import { mobileBrand } from "../theme/mobile-brand";
@@ -59,6 +60,7 @@ export function Screen({
   fixedHeader,
   virtualizedList,
   scrollRef,
+  onBack,
 }: PropsWithChildren<{
   title: string;
   description?: string;
@@ -69,6 +71,9 @@ export function Screen({
   fixedHeader?: ReactNode;
   virtualizedList?: ScreenVirtualizedListProps;
   scrollRef?: RefObject<ScrollView | null>;
+  /** Renders a back control above the title. Pushed screens need one: the
+   *  root Stack sets `headerShown: false`, so nothing supplies one. */
+  onBack?: () => void;
 }>) {
   const insets = useSafeAreaInsets();
   const { horizontalPadding, titleFontSize } = useResponsiveLayout();
@@ -100,6 +105,15 @@ export function Screen({
       </View>
     ) : null;
 
+  const headerBlock = onBack ? (
+    <>
+      <FigmaBackButton onPress={onBack} />
+      {titleBlock}
+    </>
+  ) : (
+    titleBlock
+  );
+
   const refreshControl = onRefresh ? (
     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
   ) : undefined;
@@ -124,7 +138,7 @@ export function Screen({
         renderItem={listRenderItem}
         ListHeaderComponent={
           <>
-            {!fixedHeader ? titleBlock : null}
+            {!fixedHeader ? headerBlock : null}
             {children}
           </>
         }
@@ -163,7 +177,7 @@ export function Screen({
             },
           ]}
         >
-          {titleBlock}
+          {headerBlock}
           {fixedHeader}
         </View>
         {body ?? (
@@ -212,7 +226,7 @@ export function Screen({
       keyboardShouldPersistTaps="handled"
       refreshControl={refreshControl}
     >
-      {titleBlock}
+      {headerBlock}
       {children}
     </ScrollView>
   );

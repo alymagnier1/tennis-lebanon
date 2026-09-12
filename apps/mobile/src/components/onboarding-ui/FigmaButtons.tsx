@@ -7,6 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
@@ -138,10 +139,11 @@ export function FigmaBackButton({
   onPress: () => void;
   onDark?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Back"
+      accessibilityLabel={t("common.back")}
       onPress={onPress}
       style={[styles.backBtn, onDark ? styles.backBtnDark : null]}
       hitSlop={8}

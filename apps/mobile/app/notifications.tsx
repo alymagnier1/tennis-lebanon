@@ -80,6 +80,7 @@ export default function NotificationsScreen() {
 
   return (
     <Screen
+      onBack={() => router.back()}
       title={t("notifications.centerTitle")}
       description={t("notifications.centerDescription")}
       refreshing={notificationsQuery.isRefetching}
