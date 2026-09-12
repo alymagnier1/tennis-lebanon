@@ -4,8 +4,6 @@ import {
   AppState,
   type AppStateStatus,
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
+import { KeyboardAvoider } from "./KeyboardAvoider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -388,11 +387,7 @@ export function MatchChatPanel({
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.root}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
-    >
+    <KeyboardAvoider style={styles.root}>
       {realtimeStatus === "interrupted" ? (
         <AppText style={styles.reconnecting} accessibilityRole="alert">
           {t("matches.chat.reconnecting")}
@@ -400,7 +395,7 @@ export function MatchChatPanel({
       ) : null}
       {messageList}
       {composer}
-    </KeyboardAvoidingView>
+    </KeyboardAvoider>
   );
 }
 

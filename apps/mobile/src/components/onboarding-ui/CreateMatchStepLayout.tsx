@@ -1,12 +1,7 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
+import { KeyboardAvoider } from "../KeyboardAvoider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WizardProgress } from "../AppUi";
 import { AppText } from "../AppText";
@@ -37,7 +32,7 @@ export function CreateMatchStepLayout({
   const insets = useSafeAreaInsets();
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAvoider
       style={[
         styles.root,
         {
@@ -45,7 +40,6 @@ export function CreateMatchStepLayout({
           paddingBottom: insets.bottom + 16,
         },
       ]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -73,7 +67,7 @@ export function CreateMatchStepLayout({
         {children}
       </ScrollView>
       {footer ? <View style={styles.footer}>{footer}</View> : null}
-    </KeyboardAvoidingView>
+    </KeyboardAvoider>
   );
 }
 

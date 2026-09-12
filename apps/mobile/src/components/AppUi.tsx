@@ -5,7 +5,6 @@ import {
   Easing,
   Image,
   Keyboard,
-  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -16,6 +15,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
+import { KeyboardAvoider } from "./KeyboardAvoider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   colors,
@@ -698,10 +698,8 @@ export function BottomSheet({
       visible={rendered}
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView
+      <KeyboardAvoider
         style={styles.sheetRoot}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
         pointerEvents={confirmDialogVisible ? "none" : "auto"}
       >
         <Animated.View
@@ -757,7 +755,7 @@ export function BottomSheet({
           </ScrollView>
           {footer ? <View style={styles.sheetFooter}>{footer}</View> : null}
         </Animated.View>
-      </KeyboardAvoidingView>
+      </KeyboardAvoider>
     </Modal>
   );
 }

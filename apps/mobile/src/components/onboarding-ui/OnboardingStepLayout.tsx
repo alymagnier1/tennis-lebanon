@@ -1,13 +1,12 @@
 import type { PropsWithChildren, ReactNode, RefObject } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   View,
   type ScrollView as ScrollViewType,
 } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
+import { KeyboardAvoider } from "../KeyboardAvoider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WizardProgress } from "../AppUi";
 import { AppText } from "../AppText";
@@ -62,7 +61,7 @@ export function OnboardingStepLayout({
   );
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAvoider
       style={[
         styles.root,
         {
@@ -70,7 +69,6 @@ export function OnboardingStepLayout({
           paddingBottom: insets.bottom + 16,
         },
       ]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       {scroll ? (
         <ScrollView
@@ -85,7 +83,7 @@ export function OnboardingStepLayout({
         <View style={styles.scrollContent}>{body}</View>
       )}
       {footer ? <View style={styles.footer}>{footer}</View> : null}
-    </KeyboardAvoidingView>
+    </KeyboardAvoider>
   );
 }
 
