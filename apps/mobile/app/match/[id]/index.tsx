@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   cancelBookingRequest,
+  cancelMatchInvite,
   castMatchTimeVote,
   extendMatchListing,
   getMatchHub,
@@ -75,7 +76,10 @@ import {
 import { formatUtcSlotInBeirut } from "../../../src/lib/beirut-time";
 import { confirmAction, notify } from "../../../src/lib/confirm-action";
 import { confirmCancelHostedMatch } from "../../../src/lib/confirm-cancel-hosted-match";
-import { joinErrorKey } from "../../../src/lib/join-error";
+import {
+  joinErrorKey,
+  respondRequestErrorKey,
+} from "../../../src/lib/join-error";
 import { useLayoutDirection } from "../../../src/lib/layout-direction";
 import { exitMatchHub } from "../../../src/lib/navigation";
 import {
@@ -225,7 +229,19 @@ export default function MatchHubScreen() {
     mutationFn: ({ userId, accept }: { userId: string; accept: boolean }) =>
       respondToJoinRequest(supabase, id!, userId, accept),
     onSuccess: invalidate,
-    onError: () => notify(t("matches.hub.respondError")),
+    // `match_full` is the failure a host hits routinely, because nothing
+    // declines a pending request when the roster fills. The generic copy named
+    // no cause and implied a retry that cannot work.
+    onError: (error: unknown) => notify(t(respondRequestErrorKey(error))),
+  });
+
+  // Takes the player, not an invitation id: `invited_players` carries no id,
+  // and the host is thinking "stop asking this person", not "revoke row 4f2c".
+  const cancelInviteMutation = useMutation({
+    mutationFn: (invitedUserId: string) =>
+      cancelMatchInvite(supabase, id!, invitedUserId),
+    onSuccess: invalidate,
+    onError: () => notify(t("matches.hub.cancelInviteError")),
   });
 
   // A pending request had no way out: `leave_match` refuses anything that is
@@ -423,6 +439,15 @@ export default function MatchHubScreen() {
 
   const showWithdrawRequest = hub?.viewer_status === "requested";
 
+  /**
+   * A full roster does not close the queue — somebody may still drop out, and
+   * `join_match` has always accepted an ask on a full approval-gated match.
+   * What it does close is the host's ability to answer one right now, so the
+   * section says waitlist and Approve goes inert rather than throwing
+   * `match_full` at whoever taps it.
+   */
+  const rosterFull = Boolean(hub && hub.participant_count >= hub.capacity);
+
   // Gated on match status rather than comparing the slot to the clock: reading
   // the clock during render is impure, and the lifecycle already moves a started
   // match to in_progress. `release_external_court` still enforces the exact
@@ -550,6 +575,14 @@ export default function MatchHubScreen() {
     }
     if (hub.status === "draft" && hub.viewer_is_creator) {
       return { body: t("matches.hub.draftBanner"), tone: "actionable" };
+    }
+    // Above the roster banners on purpose: for somebody still waiting on the
+    // host, the match filling or agreeing a time is not their news, and none
+    // of it is theirs to act on. `100` added the next_action; before it they
+    // fell through to `view_match` and the state was carried only by the
+    // presence of a cancel link.
+    if (hub.next_action === "request_pending") {
+      return { body: t("matches.hub.requestPendingBanner"), tone: "info" };
     }
     // Vs-hero already shows open slots; skip the duplicate awaiting banner.
     if (hub.next_action === "awaiting_players" && !vsHeroStage) {
@@ -858,21 +891,64 @@ export default function MatchHubScreen() {
                   {invited.display_name}
                 </AppText>
               </View>
-              <SemanticBadge
-                label={
-                  invited.status === "declined"
-                    ? t("matches.hub.invitedDeclined")
-                    : t("matches.hub.invitedWaiting")
-                }
-                tone={invited.status === "declined" ? "neutral" : "info"}
-              />
+              <View
+                style={[
+                  styles.invitedTrailing,
+                  { flexDirection: rowDirection },
+                ]}
+              >
+                {/*
+                  `critical`, not `neutral`. `TONE_ICONS` maps both `neutral`
+                  and `info` to the `info` glyph, so the two opposite answers a
+                  host can get back rendered as near-identical pills.
+                */}
+                <SemanticBadge
+                  label={
+                    invited.status === "declined"
+                      ? t("matches.hub.invitedDeclined")
+                      : invited.status === "superseded"
+                        ? t("matches.hub.invitedOnHold")
+                        : t("matches.hub.invitedWaiting")
+                  }
+                  tone={
+                    invited.status === "declined"
+                      ? "critical"
+                      : invited.status === "superseded"
+                        ? "neutral"
+                        : "info"
+                  }
+                />
+                {/*
+                  Only on an offer still outstanding. A decline is the invitee's
+                  answer and the record of it; clearing that off the hub would
+                  be a different feature, and `cancel_match_invite` refuses it.
+                */}
+                {invited.status !== "declined" ? (
+                  <HubDestructiveLink
+                    label={t("matches.hub.cancelInvite")}
+                    disabled={cancelInviteMutation.isPending}
+                    onPress={() => cancelInviteMutation.mutate(invited.user_id)}
+                  />
+                ) : null}
+              </View>
             </View>
           ))}
         </PlayerProfileSection>
       ) : null}
 
       {hub?.viewer_is_creator && pendingRequests.length > 0 ? (
-        <PlayerProfileSection title={t("matches.hub.pendingRequests")}>
+        <PlayerProfileSection
+          title={
+            rosterFull
+              ? t("matches.hub.waitlist")
+              : t("matches.hub.pendingRequests")
+          }
+        >
+          {rosterFull ? (
+            <AppText style={[styles.timeMeta, { writingDirection }]}>
+              {t("matches.hub.waitlistHint")}
+            </AppText>
+          ) : null}
           {pendingRequests.map((request) => (
             <View key={request.user_id} style={styles.requestCard}>
               {/*
@@ -924,6 +1000,7 @@ export default function MatchHubScreen() {
                 <View style={styles.inlineAction}>
                   <FigmaPrimaryButton
                     label={t("matches.hub.approve")}
+                    disabled={rosterFull}
                     onPress={() =>
                       respondMutation.mutate({
                         userId: request.user_id,
@@ -1247,6 +1324,10 @@ const styles = createLiveSheet(() =>
       justifyContent: "space-between",
       gap: spacing.sm,
       paddingVertical: spacing.xs,
+    },
+    invitedTrailing: {
+      alignItems: "center",
+      gap: spacing.sm,
     },
     requestCard: {
       gap: spacing.sm,

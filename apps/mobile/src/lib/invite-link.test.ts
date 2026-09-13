@@ -54,6 +54,23 @@ describe("invite link", () => {
     expect(matchInviteErrorKey(undefined)).toBe("matches.invite.error");
   });
 
+  // Two different ceilings with opposite remedies: the daily one is waited
+  // out, the per-match one is cleared by withdrawing an invite nobody answered.
+  // One message for both would tell half the hosts the wrong thing to do.
+  it("separates the per-match cap from the daily rate limit", async () => {
+    const { matchInviteErrorKey } = await import("./invite-link");
+
+    expect(matchInviteErrorKey(new Error("invite_cap_reached"))).toBe(
+      "matches.invite.capReached",
+    );
+    expect(
+      matchInviteErrorKey({ code: "P0001", message: "invite_cap_reached" }),
+    ).toBe("matches.invite.capReached");
+    expect(matchInviteErrorKey(new Error("invite_rate_limited"))).toBe(
+      "matches.invite.rateLimited",
+    );
+  });
+
   it("reads the cap off a PostgrestError, which is not an Error", async () => {
     // What supabase-js actually rejects with: a plain object. Testing
     // `instanceof Error` here would show the generic copy for every RPC failure.

@@ -3,7 +3,7 @@
 begin;
 
 create extension if not exists pgtap;
-select plan(4);
+select plan(5);
 
 create or replace function pg_temp.assert_true(
   p_condition boolean,
@@ -139,7 +139,17 @@ select pass('the host sees a decline');
 select pass('a host withdrawal is not counted as a decline');
 
 -- ---------------------------------------------------------------------------
--- Nobody else sees any of it
+-- Who the list answers
+--
+-- Revised by `100`. This file originally asserted that *nobody* but the creator
+-- saw the list. That followed the 2026-08-21 rule -- only the person who can
+-- act on a row should see it -- but applied it on a false premise:
+-- `create_match_invite` authorises **any accepted participant**, so a fellow
+-- participant can act, and hiding pending invitations from them is what made
+-- them offer a second invite to somebody already asked. Pending invitations now
+-- reach every accepted participant; a decline still does not, and a
+-- non-participant still sees nothing at all. `100`'s test covers the decline
+-- half; this one keeps the outsider.
 -- ---------------------------------------------------------------------------
 
 do $$
@@ -147,6 +157,7 @@ declare
   v_host uuid := '11111111-1111-1111-1111-111111111111';
   v_waiting uuid := '88888888-8888-8888-8888-888888888888';
   v_joiner uuid := '22222222-2222-2222-2222-222222222222';
+  v_outsider uuid := '13131313-1313-1313-1313-131313131313';
   v_match uuid;
   v_card public.match_hub_card;
 begin
@@ -158,16 +169,25 @@ begin
   perform pg_temp.set_caller(v_joiner);
   perform public.join_match(v_match);
 
+  -- The widening: a participant who may invite sees who has already been asked.
+  perform pg_temp.assert_true(
+    pg_temp.invited_count(v_match, 'invited') = 1,
+    'a fellow participant should see the pending invitation'
+  );
+
+  -- Somebody with no place in the match still sees none of it.
+  perform pg_temp.set_caller(v_outsider);
   v_card := public.get_match_hub(v_match);
 
   perform pg_temp.assert_true(
     coalesce(jsonb_array_length(coalesce(v_card.invited_players, '[]'::jsonb)), 0) = 0,
-    'a non-creator must not see who was invited'
+    'a non-participant must not see who was invited'
   );
 end;
 $$;
 
-select pass('invitations stay off every other viewer''s card');
+select pass('a fellow participant sees pending invitations');
+select pass('invitations stay off a non-participant''s card');
 
 select * from finish();
 
