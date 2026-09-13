@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-09-13 — Sign-up tells the player an address is already registered
+
+- Status: accepted
+- Context: When _Confirm email_ is on, Supabase answers `signUp` for an existing address with `200` and a user whose `identities` array is **empty**, rather than an error. That shape is deliberate: it is GoTrue's anti-enumeration design, and taking it at face value would send a returning player to "check your email" for a message that never arrives. `sign-up.tsx` reads the empty array and shows "you already have an account", which reverses that default and makes the address's registration status observable to anyone who can reach the form.
+- Decision: Keep the explicit message. Sign-**in** stays generic — `invalid_credentials` covers both an unknown address and a wrong password, and must not be split.
+- Alternatives considered: trusting the empty-identities response and routing to check-email anyway (rejected — the returning player waits for mail that never comes, then writes to support; this is the single most likely wrong turn in the whole flow); sending mail on both branches behind one neutral screen, "you already have an account, here is a sign-in link" versus "confirm your address" (the correct fix, rejected for now — it needs an Edge Function and a second template, and the leak it closes is "this address plays tennis" for a 50-player cohort); a CAPTCHA on sign-up (rejected — Supabase supports it, but it taxes every real player to slow an attacker who learns very little).
+- Consequences: An attacker with a list of addresses can determine which are registered, one form submission at a time, limited only by Supabase's email rate limits. Accepted for the pilot. **Revisit before any public launch**, and immediately if the app ever carries something a player would not want associated with their address. The enumeration surface is one branch in one file, so the neutral-screen fix stays cheap to adopt later.
+- Owner: Founder
+
 ## 2026-09-12 — Email+password and Google; magic-link login retired
 
 - Status: accepted

@@ -13,8 +13,8 @@ import { ErrorNotice } from "../../src/components/FormUi";
 import { OnboardingStepLayout } from "../../src/components/onboarding-ui";
 import { useGoogleAuthButton } from "../../src/hooks/useGoogleAuthButton";
 import {
-  canRequestMagicLink,
-  recordMagicLinkRequest,
+  canSendAuthEmail,
+  recordAuthEmailSent,
 } from "../../src/lib/auth-cooldown";
 import { getAuthRedirectUrl } from "../../src/lib/auth-redirect";
 import {
@@ -50,11 +50,10 @@ export default function SignUpScreen() {
 
   const submit = handleSubmit(async ({ email, password }) => {
     setSubmitError(null);
-    if (!canRequestMagicLink()) {
+    if (!canSendAuthEmail(email)) {
       setSubmitError("cooldown");
       return;
     }
-    recordMagicLinkRequest();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -75,6 +74,9 @@ export default function SignUpScreen() {
       router.replace("/");
       return;
     }
+    // Only here has an email actually gone out: the branches above either
+    // failed, found an existing account, or signed in without one.
+    recordAuthEmailSent(email);
     router.replace({
       pathname: "/(auth)/check-email",
       params: { reason: "confirm" },

@@ -16,8 +16,8 @@ import {
   onboardingInputStyle,
 } from "../../src/components/onboarding-ui";
 import {
-  canRequestMagicLink,
-  recordMagicLinkRequest,
+  canSendAuthEmail,
+  recordAuthEmailSent,
 } from "../../src/lib/auth-cooldown";
 import { getAuthRedirectUrl } from "../../src/lib/auth-redirect";
 import { supabase } from "../../src/lib/supabase";
@@ -39,11 +39,10 @@ export default function ForgotPasswordScreen() {
 
   const submit = handleSubmit(async ({ email }) => {
     setSubmitError(null);
-    if (!canRequestMagicLink()) {
+    if (!canSendAuthEmail(email)) {
       setSubmitError("cooldown");
       return;
     }
-    recordMagicLinkRequest();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: getAuthRedirectUrl(),
     });
@@ -51,6 +50,7 @@ export default function ForgotPasswordScreen() {
       setSubmitError("send");
       return;
     }
+    recordAuthEmailSent(email);
     router.replace({
       pathname: "/(auth)/check-email",
       params: { reason: "reset" },
