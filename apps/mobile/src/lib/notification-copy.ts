@@ -24,6 +24,14 @@ function readParams(
   const record = raw as Record<string, unknown>;
   const out: Record<string, string | number> = {};
 
+  // `match_invitation` is the only kind templating a person, and this was the
+  // one field `NotificationParams` declares that never got copied through --
+  // so every invite in the notification centre read a literal
+  // "{{name}} invited you to play". The enqueue site, the payload and the
+  // locale string were all correct; the params never reached i18next.
+  if (typeof record.name === "string") {
+    out.name = record.name;
+  }
   if (typeof record.clubName === "string") {
     out.clubName = record.clubName;
   }

@@ -44,6 +44,38 @@ describe("resolveNotificationCopy", () => {
     expect(copy.body).toBe("Someone invited you.");
   });
 
+  // The bug this exists to stop: `readParams` copied through `clubName`,
+  // `startsAt` and `spotsLeft` but not `name`, so it returned undefined, the
+  // template kept its placeholder, and the `{{`-guard fell back to a payload
+  // title that invites do not carry. Every invite read "{{name}} invited you".
+  //
+  // Uses its own template rather than the shared stub: two tests below assert
+  // on that stub's plain "Match invite", and the placeholder is what this one
+  // is about.
+  it("names the inviter rather than showing a raw placeholder", () => {
+    const named = (key: string, params?: Record<string, unknown>): string => {
+      if (key !== "notifications.kinds.match_invitation.title") {
+        return t(key, params);
+      }
+      const template = "{{name}} invited you to play";
+      if (!params) return template;
+      return template.replace(/\{\{(\w+)\}\}/g, (match, token: string) =>
+        params[token] === undefined ? match : String(params[token]),
+      );
+    };
+
+    const copy = resolveNotificationCopy(
+      {
+        kind: "match_invitation",
+        payload: { deepLink: "/match/abc", params: { name: "Player A" } },
+      },
+      named,
+    );
+
+    expect(copy.title).toBe("Player A invited you to play");
+    expect(copy.title).not.toContain("{{");
+  });
+
   it("interpolates params, showing the time in Beirut", () => {
     const copy = resolveNotificationCopy(
       {
