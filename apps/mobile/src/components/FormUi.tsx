@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { stackScreenTopPadding } from "../lib/stack-screen-padding";
 import {
   colors,
   elevation,
@@ -79,6 +80,17 @@ export function Screen({
   const { horizontalPadding, titleFontSize } = useResponsiveLayout();
   const { writingDirection } = useLayoutDirection();
   const edgePadding = Math.max(horizontalPadding, insets.left, insets.right);
+  // A back button means this is a pushed stack screen, and the root Stack runs
+  // headerShown:false -- nothing above reserves the status bar, so the header
+  // drew underneath it. Measured on a Pixel 8: the button spanned y=21..116
+  // inside a 132px status bar, entirely behind the clock and inside the
+  // swipe region that opens the notification shade.
+  //
+  // Tab roots pass no onBack; Discover and Matches inset their own header
+  // shells with tabRootHeaderPaddingTop, so gating on onBack leaves them be.
+  const stackTopPadding = onBack
+    ? stackScreenTopPadding(insets.top)
+    : undefined;
 
   const titleBlock =
     (showTitle && title) || description ? (
@@ -150,6 +162,8 @@ export function Screen({
             paddingHorizontal,
             paddingBottom,
           },
+          !belowFixedHeader &&
+            stackTopPadding !== undefined && { paddingTop: stackTopPadding },
         ]}
         keyboardShouldPersistTaps="handled"
         refreshControl={refreshControl}
@@ -173,7 +187,7 @@ export function Screen({
             styles.fixedHeader,
             {
               paddingHorizontal: edgePadding,
-              paddingTop: spacing.sm,
+              paddingTop: stackTopPadding ?? spacing.sm,
             },
           ]}
         >
@@ -222,6 +236,7 @@ export function Screen({
           paddingHorizontal: edgePadding,
           paddingBottom: Math.max(insets.bottom, spacing.lg),
         },
+        stackTopPadding !== undefined && { paddingTop: stackTopPadding },
       ]}
       keyboardShouldPersistTaps="handled"
       refreshControl={refreshControl}
