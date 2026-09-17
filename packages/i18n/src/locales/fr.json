@@ -27,6 +27,10 @@
   "settingsAppearanceSystem": "Système",
   "settingsAppearanceLight": "Clair",
   "settingsAppearanceDark": "Sombre",
+  "settingsOnboardingHero": "Visuel d'accueil",
+  "settingsOnboardingHeroHint": "Comparaison de design. Accueil et fin suivent ce choix ensemble.",
+  "settingsOnboardingHeroGreen": "Vert",
+  "settingsOnboardingHeroLight": "Terre battue",
   "settingsScreenSupport": "Assistance",
   "settingsScreenAccount": "Compte",
   "dashboard": {
@@ -311,10 +315,15 @@
     "checkEmailHint": "Le lien expire après un court délai. Si vous en demandez un autre, seul l'e-mail le plus récent fonctionnera."
   },
   "onboarding": {
+    "stepEyebrow": "Étape {{step}} sur {{total}}",
     "consent": {
       "title": "Avant de continuer",
       "description": "Lisez chaque document, puis acceptez pour continuer. Ils s’appliquent au pilote RacketBound.",
       "acceptAll": "J'accepte les conditions d'utilisation, l'avis de confidentialité et les règles de la communauté",
+      "leave": "Quitter la configuration",
+      "documentTerms": "Conditions d'utilisation",
+      "documentPrivacy": "Avis de confidentialité",
+      "documentCommunity": "Règles de la communauté",
       "terms": "J’accepte le projet de conditions d’utilisation",
       "readTerms": "Lire les conditions d’utilisation",
       "privacy": "J’accepte le projet d’avis de confidentialité",
@@ -334,6 +343,7 @@
       "gender": "Genre (facultatif)",
       "photo": "Photo de profil (facultatif)",
       "photoAdd": "Ajouter une photo",
+      "photoAdded": "Photo ajoutée",
       "photoChange": "Changer la photo",
       "photoHint": "On reconnaît un visage plus vite qu'un nom. Vous pourrez en ajouter une plus tard.",
       "adultConfirm": "Je confirme avoir au moins 18 ans",
@@ -363,7 +373,10 @@
       "description": "Choisissez une ou plusieurs zones générales. Nous ne demandons jamais votre adresse personnelle.",
       "loadError": "Impossible de charger les zones disponibles.",
       "empty": "Aucune zone pilote n’est disponible pour le moment.",
-      "commitmentEcho": "Nous chercherons des matchs {{band}} à {{areas}}."
+      "commitmentEcho": "Nous chercherons des matchs {{band}} à {{areas}}.",
+      "comingSoon": "Bientôt",
+      "upcomingTripoli": "Tripoli",
+      "upcomingSaida": "Saida"
     },
     "notifications": {
       "title": "Restez informé",
@@ -388,6 +401,7 @@
       "finish": "Terminer la configuration"
     },
     "complete": {
+      "statusPill": "Configuration terminée",
       "title": "Tout est prêt,",
       "titleAccent": "{{name}}!",
       "description": "Votre profil est prêt. Trouvez un match ouvert, ou organisez-en un pour ce soir.",

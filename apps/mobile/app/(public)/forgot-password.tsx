@@ -62,9 +62,11 @@ export default function ForgotPasswordScreen() {
       title={t("auth.forgotTitle")}
       description={t("auth.forgotBody")}
       onBack={() => router.back()}
+      marks="quiet"
       footer={
         <FigmaPrimaryButton
           label={t("auth.sendReset")}
+          hero
           onPress={() => void submit()}
           loading={isSubmitting}
         />

@@ -1,9 +1,9 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { ErrorNotice } from "../FormUi";
-import { FigmaSecondaryButton } from "../onboarding-ui";
+import { FigmaSecondaryButton, GoogleMark } from "../onboarding-ui";
 import { env } from "../../lib/env";
 import type { GoogleSignInFailure } from "../../lib/google-sign-in";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
@@ -27,15 +27,21 @@ export function AuthGoogleSection({
 
   return (
     <>
-      <AppText style={styles.separator}>
-        {mode === "signUp"
-          ? t("auth.socialSeparatorSignUp")
-          : t("auth.socialSeparatorSignIn")}
-      </AppText>
+      <View style={styles.divider}>
+        <View style={styles.rule} />
+        <AppText style={styles.separator}>
+          {mode === "signUp"
+            ? t("auth.socialSeparatorSignUp")
+            : t("auth.socialSeparatorSignIn")}
+        </AppText>
+        <View style={styles.rule} />
+      </View>
       <FigmaSecondaryButton
         label={t("auth.googleButton")}
         onPress={onPress}
         loading={busy}
+        neutral
+        leading={<GoogleMark />}
       />
       {error ? (
         <>
@@ -55,12 +61,23 @@ export function AuthGoogleSection({
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
+    divider: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      marginTop: 20,
+      marginBottom: 14,
+    },
+    rule: {
+      flex: 1,
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: tennisColors.border,
+    },
     separator: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 12,
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 11.5,
+      letterSpacing: 0.4,
       color: tennisColors.mutedForeground,
-      textAlign: "center",
-      marginVertical: 8,
     },
     diagnostic: {
       fontFamily: tennisFontFamily.body,

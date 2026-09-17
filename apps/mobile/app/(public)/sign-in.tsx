@@ -63,6 +63,7 @@ export default function SignInScreen() {
       description={t("auth.signInBody")}
       onBack={() => router.back()}
       avoidKeyboard={false}
+      marks="signin"
     >
       <View style={styles.sheet}>
         <AuthEmailPasswordFields
@@ -72,6 +73,7 @@ export default function SignInScreen() {
         <View style={styles.forgotRow}>
           <FigmaTextButton
             label={t("auth.forgotPassword")}
+            align="start"
             onPress={() => router.push("/(public)/forgot-password")}
           />
         </View>
@@ -109,8 +111,8 @@ const styles = createLiveSheet(() =>
       minHeight: 24,
     },
     forgotRow: {
-      alignItems: "flex-end",
-      marginTop: -8,
+      alignItems: "flex-start",
+      paddingTop: 12,
       marginBottom: 8,
     },
   }),

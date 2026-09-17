@@ -14,6 +14,7 @@ import { initSentry } from "../src/lib/sentry";
 import { AuthProvider } from "../src/providers/AuthProvider";
 import { ThemeProvider } from "../src/providers/ThemeProvider";
 import { OnboardingProvider } from "../src/providers/OnboardingProvider";
+import { HeroVariantProvider } from "../src/providers/HeroVariantProvider";
 import { PushTokenRegistration } from "../src/components/PushTokenRegistration";
 import { NotificationLocaleSync } from "../src/components/NotificationLocaleSync";
 import { NotificationDeepLinkHandler } from "../src/components/NotificationDeepLinkHandler";
@@ -89,6 +90,7 @@ export default function RootLayout() {
                   <NotificationDeepLinkHandler />
                   <UnreadMessagesWatcher />
                   <OnboardingProvider>
+                    <HeroVariantProvider>
                     <Stack screenOptions={{ headerShown: false }}>
                       <Stack.Screen name="index" />
                       <Stack.Screen name="(public)" />
@@ -109,6 +111,7 @@ export default function RootLayout() {
                       <Stack.Screen name="invite/[token]" />
                       <Stack.Screen name="policies" />
                     </Stack>
+                    </HeroVariantProvider>
                   </OnboardingProvider>
                 </AuthProvider>
               </ConfirmDialogProvider>

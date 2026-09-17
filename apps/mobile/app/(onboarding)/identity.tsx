@@ -25,7 +25,7 @@ import {
   OnboardingStepLayout,
   OnboardingYearField,
   PolicyToggleCard,
-  SelectionCard,
+  SkillBandCard,
   onboardingInputStyle,
 } from "../../src/components/onboarding-ui";
 import { Avatar } from "../../src/components/AppUi";
@@ -36,7 +36,7 @@ import {
 } from "../../src/lib/onboarding-identity-validation";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
-import { tennisColors } from "../../src/theme/tennis-tokens";
+import { tennisColors, tennisRadii } from "../../src/theme/tennis-tokens";
 import { tennisTextStyles } from "../../src/theme/tennis-text-styles";
 import { AppText } from "../../src/components/AppText";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
@@ -165,7 +165,7 @@ export default function IdentityScreen() {
   };
 
   const photoLabel = profile?.avatar_path
-    ? t("onboarding.identity.photoChange")
+    ? t("onboarding.identity.photoAdded")
     : t("onboarding.identity.photoAdd");
 
   return (
@@ -181,33 +181,41 @@ export default function IdentityScreen() {
           {formIncomplete ? (
             <ErrorNotice>{t("onboarding.identity.formIncomplete")}</ErrorNotice>
           ) : null}
-          <FigmaPrimaryButton label={t("common.continue")} onPress={next} />
+          <FigmaPrimaryButton
+            label={t("common.continue")}
+            hero
+            onPress={next}
+          />
         </>
       }
     >
-      <View style={styles.photoBlock}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={photoLabel}
-          disabled={avatarMutation.isPending}
-          onPress={() => avatarMutation.mutate()}
-          style={({ pressed }) => [
-            styles.photoTarget,
-            pressed && styles.photoTargetPressed,
-          ]}
-        >
-          <Avatar
-            name={displayName}
-            avatarPath={profile?.avatar_path}
-            size={92}
-          />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={
+          profile?.avatar_path
+            ? t("onboarding.identity.photoChange")
+            : t("onboarding.identity.photoAdd")
+        }
+        disabled={avatarMutation.isPending}
+        onPress={() => avatarMutation.mutate()}
+        style={({ pressed }) => [
+          styles.photoCard,
+          pressed && styles.photoTargetPressed,
+        ]}
+      >
+        <Avatar
+          name={displayName}
+          avatarPath={profile?.avatar_path}
+          size={64}
+        />
+        <View style={styles.photoCopy}>
           <AppText style={styles.photoAction}>{photoLabel}</AppText>
-        </Pressable>
-        <AppText style={[tennisTextStyles.fieldHint, styles.photoHint]}>
-          {t("onboarding.identity.photoHint")}
-        </AppText>
+          <AppText style={[tennisTextStyles.fieldHint, styles.photoHint]}>
+            {t("onboarding.identity.photoHint")}
+          </AppText>
+        </View>
+      </Pressable>
         {photoError ? <ErrorNotice>{photoError}</ErrorNotice> : null}
-      </View>
 
       <OnboardingFormField
         label={t("onboarding.identity.name")}
@@ -254,14 +262,15 @@ export default function IdentityScreen() {
       <OnboardingFormField label={t("onboarding.identity.gender")}>
         <View style={styles.chips}>
           {genders.map((option) => (
-            <ChipButton
-              key={option}
-              label={t(`gender.${option}`)}
-              selected={gender === option}
-              onPress={() =>
-                setGender((current) => (current === option ? null : option))
-              }
-            />
+              <ChipButton
+                key={option}
+                label={t(`gender.${option}`)}
+                selected={gender === option}
+                soft
+                onPress={() =>
+                  setGender((current) => (current === option ? null : option))
+                }
+              />
           ))}
         </View>
       </OnboardingFormField>
@@ -272,12 +281,13 @@ export default function IdentityScreen() {
       >
         <View style={styles.chips}>
           {languages.map((language) => (
-            <ChipButton
-              key={language}
-              label={t(`languages.${language}`)}
-              selected={selectedLanguages.includes(language)}
-              onPress={() => toggleLanguage(language)}
-            />
+              <ChipButton
+                key={language}
+                label={t(`languages.${language}`)}
+                selected={selectedLanguages.includes(language)}
+                soft
+                onPress={() => toggleLanguage(language)}
+              />
           ))}
         </View>
       </OnboardingFormField>
@@ -285,6 +295,7 @@ export default function IdentityScreen() {
       <PolicyToggleCard
         label={t("onboarding.identity.adultConfirm")}
         selected={adultConfirmed}
+        compact
         onPress={() => {
           setAdultConfirmed((value) => !value);
           clearFieldError("adultConfirm");
@@ -294,14 +305,18 @@ export default function IdentityScreen() {
         <ErrorNotice>{errors.adultConfirm}</ErrorNotice>
       ) : null}
 
-      <AppText style={styles.section}>{t("onboarding.tennis.title")}</AppText>
+      <View style={styles.tennisDivider} />
+      <AppText style={[tennisTextStyles.sectionTitle, styles.section]}>
+        {t("onboarding.tennis.title")}
+      </AppText>
       <AppText style={styles.sectionHint}>
         {t("onboarding.tennis.description")}
       </AppText>
       {errors.skillBand ? <ErrorNotice>{errors.skillBand}</ErrorNotice> : null}
       {bands.map((band) => (
-        <SelectionCard
+        <SkillBandCard
           key={band}
+          band={band}
           label={t(`onboarding.tennis.bands.${band}`)}
           description={t(`skillBands.${band}`)}
           selected={skillBand === band}
@@ -323,12 +338,13 @@ export default function IdentityScreen() {
       </AppText>
       <View style={styles.chips}>
         {intents.map((intent) => (
-          <ChipButton
-            key={intent}
-            label={t(`playIntent.${intent}`)}
-            selected={playIntent === intent}
-            onPress={() => setPlayIntent(intent)}
-          />
+            <ChipButton
+              key={intent}
+              label={t(`playIntent.${intent}`)}
+              selected={playIntent === intent}
+              soft
+              onPress={() => setPlayIntent(intent)}
+            />
         ))}
       </View>
     </OnboardingStepLayout>
@@ -337,40 +353,47 @@ export default function IdentityScreen() {
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
-    photoBlock: {
+    photoCard: {
+      flexDirection: "row",
       alignItems: "center",
-      marginBottom: 28,
+      gap: 16,
+      padding: 16,
+      borderRadius: tennisRadii.xl,
+      borderWidth: 1.5,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+      marginBottom: 22,
     },
-    photoTarget: {
-      alignItems: "center",
-      gap: 10,
+    photoCopy: {
+      flex: 1,
     },
     photoTargetPressed: {
       opacity: 0.7,
     },
     photoAction: {
-      fontFamily: tennisFontFamily.bodyMedium,
+      fontFamily: tennisFontFamily.heading,
       fontSize: 15,
-      color: tennisColors.primary,
+      color: tennisColors.heroOnLight,
+      marginBottom: 4,
     },
     photoHint: {
-      marginTop: 8,
-      textAlign: "center",
+      maxWidth: 190,
+      marginBottom: 0,
     },
     fieldHint: {
       marginTop: 6,
     },
-    chips: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 8,
+    tennisDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: tennisColors.border,
+      marginBottom: 22,
     },
     section: {
       fontFamily: tennisFontFamily.heading,
-      fontSize: 16,
-      color: tennisColors.primaryDark,
-      marginBottom: 8,
-      marginTop: 16,
+      fontSize: 19,
+      color: tennisColors.heroOnLight,
+      marginBottom: 4,
+      marginTop: 0,
     },
     sectionHint: {
       fontFamily: tennisFontFamily.body,
@@ -386,6 +409,11 @@ const styles = createLiveSheet(() =>
       color: tennisColors.primaryDark,
       marginTop: 8,
       marginBottom: 4,
+    },
+    chips: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
     },
   }),
 );

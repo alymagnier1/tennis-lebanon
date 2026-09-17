@@ -29,10 +29,12 @@ export default function CheckEmailScreen() {
           : t("auth.checkEmailConfirmBody")
       }
       onBack={() => router.replace(backHref)}
+      marks="quiet"
       footer={
         <>
           <FigmaPrimaryButton
             label={t("auth.openedLink")}
+            hero
             onPress={() => router.replace("/")}
           />
           <FigmaSecondaryButton

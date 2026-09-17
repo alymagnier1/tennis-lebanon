@@ -27,6 +27,10 @@
   "settingsAppearanceSystem": "System",
   "settingsAppearanceLight": "Light",
   "settingsAppearanceDark": "Dark",
+  "settingsOnboardingHero": "Onboarding hero",
+  "settingsOnboardingHeroHint": "Design comparison. Welcome and Done follow this together.",
+  "settingsOnboardingHeroGreen": "Green",
+  "settingsOnboardingHeroLight": "Clay",
   "settingsScreenSupport": "Support",
   "settingsScreenAccount": "Account",
   "dashboard": {
@@ -311,10 +315,15 @@
     "signOutError": "We could not sign you out. Please try again."
   },
   "onboarding": {
+    "stepEyebrow": "Step {{step}} of {{total}}",
     "consent": {
       "title": "Before you continue",
       "description": "Read each one, then accept to continue. These apply to the RacketBound pilot.",
       "acceptAll": "I accept the Terms of Use, Privacy Notice and Community Rules",
+      "leave": "Leave setup",
+      "documentTerms": "Terms of Use",
+      "documentPrivacy": "Privacy Notice",
+      "documentCommunity": "Community Rules",
       "terms": "I accept the Terms of Use draft",
       "readTerms": "Read Terms of Use",
       "privacy": "I accept the Privacy Notice draft",
@@ -334,6 +343,7 @@
       "gender": "Gender (optional)",
       "photo": "Profile photo (optional)",
       "photoAdd": "Add a photo",
+      "photoAdded": "Photo added",
       "photoChange": "Change photo",
       "photoHint": "Players recognise a face faster than a name. You can add one later instead.",
       "adultConfirm": "I confirm that I am 18 or older",
@@ -363,7 +373,10 @@
       "description": "Choose one or more broad areas. We never ask for your home address.",
       "loadError": "We could not load the available areas.",
       "empty": "No pilot areas are available yet.",
-      "commitmentEcho": "We’ll look for {{band}} in {{areas}}."
+      "commitmentEcho": "We’ll look for {{band}} in {{areas}}.",
+      "comingSoon": "Coming soon",
+      "upcomingTripoli": "Tripoli",
+      "upcomingSaida": "Saida"
     },
     "notifications": {
       "title": "Stay in the loop",
@@ -388,6 +401,7 @@
       "finish": "Finish setup"
     },
     "complete": {
+      "statusPill": "Setup complete",
       "title": "You're all set,",
       "titleAccent": "{{name}}!",
       "description": "Your profile is ready. Find an open match, or organise one for tonight.",
