@@ -49,9 +49,18 @@ export default function SettingsScreen() {
 
   const deletion = useMutation({
     mutationFn: () => requestAccountDeletion(supabase),
+    // Sign out rather than refreshing into the app. Staying signed in landed
+    // the player on `account-unavailable` -- an account they had just asked to
+    // delete, offering Contact support and Sign out -- which reads as the
+    // request having failed. Signed out, `authRouteForState` sends them to
+    // Welcome, which is the honest end of this flow.
     onSuccess: async () => {
-      await refreshProfile();
-      router.replace("/");
+      try {
+        await signOut();
+      } finally {
+        await refreshProfile();
+        router.replace("/");
+      }
     },
   });
 

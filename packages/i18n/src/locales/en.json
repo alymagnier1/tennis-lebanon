@@ -1566,14 +1566,16 @@
     "rtlLayoutCheck": "RTL layout check",
     "requestDeletion": "Request account deletion",
     "deleteTitle": "Request account deletion?",
-    "deleteDescription": "This submits a deletion request and may restrict account access while it is reviewed.",
+    "deleteDescription": "This submits a deletion request and signs you out. Access is restricted while it is reviewed, and your email stays registered until support completes it — so you will not be able to sign up again with the same address. You can undo this by logging back in.",
     "deleteError": "We could not submit your deletion request. Please try again.",
     "versionFooter": "RacketBound v{{version}} · Made in Lebanon 🇱🇧"
   },
   "account": {
     "unavailableTitle": "Account unavailable",
     "suspendedBody": "This account is suspended. Contact support from the official support channel for a review.",
-    "deletionPendingBody": "Your deletion request is pending and account access is restricted.",
+    "deletionPendingBody": "Your deletion request is pending, so account access is restricted. Your email stays registered until support completes it, so you cannot sign up again with it yet. You can keep the account instead.",
+    "keepAccount": "Keep my account",
+    "keepAccountError": "We could not restore this account.",
     "contactSupport": "Contact support"
   },
   "slotPicker": {
