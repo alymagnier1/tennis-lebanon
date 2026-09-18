@@ -23,7 +23,7 @@ export function isPilotLocale(value: string): value is PilotLocale {
 export const DEFAULT_LOCALE: SupportedLocale = "en";
 
 /** Changes when locale JSON changes — imported by mobile to refresh Metro bundles. */
-export const LOCALE_BUNDLE_ID = "2026-09-12-password-auth";
+export const LOCALE_BUNDLE_ID = "2026-09-16-onboarding-hero";
 
 const RTL_LOCALES: ReadonlySet<SupportedLocale> = new Set(["ar"]);
 

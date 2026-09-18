@@ -386,6 +386,27 @@ export async function declineMatchInvitation(
   if (error) throw error;
 }
 
+/**
+ * Take back an invitation nobody has answered.
+ *
+ * Not the same call as `declineMatchInvitation`, despite both ending in a
+ * revoked invitation: that one is the invitee's answer and records
+ * `declined_at`, this one is the sender withdrawing the offer and deliberately
+ * does not. The hub reads that difference to say "Declined" rather than
+ * silently dropping the row.
+ */
+export async function cancelMatchInvite(
+  client: TennisSupabaseClient,
+  matchId: string,
+  invitedUserId: string,
+): Promise<void> {
+  const { error } = await client.rpc("cancel_match_invite", {
+    p_match_id: matchId,
+    p_invited_user_id: invitedUserId,
+  });
+  if (error) throw error;
+}
+
 export async function castMatchTimeVote(
   client: TennisSupabaseClient,
   matchId: string,

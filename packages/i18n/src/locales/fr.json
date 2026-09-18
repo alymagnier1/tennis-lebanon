@@ -27,6 +27,10 @@
   "settingsAppearanceSystem": "Système",
   "settingsAppearanceLight": "Clair",
   "settingsAppearanceDark": "Sombre",
+  "settingsOnboardingHero": "Visuel d'accueil",
+  "settingsOnboardingHeroHint": "Comparaison de design. Accueil et fin suivent ce choix ensemble.",
+  "settingsOnboardingHeroGreen": "Vert",
+  "settingsOnboardingHeroLight": "Terre battue",
   "settingsScreenSupport": "Assistance",
   "settingsScreenAccount": "Compte",
   "dashboard": {
@@ -311,10 +315,15 @@
     "checkEmailHint": "Le lien expire après un court délai. Si vous en demandez un autre, seul l'e-mail le plus récent fonctionnera."
   },
   "onboarding": {
+    "stepEyebrow": "Étape {{step}} sur {{total}}",
     "consent": {
       "title": "Avant de continuer",
       "description": "Lisez chaque document, puis acceptez pour continuer. Ils s’appliquent au pilote RacketBound.",
       "acceptAll": "J'accepte les conditions d'utilisation, l'avis de confidentialité et les règles de la communauté",
+      "leave": "Quitter la configuration",
+      "documentTerms": "Conditions d'utilisation",
+      "documentPrivacy": "Avis de confidentialité",
+      "documentCommunity": "Règles de la communauté",
       "terms": "J’accepte le projet de conditions d’utilisation",
       "readTerms": "Lire les conditions d’utilisation",
       "privacy": "J’accepte le projet d’avis de confidentialité",
@@ -334,6 +343,7 @@
       "gender": "Genre (facultatif)",
       "photo": "Photo de profil (facultatif)",
       "photoAdd": "Ajouter une photo",
+      "photoAdded": "Photo ajoutée",
       "photoChange": "Changer la photo",
       "photoHint": "On reconnaît un visage plus vite qu'un nom. Vous pourrez en ajouter une plus tard.",
       "adultConfirm": "Je confirme avoir au moins 18 ans",
@@ -363,7 +373,10 @@
       "description": "Choisissez une ou plusieurs zones générales. Nous ne demandons jamais votre adresse personnelle.",
       "loadError": "Impossible de charger les zones disponibles.",
       "empty": "Aucune zone pilote n’est disponible pour le moment.",
-      "commitmentEcho": "Nous chercherons des matchs {{band}} à {{areas}}."
+      "commitmentEcho": "Nous chercherons des matchs {{band}} à {{areas}}.",
+      "comingSoon": "Bientôt",
+      "upcomingTripoli": "Tripoli",
+      "upcomingSaida": "Saida"
     },
     "notifications": {
       "title": "Restez informé",
@@ -388,6 +401,7 @@
       "finish": "Terminer la configuration"
     },
     "complete": {
+      "statusPill": "Configuration terminée",
       "title": "Tout est prêt,",
       "titleAccent": "{{name}}!",
       "description": "Votre profil est prêt. Trouvez un match ouvert, ou organisez-en un pour ce soir.",
@@ -955,6 +969,11 @@
         "matchOn": "Match confirmé"
       }
     },
+    "requests": {
+      "sentTitle": "Demandes que vous avez envoyées",
+      "sentSubtitle": "En attente de la réponse de l'organisateur.",
+      "cancel": "Annuler la demande"
+    },
     "lifecycle": {
       "staleBadge": "Expire bientôt",
       "staleWarning": "Ce match peut expirer bientôt. Ajoutez un créneau ou appuyez sur Toujours partant ? pour le garder actif.",
@@ -995,19 +1014,26 @@
       "participants": "Participants",
       "proposedTimes": "Créneaux proposés",
       "pendingRequests": "Demandes d'adhésion",
+      "waitlist": "Liste d'attente",
+      "waitlistHint": "Votre match est complet : ces joueurs attendent qu'une place se libère. Vous pouvez toujours en refuser un.",
       "invitedTitle": "Invités",
       "invitedWaiting": "En attente de réponse",
       "invitedDeclined": "A refusé",
+      "invitedOnHold": "En attente — match complet",
+      "cancelInvite": "Retirer",
+      "cancelInviteError": "Impossible de retirer cette invitation.",
       "join": "Rejoindre le match",
       "requestJoin": "Demander à rejoindre",
       "joinSuccess": "Vous avez rejoint ce match.",
       "requestSentSuccess": "Demande envoyée. L’hôte vous répondra.",
+      "requestPendingBanner": "Vous avez demandé à rejoindre. L'organisateur vous répondra.",
       "joinError": "Impossible de rejoindre ce match.",
       "joinTimeConflict": "Vous avez déjà un match à cette heure-là.",
       "joinFull": "Ce match s'est rempli avant vous.",
       "approve": "Approuver",
       "reject": "Refuser",
       "respondError": "Impossible de mettre à jour cette demande.",
+      "respondFull": "Ce match est déjà complet.",
       "shareInvite": "Partager le lien d'invitation",
       "leave": "Quitter le match",
       "leaveError": "Impossible de quitter ce match.",
@@ -1233,6 +1259,8 @@
       "sent": "Invitation envoyée. Elle apparaît dans Matchs → Invitations.",
       "inviteToMatch": "Inviter au match {{format}}",
       "invitePlayer": "Inviter",
+      "inviteAgain": "Inviter à nouveau",
+      "onHold": "En attente",
       "invitePlayers": "Inviter des joueurs",
       "requestedLabel": "A demandé à rejoindre",
       "joinedLabel": "Dans le match",
@@ -1262,18 +1290,25 @@
       "pendingCount": "{{count}} joueur(s) à inviter",
       "autoSendOnPublish": "Ils recevront une invitation dans l'app à la publication.",
       "rateLimited": "Vous avez envoyé beaucoup d’invitations aujourd’hui. Réessayez demain.",
+      "capReached": "Vous avez assez d'invitations en attente pour ce match. Retirez-en une depuis le match pour en envoyer une autre.",
       "notSentTitle": "Match créé, invitation non envoyée",
       "askToPlay": "Proposer un match",
       "filteredToTime": "Joueurs disponibles {{time}}",
       "showAllTimes": "Afficher les joueurs hors de ce créneau",
       "onlyMatchTime": "Uniquement ceux disponibles alors",
-      "noPlayersAtTime": "Personne ne s’est déclaré disponible {{time}}. Élargissez ci-dessous, ou changez l’heure du match.",
-      "noPlayersHere": "Aucun joueur compatible pour ce match. Essayez d’élargir ci-dessous.",
+      "freePlayersChip": "Joueurs dispo",
+      "timeChipLabel": "Dispo {{time}}",
+      "timeChipActive": "Dispo {{time}}",
+      "timeChipInactive": "Voir qui est libre {{time}}",
+      "noPlayersAtTime": "Personne ne s’est déclaré disponible {{time}}. Désactivez le filtre d’heure ci-dessus pour inclure d’autres créneaux, ou changez l’heure du match.",
+      "noPlayersHere": "Aucun joueur compatible pour ce match. Essayez d’inviter plus tard depuis un profil.",
       "noteLabel": "Ajouter une note (facultatif)",
       "notePlaceholder": "On joue samedi matin ?",
-      "noteHint": "Affichée avec chaque invitation envoyée depuis cet écran. Absente de la notification push.",
+      "noteHint": "Envoyée avec chaque invitation depuis cet écran. Absente de la notification push.",
       "noteCounter": "{{count}}/{{max}}",
-      "noteQuote": "« {{note}} »"
+      "noteQuote": "« {{note}} »",
+      "noteEdit": "Modifier la note",
+      "noteHide": "Masquer la note"
     },
     "policy": {
       "leaveBeforeBooking": "Vous pouvez quitter librement tant qu'aucun court n'est réservé. Les changements tardifs répétés peuvent affecter votre fiabilité.",
@@ -1395,16 +1430,18 @@
     "description": "Gérez votre compte et vos préférences.",
     "policies": "Consulter les politiques",
     "rtlLayoutCheck": "Vérification mise en page RTL",
-    "requestDeletion": "Demander la suppression du compte",
-    "deleteTitle": "Demander la suppression du compte ?",
-    "deleteDescription": "Cette action envoie une demande de suppression et peut limiter l’accès au compte pendant son examen.",
+    "requestDeletion": "Supprimer mon compte",
+    "deleteTitle": "Supprimer votre compte ?",
+    "deleteDescription": "Ceci supprime votre compte immédiatement et vous déconnecte. Votre nom et votre photo sont retirés, et vous quittez tout match non encore joué. Les résultats passés restent enregistrés pour vos adversaires, sous la mention joueur supprimé. Votre e-mail est libéré : vous pourrez vous réinscrire. Ceci est irréversible.",
     "deleteError": "Impossible d’envoyer votre demande de suppression. Veuillez réessayer.",
     "versionFooter": "RacketBound v{{version}} · Fabriqué au Liban 🇱🇧"
   },
   "account": {
     "unavailableTitle": "Compte indisponible",
     "suspendedBody": "Ce compte est suspendu. Contactez l’assistance via le canal officiel pour demander un examen.",
-    "deletionPendingBody": "Votre demande de suppression est en attente et l’accès au compte est limité.",
+    "deletionPendingBody": "Votre demande de suppression est en cours, l'accès au compte est donc restreint. Votre e-mail reste enregistré jusqu'à ce que le support la traite, vous ne pouvez donc pas encore vous réinscrire avec. Vous pouvez aussi conserver le compte.",
+    "keepAccount": "Conserver mon compte",
+    "keepAccountError": "Impossible de restaurer ce compte.",
     "contactSupport": "Contacter l’assistance"
   },
   "slotPicker": {
@@ -1463,6 +1500,14 @@
       "match_invitation": {
         "title": "{{name}} vous invite à jouer",
         "body": "Ouvrez pour accepter ou refuser."
+      },
+      "match_invitation_superseded": {
+        "title": "Ce match est complet",
+        "body": "La place à laquelle vous étiez invité est prise. D'autres matchs près de chez vous cherchent encore des joueurs."
+      },
+      "match_seat_reopened": {
+        "title": "Une place s'est libérée",
+        "body": "Un joueur s'est retiré d'un match auquel vous étiez invité. Votre invitation est de nouveau dans Matchs."
       },
       "stale_match_reminder": {
         "title": "Votre match expire bientôt",

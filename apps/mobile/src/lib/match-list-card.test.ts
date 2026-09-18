@@ -12,6 +12,7 @@ import {
   matchListStartsAt,
   matchTabBadgeCounts,
   completedMatchNeedsScore,
+  selectSentJoinRequests,
   splitUpcomingMatches,
 } from "./match-list-card";
 
@@ -50,6 +51,42 @@ describe("groupActiveMatches", () => {
 
     expect(grouped.now.map((row) => row.id)).toEqual(["b"]);
     expect(grouped.upcoming).toEqual([]);
+  });
+
+  // A request the host has not answered is not a match you are in. It renders
+  // beside invitations instead, so counting it here would list it twice.
+  it("drops a join request the viewer sent", () => {
+    const grouped = groupActiveMatches([
+      { id: "a", status: "open", participant_status: "accepted" },
+      { id: "b", status: "open", participant_status: "requested" },
+      { id: "c", status: "full", participant_status: "requested" },
+    ]);
+
+    expect(grouped.upcoming.map((row) => row.id)).toEqual(["a"]);
+    expect(grouped.now).toEqual([]);
+  });
+});
+
+describe("selectSentJoinRequests", () => {
+  it("keeps only rows the viewer is still waiting on a host for", () => {
+    expect(
+      selectSentJoinRequests([
+        { id: "a", status: "open", participant_status: "accepted" },
+        { id: "b", status: "open", participant_status: "requested" },
+        { id: "c", status: "full", participant_status: "requested" },
+        { id: "d", status: "confirmed" },
+      ]).map((row) => row.id),
+    ).toEqual(["b", "c"]);
+  });
+
+  // The host can fill the match and agree a time while the request sits there;
+  // none of that changes who is waiting.
+  it("keeps a request on a match that has moved on", () => {
+    expect(
+      selectSentJoinRequests([
+        { id: "a", status: "ready_to_book", participant_status: "requested" },
+      ]).map((row) => row.id),
+    ).toEqual(["a"]);
   });
 });
 
@@ -145,6 +182,26 @@ describe("matchTabBadgeCounts", () => {
       upcoming: 0,
       matchesTab: 0,
       active: 0,
+    });
+  });
+
+  // Deliberate: an invitation waits on the reader, a sent request waits on
+  // somebody else. Badging the second nags about something they cannot act on.
+  it("does not badge a join request the viewer sent", () => {
+    expect(
+      matchTabBadgeCounts({
+        inviteCount: 1,
+        matches: [
+          { status: "open", participant_status: "accepted" },
+          { status: "open", participant_status: "requested" },
+        ],
+      }),
+    ).toEqual({
+      invites: 1,
+      pending: 0,
+      upcoming: 1,
+      matchesTab: 2,
+      active: 1,
     });
   });
 });

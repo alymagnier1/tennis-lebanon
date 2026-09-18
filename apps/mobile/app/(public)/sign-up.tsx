@@ -89,6 +89,7 @@ export default function SignUpScreen() {
       description={t("auth.signUpBody")}
       onBack={() => router.back()}
       avoidKeyboard={false}
+      marks="signup"
     >
       <View style={styles.sheet}>
         <AuthEmailPasswordFields

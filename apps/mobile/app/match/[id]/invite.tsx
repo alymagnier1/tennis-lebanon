@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   StyleSheet,
   TextInput,
@@ -28,6 +29,7 @@ import {
 import { AppText } from "../../../src/components/AppText";
 import { DiscoverPlayerCard } from "../../../src/components/discover/DiscoverPlayerCard";
 import { Icon } from "../../../src/components/Icon";
+import { SettingToggle } from "../../../src/components/AppUi";
 import {
   FigmaPrimaryButton,
   FigmaSecondaryButton,
@@ -69,6 +71,12 @@ type HubParticipant = {
   status: string;
 };
 
+type HubInvited = {
+  user_id: string;
+  display_name: string;
+  status: string;
+};
+
 function filterPlayersBySearch(
   players: CompatiblePlayerCard[],
   query: string,
@@ -90,13 +98,13 @@ export default function MatchInvitePlayersScreen() {
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
   const { writingDirection, isRtl, rowDirection } = useLayoutDirection();
-  const [invitedIds, setInvitedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   // Derived from here down; nothing syncs async data into state through an
   // effect, which the compiler's cascading render rule has already forced out
   // of this codebase twice.
   const [showAllTimes, setShowAllTimes] = useState(false);
   const [inviteNote, setInviteNote] = useState("");
+  const [noteExpanded, setNoteExpanded] = useState(false);
   const autoInviteStarted = useRef(false);
 
   const hubQuery = useQuery({
@@ -108,10 +116,18 @@ export default function MatchInvitePlayersScreen() {
   const hub = hubQuery.data;
   const participants =
     (hub?.participants as HubParticipant[] | undefined) ?? [];
+  // `100` returns this to every accepted participant, not the creator alone:
+  // any of them may invite, and hiding who was already asked is what made them
+  // ask twice. A decline still reaches only the host and whoever sent it.
+  const invitedPlayers =
+    (hub?.invited_players as HubInvited[] | undefined) ?? [];
   const matchFull = Boolean(hub && hub.participant_count >= hub.capacity);
 
   const timeWindow = useMemo(() => (hub ? matchTimeWindow(hub) : null), [hub]);
   const activeWindow = showAllTimes ? null : timeWindow;
+  const timeLabel = timeWindow
+    ? formatCompactUtcInBeirut(timeWindow.freeFrom)
+    : null;
 
   const playerFilters = useMemo(() => {
     if (!hub) return null;
@@ -146,10 +162,9 @@ export default function MatchInvitePlayersScreen() {
         playerId,
         sanitizePlayerNote(inviteNote),
       ),
-    onSuccess: async (_token, playerId) => {
-      setInvitedIds((current) =>
-        current.includes(playerId) ? current : [...current, playerId],
-      );
+    // Refetching the hub is what moves the row, and it is the same fact on the
+    // next visit. A second local source would be free to disagree with it.
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
       showToast(t("matches.invite.sent"));
     },
@@ -182,14 +197,14 @@ export default function MatchInvitePlayersScreen() {
       return;
     }
 
-    // No state to set: the row already renders as invited when the player is
-    // in the match, so pushing them into invitedIds only added a second
-    // render pass for the same result.
+    // No state to set: the row already renders from the hub payload, so
+    // recording the invite locally would only add a second render pass for
+    // the same result.
     if (
       !canInviteFromState(
         invitePlayerState({
           participants,
-          locallyInvitedIds: invitedIds,
+          invitedPlayers,
           userId: invitePlayerId,
         }),
       )
@@ -201,7 +216,7 @@ export default function MatchInvitePlayersScreen() {
     inviteMutation.mutate(invitePlayerId);
     // Auto-invite once when arriving from create-for-player.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hub, id, invitePlayerId, participants]);
+  }, [hub, id, invitePlayerId, participants, invitedPlayers]);
 
   const finishMutation = useMutation({
     mutationFn: async () => {
@@ -220,11 +235,12 @@ export default function MatchInvitePlayersScreen() {
   const isDraft = hub?.status === "draft";
   const handleBack = () =>
     goBackOrReplace(id ? matchHubRoute(id) : MATCHES_TAB_ROUTE);
+  const noteHasContent = inviteNote.trim().length > 0;
 
   function playerInviteState(player: CompatiblePlayerCard): InvitePlayerState {
     return invitePlayerState({
       participants,
-      locallyInvitedIds: invitedIds,
+      invitedPlayers,
       userId: player.user_id,
     });
   }
@@ -259,7 +275,13 @@ export default function MatchInvitePlayersScreen() {
               ? t("matches.invite.joinedLabel")
               : state === "invited"
                 ? t("matches.invite.invited")
-                : t("matches.invite.invitePlayer")
+                : state === "superseded"
+                  ? t("matches.invite.onHold")
+                  : // Re-asking somebody who said no is allowed, but the row
+                    // says so, so it cannot happen by accident.
+                    state === "declined"
+                    ? t("matches.invite.inviteAgain")
+                    : t("matches.invite.invitePlayer")
         }
         primaryLoading={
           inviteMutation.isPending &&
@@ -310,10 +332,8 @@ export default function MatchInvitePlayersScreen() {
       return (
         <View style={styles.emptyState}>
           <AppText style={styles.emptyText}>
-            {activeWindow
-              ? t("matches.invite.noPlayersAtTime", {
-                  time: formatCompactUtcInBeirut(activeWindow.freeFrom),
-                })
+            {activeWindow && timeLabel
+              ? t("matches.invite.noPlayersAtTime", { time: timeLabel })
               : t("matches.invite.noPlayersHere")}
           </AppText>
         </View>
@@ -330,63 +350,6 @@ export default function MatchInvitePlayersScreen() {
 
     return null;
   }
-
-  const searchField = (
-    <View style={styles.searchWrap}>
-      <View
-        style={[
-          styles.searchIcon,
-          isRtl ? { right: 14, left: undefined } : null,
-        ]}
-      >
-        <Icon name="discover" size={16} color={tennisColors.mutedForeground} />
-      </View>
-      <TextInput
-        accessibilityLabel={t("matches.invite.searchPlaceholder")}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        placeholder={t("matches.invite.searchPlaceholder")}
-        placeholderTextColor={tennisColors.mutedForeground}
-        style={[
-          styles.searchInput,
-          { writingDirection, textAlign: isRtl ? "right" : "left" },
-          isRtl ? { paddingLeft: 12, paddingRight: 40 } : null,
-        ]}
-        autoCapitalize="none"
-        autoCorrect={false}
-        clearButtonMode="while-editing"
-      />
-    </View>
-  );
-
-  // Always rendered, not only when the list is empty. The controls used to
-  // live inside the empty state, so a host looking at twenty mediocre
-  // candidates had none at all and only a host with zero results got any --
-  // backwards, and the reason a narrowing filter could not be trusted on by
-  // default.
-  const filterBar = (
-    <View style={styles.filterBar}>
-      {activeWindow ? (
-        <AppText style={[styles.filterSummary, { writingDirection }]}>
-          {t("matches.invite.filteredToTime", {
-            time: formatCompactUtcInBeirut(activeWindow.freeFrom),
-          })}
-        </AppText>
-      ) : null}
-      <View style={[styles.filterActions, { flexDirection: rowDirection }]}>
-        {timeWindow ? (
-          <FigmaSecondaryButton
-            label={
-              showAllTimes
-                ? t("matches.invite.onlyMatchTime")
-                : t("matches.invite.showAllTimes")
-            }
-            onPress={() => setShowAllTimes((current) => !current)}
-          />
-        ) : null}
-      </View>
-    </View>
-  );
 
   if (hubQuery.isError) {
     return (
@@ -433,50 +396,100 @@ export default function MatchInvitePlayersScreen() {
     return <Redirect href={{ pathname: "/match/[id]", params: { id: id! } }} />;
   }
 
+  const listHeader = !matchFull ? (
+    <View style={styles.toolbar}>
+      <View style={[styles.searchField, { flexDirection: rowDirection }]}>
+        <Icon name="discover" size={18} color={tennisColors.mutedForeground} />
+        <TextInput
+          accessibilityLabel={t("matches.invite.searchPlaceholder")}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder={t("matches.invite.searchPlaceholder")}
+          placeholderTextColor={tennisColors.mutedForeground}
+          style={[
+            styles.searchInput,
+            { writingDirection, textAlign: isRtl ? "right" : "left" },
+          ]}
+          autoCapitalize="none"
+          autoCorrect={false}
+          clearButtonMode="while-editing"
+          returnKeyType="search"
+        />
+      </View>
+
+      {timeWindow && timeLabel ? (
+        <SettingToggle
+          variant="card"
+          label={t("matches.invite.timeChipActive", {
+            time: timeLabel,
+            defaultValue: `Available ${timeLabel}`,
+          })}
+          value={!showAllTimes}
+          onValueChange={(enabled) => setShowAllTimes(!enabled)}
+        />
+      ) : null}
+
+      <View style={styles.noteBlock}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: noteExpanded }}
+          accessibilityLabel={
+            noteExpanded
+              ? t("matches.invite.noteHide")
+              : noteHasContent
+                ? t("matches.invite.noteEdit")
+                : t("matches.invite.noteLabel")
+          }
+          onPress={() => setNoteExpanded((open) => !open)}
+          style={[styles.noteToggle, { flexDirection: rowDirection }]}
+        >
+          <AppText style={[styles.noteToggleLabel, { writingDirection }]}>
+            {!noteExpanded && noteHasContent
+              ? t("matches.invite.noteQuote", {
+                  note:
+                    inviteNote.trim().length > 42
+                      ? `${inviteNote.trim().slice(0, 42)}…`
+                      : inviteNote.trim(),
+                })
+              : t("matches.invite.noteLabel")}
+          </AppText>
+          <Icon
+            name={noteExpanded ? "close" : "add"}
+            size={16}
+            color={tennisColors.mutedForeground}
+          />
+        </Pressable>
+
+        {noteExpanded ? (
+          <View style={styles.noteEditor}>
+            <TextInput
+              accessibilityLabel={t("matches.invite.noteLabel")}
+              value={inviteNote}
+              onChangeText={(value) =>
+                setInviteNote(value.slice(0, PLAYER_NOTE_MAX))
+              }
+              placeholder={t("matches.invite.notePlaceholder")}
+              placeholderTextColor={tennisColors.mutedForeground}
+              style={[
+                styles.noteInput,
+                { writingDirection, textAlign: isRtl ? "right" : "left" },
+              ]}
+              multiline
+              maxLength={PLAYER_NOTE_MAX}
+            />
+          </View>
+        ) : null}
+      </View>
+    </View>
+  ) : null;
+
   return (
     <View style={styles.screen}>
       <FigmaSubpageHero
         title={t("matches.invite.playersTitle")}
         description={t("matches.invite.playersDescription")}
         onBack={handleBack}
-      >
-        {searchField}
-        {filterBar}
-      </FigmaSubpageHero>
-
-      {!matchFull ? (
-        <View style={styles.noteWrap}>
-          <AppText style={[styles.noteLabel, { writingDirection }]}>
-            {t("matches.invite.noteLabel")}
-          </AppText>
-          <TextInput
-            accessibilityLabel={t("matches.invite.noteLabel")}
-            value={inviteNote}
-            onChangeText={(value) =>
-              setInviteNote(value.slice(0, PLAYER_NOTE_MAX))
-            }
-            placeholder={t("matches.invite.notePlaceholder")}
-            placeholderTextColor={tennisColors.mutedForeground}
-            style={[
-              styles.noteInput,
-              { writingDirection, textAlign: isRtl ? "right" : "left" },
-            ]}
-            multiline
-            maxLength={PLAYER_NOTE_MAX}
-          />
-          <View style={[styles.noteMetaRow, { flexDirection: rowDirection }]}>
-            <AppText style={[styles.noteHint, { writingDirection, flex: 1 }]}>
-              {t("matches.invite.noteHint")}
-            </AppText>
-            <AppText style={styles.noteCounter}>
-              {t("matches.invite.noteCounter", {
-                count: inviteNote.length,
-                max: PLAYER_NOTE_MAX,
-              })}
-            </AppText>
-          </View>
-        </View>
-      ) : null}
+      />
 
       {matchFull ? (
         <View style={styles.paddedBody}>
@@ -490,10 +503,12 @@ export default function MatchInvitePlayersScreen() {
           data={filteredPlayers}
           keyExtractor={(player) => player.user_id}
           renderItem={renderPlayerRow}
+          ListHeaderComponent={listHeader}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={styles.listSeparator} />}
           ListEmptyComponent={renderListEmpty}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           refreshControl={
             <RefreshControl
               refreshing={playersQuery.isRefetching || hubQuery.isRefetching}
@@ -525,9 +540,6 @@ export default function MatchInvitePlayersScreen() {
           loading={shareLinkMutation.isPending}
           onPress={() => shareLinkMutation.mutate()}
         />
-        <AppText style={[styles.footerHint, { writingDirection }]}>
-          {t("matches.invite.shareLinkHint")}
-        </AppText>
         <FigmaPrimaryButton
           label={
             isDraft
@@ -560,60 +572,51 @@ const styles = createLiveSheet(() =>
       paddingTop: 8,
       gap: 12,
     },
-    filterBar: {
+    toolbar: {
       gap: 8,
-      paddingBottom: 4,
+      paddingBottom: 8,
     },
-    filterSummary: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 13,
-      lineHeight: 18,
-      color: tennisColors.mutedForeground,
-    },
-    filterActions: {
+    searchField: {
+      alignItems: "center",
       gap: 8,
-      flexWrap: "wrap",
-    },
-    searchWrap: {
-      position: "relative",
-      marginTop: 16,
-    },
-    searchIcon: {
-      position: "absolute",
-      left: 14,
-      top: 0,
-      bottom: 0,
-      justifyContent: "center",
-      zIndex: 1,
-    },
-    searchInput: {
       minHeight: 44,
-      paddingVertical: 12,
-      paddingLeft: 40,
-      paddingRight: 12,
-      backgroundColor: tennisColors.card,
+      paddingHorizontal: 12,
+      borderRadius: tennisRadii.lg,
       borderWidth: 1.5,
       borderColor: tennisColors.border,
-      borderRadius: tennisRadii.md,
+      backgroundColor: tennisColors.card,
+    },
+    searchInput: {
+      flex: 1,
+      minWidth: 0,
+      paddingVertical: 10,
       fontFamily: tennisFontFamily.body,
       fontSize: 14,
       color: tennisColors.primaryDark,
     },
-    noteWrap: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 8,
-      gap: 6,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: tennisColors.border,
+    noteBlock: {
+      gap: 4,
+      marginTop: 2,
     },
-    noteLabel: {
-      fontFamily: tennisFontFamily.bodySemi,
+    noteToggle: {
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+      minHeight: 32,
+      paddingVertical: 0,
+    },
+    noteToggleLabel: {
+      flex: 1,
+      fontFamily: tennisFontFamily.bodyMedium,
       fontSize: 13,
-      color: tennisColors.primaryDark,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+    },
+    noteEditor: {
+      gap: 4,
     },
     noteInput: {
-      minHeight: 64,
+      minHeight: 56,
       paddingVertical: 10,
       paddingHorizontal: 12,
       backgroundColor: tennisColors.card,
@@ -624,21 +627,6 @@ const styles = createLiveSheet(() =>
       fontSize: 14,
       color: tennisColors.primaryDark,
       textAlignVertical: "top",
-    },
-    noteMetaRow: {
-      gap: 8,
-      alignItems: "flex-start",
-    },
-    noteHint: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 12,
-      lineHeight: 16,
-      color: tennisColors.mutedForeground,
-    },
-    noteCounter: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 12,
-      color: tennisColors.mutedForeground,
     },
     list: {
       flex: 1,
@@ -652,11 +640,11 @@ const styles = createLiveSheet(() =>
       height: 12,
     },
     listLoader: {
-      marginTop: 32,
+      marginTop: 24,
     },
     emptyState: {
       gap: 12,
-      paddingTop: 16,
+      paddingTop: 4,
     },
     emptyText: {
       fontFamily: tennisFontFamily.body,
@@ -671,8 +659,8 @@ const styles = createLiveSheet(() =>
       color: tennisColors.danger,
     },
     footer: {
-      gap: 8,
-      paddingTop: 10,
+      gap: 10,
+      paddingTop: 12,
       paddingHorizontal: 20,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: tennisColors.border,
@@ -686,11 +674,8 @@ const styles = createLiveSheet(() =>
       textAlign: "center",
     },
     footerButton: {
-      alignSelf: "center",
+      alignSelf: "stretch",
       minHeight: minTouchTargetPx,
-      minWidth: 168,
-      paddingVertical: 10,
-      paddingHorizontal: 28,
       borderRadius: tennisRadii.md,
     },
   }),

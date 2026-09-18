@@ -36,6 +36,15 @@ export const tennisColorsLight = {
   white: "#FFFFFF",
   heroOverlay: "rgba(255,255,255,0.12)",
   heroBorder: "rgba(255,255,255,0.15)",
+  // Hero grounds — full-bleed onboarding art fields, scheme-independent.
+  heroGreen: "#0C382E",
+  heroGreenDeep: "#0A2D25",
+  heroGreenLift: "#124436",
+  heroPlate: "#3F7A5C",
+  heroInk: "#0A1F18",
+  heroMint: "#A7C7AF",
+  heroClay: "#E8DCC2",
+  heroOnLight: "#0D1C14",
 } as const;
 
 /**
@@ -63,6 +72,15 @@ export const tennisColorsDark = {
   white: "#FFFFFF",
   heroOverlay: "rgba(255,255,255,0.08)",
   heroBorder: "rgba(255,255,255,0.12)",
+  // Same hero values as light — onboarding art must not invert with the scheme.
+  heroGreen: "#0C382E",
+  heroGreenDeep: "#0A2D25",
+  heroGreenLift: "#124436",
+  heroPlate: "#3F7A5C",
+  heroInk: "#0A1F18",
+  heroMint: "#A7C7AF",
+  heroClay: "#E8DCC2",
+  heroOnLight: "#0D1C14",
 } as const;
 
 /**
@@ -241,6 +259,7 @@ export const tennisRadii = {
   xl: 16,
   hero: 24,
   pill: 20,
+  control: 11,
 } as const;
 
 export const tennisSpacing = {

@@ -50,3 +50,17 @@ export async function requestAccountDeletion(client: TennisSupabaseClient) {
   const { error } = await client.rpc("request_account_deletion");
   if (error) throw error;
 }
+
+/**
+ * Withdraw a pending deletion request and return the account to `active`.
+ *
+ * Callable while the account is *not* marketplace-eligible, which is the whole
+ * point: `deletion_requested` fails `assert_discovery_caller_eligible`, so
+ * every other RPC refuses these callers. Without this the state has no exit --
+ * the app is unusable and the e-mail stays registered, so signing up again is
+ * refused too.
+ */
+export async function cancelAccountDeletion(client: TennisSupabaseClient) {
+  const { error } = await client.rpc("cancel_account_deletion");
+  if (error) throw error;
+}

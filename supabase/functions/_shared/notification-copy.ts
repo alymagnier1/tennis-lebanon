@@ -95,6 +95,14 @@ export const NOTIFICATION_COPY: Record<
       title: "Your request was not accepted",
       body: "The host went with someone else this time. Other matches are still looking for players.",
     },
+    match_invitation_superseded: {
+      title: "That match filled up",
+      body: "The spot you were invited to has gone. Other matches near you are still looking for players.",
+    },
+    match_seat_reopened: {
+      title: "A spot opened up",
+      body: "Someone dropped out of a match you were invited to. Your invite is back in Matches.",
+    },
     match_request_withdrawn: {
       title: "A join request was withdrawn",
       body: "Someone who asked to join your match has changed their mind.",
@@ -185,6 +193,14 @@ export const NOTIFICATION_COPY: Record<
       title: "لم يُقبل طلبك",
       body: "اختار المضيف لاعبًا آخر هذه المرة. هناك مباريات أخرى تبحث عن لاعبين.",
     },
+    match_invitation_superseded: {
+      title: "اكتملت تلك المباراة",
+      body: "شُغل المكان الذي دُعيت إليه. هناك مباريات أخرى قريبة منك لا تزال تبحث عن لاعبين.",
+    },
+    match_seat_reopened: {
+      title: "شغر مكان",
+      body: "انسحب أحد اللاعبين من مباراة دُعيت إليها. دعوتك متاحة مجددًا في المباريات.",
+    },
     match_request_withdrawn: {
       title: "تم سحب طلب انضمام",
       body: "غيّر أحد من طلب الانضمام إلى مباراتك رأيه.",
@@ -274,6 +290,14 @@ export const NOTIFICATION_COPY: Record<
     match_request_declined: {
       title: "Votre demande n'a pas été retenue",
       body: "L'hôte a choisi quelqu'un d'autre cette fois. D'autres matchs cherchent encore des joueurs.",
+    },
+    match_invitation_superseded: {
+      title: "Ce match est complet",
+      body: "La place à laquelle vous étiez invité est prise. D'autres matchs près de chez vous cherchent encore des joueurs.",
+    },
+    match_seat_reopened: {
+      title: "Une place s'est libérée",
+      body: "Un joueur s'est retiré d'un match auquel vous étiez invité. Votre invitation est de nouveau dans Matchs.",
     },
     match_request_withdrawn: {
       title: "Une demande a été retirée",

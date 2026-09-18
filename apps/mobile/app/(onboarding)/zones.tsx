@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router } from "expo-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -11,21 +12,32 @@ import {
   FigmaPrimaryButton,
   FigmaSecondaryButton,
   OnboardingStepLayout,
-  SelectionCard,
+  UpcomingZoneCard,
+  ZoneChoiceCard,
 } from "../../src/components/onboarding-ui";
 import { autoSelectedZoneIds } from "../../src/lib/onboarding-zone-autoselect";
 import { joinOnboardingAreaNames } from "../../src/lib/onboarding-commitment";
+import { upcomingZonesToShow } from "../../src/lib/upcoming-onboarding-zones";
 import { submitOnboardingDraft } from "../../src/lib/submit-onboarding";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { useOnboarding } from "../../src/providers/OnboardingProvider";
-import { tennisTextStyles } from "../../src/theme/tennis-text-styles";
+import { tennisSemantic, tennisRadii } from "../../src/theme/tennis-tokens";
+import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
 function zoneName(names: Json, locale: string): string {
   if (names && typeof names === "object" && !Array.isArray(names)) {
     const localized = names[locale];
     const english = names.en;
     if (typeof localized === "string") return localized;
+    if (typeof english === "string") return english;
+  }
+  return "";
+}
+
+function zoneEnglishName(names: Json): string {
+  if (names && typeof names === "object" && !Array.isArray(names)) {
+    const english = names.en;
     if (typeof english === "string") return english;
   }
   return "";
@@ -90,6 +102,10 @@ export default function ZonesScreen() {
         })
       : null;
 
+  const upcoming = upcomingZonesToShow(
+    (zones ?? []).map((zone) => zoneEnglishName(zone.name_i18n)),
+  );
+
   return (
     <OnboardingStepLayout
       title={t("onboarding.zones.title")}
@@ -104,6 +120,7 @@ export default function ZonesScreen() {
           ) : null}
           <FigmaPrimaryButton
             label={t("onboarding.review.finish")}
+            hero
             disabled={draft.zoneIds.length === 0}
             loading={mutation.isPending}
             onPress={() => mutation.mutate()}
@@ -125,16 +142,51 @@ export default function ZonesScreen() {
         <ErrorNotice>{t("onboarding.zones.empty")}</ErrorNotice>
       ) : null}
       {zones?.map((zone) => (
-        <SelectionCard
+        <ZoneChoiceCard
           key={zone.id}
           label={zoneName(zone.name_i18n, locale)}
           selected={draft.zoneIds.includes(zone.id)}
           onPress={() => toggle(zone.id)}
         />
       ))}
+      {upcoming.length > 0 ? (
+        <View style={styles.upcomingRow}>
+          {upcoming.map((zone) => (
+            <UpcomingZoneCard
+              key={zone.id}
+              label={t(zone.nameKey)}
+              hint={t("onboarding.zones.comingSoon")}
+            />
+          ))}
+        </View>
+      ) : null}
       {commitmentEcho ? (
-        <AppText style={tennisTextStyles.fieldHint}>{commitmentEcho}</AppText>
+        <View style={styles.echo}>
+          <AppText style={styles.echoText}>{commitmentEcho}</AppText>
+        </View>
       ) : null}
     </OnboardingStepLayout>
   );
 }
+
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    upcomingRow: {
+      flexDirection: "row",
+      gap: 10,
+      marginBottom: 16,
+    },
+    echo: {
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: tennisRadii.md,
+      backgroundColor: tennisSemantic.info.fill,
+    },
+    echoText: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12.5,
+      lineHeight: 18,
+      color: tennisSemantic.info.text,
+    },
+  }),
+);

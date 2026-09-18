@@ -2,8 +2,8 @@ import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
   FigmaPrimaryButton,
-  FigmaSecondaryButton,
   OnboardingStepLayout,
+  PolicyDocumentList,
   PolicyToggleCard,
 } from "../../src/components/onboarding-ui";
 import { useAuth } from "../../src/providers/AuthProvider";
@@ -18,10 +18,6 @@ export default function ConsentScreen() {
     draft.acceptedPrivacy &&
     draft.acceptedCommunityRules;
 
-  // One affirmative act covering all three documents. Each stays separately
-  // readable and is still stored as its own flag, so nothing downstream changes
-  // -- this only stops the funnel asking for three taps at its highest
-  // drop-off point.
   const toggleAll = () => {
     const next = !complete;
     updateDraft({
@@ -45,30 +41,39 @@ export default function ConsentScreen() {
       step={1}
       totalSteps={3}
       onBack={leaveOnboarding}
+      backAccessibilityLabel={t("onboarding.consent.leave")}
       footer={
         <FigmaPrimaryButton
           label={t("common.continue")}
+          hero
           disabled={!complete}
           onPress={() => router.push("/(onboarding)/identity")}
         />
       }
     >
+      <PolicyDocumentList
+        items={[
+          {
+            key: "terms",
+            label: t("onboarding.consent.documentTerms"),
+            onPress: () => router.push("/policies?document=terms"),
+          },
+          {
+            key: "privacy",
+            label: t("onboarding.consent.documentPrivacy"),
+            onPress: () => router.push("/policies?document=privacy"),
+          },
+          {
+            key: "community",
+            label: t("onboarding.consent.documentCommunity"),
+            onPress: () => router.push("/policies?document=community"),
+          },
+        ]}
+      />
       <PolicyToggleCard
         label={t("onboarding.consent.acceptAll")}
         selected={complete}
         onPress={toggleAll}
-      />
-      <FigmaSecondaryButton
-        label={t("onboarding.consent.readTerms")}
-        onPress={() => router.push("/policies?document=terms")}
-      />
-      <FigmaSecondaryButton
-        label={t("onboarding.consent.readPrivacy")}
-        onPress={() => router.push("/policies?document=privacy")}
-      />
-      <FigmaSecondaryButton
-        label={t("onboarding.consent.readCommunity")}
-        onPress={() => router.push("/policies?document=community")}
       />
     </OnboardingStepLayout>
   );
