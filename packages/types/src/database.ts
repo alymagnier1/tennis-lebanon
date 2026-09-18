@@ -1820,6 +1820,7 @@ export type Database = {
         Returns: string;
       };
       booking_stale_reminders: { Args: never; Returns: Json };
+      cancel_account_deletion: { Args: never; Returns: undefined };
       cancel_booking_request: {
         Args: { p_booking_id: string };
         Returns: undefined;

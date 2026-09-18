@@ -1430,16 +1430,18 @@
     "description": "Gérez votre compte et vos préférences.",
     "policies": "Consulter les politiques",
     "rtlLayoutCheck": "Vérification mise en page RTL",
-    "requestDeletion": "Demander la suppression du compte",
-    "deleteTitle": "Demander la suppression du compte ?",
-    "deleteDescription": "Cette action envoie une demande de suppression et peut limiter l’accès au compte pendant son examen.",
+    "requestDeletion": "Supprimer mon compte",
+    "deleteTitle": "Supprimer votre compte ?",
+    "deleteDescription": "Ceci supprime votre compte immédiatement et vous déconnecte. Votre nom et votre photo sont retirés, et vous quittez tout match non encore joué. Les résultats passés restent enregistrés pour vos adversaires, sous la mention joueur supprimé. Votre e-mail est libéré : vous pourrez vous réinscrire. Ceci est irréversible.",
     "deleteError": "Impossible d’envoyer votre demande de suppression. Veuillez réessayer.",
     "versionFooter": "RacketBound v{{version}} · Fabriqué au Liban 🇱🇧"
   },
   "account": {
     "unavailableTitle": "Compte indisponible",
     "suspendedBody": "Ce compte est suspendu. Contactez l’assistance via le canal officiel pour demander un examen.",
-    "deletionPendingBody": "Votre demande de suppression est en attente et l’accès au compte est limité.",
+    "deletionPendingBody": "Votre demande de suppression est en cours, l'accès au compte est donc restreint. Votre e-mail reste enregistré jusqu'à ce que le support la traite, vous ne pouvez donc pas encore vous réinscrire avec. Vous pouvez aussi conserver le compte.",
+    "keepAccount": "Conserver mon compte",
+    "keepAccountError": "Impossible de restaurer ce compte.",
     "contactSupport": "Contacter l’assistance"
   },
   "slotPicker": {

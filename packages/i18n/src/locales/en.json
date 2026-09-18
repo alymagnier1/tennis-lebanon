@@ -1564,16 +1564,18 @@
     "description": "Manage your account and preferences.",
     "policies": "View policies",
     "rtlLayoutCheck": "RTL layout check",
-    "requestDeletion": "Request account deletion",
-    "deleteTitle": "Request account deletion?",
-    "deleteDescription": "This submits a deletion request and may restrict account access while it is reviewed.",
+    "requestDeletion": "Delete my account",
+    "deleteTitle": "Delete your account?",
+    "deleteDescription": "This deletes your account straight away and signs you out. Your name and photo are removed and you leave any match that has not been played. Past results stay on record for the players you played against, shown as a deleted player. Your email is freed, so you can sign up again from scratch. This cannot be undone.",
     "deleteError": "We could not submit your deletion request. Please try again.",
     "versionFooter": "RacketBound v{{version}} · Made in Lebanon 🇱🇧"
   },
   "account": {
     "unavailableTitle": "Account unavailable",
     "suspendedBody": "This account is suspended. Contact support from the official support channel for a review.",
-    "deletionPendingBody": "Your deletion request is pending and account access is restricted.",
+    "deletionPendingBody": "Your deletion request is pending, so account access is restricted. Your email stays registered until support completes it, so you cannot sign up again with it yet. You can keep the account instead.",
+    "keepAccount": "Keep my account",
+    "keepAccountError": "We could not restore this account.",
     "contactSupport": "Contact support"
   },
   "slotPicker": {
