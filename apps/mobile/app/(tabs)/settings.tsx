@@ -32,6 +32,7 @@ import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { useTennisTheme } from "../../src/providers/ThemeProvider";
+import { useHeroVariant } from "../../src/providers/HeroVariantProvider";
 import { tennisColors } from "../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
@@ -39,6 +40,7 @@ export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const { refreshProfile, signOut } = useAuth();
   const { preference, setPreference } = useTennisTheme();
+  const { family, setFamily } = useHeroVariant();
   const { rowDirection } = useLayoutDirection();
   const [signOutError, setSignOutError] = useState(false);
 
@@ -131,6 +133,26 @@ export default function SettingsScreen() {
               />
             </View>
           </PlayerProfileSection>
+
+          {__DEV__ ? (
+            <PlayerProfileSection title={t("settingsOnboardingHero")}>
+              <AppText style={styles.heroHint}>
+                {t("settingsOnboardingHeroHint")}
+              </AppText>
+              <View style={[styles.chips, { flexDirection: rowDirection }]}>
+                <ChipButton
+                  label={t("settingsOnboardingHeroGreen")}
+                  selected={family === "green"}
+                  onPress={() => setFamily("green")}
+                />
+                <ChipButton
+                  label={t("settingsOnboardingHeroLight")}
+                  selected={family === "light"}
+                  onPress={() => setFamily("light")}
+                />
+              </View>
+            </PlayerProfileSection>
+          ) : null}
 
           <PlayerProfileSection
             title={settingsScreenGeneralTitle(t)}
@@ -247,6 +269,13 @@ const styles = createLiveSheet(() =>
     chips: {
       flexWrap: "wrap",
       gap: 8,
+    },
+    heroHint: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 18,
+      color: tennisColors.mutedForeground,
+      marginBottom: 10,
     },
     deleteButton: {
       alignItems: "center",

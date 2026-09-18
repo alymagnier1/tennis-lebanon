@@ -35,7 +35,15 @@ export function matchInviteErrorKey(error: unknown): string {
       ? (error as { message?: unknown }).message
       : error;
 
-  return typeof message === "string" && message.includes("invite_rate_limited")
-    ? "matches.invite.rateLimited"
-    : "matches.invite.error";
+  if (typeof message !== "string") return "matches.invite.error";
+
+  if (message.includes("invite_rate_limited")) {
+    return "matches.invite.rateLimited";
+  }
+  // Per match, not per day, and the fix is the opposite one: the host does not
+  // wait, they withdraw an invitation nobody answered.
+  if (message.includes("invite_cap_reached")) {
+    return "matches.invite.capReached";
+  }
+  return "matches.invite.error";
 }

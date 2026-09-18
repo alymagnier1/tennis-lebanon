@@ -483,6 +483,28 @@ describe("sortUpcomingMatches", () => {
 
     expect(upcoming.map((row) => row.match_id)).toEqual(["confirmed", "open"]);
   });
+
+  // The Matches tab files these under "Requests you sent". Listing the same row
+  // here under a heading that says the opposite is one match telling two
+  // stories, and the host may still say no.
+  it("excludes a join request the viewer sent", () => {
+    const upcoming = sortUpcomingMatches([
+      match({
+        match_id: "asked",
+        status: "open",
+        participant_status: "requested",
+        soonest_time: "2026-08-16T15:00:00.000Z",
+      }),
+      match({
+        match_id: "joined",
+        status: "open",
+        participant_status: "accepted",
+        soonest_time: "2026-08-18T15:00:00.000Z",
+      }),
+    ]);
+
+    expect(upcoming.map((row) => row.match_id)).toEqual(["joined"]);
+  });
 });
 
 describe("homeNextActionRoute", () => {

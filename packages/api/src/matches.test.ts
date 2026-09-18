@@ -6,6 +6,7 @@ import {
   castMatchTimeVote,
   createAndPublishMatch,
   createMatchDraft,
+  cancelMatchInvite,
   createMatchInvite,
   declineMatchInvitation,
   getMatchHub,
@@ -200,6 +201,19 @@ describe("matches API wrappers", () => {
     await declineMatchInvitation(client, "invite-id");
     expect(rpc).toHaveBeenCalledWith("decline_match_invitation", {
       p_invitation_id: "invite-id",
+    });
+  });
+
+  // Separate RPC from declining on purpose: a withdrawal leaves `declined_at`
+  // null, which is what lets the hub tell "they said no" from "I took it back".
+  it("withdraws an invitation the host sent", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValueOnce({ data: null, error: null });
+
+    await cancelMatchInvite(client, "match-id", "user-id");
+    expect(rpc).toHaveBeenCalledWith("cancel_match_invite", {
+      p_match_id: "match-id",
+      p_invited_user_id: "user-id",
     });
   });
 

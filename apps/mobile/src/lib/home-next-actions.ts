@@ -5,6 +5,9 @@ import type {
 } from "@tennis-lebanon/api";
 import { canReportMatchPlayed } from "@tennis-lebanon/domain";
 import { isLastOpenMatchSpot } from "./open-match-scarcity";
+// One definition of "a request you sent", shared with the Matches tab so the
+// two surfaces cannot drift back apart.
+import { isSentJoinRequest } from "./match-list-card";
 
 /**
  * Exported so `homeNextActionTone`, `homeNextActionLabelKey` and
@@ -321,7 +324,15 @@ function mostRecentRematchCandidate(
 
 export function sortUpcomingMatches(matches: MyMatchRow[]): MyMatchRow[] {
   return [...matches]
-    .filter((match) => UPCOMING_LIST_STATUSES.has(match.status))
+    .filter(
+      (match) =>
+        UPCOMING_LIST_STATUSES.has(match.status) &&
+        // A match you have asked to join is not upcoming — nothing about it is
+        // settled, and the host may yet say no. The Matches tab files these
+        // under "Requests you sent"; listing them here as well, under a
+        // heading that says the opposite, is the same row telling two stories.
+        !isSentJoinRequest(match),
+    )
     .sort((left, right) => {
       if (!left.soonest_time && !right.soonest_time) {
         return right.updated_at.localeCompare(left.updated_at);

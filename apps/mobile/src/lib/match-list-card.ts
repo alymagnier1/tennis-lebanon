@@ -24,10 +24,31 @@ export type MatchTabBadgeCounts = {
 type ActiveListMatch = {
   status: string;
   viewer_attendance?: string | null;
+  participant_status?: string | null;
 };
 
 export function isLookingMatchStatus(status: string): boolean {
   return status === "open" || status === "full" || status === "draft";
+}
+
+/**
+ * A match you asked to join and have not been let into.
+ *
+ * It is not an active match — nothing about it is yours to act on, and the
+ * roster can fill and the time can be agreed while the host has still not
+ * answered. It belongs beside invitations, which are the same waiting state
+ * pointed the other way, so it is filtered out of Active and out of every
+ * badge: a sent request is waiting on somebody else, and badging what the
+ * reader cannot act on is nagging rather than informing.
+ */
+export function isSentJoinRequest(match: ActiveListMatch): boolean {
+  return match.participant_status === "requested";
+}
+
+export function selectSentJoinRequests<T extends ActiveListMatch>(
+  matches: T[],
+): T[] {
+  return matches.filter(isSentJoinRequest);
 }
 
 /**
@@ -64,6 +85,7 @@ export function groupActiveMatches<T extends ActiveListMatch>(
   };
 
   for (const match of matches) {
+    if (isSentJoinRequest(match)) continue;
     if (!isViewerActiveMatch(match)) continue;
     grouped[activeMatchGroup(match)].push(match);
   }

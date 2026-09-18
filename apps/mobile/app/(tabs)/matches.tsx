@@ -18,6 +18,7 @@ import {
   listMyMatchInvites,
   listMyMatches,
   listMyCompletedMatches,
+  withdrawJoinRequest,
   type MyMatchRow,
 } from "@tennis-lebanon/api";
 
@@ -30,6 +31,7 @@ import {
   EmptyState,
   ListSkeleton,
   MatchCard,
+  SectionTitle,
   SegmentTabs,
   appStyles,
 } from "../../src/components/AppUi";
@@ -70,6 +72,7 @@ import {
   matchListStartsAt,
   matchTabBadgeCounts,
   completedMatchNeedsScore,
+  selectSentJoinRequests,
   type ActiveMatchGroup,
 } from "../../src/lib/match-list-card";
 import {
@@ -216,8 +219,26 @@ export default function MatchesScreen() {
     onError: () => notify(t("matches.lifecycle.extendError")),
   });
 
+  const withdrawRequestMutation = useMutation({
+    mutationFn: (matchId: string) => withdrawJoinRequest(supabase, matchId),
+
+    onSuccess: invalidate,
+
+    onError: () => notify(t("matches.hub.withdrawRequestError")),
+  });
+
   const groupedActive = useMemo(
     () => groupActiveMatches(matchesQuery.data ?? []),
+    [matchesQuery.data],
+  );
+
+  /**
+   * Shown under the invitations, not in Active. Both are the same waiting
+   * state — one where somebody is waiting on you, one where you are waiting on
+   * them — and the Active list is for matches that are actually yours.
+   */
+  const sentRequests = useMemo(
+    () => selectSentJoinRequests(matchesQuery.data ?? []),
     [matchesQuery.data],
   );
 
@@ -275,9 +296,17 @@ export default function MatchesScreen() {
   // resolves to `data ?? []`, so without the guard "nothing here yet" renders
   // on top of the error and reads as a verdict on the pilot rather than a fetch
   // that failed.
+  /*
+   * The sent-requests group rides `matchesQuery`, but this segment's loading
+   * and error states stay tied to `invitesQuery` alone. Coupling them would let
+   * a failed match list blank out invitations that loaded perfectly well, and
+   * the Active segment already surfaces that error where it belongs. A failed
+   * match list resolves `sentRequests` to `[]`, so the group is simply absent.
+   */
   const showEmptyInvites =
     segment === "invites" &&
     invitesQuery.data?.length === 0 &&
+    sentRequests.length === 0 &&
     !invitesQuery.isLoading &&
     !invitesQuery.isError;
 
@@ -316,6 +345,63 @@ export default function MatchesScreen() {
     if (segment === "active") void matchesQuery.refetch();
     if (segment === "completed") void completedQuery.refetch();
   };
+
+  /**
+   * A match the viewer asked to join and is still waiting on.
+   *
+   * Deliberately thinner than an active row: no dismiss, no action pill, no
+   * extend. The only thing this player can do is stop waiting, and the card
+   * itself opens the hub for the rest. `matchListAction` already resolves a
+   * `requested` row to "Request sent" ahead of whatever the match is doing, so
+   * the status pill stays honest even once the roster has filled around them.
+   */
+  function renderSentRequest(match: MyMatchRow) {
+    const headlineInput = {
+      opponentNames: match.opponent_names,
+      status: match.status,
+      participantCount: match.participant_count,
+      capacity: match.capacity,
+    };
+    const action = matchListAction({
+      status: match.status,
+      isCreator: match.is_creator,
+      viewerAttendance: match.viewer_attendance,
+      participantStatus: match.participant_status,
+    });
+    const startsAt = matchListStartsAt(match);
+
+    return (
+      <View key={match.match_id} style={formStyles.stack}>
+        <MatchCard
+          status={match.status}
+          statusLabel={t(`matches.status.${match.status}`)}
+          actionLabel={action ? t(action.labelKey) : undefined}
+          actionTone={action?.tone}
+          dateTimeLabel={
+            startsAt ? formatCompactUtcInBeirut(startsAt) : undefined
+          }
+          headline={buildMatchCardHeadline(t, headlineInput)}
+          viewerName={viewerName}
+          viewerAvatarPath={profile?.avatar_path}
+          formatChip={t(`formats.${match.format}`)}
+          locationChip={`${match.participant_count}/${match.capacity}`}
+          areaChip={matchCardAreaLabel(match.zones, locale, { compact: true })}
+          onPress={() =>
+            router.push({
+              pathname: "/match/[id]",
+              params: { id: match.match_id },
+            })
+          }
+        />
+
+        <SecondaryButton
+          label={t("matches.requests.cancel")}
+          disabled={withdrawRequestMutation.isPending}
+          onPress={() => withdrawRequestMutation.mutate(match.match_id)}
+        />
+      </View>
+    );
+  }
 
   function renderActiveMatch(match: MyMatchRow) {
     const headlineInput = {
@@ -559,6 +645,21 @@ export default function MatchesScreen() {
                 ))
               : null}
           </View>
+
+          {/*
+            The other half of the same waiting state. Invitations above are
+            waiting on this player; these are waiting on somebody else, which
+            is why they carry a heading, no badge, and one action.
+          */}
+          {!segmentLoading && sentRequests.length > 0 ? (
+            <View style={appStyles.cardList}>
+              <SectionTitle
+                title={t("matches.requests.sentTitle")}
+                subtitle={t("matches.requests.sentSubtitle")}
+              />
+              {sentRequests.map(renderSentRequest)}
+            </View>
+          ) : null}
         </>
       ) : segment === "active" ? (
         <>

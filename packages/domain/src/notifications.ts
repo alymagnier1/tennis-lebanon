@@ -8,6 +8,8 @@
  */
 export const NOTIFICATION_KINDS = [
   "match_invitation",
+  "match_invitation_superseded",
+  "match_seat_reopened",
   "stale_match_reminder",
   "match_expired",
   "match_cancelled",

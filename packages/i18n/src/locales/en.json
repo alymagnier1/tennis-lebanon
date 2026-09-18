@@ -27,6 +27,10 @@
   "settingsAppearanceSystem": "System",
   "settingsAppearanceLight": "Light",
   "settingsAppearanceDark": "Dark",
+  "settingsOnboardingHero": "Onboarding hero",
+  "settingsOnboardingHeroHint": "Design comparison. Welcome and Done follow this together.",
+  "settingsOnboardingHeroGreen": "Green",
+  "settingsOnboardingHeroLight": "Clay",
   "settingsScreenSupport": "Support",
   "settingsScreenAccount": "Account",
   "dashboard": {
@@ -311,10 +315,15 @@
     "signOutError": "We could not sign you out. Please try again."
   },
   "onboarding": {
+    "stepEyebrow": "Step {{step}} of {{total}}",
     "consent": {
       "title": "Before you continue",
       "description": "Read each one, then accept to continue. These apply to the RacketBound pilot.",
       "acceptAll": "I accept the Terms of Use, Privacy Notice and Community Rules",
+      "leave": "Leave setup",
+      "documentTerms": "Terms of Use",
+      "documentPrivacy": "Privacy Notice",
+      "documentCommunity": "Community Rules",
       "terms": "I accept the Terms of Use draft",
       "readTerms": "Read Terms of Use",
       "privacy": "I accept the Privacy Notice draft",
@@ -334,6 +343,7 @@
       "gender": "Gender (optional)",
       "photo": "Profile photo (optional)",
       "photoAdd": "Add a photo",
+      "photoAdded": "Photo added",
       "photoChange": "Change photo",
       "photoHint": "Players recognise a face faster than a name. You can add one later instead.",
       "adultConfirm": "I confirm that I am 18 or older",
@@ -363,7 +373,10 @@
       "description": "Choose one or more broad areas. We never ask for your home address.",
       "loadError": "We could not load the available areas.",
       "empty": "No pilot areas are available yet.",
-      "commitmentEcho": "We’ll look for {{band}} in {{areas}}."
+      "commitmentEcho": "We’ll look for {{band}} in {{areas}}.",
+      "comingSoon": "Coming soon",
+      "upcomingTripoli": "Tripoli",
+      "upcomingSaida": "Saida"
     },
     "notifications": {
       "title": "Stay in the loop",
@@ -388,6 +401,7 @@
       "finish": "Finish setup"
     },
     "complete": {
+      "statusPill": "Setup complete",
       "title": "You're all set,",
       "titleAccent": "{{name}}!",
       "description": "Your profile is ready. Find an open match, or organise one for tonight.",
@@ -605,6 +619,14 @@
       "match_invitation": {
         "title": "{{name}} invited you to play",
         "body": "Open it to accept or decline."
+      },
+      "match_invitation_superseded": {
+        "title": "That match filled up",
+        "body": "The spot you were invited to has gone. Other matches near you are still looking for players."
+      },
+      "match_seat_reopened": {
+        "title": "A spot opened up",
+        "body": "Someone dropped out of a match you were invited to. Your invite is back in Matches."
       },
       "stale_match_reminder": {
         "title": "Your match expires soon",
@@ -1081,6 +1103,11 @@
         "matchOn": "Match is on"
       }
     },
+    "requests": {
+      "sentTitle": "Requests you sent",
+      "sentSubtitle": "Waiting for the host to answer.",
+      "cancel": "Cancel request"
+    },
     "lifecycle": {
       "staleBadge": "Expiring soon",
       "staleWarning": "This match may expire soon. Add a new time or tap Still looking? to keep it active.",
@@ -1127,9 +1154,14 @@
       "participants": "Participants",
       "proposedTimes": "Proposed times",
       "pendingRequests": "Join requests",
+      "waitlist": "Waitlist",
+      "waitlistHint": "Your match is full, so these are waiting in case a spot opens. You can still turn one down.",
       "invitedTitle": "Invited",
       "invitedWaiting": "Waiting to answer",
       "invitedDeclined": "Declined",
+      "invitedOnHold": "On hold — match full",
+      "cancelInvite": "Withdraw",
+      "cancelInviteError": "We could not withdraw this invite.",
       "join": "Join match",
       "requestJoin": "Request to join",
       "joinNoteLabel": "Add a note for the host (optional)",
@@ -1137,12 +1169,14 @@
       "joinNoteHint": "The host sees this with your request.",
       "joinSuccess": "You joined this match.",
       "requestSentSuccess": "Request sent. The host will let you know.",
+      "requestPendingBanner": "You have asked to join. The host will let you know.",
       "joinError": "We could not join this match.",
       "joinTimeConflict": "You already have a match at that time.",
       "joinFull": "That match filled up before you got in.",
       "approve": "Approve",
       "reject": "Reject",
       "respondError": "We could not update this request.",
+      "respondFull": "This match is already full.",
       "shareInvite": "Share invite link",
       "leave": "Leave match",
       "leaveError": "We could not leave this match.",
@@ -1359,6 +1393,8 @@
       "sent": "Invite sent. They will see it in Matches → Invites.",
       "inviteToMatch": "Invite to {{format}} match",
       "invitePlayer": "Invite",
+      "inviteAgain": "Invite again",
+      "onHold": "On hold",
       "invitePlayers": "Invite players",
       "requestedLabel": "Asked to join",
       "joinedLabel": "In the match",
@@ -1388,18 +1424,25 @@
       "pendingCount": "{{count}} player(s) to invite",
       "autoSendOnPublish": "They will receive an in-app invite when you publish.",
       "rateLimited": "You have sent a lot of invites today. Try again tomorrow.",
+      "capReached": "You have enough invites out for this match. Withdraw one from the match to send another.",
       "notSentTitle": "Match created, invite not sent",
       "askToPlay": "Ask to play",
       "filteredToTime": "Showing players free {{time}}",
       "showAllTimes": "Show players outside this time",
       "onlyMatchTime": "Only players free then",
-      "noPlayersAtTime": "No one has said they are free {{time}}. Widen below, or change the match time.",
-      "noPlayersHere": "No compatible players for this match yet. Try widening below.",
+      "freePlayersChip": "Free players",
+      "timeChipLabel": "Available {{time}}",
+      "timeChipActive": "Available {{time}}",
+      "timeChipInactive": "Show who is free {{time}}",
+      "noPlayersAtTime": "No one has said they are free {{time}}. Turn off the time filter above to include other times, or change the match time.",
+      "noPlayersHere": "No compatible players for this match yet. Try inviting later from a profile.",
       "noteLabel": "Add a note (optional)",
       "notePlaceholder": "Fancy a hit Saturday morning?",
-      "noteHint": "Shown with every invite you send from this screen. Not included in the push notification.",
+      "noteHint": "Sent with every invite from this screen. Not in the push notification.",
       "noteCounter": "{{count}}/{{max}}",
-      "noteQuote": "\"{{note}}\""
+      "noteQuote": "\"{{note}}\"",
+      "noteEdit": "Edit note",
+      "noteHide": "Hide note"
     },
     "policy": {
       "leaveBeforeBooking": "You can leave freely while no court is booked. Repeated late changes may affect your reliability.",

@@ -14,6 +14,7 @@ import { initSentry } from "../src/lib/sentry";
 import { AuthProvider } from "../src/providers/AuthProvider";
 import { ThemeProvider } from "../src/providers/ThemeProvider";
 import { OnboardingProvider } from "../src/providers/OnboardingProvider";
+import { HeroVariantProvider } from "../src/providers/HeroVariantProvider";
 import { PushTokenRegistration } from "../src/components/PushTokenRegistration";
 import { NotificationLocaleSync } from "../src/components/NotificationLocaleSync";
 import { NotificationDeepLinkHandler } from "../src/components/NotificationDeepLinkHandler";
@@ -89,26 +90,28 @@ export default function RootLayout() {
                   <NotificationDeepLinkHandler />
                   <UnreadMessagesWatcher />
                   <OnboardingProvider>
-                    <Stack screenOptions={{ headerShown: false }}>
-                      <Stack.Screen name="index" />
-                      <Stack.Screen name="(public)" />
-                      <Stack.Screen name="(auth)" />
-                      <Stack.Screen name="(onboarding)" />
-                      <Stack.Screen name="(tabs)" />
-                      <Stack.Screen name="player/[id]" />
-                      <Stack.Screen name="profile/availability" />
-                      <Stack.Screen name="profile/edit" />
-                      <Stack.Screen name="profile/match-defaults" />
-                      <Stack.Screen name="profile/notifications" />
-                      <Stack.Screen name="profile/where-i-play" />
-                      <Stack.Screen name="profile/tennis-preferences" />
-                      <Stack.Screen name="notifications" />
-                      <Stack.Screen name="match/[id]" />
-                      <Stack.Screen name="match/create" />
-                      <Stack.Screen name="clubs/[id]" />
-                      <Stack.Screen name="invite/[token]" />
-                      <Stack.Screen name="policies" />
-                    </Stack>
+                    <HeroVariantProvider>
+                      <Stack screenOptions={{ headerShown: false }}>
+                        <Stack.Screen name="index" />
+                        <Stack.Screen name="(public)" />
+                        <Stack.Screen name="(auth)" />
+                        <Stack.Screen name="(onboarding)" />
+                        <Stack.Screen name="(tabs)" />
+                        <Stack.Screen name="player/[id]" />
+                        <Stack.Screen name="profile/availability" />
+                        <Stack.Screen name="profile/edit" />
+                        <Stack.Screen name="profile/match-defaults" />
+                        <Stack.Screen name="profile/notifications" />
+                        <Stack.Screen name="profile/where-i-play" />
+                        <Stack.Screen name="profile/tennis-preferences" />
+                        <Stack.Screen name="notifications" />
+                        <Stack.Screen name="match/[id]" />
+                        <Stack.Screen name="match/create" />
+                        <Stack.Screen name="clubs/[id]" />
+                        <Stack.Screen name="invite/[token]" />
+                        <Stack.Screen name="policies" />
+                      </Stack>
+                    </HeroVariantProvider>
                   </OnboardingProvider>
                 </AuthProvider>
               </ConfirmDialogProvider>

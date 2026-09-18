@@ -8,6 +8,7 @@ import {
   type Path,
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { OnboardingFormField, onboardingInputStyle } from "../onboarding-ui";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
@@ -24,6 +25,8 @@ export function AuthEmailPasswordFields<T extends EmailPasswordFields>({
 }) {
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   return (
     <>
@@ -39,14 +42,22 @@ export function AuthEmailPasswordFields<T extends EmailPasswordFields>({
               accessibilityLabel={t("auth.emailLabel")}
               value={field.value}
               onChangeText={field.onChange}
-              onBlur={field.onBlur}
+              onBlur={() => {
+                field.onBlur();
+                setEmailFocused(false);
+              }}
+              onFocus={() => setEmailFocused(true)}
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"
               textContentType="emailAddress"
               autoComplete="email"
               returnKeyType="next"
-              style={onboardingInputStyle.input}
+              style={[
+                onboardingInputStyle.input,
+                emailFocused ? onboardingInputStyle.inputFocused : null,
+                fieldState.error ? onboardingInputStyle.inputError : null,
+              ]}
               placeholder={t("auth.emailPlaceholder")}
               placeholderTextColor={tennisColors.mutedForeground}
             />
@@ -66,7 +77,11 @@ export function AuthEmailPasswordFields<T extends EmailPasswordFields>({
                 accessibilityLabel={t("auth.passwordLabel")}
                 value={field.value}
                 onChangeText={field.onChange}
-                onBlur={field.onBlur}
+                onBlur={() => {
+                  field.onBlur();
+                  setPasswordFocused(false);
+                }}
+                onFocus={() => setPasswordFocused(true)}
                 autoCapitalize="none"
                 autoCorrect={false}
                 secureTextEntry={!showPassword}
@@ -74,7 +89,12 @@ export function AuthEmailPasswordFields<T extends EmailPasswordFields>({
                 autoComplete="password"
                 returnKeyType="done"
                 onSubmitEditing={onSubmitPassword}
-                style={[onboardingInputStyle.input, styles.passwordInput]}
+                style={[
+                  onboardingInputStyle.input,
+                  styles.passwordInput,
+                  passwordFocused ? onboardingInputStyle.inputFocused : null,
+                  fieldState.error ? onboardingInputStyle.inputError : null,
+                ]}
                 placeholder={t("auth.passwordPlaceholder")}
                 placeholderTextColor={tennisColors.mutedForeground}
               />
@@ -84,6 +104,7 @@ export function AuthEmailPasswordFields<T extends EmailPasswordFields>({
                   showPassword ? t("auth.hidePassword") : t("auth.showPassword")
                 }
                 onPress={() => setShowPassword((value) => !value)}
+                hitSlop={8}
                 style={styles.toggle}
               >
                 <AppText style={styles.toggleLabel}>
@@ -106,19 +127,21 @@ const styles = createLiveSheet(() =>
       position: "relative",
     },
     passwordInput: {
-      paddingRight: 72,
+      paddingRight: 70,
     },
     toggle: {
       position: "absolute",
       right: 12,
       top: 0,
       bottom: 0,
+      minWidth: minTouchTargetPx,
       justifyContent: "center",
+      alignItems: "flex-end",
     },
     toggleLabel: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 13,
-      color: tennisColors.primary,
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 12.5,
+      color: tennisColors.heroGreen,
     },
   }),
 );

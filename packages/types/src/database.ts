@@ -727,6 +727,7 @@ export type Database = {
           match_id: string;
           note: string | null;
           revoked_at: string | null;
+          superseded_at: string | null;
           token_hash: string | null;
         };
         Insert: {
@@ -740,6 +741,7 @@ export type Database = {
           match_id: string;
           note?: string | null;
           revoked_at?: string | null;
+          superseded_at?: string | null;
           token_hash?: string | null;
         };
         Update: {
@@ -753,6 +755,7 @@ export type Database = {
           match_id?: string;
           note?: string | null;
           revoked_at?: string | null;
+          superseded_at?: string | null;
           token_hash?: string | null;
         };
         Relationships: [
@@ -1825,6 +1828,10 @@ export type Database = {
         Args: { p_match_id: string; p_reason?: string };
         Returns: undefined;
       };
+      cancel_match_invite: {
+        Args: { p_invited_user_id: string; p_match_id: string };
+        Returns: undefined;
+      };
       cast_match_time_vote: {
         Args: {
           p_match_id: string;
@@ -2560,6 +2567,10 @@ export type Database = {
         Args: { p_accept: boolean; p_match_id: string; p_user_id: string };
         Returns: undefined;
       };
+      restore_superseded_invites: {
+        Args: { p_match_id: string };
+        Returns: undefined;
+      };
       resubmit_match_result: {
         Args: {
           p_match_id: string;
@@ -2570,10 +2581,6 @@ export type Database = {
       };
       review_pilot_club: {
         Args: { p_approve: boolean; p_club_id: string; p_reason?: string };
-        Returns: undefined;
-      };
-      revoke_pending_targeted_invites: {
-        Args: { p_except_invitation_id?: string; p_match_id: string };
         Returns: undefined;
       };
       run_notification_jobs: { Args: never; Returns: Json };
@@ -2651,6 +2658,10 @@ export type Database = {
           ends_at: string;
           starts_at: string;
         }[];
+      };
+      supersede_pending_invites: {
+        Args: { p_match_id: string };
+        Returns: undefined;
       };
       unreachable_notification_summary: {
         Args: never;

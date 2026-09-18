@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -7,12 +7,21 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
-import { tennisFontFamily } from "../../hooks/useTennisFonts";
+import { useLayoutDirection } from "../../lib/layout-direction";
 import { createLiveSheet } from "../../theme/create-live-sheet";
+import { tennisFontFamily } from "../../hooks/useTennisFonts";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+
+const PRESS = { transform: [{ scale: 0.985 }], opacity: 0.92 } as const;
+
+function pressStyle(pressed: boolean, extra?: StyleProp<ViewStyle>) {
+  return [extra, pressed ? PRESS : null];
+}
 
 export function FigmaPrimaryButton({
   label,
@@ -21,27 +30,34 @@ export function FigmaPrimaryButton({
   loading = false,
   style,
   lime = false,
+  hero = false,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
-  /** Lime fill (welcome/complete CTAs) */
+  /** Lime fill (welcome/complete CTAs on dark). */
   lime?: boolean;
+  /** Brand-green fill that does not follow dark-mode lavender. */
+  hero?: boolean;
 }) {
   const inactive = disabled || loading;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: inactive }}
-      onPress={onPress}
-      disabled={inactive}
-      style={[
+      onPress={() => {
+        if (inactive) return;
+        onPress();
+      }}
+      style={({ pressed }) => [
         styles.primary,
         lime ? styles.primaryLime : null,
+        hero ? styles.primaryHero : null,
         inactive ? styles.primaryDisabled : null,
         style,
+        ...pressStyle(pressed && !inactive),
       ]}
     >
       {loading ? (
@@ -51,6 +67,7 @@ export function FigmaPrimaryButton({
       ) : (
         <AppText
           style={[
+            tennisTextStyles.buttonLabel,
             styles.primaryLabel,
             lime ? styles.primaryLabelLime : null,
             inactive ? styles.primaryLabelDisabled : null,
@@ -69,42 +86,71 @@ export function FigmaSecondaryButton({
   disabled = false,
   loading = false,
   ghostOnDark = false,
+  ghostOnLight = false,
+  neutral = false,
+  leading,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
   ghostOnDark?: boolean;
+  ghostOnLight?: boolean;
+  /** Google / quiet outline on the form canvas. */
+  neutral?: boolean;
+  leading?: ReactNode;
 }) {
   const inactive = disabled || loading;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: inactive }}
-      onPress={onPress}
-      disabled={inactive}
-      style={[
+      onPress={() => {
+        if (inactive) return;
+        onPress();
+      }}
+      style={({ pressed }) => [
         styles.secondary,
         ghostOnDark ? styles.secondaryGhost : null,
+        ghostOnLight ? styles.secondaryGhostLight : null,
+        neutral ? styles.secondaryNeutral : null,
         inactive ? styles.secondaryDisabled : null,
+        ...pressStyle(pressed && !inactive),
       ]}
     >
       {loading ? (
         <ActivityIndicator
-          color={ghostOnDark ? tennisColors.white : tennisColors.primaryDark}
+          color={ghostOnDark ? tennisColors.white : tennisColors.heroOnLight}
         />
       ) : (
-        <AppText
-          style={[
-            styles.secondaryLabel,
-            ghostOnDark ? styles.secondaryLabelGhost : null,
-            inactive ? styles.secondaryLabelDisabled : null,
-          ]}
-        >
-          {label}
-        </AppText>
+        <View style={styles.secondaryRow}>
+          {leading}
+          <AppText
+            style={[
+              tennisTextStyles.buttonLabel,
+              styles.secondaryLabel,
+              ghostOnDark ? styles.secondaryLabelGhost : null,
+              ghostOnLight ? styles.secondaryLabelGhostLight : null,
+              inactive ? styles.secondaryLabelDisabled : null,
+            ]}
+          >
+            {label}
+          </AppText>
+        </View>
       )}
     </Pressable>
+  );
+}
+
+export function GoogleMark() {
+  return (
+    <FontAwesome
+      name="google"
+      size={17}
+      color="#4285F4"
+      accessibilityElementsHidden
+      importantForAccessibility="no"
+    />
   );
 }
 
@@ -112,16 +158,18 @@ export function FigmaTextButton({
   label,
   onPress,
   onDark = false,
+  align = "center",
 }: {
   label: string;
   onPress: () => void;
   onDark?: boolean;
+  align?: "center" | "start";
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={styles.textBtn}
+      style={[styles.textBtn, align === "start" ? styles.textBtnStart : null]}
     >
       <AppText
         style={[styles.textBtnLabel, onDark ? styles.textBtnLabelDark : null]}
@@ -135,21 +183,32 @@ export function FigmaTextButton({
 export function FigmaBackButton({
   onPress,
   onDark = false,
+  accessibilityLabel,
 }: {
   onPress: () => void;
   onDark?: boolean;
+  accessibilityLabel?: string;
 }) {
   const { t } = useTranslation();
+  const { isRtl } = useLayoutDirection();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t("common.back")}
+      accessibilityLabel={accessibilityLabel ?? t("common.back")}
       onPress={onPress}
-      style={[styles.backBtn, onDark ? styles.backBtnDark : null]}
-      hitSlop={8}
+      hitSlop={4}
+      style={({ pressed }) => [
+        styles.backBtn,
+        onDark ? styles.backBtnDark : null,
+        ...pressStyle(pressed),
+      ]}
     >
       <AppText
-        style={[styles.backChevron, onDark ? styles.backChevronDark : null]}
+        style={[
+          styles.backChevron,
+          onDark ? styles.backChevronDark : null,
+          isRtl ? styles.backChevronRtl : null,
+        ]}
       >
         ‹
       </AppText>
@@ -157,12 +216,6 @@ export function FigmaBackButton({
   );
 }
 
-/**
- * `StyleProp<ViewStyle>` rather than a bare `ViewStyle`, because the `View`
- * underneath already accepts an array with conditional entries and callers
- * write them — `[styles.card, isRtl && styles.cardRtl]` on the RTL check
- * screen. Narrowing the prop was the artificial constraint, not the caller.
- */
 export function FigmaCard({
   children,
   style,
@@ -173,25 +226,25 @@ export function FigmaCard({
 const styles = createLiveSheet(() =>
   StyleSheet.create({
     primary: {
-      minHeight: minTouchTargetPx + 10,
+      height: 54,
       borderRadius: tennisRadii.lg,
       backgroundColor: tennisColors.primary,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 24,
-      paddingVertical: 17,
     },
     primaryLime: {
       backgroundColor: tennisColors.lime,
+    },
+    primaryHero: {
+      backgroundColor: tennisColors.heroGreen,
     },
     primaryDisabled: {
       backgroundColor: tennisColors.muted,
     },
     primaryLabel: {
-      fontFamily: tennisFontFamily.heading,
-      fontSize: 16,
       color: tennisColors.onPrimary,
-      letterSpacing: -0.2,
+      textAlign: "center",
     },
     primaryLabelLime: {
       color: tennisColors.limeText,
@@ -200,7 +253,7 @@ const styles = createLiveSheet(() =>
       color: tennisColors.mutedForeground,
     },
     secondary: {
-      minHeight: minTouchTargetPx,
+      height: 50,
       borderRadius: tennisRadii.lg,
       backgroundColor: tennisColors.card,
       borderWidth: 1.5,
@@ -208,42 +261,64 @@ const styles = createLiveSheet(() =>
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 24,
-      paddingVertical: 15,
     },
     secondaryGhost: {
-      backgroundColor: tennisColors.heroOverlay,
-      borderColor: tennisColors.heroBorder,
+      backgroundColor: "rgba(255,255,255,0.10)",
+      borderColor: "rgba(255,255,255,0.20)",
+    },
+    secondaryGhostLight: {
+      backgroundColor: "transparent",
+      borderColor: "rgba(12,56,46,0.32)",
+    },
+    secondaryNeutral: {
+      backgroundColor: tennisColors.card,
+      borderColor: tennisColors.border,
     },
     secondaryDisabled: {
-      opacity: 0.55,
+      backgroundColor: tennisColors.muted,
+      borderColor: tennisColors.muted,
+    },
+    secondaryRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
     },
     secondaryLabel: {
-      fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 16,
-      color: tennisColors.primaryDark,
+      color: tennisColors.heroOnLight,
+      textAlign: "center",
     },
     secondaryLabelGhost: {
       color: tennisColors.white,
+    },
+    secondaryLabelGhostLight: {
+      color: tennisColors.heroGreen,
     },
     secondaryLabelDisabled: {
       color: tennisColors.mutedForeground,
     },
     textBtn: {
       alignItems: "center",
+      justifyContent: "center",
+      minHeight: minTouchTargetPx,
       paddingVertical: 12,
     },
+    textBtnStart: {
+      alignItems: "flex-start",
+    },
     textBtnLabel: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 14,
-      color: tennisColors.primary,
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      color: tennisColors.heroGreen,
     },
     textBtnLabelDark: {
-      color: "rgba(255,255,255,0.4)",
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: "rgba(255,255,255,0.55)",
     },
     backBtn: {
-      width: 36,
-      height: 36,
-      borderRadius: tennisRadii.sm,
+      width: 38,
+      height: 38,
+      borderRadius: tennisRadii.control,
       backgroundColor: tennisColors.card,
       borderWidth: 1.5,
       borderColor: tennisColors.border,
@@ -255,13 +330,16 @@ const styles = createLiveSheet(() =>
       borderWidth: 0,
     },
     backChevron: {
-      fontSize: 24,
-      lineHeight: 28,
-      color: tennisColors.primaryDark,
+      fontSize: 22,
+      lineHeight: 26,
+      color: tennisColors.heroOnLight,
       marginTop: -2,
     },
     backChevronDark: {
       color: tennisColors.white,
+    },
+    backChevronRtl: {
+      transform: [{ scaleX: -1 }],
     },
     card: {
       backgroundColor: tennisColors.card,
