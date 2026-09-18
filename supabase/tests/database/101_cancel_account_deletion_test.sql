@@ -3,7 +3,7 @@
 begin;
 
 create extension if not exists pgtap;
-select plan(8);
+select plan(7);
 
 create or replace function pg_temp.assert_true(
   p_condition boolean,
@@ -37,30 +37,31 @@ as $$
   select p.account_status::text from public.profiles as p where p.id = p_user;
 $$;
 
+-- Revised by `102`. This used to request a deletion and then withdraw it, but
+-- `request_account_deletion` no longer leaves anything pending: it completes,
+-- releases the address and tombstones the profile. `cancel_account_deletion`
+-- now serves exactly one population -- accounts flagged `deletion_requested` by
+-- the pre-102 behaviour and stranded there -- so the pending state is set
+-- directly here, which is the only way it now arises.
 -- ---------------------------------------------------------------------------
--- The round trip: request, then withdraw
+-- A legacy pending request can still be withdrawn
 -- ---------------------------------------------------------------------------
 
 do $$
 declare
   v_user uuid := '14141414-1414-1414-1414-141414141414';
 begin
-  perform pg_temp.set_caller(v_user);
-  perform public.request_account_deletion();
+  update public.profiles
+  set account_status = 'deletion_requested', deletion_requested_at = now()
+  where id = v_user;
 
-  perform pg_temp.assert_true(
-    pg_temp.status(v_user) = 'deletion_requested',
-    'requesting deletion should flag the profile'
-  );
+  perform pg_temp.set_caller(v_user);
 
   -- The state the fix exists for: nothing marketplace-facing works here,
   -- because `assert_discovery_caller_eligible` requires `active`.
   perform pg_temp.assert_true(
-    (select not exists (
-      select 1 from public.profiles as p
-      where p.id = v_user and p.account_status = 'active'
-    )),
-    'a pending deletion must not still read as active'
+    pg_temp.status(v_user) = 'deletion_requested',
+    'precondition: the account is stranded pending'
   );
 
   perform public.cancel_account_deletion();
@@ -74,24 +75,30 @@ begin
      where p.id = v_user),
     'the timestamp should be cleared, not left behind'
   );
-
-  -- Both halves stay on the record. That a request was made and withdrawn is
-  -- exactly what the audit trail is for.
   perform pg_temp.assert_true(
     (select count(*) from public.audit_events as a
-     where a.actor_id = v_user
-       and a.action in ('account_deletion_requested', 'account_deletion_cancelled')
-    ) >= 2,
-    'both the request and the withdrawal should be audited'
+     where a.actor_id = v_user and a.action = 'account_deletion_cancelled') >= 1,
+    'the withdrawal should be audited'
   );
+
+  -- A completed deletion is terminal: there is no pending request behind it.
+  perform public.request_account_deletion();
+  begin
+    perform public.cancel_account_deletion();
+    raise exception 'expected no_pending_deletion';
+  exception when others then
+    perform pg_temp.assert_true(
+      sqlerrm like '%no_pending_deletion%',
+      'a completed deletion must not be withdrawable, got: ' || sqlerrm
+    );
+  end;
 end;
 $$;
 
-select pass('requesting deletion flags the profile');
-select pass('a pending deletion is not active');
-select pass('withdrawing restores the account');
+select pass('a stranded pending request is restored');
 select pass('the requested-at timestamp is cleared');
-select pass('both events are audited');
+select pass('the withdrawal is audited');
+select pass('a completed deletion cannot be withdrawn');
 
 -- ---------------------------------------------------------------------------
 -- Only a pending request is the account holder's to undo

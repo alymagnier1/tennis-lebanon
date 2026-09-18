@@ -1430,9 +1430,9 @@
     "description": "Gérez votre compte et vos préférences.",
     "policies": "Consulter les politiques",
     "rtlLayoutCheck": "Vérification mise en page RTL",
-    "requestDeletion": "Demander la suppression du compte",
-    "deleteTitle": "Demander la suppression du compte ?",
-    "deleteDescription": "Ceci envoie une demande de suppression et vous déconnecte. L'accès est restreint pendant l'examen, et votre e-mail reste enregistré jusqu'à ce que le support la traite — vous ne pourrez donc pas vous réinscrire avec la même adresse. Vous pouvez annuler en vous reconnectant.",
+    "requestDeletion": "Supprimer mon compte",
+    "deleteTitle": "Supprimer votre compte ?",
+    "deleteDescription": "Ceci supprime votre compte immédiatement et vous déconnecte. Votre nom et votre photo sont retirés, et vous quittez tout match non encore joué. Les résultats passés restent enregistrés pour vos adversaires, sous la mention joueur supprimé. Votre e-mail est libéré : vous pourrez vous réinscrire. Ceci est irréversible.",
     "deleteError": "Impossible d’envoyer votre demande de suppression. Veuillez réessayer.",
     "versionFooter": "RacketBound v{{version}} · Fabriqué au Liban 🇱🇧"
   },

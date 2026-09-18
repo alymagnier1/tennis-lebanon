@@ -485,17 +485,41 @@ reset role;
 
 create temporary table deletion_first_result as
 select
-  deletion_requested_at,
+  account_status,
   (
     select count(*)
     from public.audit_events
     where actor_id = '90000000-0000-0000-0000-000000000012'
-      and action = 'account_deletion_requested'
+      and action = 'account_deleted'
       and entity_type = 'profile'
       and entity_id = '90000000-0000-0000-0000-000000000012'
   ) as audit_count
 from public.profiles
 where id = '90000000-0000-0000-0000-000000000012';
+
+-- Revised by `102`. This used to assert that requesting deletion twice was
+-- idempotent, because the call only set a flag an operator would later act on.
+-- No operator tooling was ever built, so the flag was permanent and the account
+-- was trapped: unusable, un-restorable, and holding its address hostage.
+-- Deletion now completes on the first call, which makes the second one an
+-- error rather than a no-op.
+select pg_temp.assert_true(
+  (
+    select first.account_status = 'deleted' and first.audit_count = 1
+    from deletion_first_result as first
+  ),
+  'deletion completes on the first call and writes one audit event'
+);
+
+-- The point of the change: the address must be free for a new sign-up.
+select pg_temp.assert_true(
+  not exists (
+    select 1 from auth.users as u
+    where u.id = '90000000-0000-0000-0000-000000000012'
+      and u.email = 'deletion@example.test'
+  ),
+  'the address is released when the account is deleted'
+);
 
 set local role authenticated;
 select set_config(
@@ -505,29 +529,13 @@ select set_config(
 );
 select set_config('request.jwt.claim.role', 'authenticated', true);
 
-select public.request_account_deletion();
+select pg_temp.assert_raises(
+  $sql$select public.request_account_deletion()$sql$,
+  '42501',
+  'an account already deleted cannot be deleted again'
+);
 
 reset role;
-
-select pg_temp.assert_true(
-  (
-    select p.account_status = 'deletion_requested'
-       and p.deletion_requested_at = first.deletion_requested_at
-       and first.audit_count = 1
-       and (
-         select count(*)
-         from public.audit_events
-         where actor_id = p.id
-           and action = 'account_deletion_requested'
-           and entity_type = 'profile'
-           and entity_id = p.id
-       ) = 1
-    from public.profiles as p
-    cross join deletion_first_result as first
-    where p.id = '90000000-0000-0000-0000-000000000012'
-  ),
-  'account deletion is retry-safe and writes one minimal audit event'
-);
 
 select pass('Milestone 1 onboarding and authorization matrix passed');
 select * from finish();

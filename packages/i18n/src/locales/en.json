@@ -1564,9 +1564,9 @@
     "description": "Manage your account and preferences.",
     "policies": "View policies",
     "rtlLayoutCheck": "RTL layout check",
-    "requestDeletion": "Request account deletion",
-    "deleteTitle": "Request account deletion?",
-    "deleteDescription": "This submits a deletion request and signs you out. Access is restricted while it is reviewed, and your email stays registered until support completes it — so you will not be able to sign up again with the same address. You can undo this by logging back in.",
+    "requestDeletion": "Delete my account",
+    "deleteTitle": "Delete your account?",
+    "deleteDescription": "This deletes your account straight away and signs you out. Your name and photo are removed and you leave any match that has not been played. Past results stay on record for the players you played against, shown as a deleted player. Your email is freed, so you can sign up again from scratch. This cannot be undone.",
     "deleteError": "We could not submit your deletion request. Please try again.",
     "versionFooter": "RacketBound v{{version}} · Made in Lebanon 🇱🇧"
   },
