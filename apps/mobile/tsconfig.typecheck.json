@@ -1,0 +1,18 @@
+{
+  // The config `pnpm typecheck` uses, in CI and on a developer machine alike.
+  //
+  // `tsconfig.json` is what the editor reads, and it pulls in two files Expo
+  // generates and `.gitignore` excludes: `expo-env.d.ts` and `.expo/types`.
+  // A checkout that has never run `expo start` does not have them, so CI
+  // compiled against a different set of types than the machine the code was
+  // written on. `expo/types` widens React Native's style unions to accept web
+  // CSS values, which is why `position: "sticky"` type-checked locally and
+  // failed the build.
+  //
+  // Excluding them here makes the command reproduce CI exactly and keeps the
+  // stricter of the two views, so a web-only style value has to be cast
+  // deliberately rather than passing by accident. The editor still loads the
+  // full set through `tsconfig.json`.
+  "extends": "./tsconfig.json",
+  "exclude": ["expo-env.d.ts", ".expo"]
+}
