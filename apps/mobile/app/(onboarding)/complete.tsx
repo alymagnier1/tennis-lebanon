@@ -143,7 +143,10 @@ function GiftMatchRow({
         </AppText>
         {when ? (
           <AppText
-            style={[styles.giftMeta, light ? styles.metaLight : styles.metaDark]}
+            style={[
+              styles.giftMeta,
+              light ? styles.metaLight : styles.metaDark,
+            ]}
             maxLines={1}
           >
             {when}
@@ -151,14 +154,20 @@ function GiftMatchRow({
         ) : null}
         {lastSpot ? (
           <AppText
-            style={[styles.giftScarce, light ? styles.accentGreen : styles.accentLime]}
+            style={[
+              styles.giftScarce,
+              light ? styles.accentGreen : styles.accentLime,
+            ]}
           >
             {t("discover.spotsRemaining", { count: 1 })}
           </AppText>
         ) : null}
       </View>
       <AppText
-        style={[styles.giftOpen, light ? styles.accentGreen : styles.accentLime]}
+        style={[
+          styles.giftOpen,
+          light ? styles.accentGreen : styles.accentLime,
+        ]}
       >
         {t("onboarding.complete.giftOpenCta")}
       </AppText>
@@ -210,12 +219,7 @@ export default function OnboardingCompleteScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View
-          style={[
-            styles.pill,
-            { backgroundColor: field.pillFill },
-          ]}
-        >
+        <View style={[styles.pill, { backgroundColor: field.pillFill }]}>
           <AppText
             style={[tennisTextStyles.statusPill, { color: field.pillText }]}
           >
@@ -226,9 +230,7 @@ export default function OnboardingCompleteScreen() {
         <AppText style={[titleType, { color: field.title }]}>
           {t("onboarding.complete.title")}
         </AppText>
-        <AppText
-          style={[titleType, { color: field.accent, marginBottom: 12 }]}
-        >
+        <AppText style={[titleType, { color: field.accent, marginBottom: 12 }]}>
           {t("onboarding.complete.titleAccent", { name })}
         </AppText>
         <AppText
@@ -246,7 +248,9 @@ export default function OnboardingCompleteScreen() {
             <AppText
               style={[
                 styles.giftTitle,
-                field.giftSurface === "light" ? styles.inkDark : styles.inkLight,
+                field.giftSurface === "light"
+                  ? styles.inkDark
+                  : styles.inkLight,
               ]}
             >
               {t("onboarding.complete.giftTitle")}
@@ -266,7 +270,9 @@ export default function OnboardingCompleteScreen() {
             <AppText
               style={[
                 styles.giftTitle,
-                field.giftSurface === "light" ? styles.inkDark : styles.inkLight,
+                field.giftSurface === "light"
+                  ? styles.inkDark
+                  : styles.inkLight,
               ]}
             >
               {t("onboarding.complete.giftEmptyTitle")}

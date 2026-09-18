@@ -89,9 +89,7 @@ export function OnboardingStepLayout({
   const body = (
     <>
       {onBack ? (
-        <View
-          style={hasSteps ? styles.backOnboarding : styles.backAuth}
-        >
+        <View style={hasSteps ? styles.backOnboarding : styles.backAuth}>
           <FigmaBackButton
             onPress={onBack}
             accessibilityLabel={backAccessibilityLabel}
