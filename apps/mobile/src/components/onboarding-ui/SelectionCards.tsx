@@ -248,9 +248,7 @@ export function ZoneChoiceCard({
         pointerEvents="none"
         style={[styles.zoneRing, selected ? styles.zoneRingSelected : null]}
       />
-      <View
-        style={[styles.zoneBox, selected ? styles.zoneBoxSelected : null]}
-      >
+      <View style={[styles.zoneBox, selected ? styles.zoneBoxSelected : null]}>
         {selected ? <AppText style={styles.zoneCheck}>✓</AppText> : null}
       </View>
       <View style={styles.selectionBody}>
@@ -264,10 +262,7 @@ export function ZoneChoiceCard({
         </AppText>
         {description ? (
           <AppText
-            style={[
-              styles.zoneSub,
-              selected ? styles.zoneSubSelected : null,
-            ]}
+            style={[styles.zoneSub, selected ? styles.zoneSubSelected : null]}
           >
             {description}
           </AppText>
@@ -326,7 +321,11 @@ export function ChipButton({
       style={[
         styles.chip,
         compact && styles.chipCompact,
-        selected ? (soft ? styles.chipSoftSelected : styles.chipSelected) : null,
+        selected
+          ? soft
+            ? styles.chipSoftSelected
+            : styles.chipSelected
+          : null,
         style,
       ]}
     >

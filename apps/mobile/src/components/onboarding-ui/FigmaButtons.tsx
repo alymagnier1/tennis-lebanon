@@ -62,11 +62,7 @@ export function FigmaPrimaryButton({
     >
       {loading ? (
         <ActivityIndicator
-          color={
-            lime
-              ? tennisColors.limeText
-              : tennisColors.onPrimary
-          }
+          color={lime ? tennisColors.limeText : tennisColors.onPrimary}
         />
       ) : (
         <AppText
@@ -173,16 +169,10 @@ export function FigmaTextButton({
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={[
-        styles.textBtn,
-        align === "start" ? styles.textBtnStart : null,
-      ]}
+      style={[styles.textBtn, align === "start" ? styles.textBtnStart : null]}
     >
       <AppText
-        style={[
-          styles.textBtnLabel,
-          onDark ? styles.textBtnLabelDark : null,
-        ]}
+        style={[styles.textBtnLabel, onDark ? styles.textBtnLabelDark : null]}
       >
         {label}
       </AppText>

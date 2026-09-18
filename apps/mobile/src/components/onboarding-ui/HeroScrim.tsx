@@ -20,8 +20,7 @@ export function HeroScrim({
   locations: readonly number[];
   anchor: "top" | "bottom";
 }) {
-  const placement: ViewStyle =
-    anchor === "top" ? { top: 0 } : { bottom: 0 };
+  const placement: ViewStyle = anchor === "top" ? { top: 0 } : { bottom: 0 };
 
   return (
     <View

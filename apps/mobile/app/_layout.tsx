@@ -91,26 +91,26 @@ export default function RootLayout() {
                   <UnreadMessagesWatcher />
                   <OnboardingProvider>
                     <HeroVariantProvider>
-                    <Stack screenOptions={{ headerShown: false }}>
-                      <Stack.Screen name="index" />
-                      <Stack.Screen name="(public)" />
-                      <Stack.Screen name="(auth)" />
-                      <Stack.Screen name="(onboarding)" />
-                      <Stack.Screen name="(tabs)" />
-                      <Stack.Screen name="player/[id]" />
-                      <Stack.Screen name="profile/availability" />
-                      <Stack.Screen name="profile/edit" />
-                      <Stack.Screen name="profile/match-defaults" />
-                      <Stack.Screen name="profile/notifications" />
-                      <Stack.Screen name="profile/where-i-play" />
-                      <Stack.Screen name="profile/tennis-preferences" />
-                      <Stack.Screen name="notifications" />
-                      <Stack.Screen name="match/[id]" />
-                      <Stack.Screen name="match/create" />
-                      <Stack.Screen name="clubs/[id]" />
-                      <Stack.Screen name="invite/[token]" />
-                      <Stack.Screen name="policies" />
-                    </Stack>
+                      <Stack screenOptions={{ headerShown: false }}>
+                        <Stack.Screen name="index" />
+                        <Stack.Screen name="(public)" />
+                        <Stack.Screen name="(auth)" />
+                        <Stack.Screen name="(onboarding)" />
+                        <Stack.Screen name="(tabs)" />
+                        <Stack.Screen name="player/[id]" />
+                        <Stack.Screen name="profile/availability" />
+                        <Stack.Screen name="profile/edit" />
+                        <Stack.Screen name="profile/match-defaults" />
+                        <Stack.Screen name="profile/notifications" />
+                        <Stack.Screen name="profile/where-i-play" />
+                        <Stack.Screen name="profile/tennis-preferences" />
+                        <Stack.Screen name="notifications" />
+                        <Stack.Screen name="match/[id]" />
+                        <Stack.Screen name="match/create" />
+                        <Stack.Screen name="clubs/[id]" />
+                        <Stack.Screen name="invite/[token]" />
+                        <Stack.Screen name="policies" />
+                      </Stack>
                     </HeroVariantProvider>
                   </OnboardingProvider>
                 </AuthProvider>

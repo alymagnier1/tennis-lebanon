@@ -155,7 +155,9 @@ export function AuthHeroLayout({
             resizeMode="contain"
             accessibilityIgnoresInvertColors
           />
-          <AppText style={[tennisTextStyles.wordmark, { color: field.wordmark }]}>
+          <AppText
+            style={[tennisTextStyles.wordmark, { color: field.wordmark }]}
+          >
             {t("common.appName")}
           </AppText>
         </View>

@@ -215,7 +215,7 @@ export default function IdentityScreen() {
           </AppText>
         </View>
       </Pressable>
-        {photoError ? <ErrorNotice>{photoError}</ErrorNotice> : null}
+      {photoError ? <ErrorNotice>{photoError}</ErrorNotice> : null}
 
       <OnboardingFormField
         label={t("onboarding.identity.name")}
@@ -262,15 +262,15 @@ export default function IdentityScreen() {
       <OnboardingFormField label={t("onboarding.identity.gender")}>
         <View style={styles.chips}>
           {genders.map((option) => (
-              <ChipButton
-                key={option}
-                label={t(`gender.${option}`)}
-                selected={gender === option}
-                soft
-                onPress={() =>
-                  setGender((current) => (current === option ? null : option))
-                }
-              />
+            <ChipButton
+              key={option}
+              label={t(`gender.${option}`)}
+              selected={gender === option}
+              soft
+              onPress={() =>
+                setGender((current) => (current === option ? null : option))
+              }
+            />
           ))}
         </View>
       </OnboardingFormField>
@@ -281,13 +281,13 @@ export default function IdentityScreen() {
       >
         <View style={styles.chips}>
           {languages.map((language) => (
-              <ChipButton
-                key={language}
-                label={t(`languages.${language}`)}
-                selected={selectedLanguages.includes(language)}
-                soft
-                onPress={() => toggleLanguage(language)}
-              />
+            <ChipButton
+              key={language}
+              label={t(`languages.${language}`)}
+              selected={selectedLanguages.includes(language)}
+              soft
+              onPress={() => toggleLanguage(language)}
+            />
           ))}
         </View>
       </OnboardingFormField>
@@ -338,13 +338,13 @@ export default function IdentityScreen() {
       </AppText>
       <View style={styles.chips}>
         {intents.map((intent) => (
-            <ChipButton
-              key={intent}
-              label={t(`playIntent.${intent}`)}
-              selected={playIntent === intent}
-              soft
-              onPress={() => setPlayIntent(intent)}
-            />
+          <ChipButton
+            key={intent}
+            label={t(`playIntent.${intent}`)}
+            selected={playIntent === intent}
+            soft
+            onPress={() => setPlayIntent(intent)}
+          />
         ))}
       </View>
     </OnboardingStepLayout>

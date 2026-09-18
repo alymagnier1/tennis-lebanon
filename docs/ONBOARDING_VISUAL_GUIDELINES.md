@@ -39,10 +39,7 @@ Source tokens live in `apps/mobile/src/theme/tennis-tokens.ts`. Prefer those hex
 
 ---
 
-
-
 ## 2. Screen jobs (do not decorate every screen the same)
-
 
 | Screen                            | Job                            | Visual weight                                                 |
 | --------------------------------- | ------------------------------ | ------------------------------------------------------------- |
@@ -51,19 +48,13 @@ Source tokens live in `apps/mobile/src/theme/tennis-tokens.ts`. Prefer those hex
 | **Check email / Forgot password** | Explain next step              | Same quiet family as Sign up / Log in                         |
 | **Onboarding after auth**         | Consent → identity → zones     | Existing light onboarding system; do not re-skin as dark hero |
 
-
 Rule: Welcome is the only screen that “performs.” Forms must feel like tools.
 
 ---
 
-
-
 ## 3. Colour system (bind to app tokens)
 
-
-
 ### Core brand
-
 
 | Role             | Token                      | Hex       | Use                                                      |
 | ---------------- | -------------------------- | --------- | -------------------------------------------------------- |
@@ -78,19 +69,12 @@ Rule: Welcome is the only screen that “performs.” Forms must feel like tools
 | Clay accent      | `accent`                   | `#C4521A` | Rare; not for auth CTAs                                  |
 | Danger           | `danger`                   | `#B91C1C` | Errors only                                              |
 
-
-
-
 ### Illustration-only neutrals (ok if not tokenized yet)
-
 
 | Role                  | Approx hex             | Use                                  |
 | --------------------- | ---------------------- | ------------------------------------ |
 | Net tape / cream line | `#F5F0E6`              | Net band, ball seam                  |
 | Mesh / deep shadow    | `#0A1F18` or `#0D1C14` | Net grid, contact shadow under balls |
-
-
-
 
 ### Do not introduce as brand primaries
 
@@ -100,8 +84,6 @@ Rule: Welcome is the only screen that “performs.” Forms must feel like tools
 - Pure social-purple gradients
 
 ---
-
-
 
 ## 4. Composition rules
 
@@ -115,8 +97,6 @@ Rule: Welcome is the only screen that “performs.” Forms must feel like tools
 
 ---
 
-
-
 ## 5. Typography & UI chrome
 
 - Headlines: bold geometric sans; large; tight leading; one lime accent word on Welcome is enough.
@@ -129,8 +109,6 @@ Rule: Welcome is the only screen that “performs.” Forms must feel like tools
 - Display name is **not** on Sign up; it stays in identity onboarding.
 
 ---
-
-
 
 ## 6. Illustration craft
 
@@ -156,8 +134,6 @@ Rule: Welcome is the only screen that “performs.” Forms must feel like tools
 
 ---
 
-
-
 ## 7. Copy tone (structure, not final strings)
 
 - Welcome: short promise (find a match at the right level—not a feed).
@@ -167,8 +143,6 @@ Rule: Welcome is the only screen that “performs.” Forms must feel like tools
 - All user-facing strings go through i18n (`en` / `ar` / `fr`). Never hard-code final copy in components.
 
 ---
-
-
 
 ## 8. What to deliver when asked to “design onboarding”
 
@@ -184,8 +158,6 @@ Do **not** invent a new colour story. Do **not** redesign post-auth onboarding i
 
 ---
 
-
-
 ## 9. Quick checklist before accepting a design
 
 - [ ] Welcome is dark court green; forms are light (or clearly quieter)
@@ -200,11 +172,8 @@ Do **not** invent a new colour story. Do **not** redesign post-auth onboarding i
 
 ---
 
-
-
 ## 10. Relationship to product decisions
 
 - Auth method: email+password + Google (`docs/DECISIONS.md`, 2026-09-12).
 - Brand name: RacketBound; scheme/slug unchanged for deep links.
 - This guideline governs **visual direction for auth/welcome only**. Match hub, Discover, and club dashboard keep their existing systems unless a later decision extends this language.
-

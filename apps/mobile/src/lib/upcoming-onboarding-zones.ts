@@ -6,8 +6,16 @@
  * not produce both a selectable card and a "coming soon" card.
  */
 export const UPCOMING_ONBOARDING_ZONES = [
-  { id: "upcoming-tripoli", englishName: "Tripoli", nameKey: "onboarding.zones.upcomingTripoli" },
-  { id: "upcoming-saida", englishName: "Saida", nameKey: "onboarding.zones.upcomingSaida" },
+  {
+    id: "upcoming-tripoli",
+    englishName: "Tripoli",
+    nameKey: "onboarding.zones.upcomingTripoli",
+  },
+  {
+    id: "upcoming-saida",
+    englishName: "Saida",
+    nameKey: "onboarding.zones.upcomingSaida",
+  },
 ] as const;
 
 export function upcomingZonesToShow(liveEnglishNames: string[]) {
