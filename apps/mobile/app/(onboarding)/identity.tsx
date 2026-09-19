@@ -13,7 +13,6 @@ import { useTranslation } from "react-i18next";
 import {
   normalizeDisplayName,
   type Gender,
-  type PlayIntent,
   type SkillBand,
   type SupportedLanguage,
 } from "@tennis-lebanon/domain";
@@ -50,7 +49,6 @@ const bands: SkillBand[] = [
   "advanced",
   "competitive",
 ];
-const intents: PlayIntent[] = ["social", "competitive", "either"];
 
 const currentYear = new Date().getUTCFullYear();
 const youngestEligibleYear = currentYear - 18;
@@ -87,7 +85,6 @@ export default function IdentityScreen() {
   const [selectedLanguages, setSelectedLanguages] = useState(draft.languages);
   const [gender, setGender] = useState<Gender | null>(draft.gender);
   const [skillBand, setSkillBand] = useState(draft.skillBand);
-  const [playIntent, setPlayIntent] = useState(draft.playIntent);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formIncomplete, setFormIncomplete] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -157,7 +154,7 @@ export default function IdentityScreen() {
       isAdultConfirmed: adultConfirmed,
       languages: selectedLanguages,
       skillBand,
-      playIntent,
+      playIntent: draft.playIntent,
       prefersSingles: true,
       prefersDoubles: true,
     });
@@ -333,20 +330,6 @@ export default function IdentityScreen() {
           })}
         </AppText>
       ) : null}
-      <AppText style={styles.section}>
-        {t("onboarding.tennis.provisional")}
-      </AppText>
-      <View style={styles.chips}>
-        {intents.map((intent) => (
-          <ChipButton
-            key={intent}
-            label={t(`playIntent.${intent}`)}
-            selected={playIntent === intent}
-            soft
-            onPress={() => setPlayIntent(intent)}
-          />
-        ))}
-      </View>
     </OnboardingStepLayout>
   );
 }

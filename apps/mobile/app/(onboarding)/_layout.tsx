@@ -29,7 +29,15 @@ export default function OnboardingLayout() {
       </View>
     );
   }
-  if (state !== "needsOnboarding") {
+  /**
+   * `complete` is the one step the player reaches *after* onboarding stops
+   * being incomplete: the step before it writes the profile, `state` flips to
+   * `ready`, and the gate below then redirected to the tabs. The screen still
+   * rendered, for about one frame, which read as it being skipped.
+   */
+  const isDoneStep = pathname.endsWith("/complete");
+
+  if (state !== "needsOnboarding" && !(state === "ready" && isDoneStep)) {
     const destination = authRouteForState(state);
     if (destination) return <Redirect href={destination} />;
     return (

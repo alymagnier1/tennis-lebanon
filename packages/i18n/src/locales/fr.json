@@ -312,7 +312,19 @@
     "signOutConfirmBody": "Vous aurez besoin de votre e-mail et mot de passe, ou de Google, pour revenir.",
     "signOutError": "Impossible de vous déconnecter. Veuillez réessayer.",
     "emailPlaceholder": "you@example.com",
-    "checkEmailHint": "Le lien expire après un court délai. Si vous en demandez un autre, seul l'e-mail le plus récent fonctionnera."
+    "checkEmailHint": "Le lien expire après un court délai. Si vous en demandez un autre, seul l'e-mail le plus récent fonctionnera.",
+    "verifyCode": {
+      "title": "Saisissez votre code",
+      "body": "Nous avons envoyé un code à 6 chiffres à {{email}}. Saisissez-le ici pour confirmer votre adresse.",
+      "inputLabel": "Code de confirmation à 6 chiffres",
+      "hint": "Le code expire dans une heure. Si vous en demandez un autre, seul le plus récent fonctionne.",
+      "submit": "Confirmer",
+      "resend": "Envoyer un nouveau code",
+      "sent": "Nouveau code envoyé. Consultez votre boîte de réception.",
+      "invalid": "Ce code est incorrect ou a expiré. Vérifiez le dernier e-mail ou demandez un nouveau code.",
+      "rateLimited": "Trop de demandes. Attendez une minute avant d'en demander un autre.",
+      "generic": "Nous n'avons pas pu confirmer ce code. Veuillez réessayer."
+    }
   },
   "onboarding": {
     "stepEyebrow": "Étape {{step}} sur {{total}}",
@@ -363,7 +375,6 @@
         "advanced": "Je joue des matchs régulièrement",
         "competitive": "Je m'entraîne et je joue en compétition"
       },
-      "provisional": "Choisissez votre style de jeu et vos formats préférés.",
       "formatError": "Choisissez le simple, le double ou les deux.",
       "skillError": "Choisissez la phrase qui vous ressemble le plus.",
       "commitmentEcho": "Nous chercherons des matchs {{band}}. Vous pourrez modifier ce choix tant que votre classement est provisoire."

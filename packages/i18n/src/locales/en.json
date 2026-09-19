@@ -312,7 +312,19 @@
     "signOut": "Sign out",
     "signOutConfirmTitle": "Sign out?",
     "signOutConfirmBody": "You will need your email and password, or Google, to get back in.",
-    "signOutError": "We could not sign you out. Please try again."
+    "signOutError": "We could not sign you out. Please try again.",
+    "verifyCode": {
+      "title": "Enter your code",
+      "body": "We sent a 6-digit code to {{email}}. Enter it here to confirm your address.",
+      "inputLabel": "6-digit confirmation code",
+      "hint": "The code expires in an hour. If you ask for another, only the newest one works.",
+      "submit": "Confirm",
+      "resend": "Send a new code",
+      "sent": "New code sent. Check your inbox.",
+      "invalid": "That code is wrong or has expired. Check the newest email, or send a new code.",
+      "rateLimited": "Too many requests. Wait a minute before asking for another code.",
+      "generic": "We could not confirm that code. Please try again."
+    }
   },
   "onboarding": {
     "stepEyebrow": "Step {{step}} of {{total}}",
@@ -363,7 +375,6 @@
         "advanced": "I play matches regularly",
         "competitive": "I train and compete"
       },
-      "provisional": "Choose your play style and preferred formats.",
       "formatError": "Choose singles, doubles, or both.",
       "skillError": "Choose the line that sounds most like you.",
       "commitmentEcho": "We’ll look for {{band}} matches. You can change this while your rating is provisional."

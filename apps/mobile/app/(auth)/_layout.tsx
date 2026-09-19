@@ -20,7 +20,7 @@ export default function AuthLayout() {
   // actually worked.
   //
   // Scoped to that one route rather than every `anonymous` visitor, because the
-  // rest of this stack is *for* signed-out people: `check-email` after sign-up,
+  // rest of this stack is *for* signed-out people: `verify-code` after sign-up,
   // `callback` on a deep link, `update-password` during recovery. Bouncing
   // those to Welcome would break each of them.
   if (state === "anonymous" && routeName === "account-unavailable") {
