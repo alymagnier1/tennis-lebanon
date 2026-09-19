@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TextInput } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -29,6 +30,7 @@ export default function UpdatePasswordScreen() {
    * somebody they are updating a password they have never had is a small lie
    * that makes them hunt for the old one.
    */
+  const queryClient = useQueryClient();
   const params = useLocalSearchParams<{ mode?: string }>();
   const setting = params.mode === "set";
   const {
@@ -48,6 +50,10 @@ export default function UpdatePasswordScreen() {
       return;
     }
     clearPasswordRecoveryPending();
+    // Settings decides whether to offer "Set a password" from this flag, and it
+    // has just stopped being true. Without this the row survives on the cached
+    // answer and invites the player to do it again.
+    await queryClient.invalidateQueries({ queryKey: ["caller-has-password"] });
     router.replace("/");
   });
 
