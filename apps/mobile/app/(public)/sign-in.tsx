@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Redirect, router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { signInSchema, type SignInInput } from "@tennis-lebanon/domain";
+import { AppText } from "../../src/components/AppText";
 import { AuthAlreadySignedIn } from "../../src/components/auth/AuthAlreadySignedIn";
 import { AuthCredentialsActions } from "../../src/components/auth/AuthCredentialsActions";
 import { AuthEmailPasswordFields } from "../../src/components/auth/AuthEmailPasswordFields";
@@ -21,6 +22,8 @@ import {
 } from "../../src/lib/email-auth-error";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
+import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
+import { tennisColors } from "../../src/theme/tennis-tokens";
 
 export default function SignInScreen() {
   const { t } = useTranslation();
@@ -78,13 +81,26 @@ export default function SignInScreen() {
           />
         </View>
         {submitError ? (
-          <ErrorNotice>
-            {submitError === "invalid"
-              ? t("auth.invalidCredentials")
-              : submitError === "unconfirmed"
-                ? t("auth.emailUnconfirmed")
-                : t("auth.signInError")}
-          </ErrorNotice>
+          <>
+            <ErrorNotice>
+              {submitError === "invalid"
+                ? t("auth.invalidCredentials")
+                : submitError === "unconfirmed"
+                  ? t("auth.emailUnconfirmed")
+                  : t("auth.signInError")}
+            </ErrorNotice>
+            {/*
+              An account created through Google has no password, so a password
+              typed against it fails as "incorrect" -- and the player goes off
+              to reset a password that never existed. Supabase will not say
+              which providers an address holds, deliberately, so this names the
+              possibility rather than the account: it needs no lookup and
+              cannot be used to test whether an address is registered.
+            */}
+            {submitError === "invalid" ? (
+              <AppText style={styles.hint}>{t("auth.googleHint")}</AppText>
+            ) : null}
+          </>
         ) : null}
         <View style={styles.spacer} />
         <AuthCredentialsActions
@@ -92,7 +108,6 @@ export default function SignInScreen() {
           onPrimary={() => void submit()}
           primaryLoading={isSubmitting}
           google={google}
-          mode="signIn"
           switchLabel={t("auth.needAccount")}
           onSwitch={() => router.replace("/(public)/sign-up")}
         />
@@ -114,6 +129,13 @@ const styles = createLiveSheet(() =>
       alignItems: "flex-start",
       paddingTop: 12,
       marginBottom: 8,
+    },
+    hint: {
+      marginTop: 8,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
     },
   }),
 );

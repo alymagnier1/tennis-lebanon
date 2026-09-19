@@ -5,9 +5,9 @@ import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import * as Linking from "expo-linking";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { requestAccountDeletion } from "@tennis-lebanon/api";
+import { callerHasPassword, requestAccountDeletion } from "@tennis-lebanon/api";
 import { PILOT_LOCALES, type PilotLocale } from "@tennis-lebanon/i18n";
 import { AppText } from "../../src/components/AppText";
 import { ErrorNotice } from "../../src/components/FormUi";
@@ -47,6 +47,15 @@ export default function SettingsScreen() {
   const appVersion =
     Constants.expoConfig?.version ?? Constants.nativeAppVersion ?? "1.0.0";
 
+  /**
+   * Offered only to accounts that cannot already be opened with a password,
+   * which in practice means the ones Google created. Asking the server is the
+   * only way to know: the session carries no hint, and it must not.
+   */
+  const passwordQuery = useQuery({
+    queryKey: ["caller-has-password"],
+    queryFn: () => callerHasPassword(supabase),
+  });
   const deletion = useMutation({
     mutationFn: () => requestAccountDeletion(supabase),
     // Sign out rather than refreshing into the app. Staying signed in landed
@@ -220,6 +229,21 @@ export default function SettingsScreen() {
             title={settingsScreenAccountTitle(t)}
             variant="grouped"
           >
+            {passwordQuery.data === false ? (
+              <ProfileMenuRow
+                icon={
+                  <Icon name="lock" size={16} color={tennisColors.accent} />
+                }
+                label={t("auth.setPasswordRow")}
+                subtitle={t("auth.setPasswordHint")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(auth)/update-password",
+                    params: { mode: "set" },
+                  })
+                }
+              />
+            ) : null}
             <ProfileMenuRow
               icon={<Icon name="close" size={16} color={tennisColors.accent} />}
               label={t("auth.signOut")}

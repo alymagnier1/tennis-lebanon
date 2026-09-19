@@ -285,8 +285,6 @@
     "googleUnavailable": "La connexion Google n’est pas disponible sur cet appareil. Utilisez e-mail et mot de passe.",
     "googleError": "Impossible de vous connecter avec Google. Veuillez réessayer.",
     "orSeparator": "ou",
-    "socialSeparatorSignIn": "Se connecter avec",
-    "socialSeparatorSignUp": "S’inscrire avec",
     "cooldownError": "Attendez une minute avant de demander un autre e-mail. Celui déjà envoyé fonctionne toujours.",
     "checkEmailTitle": "Consultez vos e-mails",
     "checkEmailConfirmBody": "Nous avons envoyé un lien de confirmation. Ouvrez-le sur cet appareil pour continuer.",
@@ -324,7 +322,13 @@
       "invalid": "Ce code est incorrect ou a expiré. Vérifiez le dernier e-mail ou demandez un nouveau code.",
       "rateLimited": "Trop de demandes. Attendez une minute avant d'en demander un autre.",
       "generic": "Nous n'avons pas pu confirmer ce code. Veuillez réessayer."
-    }
+    },
+    "socialSeparator": "ou",
+    "googleHint": "Si vous vous êtes inscrit avec Google, utilisez Continuer avec Google.",
+    "setPasswordRow": "Définir un mot de passe",
+    "setPasswordHint": "Ajoutez un mot de passe pour vous connecter sans Google.",
+    "setPasswordTitle": "Définir un mot de passe",
+    "setPasswordBody": "Votre compte utilise Google. Ajoutez un mot de passe et l'un ou l'autre y donnera accès."
   },
   "onboarding": {
     "stepEyebrow": "Étape {{step}} sur {{total}}",

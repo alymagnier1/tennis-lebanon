@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TextInput } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
   newPasswordSchema,
@@ -22,6 +22,15 @@ import { tennisColors } from "../../src/theme/tennis-tokens";
 export default function UpdatePasswordScreen() {
   const { t } = useTranslation();
   const [submitError, setSubmitError] = useState(false);
+  /**
+   * Recovery reaches this screen to *replace* a password; settings reaches it
+   * to give a Google-created account its first one. Same call either way --
+   * `secure_password_change` is off, so no reauthentication -- but telling
+   * somebody they are updating a password they have never had is a small lie
+   * that makes them hunt for the old one.
+   */
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const setting = params.mode === "set";
   const {
     control,
     handleSubmit,
@@ -44,8 +53,10 @@ export default function UpdatePasswordScreen() {
 
   return (
     <OnboardingStepLayout
-      title={t("auth.updatePasswordTitle")}
-      description={t("auth.updatePasswordBody")}
+      title={t(setting ? "auth.setPasswordTitle" : "auth.updatePasswordTitle")}
+      description={t(
+        setting ? "auth.setPasswordBody" : "auth.updatePasswordBody",
+      )}
       footer={
         <FigmaPrimaryButton
           label={t("auth.savePassword")}
