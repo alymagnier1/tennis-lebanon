@@ -78,8 +78,8 @@ export default function SignUpScreen() {
     // failed, found an existing account, or signed in without one.
     recordAuthEmailSent(email);
     router.replace({
-      pathname: "/(auth)/check-email",
-      params: { reason: "confirm" },
+      pathname: "/(auth)/verify-code",
+      params: { email },
     });
   });
 
