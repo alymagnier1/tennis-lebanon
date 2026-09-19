@@ -52,8 +52,8 @@ export default function ForgotPasswordScreen() {
     }
     recordAuthEmailSent(email);
     router.replace({
-      pathname: "/(auth)/check-email",
-      params: { reason: "reset" },
+      pathname: "/(auth)/verify-code",
+      params: { email, purpose: "recovery" },
     });
   });
 

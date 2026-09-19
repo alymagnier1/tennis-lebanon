@@ -64,7 +64,7 @@ export default function SignUpScreen() {
       return;
     }
     // Confirm-email on can return 200 with an empty identities list when the
-    // address is already registered, so we do not send them to check-email.
+    // address is already registered, so we do not send them on to the code.
     if (data.user && data.user.identities?.length === 0) {
       setSubmitError("exists");
       return;

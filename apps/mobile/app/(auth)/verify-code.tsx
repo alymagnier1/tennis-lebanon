@@ -14,6 +14,8 @@ import {
   canSendAuthEmail,
   recordAuthEmailSent,
 } from "../../src/lib/auth-cooldown";
+import { getAuthRedirectUrl } from "../../src/lib/auth-redirect";
+import { markPasswordRecoveryPending } from "../../src/lib/password-recovery";
 import { supabase } from "../../src/lib/supabase";
 import {
   resendCodeFailure,
@@ -37,20 +39,27 @@ const MAX_CODE_LENGTH = 10;
 type Notice = { kind: "error"; key: string } | { kind: "sent" } | null;
 
 /**
- * Confirms a new address with the code from the email instead of a link.
+ * Takes the code from an auth email instead of a link, for both errands that
+ * send one: confirming a new address, and proving an address before choosing a
+ * new password.
  *
  * The link flow needed `tennislebanon://` to survive the mail client, the
  * browser and the OS, and when any of those dropped it the player landed back
  * on Welcome with nothing to act on. A code needs none of that, and works when
  * the mail is read on a laptop -- which is where most people read mail.
  *
- * `verifyOtp` returns a session on success, so nothing here navigates: the auth
- * layout sees the new state and moves to onboarding on its own.
+ * `verifyOtp` returns a session either way. After a sign-up that is all that
+ * is needed -- the auth layout sees the new state and moves to onboarding on
+ * its own. A recovery has to go on to set the password, and is walked there
+ * deliberately: `PASSWORD_RECOVERY` is emitted for a recovery **link**, and
+ * relying on `verifyOtp` to emit it too would leave a player signed in on
+ * their old password if it did not.
  */
 export default function VerifyCodeScreen() {
   const { t } = useTranslation();
-  const params = useLocalSearchParams<{ email?: string }>();
+  const params = useLocalSearchParams<{ email?: string; purpose?: string }>();
   const email = typeof params.email === "string" ? params.email : "";
+  const recovery = params.purpose === "recovery";
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
@@ -64,7 +73,7 @@ export default function VerifyCodeScreen() {
     const { error } = await supabase.auth.verifyOtp({
       email,
       token: code,
-      type: "signup",
+      type: recovery ? "recovery" : "signup",
     });
     setBusy(false);
     if (error) {
@@ -73,6 +82,11 @@ export default function VerifyCodeScreen() {
         key: `auth.verifyCode.${verifyCodeFailure(error)}`,
       });
       setCode("");
+      return;
+    }
+    if (recovery) {
+      markPasswordRecoveryPending();
+      router.replace("/(auth)/update-password");
     }
   };
 
@@ -86,7 +100,11 @@ export default function VerifyCodeScreen() {
     }
     setBusy(true);
     setNotice(null);
-    const { error } = await supabase.auth.resend({ type: "signup", email });
+    const { error } = recovery
+      ? await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: getAuthRedirectUrl(),
+        })
+      : await supabase.auth.resend({ type: "signup", email });
     setBusy(false);
     if (error) {
       setNotice({
@@ -103,13 +121,24 @@ export default function VerifyCodeScreen() {
   return (
     <OnboardingStepLayout
       title={t("auth.verifyCode.title")}
-      description={t("auth.verifyCode.body", { email })}
-      onBack={() => router.replace("/(public)/sign-up")}
+      description={t(
+        recovery ? "auth.verifyCode.recoveryBody" : "auth.verifyCode.body",
+        { email },
+      )}
+      onBack={() =>
+        router.replace(
+          recovery ? "/(public)/forgot-password" : "/(public)/sign-up",
+        )
+      }
       marks="quiet"
       footer={
         <>
           <FigmaPrimaryButton
-            label={t("auth.verifyCode.submit")}
+            label={t(
+              recovery
+                ? "auth.verifyCode.recoverySubmit"
+                : "auth.verifyCode.submit",
+            )}
             hero
             disabled={!ready}
             onPress={() => void verify()}
