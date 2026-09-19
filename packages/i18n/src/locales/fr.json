@@ -315,8 +315,8 @@
     "checkEmailHint": "Le lien expire après un court délai. Si vous en demandez un autre, seul l'e-mail le plus récent fonctionnera.",
     "verifyCode": {
       "title": "Saisissez votre code",
-      "body": "Nous avons envoyé un code à 6 chiffres à {{email}}. Saisissez-le ici pour confirmer votre adresse.",
-      "inputLabel": "Code de confirmation à 6 chiffres",
+      "body": "Nous avons envoyé un code à {{email}}. Saisissez-le ici pour confirmer votre adresse.",
+      "inputLabel": "Code de confirmation",
       "hint": "Le code expire dans une heure. Si vous en demandez un autre, seul le plus récent fonctionne.",
       "submit": "Confirmer",
       "resend": "Envoyer un nouveau code",
