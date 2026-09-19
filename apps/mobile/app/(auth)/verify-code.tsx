@@ -22,8 +22,17 @@ import {
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import { tennisColors } from "../../src/theme/tennis-tokens";
 
-/** Matches `otp_length` in supabase/config.toml. */
-const CODE_LENGTH = 6;
+/**
+ * The project decides how long the code is, not the app. `otp_length` in
+ * supabase/config.toml governs the **local** stack only; the hosted project
+ * carries its own setting, and it was issuing eight digits against a screen
+ * that hardcoded six, so Confirm could never enable.
+ *
+ * Accepting a range keeps this working whichever value a project is set to,
+ * and the copy no longer claims a length the app cannot know.
+ */
+const MIN_CODE_LENGTH = 6;
+const MAX_CODE_LENGTH = 10;
 
 type Notice = { kind: "error"; key: string } | { kind: "sent" } | null;
 
@@ -46,7 +55,7 @@ export default function VerifyCodeScreen() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
 
-  const ready = code.length === CODE_LENGTH && email.length > 0 && !busy;
+  const ready = code.length >= MIN_CODE_LENGTH && email.length > 0 && !busy;
 
   const verify = async () => {
     if (!ready) return;
@@ -118,7 +127,7 @@ export default function VerifyCodeScreen() {
         onChangeText={(next) => {
           // Mail clients and password managers paste the code with spaces, and
           // some keyboards offer it with a trailing one.
-          setCode(next.replace(/\D/g, "").slice(0, CODE_LENGTH));
+          setCode(next.replace(/\D/g, "").slice(0, MAX_CODE_LENGTH));
           setNotice(null);
         }}
         keyboardType="number-pad"
@@ -126,7 +135,7 @@ export default function VerifyCodeScreen() {
         textContentType="oneTimeCode"
         autoComplete="one-time-code"
         autoFocus
-        maxLength={CODE_LENGTH}
+        maxLength={MAX_CODE_LENGTH}
         style={[onboardingInputStyle.input, styles.code]}
       />
       <AppText style={styles.hint}>{t("auth.verifyCode.hint")}</AppText>
@@ -145,7 +154,7 @@ export default function VerifyCodeScreen() {
 const styles = StyleSheet.create({
   code: {
     fontSize: 28,
-    letterSpacing: 10,
+    letterSpacing: 6,
     textAlign: "center",
     fontFamily: tennisFontFamily.headingSemi,
   },

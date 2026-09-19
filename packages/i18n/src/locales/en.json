@@ -315,8 +315,8 @@
     "signOutError": "We could not sign you out. Please try again.",
     "verifyCode": {
       "title": "Enter your code",
-      "body": "We sent a 6-digit code to {{email}}. Enter it here to confirm your address.",
-      "inputLabel": "6-digit confirmation code",
+      "body": "We sent a code to {{email}}. Enter it here to confirm your address.",
+      "inputLabel": "Confirmation code",
       "hint": "The code expires in an hour. If you ask for another, only the newest one works.",
       "submit": "Confirm",
       "resend": "Send a new code",
