@@ -46,6 +46,22 @@ export async function completeOnboarding(
   if (error) throw error;
 }
 
+/**
+ * Whether this account can be opened with a password.
+ *
+ * Google-created accounts have none, and the app has to know before it can
+ * offer to set one. `encrypted_password` is not in the session and must not
+ * be, so the answer comes from the server -- scoped to the caller, returning
+ * a bare boolean, so it cannot be pointed at anyone else.
+ */
+export async function callerHasPassword(
+  client: TennisSupabaseClient,
+): Promise<boolean> {
+  const { data, error } = await client.rpc("caller_has_password");
+  if (error) throw error;
+  return data === true;
+}
+
 export async function requestAccountDeletion(client: TennisSupabaseClient) {
   const { error } = await client.rpc("request_account_deletion");
   if (error) throw error;

@@ -285,8 +285,6 @@
     "googleUnavailable": "تسجيل الدخول عبر Google غير متاح على هذا الجهاز. استخدم البريد وكلمة المرور.",
     "googleError": "تعذّر تسجيل دخولك عبر Google. حاول مرة أخرى.",
     "orSeparator": "أو",
-    "socialSeparatorSignIn": "تسجيل الدخول عبر",
-    "socialSeparatorSignUp": "إنشاء حساب عبر",
     "cooldownError": "انتظر دقيقة واحدة قبل طلب رسالة أخرى. الرسالة التي أرسلناها ما زالت تعمل.",
     "checkEmailTitle": "تحقّق من بريدك الإلكتروني",
     "checkEmailConfirmBody": "أرسلنا وصلة تأكيد إلى بريدك. افتحها على هذا الجهاز للمتابعة.",
@@ -324,7 +322,13 @@
       "invalid": "الرمز غير صحيح أو انتهت صلاحيته. تحقّق من أحدث رسالة أو اطلب رمزاً جديداً.",
       "rateLimited": "طلبات كثيرة. انتظر دقيقة قبل طلب رمز آخر.",
       "generic": "تعذّر تأكيد الرمز. حاول مرة أخرى."
-    }
+    },
+    "socialSeparator": "أو",
+    "googleHint": "إذا سجّلت عبر Google، فاستخدم «المتابعة عبر Google».",
+    "setPasswordRow": "تعيين كلمة مرور",
+    "setPasswordHint": "أضف كلمة مرور لتسجّل الدخول بدون Google.",
+    "setPasswordTitle": "تعيين كلمة مرور",
+    "setPasswordBody": "حسابك يستخدم Google. أضف كلمة مرور وسيفتح الحساب بأيّ منهما."
   },
   "onboarding": {
     "stepEyebrow": "الخطوة {{step}} من {{total}}",

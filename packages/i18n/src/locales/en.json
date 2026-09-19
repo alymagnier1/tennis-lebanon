@@ -286,8 +286,6 @@
     "googleUnavailable": "Google sign-in is not available on this device. Use email and password instead.",
     "googleError": "We could not sign you in with Google. Please try again.",
     "orSeparator": "or",
-    "socialSeparatorSignIn": "Sign in with",
-    "socialSeparatorSignUp": "Sign up with",
     "cooldownError": "Please wait one minute before requesting another email. The one we already sent still works.",
     "checkEmailTitle": "Check your email",
     "checkEmailConfirmBody": "We sent a confirmation link to your inbox. Open it on this device to continue.",
@@ -324,7 +322,13 @@
       "invalid": "That code is wrong or has expired. Check the newest email, or send a new code.",
       "rateLimited": "Too many requests. Wait a minute before asking for another code.",
       "generic": "We could not confirm that code. Please try again."
-    }
+    },
+    "socialSeparator": "or",
+    "googleHint": "If you signed up with Google, use Continue with Google.",
+    "setPasswordRow": "Set a password",
+    "setPasswordHint": "Add a password so you can log in without Google.",
+    "setPasswordTitle": "Set a password",
+    "setPasswordBody": "Your account uses Google. Add a password and either one will open it."
   },
   "onboarding": {
     "stepEyebrow": "Step {{step}} of {{total}}",

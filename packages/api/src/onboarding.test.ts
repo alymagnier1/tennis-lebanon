@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POLICY_VERSIONS, type OnboardingInput } from "@tennis-lebanon/domain";
-import { completeOnboarding, requestAccountDeletion } from "./onboarding";
+import {
+  callerHasPassword,
+  completeOnboarding,
+  requestAccountDeletion,
+} from "./onboarding";
 import type { TennisSupabaseClient } from "./client";
 
 const validInput: OnboardingInput = {
@@ -76,5 +80,41 @@ describe("onboarding API wrappers", () => {
     rpc.mockResolvedValue({ error: rpcError });
 
     await expect(requestAccountDeletion(client)).rejects.toEqual(rpcError);
+  });
+});
+
+describe("callerHasPassword", () => {
+  it("asks the server, with no arguments to point anywhere else", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: true, error: null });
+
+    await expect(callerHasPassword(client)).resolves.toBe(true);
+    expect(rpc).toHaveBeenCalledWith("caller_has_password");
+  });
+
+  // A Google-created account. The caller uses this to decide whether to offer
+  // "Set a password", so a false has to survive as false.
+  it("reports an account with no password", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: false, error: null });
+
+    await expect(callerHasPassword(client)).resolves.toBe(false);
+  });
+
+  // Never render the row on a maybe: null and undefined mean the question was
+  // not answered, and `data === true` keeps them out of the truthy branch.
+  it("treats a missing answer as no answer, not as a password", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    await expect(callerHasPassword(client)).resolves.toBe(false);
+  });
+
+  it("throws when the RPC fails", async () => {
+    const { client, rpc } = createMockClient();
+    const rpcError = { message: "Authentication required", code: "42501" };
+    rpc.mockResolvedValue({ error: rpcError });
+
+    await expect(callerHasPassword(client)).rejects.toEqual(rpcError);
   });
 });

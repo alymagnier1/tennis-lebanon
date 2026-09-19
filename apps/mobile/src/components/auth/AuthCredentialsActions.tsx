@@ -7,13 +7,17 @@ import type { GoogleSignInFailure } from "../../lib/google-sign-in";
 /**
  * Shared action stack for Log in and Sign up so the two screens pin the same
  * way: primary, social separator, Google, then the cross-link.
+ *
+ * Deliberately identical on both. Google signs a returning player in and
+ * creates an account for a new one -- it is one action, and labelling it two
+ * ways asked the reader to know which they were, which is the question the
+ * provider already answered.
  */
 export function AuthCredentialsActions({
   primaryLabel,
   onPrimary,
   primaryLoading,
   google,
-  mode,
   switchLabel,
   onSwitch,
 }: {
@@ -26,7 +30,6 @@ export function AuthCredentialsActions({
     error: { reason: GoogleSignInFailure; detail?: string } | null;
     signIn: () => Promise<void>;
   };
-  mode: "signIn" | "signUp";
   switchLabel: string;
   onSwitch: () => void;
 }) {
@@ -42,7 +45,6 @@ export function AuthCredentialsActions({
         available={google.available}
         busy={google.busy}
         error={google.error}
-        mode={mode}
         onPress={() => void google.signIn()}
       />
       <FigmaTextButton label={switchLabel} onPress={onSwitch} />

@@ -14,13 +14,11 @@ export function AuthGoogleSection({
   busy,
   error,
   onPress,
-  mode,
 }: {
   available: boolean;
   busy: boolean;
   error: { reason: GoogleSignInFailure; detail?: string } | null;
   onPress: () => void;
-  mode: "signIn" | "signUp";
 }) {
   const { t } = useTranslation();
   if (!available) return null;
@@ -29,11 +27,7 @@ export function AuthGoogleSection({
     <>
       <View style={styles.divider}>
         <View style={styles.rule} />
-        <AppText style={styles.separator}>
-          {mode === "signUp"
-            ? t("auth.socialSeparatorSignUp")
-            : t("auth.socialSeparatorSignIn")}
-        </AppText>
+        <AppText style={styles.separator}>{t("auth.socialSeparator")}</AppText>
         <View style={styles.rule} />
       </View>
       <FigmaSecondaryButton

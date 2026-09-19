@@ -113,7 +113,6 @@ export default function SignUpScreen() {
           onPrimary={() => void submit()}
           primaryLoading={isSubmitting}
           google={google}
-          mode="signUp"
           switchLabel={t("auth.haveAccount")}
           onSwitch={() => router.replace("/(public)/sign-in")}
         />

@@ -1821,6 +1821,7 @@ export type Database = {
       };
       booking_stale_reminders: { Args: never; Returns: Json };
       cancel_account_deletion: { Args: never; Returns: undefined };
+      caller_has_password: { Args: never; Returns: boolean };
       cancel_booking_request: {
         Args: { p_booking_id: string };
         Returns: undefined;

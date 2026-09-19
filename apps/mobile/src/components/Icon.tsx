@@ -35,6 +35,7 @@ const ICONS = {
   mail: "mail-outline",
   info: "information-circle-outline",
   camera: "camera-outline",
+  lock: "lock-closed-outline",
   star: "star",
 } as const;
 
