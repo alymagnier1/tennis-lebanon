@@ -286,11 +286,6 @@
     "googleError": "Impossible de vous connecter avec Google. Veuillez réessayer.",
     "orSeparator": "ou",
     "cooldownError": "Attendez une minute avant de demander un autre e-mail. Celui déjà envoyé fonctionne toujours.",
-    "checkEmailTitle": "Consultez vos e-mails",
-    "checkEmailConfirmBody": "Nous avons envoyé un lien de confirmation. Ouvrez-le sur cet appareil pour continuer.",
-    "checkEmailResetBody": "Nous avons envoyé un lien pour réinitialiser le mot de passe. Ouvrez-le sur cet appareil.",
-    "openedLink": "J’ai ouvert le lien",
-    "useAnotherEmail": "Utiliser une autre adresse",
     "updatePasswordTitle": "Choisissez un nouveau mot de passe",
     "updatePasswordBody": "C’est le mot de passe que vous utiliserez à la prochaine connexion.",
     "savePassword": "Enregistrer le mot de passe",
@@ -310,7 +305,6 @@
     "signOutConfirmBody": "Vous aurez besoin de votre e-mail et mot de passe, ou de Google, pour revenir.",
     "signOutError": "Impossible de vous déconnecter. Veuillez réessayer.",
     "emailPlaceholder": "you@example.com",
-    "checkEmailHint": "Le lien expire après un court délai. Si vous en demandez un autre, seul l'e-mail le plus récent fonctionnera.",
     "verifyCode": {
       "title": "Saisissez votre code",
       "body": "Nous avons envoyé un code à {{email}}. Saisissez-le ici pour confirmer votre adresse.",
@@ -321,14 +315,17 @@
       "sent": "Nouveau code envoyé. Consultez votre boîte de réception.",
       "invalid": "Ce code est incorrect ou a expiré. Vérifiez le dernier e-mail ou demandez un nouveau code.",
       "rateLimited": "Trop de demandes. Attendez une minute avant d'en demander un autre.",
-      "generic": "Nous n'avons pas pu confirmer ce code. Veuillez réessayer."
+      "generic": "Nous n'avons pas pu confirmer ce code. Veuillez réessayer.",
+      "recoveryBody": "Nous avons envoyé un code à {{email}}. Saisissez-le ici, puis choisissez un nouveau mot de passe.",
+      "recoverySubmit": "Continuer"
     },
     "socialSeparator": "ou",
     "googleHint": "Si vous vous êtes inscrit avec Google, utilisez Continuer avec Google.",
     "setPasswordRow": "Définir un mot de passe",
     "setPasswordHint": "Ajoutez un mot de passe pour vous connecter sans Google.",
     "setPasswordTitle": "Définir un mot de passe",
-    "setPasswordBody": "Votre compte utilise Google. Ajoutez un mot de passe et l'un ou l'autre y donnera accès."
+    "setPasswordBody": "Votre compte utilise Google. Ajoutez un mot de passe et l'un ou l'autre y donnera accès.",
+    "useAnotherEmail": "Utiliser une autre adresse e-mail"
   },
   "onboarding": {
     "stepEyebrow": "Étape {{step}} sur {{total}}",

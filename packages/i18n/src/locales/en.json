@@ -287,12 +287,6 @@
     "googleError": "We could not sign you in with Google. Please try again.",
     "orSeparator": "or",
     "cooldownError": "Please wait one minute before requesting another email. The one we already sent still works.",
-    "checkEmailTitle": "Check your email",
-    "checkEmailConfirmBody": "We sent a confirmation link to your inbox. Open it on this device to continue.",
-    "checkEmailResetBody": "We sent a password reset link to your inbox. Open it on this device to choose a new password.",
-    "checkEmailHint": "The link expires after a short time. If you request another, only the newest email will work.",
-    "openedLink": "I opened the link",
-    "useAnotherEmail": "Use another email",
     "updatePasswordTitle": "Choose a new password",
     "updatePasswordBody": "This becomes the password you use next time you log in.",
     "savePassword": "Save password",
@@ -321,14 +315,17 @@
       "sent": "New code sent. Check your inbox.",
       "invalid": "That code is wrong or has expired. Check the newest email, or send a new code.",
       "rateLimited": "Too many requests. Wait a minute before asking for another code.",
-      "generic": "We could not confirm that code. Please try again."
+      "generic": "We could not confirm that code. Please try again.",
+      "recoveryBody": "We sent a code to {{email}}. Enter it here, then choose a new password.",
+      "recoverySubmit": "Continue"
     },
     "socialSeparator": "or",
     "googleHint": "If you signed up with Google, use Continue with Google.",
     "setPasswordRow": "Set a password",
     "setPasswordHint": "Add a password so you can log in without Google.",
     "setPasswordTitle": "Set a password",
-    "setPasswordBody": "Your account uses Google. Add a password and either one will open it."
+    "setPasswordBody": "Your account uses Google. Add a password and either one will open it.",
+    "useAnotherEmail": "Use another email"
   },
   "onboarding": {
     "stepEyebrow": "Step {{step}} of {{total}}",

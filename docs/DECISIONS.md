@@ -11,6 +11,15 @@ Record decisions using this template:
 - Consequences:
 - Owner:
 
+## 2026-09-19 — Password reset takes a code too, and the link screen goes
+
+- Status: accepted
+- Context: Sign-up moved to a code earlier today because the link needed `tennislebanon://` to survive the mail client, the browser and the OS, and when any of them dropped it the player landed back on Welcome with nothing to act on. Reset was left on the link, which meant the same fragility sat on the path people reach _because_ they are already locked out — the worst place for it — and the app carried two answers to the same problem. `check-email` also still claimed "The link expires after a short time... request another" while nothing in the app could send one; the resend built for sign-up did not serve it.
+- Decision: `forgot-password` hands the address to the same `verify-code` screen with `purpose=recovery`. One screen serves both errands: `verifyOtp` takes `recovery` or `signup`, resend calls `resetPasswordForEmail` or `resend`, and the copy and back target follow. After a recovery the screen marks recovery pending and walks the player to `update-password` itself, rather than trusting `verifyOtp` to emit `PASSWORD_RECOVERY` — that event is documented for the recovery **link**, and a player left signed in on their old password would be the failure. `check-email.tsx`, `check-email-reason.ts` and its test are deleted, with the six copy keys they owned; `useAnotherEmail` stays, because `AuthAlreadySignedIn` still offers it.
+- Alternatives considered: a second screen for recovery (rejected — the two differ in an OTP type, two strings and where Back goes; a copy would have drifted); leaving reset on the link and only adding a resend (rejected — it keeps the deep-link failure on the path for people who are already locked out, and keeps two mental models in one app); emitting `PASSWORD_RECOVERY` ourselves so routing stayed uniform (rejected — it fakes an auth event to steer navigation, and `markPasswordRecoveryPending` already exists for exactly this).
+- Consequences: **The Reset Password email template needs `{{ .Token }}` in the Supabase dashboard, exactly as Confirm signup did.** Until it does, reset emails carry a link and the screen asks for a code that is not in them — the same mismatch sign-up had this morning, and the reason this is called out here rather than left to be discovered. The deep-link callback still exists and still works; nothing in the app routes to it for reset any more, so `tennislebanon://auth/callback` now matters only for whatever else uses it. Mobile test files drop from 81 to 80 with the parser's test.
+- Owner: Founder/product validation
+
 ## 2026-09-19 — Google is one door, and an account without a password can grow one
 
 - Status: accepted
