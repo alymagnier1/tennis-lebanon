@@ -1348,7 +1348,19 @@
       "noteCounter": "{{count}}/{{max}}",
       "noteQuote": "« {{note}} »",
       "noteEdit": "Modifier la note",
-      "noteHide": "Masquer la note"
+      "noteHide": "Masquer la note",
+      "link": {
+        "alreadyAccepted": "Quelqu'un a déjà utilisé ce lien. Demandez-en un autre à l'organisateur.",
+        "alreadyMember": "Vous participez déjà à ce match.",
+        "browse": "Trouver un autre match",
+        "expired": "Cette invitation a expiré. Demandez-en une nouvelle à l'organisateur.",
+        "full": "Ce match est complet.",
+        "loadError": "Nous n'avons pas pu ouvrir cette invitation.",
+        "notFound": "Ce lien d'invitation n'est pas valide. Demandez-en un nouveau à l'organisateur.",
+        "revoked": "L'organisateur a retiré cette invitation.",
+        "unavailable": "Ce match n'accepte plus de joueurs.",
+        "wrongRecipient": "Cette invitation a été envoyée à quelqu'un d'autre. Demandez à l'organisateur de vous inviter directement."
+      }
     },
     "policy": {
       "leaveBeforeBooking": "Vous pouvez quitter librement tant qu'aucun court n'est réservé. Les changements tardifs répétés peuvent affecter votre fiabilité.",
