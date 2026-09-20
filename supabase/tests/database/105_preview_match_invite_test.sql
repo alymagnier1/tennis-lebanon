@@ -30,7 +30,11 @@ end;
 $$;
 
 -- Doubles, so an invitee can sit alongside an accepted joiner without filling
--- the roster and moving the match out of `open`. Same helper shape as `098`.
+-- the roster and moving the match out of `open`. Same helper shape as `098`,
+-- but open to every band: the person opening a shared link is a stranger the
+-- host never picked, and the seeded stranger is a `beginner`, so a narrower
+-- range would fail these fixtures on `skill_out_of_range` rather than on
+-- anything this migration does.
 create or replace function pg_temp.doubles_match(p_creator uuid)
 returns uuid
 language plpgsql
@@ -52,7 +56,7 @@ begin
     'doubles'::public.match_format,
     'public'::public.match_visibility,
     'social'::public.play_intent,
-    'improving'::public.skill_band,
+    'beginner'::public.skill_band,
     'competitive'::public.skill_band,
     false,
     null,
