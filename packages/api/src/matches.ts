@@ -1,5 +1,6 @@
 import type { CreateMatchInput } from "@tennis-lebanon/domain";
 import { toRpcProposedTimes } from "@tennis-lebanon/domain";
+import type { Json } from "@tennis-lebanon/types";
 import type { MatchHubBooking } from "./bookings";
 import type { TennisSupabaseClient } from "./client";
 import type { MatchHubResult } from "./results";
@@ -362,6 +363,78 @@ export async function createMatchInvite(
   });
   if (error) throw error;
   return data as string;
+}
+
+/**
+ * Why an invite link cannot be opened, or that it can.
+ *
+ * Every one of these was `P0002 Invite not found or expired` before `105`, so
+ * a screen could not tell a withdrawn link from one somebody else already used
+ * from a typo. `already_member` in particular is the state of a person who is
+ * *in* the match, and telling them the invite expired is both true and useless.
+ */
+export type MatchInvitePreviewStatus =
+  | "ok"
+  | "not_found"
+  | "wrong_recipient"
+  | "revoked"
+  | "already_accepted"
+  | "already_member"
+  | "expired"
+  | "full"
+  | "unavailable";
+
+/**
+ * What a shared invite link shows before it is accepted.
+ *
+ * Deliberately the `MatchInviteInboxRow` fields plus `zones`, and deliberately
+ * no roster and no skill range: a link recipient may be a stranger who never
+ * joins, and naming existing participants to them discloses somebody who did
+ * not agree to it.
+ *
+ * Everything but `status` is null when the status is `not_found`,
+ * `wrong_recipient` or `revoked` — the server withholds the summary rather than
+ * dressing a leak as an error state.
+ */
+export type MatchInvitePreview = {
+  /**
+   * Lets Decline be a real refusal: `declineMatchInvitation` stamps
+   * `declined_at` for an addressed invitation and matches nothing for a shared
+   * link, so one call serves both and Decline means here what it means in the
+   * inbox.
+   */
+  invitation_id: string | null;
+  match_id: string | null;
+  format: string | null;
+  match_status: string | null;
+  creator_display_name: string | null;
+  inviter_display_name: string | null;
+  participant_count: number | null;
+  capacity: number | null;
+  soonest_time: string | null;
+  expires_at: string | null;
+  /** Optional one-way note from the inviter; null when none was sent. */
+  note: string | null;
+  /** Same jsonb shape `get_match_hub` returns, for the client's area label. */
+  zones: Json | null;
+  status: MatchInvitePreviewStatus;
+};
+
+/**
+ * Reads an invite token without consuming it.
+ *
+ * The counterpart to `acceptMatchInvite`, which mutates: opening a link must
+ * never join anybody, so the screen reads first and accepts only on a tap.
+ */
+export async function previewMatchInvite(
+  client: TennisSupabaseClient,
+  token: string,
+): Promise<MatchInvitePreview> {
+  const { data, error } = await client.rpc("preview_match_invite", {
+    p_token: token,
+  });
+  if (error) throw error;
+  return data as MatchInvitePreview;
 }
 
 export async function acceptMatchInvite(

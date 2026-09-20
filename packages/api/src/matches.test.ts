@@ -14,6 +14,7 @@ import {
   listMyMatchInvites,
   listMyMatches,
   listMyCompletedMatches,
+  previewMatchInvite,
   publishMatch,
   removeMatchParticipant,
   respondToJoinRequest,
@@ -160,6 +161,38 @@ describe("matches API wrappers", () => {
       p_note: "Fancy a hit",
     });
     await expect(acceptMatchInvite(client, "token")).resolves.toBe("match-id");
+  });
+
+  it("previews an invite token without accepting it", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({
+      data: { status: "ok", match_id: "match-id", capacity: 4 },
+      error: null,
+    });
+
+    await expect(previewMatchInvite(client, "token")).resolves.toEqual({
+      status: "ok",
+      match_id: "match-id",
+      capacity: 4,
+    });
+    // The whole point of the function: reading a token must reach the read,
+    // never `accept_match_invite`.
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith("preview_match_invite", {
+      p_token: "token",
+    });
+  });
+
+  it("surfaces a refusal without a summary", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({
+      data: { status: "wrong_recipient", match_id: null },
+      error: null,
+    });
+
+    const preview = await previewMatchInvite(client, "token");
+    expect(preview.status).toBe("wrong_recipient");
+    expect(preview.match_id).toBeNull();
   });
 
   it("loads hub and list data", async () => {

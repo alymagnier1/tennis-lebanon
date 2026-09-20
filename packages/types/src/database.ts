@@ -2473,6 +2473,10 @@ export type Database = {
         };
         Returns: number;
       };
+      preview_match_invite: {
+        Args: { p_token: string };
+        Returns: Database["public"]["CompositeTypes"]["match_invite_preview"];
+      };
       propose_booking_alternative: {
         Args: {
           p_booking_id: string;
@@ -2803,6 +2807,16 @@ export type Database = {
         | "cancelled"
         | "expired"
         | "disputed";
+      match_invite_preview_status:
+        | "ok"
+        | "not_found"
+        | "wrong_recipient"
+        | "revoked"
+        | "already_accepted"
+        | "already_member"
+        | "expired"
+        | "full"
+        | "unavailable";
       match_visibility: "public" | "invite_only" | "private";
       participant_status:
         "invited" | "requested" | "accepted" | "declined" | "left" | "removed";
@@ -2928,6 +2942,22 @@ export type Database = {
         expires_at: string | null;
         created_at: string | null;
         note: string | null;
+      };
+      match_invite_preview: {
+        invitation_id: string | null;
+        match_id: string | null;
+        format: Database["public"]["Enums"]["match_format"] | null;
+        match_status: Database["public"]["Enums"]["match_status"] | null;
+        creator_display_name: string | null;
+        inviter_display_name: string | null;
+        participant_count: number | null;
+        capacity: number | null;
+        soonest_time: string | null;
+        expires_at: string | null;
+        note: string | null;
+        zones: Json | null;
+        status:
+          Database["public"]["Enums"]["match_invite_preview_status"] | null;
       };
       user_report_queue_row: {
         report_id: string | null;
