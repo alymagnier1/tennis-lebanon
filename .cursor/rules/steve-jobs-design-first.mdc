@@ -1,0 +1,14 @@
+---
+description: Prioritize Steve Jobs design review for UI/UX and product critique
+alwaysApply: true
+---
+
+# Design review priority — Steve Jobs first
+
+When assessing layout, UI, UX, screens, flows, settings, or “what should we cut/polish”:
+
+1. **Lead with** the Steve Jobs design review skill (`steve-jobs-design-review`): customer experience backward, ruthless simplicity, saying no, design-is-how-it-works, whole journey, binary score (0–10) and failed diagnostic rows.
+2. **Then** layer Tennis Lebanon skills: `tennis-ux-audit` / `tennis-screen-polish` and `.cursor/rules/mobile-ui-ux.mdc` for tokens, a11y, async honesty, i18n.
+3. Use other design skills (iOS HIG, UX heuristics, Refactoring UI, microinteractions) only as secondary checks after the Jobs pass.
+
+Do not ship a settings/screen “go over” that is only a checklist scan. Start with: one-sentence job of the screen, what to remove, steps-to-value, and whether it is done enough to ship.
