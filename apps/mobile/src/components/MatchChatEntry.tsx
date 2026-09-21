@@ -133,10 +133,10 @@ const styles = createLiveSheet(() =>
       gap: 12,
     },
     badge: {
-      minWidth: 22,
-      height: 22,
-      borderRadius: 11,
-      paddingHorizontal: 6,
+      minWidth: 24,
+      height: 24,
+      borderRadius: 12,
+      paddingHorizontal: 7,
       backgroundColor: tennisColors.primary,
       alignItems: "center",
       justifyContent: "center",
@@ -144,6 +144,7 @@ const styles = createLiveSheet(() =>
     badgeLabel: {
       fontFamily: tennisFontFamily.bodySemi,
       fontSize: 12,
+      lineHeight: 14,
       color: tennisColors.white,
     },
     iconWrap: {
