@@ -1,46 +1,77 @@
+import { StyleSheet, View } from "react-native";
+import { createLiveSheet } from "../src/theme/create-live-sheet";
 import { router, useLocalSearchParams } from "expo-router";
-import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { POLICY_VERSIONS } from "@tennis-lebanon/domain";
+import {
+  POLICY_DOCUMENT_IDS,
+  type PolicyDocumentId,
+} from "@tennis-lebanon/i18n";
+import { AppText } from "../src/components/AppText";
 import { StatusBanner } from "../src/components/AppUi";
 import { Icon } from "../src/components/Icon";
 import { OnboardingStepLayout } from "../src/components/onboarding-ui";
 import { PlayerProfileSection } from "../src/components/player/PlayerProfileSection";
 import { ProfileMenuRow } from "../src/components/profile/ProfileMenuRow";
-import { tennisColors } from "../src/theme/tennis-tokens";
+import { ensureLocaleResources } from "../src/lib/i18n";
+import {
+  isPolicyDocumentId,
+  readPolicySections,
+} from "../src/lib/policy-document";
+import { tennisColors, tennisSpacing } from "../src/theme/tennis-tokens";
+import { tennisFontFamily } from "../src/hooks/useTennisFonts";
+import { useLayoutDirection } from "../src/lib/layout-direction";
 
-type PolicyDocument = "terms" | "privacy" | "community";
-
-const POLICY_DOCS: PolicyDocument[] = ["terms", "privacy", "community"];
-
-const POLICY_VERSION_BY_DOC: Record<PolicyDocument, string> = {
+const POLICY_VERSION_BY_DOC: Record<PolicyDocumentId, string> = {
   terms: POLICY_VERSIONS.terms,
   privacy: POLICY_VERSIONS.privacy,
   community: POLICY_VERSIONS.communityRules,
 };
 
-function isPolicyDocument(value: unknown): value is PolicyDocument {
-  return value === "terms" || value === "privacy" || value === "community";
-}
+ensureLocaleResources();
 
 export default function PoliciesScreen() {
   const { t } = useTranslation();
+  const { writingDirection } = useLayoutDirection();
   const { document: param } = useLocalSearchParams<{ document?: string }>();
-  const document = isPolicyDocument(param) ? param : "terms";
-  const otherDocuments = POLICY_DOCS.filter((entry) => entry !== document);
+  const document: PolicyDocumentId = isPolicyDocumentId(param)
+    ? param
+    : "terms";
+  const otherDocuments = POLICY_DOCUMENT_IDS.filter(
+    (entry) => entry !== document,
+  );
   const version = POLICY_VERSION_BY_DOC[document];
+  const sections = readPolicySections(t, document);
 
   return (
     <OnboardingStepLayout
       title={t(`policies.${document}.title`)}
-      description={t(`policies.${document}.body`)}
+      description={t(`policies.${document}.summary`)}
       onBack={() => router.back()}
     >
-      <View style={{ gap: 20 }}>
+      <View style={styles.content}>
         <StatusBanner
           tone="attention"
           body={`${t("policies.developmentWarning")} ${t("policies.version", { version })}`}
         />
+
+        <AppText style={[styles.intro, { writingDirection }]}>
+          {t(`policies.${document}.intro`)}
+        </AppText>
+
+        {sections.map((section) => (
+          <View key={section.heading} style={styles.section}>
+            <AppText
+              accessibilityRole="header"
+              style={[styles.sectionHeading, { writingDirection }]}
+            >
+              {section.heading}
+            </AppText>
+            <AppText style={[styles.sectionBody, { writingDirection }]}>
+              {section.body}
+            </AppText>
+          </View>
+        ))}
 
         {otherDocuments.length > 0 ? (
           <PlayerProfileSection
@@ -54,7 +85,7 @@ export default function PoliciesScreen() {
                   <Icon name="info" size={16} color={tennisColors.primary} />
                 }
                 label={t(`policies.${entry}.title`)}
-                subtitle={t(`policies.${entry}.body`)}
+                subtitle={t(`policies.${entry}.summary`)}
                 onPress={() => router.replace(`/policies?document=${entry}`)}
                 showDivider={index > 0}
               />
@@ -65,3 +96,34 @@ export default function PoliciesScreen() {
     </OnboardingStepLayout>
   );
 }
+
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    content: {
+      gap: 20,
+      paddingBottom: tennisSpacing.section,
+    },
+    intro: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 21,
+      color: tennisColors.mutedForeground,
+    },
+    section: {
+      gap: 8,
+    },
+    sectionHeading: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 15,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
+    },
+    sectionBody: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 21,
+      color: tennisColors.primaryDark,
+    },
+  }),
+);
