@@ -284,6 +284,24 @@ export async function leaveMatch(
 }
 
 /**
+ * Host-only: take an accepted player off the roster before the agreed hour.
+ * `reason` is a closed set of codes; the player is told which one.
+ */
+export async function removeMatchParticipant(
+  client: TennisSupabaseClient,
+  matchId: string,
+  userId: string,
+  reason: string,
+): Promise<void> {
+  const { error } = await client.rpc("remove_match_participant", {
+    p_match_id: matchId,
+    p_user_id: userId,
+    p_reason: reason,
+  });
+  if (error) throw error;
+}
+
+/**
  * Answers the prompt raised when a match's hour passed with no court recorded.
  * `true` sends it to the attendance and result flow; `false` closes it.
  */

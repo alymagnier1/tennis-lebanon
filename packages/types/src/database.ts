@@ -837,6 +837,8 @@ export type Database = {
           joined_at: string | null;
           left_at: string | null;
           match_id: string;
+          removed_at: string | null;
+          removed_reason: string | null;
           score_declined_at: string | null;
           status: Database["public"]["Enums"]["participant_status"];
           user_id: string;
@@ -850,6 +852,8 @@ export type Database = {
           joined_at?: string | null;
           left_at?: string | null;
           match_id: string;
+          removed_at?: string | null;
+          removed_reason?: string | null;
           score_declined_at?: string | null;
           status: Database["public"]["Enums"]["participant_status"];
           user_id: string;
@@ -863,6 +867,8 @@ export type Database = {
           joined_at?: string | null;
           left_at?: string | null;
           match_id?: string;
+          removed_at?: string | null;
+          removed_reason?: string | null;
           score_declined_at?: string | null;
           status?: Database["public"]["Enums"]["participant_status"];
           user_id?: string;
@@ -2537,6 +2543,10 @@ export type Database = {
       };
       release_external_court: {
         Args: { p_match_id: string; p_reason?: string };
+        Returns: undefined;
+      };
+      remove_match_participant: {
+        Args: { p_match_id: string; p_reason: string; p_user_id: string };
         Returns: undefined;
       };
       report_match_played: {

@@ -15,6 +15,7 @@ import {
   listMyMatches,
   listMyCompletedMatches,
   publishMatch,
+  removeMatchParticipant,
   respondToJoinRequest,
   withdrawMatchTimeOption,
 } from "./matches";
@@ -214,6 +215,23 @@ describe("matches API wrappers", () => {
     expect(rpc).toHaveBeenCalledWith("cancel_match_invite", {
       p_match_id: "match-id",
       p_invited_user_id: "user-id",
+    });
+  });
+
+  it("removes an accepted player via RPC", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValueOnce({ data: null, error: null });
+
+    await removeMatchParticipant(
+      client,
+      "match-id",
+      "user-id",
+      "conduct_issue",
+    );
+    expect(rpc).toHaveBeenCalledWith("remove_match_participant", {
+      p_match_id: "match-id",
+      p_user_id: "user-id",
+      p_reason: "conduct_issue",
     });
   });
 
