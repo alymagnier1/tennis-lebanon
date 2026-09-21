@@ -1,6 +1,7 @@
 import { useFonts } from "expo-font";
 import {
   Outfit_400Regular,
+  Outfit_500Medium,
   Outfit_600SemiBold,
   Outfit_700Bold,
   Outfit_800ExtraBold,
@@ -14,6 +15,7 @@ import {
 export function useTennisFonts() {
   const [loaded] = useFonts({
     Outfit_400Regular,
+    Outfit_500Medium,
     Outfit_600SemiBold,
     Outfit_700Bold,
     Outfit_800ExtraBold,
@@ -29,6 +31,8 @@ export const tennisFontFamily = {
   heading: "Outfit_700Bold",
   headingExtra: "Outfit_800ExtraBold",
   headingSemi: "Outfit_600SemiBold",
+  /** Frame A names — Outfit 500, lighter than semi-bold. */
+  headingMedium: "Outfit_500Medium",
   body: "Inter_400Regular",
   bodyMedium: "Inter_500Medium",
   bodySemi: "Inter_600SemiBold",

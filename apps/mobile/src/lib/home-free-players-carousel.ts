@@ -6,6 +6,12 @@ export const HOME_FREE_PLAYER_CARD_GAP = 12;
 export const HOME_FREE_PLAYER_SNAP_INTERVAL =
   HOME_FREE_PLAYER_CARD_WIDTH + HOME_FREE_PLAYER_CARD_GAP;
 
+/** Pull past the last card (or fling at the end) to switch time windows. */
+export const HOME_FREE_PLAYER_OVERSCROLL_PX = 40;
+export const HOME_FREE_PLAYER_END_FLING_VX = 0.35;
+/** Trailing strip slack so web (no bounce) can scroll past "View all". */
+export const HOME_FREE_PLAYER_TRAILING_SLACK_PX = 56;
+
 /**
  * Start offsets for each player card plus the trailing "View all" tile.
  * Interval is card width + strip gap so native snap and CSS scroll-snap stay aligned.
@@ -17,6 +23,69 @@ export function homeFreePlayerSnapOffsets(playerCount: number): number[] {
     offsets.push(index * HOME_FREE_PLAYER_SNAP_INTERVAL);
   }
   return offsets;
+}
+
+/**
+ * Next / previous liquidity offer startsAt, or null at the ends.
+ */
+export function adjacentLiquidityOfferStartsAt(
+  offers: readonly { startsAt: string }[],
+  selectedStartsAt: string,
+  direction: "next" | "prev",
+): string | null {
+  const index = offers.findIndex(
+    (offer) => offer.startsAt === selectedStartsAt,
+  );
+  if (index < 0) return null;
+  const nextIndex = direction === "next" ? index + 1 : index - 1;
+  return offers[nextIndex]?.startsAt ?? null;
+}
+
+/**
+ * True when the strip has been pulled (bounce / trailing slack) or flung past
+ * the last card.
+ */
+export function homeFreePlayerShouldAdvanceOffer(input: {
+  offsetX: number;
+  contentWidth: number;
+  viewportWidth: number;
+  velocityX?: number;
+  /** Already parked on / past the last snap before this gesture. */
+  wasAtEnd: boolean;
+  trailingSlackPx?: number;
+}): boolean {
+  const slack = input.trailingSlackPx ?? 0;
+  const maxX = Math.max(0, input.contentWidth - input.viewportWidth);
+  const endWithoutSlack = Math.max(0, maxX - slack);
+  if (input.offsetX - endWithoutSlack >= HOME_FREE_PLAYER_OVERSCROLL_PX) {
+    return true;
+  }
+  if (
+    input.wasAtEnd &&
+    input.offsetX >= endWithoutSlack - 2 &&
+    (input.velocityX ?? 0) > HOME_FREE_PLAYER_END_FLING_VX
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function homeFreePlayerShouldRewindOffer(input: {
+  offsetX: number;
+  velocityX?: number;
+  wasAtStart: boolean;
+}): boolean {
+  if (input.offsetX <= -HOME_FREE_PLAYER_OVERSCROLL_PX) {
+    return true;
+  }
+  if (
+    input.wasAtStart &&
+    input.offsetX <= 2 &&
+    (input.velocityX ?? 0) < -HOME_FREE_PLAYER_END_FLING_VX
+  ) {
+    return true;
+  }
+  return false;
 }
 
 /**

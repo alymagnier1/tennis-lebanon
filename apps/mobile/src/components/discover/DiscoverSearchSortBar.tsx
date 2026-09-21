@@ -64,7 +64,7 @@ const styles = createLiveSheet(() =>
       borderRadius: tennisRadii.lg,
       borderWidth: 1.5,
       borderColor: tennisColors.border,
-      backgroundColor: tennisColors.background,
+      backgroundColor: tennisColors.card,
     },
     searchInput: {
       flex: 1,

@@ -15,6 +15,7 @@ type Translate = (key: string, params?: Record<string, unknown>) => string;
 
 function readParams(
   payload: Record<string, unknown> | null | undefined,
+  t: Translate,
 ): Record<string, string | number> | undefined {
   const raw = payload?.params;
   if (!raw || typeof raw !== "object") {
@@ -42,6 +43,13 @@ function readParams(
   }
   if (typeof record.spotsLeft === "number") {
     out.spotsLeft = record.spotsLeft;
+  }
+  if (typeof record.reason === "string") {
+    const localized = t(`matches.hub.removeReasons.${record.reason}`);
+    out.reason =
+      localized === `matches.hub.removeReasons.${record.reason}`
+        ? record.reason
+        : localized;
   }
 
   return Object.keys(out).length > 0 ? out : undefined;
@@ -72,7 +80,7 @@ export function resolveNotificationCopy(
     };
   }
 
-  const params = readParams(payload);
+  const params = readParams(payload, t);
   const title = t(`notifications.kinds.${input.kind}.title`, params);
   const body = t(`notifications.kinds.${input.kind}.body`, params);
 

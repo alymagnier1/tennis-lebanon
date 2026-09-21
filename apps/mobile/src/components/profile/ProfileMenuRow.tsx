@@ -16,6 +16,7 @@ export function ProfileMenuRow({
   showDivider = true,
   showChevron = true,
   tone = "default",
+  disabled = false,
 }: {
   icon: ReactNode;
   label: string;
@@ -27,6 +28,7 @@ export function ProfileMenuRow({
   showDivider?: boolean;
   showChevron?: boolean;
   tone?: "default" | "danger";
+  disabled?: boolean;
 }) {
   const { rowDirection, writingDirection } = useLayoutDirection();
   const isDanger = tone === "danger";
@@ -37,11 +39,14 @@ export function ProfileMenuRow({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={a11yLabel}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
         { flexDirection: rowDirection },
-        pressed && styles.rowPressed,
+        pressed && !disabled && styles.rowPressed,
+        disabled && styles.rowDisabled,
         showDivider && styles.rowDivider,
       ]}
     >
@@ -70,7 +75,7 @@ export function ProfileMenuRow({
         <Icon
           name="chevron"
           size={14}
-          color={isDanger ? tennisColors.accent : tennisColors.mutedForeground}
+          color={isDanger ? tennisColors.danger : tennisColors.mutedForeground}
         />
       ) : null}
     </Pressable>
@@ -84,9 +89,13 @@ const styles = createLiveSheet(() =>
       gap: 14,
       paddingVertical: 14,
       paddingHorizontal: 16,
+      minHeight: 44,
     },
     rowPressed: {
       opacity: 0.85,
+    },
+    rowDisabled: {
+      opacity: 0.55,
     },
     rowDivider: {
       borderTopWidth: 1,
@@ -95,14 +104,14 @@ const styles = createLiveSheet(() =>
     iconCircle: {
       width: 38,
       height: 38,
-      borderRadius: 11,
+      borderRadius: tennisRadii.control,
       backgroundColor: tennisColors.secondary,
       alignItems: "center",
       justifyContent: "center",
       flexShrink: 0,
     },
     iconCircleDanger: {
-      backgroundColor: "#FEF0E7",
+      backgroundColor: tennisColors.dangerSoft,
     },
     labelBlock: {
       flex: 1,
@@ -114,7 +123,7 @@ const styles = createLiveSheet(() =>
       color: tennisColors.primaryDark,
     },
     labelDanger: {
-      color: tennisColors.accent,
+      color: tennisColors.danger,
     },
     value: {
       fontFamily: tennisFontFamily.body,

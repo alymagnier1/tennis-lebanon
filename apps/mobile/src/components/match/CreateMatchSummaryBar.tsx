@@ -162,8 +162,8 @@ const styles = createLiveSheet(() =>
     },
     chipLabel: {
       fontFamily: tennisFontFamily.body,
-      fontSize: 9,
-      lineHeight: 12,
+      fontSize: 11,
+      lineHeight: 14,
       color: "rgba(255,255,255,0.82)",
     },
     chipValue: {

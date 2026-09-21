@@ -9,7 +9,12 @@
     "no": "Non",
     "loading": "Chargement…",
     "change": "Modifier",
-    "done": "OK"
+    "done": "OK",
+    "offline": {
+      "title": "Vous êtes hors ligne",
+      "body": "Nous réessaierons dès que la connexion sera rétablie."
+    },
+    "dismissHint": "Appuyez pour fermer"
   },
   "profileScreenEdit": "Modifier",
   "profileScreenAboutTitle": "À propos de moi",
@@ -21,7 +26,7 @@
   "profileScreenMatchFormats": "Formats de match",
   "profileScreenPreferredAreasTitle": "Zones préférées",
   "profileScreenZonesError": "Choisissez au moins une zone.",
-  "settingsScreenGeneral": "Général",
+  "settingsScreenPreferences": "Préférences",
   "settingsScreenLanguage": "Langue",
   "settingsScreenAppearance": "Apparence",
   "settingsAppearanceSystem": "Système",
@@ -31,7 +36,6 @@
   "settingsOnboardingHeroHint": "Comparaison de design. Accueil et fin suivent ce choix ensemble.",
   "settingsOnboardingHeroGreen": "Vert",
   "settingsOnboardingHeroLight": "Terre battue",
-  "settingsScreenSupport": "Assistance",
   "settingsScreenAccount": "Compte",
   "dashboard": {
     "login": {
@@ -466,23 +470,6 @@
     "ownProvisional": "Provisoire · {{count}}/{{threshold}} résultats confirmés",
     "progressHint": "Jouez et confirmez cinq résultats de match pour débloquer votre classement."
   },
-  "policies": {
-    "developmentWarning": "PROJET DE DÉVELOPPEMENT — non approuvé juridiquement et non destiné à une diffusion publique.",
-    "version": "Version : {{version}}",
-    "otherDocuments": "Autres politiques",
-    "terms": {
-      "title": "Conditions d’utilisation",
-      "body": "Pilote réservé aux adultes. Utilisez le service légalement et respectueusement. Les matchs et les réservations de terrains ne sont pas garantis."
-    },
-    "privacy": {
-      "title": "Avis de confidentialité",
-      "body": "Nous recueillons le minimum de données de compte, de profil, de zone générale et de match pour exploiter le pilote. Vos coordonnées ne sont pas affichées aux autres joueurs."
-    },
-    "community": {
-      "title": "Règles de la communauté",
-      "body": "Soyez respectueux, communiquez honnêtement, protégez la vie privée et signalez tout comportement dangereux ou abusif."
-    }
-  },
   "tabs": {
     "home": "Accueil",
     "discover": "Découvrir",
@@ -697,10 +684,12 @@
     "anyFormat": "Tout format",
     "anyIntent": "Toute intention",
     "chipMatchLevel": "Niveau",
-    "chipMatchIntent": "Intention",
     "chipMatchArea": "Zone",
     "chipMatchFormat": "Format",
     "chipMatchAvailability": "Disponibilité",
+    "matchFiltersHelpA11y": "À quoi servent ces filtres",
+    "matchFiltersHelpTitle": "À quoi servent ces filtres",
+    "matchFiltersHelpBody": "Activé = résultats plus ciblés ; désactivé = plus large.\n\nNiveau — niveau proche du vôtre.\nZone — zones préférées en commun.\nDisponibilité — créneaux hebdomadaires qui se chevauchent.",
     "filtersActive": "{{count}} actifs",
     "clearFilters": "Tout effacer",
     "resultsPlayers_one": "{{count}} joueur trouvé",
@@ -822,6 +811,10 @@
       "matchTypeDescription": "Simple ou double, et niveau de compétitivité souhaité.",
       "joinSettingsSection": "Qui peut rejoindre",
       "joinSettingsDescription": "Invitez des joueurs après la création du match, ou laissez les autres le trouver dans Découvrir.",
+      "advancedSection": "Qui peut rejoindre",
+      "advancedShow": "Afficher qui peut rejoindre",
+      "advancedHide": "Masquer qui peut rejoindre",
+      "notesAdded": "Note ajoutée",
       "listOnDiscover": "Afficher dans Découvrir",
       "listOnDiscoverHint": "Montrez ce match dans les matchs ouverts pour que les joueurs proches puissent rejoindre.",
       "listOnDiscoverOn": "Affiché dans Découvrir",
@@ -837,13 +830,13 @@
       "requiresApprovalOn": "Les demandes nécessitent votre approbation",
       "notes": "Notes (facultatif)",
       "zoneRequired": "Sélectionnez au moins une zone.",
-      "preferredClubsRequiredHelp": "Choisissez jusqu'à 3 clubs où vous accepteriez de jouer. Les joueurs les voient avant de rejoindre. Aucun court n'est encore réservé.",
-      "preferredClubsOptionalHelp": "Choisissez jusqu'à 3 clubs où vous accepteriez de jouer. Aucun court n'est encore réservé.",
+      "preferredClubsRequiredHelp": "Jusqu’à 3 clubs · visibles avant de rejoindre.",
+      "preferredClubsOptionalHelp": "Jusqu’à 3 clubs · facultatif pour ce match.",
       "zonesWithoutClubWarning": "Aucun de vos clubs ne se trouve à {{zones}}. Les joueurs qui rejoignent pour cette zone devront se déplacer.",
-      "preferredClubsPickZoneFirst": "Choisissez d'abord une zone pour voir ses clubs.",
-      "preferredClubsEmpty": "Aucun club dans les zones sélectionnées pour le moment.",
+      "preferredClubsPickZoneFirst": "Choisissez une zone pour voir les clubs.",
+      "preferredClubsEmpty": "Aucun club dans ces zones pour le moment.",
       "clubRequired": "Choisissez au moins un club pour que les joueurs sachent où ils joueraient.",
-      "summaryWhere": "Lieu pour ce match",
+      "summaryWhere": "Lieu",
       "summaryWhen": "Quand",
       "summaryDiscover": "Découvrir",
       "summaryInviteOnly": "Sur invitation",
@@ -851,6 +844,8 @@
       "levelRange": "Plage de niveau",
       "matchLevel": "Niveau du match",
       "yourLevel": "Votre niveau",
+      "levelHelpA11y": "Ce que signifie chaque niveau",
+      "levelHelpTitle": "Ce que signifie chaque niveau",
       "allLevels": "Tous les niveaux",
       "publish": "Publier le match",
       "publishError": "Impossible de publier ce match.",
@@ -874,19 +869,20 @@
       "overridesDone": "Terminé",
       "moreOptionsShow": "Plus d'options de timing",
       "moreOptionsHide": "Masquer les options de timing",
-      "preferredClubsForMatchTitle": "Clubs pour ce match",
+      "preferredClubsForMatchTitle": "Clubs",
       "preferredClubsListingOnly": "Jusqu’à 3 clubs pour cette annonce seulement.",
-      "preferredClubsNone": "Aucun club choisi pour ce match.",
-      "whereEditForMatch": "Modifier pour ce match",
-      "whereEditDisclaimer": "Les changements ici s’appliquent à ce match seulement.",
+      "preferredClubsNone": "Aucun club choisi.",
+      "whereEditForMatch": "Modifier",
+      "whereEditDisclaimer": "Les changements s’appliquent à ce match seulement.",
       "whereProfileDefaultsLink": "Gérer les paramètres du profil",
       "summaryBar": {
         "title": "Paramètres de cette annonce",
         "edit": "Modifier",
         "a11y": "Paramètres du match : {{summary}}. Modifier pour ce match."
       },
-      "publishActionsHint": "Publier affiche le match dans Découvrir. Invitez ensuite depuis le hub du match.",
+      "publishActionsHint": "Visible dans Découvrir. Invitez ensuite depuis le hub.",
       "notesAdd": "Ajouter une note",
+      "notesEdit": "Modifier la note",
       "notesHide": "Masquer la note",
       "sendRequest": "Envoyer la demande à {{name}}",
       "sendRequestHint": "Seul {{name}} voit cette demande. Il peut accepter ou refuser.",
@@ -1003,17 +999,20 @@
     },
     "chat": {
       "title": "Chat du match",
-      "empty": "Pas encore de messages. Coordonnez-vous ici.",
+      "empty": "Pas encore de messages. Proposez un court ou confirmez l'heure ici.",
       "placeholder": "Écrire un message",
       "send": "Envoyer",
       "error": "Impossible d'envoyer ce message.",
-      "reconnecting": "Reconnexion… les nouveaux messages peuvent tarder.",
+      "loadError": "Impossible de charger ces messages.",
+      "reconnecting": "Reconnexion… appuyez pour actualiser.",
       "open": "Ouvrir le chat du match",
       "openWithUnread": "Ouvrir la discussion, {{count}} non lus",
       "unreadBadge": "{{display}} non lus",
       "openHint": "Écrire au groupe",
       "denied": "Rejoignez ce match pour utiliser le chat.",
-      "lockedRecruiting": "Le chat s’ouvre quand l’équipe est au complet.",
+      "deniedHint": "Seuls les joueurs acceptés peuvent écrire à ce groupe.",
+      "lockedRecruiting": "Le chat s'ouvre quand tout le monde est là.",
+      "yesterday": "Hier",
       "emojiPicker": "Émojis",
       "emojiPickerClose": "Fermer les émojis",
       "insertEmoji": "Insérer {{emoji}}"
@@ -1039,16 +1038,40 @@
       "joinSuccess": "Vous avez rejoint ce match.",
       "requestSentSuccess": "Demande envoyée. L’hôte vous répondra.",
       "requestPendingBanner": "Vous avez demandé à rejoindre. L'organisateur vous répondra.",
+      "joinerIntentAwaitingPlayers": "Vous êtes dans le match. En attente d'autres joueurs.",
+      "joinerIntentHostBooking": "Vous êtes dans le match. L'hôte réserve le court.",
+      "joinerIntentVote": "Vous êtes dans le match. Votez pour un horaire qui convient à tous.",
+      "joinerIntentAwaitingClub": "Vous êtes dans le match. En attente de la confirmation du club.",
+      "joinerIntentCourtConfirmed": "Vous êtes dans le match. Court confirmé — à bientôt.",
       "joinError": "Impossible de rejoindre ce match.",
       "joinTimeConflict": "Vous avez déjà un match à cette heure-là.",
       "joinFull": "Ce match s'est rempli avant vous.",
       "approve": "Approuver",
+      "decline": "Refuser",
       "reject": "Refuser",
       "respondError": "Impossible de mettre à jour cette demande.",
       "respondFull": "Ce match est déjà complet.",
       "shareInvite": "Partager le lien d'invitation",
       "leave": "Quitter le match",
       "leaveError": "Impossible de quitter ce match.",
+      "removePlayer": "Retirer",
+      "removePlayerA11y": "Retirer {{name}} de ce match",
+      "removeSheetTitle": "Retirer {{name}} ?",
+      "removeSheetBody": "Le joueur sera prévenu et sa place se rouvrira si le match cherche encore des joueurs.",
+      "removeSheetWarning": "Ce match commence dans moins de deux heures. Le retirer maintenant peut déranger ses plans.",
+      "removeReasonLabel": "Motif",
+      "removeReasons": {
+        "match_requirements_mismatch": "Les exigences du match ne correspondent pas",
+        "player_requested_removal": "Le joueur a demandé à être retiré",
+        "conduct_issue": "Problème de conduite"
+      },
+      "removeReasonRequired": "Choisissez un motif avant de le retirer.",
+      "removeConfirm": "Retirer le joueur",
+      "removeSuccess": "Joueur retiré.",
+      "removeError": "Impossible de retirer ce joueur.",
+      "removeErrorStarted": "Le match a déjà commencé, ce joueur ne peut plus être retiré.",
+      "removeErrorNotAccepted": "Ce joueur n'est pas sur la feuille.",
+      "removeErrorNotRemovable": "On ne peut plus retirer de joueurs de ce match.",
       "withdraw": "Se retirer du match",
       "withdrawRequest": "Annuler ma demande",
       "withdrawRequestConfirm": "L'hôte saura que vous n'attendez plus. Vous pourrez redemander plus tard.",
@@ -1114,6 +1137,11 @@
       "agreedTimeBookHint": "Réservez un court pour ce créneau.",
       "agreedTimeVenueHint": "Préféré",
       "openPlayerSlot": "Place libre",
+      "wantsToJoin": "Souhaite rejoindre",
+      "inviteSomeoneElse": "Inviter quelqu'un d'autre",
+      "requestCarouselA11y": "Demande d'adhésion {{current}} sur {{total}}",
+      "durationMinutes": "{{minutes}} min",
+      "changeTime": "Changer l'heure",
       "preferredClubs": "Clubs préférés",
       "openClubDetails": "Voir les détails de {{club}}",
       "contactClub": "Contacter {{club}} sur WhatsApp",
@@ -1435,17 +1463,22 @@
     "indoor": "Intérieur",
     "outdoor": "Extérieur",
     "confirmExternalCourt": "J’ai déjà réservé ce court",
-    "confirmExternalCourtHelp": "À utiliser si vous avez réservé le court vous-même, par téléphone ou WhatsApp. Cela confirme le match afin que la présence et les résultats fonctionnent."
+    "confirmExternalCourtHelp": "À utiliser si vous avez réservé le court vous-même, par téléphone ou WhatsApp. Cela confirme le match afin que la présence et les résultats fonctionnent.",
+    "emptyBody": "Ajoutez d'autres zones dans Où je joue et les clubs proches apparaîtront ici.",
+    "emptyAction": "Ajouter des zones",
+    "filteredEmptyTitle": "Aucun club ne correspond à ces filtres",
+    "filteredEmptyBody": "Essayez un autre terme de recherche ou une autre surface."
   },
   "settings": {
     "title": "Paramètres",
-    "description": "Gérez votre compte et vos préférences.",
     "policies": "Consulter les politiques",
     "rtlLayoutCheck": "Vérification mise en page RTL",
     "requestDeletion": "Supprimer mon compte",
     "deleteTitle": "Supprimer votre compte ?",
     "deleteDescription": "Ceci supprime votre compte immédiatement et vous déconnecte. Votre nom et votre photo sont retirés, et vous quittez tout match non encore joué. Les résultats passés restent enregistrés pour vos adversaires, sous la mention joueur supprimé. Votre e-mail est libéré : vous pourrez vous réinscrire. Ceci est irréversible.",
     "deleteError": "Impossible d’envoyer votre demande de suppression. Veuillez réessayer.",
+    "passwordCheckError": "Impossible de vérifier vos options de mot de passe. Appuyez pour réessayer.",
+    "supportOpenError": "Impossible d’ouvrir l’e-mail. Écrivez à {{email}} à la place.",
     "versionFooter": "RacketBound v{{version}} · Fabriqué au Liban 🇱🇧"
   },
   "account": {
@@ -1593,6 +1626,10 @@
         "title": "Un joueur a quitté votre match",
         "body": "Quelqu'un est parti. Invitez un remplaçant avant l'heure du match."
       },
+      "match_participant_removed": {
+        "title": "Vous avez été retiré d'un match",
+        "body": "L'hôte vous a retiré. {{reason}}"
+      },
       "match_message": {
         "title": "Nouveau message dans votre match",
         "body": "Ça discute dans le chat de votre match. Ouvrez-le pour suivre."
@@ -1605,6 +1642,7 @@
         "title": "Score confirmé",
         "body": "Personne n'a contesté sous trois jours : ce score est désormais retenu."
       }
-    }
+    },
+    "unreadItem": "Non lu"
   }
 }

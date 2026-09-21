@@ -1,4 +1,4 @@
-import { ScrollView, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { minTouchTargetPx, spacing } from "@tennis-lebanon/ui";
 import type { SkillBand } from "@tennis-lebanon/domain";
@@ -9,6 +9,11 @@ import { figmaFormStyles } from "./onboarding-ui/figma-form-styles";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
+/**
+ * Skill bands wrap instead of hiding in a horizontal scroller — a flush-cut
+ * row with `showsHorizontalScrollIndicator={false}` looked like Intermediate
+ * was the last option.
+ */
 export function LevelRangePicker({
   label,
   bands,
@@ -24,7 +29,7 @@ export function LevelRangePicker({
   yourLevel?: SkillBand | null;
   yourLevelLabel?: string;
 }) {
-  const { writingDirection } = useLayoutDirection();
+  const { writingDirection, rowDirection } = useLayoutDirection();
 
   return (
     <View style={styles.levelSection}>
@@ -33,12 +38,7 @@ export function LevelRangePicker({
           {label}
         </AppText>
       ) : null}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.levelRow}
-        style={styles.levelScroll}
-      >
+      <View style={[styles.levelRow, { flexDirection: rowDirection }]}>
         {bands.map((band) => {
           const isSelected = isSkillBandSelected(band.value, selected);
           const isYourLevel = yourLevel === band.value;
@@ -75,7 +75,7 @@ export function LevelRangePicker({
             </Pressable>
           );
         })}
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -85,14 +85,11 @@ const styles = createLiveSheet(() =>
     levelSection: {
       overflow: "visible",
     },
-    levelScroll: {
-      overflow: "visible",
-    },
     levelRow: {
+      flexWrap: "wrap",
       gap: 10,
       paddingTop: spacing.lg,
       paddingBottom: spacing.xs,
-      paddingRight: spacing.sm,
     },
     levelChip: {
       minHeight: minTouchTargetPx,
@@ -122,7 +119,8 @@ const styles = createLiveSheet(() =>
     yourLevelBadgeText: {
       fontFamily: tennisFontFamily.bodySemi,
       color: tennisColors.white,
-      fontSize: 10,
+      fontSize: 11,
+      lineHeight: 14,
     },
   }),
 );

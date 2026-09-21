@@ -1,9 +1,12 @@
+import { useRef } from "react";
 import {
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   type ViewStyle,
 } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
@@ -27,7 +30,10 @@ import {
   HOME_FREE_PLAYER_CARD_GAP,
   HOME_FREE_PLAYER_CARD_WIDTH,
   HOME_FREE_PLAYER_SNAP_INTERVAL,
+  HOME_FREE_PLAYER_TRAILING_SLACK_PX,
   homeFreePlayerDetailLine,
+  homeFreePlayerShouldAdvanceOffer,
+  homeFreePlayerShouldRewindOffer,
   homeFreePlayerSnapOffsets,
 } from "../../lib/home-free-players-carousel";
 import { clubNamesFromList } from "../../lib/match-clubs";
@@ -57,6 +63,14 @@ type FreeBlock = {
   label: string;
 };
 
+type HomeFreePlayersCarouselProps = {
+  block: FreeBlock;
+  /** Past the trailing "View all" card → next time-window chip. */
+  onScrollPastEnd?: () => void;
+  /** Past the first card toward the leading edge → previous chip. */
+  onScrollPastStart?: () => void;
+};
+
 /**
  * The people behind the busiest block.
  *
@@ -66,11 +80,21 @@ type FreeBlock = {
  * so cards stay the same height. There is no in-card Create — the whole card
  * opens the profile so Home stays a browse surface. Discover still gets the
  * time window through "View all".
+ *
+ * Pulling past the last card (or flinging while already there) advances the
+ * parent chip selection; the reverse rewind works from the first card.
  */
-export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
+export function HomeFreePlayersCarousel({
+  block,
+  onScrollPastEnd,
+  onScrollPastStart,
+}: HomeFreePlayersCarouselProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const { rowDirection, writingDirection } = useLayoutDirection();
+  const edgeRef = useRef({ atStart: true, atEnd: false });
+  const gestureStartEdgeRef = useRef({ atStart: true, atEnd: false });
+  const advancedRef = useRef(false);
 
   const ownZonesQuery = useQuery({
     queryKey: ["own-preferred-zone-ids"],
@@ -95,7 +119,6 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
         ...resolveDiscoverFiltersFromProfile({
           toggles: {
             matchLevel: false,
-            matchIntent: false,
             matchArea: Boolean(ownZonesQuery.data?.length),
             matchAvailability: false,
           },
@@ -120,6 +143,87 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
   const openProfile = (player: CompatiblePlayerCard) =>
     router.push({ pathname: "/player/[id]", params: { id: player.user_id } });
 
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const maxX = Math.max(0, contentSize.width - layoutMeasurement.width);
+    edgeRef.current = {
+      atStart: contentOffset.x <= 2,
+      atEnd: contentOffset.x >= maxX - HOME_FREE_PLAYER_TRAILING_SLACK_PX - 2,
+    };
+
+    if (advancedRef.current) return;
+
+    // Bounce / trailing slack past the end — do not require a prior "at end".
+    if (
+      onScrollPastEnd &&
+      homeFreePlayerShouldAdvanceOffer({
+        offsetX: contentOffset.x,
+        contentWidth: contentSize.width,
+        viewportWidth: layoutMeasurement.width,
+        wasAtEnd: false,
+        trailingSlackPx: HOME_FREE_PLAYER_TRAILING_SLACK_PX,
+      })
+    ) {
+      advancedRef.current = true;
+      onScrollPastEnd();
+      return;
+    }
+
+    if (
+      onScrollPastStart &&
+      homeFreePlayerShouldRewindOffer({
+        offsetX: contentOffset.x,
+        wasAtStart: false,
+      })
+    ) {
+      advancedRef.current = true;
+      onScrollPastStart();
+    }
+  };
+
+  const handleScrollBeginDrag = () => {
+    gestureStartEdgeRef.current = { ...edgeRef.current };
+    advancedRef.current = false;
+  };
+
+  const handleScrollEndDrag = (
+    event: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    if (advancedRef.current) return;
+    const { contentOffset, contentSize, layoutMeasurement, velocity } =
+      event.nativeEvent;
+    const velocityX = velocity?.x ?? 0;
+    const { atStart, atEnd } = gestureStartEdgeRef.current;
+
+    if (
+      onScrollPastEnd &&
+      homeFreePlayerShouldAdvanceOffer({
+        offsetX: contentOffset.x,
+        contentWidth: contentSize.width,
+        viewportWidth: layoutMeasurement.width,
+        velocityX,
+        wasAtEnd: atEnd,
+        trailingSlackPx: HOME_FREE_PLAYER_TRAILING_SLACK_PX,
+      })
+    ) {
+      advancedRef.current = true;
+      onScrollPastEnd();
+      return;
+    }
+
+    if (
+      onScrollPastStart &&
+      homeFreePlayerShouldRewindOffer({
+        offsetX: contentOffset.x,
+        velocityX,
+        wasAtStart: atStart,
+      })
+    ) {
+      advancedRef.current = true;
+      onScrollPastStart();
+    }
+  };
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -130,6 +234,13 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
         snapToInterval={HOME_FREE_PLAYER_SNAP_INTERVAL}
         snapToOffsets={homeFreePlayerSnapOffsets(players.length)}
         disableIntervalMomentum
+        bounces
+        alwaysBounceHorizontal
+        overScrollMode="always"
+        onScroll={handleScroll}
+        onScrollBeginDrag={handleScrollBeginDrag}
+        onScrollEndDrag={handleScrollEndDrag}
+        scrollEventThrottle={16}
         style={[
           styles.scroll,
           webStripSnap,
@@ -266,6 +377,12 @@ export function HomeFreePlayersCarousel({ block }: { block: FreeBlock }) {
             {t("home.free.viewAll")}
           </AppText>
         </Pressable>
+        {/* Slack past View all so web (no rubber-band) can keep scrolling. */}
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={styles.trailingSlack}
+        />
       </ScrollView>
     </View>
   );
@@ -372,8 +489,11 @@ const styles = createLiveSheet(() =>
     seeAllLabel: {
       fontFamily: tennisFontFamily.bodyMedium,
       fontSize: 14,
-      color: tennisColors.violet,
+      color: tennisColors.violetText,
       textAlign: "center",
+    },
+    trailingSlack: {
+      width: HOME_FREE_PLAYER_TRAILING_SLACK_PX,
     },
   }),
 );

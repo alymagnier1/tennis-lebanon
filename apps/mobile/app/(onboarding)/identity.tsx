@@ -178,11 +178,7 @@ export default function IdentityScreen() {
           {formIncomplete ? (
             <ErrorNotice>{t("onboarding.identity.formIncomplete")}</ErrorNotice>
           ) : null}
-          <FigmaPrimaryButton
-            label={t("common.continue")}
-            hero
-            onPress={next}
-          />
+          <FigmaPrimaryButton label={t("common.continue")} onPress={next} />
         </>
       }
     >
@@ -356,7 +352,7 @@ const styles = createLiveSheet(() =>
     photoAction: {
       fontFamily: tennisFontFamily.heading,
       fontSize: 15,
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
       marginBottom: 4,
     },
     photoHint: {
@@ -374,7 +370,7 @@ const styles = createLiveSheet(() =>
     section: {
       fontFamily: tennisFontFamily.heading,
       fontSize: 19,
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
       marginBottom: 4,
       marginTop: 0,
     },

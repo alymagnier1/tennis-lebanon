@@ -31,6 +31,8 @@ import {
   CreateMatchPanel,
   CreateMatchSection,
 } from "../../../src/lib/create-match-ui";
+import { notify } from "../../../src/lib/confirm-action";
+import { skillBandHelpBody } from "../../../src/lib/skill-band-help";
 import { MATCHES_ROUTE } from "../../../src/lib/routes";
 import { useAuth } from "../../../src/providers/AuthProvider";
 import { supabase } from "../../../src/lib/supabase";
@@ -195,7 +197,13 @@ export default function CreateMatchDetailsScreen() {
           </CreateMatchSection>
         </CreateMatchPanel>
 
-        <CreateMatchPanel title={t("matches.create.matchLevel")}>
+        <CreateMatchPanel
+          title={t("matches.create.matchLevel")}
+          infoAccessibilityLabel={t("matches.create.levelHelpA11y")}
+          onInfo={() =>
+            notify(t("matches.create.levelHelpTitle"), skillBandHelpBody(t))
+          }
+        >
           <LevelRangePicker
             bands={levelOptions}
             selected={effectiveBands}

@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import type { PropsWithChildren, ReactNode } from "react";
 import { AppText } from "../components/AppText";
+import { Icon } from "../components/Icon";
 import { figmaFormStyles } from "../components/onboarding-ui/figma-form-styles";
 import { useLayoutDirection } from "./layout-direction";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
@@ -17,12 +18,17 @@ export function CreateMatchPanel({
   description,
   actionLabel,
   onAction,
+  onInfo,
+  infoAccessibilityLabel,
   children,
 }: PropsWithChildren<{
   title: string;
   description?: string;
   actionLabel?: string;
   onAction?: () => void;
+  /** Optional info control in the header (e.g. skill-band blurbs). */
+  onInfo?: () => void;
+  infoAccessibilityLabel?: string;
 }>) {
   const { rowDirection } = useLayoutDirection();
 
@@ -41,18 +47,40 @@ export function CreateMatchPanel({
           >
             {title}
           </AppText>
-          {actionLabel && onAction ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={actionLabel}
-              hitSlop={8}
-              onPress={onAction}
-            >
-              <AppText style={createMatchPanelStyles.panelAction}>
-                {actionLabel}
-              </AppText>
-            </Pressable>
-          ) : null}
+          <View
+            style={[
+              createMatchPanelStyles.panelHeaderActions,
+              { flexDirection: rowDirection },
+            ]}
+          >
+            {onInfo ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={infoAccessibilityLabel}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                onPress={onInfo}
+                style={createMatchPanelStyles.panelInfoButton}
+              >
+                <Icon
+                  name="info"
+                  size={22}
+                  color={tennisColors.mutedForeground}
+                />
+              </Pressable>
+            ) : null}
+            {actionLabel && onAction ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={actionLabel}
+                hitSlop={8}
+                onPress={onAction}
+              >
+                <AppText style={createMatchPanelStyles.panelAction}>
+                  {actionLabel}
+                </AppText>
+              </Pressable>
+            ) : null}
+          </View>
         </View>
         {description ? (
           <AppText style={tennisTextStyles.sectionSubtitle}>
@@ -98,13 +126,38 @@ export function CreateMatchSection({
 
 export function CreateMatchSubsection({
   label,
+  hint,
   children,
 }: PropsWithChildren<{
   label: string;
+  /** Quiet copy on the same row as the label (trailing). */
+  hint?: string;
 }>) {
+  const { rowDirection, writingDirection } = useLayoutDirection();
+
   return (
     <View style={createMatchPanelStyles.subsection}>
-      <AppText style={createMatchPanelStyles.subsectionLabel}>{label}</AppText>
+      <View
+        style={[
+          createMatchPanelStyles.subsectionHeader,
+          { flexDirection: rowDirection },
+        ]}
+      >
+        <AppText style={createMatchPanelStyles.subsectionLabel}>
+          {label}
+        </AppText>
+        {hint ? (
+          <AppText
+            style={[
+              createMatchPanelStyles.subsectionHint,
+              { writingDirection },
+            ]}
+            maxLines={2}
+          >
+            {hint}
+          </AppText>
+        ) : null}
+      </View>
       <View style={createMatchPanelStyles.subsectionBody}>{children}</View>
     </View>
   );
@@ -164,30 +217,57 @@ const createMatchPanelStyles = createLiveSheet(() =>
       lineHeight: 18,
       color: tennisColors.primary,
     },
+    panelHeaderActions: {
+      alignItems: "center",
+      gap: 4,
+      flexShrink: 0,
+    },
+    panelInfoButton: {
+      minWidth: 44,
+      minHeight: 44,
+      alignItems: "center",
+      justifyContent: "center",
+    },
     panelBody: {
       gap: 12,
     },
     panelBodyAfterTitle: {
-      marginTop: 8,
+      // Match panel padding so space above the title equals space below it.
+      marginTop: 16,
     },
     panelBodyAfterSubtitle: {
-      marginTop: 10,
+      marginTop: 16,
     },
     subsection: {
-      gap: 4,
+      gap: 8,
+    },
+    subsectionHeader: {
+      alignItems: "baseline",
+      gap: 8,
     },
     subsectionLabel: {
+      flexShrink: 0,
       fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 11,
-      lineHeight: 15,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+      letterSpacing: 0.2,
+    },
+    subsectionHint: {
+      flex: 1,
+      minWidth: 0,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
       color: tennisColors.mutedForeground,
     },
     subsectionBody: {
       gap: 8,
     },
     subsectionDivider: {
-      height: 1,
+      height: StyleSheet.hairlineWidth,
       backgroundColor: tennisColors.border,
+      marginVertical: 4,
     },
     summaryValueWrap: {
       paddingHorizontal: 12,

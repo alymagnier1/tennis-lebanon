@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
@@ -30,6 +31,7 @@ export function useToast(): ToastContextValue {
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { scheme } = useTennisTheme();
   const [message, setMessage] = useState<string | null>(null);
@@ -62,6 +64,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         >
           <Pressable
             accessibilityRole="alert"
+            accessibilityHint={t("common.dismissHint")}
             onPress={hide}
             style={[styles.toast, scheme === "dark" && styles.toastDark]}
           >

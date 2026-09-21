@@ -22,6 +22,7 @@ import { matchHubRoute } from "../../src/lib/routes";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import {
   tennisColors,
+  tennisHeroArt,
   tennisRadii,
   tennisSpacing,
 } from "../../src/theme/tennis-tokens";
@@ -58,7 +59,7 @@ type DoneField = {
 function doneFields(): Record<HeroFamily, DoneField> {
   return {
     green: {
-      ground: tennisColors.heroGreenDeep,
+      ground: tennisHeroArt.heroGreenDeep,
       art: ART.court,
       artStyle: { opacity: 0.55 },
       statusBar: "light",
@@ -83,7 +84,7 @@ function doneFields(): Record<HeroFamily, DoneField> {
       secondaryGhost: "dark",
     },
     light: {
-      ground: tennisColors.heroClay,
+      ground: tennisHeroArt.heroClay,
       art: ART.racket,
       artStyle: { top: 0, bottom: 300, left: 0, right: 0 },
       statusBar: "dark",
@@ -92,14 +93,14 @@ function doneFields(): Record<HeroFamily, DoneField> {
         colors: [
           "rgba(232,220,194,0)",
           "rgba(232,220,194,0.92)",
-          tennisColors.heroClay,
+          tennisHeroArt.heroClay,
         ],
         locations: [0, 0.38, 1],
       },
-      pillFill: tennisColors.heroGreen,
+      pillFill: tennisHeroArt.heroGreen,
       pillText: tennisColors.onPrimary,
-      title: tennisColors.heroOnLight,
-      accent: tennisColors.heroGreen,
+      title: tennisHeroArt.heroOnLight,
+      accent: tennisHeroArt.heroGreen,
       display: "tall",
       description: "rgba(13,28,20,0.7)",
       giftSurface: "light",
@@ -423,7 +424,7 @@ const styles = createLiveSheet(() =>
       color: tennisColors.white,
     },
     inkDark: {
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
     },
     metaDark: {
       color: "rgba(255,255,255,0.65)",
@@ -435,7 +436,7 @@ const styles = createLiveSheet(() =>
       color: tennisColors.lime,
     },
     accentGreen: {
-      color: tennisColors.heroGreen,
+      color: tennisColors.linkText,
     },
   }),
 );

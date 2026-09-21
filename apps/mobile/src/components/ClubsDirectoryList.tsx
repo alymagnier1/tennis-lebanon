@@ -6,9 +6,8 @@ import type { ClubDirectoryRow } from "@tennis-lebanon/api";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { ClubDirectoryCard } from "./ClubDirectoryCard";
 import { EmptyState } from "./AppUi";
-import { PrimaryButton, formStyles } from "./FormUi";
-import { AppText } from "./AppText";
-import { clubDetailRoute } from "../lib/routes";
+import { PrimaryButton, ScreenError, formStyles } from "./FormUi";
+import { clubDetailRoute, PROFILE_WHERE_I_PLAY_ROUTE } from "../lib/routes";
 
 type ClubsDirectoryListProps = {
   clubsQuery: UseQueryResult<ClubDirectoryRow[], Error>;
@@ -58,21 +57,40 @@ export function ClubsDirectoryList({
 
   if (clubsQuery.isError) {
     return (
-      <View>
-        <AppText style={formStyles.errorText}>{t("clubs.loadError")}</AppText>
-        <PrimaryButton
-          label={t("common.retry")}
-          onPress={() => void clubsQuery.refetch()}
-        />
-      </View>
+      <ScreenError
+        message={t("clubs.loadError")}
+        retryLabel={t("common.retry")}
+        onRetry={() => void clubsQuery.refetch()}
+      />
     );
   }
 
   if (clubs.length === 0) {
+    // Two different dead ends wearing one face. If the source has rows and the
+    // caller filtered them all away, the fix is the filter sitting right above
+    // this list; if the source itself is empty the player has no clubs in the
+    // areas they picked, and the only way out is picking more areas.
+    const filteredToNothing = (clubsQuery.data?.length ?? 0) > 0;
+
+    if (filteredToNothing) {
+      return (
+        <EmptyState
+          title={t("clubs.filteredEmptyTitle")}
+          body={t("clubs.filteredEmptyBody")}
+        />
+      );
+    }
+
     return (
       <EmptyState
         title={t("clubs.empty")}
-        body={t("clubs.directoryDescription")}
+        body={t("clubs.emptyBody")}
+        action={
+          <PrimaryButton
+            label={t("clubs.emptyAction")}
+            onPress={() => router.push(PROFILE_WHERE_I_PLAY_ROUTE)}
+          />
+        }
       />
     );
   }

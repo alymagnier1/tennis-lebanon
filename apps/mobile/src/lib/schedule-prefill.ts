@@ -33,16 +33,15 @@ export function favoriteClubIdsFromDirectory(
  * Whether the "Where" section knows enough to decide between its summary and
  * its editor.
  *
- * Before the zones and the club directory have both settled, no club is
- * selected yet even for a host whose favourites are about to seed. Deciding
- * then opens the editor and collapses it a moment later.
+ * Wait for club *seeding*, not merely the directory response. Treating
+ * directory-settled as ready opened the editor while favourites were still
+ * empty, then left it open after seed completed.
  */
 export function whereSectionHydrated(input: {
   zonesHydrated: boolean;
   clubsHydrated: boolean;
-  clubsSettled: boolean;
 }): boolean {
-  return input.zonesHydrated && (input.clubsHydrated || input.clubsSettled);
+  return input.zonesHydrated && input.clubsHydrated;
 }
 
 /**

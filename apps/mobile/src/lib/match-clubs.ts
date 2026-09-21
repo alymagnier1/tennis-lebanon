@@ -52,15 +52,18 @@ export function clubIdsFromList(clubs: unknown): string[] {
     .filter(Boolean);
 }
 
-/** Public address first; zone if the club has no street line yet. */
+/** Zone first when `areaOnly`; otherwise public address, then zone. */
 export function preferredClubLocationLabel(input: {
   addressPublic?: string | null;
   zoneNameI18n?: Json;
   locale: string;
+  /** Compact hub rows: area name only, never the street line. */
+  areaOnly?: boolean;
 }): string | null {
+  const zone = zoneNameFromJson(input.zoneNameI18n ?? null, input.locale);
+  if (input.areaOnly) return zone || null;
   const address = input.addressPublic?.trim();
   if (address) return address;
-  const zone = zoneNameFromJson(input.zoneNameI18n ?? null, input.locale);
   return zone || null;
 }
 

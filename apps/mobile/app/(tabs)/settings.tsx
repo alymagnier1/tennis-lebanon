@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { confirmAction } from "../../src/lib/confirm-action";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import * as Linking from "expo-linking";
 import Constants from "expo-constants";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { callerHasPassword, requestAccountDeletion } from "@tennis-lebanon/api";
@@ -24,16 +30,22 @@ import { goBackOrReplace, PROFILE_TAB_ROUTE } from "../../src/lib/navigation";
 import {
   settingsScreenAccountTitle,
   settingsScreenAppearanceTitle,
-  settingsScreenGeneralTitle,
   settingsScreenLanguageTitle,
-  settingsScreenSupportTitle,
+  settingsScreenPreferencesTitle,
 } from "../../src/lib/settings-screen-copy";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
+import {
+  getPushPermissionState,
+  syncDevicePushToken,
+  type PushPermissionState,
+  type PushRegistrationResult,
+} from "../../src/lib/push-notifications";
+import { derivePushSettingsView } from "../../src/lib/push-settings";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { useTennisTheme } from "../../src/providers/ThemeProvider";
 import { useHeroVariant } from "../../src/providers/HeroVariantProvider";
-import { tennisColors } from "../../src/theme/tennis-tokens";
+import { tennisColors, tennisSpacing } from "../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
 export default function SettingsScreen() {
@@ -43,6 +55,11 @@ export default function SettingsScreen() {
   const { family, setFamily } = useHeroVariant();
   const { rowDirection } = useLayoutDirection();
   const [signOutError, setSignOutError] = useState(false);
+  const [supportError, setSupportError] = useState(false);
+  const [pushPermission, setPushPermission] =
+    useState<PushPermissionState | null>(null);
+  const [pushRegistration, setPushRegistration] =
+    useState<PushRegistrationResult | null>(null);
 
   const appVersion =
     Constants.expoConfig?.version ?? Constants.nativeAppVersion ?? "1.0.0";
@@ -72,6 +89,28 @@ export default function SettingsScreen() {
       }
     },
   });
+
+  const refreshPushStatus = useCallback(async () => {
+    const next = await getPushPermissionState();
+    setPushPermission(next);
+    const result = await syncDevicePushToken().catch(
+      (): PushRegistrationResult => "unavailable",
+    );
+    setPushRegistration(result);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshPushStatus();
+    }, [refreshPushStatus]),
+  );
+
+  const pushView = pushPermission
+    ? derivePushSettingsView({
+        permission: pushPermission,
+        registration: pushRegistration,
+      })
+    : null;
 
   const confirmDeletion = () => {
     confirmAction({
@@ -106,6 +145,15 @@ export default function SettingsScreen() {
     });
   };
 
+  const openSupport = async () => {
+    setSupportError(false);
+    try {
+      await Linking.openURL(`mailto:${env.SUPPORT_EMAIL}`);
+    } catch {
+      setSupportError(true);
+    }
+  };
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -114,7 +162,6 @@ export default function SettingsScreen() {
       >
         <FigmaSubpageHero
           title={t("settings.title")}
-          description={t("settings.description")}
           onBack={() => goBackOrReplace(PROFILE_TAB_ROUTE)}
         />
 
@@ -173,7 +220,7 @@ export default function SettingsScreen() {
           ) : null}
 
           <PlayerProfileSection
-            title={settingsScreenGeneralTitle(t)}
+            title={settingsScreenPreferencesTitle(t)}
             variant="grouped"
           >
             <ProfileMenuRow
@@ -185,50 +232,44 @@ export default function SettingsScreen() {
                 />
               }
               label={t("notifications.settings.title")}
+              subtitle={pushView ? t(pushView.statusKey) : t("common.loading")}
               onPress={() => router.push("/profile/notifications")}
               showDivider={false}
             />
-            <ProfileMenuRow
-              icon={
-                <Icon name="matches" size={16} color={tennisColors.primary} />
-              }
-              label={t("notifications.centerTitle")}
-              onPress={() => router.push("/notifications")}
-            />
-          </PlayerProfileSection>
-
-          <PlayerProfileSection
-            title={settingsScreenSupportTitle(t)}
-            variant="grouped"
-          >
-            <ProfileMenuRow
-              icon={<Icon name="info" size={16} color={tennisColors.primary} />}
-              label={t("settings.policies")}
-              onPress={() => router.push("/policies?document=privacy")}
-            />
-            <ProfileMenuRow
-              icon={<Icon name="chat" size={16} color={tennisColors.primary} />}
-              label={t("account.contactSupport")}
-              onPress={() =>
-                void Linking.openURL(`mailto:${env.SUPPORT_EMAIL}`)
-              }
-            />
-            {__DEV__ ? (
-              <ProfileMenuRow
-                icon={
-                  <Icon name="filter" size={16} color={tennisColors.primary} />
-                }
-                label={t("settings.rtlLayoutCheck")}
-                onPress={() => router.push("/rtl-check")}
-                showDivider={false}
-              />
-            ) : null}
           </PlayerProfileSection>
 
           <PlayerProfileSection
             title={settingsScreenAccountTitle(t)}
             variant="grouped"
           >
+            {passwordQuery.isPending ? (
+              <ProfileMenuRow
+                icon={
+                  <ActivityIndicator size="small" color={tennisColors.accent} />
+                }
+                label={t("auth.setPasswordRow")}
+                subtitle={t("common.loading")}
+                onPress={() => undefined}
+                disabled
+                showChevron={false}
+              />
+            ) : null}
+            {passwordQuery.isError ? (
+              <ProfileMenuRow
+                icon={
+                  <Icon name="lock" size={16} color={tennisColors.accent} />
+                }
+                label={t("auth.setPasswordRow")}
+                subtitle={
+                  passwordQuery.isFetching
+                    ? t("common.loading")
+                    : t("settings.passwordCheckError")
+                }
+                onPress={() => void passwordQuery.refetch()}
+                showChevron={false}
+                disabled={passwordQuery.isFetching}
+              />
+            ) : null}
             {passwordQuery.data === false ? (
               <ProfileMenuRow
                 icon={
@@ -245,29 +286,26 @@ export default function SettingsScreen() {
               />
             ) : null}
             <ProfileMenuRow
-              icon={<Icon name="close" size={16} color={tennisColors.accent} />}
+              icon={
+                <Icon name="signOut" size={16} color={tennisColors.danger} />
+              }
               label={t("auth.signOut")}
               onPress={confirmLogout}
-              showDivider={false}
+              showChevron={false}
               tone="danger"
             />
+            <ProfileMenuRow
+              icon={
+                <Icon name="warning" size={16} color={tennisColors.danger} />
+              }
+              label={t("settings.requestDeletion")}
+              onPress={confirmDeletion}
+              showDivider={false}
+              showChevron={false}
+              tone="danger"
+              disabled={deletion.isPending}
+            />
           </PlayerProfileSection>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("settings.requestDeletion")}
-            disabled={deletion.isPending}
-            onPress={confirmDeletion}
-            style={({ pressed }) => [
-              styles.deleteButton,
-              pressed && styles.deleteButtonPressed,
-              deletion.isPending && styles.deleteButtonDisabled,
-            ]}
-          >
-            <AppText style={styles.deleteLabel}>
-              {t("settings.requestDeletion")}
-            </AppText>
-          </Pressable>
 
           {signOutError ? (
             <ErrorNotice>{t("auth.signOutError")}</ErrorNotice>
@@ -275,10 +313,63 @@ export default function SettingsScreen() {
           {deletion.isError ? (
             <ErrorNotice>{t("settings.deleteError")}</ErrorNotice>
           ) : null}
+          {supportError ? (
+            <ErrorNotice>
+              {t("settings.supportOpenError", { email: env.SUPPORT_EMAIL })}
+            </ErrorNotice>
+          ) : null}
 
-          <AppText style={styles.version}>
-            {t("settings.versionFooter", { version: appVersion })}
-          </AppText>
+          <View style={styles.footer}>
+            <View style={[styles.footerLinks, { flexDirection: rowDirection }]}>
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel={t("settings.policies")}
+                onPress={() => router.push("/policies?document=privacy")}
+                style={({ pressed }) => [
+                  styles.footerLink,
+                  pressed && styles.footerLinkPressed,
+                ]}
+              >
+                <AppText style={styles.footerLinkLabel}>
+                  {t("settings.policies")}
+                </AppText>
+              </Pressable>
+              <AppText style={styles.footerDot}>·</AppText>
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel={t("account.contactSupport")}
+                onPress={() => void openSupport()}
+                style={({ pressed }) => [
+                  styles.footerLink,
+                  pressed && styles.footerLinkPressed,
+                ]}
+              >
+                <AppText style={styles.footerLinkLabel}>
+                  {t("account.contactSupport")}
+                </AppText>
+              </Pressable>
+            </View>
+
+            {__DEV__ ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("settings.rtlLayoutCheck")}
+                onPress={() => router.push("/rtl-check")}
+                style={({ pressed }) => [
+                  styles.footerLink,
+                  pressed && styles.footerLinkPressed,
+                ]}
+              >
+                <AppText style={styles.footerLinkLabel}>
+                  {t("settings.rtlLayoutCheck")}
+                </AppText>
+              </Pressable>
+            ) : null}
+
+            <AppText style={styles.version}>
+              {t("settings.versionFooter", { version: appVersion })}
+            </AppText>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -292,10 +383,10 @@ const styles = createLiveSheet(() =>
       backgroundColor: tennisColors.background,
     },
     scrollContent: {
-      paddingBottom: 48,
+      paddingBottom: tennisSpacing.screenBottom,
     },
     body: {
-      paddingHorizontal: 20,
+      paddingHorizontal: tennisSpacing.screenX,
       paddingTop: 20,
       gap: 16,
     },
@@ -310,28 +401,41 @@ const styles = createLiveSheet(() =>
       color: tennisColors.mutedForeground,
       marginBottom: 10,
     },
-    deleteButton: {
+    footer: {
       alignItems: "center",
-      paddingVertical: 8,
+      gap: 10,
+      marginTop: 8,
     },
-    deleteButtonPressed: {
-      opacity: 0.85,
+    footerLinks: {
+      flexWrap: "wrap",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
     },
-    deleteButtonDisabled: {
-      opacity: 0.5,
+    footerLink: {
+      minHeight: 44,
+      justifyContent: "center",
+      paddingHorizontal: 4,
     },
-    deleteLabel: {
+    footerLinkPressed: {
+      opacity: 0.75,
+    },
+    footerLinkLabel: {
       fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 14,
-      color: tennisColors.danger,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
       letterSpacing: -0.1,
+    },
+    footerDot: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
     },
     version: {
       textAlign: "center",
       fontFamily: tennisFontFamily.body,
       fontSize: 11,
       color: tennisColors.mutedForeground,
-      marginTop: 4,
     },
   }),
 );

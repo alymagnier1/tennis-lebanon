@@ -22,7 +22,6 @@ export const MAX_LEVEL_WINDOW = 4;
 
 export type DiscoverMatchToggles = {
   matchLevel: boolean;
-  matchIntent: boolean;
   matchArea: boolean;
   matchAvailability: boolean;
 };
@@ -30,15 +29,17 @@ export type DiscoverMatchToggles = {
 /**
  * Every toggle **narrows** when true. `matchArea` used to do the opposite, which
  * made the chip labelled "Area" widen the search and made "Show everyone" — which
- * clears all four — add a zone restriction.
+ * clears all three — add a zone restriction.
  *
  * `matchArea` defaults to false so the room stays as wide as it actually is today
  * at pilot density; the difference is that the chip now tells the truth about it,
  * and turning it on is a real opt-in to your own areas.
+ *
+ * Play intent is not a Discover chip: browse stays open ("either"). Profile
+ * intent still seeds create-match defaults.
  */
 export const DEFAULT_DISCOVER_MATCH_TOGGLES: DiscoverMatchToggles = {
   matchLevel: true,
-  matchIntent: false,
   matchArea: false,
   matchAvailability: false,
 };
@@ -127,7 +128,7 @@ export function resolveDiscoverFiltersFromProfile(input: {
   ownZoneIds?: string[];
 }): DiscoveryFiltersInput {
   return {
-    // Narrows when on, like the other three. `undefined` means "no zone filter"
+    // Narrows when on, like the other toggles. `undefined` means "no zone filter"
     // to `discover_compatible_players`, so a player with no zones set cannot be
     // restricted to nothing.
     zoneIds:
@@ -136,10 +137,8 @@ export function resolveDiscoverFiltersFromProfile(input: {
         : undefined,
     // Format is a per-match choice, not a discovery identity filter.
     format: null,
-    intent:
-      input.toggles.matchIntent && input.playIntent !== "either"
-        ? input.playIntent
-        : null,
+    // Browse never gates on play intent — profile intent is for create defaults.
+    intent: null,
     requireAvailabilityOverlap: input.toggles.matchAvailability,
     levelWindow: input.toggles.matchLevel
       ? DEFAULT_LEVEL_WINDOW

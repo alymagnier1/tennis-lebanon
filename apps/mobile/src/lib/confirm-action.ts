@@ -33,10 +33,24 @@ export type CancelMatchDialogOptions = {
   onDismiss?: () => void;
 };
 
+export type RemoveParticipantDialogOptions = {
+  title: string;
+  message: string;
+  warning?: string;
+  reasonLabel: string;
+  reasons: { value: string; label: string }[];
+  reasonRequiredMessage: string;
+  submitLabel: string;
+  dismissLabel: string;
+  onSubmit: (reason: string) => void | Promise<void>;
+  onDismiss?: () => void;
+};
+
 type ConfirmPresenters = {
   notify: (title: string, message?: string) => void;
   chooseAction: (options: ChooseActionOptions) => void;
   cancelMatchDialog: (options: CancelMatchDialogOptions) => void;
+  removeParticipantDialog: (options: RemoveParticipantDialogOptions) => void;
 };
 
 let presenters: ConfirmPresenters | null = null;
@@ -127,6 +141,38 @@ export function presentCancelMatchDialog(
       text: options.submitLabel,
       onPress: () => void options.onSubmit(""),
     },
+  ]);
+}
+
+/** Host-remove a player with a required reason — requires ConfirmDialogProvider. */
+export function presentRemoveParticipantDialog(
+  options: RemoveParticipantDialogOptions,
+): void {
+  if (presenters?.removeParticipantDialog) {
+    presenters.removeParticipantDialog(options);
+    return;
+  }
+
+  if (Platform.OS === "web") {
+    if (typeof window === "undefined") return;
+    if (
+      !window.confirm(
+        options.message
+          ? `${options.title}\n\n${options.message}`
+          : options.title,
+      )
+    ) {
+      options.onDismiss?.();
+    }
+    return;
+  }
+
+  Alert.alert(options.title, options.message, [
+    { text: options.dismissLabel, onPress: options.onDismiss },
+    ...options.reasons.map((reason) => ({
+      text: reason.label,
+      onPress: () => void options.onSubmit(reason.value),
+    })),
   ]);
 }
 

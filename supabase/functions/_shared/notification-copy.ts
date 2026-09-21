@@ -115,6 +115,10 @@ export const NOTIFICATION_COPY: Record<
       title: "Your match lost a player",
       body: "Someone left. Invite a replacement before the hour comes round.",
     },
+    match_participant_removed: {
+      title: "You were removed from a match",
+      body: "The host removed you. {{reason}}",
+    },
     match_message: {
       title: "New message in your match",
       body: "Your match group is talking. Open the chat to catch up.",
@@ -212,6 +216,10 @@ export const NOTIFICATION_COPY: Record<
     match_participant_left: {
       title: "غادر لاعب مباراتك",
       body: "غادر أحدهم. ادعُ بديلًا قبل حلول الموعد.",
+    },
+    match_participant_removed: {
+      title: "أُزلت من مباراة",
+      body: "أزالك المضيف. {{reason}}",
     },
     match_message: {
       title: "رسالة جديدة في مباراتك",
@@ -311,6 +319,10 @@ export const NOTIFICATION_COPY: Record<
       title: "Un joueur a quitté votre match",
       body: "Quelqu'un est parti. Invitez un remplaçant avant l'heure du match.",
     },
+    match_participant_removed: {
+      title: "Vous avez été retiré d'un match",
+      body: "L'hôte vous a retiré. {{reason}}",
+    },
     match_message: {
       title: "Nouveau message dans votre match",
       body: "Ça discute dans le chat de votre match. Ouvrez-le pour suivre.",
@@ -325,6 +337,38 @@ export const NOTIFICATION_COPY: Record<
     },
   },
 };
+
+/** Closed reason codes from `remove_match_participant`. Localized here so push copy can interpolate `{{reason}}`. */
+export const REMOVAL_REASON_COPY: Record<
+  NotificationLocale,
+  Record<string, string>
+> = {
+  en: {
+    match_requirements_mismatch: "Match requirements mismatch",
+    player_requested_removal: "Player requested removal",
+    conduct_issue: "Conduct issue",
+  },
+  ar: {
+    match_requirements_mismatch: "عدم توافق متطلبات المباراة",
+    player_requested_removal: "طلب اللاعب الإزالة",
+    conduct_issue: "مشكلة في السلوك",
+  },
+  fr: {
+    match_requirements_mismatch: "Les exigences du match ne correspondent pas",
+    player_requested_removal: "Le joueur a demandé à être retiré",
+    conduct_issue: "Problème de conduite",
+  },
+};
+
+export function localizeRemovalReason(
+  reason: string | undefined,
+  locale: NotificationLocale,
+): string | undefined {
+  if (!reason) return undefined;
+  return (
+    REMOVAL_REASON_COPY[locale]?.[reason] ?? REMOVAL_REASON_COPY.en[reason]
+  );
+}
 
 export function normalizeNotificationLocale(
   value: string | null | undefined,

@@ -36,12 +36,11 @@ describe("resolveDiscoverFiltersFromProfile", () => {
     ).toEqual(["zone-a", "zone-b"]);
   });
 
-  it("widens level, area, intent, and availability when toggles are off", () => {
+  it("widens level, area, and availability when toggles are off", () => {
     expect(
       resolveDiscoverFiltersFromProfile({
         toggles: {
           matchLevel: false,
-          matchIntent: false,
           matchArea: false,
           matchAvailability: false,
         },
@@ -64,7 +63,6 @@ describe("resolveDiscoverFiltersFromProfile", () => {
     const relaxed = resolveDiscoverFiltersFromProfile({
       toggles: {
         matchLevel: false,
-        matchIntent: false,
         matchArea: false,
         matchAvailability: false,
       },
@@ -88,19 +86,18 @@ describe("resolveDiscoverFiltersFromProfile", () => {
     ).toBeUndefined();
   });
 
-  it("applies profile intent and availability when those toggles are on", () => {
+  it("never hard-filters on play intent, even when profile intent is set", () => {
     expect(
       resolveDiscoverFiltersFromProfile({
         toggles: {
           ...DEFAULT_DISCOVER_MATCH_TOGGLES,
-          matchIntent: true,
           matchAvailability: true,
         },
         playIntent: "competitive",
         ownZoneIds: ["zone-a"],
       }),
     ).toMatchObject({
-      intent: "competitive",
+      intent: null,
       format: null,
       requireAvailabilityOverlap: true,
     });

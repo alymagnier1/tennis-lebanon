@@ -66,7 +66,6 @@ export default function ForgotPasswordScreen() {
       footer={
         <FigmaPrimaryButton
           label={t("auth.sendReset")}
-          hero
           onPress={() => void submit()}
           loading={isSubmitting}
         />

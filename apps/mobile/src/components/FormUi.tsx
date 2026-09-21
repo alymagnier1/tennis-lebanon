@@ -278,7 +278,7 @@ export function PrimaryButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={colors.neutral[0]} />
+        <ActivityIndicator color={tennisColors.onPrimary} />
       ) : (
         <AppText style={styles.primaryButtonText} maxLines={2}>
           {label}
@@ -346,7 +346,7 @@ export function DestructiveButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={colors.danger[700]} />
+        <ActivityIndicator color={tennisColors.danger} />
       ) : (
         <AppText style={styles.destructiveButtonText} maxLines={2}>
           {label}
@@ -368,7 +368,7 @@ export function FormField({
         accessibilityLabel={label}
         maxFontSizeMultiplier={1.3}
         style={[styles.input, error ? styles.inputError : null]}
-        placeholderTextColor={colors.neutral[500]}
+        placeholderTextColor={tennisColors.mutedForeground}
         {...props}
       />
       {error ? (
@@ -506,26 +506,26 @@ export const formStyles = createLiveSheet(() =>
     row: { flexDirection: "row", gap: spacing.sm },
     flex: { flex: 1 },
     summary: {
-      backgroundColor: colors.neutral[50],
+      backgroundColor: tennisColors.muted,
       borderRadius: radii.md,
       padding: spacing.lg,
       gap: spacing.sm,
     },
     summaryLabel: {
-      color: colors.neutral[500],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
     },
     summaryValue: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.md,
     },
     description: {
-      color: colors.neutral[700],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.md,
       lineHeight: 24,
     },
     title: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.lg,
       fontWeight: typography.weight.semibold,
     },
@@ -533,10 +533,10 @@ export const formStyles = createLiveSheet(() =>
       fontFamily: tennisFontFamily.body,
       fontSize: tennisTypography.fieldHint.fontSize,
       lineHeight: tennisTypography.fieldHint.lineHeight,
-      color: colors.neutral[700],
+      color: tennisColors.mutedForeground,
     },
     errorText: {
-      color: colors.danger[700],
+      color: tennisColors.danger,
       fontSize: typography.size.sm,
     },
     card: {
@@ -548,14 +548,14 @@ export const formStyles = createLiveSheet(() =>
     },
     compactCard: {
       borderWidth: 1,
-      borderColor: colors.neutral[100],
+      borderColor: tennisColors.border,
       borderRadius: radii.md,
       padding: spacing.md,
       gap: 6,
-      backgroundColor: colors.neutral[0],
+      backgroundColor: tennisColors.card,
     },
     compactCardTitle: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.semibold,
       marginBottom: 2,
@@ -566,13 +566,13 @@ export const formStyles = createLiveSheet(() =>
       gap: spacing.sm,
     },
     summaryRowLabel: {
-      color: colors.neutral[500],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.xs,
       flexShrink: 0,
       minWidth: 56,
     },
     summaryRowValue: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.medium,
       flex: 1,
@@ -588,10 +588,10 @@ export const formStyles = createLiveSheet(() =>
       justifyContent: "center",
       borderRadius: radii.full,
       paddingHorizontal: spacing.md,
-      backgroundColor: colors.neutral[50],
+      backgroundColor: tennisColors.muted,
     },
     segmentButtonActive: {
-      backgroundColor: colors.neutral[0],
+      backgroundColor: tennisColors.card,
       shadowColor: colors.neutral[900],
       shadowOpacity: 0.06,
       shadowRadius: 4,
@@ -599,7 +599,7 @@ export const formStyles = createLiveSheet(() =>
       elevation: 1,
     },
     segmentButtonText: {
-      color: colors.neutral[700],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.semibold,
     },
@@ -654,7 +654,7 @@ const styles = createLiveSheet(() =>
       ...elevation.sm,
     },
     primaryButtonText: {
-      color: colors.neutral[0],
+      color: tennisColors.onPrimary,
       fontSize: typography.size.md,
       fontWeight: typography.weight.semibold,
       textAlign: "center",
@@ -668,7 +668,7 @@ const styles = createLiveSheet(() =>
       borderWidth: 1,
       borderColor: mobileBrand[500],
       borderRadius: radii.full,
-      backgroundColor: colors.neutral[0],
+      backgroundColor: tennisColors.card,
     },
     secondaryButtonText: {
       color: mobileBrand[700],
@@ -683,12 +683,12 @@ const styles = createLiveSheet(() =>
       paddingHorizontal: spacing.lg,
       paddingVertical: spacing.md,
       borderWidth: 1,
-      borderColor: colors.danger[500],
+      borderColor: tennisColors.danger,
       borderRadius: radii.full,
-      backgroundColor: colors.neutral[0],
+      backgroundColor: tennisColors.card,
     },
     destructiveButtonText: {
-      color: colors.danger[700],
+      color: tennisColors.danger,
       fontSize: typography.size.md,
       fontWeight: typography.weight.semibold,
       textAlign: "center",
@@ -697,25 +697,25 @@ const styles = createLiveSheet(() =>
     pressed: { opacity: 0.8 },
     field: { gap: spacing.xs },
     label: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.medium,
     },
     input: {
       minHeight: minTouchTargetPx,
       borderWidth: 1,
-      borderColor: colors.neutral[300],
+      borderColor: tennisColors.border,
       borderRadius: radii.md,
       paddingHorizontal: spacing.md,
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.md,
     },
-    inputError: { borderColor: colors.danger[500] },
-    error: { color: colors.danger[700], fontSize: typography.size.sm },
+    inputError: { borderColor: tennisColors.danger },
+    error: { color: tennisColors.danger, fontSize: typography.size.sm },
     errorNotice: {
       padding: spacing.md,
-      color: colors.danger[700],
-      backgroundColor: colors.danger[100],
+      color: tennisColors.danger,
+      backgroundColor: tennisColors.dangerSoft,
       borderRadius: radii.md,
     },
     screenError: {
@@ -728,7 +728,9 @@ const styles = createLiveSheet(() =>
       justifyContent: "center",
     },
     screenErrorRetryLabel: {
-      color: colors.brand[700],
+      // Was colors.brand[700] -- the dashboard's blue ramp, which is off-brand
+      // on mobile and, being scheme-independent, sat at 2.32:1 on the dark card.
+      color: tennisColors.linkText,
       fontSize: typography.size.md,
       fontWeight: typography.weight.semibold,
     },
@@ -738,9 +740,9 @@ const styles = createLiveSheet(() =>
       gap: spacing.md,
       padding: spacing.md,
       borderWidth: 1,
-      borderColor: colors.neutral[300],
+      borderColor: tennisColors.border,
       borderRadius: radii.lg,
-      backgroundColor: colors.neutral[0],
+      backgroundColor: tennisColors.card,
     },
     choiceSelected: {
       borderColor: mobileBrand[500],
@@ -748,12 +750,12 @@ const styles = createLiveSheet(() =>
     },
     choiceText: { flex: 1, gap: spacing.xs, minWidth: 0 },
     choiceLabel: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.md,
       fontWeight: typography.weight.medium,
     },
     choiceDescription: {
-      color: colors.neutral[700],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
     },
     checkmark: {

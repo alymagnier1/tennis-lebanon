@@ -9,7 +9,12 @@
     "no": "لا",
     "loading": "جارٍ التحميل…",
     "change": "تغيير",
-    "done": "تم"
+    "done": "تم",
+    "offline": {
+      "title": "أنت غير متصل بالإنترنت",
+      "body": "سنعيد المحاولة فور عودة الاتصال."
+    },
+    "dismissHint": "انقر للإغلاق"
   },
   "profileScreenEdit": "تعديل",
   "profileScreenAboutTitle": "نبذة عني",
@@ -21,7 +26,7 @@
   "profileScreenMatchFormats": "صيغ المباراة",
   "profileScreenPreferredAreasTitle": "المناطق المفضلة",
   "profileScreenZonesError": "اختر منطقة واحدة على الأقل.",
-  "settingsScreenGeneral": "عام",
+  "settingsScreenPreferences": "التفضيلات",
   "settingsScreenLanguage": "اللغة",
   "settingsScreenAppearance": "المظهر",
   "settingsAppearanceSystem": "النظام",
@@ -31,7 +36,6 @@
   "settingsOnboardingHeroHint": "مقارنة تصميم. الترحيب والنهاية يتبعان هذا معًا.",
   "settingsOnboardingHeroGreen": "أخضر",
   "settingsOnboardingHeroLight": "طيني",
-  "settingsScreenSupport": "الدعم",
   "settingsScreenAccount": "الحساب",
   "dashboard": {
     "login": {
@@ -466,23 +470,6 @@
     "ownProvisional": "مبدئي · {{count}}/{{threshold}} نتائج مؤكدة",
     "progressHint": "العب وأكّد خمس نتائج مباريات لفتح تصنيفك."
   },
-  "policies": {
-    "developmentWarning": "مسودة للتطوير — غير معتمدة قانونيًا وغير مخصّصة للنشر العام.",
-    "version": "الإصدار: {{version}}",
-    "otherDocuments": "سياسات أخرى",
-    "terms": {
-      "title": "شروط الاستخدام",
-      "body": "هذه تجربة للبالغين فقط. استخدم الخدمة بصورة قانونية ومحترمة. لا نضمن إتمام ترتيبات المباريات أو حجوزات الملاعب."
-    },
-    "privacy": {
-      "title": "إشعار الخصوصية",
-      "body": "نجمع الحد الأدنى من بيانات الحساب والملف والمنطقة العامة والمباريات لتشغيل التجربة. لا نعرض بيانات الاتصال للاعبين الآخرين."
-    },
-    "community": {
-      "title": "قواعد المجتمع",
-      "body": "عامل الآخرين باحترام، وتواصل بصدق، واحمِ الخصوصية، وأبلغ عن أي سلوك مسيء أو غير آمن."
-    }
-  },
   "tabs": {
     "home": "الرئيسية",
     "discover": "استكشاف",
@@ -697,10 +684,12 @@
     "anyFormat": "أي صيغة",
     "anyIntent": "أي نية لعب",
     "chipMatchLevel": "المستوى",
-    "chipMatchIntent": "النية",
     "chipMatchArea": "المنطقة",
     "chipMatchFormat": "الصيغة",
     "chipMatchAvailability": "التوفر",
+    "matchFiltersHelpA11y": "ماذا تفعل هذه الفلاتر",
+    "matchFiltersHelpTitle": "ماذا تفعل هذه الفلاتر",
+    "matchFiltersHelpBody": "التفعيل يضيّق النتائج؛ الإيقاف يعرض أكثر.\n\nالمستوى — مهارة قريبة منك.\nالمنطقة — مناطق مفضلة مشتركة.\nالتوفر — ساعات أسبوعية متداخلة.",
     "filtersActive": "{{count}} مفعّل",
     "clearFilters": "مسح الكل",
     "resultsPlayers_one": "تم العثور على لاعب واحد",
@@ -822,6 +811,10 @@
       "matchTypeDescription": "فردي أو زوجي، ومدى تنافسية اللعب.",
       "joinSettingsSection": "من يمكنه الانضمام",
       "joinSettingsDescription": "ادعُ لاعبين بعد إنشاء المباراة، أو دع الآخرين يجدونها في الاكتشاف.",
+      "advancedSection": "من يمكنه الانضمام",
+      "advancedShow": "إظهار من يمكنه الانضمام",
+      "advancedHide": "إخفاء من يمكنه الانضمام",
+      "notesAdded": "تمت إضافة ملاحظة",
       "listOnDiscover": "عرض في الاكتشاف",
       "listOnDiscoverHint": "اعرض هذه المباراة في المباريات المفتوحة ليتمكن اللاعبون القريبون من الانضمام.",
       "listOnDiscoverOn": "معروضة في الاكتشاف",
@@ -837,13 +830,13 @@
       "requiresApprovalOn": "طلبات الانضمام تحتاج موافقتك",
       "notes": "ملاحظات (اختياري)",
       "zoneRequired": "اختر منطقة واحدة على الأقل.",
-      "preferredClubsRequiredHelp": "اختر حتى ٣ نوادٍ يسعدك اللعب فيها. يراها اللاعبون قبل الانضمام. لم يُحجز أي ملعب بعد.",
-      "preferredClubsOptionalHelp": "اختر حتى ٣ نوادٍ يسعدك اللعب فيها. لم يُحجز أي ملعب بعد.",
+      "preferredClubsRequiredHelp": "حتى ٣ نوادٍ · يراها اللاعبون قبل الانضمام.",
+      "preferredClubsOptionalHelp": "حتى ٣ نوادٍ · اختياري لهذه المباراة.",
       "zonesWithoutClubWarning": "لا يوجد أي من أنديتك في {{zones}}. من ينضم من تلك المنطقة سيضطر إلى التنقل.",
-      "preferredClubsPickZoneFirst": "اختر منطقة أولًا لعرض نواديها.",
-      "preferredClubsEmpty": "لا توجد نوادٍ في المناطق التي اخترتها بعد.",
+      "preferredClubsPickZoneFirst": "اختر منطقة لعرض النوادي.",
+      "preferredClubsEmpty": "لا نوادٍ في تلك المناطق بعد.",
       "clubRequired": "اختر ناديًا واحدًا على الأقل ليعرف اللاعبون أين سيلعبون.",
-      "summaryWhere": "المكان لهذه المباراة",
+      "summaryWhere": "المكان",
       "summaryWhen": "الوقت",
       "summaryDiscover": "الاكتشاف",
       "summaryInviteOnly": "بالدعوة فقط",
@@ -851,6 +844,8 @@
       "levelRange": "نطاق المستوى",
       "matchLevel": "مستوى المباراة",
       "yourLevel": "مستواك",
+      "levelHelpA11y": "ماذا يعني كل مستوى",
+      "levelHelpTitle": "ماذا يعني كل مستوى",
       "allLevels": "كل المستويات",
       "publish": "نشر المباراة",
       "publishError": "تعذّر نشر هذه المباراة.",
@@ -874,19 +869,20 @@
       "overridesDone": "تم",
       "moreOptionsShow": "خيارات توقيت إضافية",
       "moreOptionsHide": "إخفاء خيارات التوقيت",
-      "preferredClubsForMatchTitle": "نوادي هذه المباراة",
+      "preferredClubsForMatchTitle": "النوادي",
       "preferredClubsListingOnly": "حتى 3 نوادي لهذا العرض فقط.",
-      "preferredClubsNone": "لم يُختَر نادي لهذه المباراة.",
-      "whereEditForMatch": "تعديل لهذه المباراة",
-      "whereEditDisclaimer": "التغييرات هنا تنطبق على هذه المباراة فقط.",
+      "preferredClubsNone": "لم يُختَر نادي.",
+      "whereEditForMatch": "تعديل",
+      "whereEditDisclaimer": "التغييرات تنطبق على هذه المباراة فقط.",
       "whereProfileDefaultsLink": "إدارة الإعدادات الافتراضية في الملف الشخصي",
       "summaryBar": {
         "title": "إعدادات هذه العرض",
         "edit": "تعديل",
         "a11y": "إعدادات المباراة: {{summary}}. تعديل لهذه المباراة."
       },
-      "publishActionsHint": "النشر يعرض المباراة في الاستكشاف. ادعُ اللاعبين من مركز المباراة بعد ذلك.",
+      "publishActionsHint": "تُعرض في الاستكشاف. ادعُ من مركز المباراة بعد ذلك.",
       "notesAdd": "أضف ملاحظة",
+      "notesEdit": "تعديل الملاحظة",
       "notesHide": "إخفاء الملاحظة",
       "sendRequest": "أرسل طلبًا إلى {{name}}",
       "sendRequestHint": "{{name}} وحده يرى هذا. يمكنه القبول أو الرفض.",
@@ -1003,17 +999,20 @@
     },
     "chat": {
       "title": "محادثة المباراة",
-      "empty": "لا رسائل بعد. نسّق مع مجموعتك هنا.",
+      "empty": "لا رسائل بعد. اقترح ملعباً أو أكّد الوقت هنا.",
       "placeholder": "اكتب رسالة",
       "send": "إرسال",
       "error": "تعذر إرسال هذه الرسالة.",
-      "reconnecting": "جارٍ إعادة الاتصال… قد تتأخر الرسائل الجديدة.",
+      "loadError": "تعذر تحميل هذه الرسائل.",
+      "reconnecting": "جارٍ إعادة الاتصال… اضغط للتحديث.",
       "open": "فتح محادثة المباراة",
       "openWithUnread": "افتح المحادثة، {{count}} غير مقروءة",
       "unreadBadge": "{{display}} غير مقروءة",
       "openHint": "راسل مجموعتك",
       "denied": "انضم إلى هذه المباراة لاستخدام المحادثة.",
-      "lockedRecruiting": "تُفتح المحادثة عندما يكتمل عدد اللاعبين.",
+      "deniedHint": "فقط اللاعبون المقبولون يمكنهم مراسلة هذه المجموعة.",
+      "lockedRecruiting": "تُفتح المحادثة عندما يكتمل الجميع.",
+      "yesterday": "أمس",
       "emojiPicker": "رموز تعبيرية",
       "emojiPickerClose": "إغلاق الرموز",
       "insertEmoji": "إدراج {{emoji}}"
@@ -1039,16 +1038,40 @@
       "joinSuccess": "انضممت إلى هذه المباراة.",
       "requestSentSuccess": "أُرسل الطلب. سيردّ عليك المنظّم.",
       "requestPendingBanner": "طلبت الانضمام. سيردّ عليك المضيف.",
+      "joinerIntentAwaitingPlayers": "أنت ضمن المباراة. بانتظار المزيد من اللاعبين.",
+      "joinerIntentHostBooking": "أنت ضمن المباراة. المضيف يحجز الملعب.",
+      "joinerIntentVote": "أنت ضمن المباراة. صوّت على وقت يناسب الجميع.",
+      "joinerIntentAwaitingClub": "أنت ضمن المباراة. بانتظار تأكيد النادي للملعب.",
+      "joinerIntentCourtConfirmed": "أنت ضمن المباراة. تم تأكيد الملعب — نراك هناك.",
       "joinError": "تعذّر الانضمام إلى هذه المباراة.",
       "joinTimeConflict": "لديك مباراة في هذا الوقت بالفعل.",
       "joinFull": "اكتمل عدد المباراة قبل انضمامك.",
       "approve": "قبول",
+      "decline": "رفض",
       "reject": "رفض",
       "respondError": "تعذّر تحديث هذا الطلب.",
       "respondFull": "هذه المباراة مكتملة بالفعل.",
       "shareInvite": "مشاركة رابط الدعوة",
       "leave": "مغادرة المباراة",
       "leaveError": "تعذّر مغادرة هذه المباراة.",
+      "removePlayer": "إزالة",
+      "removePlayerA11y": "إزالة {{name}} من هذه المباراة",
+      "removeSheetTitle": "إزالة {{name}}؟",
+      "removeSheetBody": "سيُبلَّغ اللاعب ويُعاد فتح مكانه إذا كانت المباراة ما زالت تبحث عن لاعبين.",
+      "removeSheetWarning": "تبدأ المباراة خلال أقل من ساعتين. إزالته الآن قد تعطّل خططه.",
+      "removeReasonLabel": "السبب",
+      "removeReasons": {
+        "match_requirements_mismatch": "عدم توافق متطلبات المباراة",
+        "player_requested_removal": "طلب اللاعب الإزالة",
+        "conduct_issue": "مشكلة في السلوك"
+      },
+      "removeReasonRequired": "اختر سببًا قبل الإزالة.",
+      "removeConfirm": "إزالة اللاعب",
+      "removeSuccess": "تمت إزالة اللاعب.",
+      "removeError": "تعذّر إزالة هذا اللاعب.",
+      "removeErrorStarted": "بدأت المباراة، لذا لا يمكن إزالة هذا اللاعب.",
+      "removeErrorNotAccepted": "هذا اللاعب ليس في القائمة.",
+      "removeErrorNotRemovable": "لم يعد بالإمكان إزالة لاعبين من هذه المباراة.",
       "withdraw": "الانسحاب من المباراة",
       "withdrawRequest": "ألغِ طلبي",
       "withdrawRequestConfirm": "سيُبلَّغ المضيف بأنك لم تعد بانتظار الرد. يمكنك الطلب مجددًا لاحقًا.",
@@ -1114,6 +1137,11 @@
       "agreedTimeBookHint": "احجز ملعباً لهذا الوقت.",
       "agreedTimeVenueHint": "المفضّل",
       "openPlayerSlot": "مقعد فارغ",
+      "wantsToJoin": "يريد الانضمام",
+      "inviteSomeoneElse": "دعوة شخص آخر",
+      "requestCarouselA11y": "طلب انضمام {{current}} من {{total}}",
+      "durationMinutes": "{{minutes}} دقيقة",
+      "changeTime": "تغيير الوقت",
       "preferredClubs": "الأندية المفضّلة",
       "openClubDetails": "عرض تفاصيل {{club}}",
       "contactClub": "تواصل مع {{club}} عبر واتساب",
@@ -1435,17 +1463,22 @@
     "indoor": "داخلي",
     "outdoor": "خارجي",
     "confirmExternalCourt": "لقد حجزت هذا الملعب بالفعل",
-    "confirmExternalCourtHelp": "استخدم هذا إذا حجزت الملعب بنفسك عبر الهاتف أو واتساب. سيؤكد المباراة حتى يستمر تسجيل الحضور والنتائج."
+    "confirmExternalCourtHelp": "استخدم هذا إذا حجزت الملعب بنفسك عبر الهاتف أو واتساب. سيؤكد المباراة حتى يستمر تسجيل الحضور والنتائج.",
+    "emptyBody": "أضف مناطق أخرى في أين ألعب وستظهر النوادي القريبة هنا.",
+    "emptyAction": "إضافة مناطق",
+    "filteredEmptyTitle": "لا توجد نوادٍ تطابق هذه العوامل",
+    "filteredEmptyBody": "جرّب مصطلح بحث آخر أو نوع ملعب مختلف."
   },
   "settings": {
     "title": "الإعدادات",
-    "description": "أدر حسابك وتفضيلاتك.",
     "policies": "عرض السياسات",
     "rtlLayoutCheck": "فحص تخطيط RTL",
     "requestDeletion": "احذف حسابي",
     "deleteTitle": "حذف حسابك؟",
     "deleteDescription": "يحذف هذا حسابك فورًا ويسجّل خروجك. يُزال اسمك وصورتك، وتغادر أي مباراة لم تُلعب بعد. تبقى النتائج السابقة مسجّلة لمن لعبوا معك، باسم لاعب محذوف. يُحرّر بريدك، فيمكنك التسجيل من جديد. لا يمكن التراجع عن هذا.",
     "deleteError": "تعذّر إرسال طلب الحذف. حاول مرة أخرى.",
+    "passwordCheckError": "تعذّر التحقق من خيارات كلمة المرور. اضغط للمحاولة مجددًا.",
+    "supportOpenError": "تعذّر فتح البريد. راسل {{email}} بدلًا من ذلك.",
     "versionFooter": "RacketBound v{{version}} · صُنع في لبنان 🇱🇧"
   },
   "account": {
@@ -1593,6 +1626,10 @@
         "title": "غادر لاعب مباراتك",
         "body": "غادر أحدهم. ادعُ بديلًا قبل حلول الموعد."
       },
+      "match_participant_removed": {
+        "title": "أُزلت من مباراة",
+        "body": "أزالك المضيف. {{reason}}"
+      },
       "match_message": {
         "title": "رسالة جديدة في مباراتك",
         "body": "هناك حديث في محادثة مباراتك. افتحها لمتابعة الرسائل."
@@ -1605,6 +1642,7 @@
         "title": "تم تأكيد النتيجة",
         "body": "لم يعترض أحد خلال ثلاثة أيام، لذا اعتُمدت هذه النتيجة."
       }
-    }
+    },
+    "unreadItem": "غير مقروء"
   }
 }

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { BottomSheet, SheetOption } from "../AppUi";
+import { AppText } from "../AppText";
 import { Icon } from "../Icon";
 import {
   DISCOVER_SORT_MODES,
@@ -10,6 +11,7 @@ import {
 } from "../../lib/discover-sort";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 const SORT_LABEL_KEYS: Record<DiscoverSortMode, string> = {
   recommended: "discover.sortRecommended",
@@ -26,7 +28,7 @@ export function DiscoverSortControl({
   onChange: (next: DiscoverSortMode) => void;
 }) {
   const { t } = useTranslation();
-  const { rowDirection } = useLayoutDirection();
+  const { rowDirection, writingDirection } = useLayoutDirection();
   const [open, setOpen] = useState(false);
 
   return (
@@ -43,6 +45,12 @@ export function DiscoverSortControl({
         ]}
       >
         <Icon name="sort" size={16} color={tennisColors.primary} />
+        <AppText
+          style={[styles.triggerLabel, { writingDirection }]}
+          maxLines={1}
+        >
+          {t("discover.sortBy")}
+        </AppText>
       </Pressable>
 
       <BottomSheet
@@ -84,6 +92,12 @@ const styles = createLiveSheet(() =>
     },
     triggerPressed: {
       opacity: 0.88,
+    },
+    triggerLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.primary,
+      flexShrink: 1,
     },
     options: {
       gap: 8,

@@ -10,6 +10,7 @@ import {
 } from "@tennis-lebanon/api";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "./AppText";
+import { CountBadge } from "./CountBadge";
 import { Icon, type IconName } from "./Icon";
 import { openCreateMatchFlow } from "../lib/create-match-guard";
 import {
@@ -161,19 +162,17 @@ export function TennisTabBar({
         }}
         style={styles.tab}
       >
-        <View
-          style={[
-            styles.iconWell,
-            isFocused &&
-              (isDark ? styles.iconWellActiveDark : styles.iconWellActive),
-          ]}
-        >
-          <Icon name={iconName} size={TAB_ICON_SIZE} color={iconColor} />
-          {badgeLabel ? (
-            <View style={styles.tabBadge} accessibilityElementsHidden>
-              <AppText style={styles.tabBadgeText}>{badgeLabel}</AppText>
-            </View>
-          ) : null}
+        <View style={styles.iconWell}>
+          <View
+            style={[
+              styles.iconWellFill,
+              isFocused &&
+                (isDark ? styles.iconWellActiveDark : styles.iconWellActive),
+            ]}
+          >
+            <Icon name={iconName} size={TAB_ICON_SIZE} color={iconColor} />
+          </View>
+          {badgeLabel ? <CountBadge label={badgeLabel} /> : null}
         </View>
         <AppText
           style={[
@@ -256,33 +255,25 @@ const styles = createLiveSheet(() =>
     iconWell: {
       width: 48,
       height: TAB_BAR_ICON_WELL_HEIGHT,
+      alignItems: "center",
+      justifyContent: "center",
+      // Keep visible so CountBadge can overhang; rounding lives on the fill.
+      overflow: "visible",
+    },
+    iconWellFill: {
+      ...StyleSheet.absoluteFill,
       borderRadius: tennisRadii.md,
       alignItems: "center",
       justifyContent: "center",
+      // Native only clips backgroundColor to borderRadius with hidden overflow;
+      // web rounds the fill either way. Badge sits on the outer well.
+      overflow: "hidden",
     },
     iconWellActive: {
       backgroundColor: tennisColors.secondary,
     },
     iconWellActiveDark: {
       backgroundColor: tennisColors.violet,
-    },
-    tabBadge: {
-      position: "absolute",
-      top: 2,
-      end: 2,
-      minWidth: 16,
-      height: 16,
-      borderRadius: 8,
-      paddingHorizontal: 4,
-      backgroundColor: tennisColors.accent,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    tabBadgeText: {
-      color: tennisColors.white,
-      fontSize: 9,
-      lineHeight: 11,
-      fontFamily: tennisFontFamily.bodySemi,
     },
     label: {
       fontSize: 11,

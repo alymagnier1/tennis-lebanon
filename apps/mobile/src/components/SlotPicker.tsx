@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -165,10 +165,10 @@ export function SlotPicker({
 
   return (
     <View style={styles.root}>
-      <AppText style={styles.label}>{t("slotPicker.day")}</AppText>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        accessibilityLabel={t("slotPicker.day")}
         contentContainerStyle={[styles.dayRow, { flexDirection: rowDirection }]}
       >
         {days.map((day) => {
@@ -205,7 +205,6 @@ export function SlotPicker({
         })}
       </ScrollView>
 
-      <AppText style={styles.label}>{t("slotPicker.time")}</AppText>
       <View style={[styles.timeRow, { flexDirection: rowDirection }]}>
         <TextInput
           accessibilityLabel={t("slotPicker.time")}
@@ -313,9 +312,9 @@ export function SlotPicker({
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
-    root: { gap: spacing.md },
+    root: { gap: spacing.sm },
     label: figmaFormStyles.fieldLabel,
-    dayRow: { gap: 10, paddingVertical: spacing.xs },
+    dayRow: { gap: 10 },
     dayChip: {
       minWidth: 56,
       minHeight: minTouchTargetPx + 12,

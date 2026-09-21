@@ -1,6 +1,3 @@
-import type { MatchHubCard } from "@tennis-lebanon/api";
-import { matchHubLevelSummary } from "./match-hub-summaries";
-
 export type HubVsParticipant = {
   user_id: string;
   display_name: string;
@@ -16,8 +13,6 @@ export type HubVsSides = {
   leftOpen: number;
   rightOpen: number;
 };
-
-type Translate = (key: string, options?: Record<string, unknown>) => string;
 
 /** Accepted participants ordered host-first for the ready-to-book vs frame. */
 export function acceptedHubParticipants(
@@ -51,13 +46,76 @@ export function pickHubVsSides(
   };
 }
 
-export function matchHubReadyChips(
-  hub: Pick<MatchHubCard, "format" | "intent" | "min_skill" | "max_skill">,
-  t: Translate,
-): string[] {
-  return [
-    t(`formats.${hub.format}`),
-    t(`playIntent.${hub.intent}`),
-    matchHubLevelSummary(hub, t),
-  ].filter(Boolean);
+export function hubOpenSpotCount(sides: HubVsSides): number {
+  return sides.leftOpen + sides.rightOpen;
+}
+
+/**
+ * First-in-queue requester may occupy a dashed slot only when the queue is
+ * no longer than the empty seats. Two asks for one seat keep the slot empty
+ * so the card never implies a place it cannot honour.
+ */
+export function pickHubSlotOccupant<T>(
+  requests: T[],
+  openSpots: number,
+): T | null {
+  if (requests.length === 0 || openSpots <= 0) return null;
+  if (requests.length > openSpots) return null;
+  return requests[0] ?? null;
+}
+
+export type HubVsSidesWithOccupant = HubVsSides & {
+  leftOccupant: HubVsParticipant | null;
+  rightOccupant: HubVsParticipant | null;
+};
+
+/** Prefer the first empty seat, left column then right. */
+export function placeHubVsOccupant(
+  sides: HubVsSides,
+  occupant: HubVsParticipant | null,
+): HubVsSidesWithOccupant {
+  if (!occupant) {
+    return { ...sides, leftOccupant: null, rightOccupant: null };
+  }
+  if (sides.leftOpen > 0) {
+    return {
+      ...sides,
+      leftOpen: sides.leftOpen - 1,
+      leftOccupant: occupant,
+      rightOccupant: null,
+    };
+  }
+  if (sides.rightOpen > 0) {
+    return {
+      ...sides,
+      rightOpen: sides.rightOpen - 1,
+      leftOccupant: null,
+      rightOccupant: occupant,
+    };
+  }
+  return { ...sides, leftOccupant: null, rightOccupant: null };
+}
+
+/**
+ * Vs-card label: given name plus family initial, e.g. "Rami N.".
+ * A single token stays the given name. Non-Latin scripts keep their letters.
+ */
+export function shortPlayerLabel(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "";
+  const given = parts[0]!;
+  if (parts.length === 1) return given;
+  const initial = Array.from(parts[parts.length - 1]!)[0];
+  if (!initial) return given;
+  return `${given} ${initial.toLocaleUpperCase()}.`;
+}
+
+export function hubSlotDurationMinutes(
+  startsAt: string | null | undefined,
+  endsAt: string | null | undefined,
+): number | null {
+  if (!startsAt || !endsAt) return null;
+  const ms = Date.parse(endsAt) - Date.parse(startsAt);
+  if (!Number.isFinite(ms) || ms <= 0) return null;
+  return Math.round(ms / 60_000);
 }

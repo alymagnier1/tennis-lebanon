@@ -28,6 +28,7 @@ export const NOTIFICATION_KINDS = [
   "match_request_withdrawn",
   "match_participant_joined",
   "match_participant_left",
+  "match_participant_removed",
   "match_message",
   "result_confirm_request",
   "result_auto_confirmed",
@@ -46,6 +47,8 @@ export type NotificationParams = {
   clubName?: string;
   startsAt?: string;
   spotsLeft?: number;
+  /** Host-removal reason code; localized at display time. */
+  reason?: string;
 };
 
 export type NotificationPayload = {
@@ -96,17 +99,20 @@ function parseNotificationParams(
     typeof record.startsAt === "string" ? record.startsAt.trim() : undefined;
   const spotsLeft =
     typeof record.spotsLeft === "number" ? record.spotsLeft : undefined;
+  const reason =
+    typeof record.reason === "string" ? record.reason.trim() : undefined;
 
   if (
     name === undefined &&
     clubName === undefined &&
     startsAt === undefined &&
-    spotsLeft === undefined
+    spotsLeft === undefined &&
+    reason === undefined
   ) {
     return undefined;
   }
 
-  return { name, clubName, startsAt, spotsLeft };
+  return { name, clubName, startsAt, spotsLeft, reason };
 }
 
 export function normalizeNotificationDeepLink(

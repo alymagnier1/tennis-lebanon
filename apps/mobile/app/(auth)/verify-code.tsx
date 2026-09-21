@@ -23,6 +23,7 @@ import {
 } from "../../src/lib/verify-code-error";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import { tennisColors } from "../../src/theme/tennis-tokens";
+import { createLiveSheet } from "../../src/theme/create-live-sheet";
 
 /**
  * The project decides how long the code is, not the app. `otp_length` in
@@ -139,7 +140,6 @@ export default function VerifyCodeScreen() {
                 ? "auth.verifyCode.recoverySubmit"
                 : "auth.verifyCode.submit",
             )}
-            hero
             disabled={!ready}
             onPress={() => void verify()}
           />
@@ -180,27 +180,29 @@ export default function VerifyCodeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  code: {
-    fontSize: 28,
-    letterSpacing: 6,
-    textAlign: "center",
-    fontFamily: tennisFontFamily.headingSemi,
-  },
-  hint: {
-    marginTop: 12,
-    fontFamily: tennisFontFamily.body,
-    fontSize: 14,
-    lineHeight: 22,
-    color: tennisColors.mutedForeground,
-  },
-  sent: {
-    marginTop: 12,
-    fontFamily: tennisFontFamily.bodyMedium,
-    fontSize: 14,
-    color: tennisColors.primary,
-  },
-  error: {
-    marginTop: 12,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    code: {
+      fontSize: 28,
+      letterSpacing: 6,
+      textAlign: "center",
+      fontFamily: tennisFontFamily.headingSemi,
+    },
+    hint: {
+      marginTop: 12,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 22,
+      color: tennisColors.mutedForeground,
+    },
+    sent: {
+      marginTop: 12,
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 14,
+      color: tennisColors.primary,
+    },
+    error: {
+      marginTop: 12,
+    },
+  }),
+);

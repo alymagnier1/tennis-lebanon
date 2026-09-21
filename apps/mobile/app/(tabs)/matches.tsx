@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { notify } from "../../src/lib/confirm-action";
 
 import { View } from "react-native";

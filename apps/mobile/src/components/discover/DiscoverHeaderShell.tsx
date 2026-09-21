@@ -7,8 +7,8 @@ import { tennisColors } from "../../theme/tennis-tokens";
 import { tabRootHeaderPaddingTop } from "../../lib/tab-root-header";
 
 /**
- * Full-bleed white header block with a bottom border — matches Figma Discover
- * (filters on card surface, results on the page background below).
+ * Full-bleed header block with a bottom border — filters sit on the page
+ * background (same as the screen), not a white card slab.
  */
 export function DiscoverHeaderShell({ children }: { children: ReactNode }) {
   const insets = useSafeAreaInsets();
@@ -34,7 +34,7 @@ export function DiscoverHeaderShell({ children }: { children: ReactNode }) {
 const styles = createLiveSheet(() =>
   StyleSheet.create({
     shell: {
-      backgroundColor: tennisColors.card,
+      backgroundColor: tennisColors.background,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: tennisColors.border,
       paddingBottom: 16,

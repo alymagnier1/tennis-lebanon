@@ -3,8 +3,11 @@ import {
   canManageProposedTimes,
   canReportMatchPlayed,
   canRescheduleMatch,
+  canHostRemoveParticipant,
   canShowJoinAction,
   canVoteOnTimes,
+  hostRemovalNeedsStartWarning,
+  HOST_REMOVAL_WARNING_HOURS,
   canCreatorCancelBeforeBooking,
   capacityForFormat,
   createMatchInputSchema,
@@ -200,6 +203,70 @@ describe("matches domain rules", () => {
         requiresCreatorApproval: false,
       }),
     ).toBe("none");
+    expect(
+      canShowJoinAction({
+        viewerStatus: "removed",
+        matchStatus: "open",
+        requiresCreatorApproval: false,
+      }),
+    ).toBe("join");
+  });
+
+  describe("host removal", () => {
+    const now = new Date("2030-01-01T12:00:00.000Z");
+    const removable = {
+      viewerIsCreator: true,
+      matchStatus: "open",
+      targetIsCreator: false,
+      targetStatus: "accepted",
+      startsAt: "2030-01-01T18:00:00.000Z",
+      now,
+    };
+
+    it("lets the host remove an accepted player before the hour", () => {
+      expect(canHostRemoveParticipant(removable)).toBe(true);
+      expect(
+        canHostRemoveParticipant({ ...removable, matchStatus: "confirmed" }),
+      ).toBe(true);
+    });
+
+    it("refuses anyone who is not the host, or the host themselves", () => {
+      expect(
+        canHostRemoveParticipant({ ...removable, viewerIsCreator: false }),
+      ).toBe(false);
+      expect(
+        canHostRemoveParticipant({ ...removable, targetIsCreator: true }),
+      ).toBe(false);
+    });
+
+    it("leaves pending asks and started matches alone", () => {
+      expect(
+        canHostRemoveParticipant({ ...removable, targetStatus: "requested" }),
+      ).toBe(false);
+      expect(
+        canHostRemoveParticipant({ ...removable, matchStatus: "in_progress" }),
+      ).toBe(false);
+      expect(
+        canHostRemoveParticipant({
+          ...removable,
+          startsAt: "2030-01-01T11:00:00.000Z",
+        }),
+      ).toBe(false);
+    });
+
+    it("warns only inside the two-hour window before start", () => {
+      expect(HOST_REMOVAL_WARNING_HOURS).toBe(2);
+      expect(
+        hostRemovalNeedsStartWarning("2030-01-01T13:30:00.000Z", now),
+      ).toBe(true);
+      expect(
+        hostRemovalNeedsStartWarning("2030-01-01T16:00:00.000Z", now),
+      ).toBe(false);
+      expect(
+        hostRemovalNeedsStartWarning("2030-01-01T11:00:00.000Z", now),
+      ).toBe(false);
+      expect(hostRemovalNeedsStartWarning(null, now)).toBe(false);
+    });
   });
 
   it("derives time voting eligibility and agreement", () => {

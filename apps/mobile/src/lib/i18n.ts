@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { createInstance } from "i18next";
+import { createInstance, type i18n as I18nInstance } from "i18next";
 import { initReactI18next } from "react-i18next";
 import {
   DEFAULT_LOCALE,
@@ -8,25 +8,52 @@ import {
   isSupportedLocale,
   LOCALE_BUNDLE_ID,
   resources,
+  SUPPORTED_LOCALES,
   type PilotLocale,
-  type SupportedLocale,
 } from "@tennis-lebanon/i18n";
 import { syncNativeLayoutDirection } from "./layout-rtl";
 
 const LOCALE_STORAGE_KEY = "tennis-lebanon.locale";
 
-const i18next = createInstance();
+declare global {
+  // Survives Metro HMR so we merge locale JSON into the live instance.
+  var __racketboundI18n: I18nInstance | undefined;
+}
 
-// Tie mobile bundle to locale JSON so Metro reloads workspace i18n edits.
+const i18next = globalThis.__racketboundI18n ?? createInstance();
+globalThis.__racketboundI18n = i18next;
+
+/**
+ * Tie this module to locale JSON edits. When Metro re-evaluates it, merge the
+ * fresh bundles so new keys are not shown raw after a hot reload.
+ */
 void LOCALE_BUNDLE_ID;
 
-i18next.use(initReactI18next).init({
-  resources,
-  lng: DEFAULT_LOCALE,
-  fallbackLng: DEFAULT_LOCALE,
-  interpolation: { escapeValue: false },
-  compatibilityJSON: "v4",
-});
+/** Call from screens that ship with new locale keys so HMR picks them up. */
+export function ensureLocaleResources(): void {
+  if (!i18next.isInitialized) return;
+  for (const locale of SUPPORTED_LOCALES) {
+    i18next.addResourceBundle(
+      locale,
+      "translation",
+      resources[locale].translation,
+      true,
+      true,
+    );
+  }
+}
+
+if (i18next.isInitialized) {
+  ensureLocaleResources();
+} else {
+  i18next.use(initReactI18next).init({
+    resources,
+    lng: DEFAULT_LOCALE,
+    fallbackLng: DEFAULT_LOCALE,
+    interpolation: { escapeValue: false },
+    compatibilityJSON: "v4",
+  });
+}
 
 async function readStoredLocale(): Promise<string | null> {
   try {

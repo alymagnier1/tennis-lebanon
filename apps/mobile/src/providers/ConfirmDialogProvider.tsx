@@ -1,4 +1,3 @@
-import { useTranslation } from "react-i18next";
 import {
   useCallback,
   useEffect,
@@ -20,8 +19,10 @@ import {
   registerConfirmPresenters,
   type ChooseActionOptions,
   type CancelMatchDialogOptions,
+  type RemoveParticipantDialogOptions,
 } from "../lib/confirm-action";
 import { CancelMatchDialogPanel } from "./CancelMatchDialogPanel";
+import { RemoveParticipantDialogPanel } from "./RemoveParticipantDialogPanel";
 import { ConfirmDialogVisibilityContext } from "./confirm-dialog-visibility";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 
@@ -41,12 +42,17 @@ type CancelMatchState = {
   options: CancelMatchDialogOptions;
 };
 
-type DialogState = NotifyState | ChooseState | CancelMatchState | null;
+type RemoveParticipantState = {
+  kind: "removeParticipant";
+  options: RemoveParticipantDialogOptions;
+};
+
+type DialogState =
+  NotifyState | ChooseState | CancelMatchState | RemoveParticipantState | null;
 
 export { useConfirmDialogVisible } from "./confirm-dialog-visibility";
 
 export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
-  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { writingDirection } = useLayoutDirection();
   const [dialog, setDialog] = useState<DialogState>(null);
@@ -68,14 +74,27 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const presentRemoveParticipant = useCallback(
+    (options: RemoveParticipantDialogOptions) => {
+      setDialog({ kind: "removeParticipant", options });
+    },
+    [],
+  );
+
   useEffect(() => {
     registerConfirmPresenters({
       notify: presentNotify,
       chooseAction: presentChoose,
       cancelMatchDialog: presentCancelMatch,
+      removeParticipantDialog: presentRemoveParticipant,
     });
     return () => registerConfirmPresenters(null);
-  }, [presentCancelMatch, presentChoose, presentNotify]);
+  }, [
+    presentCancelMatch,
+    presentChoose,
+    presentNotify,
+    presentRemoveParticipant,
+  ]);
 
   const value = useMemo(() => ({ visible: dialog !== null }), [dialog]);
 
@@ -118,16 +137,11 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                   {dialog.message ? (
                     <AppText
                       style={[styles.message, { writingDirection }]}
-                      maxLines={6}
+                      maxLines={16}
                     >
                       {dialog.message}
                     </AppText>
                   ) : null}
-                  <FigmaPrimaryButton
-                    label={t("common.done")}
-                    onPress={close}
-                    style={styles.singleAction}
-                  />
                 </>
               ) : null}
 
@@ -171,6 +185,14 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
 
               {dialog.kind === "cancelMatch" ? (
                 <CancelMatchDialogPanel
+                  options={dialog.options}
+                  writingDirection={writingDirection}
+                  onClose={close}
+                />
+              ) : null}
+
+              {dialog.kind === "removeParticipant" ? (
+                <RemoveParticipantDialogPanel
                   options={dialog.options}
                   writingDirection={writingDirection}
                   onClose={close}
@@ -231,9 +253,6 @@ const styles = createLiveSheet(() =>
     },
     actions: {
       gap: 10,
-      marginTop: 4,
-    },
-    singleAction: {
       marginTop: 4,
     },
   }),

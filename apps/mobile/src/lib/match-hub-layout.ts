@@ -100,6 +100,54 @@ export function shouldShowAgreedTimeSection(
   );
 }
 
+/** Frame A name rows on the hub. Court-locked matches use the confirmed hero. */
+export function shouldUseCompactPreferredClubs(input: {
+  vsHeroStage: boolean;
+  canConfirmCourt: boolean;
+  courtLocked: boolean;
+}): boolean {
+  return input.vsHeroStage && !input.courtLocked;
+}
+
+/**
+ * When Confirm is the host's job, preferred clubs must sit above join-request
+ * and invited sections so the CTA is not below the fold. While answering
+ * requests (`manage_requests`), Approve stays first (Frame A).
+ */
+export function preferredClubsBeforePeoplePipeline(input: {
+  canConfirmCourt: boolean;
+}): boolean {
+  return input.canConfirmCourt;
+}
+
+/**
+ * One-sentence next step for an accepted joiner on the polished hub.
+ * Hosts already get Confirm / Invite; joiners used to get a silent lobby.
+ */
+export function joinerHubIntentCopyKey(input: {
+  viewerIsCreator: boolean;
+  viewerStatus: string | null | undefined;
+  nextAction: string | null | undefined;
+}): string | null {
+  if (input.viewerIsCreator) return null;
+  if (input.viewerStatus !== "accepted") return null;
+
+  switch (input.nextAction) {
+    case "awaiting_players":
+      return "matches.hub.joinerIntentAwaitingPlayers";
+    case "vote_on_times":
+      return "matches.hub.joinerIntentVote";
+    case "time_agreed":
+      return "matches.hub.joinerIntentHostBooking";
+    case "awaiting_club":
+      return "matches.hub.joinerIntentAwaitingClub";
+    case "pay_at_club":
+      return "matches.hub.joinerIntentCourtConfirmed";
+    default:
+      return null;
+  }
+}
+
 export function shouldShowPayAtClubBanner(
   nextAction: string | null | undefined,
   booking: MatchHubBooking | null,
@@ -128,8 +176,8 @@ export function shouldShowTimeAgreedBanner(
  * at `full` needing a conversation to resolve the vote while the conversation
  * only unlocked once the vote resolved. It also meant withdrawing a time option
  * took `ready_to_book` -> `full` and re-locked a live thread mid-sentence, and
- * it made `matches.chat.lockedRecruiting` ("Chat opens when the roster is
- * full") describe a rule the code did not implement.
+ * it made `matches.chat.lockedRecruiting` ("Chat unlocks once everyone is in")
+ * describe a rule the code did not implement.
  *
  * `open` stays locked: a public listing has a fluid participant set, so
  * join-read-leave is a real privacy problem there, and a half-filled match

@@ -30,6 +30,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
 import { EmptyState, ListSkeleton, MatchCard, Avatar } from "../AppUi";
+import { ScreenError } from "../FormUi";
+import { CountBadge } from "../CountBadge";
 import { HomeFreeSlots } from "./HomeFreeSlots";
 import { HomeOpenMatches } from "./HomeOpenMatches";
 import { HomeNextActionsCarousel } from "./HomeNextActionsCarousel";
@@ -43,10 +45,11 @@ import {
 import { matchCardAreaLabel, matchCardClubLabel } from "../../lib/match-clubs";
 import { opponentAvatarColor } from "../../lib/match-card-status";
 import {
+  completedMatchNeedsScore,
+  formatTabBadgeCount,
   matchListAction,
   matchListActionOpensInvite,
   matchListStartsAt,
-  completedMatchNeedsScore,
 } from "../../lib/match-list-card";
 import {
   deriveHomeNextActions,
@@ -79,6 +82,7 @@ import {
   tennisRadii,
   tennisSpacing,
 } from "../../theme/tennis-tokens";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useHomeOpenMatchPicks } from "../../hooks/useHomeOpenMatchPicks";
 import { useHomeLiquidityOffers } from "../../hooks/useHomeLiquidityOffers";
@@ -329,11 +333,11 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
               color={tennisColors.primaryDark}
             />
             {unreadCount > 0 ? (
-              <View style={styles.bellBadge}>
-                <AppText style={styles.bellBadgeText}>
-                  {unreadCount > 9 ? "9+" : String(unreadCount)}
-                </AppText>
-              </View>
+              <CountBadge
+                label={formatTabBadgeCount(unreadCount) ?? String(unreadCount)}
+                tone="violet"
+                style={{ borderColor: tennisColors.card }}
+              />
             ) : null}
           </Pressable>
         </View>
@@ -426,16 +430,11 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
 
       <View style={styles.body}>
         {bodyError ? (
-          <View style={styles.errorCard}>
-            <AppText style={styles.errorText}>{t("home.loadError")}</AppText>
-            <Pressable
-              accessibilityRole="button"
-              onPress={refresh}
-              style={styles.retryButton}
-            >
-              <AppText style={styles.retryLabel}>{t("common.retry")}</AppText>
-            </Pressable>
-          </View>
+          <ScreenError
+            message={t("home.loadError")}
+            retryLabel={t("common.retry")}
+            onRetry={refresh}
+          />
         ) : null}
 
         {bodyLoading ? <ListSkeleton rows={3} /> : null}
@@ -483,7 +482,7 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
 
         {!bodyLoading && !bodyError && upcomingMatches.length > 0 ? (
           <View style={styles.section}>
-            <AppText style={styles.sectionTitle}>
+            <AppText style={tennisTextStyles.sectionTitle}>
               {t("home.upcomingTitle")}
             </AppText>
             <View style={styles.sectionStack}>
@@ -634,23 +633,7 @@ const styles = createLiveSheet(() =>
       borderColor: tennisColors.border,
       alignItems: "center",
       justifyContent: "center",
-    },
-    bellBadge: {
-      position: "absolute",
-      top: 4,
-      right: 4,
-      minWidth: 18,
-      height: 18,
-      borderRadius: 9,
-      backgroundColor: tennisColors.violet,
-      alignItems: "center",
-      justifyContent: "center",
-      paddingHorizontal: 4,
-    },
-    bellBadgeText: {
-      color: tennisColors.onViolet,
-      fontSize: 10,
-      fontFamily: tennisFontFamily.bodySemi,
+      overflow: "visible",
     },
     ratingProgress: {
       marginTop: 14,
@@ -700,17 +683,21 @@ const styles = createLiveSheet(() =>
       alignItems: "center",
       gap: 4,
     },
+    // The number is what this card exists to show, so it reads larger than the
+    // section titles around it. It used to be 14px under an 18px title, with a
+    // 10px caption, which inverted the hierarchy and made the stats look like
+    // a footnote on the player's own summary.
     homeStatValue: {
       fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 14,
-      lineHeight: 18,
+      fontSize: 22,
+      lineHeight: 26,
       color: tennisColors.primaryDark,
-      letterSpacing: -0.2,
+      letterSpacing: -0.4,
     },
     homeStatLabel: {
       fontFamily: tennisFontFamily.body,
-      fontSize: 10,
-      lineHeight: 13,
+      fontSize: 12,
+      lineHeight: 16,
       color: tennisColors.mutedForeground,
       marginTop: 1,
       textAlign: "center",
@@ -719,7 +706,7 @@ const styles = createLiveSheet(() =>
       fontFamily: tennisFontFamily.bodySemi,
       fontSize: 13,
       lineHeight: 18,
-      color: tennisColors.violet,
+      color: tennisColors.violetText,
       textDecorationLine: "underline",
     },
     body: {
@@ -733,11 +720,6 @@ const styles = createLiveSheet(() =>
     sectionStack: {
       gap: 10,
     },
-    sectionTitle: {
-      fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 18,
-      color: tennisColors.primaryDark,
-    },
     emptyUpcoming: {
       gap: 12,
     },
@@ -745,30 +727,6 @@ const styles = createLiveSheet(() =>
       fontFamily: tennisFontFamily.body,
       fontSize: 14,
       color: tennisColors.mutedForeground,
-    },
-    errorCard: {
-      gap: 12,
-      padding: 16,
-      borderRadius: tennisRadii.lg,
-      borderWidth: 1,
-      borderColor: tennisColors.border,
-      backgroundColor: tennisColors.card,
-    },
-    errorText: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 14,
-      color: tennisColors.primaryDark,
-    },
-    retryButton: {
-      alignSelf: "flex-start",
-      minHeight: 44,
-      justifyContent: "center",
-      paddingHorizontal: 4,
-    },
-    retryLabel: {
-      fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 15,
-      color: tennisColors.violet,
     },
   }),
 );

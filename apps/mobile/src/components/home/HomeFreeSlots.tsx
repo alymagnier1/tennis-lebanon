@@ -3,16 +3,17 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
-import { ErrorNotice } from "../FormUi";
-import { FigmaSecondaryButton } from "../onboarding-ui";
+import { ScreenError } from "../FormUi";
 import { HomeFreePlayersCarousel } from "./HomeFreePlayersCarousel";
 import { trackLiquiditySignalViewed } from "../../lib/analytics";
 import { peakLiquidity } from "../../lib/availability-liquidity";
 import { type PingSlot } from "../../lib/availability-ping";
+import { adjacentLiquidityOfferStartsAt } from "../../lib/home-free-players-carousel";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { weekdayIndexFromBeirutDateKey } from "../../lib/near-term-availability";
 import { useHomeLiquidityOffers } from "../../hooks/useHomeLiquidityOffers";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 /**
@@ -80,13 +81,13 @@ export function HomeFreeSlots() {
   if (liquidityQuery.isError) {
     return (
       <View style={styles.root}>
-        <AppText style={[styles.title, { writingDirection }]}>
+        <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
           {t("home.free.busiestTitle")}
         </AppText>
-        <ErrorNotice>{t("home.loadError")}</ErrorNotice>
-        <FigmaSecondaryButton
-          label={t("common.retry")}
-          onPress={() => void liquidityQuery.refetch()}
+        <ScreenError
+          message={t("home.loadError")}
+          retryLabel={t("common.retry")}
+          onRetry={() => void liquidityQuery.refetch()}
         />
       </View>
     );
@@ -101,9 +102,20 @@ export function HomeFreeSlots() {
   const selected =
     offers.find((offer) => offer.startsAt === selectedStartsAt) ?? offers[0]!;
 
+  function selectAdjacentOffer(direction: "next" | "prev") {
+    const nextStartsAt = adjacentLiquidityOfferStartsAt(
+      offers,
+      selected.startsAt,
+      direction,
+    );
+    if (nextStartsAt) {
+      setSelectedStartsAt(nextStartsAt);
+    }
+  }
+
   return (
     <View style={styles.root}>
-      <AppText style={[styles.title, { writingDirection }]}>
+      <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
         {t("home.free.busiestTitle")}
       </AppText>
 
@@ -155,11 +167,14 @@ export function HomeFreeSlots() {
       </ScrollView>
 
       <HomeFreePlayersCarousel
+        key={selected.startsAt}
         block={{
           startsAt: selected.startsAt,
           endsAt: selected.endsAt,
           label: slotLabel(selected),
         }}
+        onScrollPastEnd={() => selectAdjacentOffer("next")}
+        onScrollPastStart={() => selectAdjacentOffer("prev")}
       />
     </View>
   );
@@ -169,11 +184,6 @@ const styles = createLiveSheet(() =>
   StyleSheet.create({
     root: {
       gap: tennisSpacing.sectionTitleContent,
-    },
-    title: {
-      fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 18,
-      color: tennisColors.primaryDark,
     },
     // Text tabs rather than filled pills. Three of them sit directly above the
     // cards they switch, so a filled chip would carry more weight than the
@@ -206,7 +216,7 @@ const styles = createLiveSheet(() =>
       color: tennisColors.mutedForeground,
     },
     chipLabelSelected: {
-      color: tennisColors.violet,
+      color: tennisColors.violetText,
       fontFamily: tennisFontFamily.bodySemi,
     },
   }),

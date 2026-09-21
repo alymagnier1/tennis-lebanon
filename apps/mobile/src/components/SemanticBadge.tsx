@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import type { SemanticTone } from "../theme/tennis-tokens";
 import { tennisSemantic } from "../theme/tennis-tokens";

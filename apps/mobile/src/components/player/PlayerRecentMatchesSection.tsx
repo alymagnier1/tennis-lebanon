@@ -8,7 +8,7 @@ import { PlayerProfileSection } from "./PlayerProfileSection";
 import { formatShortUtcDateInBeirut } from "../../lib/beirut-time";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { tennisColors } from "../../theme/tennis-tokens";
 
 // Read from the profiled player's side, not side A's, so their games come
 // first on their own profile.

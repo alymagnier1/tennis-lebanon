@@ -126,6 +126,14 @@ export default function NotificationsScreen() {
             <Pressable
               key={row.id}
               accessibilityRole="button"
+              accessibilityLabel={[
+                row.read_at ? null : t("notifications.unreadItem"),
+                copy.title,
+                copy.body,
+                timestamp,
+              ]
+                .filter(Boolean)
+                .join(". ")}
               onPress={() => void openNotification(row)}
               style={({ pressed }) => [
                 styles.row,

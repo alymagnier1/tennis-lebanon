@@ -9,7 +9,12 @@
     "no": "No",
     "loading": "Loading…",
     "change": "Change",
-    "done": "Done"
+    "done": "Done",
+    "offline": {
+      "title": "You're offline",
+      "body": "We'll retry as soon as you're back on a connection."
+    },
+    "dismissHint": "Tap to dismiss"
   },
   "profileScreenEdit": "Edit",
   "profileScreenAboutTitle": "About me",
@@ -21,7 +26,7 @@
   "profileScreenMatchFormats": "Match formats",
   "profileScreenPreferredAreasTitle": "Preferred areas",
   "profileScreenZonesError": "Choose at least one area.",
-  "settingsScreenGeneral": "General",
+  "settingsScreenPreferences": "Preferences",
   "settingsScreenLanguage": "Language",
   "settingsScreenAppearance": "Appearance",
   "settingsAppearanceSystem": "System",
@@ -31,7 +36,6 @@
   "settingsOnboardingHeroHint": "Design comparison. Welcome and Done follow this together.",
   "settingsOnboardingHeroGreen": "Green",
   "settingsOnboardingHeroLight": "Clay",
-  "settingsScreenSupport": "Support",
   "settingsScreenAccount": "Account",
   "dashboard": {
     "login": {
@@ -466,23 +470,6 @@
     "ownProvisional": "Provisional · {{count}}/{{threshold}} confirmed results",
     "progressHint": "Play and confirm five match results to unlock your rating."
   },
-  "policies": {
-    "developmentWarning": "DEVELOPMENT DRAFT — not legally approved and not for public release.",
-    "version": "Version: {{version}}",
-    "otherDocuments": "Other policies",
-    "terms": {
-      "title": "Terms of Use",
-      "body": "Adult-only pilot. Use the service lawfully and respectfully. Match and court arrangements are not guaranteed."
-    },
-    "privacy": {
-      "title": "Privacy Notice",
-      "body": "We collect minimal account, profile, coarse-area, and match data to operate the pilot. Contact details are not shown to other players."
-    },
-    "community": {
-      "title": "Community Rules",
-      "body": "Be respectful, communicate honestly, protect privacy, and report unsafe or abusive behavior."
-    }
-  },
   "tabs": {
     "home": "Home",
     "discover": "Discover",
@@ -712,6 +699,10 @@
         "title": "Your match lost a player",
         "body": "Someone left. Invite a replacement before the hour comes round."
       },
+      "match_participant_removed": {
+        "title": "You were removed from a match",
+        "body": "The host removed you. {{reason}}"
+      },
       "match_message": {
         "title": "New message in your match",
         "body": "Your match group is talking. Open the chat to catch up."
@@ -724,7 +715,8 @@
         "title": "Score confirmed",
         "body": "Nobody objected within three days, so this score now stands."
       }
-    }
+    },
+    "unreadItem": "Unread"
   },
   "profile": {
     "title": "Profile",
@@ -831,10 +823,12 @@
     "anyFormat": "Any format",
     "anyIntent": "Any intent",
     "chipMatchLevel": "Level",
-    "chipMatchIntent": "Intent",
     "chipMatchArea": "Area",
     "chipMatchFormat": "Format",
     "chipMatchAvailability": "Availability",
+    "matchFiltersHelpA11y": "What these filters do",
+    "matchFiltersHelpTitle": "What these filters do",
+    "matchFiltersHelpBody": "On narrows results; off shows more.\n\nLevel — skill near yours.\nArea — shared preferred areas.\nAvailability — overlapping weekly hours.",
     "filtersActive": "{{count}} active",
     "clearFilters": "Clear all",
     "resultsPlayers_one": "{{count}} player found",
@@ -956,6 +950,10 @@
       "matchTypeDescription": "Singles or doubles, and how competitive you want to play.",
       "joinSettingsSection": "Who can join",
       "joinSettingsDescription": "Invite players after creating the match, or let others find it on Discover.",
+      "advancedSection": "Who can join",
+      "advancedShow": "Show who can join",
+      "advancedHide": "Hide who can join",
+      "notesAdded": "Note added",
       "listOnDiscover": "List on Discover",
       "listOnDiscoverHint": "Show this match in open matches so nearby players can join.",
       "listOnDiscoverOn": "Listed on Discover",
@@ -978,13 +976,13 @@
       "requiresApprovalOn": "Join requests need your approval",
       "notes": "Notes (optional)",
       "zoneRequired": "Select at least one area.",
-      "preferredClubsRequiredHelp": "Choose up to 3 clubs you would be happy to play at. Players see these before they join. No court is booked yet.",
-      "preferredClubsOptionalHelp": "Choose up to 3 clubs you would be happy to play at. No court is booked yet.",
+      "preferredClubsRequiredHelp": "Up to 3 clubs · players see these before joining.",
+      "preferredClubsOptionalHelp": "Up to 3 clubs · optional for this match.",
       "zonesWithoutClubWarning": "None of your clubs are in {{zones}}. Anyone joining for that area will have to travel.",
-      "preferredClubsPickZoneFirst": "Choose an area first to see its clubs.",
-      "preferredClubsEmpty": "No clubs in the areas you selected yet.",
+      "preferredClubsPickZoneFirst": "Pick an area to see clubs.",
+      "preferredClubsEmpty": "No clubs in those areas yet.",
       "clubRequired": "Choose at least one club so players know where they would play.",
-      "summaryWhere": "Where for this match",
+      "summaryWhere": "Where",
       "summaryWhen": "When",
       "summaryDiscover": "Discover",
       "summaryInviteOnly": "Invite only",
@@ -992,6 +990,8 @@
       "levelRange": "Level range",
       "matchLevel": "Match level",
       "yourLevel": "Your level",
+      "levelHelpA11y": "What each level means",
+      "levelHelpTitle": "What each level means",
       "allLevels": "All levels",
       "publish": "Publish match",
       "publishError": "We could not publish this match.",
@@ -1008,19 +1008,20 @@
       "overridesDone": "Done",
       "moreOptionsShow": "More timing options",
       "moreOptionsHide": "Hide timing options",
-      "preferredClubsForMatchTitle": "Clubs for this match",
+      "preferredClubsForMatchTitle": "Clubs",
       "preferredClubsListingOnly": "Up to 3 clubs for this listing only.",
-      "preferredClubsNone": "None chosen for this match.",
-      "whereEditForMatch": "Edit for this match",
-      "whereEditDisclaimer": "Changes here apply to this match only.",
+      "preferredClubsNone": "No clubs chosen.",
+      "whereEditForMatch": "Edit",
+      "whereEditDisclaimer": "Changes apply to this match only.",
       "whereProfileDefaultsLink": "Manage profile defaults",
       "summaryBar": {
         "title": "Match defaults for this listing",
         "edit": "Edit",
         "a11y": "Match settings: {{summary}}. Edit for this match."
       },
-      "publishActionsHint": "Publishing lists the match on Discover. Invite players from the match hub next.",
+      "publishActionsHint": "Lists on Discover. Invite from the hub after.",
       "notesAdd": "Add a note",
+      "notesEdit": "Edit note",
       "notesHide": "Hide note",
       "sendRequest": "Send request to {{name}}",
       "sendRequestHint": "Only {{name}} sees this. They can accept or decline.",
@@ -1137,17 +1138,20 @@
     },
     "chat": {
       "title": "Match chat",
-      "empty": "No messages yet. Coordinate with your group here.",
+      "empty": "No messages yet. Suggest a court or confirm the time here.",
       "placeholder": "Write a message",
       "send": "Send",
       "error": "We could not send this message.",
-      "reconnecting": "Reconnecting… new messages may be delayed.",
+      "loadError": "We could not load these messages.",
+      "reconnecting": "Reconnecting… tap to refresh.",
       "open": "Open match chat",
       "openWithUnread": "Open chat, {{count}} unread",
       "unreadBadge": "{{display}} unread",
       "openHint": "Message your group",
       "denied": "Join this match to use chat.",
-      "lockedRecruiting": "Chat opens when the roster is full.",
+      "deniedHint": "Only accepted players can message this group.",
+      "lockedRecruiting": "Chat unlocks once everyone is in.",
+      "yesterday": "Yesterday",
       "emojiPicker": "Emoji",
       "emojiPickerClose": "Close emoji",
       "insertEmoji": "Insert {{emoji}}"
@@ -1182,16 +1186,40 @@
       "joinSuccess": "You joined this match.",
       "requestSentSuccess": "Request sent. The host will let you know.",
       "requestPendingBanner": "You have asked to join. The host will let you know.",
+      "joinerIntentAwaitingPlayers": "You're in. Waiting for more players.",
+      "joinerIntentHostBooking": "You're in. The host is booking the court.",
+      "joinerIntentVote": "You're in. Vote on a time that works for everyone.",
+      "joinerIntentAwaitingClub": "You're in. Waiting for the club to confirm the court.",
+      "joinerIntentCourtConfirmed": "You're in. Court confirmed — see you there.",
       "joinError": "We could not join this match.",
       "joinTimeConflict": "You already have a match at that time.",
       "joinFull": "That match filled up before you got in.",
       "approve": "Approve",
+      "decline": "Decline",
       "reject": "Reject",
       "respondError": "We could not update this request.",
       "respondFull": "This match is already full.",
       "shareInvite": "Share invite link",
       "leave": "Leave match",
       "leaveError": "We could not leave this match.",
+      "removePlayer": "Remove",
+      "removePlayerA11y": "Remove {{name}} from this match",
+      "removeSheetTitle": "Remove {{name}}?",
+      "removeSheetBody": "They will be notified and their seat will reopen if the match is still looking for players.",
+      "removeSheetWarning": "This match starts in less than two hours. Removing them now may disrupt their plans.",
+      "removeReasonLabel": "Reason",
+      "removeReasons": {
+        "match_requirements_mismatch": "Match requirements mismatch",
+        "player_requested_removal": "Player requested removal",
+        "conduct_issue": "Conduct issue"
+      },
+      "removeReasonRequired": "Choose a reason before removing them.",
+      "removeConfirm": "Remove player",
+      "removeSuccess": "Player removed.",
+      "removeError": "We could not remove this player.",
+      "removeErrorStarted": "The match has already started, so this player cannot be removed.",
+      "removeErrorNotAccepted": "That player is not on the roster.",
+      "removeErrorNotRemovable": "This match can no longer have players removed.",
       "withdraw": "Withdraw from match",
       "withdrawRequest": "Cancel my request",
       "withdrawRequestConfirm": "The host will be told you are no longer waiting. You can ask again later.",
@@ -1257,6 +1285,11 @@
       "agreedTimeBookHint": "Book a court for this slot.",
       "agreedTimeVenueHint": "Preferred",
       "openPlayerSlot": "Open spot",
+      "wantsToJoin": "Wants to join",
+      "inviteSomeoneElse": "Invite someone else",
+      "requestCarouselA11y": "Join request {{current}} of {{total}}",
+      "durationMinutes": "{{minutes}} minutes",
+      "changeTime": "Change time",
       "preferredClubs": "Preferred clubs",
       "openClubDetails": "View {{club}} details",
       "contactClub": "Contact {{club}} on WhatsApp",
@@ -1569,17 +1602,22 @@
     "indoor": "Indoor",
     "outdoor": "Outdoor",
     "confirmExternalCourt": "I have already arranged this court",
-    "confirmExternalCourtHelp": "Use this if you booked the court yourself, by phone or WhatsApp. It confirms the match so attendance and results still work."
+    "confirmExternalCourtHelp": "Use this if you booked the court yourself, by phone or WhatsApp. It confirms the match so attendance and results still work.",
+    "emptyBody": "Add more areas in Where I play and clubs near them show up here.",
+    "emptyAction": "Add more areas",
+    "filteredEmptyTitle": "No clubs match those filters",
+    "filteredEmptyBody": "Try a different search term or surface."
   },
   "settings": {
     "title": "Settings",
-    "description": "Manage your account and preferences.",
     "policies": "View policies",
     "rtlLayoutCheck": "RTL layout check",
     "requestDeletion": "Delete my account",
     "deleteTitle": "Delete your account?",
     "deleteDescription": "This deletes your account straight away and signs you out. Your name and photo are removed and you leave any match that has not been played. Past results stay on record for the players you played against, shown as a deleted player. Your email is freed, so you can sign up again from scratch. This cannot be undone.",
     "deleteError": "We could not submit your deletion request. Please try again.",
+    "passwordCheckError": "We could not check your password options. Tap to try again.",
+    "supportOpenError": "We could not open email. Write to {{email}} instead.",
     "versionFooter": "RacketBound v{{version}} · Made in Lebanon 🇱🇧"
   },
   "account": {

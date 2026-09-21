@@ -5,8 +5,10 @@ import * as Linking from "expo-linking";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useTennisFonts } from "../src/hooks/useTennisFonts";
+import * as Network from "expo-network";
 import {
   focusManager,
+  onlineManager,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
@@ -20,6 +22,7 @@ import { NotificationLocaleSync } from "../src/components/NotificationLocaleSync
 import { NotificationDeepLinkHandler } from "../src/components/NotificationDeepLinkHandler";
 import { UnreadMessagesWatcher } from "../src/components/UnreadMessagesWatcher";
 import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
+import { OfflineBanner } from "../src/components/OfflineBanner";
 import { ToastProvider } from "../src/providers/ToastProvider";
 import { ConfirmDialogProvider } from "../src/providers/ConfirmDialogProvider";
 import { installDeepLinkCapture } from "../src/lib/deep-link-buffer";
@@ -49,6 +52,21 @@ focusManager.setEventListener((handleFocus) => {
   const subscription = AppState.addEventListener("change", (state) => {
     handleFocus(state === "active");
   });
+  return () => subscription.remove();
+});
+
+// The other half of the same problem. React Query's default onlineManager is a
+// browser one too, so on native it assumes the device is always connected: a
+// request made with no signal did not wait, it burned the one configured retry
+// and surfaced as "couldn't load". Pilot players are on Lebanese mobile data,
+// where losing signal for a minute is ordinary, so queries should pause and
+// resume rather than fail.
+onlineManager.setEventListener((setOnline) => {
+  const subscription = Network.addNetworkStateListener(
+    ({ isInternetReachable }) => {
+      setOnline(Boolean(isInternetReachable));
+    },
+  );
   return () => subscription.remove();
 });
 
@@ -91,6 +109,10 @@ export default function RootLayout() {
                   <UnreadMessagesWatcher />
                   <OnboardingProvider>
                     <HeroVariantProvider>
+                      {/* Above the Stack so the bar is visible on whatever
+                          screen the player happens to be on when signal
+                          drops, rather than per-screen. */}
+                      <OfflineBanner />
                       <Stack screenOptions={{ headerShown: false }}>
                         <Stack.Screen name="index" />
                         <Stack.Screen name="(public)" />

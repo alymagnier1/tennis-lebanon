@@ -1,10 +1,14 @@
 import { useEffect, useRef } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { acceptMatchInvite } from "@tennis-lebanon/api";
-import { PrimaryButton, Screen, formStyles } from "../../src/components/FormUi";
+import {
+  PrimaryButton,
+  Screen,
+  ScreenError,
+} from "../../src/components/FormUi";
 import { authRouteForState } from "../../src/lib/auth-routing";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
@@ -69,15 +73,11 @@ export default function InviteAcceptScreen() {
         <ActivityIndicator accessibilityLabel={t("matches.invite.accepting")} />
       ) : null}
       {acceptMutation.isError ? (
-        <View>
-          <Text style={formStyles.errorText}>
-            {t("matches.invite.acceptError")}
-          </Text>
-          <PrimaryButton
-            label={t("common.retry")}
-            onPress={() => acceptMutation.mutate()}
-          />
-        </View>
+        <ScreenError
+          message={t("matches.invite.acceptError")}
+          retryLabel={t("common.retry")}
+          onRetry={() => acceptMutation.mutate()}
+        />
       ) : null}
     </Screen>
   );
