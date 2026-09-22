@@ -186,6 +186,19 @@ silently.
 - [ ] `select count(*) from public.device_push_tokens where is_active;` is
       non-zero on staging after a real device signs in
 
+Onboarding no longer asks for notification permission, so **signing in does
+not register a device**. A token is written only after Profile → Notifications
+→ enable, or accepting the in-match push prompt. Registration failures are
+reported to Sentry with `stage: expo-push-token` or
+`stage: register-device-push-token`.
+
+As of 2026-09-22 staging had zero token rows, and every
+`invoke_process_notifications` call was answered **401**: the Vault
+`process_notifications_token` did not match the function's
+`SUPABASE_SERVICE_ROLE_KEY`. Re-set it with `vault.update_secret` to the exact
+legacy service_role key, then confirm
+`select status_code, count(*) from net._http_response group by 1;` shows 200s.
+
 ### Club staff have no push channel
 
 Push registration exists only in the mobile app, so club staff who work in the
@@ -204,6 +217,32 @@ Reaching club staff out of band needs a decision **before any club depends on a 
 
 - [ ] Channel chosen and recorded in `docs/DECISIONS.md` — **not applicable to cohort 1**
 - [ ] If ops-driven: named owner and expected response time agreed with clubs — **not applicable to cohort 1**
+
+## 7c. Two-player rehearsal (cohort-1 gate)
+
+Two physical Android phones on the current staging APK. **A** is an existing
+player; **B** is a person with no account and the app **not installed**. Tick
+each step only when it happened on the phone, not when the database says so.
+
+- [ ] A signs in with Google and turns on Profile → Notifications
+- [ ] A creates a **flexible** singles match with two proposed times and publishes
+- [ ] A shares the invite to B on WhatsApp; the message shows an
+      `https://racketbound.com/invite#…` link
+- [ ] B taps it: the invite page loads, Get the app installs the APK, Back →
+      Open in the app opens RacketBound on the invite screen
+- [ ] B signs up, confirms the email code, finishes onboarding, and **lands on the
+      invite** (not Home); the summary shows zone and time; Accept joins
+- [ ] B turns on Profile → Notifications; `device_push_tokens` now has two
+      active rows
+- [ ] Both vote Yes on the same slot; **B's phone physically shows** the
+      agreed-time push
+- [ ] A opens the court step, uses the WhatsApp hand-off to the club, then
+      confirms the court was booked; both hubs show the confirmed court
+- [ ] After the start time: both confirm attendance and the same score; the
+      result shows as confirmed and the rematch card appears
+- [ ] `select * from public.unreachable_notification_summary();` reviewed, and
+      Sentry checked for `stage: expo-push-token` / `register-device-push-token`
+- [ ] Anything that surprised either player written down before it is fixed
 
 ## 8. Promotion sign-off
 

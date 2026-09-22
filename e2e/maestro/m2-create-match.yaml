@@ -1,7 +1,14 @@
-appId: com.tennislebanon.dev
-name: M2 create match from tab FAB
+appId: com.racketbound.app
+name: M2 open the create-match form from the tab bar
 ---
-- launchApp
+- runFlow:
+    file: flows/sign-in.yaml
+    env:
+      EMAIL: ${PLAYER_A_EMAIL}
+      PASSWORD: ${PLAYER_A_PASSWORD}
 - tapOn:
     id: "tab-create-match"
 - assertVisible: "Create new match"
+- assertVisible: "When"
+- assertVisible: "Where"
+- assertVisible: "Publish match"

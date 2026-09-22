@@ -1,0 +1,19 @@
+# Signs in with an existing, fully onboarded staging account.
+# Called with EMAIL and PASSWORD; see ../README.md.
+appId: com.racketbound.app
+---
+- launchApp:
+    clearState: true
+- tapOn: "Log in"
+- assertVisible: "Welcome back"
+# Placeholders, not the labels: "Email" and "Password" also match the field
+# captions above the inputs, and tapping a caption does not focus anything.
+- tapOn: "you@example.com"
+- inputText: ${EMAIL}
+- tapOn: "At least 8 characters"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "Log in"
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
