@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-22 — Invite links are https, carry the token in the fragment, and survive sign-up
+
+- Status: accepted
+- Context: the share sheet sent `tennislebanon:///invite/<token>`, which does nothing on a phone without the app — and a shared link exists to reach somebody who does not have it. Even when that person did install, `invite/[token].tsx` sent them to sign in and forgot the token, so onboarding ended on Home with the invite lost. The audit of 2026-09-22 rated this the acquisition blocker.
+- Decision: the share sheet sends `https://racketbound.com/invite#<token>` (`INVITE_BASE_URL`, default that origin). The dashboard serves `/invite` as a public, client-only page with **no match details**: "You're invited to a tennis match", **Open in the app** (a Chrome intent URL on Android that falls back to the install page, the app scheme on iOS, nothing on desktop) and **Get the app** (`NEXT_PUBLIC_GET_APP_URL`, the EAS install page for cohort 1; empty hides it). The token rides in the **fragment**, which browsers never send to the server, so no hosting log records it; the page strips it from the address bar after reading it and keeps a tab-scoped `sessionStorage` copy so Back after installing still works. In the app, the invite screen remembers the token in SecureStore when the player is not ready, and the tab layout opens it once they are — covering sign-in and the end of onboarding. The signed-out copy says "Sign up or log in", not "Try signing in again". Shared helpers live in `packages/domain/src/invite-links.ts`.
+- Alternatives considered: show the match's zone and time to link holders (rejected for now — a new anonymous-read rule and RLS surface; `preview_match_invite` stays `authenticated` only); token in the path (rejected — it lands in Vercel request logs); Android App Links so installed users skip the page (deferred — needs `assetlinks.json` on the domain first, and one extra tap is acceptable for cohort 1); Play Install Referrer for deferred deep linking (not applicable — cohort 1 installs from EAS, not the Play Store).
+- Consequences: the page only works once `racketbound.com` points at Vercel. Installed players take one extra tap until App Links ship. A player who installs and opens the app from the launcher, rather than coming back to the page, will not see the invite until they tap the link again. The pending token is device-scoped and dropped after 14 days, the invitation lifetime.
+- Owner: Founder
+
 ## 2026-09-21 — Club directory drops surface chips until the list knows the surface
 
 - Status: accepted

@@ -17,6 +17,12 @@ const clientSchema = z
     // boots before the Google console work is done -- the button hides itself.
     GOOGLE_WEB_CLIENT_ID: z.string().min(1).optional().or(z.literal("")),
     GOOGLE_IOS_CLIENT_ID: z.string().min(1).optional().or(z.literal("")),
+    // Origin of the public invite page. Shared links point here so they work
+    // for somebody who does not have the app yet.
+    INVITE_BASE_URL: z.string().url().default("https://racketbound.com"),
+    // Where the invite page's "Get the app" goes. Empty hides the button:
+    // better no button than one that leads nowhere.
+    GET_APP_URL: z.string().url().optional().or(z.literal("")),
   })
   .superRefine((value, context) => {
     if (value.APP_ENV !== "local" && value.SUPPORT_EMAIL.endsWith(".invalid")) {
@@ -53,6 +59,8 @@ export function loadClientEnv(
     SUPPORT_EMAIL: source[`${prefix}SUPPORT_EMAIL`],
     GOOGLE_WEB_CLIENT_ID: source[`${prefix}GOOGLE_WEB_CLIENT_ID`] ?? "",
     GOOGLE_IOS_CLIENT_ID: source[`${prefix}GOOGLE_IOS_CLIENT_ID`] ?? "",
+    INVITE_BASE_URL: source[`${prefix}INVITE_BASE_URL`] || undefined,
+    GET_APP_URL: source[`${prefix}GET_APP_URL`] ?? "",
     AUTH_REDIRECT_URL:
       source[`${prefix}AUTH_REDIRECT_URL`] ??
       (prefix === "EXPO_PUBLIC_"

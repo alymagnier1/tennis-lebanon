@@ -1291,7 +1291,8 @@
     },
     "invite": {
       "title": "Invitation au match",
-      "signInRequired": "Connectez-vous pour accepter cette invitation.",
+      "signInRequired": "Créez un compte ou connectez-vous pour voir cette invitation. Nous vous y ramènerons ensuite.",
+      "signInAction": "S’inscrire ou se connecter",
       "accepting": "Acceptation de l'invitation…",
       "error": "Impossible d'envoyer cette invitation.",
       "acceptError": "Impossible d'accepter cette invitation.",
@@ -1662,5 +1663,17 @@
       }
     },
     "unreadItem": "Non lu"
+  },
+  "invitePage": {
+    "metaTitle": "Vous êtes invité à un match de tennis",
+    "metaDescription": "Ouvrez l’invitation dans RacketBound pour voir le match et le rejoindre.",
+    "title": "Vous êtes invité à un match de tennis",
+    "body": "Quelqu’un veut jouer avec vous sur RacketBound. Ouvrez l’invitation dans l’application pour voir quand et où, puis décidez.",
+    "openApp": "Ouvrir dans l’application",
+    "getApp": "Obtenir l’application",
+    "installedHint": "Vous venez de l’installer ? Revenez sur cette page et touchez Ouvrir dans l’application.",
+    "desktopHint": "Ouvrez ce lien sur votre téléphone pour continuer.",
+    "incompleteTitle": "Ce lien d’invitation est incomplet",
+    "incompleteBody": "Une partie du lien manque. Demandez à la personne qui l’a envoyé de le partager à nouveau."
   }
 }

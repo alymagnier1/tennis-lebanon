@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -21,6 +22,10 @@ import { authRouteForState } from "../../src/lib/auth-routing";
 import { buildMatchCardHeadline } from "../../src/lib/match-card-headline";
 import { matchCardAreaLabel } from "../../src/lib/match-clubs";
 import { opponentAvatarColor } from "../../src/lib/match-card-status";
+import {
+  clearPendingInvite,
+  rememberPendingInvite,
+} from "../../src/lib/pending-invite";
 import { discoverOpenMatchesRoute, matchHubRoute } from "../../src/lib/routes";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
@@ -62,6 +67,18 @@ export default function InviteAcceptScreen() {
   const { state } = useAuth();
   const queryClient = useQueryClient();
 
+  // Somebody who is not signed in yet cannot act on this, and the route is gone
+  // by the time sign-up and onboarding finish. Remember the token so the tab
+  // layout can bring them back here; forget it once they are.
+  useEffect(() => {
+    if (!token || state === "loading") return;
+    if (state === "ready") {
+      void clearPendingInvite();
+    } else {
+      void rememberPendingInvite(token);
+    }
+  }, [state, token]);
+
   const previewQuery = useQuery({
     queryKey: ["match-invite-preview", token],
     queryFn: () => previewMatchInvite(supabase, token!),
@@ -98,6 +115,14 @@ export default function InviteAcceptScreen() {
 
   if (state !== "ready") {
     const destination = authRouteForState(state);
+    // Most people here have never had an account: a shared link is how they
+    // heard of RacketBound. "Try again" read as if they had failed at something.
+    const actionLabel =
+      state === "anonymous"
+        ? t("matches.invite.signInAction")
+        : state === "needsOnboarding"
+          ? t("auth.continueOnboarding")
+          : t("auth.tryAgain");
     return (
       <Screen
         title={t("matches.invite.title")}
@@ -105,7 +130,7 @@ export default function InviteAcceptScreen() {
       >
         {destination ? (
           <PrimaryButton
-            label={t("auth.tryAgain")}
+            label={actionLabel}
             onPress={() => router.replace(destination)}
           />
         ) : null}

@@ -28,6 +28,14 @@ export function matchInviteRoute(
   } as Href;
 }
 
+/** The invite-link screen, `app/invite/[token].tsx`. */
+export function inviteTokenRoute(token: string): Href {
+  return {
+    pathname: "/invite/[token]",
+    params: { token },
+  } as Href;
+}
+
 export function matchHubRoute(matchId: string): Href {
   return {
     pathname: "/match/[id]",

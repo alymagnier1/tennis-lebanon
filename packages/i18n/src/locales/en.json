@@ -1430,7 +1430,8 @@
     },
     "invite": {
       "title": "Match invite",
-      "signInRequired": "Sign in to accept this invite.",
+      "signInRequired": "Create an account or log in to see this invite. We'll bring you back to it.",
+      "signInAction": "Sign up or log in",
       "accepting": "Accepting invite…",
       "error": "We could not send this invite.",
       "acceptError": "We could not accept this invite.",
@@ -1662,5 +1663,17 @@
       "AM": "AM",
       "PM": "PM"
     }
+  },
+  "invitePage": {
+    "metaTitle": "You're invited to a tennis match",
+    "metaDescription": "Open the invite in RacketBound to see the match and join.",
+    "title": "You're invited to a tennis match",
+    "body": "Someone wants to play with you on RacketBound. Open the invite in the app to see when and where, then decide.",
+    "openApp": "Open in the app",
+    "getApp": "Get the app",
+    "installedHint": "Just installed it? Come back to this page and tap Open in the app.",
+    "desktopHint": "Open this link on your phone to continue.",
+    "incompleteTitle": "This invite link is incomplete",
+    "incompleteBody": "Part of the link is missing. Ask the person who sent it to share it again."
   }
 }

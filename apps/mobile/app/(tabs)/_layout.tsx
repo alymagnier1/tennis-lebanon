@@ -1,8 +1,11 @@
-import { Redirect, Tabs } from "expo-router";
+import { useEffect } from "react";
+import { Redirect, Tabs, router } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { TennisTabBar } from "../../src/components/TennisTabBar";
 import { authRouteForState } from "../../src/lib/auth-routing";
+import { takePendingInvite } from "../../src/lib/pending-invite";
+import { inviteTokenRoute } from "../../src/lib/routes";
 import { useTennisTheme } from "../../src/providers/ThemeProvider";
 import { useAuth } from "../../src/providers/AuthProvider";
 
@@ -10,6 +13,16 @@ export default function TabsLayout() {
   const { t } = useTranslation();
   const { state } = useAuth();
   const { colors } = useTennisTheme();
+
+  // Sign-in and the end of onboarding both land here, so this is the one place
+  // that sees every way a player becomes ready. An invite they opened before
+  // they had an account is waiting for them; open it on top of Home.
+  useEffect(() => {
+    if (state !== "ready") return;
+    void takePendingInvite().then((token) => {
+      if (token) router.push(inviteTokenRoute(token));
+    });
+  }, [state]);
 
   if (state === "loading") {
     return (

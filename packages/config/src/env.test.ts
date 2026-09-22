@@ -22,6 +22,32 @@ describe("loadClientEnv", () => {
     ).toThrow(/SUPPORT_EMAIL/);
   });
 
+  it("defaults the invite page to the production domain", () => {
+    const env = loadClientEnv(base, "EXPO_PUBLIC_");
+    expect(env.INVITE_BASE_URL).toBe("https://racketbound.com");
+    expect(env.GET_APP_URL).toBe("");
+  });
+
+  it("treats an empty invite base URL as unset", () => {
+    const env = loadClientEnv(
+      { ...base, EXPO_PUBLIC_INVITE_BASE_URL: "" },
+      "EXPO_PUBLIC_",
+    );
+    expect(env.INVITE_BASE_URL).toBe("https://racketbound.com");
+  });
+
+  it("reads the get-the-app URL for the dashboard", () => {
+    const env = loadClientEnv(
+      {
+        NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "publishable-key",
+        NEXT_PUBLIC_GET_APP_URL: "https://expo.dev/accounts/x/builds/1",
+      },
+      "NEXT_PUBLIC_",
+    );
+    expect(env.GET_APP_URL).toBe("https://expo.dev/accounts/x/builds/1");
+  });
+
   it("accepts a configured production support path", () => {
     const env = loadClientEnv(
       {

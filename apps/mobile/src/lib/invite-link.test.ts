@@ -6,16 +6,20 @@ vi.mock("react-native", () => ({
   Share: { share: shareMock },
 }));
 
+vi.mock("./env", () => ({
+  env: { INVITE_BASE_URL: "https://racketbound.com" },
+}));
+
 describe("invite link", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("builds a deep link for the invite token", async () => {
+  it("shares the https invite page with the token in the fragment", async () => {
     const { buildMatchInviteUrl } = await import("./invite-link");
 
     expect(buildMatchInviteUrl("abc123")).toBe(
-      "tennislebanon:///invite/abc123",
+      "https://racketbound.com/invite#abc123",
     );
   });
 

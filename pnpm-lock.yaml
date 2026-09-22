@@ -44,6 +44,9 @@ importers:
       '@tennis-lebanon/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@tennis-lebanon/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@tennis-lebanon/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n

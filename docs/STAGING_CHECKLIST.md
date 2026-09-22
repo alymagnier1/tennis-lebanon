@@ -94,6 +94,23 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 - [ ] Production domain and HTTPS configured
 - [ ] Platform admin routes (`/admin/reports`, `/admin/disputes`) restricted to operators
 - [ ] Login form and booking queue tested on Chrome + Safari
+- [ ] `NEXT_PUBLIC_GET_APP_URL` set in Vercel to the current install page; without it
+      the invite page hides "Get the app" and Android falls back to the bare app scheme
+
+### Invite links
+
+Shared links are `https://racketbound.com/invite#<token>` (see the 2026-09-22
+decision). The page is public and static; the token never reaches the server.
+
+- [ ] `/invite#<token>` from WhatsApp on an Android phone **without** the app:
+      page loads, "Get the app" reaches the install page, and after installing,
+      Back then "Open in the app" opens the invite screen
+- [ ] Same link on a phone **with** the app, signed in: "Open in the app" lands on
+      the invite summary with Accept / Decline, and nothing is joined until Accept
+- [ ] Signed-out path: open the invite, sign up, finish onboarding, and the app
+      returns to the invite rather than Home
+- [ ] `/invite` with no fragment shows "This invite link is incomplete"
+- [ ] Arabic phone: page renders right-to-left
 
 ## 6. Legal and support
 
