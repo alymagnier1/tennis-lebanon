@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-22 — The notification sender authenticates with its own token
+
+- Status: accepted
+- Context: `invoke_process_notifications` sent the Vault `process_notifications_token` and the function compared it with its runtime `SUPABASE_SERVICE_ROLE_KEY`. Staging has both legacy JWT keys and `sb_secret_` keys; the runtime value did not equal the legacy service_role key copied from the dashboard, so every cron run since setup was answered 401 and no notification was ever processed. It also kept the project's most privileged key in Vault purely to authenticate a cron call.
+- Decision: the function checks a dedicated random token, `PROCESS_NOTIFICATIONS_TOKEN` (function secret), against the same value in Vault, with a constant-time comparison (`supabase/functions/_shared/invoker-auth.ts`). The service role key is still used, from the runtime environment, for the function's own database calls. A missing or too-short function secret answers 500 with its name, not 401.
+- Alternatives considered: store the `sb_secret_` key in Vault instead (rejected — couples the invoker to whichever key format Supabase injects, and breaks again silently on the next change); turn on `verify_jwt` and send the legacy service key (rejected — same coupling, and still keeps the service key in Vault).
+- Consequences: two places to set per environment, documented in `docs/STAGING_CHECKLIST.md` §7b. Rotating the service key no longer affects notifications, which makes rotating the staging key exposed on 2026-09-22 safe to do before cohort 1.
+- Owner: Founder
+
 ## 2026-09-22 — Invite links are https, carry the token in the fragment, and survive sign-up
 
 - Status: accepted

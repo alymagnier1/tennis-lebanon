@@ -134,9 +134,15 @@ missing: `public.invoke_process_notifications()` posts to the Edge Function and
 at all, so every reminder, club nudge and attendance prompt was written to the
 outbox and left there — silently, with no error anywhere.
 
-The job is inert until both Vault secrets exist. Create them **per
-environment** (they differ between staging and production), then confirm the
-first run:
+The job is inert until both Vault secrets exist and the function has the
+matching `PROCESS_NOTIFICATIONS_TOKEN` secret. Set them **per environment**
+(they differ between staging and production).
+
+The token is a dedicated random value, **not** the service_role key (changed
+2026-09-22: on a project with both legacy and `sb_secret_` keys the function's
+`SUPABASE_SERVICE_ROLE_KEY` did not match the key copied from the dashboard,
+and every run was answered 401). It lives in exactly two places, so rotating
+the service key never breaks notifications.
 
 ```sql
 select vault.create_secret(
@@ -144,16 +150,23 @@ select vault.create_secret(
   'process_notifications_url',
   'Edge Function endpoint invoked by tennis_process_notifications'
 );
+-- Generates the token and stores it. Use update_secret if it already exists.
 select vault.create_secret(
-  '<service-role-key>',
+  encode(extensions.gen_random_bytes(32), 'hex'),
   'process_notifications_token',
-  'Service role key used to authenticate the notification sender'
+  'Invoker token for process-notifications; must equal PROCESS_NOTIFICATIONS_TOKEN'
 );
+-- Copy this value into Edge Functions -> Secrets as PROCESS_NOTIFICATIONS_TOKEN.
+select decrypted_secret from vault.decrypted_secrets
+where name = 'process_notifications_token';
 
 -- Non-null request id means it fired; null means the secrets are still missing.
 select public.invoke_process_notifications();
 select * from net._http_response order by created desc limit 5;
 ```
+
+A 500 reading `PROCESS_NOTIFICATIONS_TOKEN is not configured` means the
+function secret is missing; a 401 means the two copies differ.
 
 - [x] Named invoker for `process-notifications` recorded below, with schedule
       and which secret it authenticates with
@@ -171,6 +184,7 @@ select * from net._http_response order by created desc limit 5;
 | Invoker  | `pg_cron` job `tennis_process_notifications` → `invoke_process_notifications` |
 | Schedule | `*/5 * * * *`                                                                 |
 | Secret   | Vault: `process_notifications_url`, `process_notifications_token`             |
+| Checked  | Function secret `PROCESS_NOTIFICATIONS_TOKEN` (same value as the Vault token) |
 
 ### The mobile app needs an Expo project id
 
@@ -193,10 +207,8 @@ reported to Sentry with `stage: expo-push-token` or
 `stage: register-device-push-token`.
 
 As of 2026-09-22 staging had zero token rows, and every
-`invoke_process_notifications` call was answered **401**: the Vault
-`process_notifications_token` did not match the function's
-`SUPABASE_SERVICE_ROLE_KEY`. Re-set it with `vault.update_secret` to the exact
-legacy service_role key, then confirm
+`invoke_process_notifications` call was answered **401** — see the dedicated
+invoker token above. Confirm
 `select status_code, count(*) from net._http_response group by 1;` shows 200s.
 
 ### Club staff have no push channel
