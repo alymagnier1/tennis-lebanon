@@ -1826,8 +1826,8 @@ export type Database = {
         Returns: string;
       };
       booking_stale_reminders: { Args: never; Returns: Json };
-      cancel_account_deletion: { Args: never; Returns: undefined };
       caller_has_password: { Args: never; Returns: boolean };
+      cancel_account_deletion: { Args: never; Returns: undefined };
       cancel_booking_request: {
         Args: { p_booking_id: string };
         Returns: undefined;
@@ -2476,6 +2476,12 @@ export type Database = {
       preview_match_invite: {
         Args: { p_token: string };
         Returns: Database["public"]["CompositeTypes"]["match_invite_preview"];
+        SetofOptions: {
+          from: "*";
+          to: "match_invite_preview";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       propose_booking_alternative: {
         Args: {
@@ -2795,6 +2801,16 @@ export type Database = {
       court_request_status: "opened" | "sent" | "not_sent";
       gender: "female" | "male";
       match_format: "singles" | "doubles";
+      match_invite_preview_status:
+        | "ok"
+        | "not_found"
+        | "wrong_recipient"
+        | "revoked"
+        | "already_accepted"
+        | "already_member"
+        | "expired"
+        | "full"
+        | "unavailable";
       match_status:
         | "draft"
         | "open"
@@ -2807,16 +2823,6 @@ export type Database = {
         | "cancelled"
         | "expired"
         | "disputed";
-      match_invite_preview_status:
-        | "ok"
-        | "not_found"
-        | "wrong_recipient"
-        | "revoked"
-        | "already_accepted"
-        | "already_member"
-        | "expired"
-        | "full"
-        | "unavailable";
       match_visibility: "public" | "invite_only" | "private";
       participant_status:
         "invited" | "requested" | "accepted" | "declined" | "left" | "removed";
@@ -3120,6 +3126,17 @@ export const Constants = {
       court_request_status: ["opened", "sent", "not_sent"],
       gender: ["female", "male"],
       match_format: ["singles", "doubles"],
+      match_invite_preview_status: [
+        "ok",
+        "not_found",
+        "wrong_recipient",
+        "revoked",
+        "already_accepted",
+        "already_member",
+        "expired",
+        "full",
+        "unavailable",
+      ],
       match_status: [
         "draft",
         "open",
