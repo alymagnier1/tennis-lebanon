@@ -126,7 +126,7 @@ export function formatUtcTimeInBeirut(iso: string): string {
 }
 
 export function formatTodayAvailabilityTime(
-  slots: Array<{ starts_at: string }>,
+  slots: { starts_at: string }[],
   now: Date = new Date(),
 ): string | null {
   const today = beirutDateKey(now.toISOString());

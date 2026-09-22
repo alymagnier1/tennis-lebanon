@@ -1427,7 +1427,7 @@
   "clubs": {
     "title": "Clubs",
     "directoryTitle": "Trouver un club",
-    "directoryDescription": "Parcourez les clubs et demandez un court pour votre match.",
+    "directoryDescription": "Clubs dans vos zones. Réservez auprès du club et payez sur place.",
     "searchPlaceholder": "Rechercher des clubs ou des zones...",
     "resultCount": "{{count}} clubs au Liban",
     "surfaceAll": "Tous",
@@ -1436,6 +1436,7 @@
     "selected": "Sélectionné pour ce booking",
     "pricePerHour": "/h",
     "loadError": "Impossible de charger les clubs.",
+    "notFound": "Ce club n’est pas disponible.",
     "empty": "Aucun club dans ces zones pour le moment.",
     "detailTitle": "Détails du club",
     "courts": "Courts",
@@ -1466,8 +1467,13 @@
     "confirmExternalCourtHelp": "À utiliser si vous avez réservé le court vous-même, par téléphone ou WhatsApp. Cela confirme le match afin que la présence et les résultats fonctionnent.",
     "emptyBody": "Ajoutez d'autres zones dans Où je joue et les clubs proches apparaîtront ici.",
     "emptyAction": "Ajouter des zones",
-    "filteredEmptyTitle": "Aucun club ne correspond à ces filtres",
-    "filteredEmptyBody": "Essayez un autre terme de recherche ou une autre surface."
+    "filteredEmptyTitle": "Aucun club ne correspond à cette recherche",
+    "filteredEmptyBody": "Essayez un autre nom ou une autre zone.",
+    "amenity": {
+      "parking": "Parking",
+      "showers": "Douches",
+      "pay_as_you_play": "Payer sur place"
+    }
   },
   "settings": {
     "title": "Paramètres",

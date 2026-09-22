@@ -1,10 +1,13 @@
 import { useMemo } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import type { ClubDirectoryRow } from "@tennis-lebanon/api";
 import type { UseQueryResult } from "@tanstack/react-query";
-import { ClubDirectoryCard } from "./ClubDirectoryCard";
+import {
+  ClubDirectoryCard,
+  ClubDirectoryCardSkeleton,
+} from "./ClubDirectoryCard";
 import { EmptyState } from "./AppUi";
 import { PrimaryButton, ScreenError, formStyles } from "./FormUi";
 import { clubDetailRoute, PROFILE_WHERE_I_PLAY_ROUTE } from "../lib/routes";
@@ -51,8 +54,14 @@ export function ClubsDirectoryList({
     router.push(clubDetailRoute(clubId, matchId ? { matchId } : undefined));
   };
 
-  if (clubsQuery.isLoading && !clubsOverride) {
-    return <ActivityIndicator accessibilityLabel={t("common.loading")} />;
+  if (clubsQuery.isLoading && !clubsQuery.data) {
+    return (
+      <View style={formStyles.stack} accessibilityLabel={t("common.loading")}>
+        <ClubDirectoryCardSkeleton />
+        <ClubDirectoryCardSkeleton />
+        <ClubDirectoryCardSkeleton />
+      </View>
+    );
   }
 
   if (clubsQuery.isError) {

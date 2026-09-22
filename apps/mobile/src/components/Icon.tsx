@@ -40,6 +40,7 @@ const ICONS = {
   lock: "lock-closed-outline",
   signOut: "log-out-outline",
   star: "star",
+  starOutline: "star-outline",
 } as const;
 
 export type IconName = keyof typeof ICONS;

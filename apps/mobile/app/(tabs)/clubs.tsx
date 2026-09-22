@@ -1,10 +1,4 @@
-import {
-  ActivityIndicator,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import {
@@ -29,8 +23,13 @@ export default function ClubsTabScreen() {
   const zoneLabel = (club: ClubDirectoryRow) =>
     zoneNameFromJson(club.zone_name_i18n as Json, locale);
 
-  const { search, setSearch, surface, setSurface, filtered } =
-    useClubsDirectoryFilters(clubs, zoneLabel);
+  const { search, setSearch, filtered } = useClubsDirectoryFilters(
+    clubs,
+    zoneLabel,
+  );
+
+  const showCount =
+    !clubsQuery.isLoading && !clubsQuery.isError && filtered.length > 0;
 
   return (
     <View style={styles.root}>
@@ -43,24 +42,15 @@ export default function ClubsTabScreen() {
           />
         }
       >
-        <ClubsDirectoryHeader
-          search={search}
-          onSearchChange={setSearch}
-          surface={surface}
-          onSurfaceChange={setSurface}
-        />
+        <ClubsDirectoryHeader search={search} onSearchChange={setSearch} />
 
         <View style={styles.listSection}>
-          {clubsQuery.isLoading ? (
-            <ActivityIndicator accessibilityLabel={t("common.loading")} />
-          ) : (
-            <>
-              <AppText style={styles.resultCount}>
-                {t("clubs.resultCount", { count: filtered.length })}
-              </AppText>
-              <ClubsDirectoryList clubsQuery={clubsQuery} clubs={filtered} />
-            </>
-          )}
+          {showCount ? (
+            <AppText style={styles.resultCount}>
+              {t("clubs.resultCount", { count: filtered.length })}
+            </AppText>
+          ) : null}
+          <ClubsDirectoryList clubsQuery={clubsQuery} clubs={filtered} />
         </View>
       </ScrollView>
     </View>
@@ -75,7 +65,7 @@ const styles = createLiveSheet(() =>
     },
     listSection: {
       paddingHorizontal: 20,
-      paddingTop: 16,
+      paddingTop: 8,
       paddingBottom: 100,
       gap: 16,
     },

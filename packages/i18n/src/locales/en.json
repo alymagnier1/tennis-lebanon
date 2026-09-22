@@ -1566,7 +1566,7 @@
   "clubs": {
     "title": "Clubs",
     "directoryTitle": "Find a club",
-    "directoryDescription": "Browse clubs and request a court for your match.",
+    "directoryDescription": "Clubs in your areas. Book through the club and pay there.",
     "searchPlaceholder": "Search clubs or zones...",
     "resultCount": "{{count}} clubs in Lebanon",
     "surfaceAll": "All",
@@ -1575,6 +1575,7 @@
     "selected": "Selected for this booking",
     "pricePerHour": "/hr",
     "loadError": "We could not load clubs.",
+    "notFound": "This club is not available.",
     "empty": "No clubs in these areas yet.",
     "detailTitle": "Club details",
     "courts": "Courts",
@@ -1605,8 +1606,13 @@
     "confirmExternalCourtHelp": "Use this if you booked the court yourself, by phone or WhatsApp. It confirms the match so attendance and results still work.",
     "emptyBody": "Add more areas in Where I play and clubs near them show up here.",
     "emptyAction": "Add more areas",
-    "filteredEmptyTitle": "No clubs match those filters",
-    "filteredEmptyBody": "Try a different search term or surface."
+    "filteredEmptyTitle": "No clubs match that search",
+    "filteredEmptyBody": "Try a different name or area.",
+    "amenity": {
+      "parking": "Parking",
+      "showers": "Showers",
+      "pay_as_you_play": "Pay as you play"
+    }
   },
   "settings": {
     "title": "Settings",

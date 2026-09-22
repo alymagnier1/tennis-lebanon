@@ -1,37 +1,23 @@
 import { useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
-import { AppText } from "./AppText";
 import { Icon } from "./Icon";
 import { FigmaSubpageHero } from "./onboarding-ui";
+import { filterClubsDirectory } from "../lib/clubs-directory-filters";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
-const SURFACE_FILTERS = ["all", "hard", "clay", "grass", "other"] as const;
-
-export type ClubsSurfaceFilter = (typeof SURFACE_FILTERS)[number];
-
 export function ClubsDirectoryHeader({
   search,
   onSearchChange,
-  surface,
-  onSurfaceChange,
 }: {
   search: string;
   onSearchChange: (value: string) => void;
-  surface: ClubsSurfaceFilter;
-  onSurfaceChange: (value: ClubsSurfaceFilter) => void;
 }) {
   const { t } = useTranslation();
-  const { rowDirection, writingDirection, isRtl } = useLayoutDirection();
+  const { writingDirection, isRtl } = useLayoutDirection();
 
   return (
     <View>
@@ -40,7 +26,12 @@ export function ClubsDirectoryHeader({
         description={t("clubs.directoryDescription")}
       >
         <View style={styles.searchWrap}>
-          <View style={styles.searchIcon}>
+          <View
+            style={[
+              styles.searchIcon,
+              isRtl ? styles.searchIconRtl : styles.searchIconLtr,
+            ]}
+          >
             <Icon
               name="discover"
               size={16}
@@ -55,44 +46,12 @@ export function ClubsDirectoryHeader({
             onChangeText={onSearchChange}
             style={[
               styles.searchInput,
+              isRtl ? styles.searchInputRtl : styles.searchInputLtr,
               { writingDirection, textAlign: isRtl ? "right" : "left" },
             ]}
           />
         </View>
       </FigmaSubpageHero>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.filterRow,
-          { flexDirection: rowDirection },
-        ]}
-      >
-        {SURFACE_FILTERS.map((filter) => {
-          const selected = surface === filter;
-          return (
-            <Pressable
-              key={filter}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              onPress={() => onSurfaceChange(filter)}
-              style={[styles.filterChip, selected && styles.filterChipSelected]}
-            >
-              <AppText
-                style={[
-                  styles.filterChipLabel,
-                  selected && styles.filterChipLabelSelected,
-                ]}
-              >
-                {filter === "all"
-                  ? t("clubs.surfaceAll")
-                  : t(`clubs.surfaces.${filter}`)}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
     </View>
   );
 }
@@ -105,39 +64,15 @@ export function useClubsDirectoryFilters<
   },
 >(clubs: T[], zoneLabel: (club: T) => string) {
   const [search, setSearch] = useState("");
-  const [surface, setSurface] = useState<ClubsSurfaceFilter>("all");
 
-  const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    return clubs.filter((club) => {
-      const zone = zoneLabel(club).toLowerCase();
-      if (
-        query &&
-        !club.name.toLowerCase().includes(query) &&
-        !zone.includes(query)
-      ) {
-        return false;
-      }
-
-      if (surface === "all") {
-        return true;
-      }
-
-      const surfaceLabel = surface.toLowerCase();
-      const haystack = [...club.amenities, club.name, zone]
-        .join(" ")
-        .toLowerCase();
-
-      return haystack.includes(surfaceLabel);
-    });
-  }, [clubs, search, surface, zoneLabel]);
+  const filtered = useMemo(
+    () => filterClubsDirectory(clubs, search, zoneLabel),
+    [clubs, search, zoneLabel],
+  );
 
   return {
     search,
     setSearch,
-    surface,
-    setSurface,
     filtered,
   };
 }
@@ -150,16 +85,19 @@ const styles = createLiveSheet(() =>
     },
     searchIcon: {
       position: "absolute",
-      left: 14,
       top: 0,
       bottom: 0,
       justifyContent: "center",
       zIndex: 1,
     },
+    searchIconLtr: {
+      left: 14,
+    },
+    searchIconRtl: {
+      right: 14,
+    },
     searchInput: {
       paddingVertical: 12,
-      paddingLeft: 40,
-      paddingRight: 12,
       backgroundColor: tennisColors.card,
       borderWidth: 1.5,
       borderColor: tennisColors.border,
@@ -168,30 +106,13 @@ const styles = createLiveSheet(() =>
       fontSize: 14,
       color: tennisColors.primaryDark,
     },
-    filterRow: {
-      backgroundColor: tennisColors.card,
-      borderBottomWidth: 1,
-      borderBottomColor: tennisColors.border,
-      paddingHorizontal: 20,
-      paddingVertical: 12,
-      gap: 8,
+    searchInputLtr: {
+      paddingLeft: 40,
+      paddingRight: 12,
     },
-    filterChip: {
-      paddingHorizontal: 16,
-      paddingVertical: 7,
-      borderRadius: tennisRadii.pill,
-      backgroundColor: tennisColors.muted,
-    },
-    filterChipSelected: {
-      backgroundColor: tennisColors.primary,
-    },
-    filterChipLabel: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 13,
-      color: tennisColors.mutedForeground,
-    },
-    filterChipLabelSelected: {
-      color: tennisColors.white,
+    searchInputRtl: {
+      paddingRight: 40,
+      paddingLeft: 12,
     },
   }),
 );

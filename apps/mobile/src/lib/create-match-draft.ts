@@ -1,6 +1,5 @@
-import type { CreateMatchInput } from "@tennis-lebanon/domain";
+import type { CreateMatchInput, SkillBand } from "@tennis-lebanon/domain";
 import { createMatchInputSchema } from "@tennis-lebanon/domain";
-import type { SkillBand } from "@tennis-lebanon/domain";
 
 export type Draft = Partial<CreateMatchInput> & {
   selectedSkillBands?: SkillBand[];

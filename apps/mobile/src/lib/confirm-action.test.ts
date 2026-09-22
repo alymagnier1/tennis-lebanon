@@ -26,9 +26,9 @@ describe("confirmAction", () => {
     });
 
     expect(alertMock).toHaveBeenCalledOnce();
-    const buttons = alertMock.mock.calls[0]?.[2] as Array<{
+    const buttons = alertMock.mock.calls[0]?.[2] as {
       onPress?: () => void;
-    }>;
+    }[];
     buttons[1]?.onPress?.();
     expect(onConfirm).toHaveBeenCalledOnce();
   });

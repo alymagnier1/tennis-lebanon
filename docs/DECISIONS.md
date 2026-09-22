@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-21 — Club directory drops surface chips until the list knows the surface
+
+- Status: accepted
+- Context: the Clubs tab offered Hard / Clay / Grass / Other chips, but `ClubDirectoryRow` has no court surface — the filter searched amenities and the club name. Seed clubs have parking/showers, not "clay", so every chip except All emptied the list. Directory cards also stacked a "View club" button on a card that was already tappable, and club detail showed two primary booking buttons plus a favourite text row at the bottom.
+- Decision: cut the surface chips until `list_clubs_directory` exposes a real surface. Search is name, zone, and amenity only. Detail is a clay hero with name overlay, a star favourite on the photo, fact chips from actual courts, the full description, and one sticky primary (WhatsApp or request, never both). Figma ratings, opening hours, and live availability stay out — they are not in the product data.
+- Alternatives considered: keep the chips and map them to amenities (rejected — it lies); add a surface column to the directory RPC in the same change (rejected — product-schema change, not a layout polish).
+- Consequences: an empty search result talks about name/area, not surface. Restoring surface filters later needs the RPC, then the chips.
+- Owner: Founder
+
 ## YYYY-MM-DD — Decision title
 
 - Status: proposed | accepted | superseded

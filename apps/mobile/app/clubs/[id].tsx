@@ -12,8 +12,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import {
-  canBookClubInApp,
   canConfirmExternalCourt,
   canRequestCourt,
 } from "@tennis-lebanon/domain";
@@ -28,7 +28,7 @@ import {
 import type { Json } from "@tennis-lebanon/types";
 import { AppText } from "../../src/components/AppText";
 import { Icon } from "../../src/components/Icon";
-import { ErrorNotice } from "../../src/components/FormUi";
+import { ScreenError } from "../../src/components/FormUi";
 import {
   FigmaBackButton,
   FigmaPrimaryButton,
@@ -36,29 +36,38 @@ import {
 } from "../../src/components/onboarding-ui";
 import { formatUtcSlotInBeirut } from "../../src/lib/beirut-time";
 import { clubBookingModeLabelKey } from "../../src/lib/club-booking-label";
+import {
+  clubAmenityI18nKey,
+  clubBrowsePrimaryAction,
+  clubFactChips,
+  clubMatchPrimaryAction,
+  humanizeClubAmenity,
+  isKnownClubSurface,
+  type ClubFactChip,
+  type ClubPrimaryAction,
+} from "../../src/lib/club-detail-layout";
 import { confirmAction, notify } from "../../src/lib/confirm-action";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitClubDetail } from "../../src/lib/navigation";
 import { preferredClubLocationLabel } from "../../src/lib/match-clubs";
 import { matchHubRoute } from "../../src/lib/routes";
-import { stackScreenTopPadding } from "../../src/lib/stack-screen-padding";
 import { supabase } from "../../src/lib/supabase";
 import { openWhatsAppBooking } from "../../src/lib/whatsapp-booking";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import {
   tennisBrand,
   tennisColors,
+  tennisHeroArt,
   tennisRadii,
   tennisSemantic,
   tennisSpacing,
 } from "../../src/theme/tennis-tokens";
-import { tennisTextStyles } from "../../src/theme/tennis-text-styles";
 
 /**
- * Club detail: image + essentials, then one booking path when opened from a match.
+ * Club detail: decide if this is tonight's court, then take one booking path.
  *
- * v1 does not ask the host to pick a court on this screen — the first court on
- * the club stands in so Message / Request / Confirm stay one tap.
+ * v1 does not ask the host to pick a court — the first court stands in so
+ * Message / Request / Confirm stay one tap.
  */
 export default function ClubDetailScreen() {
   const { id, matchId } = useLocalSearchParams<{
@@ -67,11 +76,10 @@ export default function ClubDetailScreen() {
   }>();
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { writingDirection } = useLayoutDirection();
+  const { writingDirection, isRtl } = useLayoutDirection();
   const queryClient = useQueryClient();
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const isMatchBooking = Boolean(matchId);
-  const topPadding = stackScreenTopPadding(insets.top);
 
   const clubQuery = useQuery({
     queryKey: ["club-detail", id],
@@ -176,9 +184,6 @@ export default function ClubDetailScreen() {
   });
 
   const club = clubQuery.data;
-  const supportsInAppBooking = club
-    ? canBookClubInApp(club.booking_mode)
-    : false;
   const defaultCourt = club?.courts[0] ?? null;
   const location = club
     ? preferredClubLocationLabel({
@@ -188,16 +193,13 @@ export default function ClubDetailScreen() {
       })
     : null;
 
-  const surfaceSummary = useMemo(() => {
-    if (!club?.courts.length) return null;
-    const surfaces = [
-      ...new Set(club.courts.map((court) => court.surface)),
-    ].map((surface) => t(`clubs.surfaces.${surface}`));
-    return [
-      t("clubs.courtCount", { count: club.courts.length }),
-      ...surfaces.slice(0, 2),
-    ].join(" · ");
-  }, [club, t]);
+  const facts = useMemo(() => (club ? clubFactChips(club.courts) : []), [club]);
+
+  const primaryAction: ClubPrimaryAction = club
+    ? showMatchBooking
+      ? clubMatchPrimaryAction(club)
+      : clubBrowsePrimaryAction(club.whatsapp_booking_available)
+    : "none";
 
   function handleConfirmExternal() {
     if (!defaultCourt || !agreedSlot || !club) return;
@@ -214,37 +216,46 @@ export default function ClubDetailScreen() {
     });
   }
 
-  const title = club?.name ?? t("clubs.detailTitle");
+  function amenityLabel(amenity: string): string {
+    const key = clubAmenityI18nKey(amenity);
+    return key ? t(key) : humanizeClubAmenity(amenity);
+  }
+
+  function factLabel(chip: ClubFactChip): string {
+    switch (chip.kind) {
+      case "courts":
+        return t("clubs.courtCount", { count: chip.count });
+      case "surface":
+        return isKnownClubSurface(chip.surface)
+          ? t(`clubs.surfaces.${chip.surface}`)
+          : chip.surface;
+      case "indoor":
+        return t("clubs.indoor");
+      case "fromPrice":
+        return t("clubs.from", { price: chip.priceLabel });
+    }
+  }
+
+  const showFooter =
+    Boolean(club) && (primaryAction !== "none" || showMatchBooking);
+  const primaryDisabled =
+    showMatchBooking &&
+    (!agreedSlot ||
+      (primaryAction === "request" && !defaultCourt) ||
+      whatsappMutation.isPending ||
+      requestMutation.isPending);
+  const primaryLoading =
+    primaryAction === "whatsapp"
+      ? whatsappMutation.isPending
+      : primaryAction === "request"
+        ? requestMutation.isPending
+        : false;
 
   return (
     <View style={styles.screen}>
-      <View
-        style={[
-          styles.header,
-          { paddingTop: topPadding, paddingHorizontal: tennisSpacing.screenX },
-        ]}
-      >
-        <FigmaBackButton onPress={exitClubDetail} />
-        <View style={tennisTextStyles.titleSubtitleBlock}>
-          <AppText
-            accessibilityRole="header"
-            style={[styles.title, { writingDirection }]}
-            maxLines={2}
-          >
-            {title}
-          </AppText>
-        </View>
-      </View>
-
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[
-          styles.content,
-          {
-            paddingHorizontal: tennisSpacing.screenX,
-            paddingBottom: insets.bottom + 24,
-          },
-        ]}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -254,171 +265,330 @@ export default function ClubDetailScreen() {
         }
       >
         {clubQuery.isLoading ? (
-          <ActivityIndicator accessibilityLabel={t("common.loading")} />
+          <ClubDetailSkeleton
+            topInset={insets.top}
+            isRtl={isRtl}
+            loadingLabel={t("common.loading")}
+          />
         ) : null}
 
         {clubQuery.isError ? (
-          <ErrorNotice>{t("clubs.loadError")}</ErrorNotice>
+          <View style={styles.errorBlock}>
+            <View
+              style={[
+                styles.chromeRow,
+                {
+                  paddingTop: insets.top + 8,
+                  flexDirection: isRtl ? "row-reverse" : "row",
+                },
+              ]}
+            >
+              <FigmaBackButton onPress={exitClubDetail} />
+            </View>
+            <View style={styles.errorNotice}>
+              <ScreenError
+                message={t("clubs.loadError")}
+                retryLabel={t("common.retry")}
+                onRetry={() => void clubQuery.refetch()}
+              />
+            </View>
+          </View>
+        ) : null}
+
+        {!clubQuery.isLoading && !clubQuery.isError && !club ? (
+          <View style={styles.errorBlock}>
+            <View
+              style={[
+                styles.chromeRow,
+                {
+                  paddingTop: insets.top + 8,
+                  flexDirection: isRtl ? "row-reverse" : "row",
+                },
+              ]}
+            >
+              <FigmaBackButton onPress={exitClubDetail} />
+            </View>
+            <View style={styles.errorNotice}>
+              <ScreenError
+                message={t("clubs.notFound")}
+                retryLabel={t("common.retry")}
+              />
+            </View>
+          </View>
         ) : null}
 
         {club ? (
-          <View style={styles.body}>
+          <View>
             <View style={styles.hero}>
-              <Icon name="place" size={40} color={tennisColors.white} />
-            </View>
-
-            <View style={styles.details}>
-              {location ? (
-                <AppText
-                  style={[
-                    tennisTextStyles.sectionSubtitle,
-                    { writingDirection },
-                  ]}
-                  maxLines={2}
-                >
-                  {location}
-                </AppText>
-              ) : null}
-
-              <View style={styles.badgeRow}>
+              <View style={styles.heroFill} />
+              <View style={styles.heroMark} accessibilityElementsHidden>
+                <Icon name="court" size={88} color={tennisColors.white} />
+              </View>
+              <View style={styles.heroScrim} />
+              <View
+                style={[
+                  styles.heroChrome,
+                  { paddingTop: insets.top + 8, paddingBottom: 20 },
+                ]}
+              >
                 <View
                   style={[
-                    styles.badge,
-                    club.whatsapp_booking_available
-                      ? styles.badgeWhatsApp
-                      : styles.badgeDefault,
+                    styles.chromeRow,
+                    { flexDirection: isRtl ? "row-reverse" : "row" },
                   ]}
                 >
-                  <AppText
-                    style={[
-                      styles.badgeText,
-                      club.whatsapp_booking_available
-                        ? styles.badgeTextWhatsApp
-                        : styles.badgeTextDefault,
+                  <FigmaBackButton onDark onPress={exitClubDetail} />
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      club.is_favorite
+                        ? t("clubs.unfavorite")
+                        : t("clubs.favorite")
+                    }
+                    accessibilityState={{ selected: club.is_favorite }}
+                    disabled={favoriteMutation.isPending}
+                    onPress={() => favoriteMutation.mutate(!club.is_favorite)}
+                    style={({ pressed }) => [
+                      styles.favoriteBtn,
+                      club.is_favorite && styles.favoriteBtnOn,
+                      pressed && styles.pressed,
                     ]}
                   >
-                    {t(clubBookingModeLabelKey(club.booking_mode))}
+                    <Icon
+                      name={club.is_favorite ? "star" : "starOutline"}
+                      size={20}
+                      color={
+                        club.is_favorite
+                          ? tennisColors.limeText
+                          : tennisColors.white
+                      }
+                    />
+                  </Pressable>
+                </View>
+
+                <View style={styles.heroCopy}>
+                  <AppText
+                    accessibilityRole="header"
+                    style={[styles.heroName, { writingDirection }]}
+                    maxLines={2}
+                  >
+                    {club.name}
+                  </AppText>
+                  {location ? (
+                    <AppText
+                      style={[styles.heroLocation, { writingDirection }]}
+                      maxLines={2}
+                    >
+                      {location}
+                    </AppText>
+                  ) : null}
+                  <View
+                    style={[
+                      styles.badgeRow,
+                      { flexDirection: isRtl ? "row-reverse" : "row" },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.badge,
+                        club.whatsapp_booking_available
+                          ? styles.badgeWhatsApp
+                          : styles.badgeDefault,
+                      ]}
+                    >
+                      <AppText
+                        style={[
+                          styles.badgeText,
+                          club.whatsapp_booking_available
+                            ? styles.badgeTextWhatsApp
+                            : styles.badgeTextDefault,
+                        ]}
+                      >
+                        {t(clubBookingModeLabelKey(club.booking_mode))}
+                      </AppText>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            <View
+              style={[
+                styles.body,
+                { paddingHorizontal: tennisSpacing.screenX },
+              ]}
+            >
+              {facts.length > 0 ? (
+                <View
+                  style={[
+                    styles.chipRow,
+                    { flexDirection: isRtl ? "row-reverse" : "row" },
+                  ]}
+                >
+                  {facts.map((chip) => (
+                    <View
+                      key={`${chip.kind}-${chip.kind === "surface" ? chip.surface : chip.kind === "courts" ? chip.count : chip.kind === "fromPrice" ? chip.priceLabel : "indoor"}`}
+                      style={styles.chip}
+                    >
+                      <AppText style={styles.chipText}>
+                        {factLabel(chip)}
+                      </AppText>
+                    </View>
+                  ))}
+                  <View style={styles.chipQuiet}>
+                    <AppText style={styles.chipQuietText}>
+                      {t("clubs.payAtClub")}
+                    </AppText>
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.chipQuiet}>
+                  <AppText style={styles.chipQuietText}>
+                    {t("clubs.payAtClub")}
                   </AppText>
                 </View>
-                <AppText style={styles.payHint}>{t("clubs.payAtClub")}</AppText>
-              </View>
-
-              {surfaceSummary ? (
-                <AppText
-                  style={[styles.metaLine, { writingDirection }]}
-                  maxLines={1}
-                >
-                  {surfaceSummary}
-                </AppText>
-              ) : null}
+              )}
 
               {club.description ? (
-                <AppText
-                  style={[styles.description, { writingDirection }]}
-                  maxLines={2}
-                >
+                <AppText style={[styles.description, { writingDirection }]}>
                   {club.description}
                 </AppText>
               ) : null}
-            </View>
 
-            {showMatchBooking ? (
-              <View style={styles.bookingCard}>
-                <AppText style={styles.bookingTitle}>
-                  {t("clubs.bookForMatch")}
-                </AppText>
-                {hubQuery.isLoading ? (
-                  <ActivityIndicator accessibilityLabel={t("common.loading")} />
-                ) : agreedSlot ? (
-                  <AppText style={[styles.metaLine, { writingDirection }]}>
-                    {formatUtcSlotInBeirut(
-                      agreedSlot.starts_at,
-                      agreedSlot.ends_at,
-                    )}
+              {club.amenities.length > 0 ? (
+                <View style={styles.amenities}>
+                  <AppText style={styles.amenitiesLabel}>
+                    {t("clubs.amenities")}
                   </AppText>
-                ) : (
-                  <AppText style={[styles.metaLine, { writingDirection }]}>
-                    {t("matches.booking.confirmTime")}
-                  </AppText>
-                )}
-
-                {club.whatsapp_booking_available ? (
-                  <FigmaPrimaryButton
-                    label={t("clubs.bookWhatsApp")}
-                    disabled={!agreedSlot}
-                    loading={whatsappMutation.isPending}
-                    onPress={() => whatsappMutation.mutate()}
-                  />
-                ) : null}
-
-                {supportsInAppBooking ? (
-                  <FigmaPrimaryButton
-                    label={t("clubs.requestCourt")}
-                    disabled={!defaultCourt || !agreedSlot}
-                    loading={requestMutation.isPending}
-                    onPress={() => {
-                      if (!defaultCourt) return;
-                      requestMutation.mutate(defaultCourt.court_id);
-                    }}
-                  />
-                ) : null}
-
-                <FigmaSecondaryButton
-                  label={t("matches.booking.bookedOffAppConfirm")}
-                  disabled={
-                    !defaultCourt ||
-                    !agreedSlot ||
-                    confirmExternalMutation.isPending
-                  }
-                  onPress={handleConfirmExternal}
-                />
-              </View>
-            ) : club.whatsapp_booking_available ? (
-              <FigmaPrimaryButton
-                label={t("clubs.bookWhatsApp")}
-                loading={whatsappMutation.isPending}
-                onPress={() => whatsappMutation.mutate()}
-              />
-            ) : null}
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                club.is_favorite ? t("clubs.unfavorite") : t("clubs.favorite")
-              }
-              disabled={favoriteMutation.isPending}
-              onPress={() => favoriteMutation.mutate(!club.is_favorite)}
-              style={({ pressed }) => [
-                styles.favoriteRow,
-                pressed && styles.pressed,
-              ]}
-            >
-              <AppText style={styles.favoriteLabel}>
-                {favoriteMutation.isPending
-                  ? t("common.loading")
-                  : club.is_favorite
-                    ? t("clubs.unfavorite")
-                    : t("clubs.favorite")}
-              </AppText>
-            </Pressable>
-
-            {club.amenities.length > 0 ? (
-              <View style={styles.amenities}>
-                <AppText style={styles.amenitiesLabel}>
-                  {t("clubs.amenities")}
-                </AppText>
-                <View style={styles.chipRow}>
-                  {club.amenities.map((amenity) => (
-                    <View key={amenity} style={styles.chip}>
-                      <AppText style={styles.chipText}>{amenity}</AppText>
-                    </View>
-                  ))}
+                  <View
+                    style={[
+                      styles.chipRow,
+                      { flexDirection: isRtl ? "row-reverse" : "row" },
+                    ]}
+                  >
+                    {club.amenities.map((amenity) => (
+                      <View key={amenity} style={styles.chip}>
+                        <AppText style={styles.chipText}>
+                          {amenityLabel(amenity)}
+                        </AppText>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-              </View>
-            ) : null}
+              ) : null}
+            </View>
           </View>
         ) : null}
       </ScrollView>
+
+      {showFooter ? (
+        <View
+          style={[
+            styles.footer,
+            {
+              paddingHorizontal: tennisSpacing.screenX,
+              paddingBottom: insets.bottom + 12,
+            },
+          ]}
+        >
+          {showMatchBooking ? (
+            <View style={styles.matchMeta}>
+              <AppText style={styles.bookingTitle}>
+                {t("clubs.bookForMatch")}
+              </AppText>
+              {hubQuery.isLoading ? (
+                <ActivityIndicator accessibilityLabel={t("common.loading")} />
+              ) : agreedSlot ? (
+                <AppText style={[styles.metaLine, { writingDirection }]}>
+                  {formatUtcSlotInBeirut(
+                    agreedSlot.starts_at,
+                    agreedSlot.ends_at,
+                  )}
+                </AppText>
+              ) : (
+                <AppText style={[styles.metaLine, { writingDirection }]}>
+                  {t("matches.booking.confirmTime")}
+                </AppText>
+              )}
+            </View>
+          ) : null}
+
+          {primaryAction === "whatsapp" ? (
+            <FigmaPrimaryButton
+              label={t("clubs.bookWhatsApp")}
+              disabled={primaryDisabled}
+              loading={primaryLoading}
+              onPress={() => whatsappMutation.mutate()}
+            />
+          ) : null}
+
+          {primaryAction === "request" ? (
+            <FigmaPrimaryButton
+              label={t("clubs.requestCourt")}
+              disabled={primaryDisabled}
+              loading={primaryLoading}
+              onPress={() => {
+                if (!defaultCourt) return;
+                requestMutation.mutate(defaultCourt.court_id);
+              }}
+            />
+          ) : null}
+
+          {showMatchBooking ? (
+            <FigmaSecondaryButton
+              label={t("matches.booking.bookedOffAppConfirm")}
+              disabled={
+                !defaultCourt ||
+                !agreedSlot ||
+                confirmExternalMutation.isPending
+              }
+              onPress={handleConfirmExternal}
+            />
+          ) : null}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function ClubDetailSkeleton({
+  topInset,
+  isRtl,
+  loadingLabel,
+}: {
+  topInset: number;
+  isRtl: boolean;
+  loadingLabel: string;
+}) {
+  return (
+    <View accessibilityLabel={loadingLabel}>
+      <View style={styles.hero}>
+        <View style={styles.heroFill} />
+        <View
+          style={[
+            styles.heroChrome,
+            { paddingTop: topInset + 8, paddingBottom: 20 },
+          ]}
+        >
+          <View
+            style={[
+              styles.chromeRow,
+              { flexDirection: isRtl ? "row-reverse" : "row" },
+            ]}
+          >
+            <FigmaBackButton onDark onPress={exitClubDetail} />
+          </View>
+        </View>
+      </View>
+      <View style={[styles.body, { paddingHorizontal: tennisSpacing.screenX }]}>
+        <View style={styles.skeletonChipRow}>
+          <View style={styles.skeletonChip} />
+          <View style={styles.skeletonChip} />
+          <View style={styles.skeletonChipWide} />
+        </View>
+        <View style={styles.skeletonLine} />
+        <View style={styles.skeletonLineShort} />
+      </View>
     </View>
   );
 }
@@ -429,44 +599,78 @@ const styles = createLiveSheet(() =>
       flex: 1,
       backgroundColor: tennisColors.background,
     },
-    header: {
-      gap: 12,
-      paddingBottom: 8,
-    },
-    title: {
-      fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 24,
-      lineHeight: 30,
-      color: tennisColors.primaryDark,
-      letterSpacing: -0.4,
-    },
     scroll: {
       flex: 1,
     },
     content: {
-      gap: 16,
-      paddingTop: 8,
-    },
-    body: {
-      gap: 16,
+      flexGrow: 1,
     },
     hero: {
-      height: 160,
-      borderRadius: tennisRadii.lg,
+      height: 248,
+      overflow: "hidden",
       backgroundColor: tennisColors.photoPlaceholder,
+    },
+    heroFill: {
+      ...StyleSheet.absoluteFill,
+      backgroundColor: tennisColors.photoPlaceholder,
+    },
+    heroMark: {
+      ...StyleSheet.absoluteFill,
       alignItems: "center",
       justifyContent: "center",
-      overflow: "hidden",
+      opacity: 0.22,
     },
-    details: {
+    heroScrim: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: 148,
+      backgroundColor: tennisHeroArt.heroGreen,
+      opacity: 0.78,
+    },
+    heroChrome: {
+      ...StyleSheet.absoluteFill,
+      justifyContent: "space-between",
+      paddingHorizontal: tennisSpacing.screenX,
+    },
+    chromeRow: {
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    favoriteBtn: {
+      width: minTouchTargetPx,
+      height: minTouchTargetPx,
+      borderRadius: minTouchTargetPx / 2,
+      backgroundColor: "rgba(13, 28, 20, 0.45)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    favoriteBtnOn: {
+      backgroundColor: tennisColors.lime,
+    },
+    heroCopy: {
       gap: 6,
     },
+    heroName: {
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 28,
+      lineHeight: 32,
+      color: tennisColors.white,
+      letterSpacing: -0.5,
+    },
+    heroLocation: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 20,
+      color: tennisColors.white,
+      opacity: 0.88,
+    },
     badgeRow: {
-      flexDirection: "row",
       alignItems: "center",
       flexWrap: "wrap",
       gap: 8,
-      marginTop: 4,
+      marginTop: 8,
     },
     badge: {
       borderRadius: tennisRadii.pill,
@@ -489,10 +693,70 @@ const styles = createLiveSheet(() =>
     badgeTextDefault: {
       color: tennisSemantic.attention.text,
     },
-    payHint: {
-      fontFamily: tennisFontFamily.body,
+    body: {
+      gap: 16,
+      paddingTop: 20,
+      paddingBottom: 28,
+    },
+    chipRow: {
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    chip: {
+      backgroundColor: tennisColors.muted,
+      borderRadius: tennisRadii.pill,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+    },
+    chipText: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: tennisColors.primaryDark,
+    },
+    chipQuiet: {
+      backgroundColor: tennisColors.quietFill,
+      borderRadius: tennisRadii.pill,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+    },
+    chipQuietText: {
+      fontFamily: tennisFontFamily.bodyMedium,
       fontSize: 12,
       color: tennisColors.mutedForeground,
+    },
+    description: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 15,
+      lineHeight: 22,
+      color: tennisColors.primaryDark,
+    },
+    amenities: {
+      gap: 10,
+    },
+    amenitiesLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    footer: {
+      borderTopWidth: 1,
+      borderTopColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+      paddingTop: 12,
+      gap: 10,
+    },
+    matchMeta: {
+      gap: 4,
+      marginBottom: 4,
+    },
+    bookingTitle: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 16,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
+      letterSpacing: -0.2,
     },
     metaLine: {
       fontFamily: tennisFontFamily.body,
@@ -500,68 +764,42 @@ const styles = createLiveSheet(() =>
       lineHeight: 18,
       color: tennisColors.mutedForeground,
     },
-    description: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 13,
-      lineHeight: 18,
-      color: tennisColors.mutedForeground,
-      marginTop: 2,
+    errorBlock: {
+      flexGrow: 1,
     },
-    bookingCard: {
-      backgroundColor: tennisColors.card,
-      borderRadius: tennisRadii.lg,
-      borderWidth: 1.5,
-      borderColor: tennisColors.border,
-      padding: 16,
-      gap: 12,
-    },
-    bookingTitle: {
-      fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 17,
-      lineHeight: 22,
-      color: tennisColors.primaryDark,
-      letterSpacing: -0.2,
-    },
-    favoriteRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      minHeight: 44,
-      alignSelf: "flex-start",
-    },
-    favoriteLabel: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 14,
-      color: tennisColors.primary,
-    },
-    amenities: {
-      gap: 8,
-    },
-    amenitiesLabel: {
-      fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 13,
-      color: tennisColors.mutedForeground,
-      textTransform: "uppercase",
-      letterSpacing: 0.4,
-    },
-    chipRow: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 8,
-    },
-    chip: {
-      backgroundColor: tennisColors.muted,
-      borderRadius: tennisRadii.pill,
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-    },
-    chipText: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 12,
-      color: tennisColors.primaryDark,
+    errorNotice: {
+      paddingHorizontal: tennisSpacing.screenX,
+      paddingTop: 12,
     },
     pressed: {
       opacity: 0.85,
+    },
+    skeletonChipRow: {
+      flexDirection: "row",
+      gap: 8,
+    },
+    skeletonChip: {
+      width: 72,
+      height: 28,
+      borderRadius: tennisRadii.pill,
+      backgroundColor: tennisColors.muted,
+    },
+    skeletonChipWide: {
+      width: 108,
+      height: 28,
+      borderRadius: tennisRadii.pill,
+      backgroundColor: tennisColors.muted,
+    },
+    skeletonLine: {
+      height: 14,
+      borderRadius: 7,
+      backgroundColor: tennisColors.muted,
+    },
+    skeletonLineShort: {
+      height: 14,
+      width: "62%",
+      borderRadius: 7,
+      backgroundColor: tennisColors.muted,
     },
   }),
 );
