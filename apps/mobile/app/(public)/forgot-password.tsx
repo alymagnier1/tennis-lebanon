@@ -20,6 +20,7 @@ import {
   recordAuthEmailSent,
 } from "../../src/lib/auth-cooldown";
 import { getAuthRedirectUrl } from "../../src/lib/auth-redirect";
+import { exitAuthScreen } from "../../src/lib/navigation";
 import { supabase } from "../../src/lib/supabase";
 import { tennisColors } from "../../src/theme/tennis-tokens";
 
@@ -61,7 +62,7 @@ export default function ForgotPasswordScreen() {
     <OnboardingStepLayout
       title={t("auth.forgotTitle")}
       description={t("auth.forgotBody")}
-      onBack={() => router.back()}
+      onBack={exitAuthScreen}
       marks="quiet"
       footer={
         <FigmaPrimaryButton

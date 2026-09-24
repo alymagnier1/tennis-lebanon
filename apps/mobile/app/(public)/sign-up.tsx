@@ -21,6 +21,7 @@ import {
   emailAuthFailure,
   type EmailAuthFailure,
 } from "../../src/lib/email-auth-error";
+import { exitAuthScreen } from "../../src/lib/navigation";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
 
@@ -87,7 +88,7 @@ export default function SignUpScreen() {
     <OnboardingStepLayout
       title={t("auth.signUpTitle")}
       description={t("auth.signUpBody")}
-      onBack={() => router.back()}
+      onBack={exitAuthScreen}
       avoidKeyboard={false}
       marks="signup"
     >

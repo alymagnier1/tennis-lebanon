@@ -20,6 +20,7 @@ import {
   emailAuthFailure,
   type EmailAuthFailure,
 } from "../../src/lib/email-auth-error";
+import { exitAuthScreen } from "../../src/lib/navigation";
 import { supabase } from "../../src/lib/supabase";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
@@ -64,7 +65,7 @@ export default function SignInScreen() {
     <OnboardingStepLayout
       title={t("auth.signInTitle")}
       description={t("auth.signInBody")}
-      onBack={() => router.back()}
+      onBack={exitAuthScreen}
       avoidKeyboard={false}
       marks="signin"
     >
