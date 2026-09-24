@@ -41,11 +41,19 @@ export function buildInviteAppUrl(token: string): string {
  * `fallbackUrl` when it is not. A bare custom-scheme link does nothing at all
  * on Android when the app is missing, which is exactly the person this page
  * exists for. Chrome rebuilds the data URI as `tennislebanon:///invite/<token>`.
+ *
+ * Null for anything that is not a token. The path is interpolated raw, and an
+ * `intent:` URL is a structured, semicolon-delimited grammar that Chrome parses
+ * into an Android Intent -- so a value carrying `;` or `#` would not be a
+ * broken link, it would be extra fields in that intent. Every caller happens to
+ * pass a `parseInviteFragment` result today; this makes it safe by construction
+ * rather than by the habits of callers.
  */
 export function buildAndroidInviteIntentUrl(
   token: string,
   fallbackUrl: string,
-): string {
+): string | null {
+  if (!isInviteToken(token)) return null;
   return (
     `intent:///invite/${token}#Intent;` +
     `scheme=${APP_URL_SCHEME};` +

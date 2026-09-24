@@ -81,6 +81,24 @@ describe("buildAndroidInviteIntentUrl", () => {
         "end",
     );
   });
+
+  // `intent:` is a semicolon-delimited grammar Chrome parses into an Android
+  // Intent, so a value carrying `;` or `#` would add fields to that intent
+  // rather than simply producing a dead link.
+  it("refuses anything that is not a token", () => {
+    const fallback = "https://example.com/get";
+
+    expect(
+      buildAndroidInviteIntentUrl(`${TOKEN};component=evil/Evil`, fallback),
+    ).toBeNull();
+    expect(buildAndroidInviteIntentUrl("", fallback)).toBeNull();
+    expect(
+      buildAndroidInviteIntentUrl(TOKEN.slice(0, 47), fallback),
+    ).toBeNull();
+    expect(
+      buildAndroidInviteIntentUrl(TOKEN.toUpperCase(), fallback),
+    ).toBeNull();
+  });
 });
 
 describe("detectInvitePlatform", () => {
