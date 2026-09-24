@@ -169,7 +169,11 @@ export default function VerifyCodeScreen() {
       />
       <AppText style={styles.hint}>{t("auth.verifyCode.hint")}</AppText>
       {notice?.kind === "sent" ? (
-        <AppText style={styles.sent}>{t("auth.verifyCode.sent")}</AppText>
+        <AppText style={styles.sent}>
+          {t(
+            recovery ? "auth.verifyCode.recoverySent" : "auth.verifyCode.sent",
+          )}
+        </AppText>
       ) : null}
       {notice?.kind === "error" ? (
         <View style={styles.error}>
