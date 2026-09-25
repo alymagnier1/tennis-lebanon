@@ -19,6 +19,7 @@ import {
 } from "../../src/components/FormUi";
 import { formatCompactUtcInBeirut } from "../../src/lib/beirut-time";
 import { authRouteForState } from "../../src/lib/auth-routing";
+import { inviteDeclineAction } from "../../src/lib/invite-decline";
 import { buildMatchCardHeadline } from "../../src/lib/match-card-headline";
 import { matchCardAreaLabel } from "../../src/lib/match-clubs";
 import { opponentAvatarColor } from "../../src/lib/match-card-status";
@@ -43,6 +44,7 @@ const STATUS_COPY_KEY: Record<
   expired: "matches.invite.link.expired",
   full: "matches.invite.link.full",
   unavailable: "matches.invite.link.unavailable",
+  skill_out_of_range: "matches.invite.link.skillOutOfRange",
 };
 
 /**
@@ -55,10 +57,12 @@ const STATUS_COPY_KEY: Record<
  * on brand-new accounts seconds after sign-up.
  *
  * It now reads the invitation with `preview_match_invite` — which does not
- * mutate — and accepts only when the person says so. Decline is a real refusal
- * rather than a way out of the screen: `decline_match_invitation` stamps
- * `declined_at` for an addressed invitation, and matches nothing for a shared
- * link, which has no recipient to refuse on anyone's behalf.
+ * mutate — and accepts only when the person says so. The preview only offers
+ * Accept when acceptance can succeed (migration 108): a band outside the range
+ * or a match with no future time is reported instead, and a blocked caller sees
+ * a link that does not exist. Decline depends on the invitation: an addressed
+ * one is refused on the server, a shared link is simply left, because refusing
+ * it would withdraw it from everyone it was sent to (`inviteDeclineAction`).
  */
 export default function InviteAcceptScreen() {
   const { token } = useLocalSearchParams<{ token: string }>();
@@ -264,11 +268,12 @@ export default function InviteAcceptScreen() {
         label={t("matches.invite.decline")}
         disabled={acceptMutation.isPending || declineMutation.isPending}
         onPress={() => {
-          if (!preview.invitation_id) {
+          const action = inviteDeclineAction(preview);
+          if (action.kind === "leave") {
             router.replace(discoverOpenMatchesRoute());
             return;
           }
-          declineMutation.mutate(preview.invitation_id);
+          declineMutation.mutate(action.invitationId);
         }}
       />
     </Screen>

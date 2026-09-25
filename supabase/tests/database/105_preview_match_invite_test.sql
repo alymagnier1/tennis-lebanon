@@ -277,16 +277,25 @@ select is(
   'the preview exposes no roster and no skill range'
 );
 
+-- By name rather than by count, so a swap cannot pass either. `is_addressed`
+-- was added by `107`: whether the invitation names a recipient, so the screen
+-- knows whether Decline is a server-side refusal or just leaving the page. It
+-- describes the invitation, not anybody in the match.
 select is(
   (
-    select count(*)::int
+    select array_agg(a.attname::text order by a.attnum)
     from pg_attribute as a
     join pg_class as c on c.oid = a.attrelid
     where c.relname = 'match_invite_preview'
       and a.attnum > 0
       and not a.attisdropped
   ),
-  13,
+  array[
+    'invitation_id', 'match_id', 'format', 'match_status',
+    'creator_display_name', 'inviter_display_name', 'participant_count',
+    'capacity', 'soonest_time', 'expires_at', 'note', 'zones', 'status',
+    'is_addressed'
+  ],
   'the preview is exactly the agreed fields, and no more'
 );
 

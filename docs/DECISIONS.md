@@ -2,6 +2,33 @@
 
 Record decisions using this template:
 
+## 2026-09-25 — Runtime version follows the app version, not the fingerprint
+
+- Status: accepted
+- Context: `1e0bd3d` added `expo-updates` with the `fingerprint` runtime-version policy, reasoning that `version` was stuck at `0.0.0` so `appVersion` carried no signal. The first EAS build with it (`c5db2d83`) failed in `CONFIGURE_EXPO_UPDATES`: the fingerprint computed on the Windows machine that started the build (`b284c30…`) differed from EAS's (`5a29c2e…`) in 235 entries. pnpm shortens virtual-store directory names to 60 characters on Windows and 120 on Linux, so the same packages at the same hashes sit at different paths, and the fingerprint hashes paths. Every build started from this machine would fail the same way.
+- Decision: `runtimeVersion: { policy: "appVersion" }`, and `version` moves to `0.1.0` so it carries a signal from now on. **Bump `version` whenever native code changes** — any native dependency added, removed or upgraded, a config plugin, the Expo SDK, `app.json` native fields — and cut a build; JS-only changes ship with `eas update` on the same version.
+- Alternatives considered: keep `fingerprint` and align pnpm's `virtual-store-dir-max-length` across platforms (rejected for now — 177 further config-plugin entries appeared only on the local side, the fix was unproven, and each attempt costs a queued EAS build); `.fingerprintignore` for `node_modules` (rejected — ignores exactly the native changes the policy exists to catch).
+- Consequences: protection against shipping an update to an incompatible binary now depends on the bump rule, not automation — recorded in `docs/STAGING_CHECKLIST.md` §4. Revisit fingerprint once builds run from CI on Linux, where both sides compute the same paths.
+- Owner: Founder
+
+## 2026-09-25 — An invite preview agrees with acceptance, and hides everything from a blocked player
+
+- Status: accepted
+- Context: the 2026-09-25 implementation review (`docs/audits/CLAUDE_IMPLEMENTATION_ASSESSMENT_2026-09-25.md`) reproduced three defects in `preview_match_invite` (105) and the invite screen: a player blocked after receiving a shared link could still read the host's name, time, zones and note; the preview offered Accept to a band outside the match's range, which acceptance then always refused; and Decline on a shared link raised `P0002`, because every preview carries an `invitation_id` and `decline_match_invitation` matches only addressed invitations.
+- Decision: migrations `107`/`108`. A blocked caller (either direction, against any live participant, the creator or the inviter) gets `not_found` with no payload — the same answer as a token that never existed, so the block itself is not revealed; a member is exempt. A band outside the range reports a new `skill_out_of_range` status; a match with no future time reports `unavailable`; both mirror `assert_joinable_match` expression for expression, and acceptance stays authoritative. The preview gains `is_addressed`: the screen refuses an addressed invitation on the server and simply leaves a shared link (`inviteDeclineAction`). `decline_match_invitation` also treats a live shared invitation as a no-op instead of `P0002`, so builds already installed stop failing without an update.
+- Alternatives considered: a distinct `blocked` status (rejected — tells the blocked player they were blocked); revoking a shared link on Decline (rejected — withdraws it from everyone else it was sent to); fixing only the client (rejected — the APK queued for the rehearsal already carries the old screen).
+- Consequences: the preview's field list is pinned by name in the 105 test, so adding `is_addressed` was a deliberate edit and a future one will be too. `108` must reach staging before the rehearsal; the screen change ships with the next build or an EAS update.
+- Owner: Founder
+
+## 2026-09-25 — Staging moves to publishable and secret keys, then retires the legacy pair
+
+- Status: accepted
+- Context: staging's legacy `service_role` key appeared in a chat screenshot on 2026-09-22. Supabase no longer allows rotating the legacy `anon`, `service_role` or JWT secret; the documented remedy for a leaked `service_role` key is to replace it with a secret key and deactivate the legacy keys. The leaked key is itself a JWT signed by the legacy secret, so it stays usable until that secret is revoked.
+- Decision: two phases. **Phase 1 (no downtime, both key types live):** the mobile build and the dashboard use the `sb_publishable_...` key — the env var keeps its `SUPABASE_ANON_KEY` name, only the value changes; `process-notifications` reads `SUPABASE_SECRET_KEYS.default` for its database calls and reports `keySource` in its response; the unused Vercel `SUPABASE_SERVICE_ROLE_KEY` is deleted. **Phase 2 (once the new build is on the test phones, before any real player):** deactivate the legacy API keys, migrate to JWT signing keys, rotate, wait the access-token lifetime plus 15 minutes (1 h 15 min at the default; corrected from "an hour" after the 2026-09-25 review) for active sessions to pick up new tokens, then revoke the legacy JWT secret. Both phase-2 steps are reversible in the dashboard.
+- Alternatives considered: keep the legacy keys until Supabase retires them at the end of 2026 (rejected — a leaked key that bypasses RLS stays valid for months); rename the env var to `SUPABASE_PUBLISHABLE_KEY` (deferred — touches every env source for no behavioural gain).
+- Consequences: installed builds carrying the legacy anon key stop working at phase 2, so it waits for the new build. Verified before switching: the publishable key behaves identically to the legacy anon key for signed-out Auth and PostgREST calls, with or without the key repeated in `Authorization`.
+- Owner: Founder
+
 ## 2026-09-22 — The notification sender authenticates with its own token
 
 - Status: accepted

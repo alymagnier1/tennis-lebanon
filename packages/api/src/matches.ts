@@ -382,7 +382,9 @@ export type MatchInvitePreviewStatus =
   | "already_member"
   | "expired"
   | "full"
-  | "unavailable";
+  | "unavailable"
+  /** The caller's band is outside the match's range; acceptance would fail. */
+  | "skill_out_of_range";
 
 /**
  * What a shared invite link shows before it is accepted.
@@ -394,16 +396,19 @@ export type MatchInvitePreviewStatus =
  *
  * Everything but `status` is null when the status is `not_found`,
  * `wrong_recipient` or `revoked` — the server withholds the summary rather than
- * dressing a leak as an error state.
+ * dressing a leak as an error state. A caller blocked from the match also gets
+ * `not_found` and nothing else (migration 108).
  */
 export type MatchInvitePreview = {
-  /**
-   * Lets Decline be a real refusal: `declineMatchInvitation` stamps
-   * `declined_at` for an addressed invitation and matches nothing for a shared
-   * link, so one call serves both and Decline means here what it means in the
-   * inbox.
-   */
+  /** Present for shared links too, so it cannot tell Decline what to do alone. */
   invitation_id: string | null;
+  /**
+   * Whether the invitation names a recipient. Only an addressed invitation can
+   * be refused with `declineMatchInvitation`; a shared link is declined by
+   * leaving, since refusing it would withdraw it from everyone it was sent to.
+   * See `inviteDeclineAction` in the mobile app. Null from a server before 108.
+   */
+  is_addressed: boolean | null;
   match_id: string | null;
   format: string | null;
   match_status: string | null;
