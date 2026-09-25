@@ -25,10 +25,17 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
     and status in ('draft', 'open', 'full', 'ready_to_book');
 ```
 
-- [ ] `pnpm verify:pilot` passes
-- [ ] `pnpm db:test` passes on the release commit
-- [ ] No open critical/high security findings
-- [ ] Database types regenerated if migrations changed: `pnpm db:types`
+- [x] `pnpm verify:pilot` passes
+  - Verified 2026-09-25 on `8058d5a` (the build and update commit): lint, types,
+    unit tests, migration checks and format, end to end.
+- [x] `pnpm db:test` passes on the release commit
+  - Verified 2026-09-25 on `8058d5a`: clean `pnpm db:reset` (001→108), then
+    81 files / 351 tests.
+- [ ] No open critical/high security findings — **open**: the staging
+      `service_role` key exposed on 2026-09-22 stays valid until §7d is done
+- [x] Database types regenerated if migrations changed: `pnpm db:types`
+  - Verified 2026-09-25 on `8058d5a`: regenerating from 001→108 leaves
+    `packages/types` unchanged.
 
 ## 2. Environment separation
 
@@ -90,6 +97,19 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
       `version` in `apps/mobile/app.json` before building. The runtime version is
       the app version (2026-09-25 decision), so a missed bump lets an `eas update`
       reach a build that cannot run it. JS-only changes ship with `eas update`
+- [ ] **Publishing an `eas update`:** an update bakes in `EXPO_PUBLIC_*` from where
+      it is exported, and does **not** read `eas.json`'s build-profile `env`. Export
+      with `.env` files off and the staging profile's values set explicitly, with a
+      cleared Metro cache, then inspect before publishing:
+      `EXPO_NO_DOTENV=1` + the `build.staging.env` values from `apps/mobile/eas.json`
+      (+ `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`) → `npx expo export --platform android
+    --output-dir dist --clear` → confirm the bundle has the staging URL and the
+      `sb_publishable_` key and no `eyJ…` JWT or `127.0.0.1` → `eas update
+    --skip-bundler --input-dir dist --channel staging --platform android
+    --environment preview`. Without `--clear`, Metro reused a bundle with the old
+      key inlined (2026-09-25)
+  - First update published this way 2026-09-25: group `f90371b1-d80e-48a7-83a6-84b2538e183c`,
+    runtime `0.1.0`, commit `8058d5a`, bundle checked before upload.
 - [ ] Deep links and magic-link redirect URLs match staging/production Supabase auth settings
 - [x] Push notification credentials configured for the target environment
   - Confirmed by the founder 2026-09-25: FCM V1 service account key present in EAS credentials for `com.racketbound.app`.
@@ -286,9 +306,13 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
 - [x] `select left(content::text, 200) from net._http_response order by created desc limit 1;`
       shows `"keySource":"secret"`
   - Verified 2026-09-25: `"keySource":"secret"` from function v4.
-- [x] EAS environment variable `EXPO_PUBLIC_SUPABASE_ANON_KEY` holds the publishable
+- [ ] EAS environment variable `EXPO_PUBLIC_SUPABASE_ANON_KEY` holds the publishable
       key in every EAS environment, not only the staging profile's `eas.json`
-  - Confirmed by the founder 2026-09-25.
+  - **Unticked 2026-09-25.** Reported done, but an update exported with
+    `eas env:exec preview` inlined the legacy anon JWT, so the **preview**
+    environment still holds it. Builds are unaffected (the `eas.json` staging value
+    wins); updates must set the key explicitly (§4) until every environment is
+    fixed.
 - [ ] Inventory confirmed: every EAS profile and update environment, installed
       builds, Vercel (Production and Preview), cron / `pg_net`, CI, local `.env`
 - [ ] New EAS build (publishable key from `eas.json`) installed on every test phone
