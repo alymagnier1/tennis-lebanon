@@ -21,10 +21,10 @@
     "db:start": "supabase start",
     "db:start:lean": "supabase start -x vector,logflare,imgproxy,studio,edge-runtime",
     "db:stop": "supabase stop",
-    "db:reset": "supabase db reset",
+    "db:reset": "supabase db reset --local",
     "db:test": "dotenv -v DO_NOT_TRACK=1 -- supabase test db supabase/tests/database --local",
     "db:types": "dotenv -v DO_NOT_TRACK=1 -- supabase gen types typescript --local > packages/types/src/database.ts && prettier --write packages/types/src/database.ts",
-    "db:diff": "supabase db diff",
+    "db:diff": "supabase db diff --local",
     "verify:pilot": "node scripts/verify-pilot-gates.mjs",
     "drill:backup": "node scripts/backup-restore-drill.mjs",
     "clean": "turbo run clean && rimraf node_modules"
