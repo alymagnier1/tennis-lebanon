@@ -1,0 +1,10 @@
+appId: com.racketbound.app
+name: M1 sign in with email and password
+---
+- runFlow:
+    file: flows/sign-in.yaml
+    env:
+      EMAIL: ${PLAYER_A_EMAIL}
+      PASSWORD: ${PLAYER_A_PASSWORD}
+- assertVisible: "Discover"
+- assertVisible: "Matches"

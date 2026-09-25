@@ -1,5 +1,6 @@
 import {
   interpolateNotificationCopy,
+  localizeRemovalReason,
   NOTIFICATION_COPY,
   normalizeNotificationLocale,
   type NotificationLocale,
@@ -10,6 +11,7 @@ export type NotificationParams = {
   clubName?: string;
   startsAt?: string;
   spotsLeft?: number;
+  reason?: string;
 };
 
 export type NotificationPayload = {
@@ -32,17 +34,20 @@ function parseParams(value: unknown): NotificationParams | undefined {
     typeof record.startsAt === "string" ? record.startsAt.trim() : undefined;
   const spotsLeft =
     typeof record.spotsLeft === "number" ? record.spotsLeft : undefined;
+  const reason =
+    typeof record.reason === "string" ? record.reason.trim() : undefined;
 
   if (
     name === undefined &&
     clubName === undefined &&
     startsAt === undefined &&
-    spotsLeft === undefined
+    spotsLeft === undefined &&
+    reason === undefined
   ) {
     return undefined;
   }
 
-  return { name, clubName, startsAt, spotsLeft };
+  return { name, clubName, startsAt, spotsLeft, reason };
 }
 
 export function parseNotificationPayload(
@@ -120,6 +125,7 @@ function displayParams(
       ? formatStartsAt(params.startsAt, locale)
       : undefined,
     spotsLeft: params.spotsLeft,
+    reason: localizeRemovalReason(params.reason, locale),
   };
 }
 

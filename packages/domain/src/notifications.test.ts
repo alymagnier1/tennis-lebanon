@@ -38,6 +38,22 @@ describe("notifications", () => {
       clubName: "Hippodrome",
       startsAt: "2026-08-20T15:00:00Z",
       spotsLeft: undefined,
+      reason: undefined,
+    });
+  });
+
+  it("parses a host-removal reason code", () => {
+    expect(
+      parseNotificationPayload({
+        deepLink: "/matches",
+        params: { reason: "conduct_issue" },
+      })?.params,
+    ).toEqual({
+      name: undefined,
+      clubName: undefined,
+      startsAt: undefined,
+      spotsLeft: undefined,
+      reason: "conduct_issue",
     });
   });
 
@@ -54,6 +70,7 @@ describe("notifications", () => {
     expect(isNotificationKind("match_time_changed")).toBe(true);
     expect(isNotificationKind("match_court_confirmed")).toBe(true);
     expect(isNotificationKind("match_message")).toBe(true);
+    expect(isNotificationKind("match_participant_removed")).toBe(true);
     expect(isNotificationKind("not_a_kind")).toBe(false);
   });
 });

@@ -24,6 +24,8 @@ const ICONS = {
   court: "tennisball-outline",
   playIntent: "ribbon-outline",
   check: "checkmark-circle",
+  /** Bare tick for filled checkboxes — no circle disc. */
+  checkMark: "checkmark",
   warning: "alert-circle-outline",
   chat: "chatbubble-ellipses-outline",
   emoji: "happy-outline",
@@ -36,7 +38,9 @@ const ICONS = {
   info: "information-circle-outline",
   camera: "camera-outline",
   lock: "lock-closed-outline",
+  signOut: "log-out-outline",
   star: "star",
+  starOutline: "star-outline",
 } as const;
 
 export type IconName = keyof typeof ICONS;

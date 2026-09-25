@@ -119,14 +119,93 @@ export function capacityForFormat(format: "singles" | "doubles"): number {
   return format === "singles" ? 2 : 4;
 }
 
+const LIVE_PARTICIPANT_STATUSES = ["accepted", "requested", "invited"] as const;
+
 export function canShowJoinAction(input: {
   viewerStatus?: string | null;
   matchStatus: string;
   requiresCreatorApproval: boolean;
 }): "join" | "request" | "none" {
-  if (input.viewerStatus) return "none";
+  if (
+    input.viewerStatus &&
+    (LIVE_PARTICIPANT_STATUSES as readonly string[]).includes(
+      input.viewerStatus,
+    )
+  ) {
+    return "none";
+  }
   if (input.matchStatus !== "open") return "none";
   return input.requiresCreatorApproval ? "request" : "join";
+}
+
+export const HOST_REMOVAL_REASONS = [
+  "match_requirements_mismatch",
+  "player_requested_removal",
+  "conduct_issue",
+] as const;
+
+export type HostRemovalReason = (typeof HOST_REMOVAL_REASONS)[number];
+
+export const HOST_REMOVAL_WARNING_HOURS = 2;
+
+const REMOVABLE_MATCH_STATUSES = [
+  "open",
+  "full",
+  "ready_to_book",
+  "booking_pending",
+  "confirmed",
+] as const;
+
+export function isHostRemovalReason(value: string): value is HostRemovalReason {
+  return (HOST_REMOVAL_REASONS as readonly string[]).includes(value);
+}
+
+/**
+ * The host can take an accepted player off the roster until the agreed hour.
+ * After that the record stays: withdrawal, no-show, or reporting take over.
+ */
+export function canHostRemoveParticipant(input: {
+  viewerIsCreator: boolean;
+  matchStatus: string;
+  targetIsCreator: boolean;
+  targetStatus?: string | null;
+  startsAt?: string | null;
+  now?: Date;
+}): boolean {
+  if (!input.viewerIsCreator || input.targetIsCreator) return false;
+  if (input.targetStatus && input.targetStatus !== "accepted") return false;
+  if (
+    !(REMOVABLE_MATCH_STATUSES as readonly string[]).includes(input.matchStatus)
+  ) {
+    return false;
+  }
+
+  if (input.startsAt) {
+    const startsAtMs = new Date(input.startsAt).getTime();
+    if (
+      !Number.isNaN(startsAtMs) &&
+      startsAtMs <= (input.now ?? new Date()).getTime()
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/** Extra confirmation when the hour is close enough to disrupt someone's plans. */
+export function hostRemovalNeedsStartWarning(
+  startsAt: string | null | undefined,
+  now = new Date(),
+): boolean {
+  if (!startsAt) return false;
+  const startsAtMs = new Date(startsAt).getTime();
+  if (Number.isNaN(startsAtMs)) return false;
+  const remainingMs = startsAtMs - now.getTime();
+  return (
+    remainingMs > 0 &&
+    remainingMs <= HOST_REMOVAL_WARNING_HOURS * 60 * 60 * 1000
+  );
 }
 
 /** Statuses in which a fixed match's time can still be moved. */

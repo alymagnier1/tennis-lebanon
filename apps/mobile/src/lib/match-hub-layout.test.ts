@@ -6,10 +6,13 @@ import {
   isHubVsHeroStage,
   isMatchHubChatAvailable,
   isMatchHubChatLocked,
+  joinerHubIntentCopyKey,
+  preferredClubsBeforePeoplePipeline,
   shouldShowAgreedTimeSection,
   shouldShowDiscoveryOverview,
   shouldShowPayAtClubBanner,
   shouldShowTimeAgreedBanner,
+  shouldUseCompactPreferredClubs,
   shouldUsePolishedHubLayout,
 } from "./match-hub-layout";
 
@@ -121,6 +124,49 @@ describe("shouldUsePolishedHubLayout", () => {
   });
 });
 
+describe("shouldUseCompactPreferredClubs", () => {
+  it("is true while recruiting, before a court is being confirmed", () => {
+    expect(
+      shouldUseCompactPreferredClubs({
+        vsHeroStage: true,
+        canConfirmCourt: false,
+        courtLocked: false,
+      }),
+    ).toBe(true);
+  });
+
+  it("stays on name rows while confirming a court, and not once the court is locked", () => {
+    expect(
+      shouldUseCompactPreferredClubs({
+        vsHeroStage: true,
+        canConfirmCourt: true,
+        courtLocked: false,
+      }),
+    ).toBe(true);
+    expect(
+      shouldUseCompactPreferredClubs({
+        vsHeroStage: true,
+        canConfirmCourt: false,
+        courtLocked: true,
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("preferredClubsBeforePeoplePipeline", () => {
+  it("hoists clubs above requests and invites when Confirm is the job", () => {
+    expect(preferredClubsBeforePeoplePipeline({ canConfirmCourt: true })).toBe(
+      true,
+    );
+  });
+
+  it("keeps Frame A order (people first) while recruiting", () => {
+    expect(preferredClubsBeforePeoplePipeline({ canConfirmCourt: false })).toBe(
+      false,
+    );
+  });
+});
+
 describe("shouldShowDiscoveryOverview", () => {
   it("hides during polished stages including open recruiting", () => {
     expect(shouldShowDiscoveryOverview(readyHub, null, true)).toBe(false);
@@ -184,6 +230,49 @@ describe("shouldShowTimeAgreedBanner", () => {
     expect(
       shouldShowTimeAgreedBanner("time_agreed", openHub, null, false),
     ).toBe(false);
+  });
+});
+
+describe("joinerHubIntentCopyKey", () => {
+  it("stays quiet for the host and for non-participants", () => {
+    expect(
+      joinerHubIntentCopyKey({
+        viewerIsCreator: true,
+        viewerStatus: "accepted",
+        nextAction: "time_agreed",
+      }),
+    ).toBeNull();
+    expect(
+      joinerHubIntentCopyKey({
+        viewerIsCreator: false,
+        viewerStatus: "requested",
+        nextAction: "request_pending",
+      }),
+    ).toBeNull();
+  });
+
+  it("names the next step after joining", () => {
+    expect(
+      joinerHubIntentCopyKey({
+        viewerIsCreator: false,
+        viewerStatus: "accepted",
+        nextAction: "awaiting_players",
+      }),
+    ).toBe("matches.hub.joinerIntentAwaitingPlayers");
+    expect(
+      joinerHubIntentCopyKey({
+        viewerIsCreator: false,
+        viewerStatus: "accepted",
+        nextAction: "time_agreed",
+      }),
+    ).toBe("matches.hub.joinerIntentHostBooking");
+    expect(
+      joinerHubIntentCopyKey({
+        viewerIsCreator: false,
+        viewerStatus: "accepted",
+        nextAction: "vote_on_times",
+      }),
+    ).toBe("matches.hub.joinerIntentVote");
   });
 });
 

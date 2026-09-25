@@ -6,8 +6,7 @@ import { type OpenMatchCard } from "@tennis-lebanon/api";
 import { canShowJoinAction } from "@tennis-lebanon/domain";
 import { AppText } from "../AppText";
 import { ListSkeleton, MatchCard } from "../AppUi";
-import { ErrorNotice } from "../FormUi";
-import { FigmaSecondaryButton } from "../onboarding-ui";
+import { ScreenError } from "../FormUi";
 import {
   compactJoinedLabel,
   clubNamesFromList,
@@ -21,6 +20,7 @@ import { useLayoutDirection } from "../../lib/layout-direction";
 import { discoverOpenMatchesRoute, matchHubRoute } from "../../lib/routes";
 import { useHomeOpenMatchPicks } from "../../hooks/useHomeOpenMatchPicks";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
+import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 function OpenMatchHomeCard({
@@ -85,13 +85,13 @@ export function HomeOpenMatches() {
   if (matchesQuery.isError || clubsQuery.isError) {
     return (
       <View style={styles.root}>
-        <AppText style={[styles.title, { writingDirection }]}>
+        <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
           {t("home.openMatches.title")}
         </AppText>
-        <ErrorNotice>{t("home.loadError")}</ErrorNotice>
-        <FigmaSecondaryButton
-          label={t("home.openMatches.retry")}
-          onPress={() => {
+        <ScreenError
+          message={t("home.loadError")}
+          retryLabel={t("home.openMatches.retry")}
+          onRetry={() => {
             void matchesQuery.refetch();
             void clubsQuery.refetch();
           }}
@@ -103,7 +103,7 @@ export function HomeOpenMatches() {
   if (matchesQuery.isPending || clubsQuery.isPending) {
     return (
       <View style={styles.root}>
-        <AppText style={[styles.title, { writingDirection }]}>
+        <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
           {t("home.openMatches.title")}
         </AppText>
         <ListSkeleton rows={2} />
@@ -119,7 +119,7 @@ export function HomeOpenMatches() {
     <View style={styles.root}>
       <View style={[styles.header, { flexDirection: rowDirection }]}>
         <AppText
-          style={[styles.title, { writingDirection, flex: 1 }]}
+          style={[tennisTextStyles.sectionTitle, { writingDirection, flex: 1 }]}
           maxLines={1}
         >
           {t("home.openMatches.titleCount", { count: matches.length })}
@@ -165,11 +165,6 @@ const styles = createLiveSheet(() =>
       justifyContent: "space-between",
       gap: 10,
     },
-    title: {
-      fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 18,
-      color: tennisColors.primaryDark,
-    },
     viewAll: {
       justifyContent: "center",
     },
@@ -179,7 +174,7 @@ const styles = createLiveSheet(() =>
     viewAllLabel: {
       fontFamily: tennisFontFamily.bodySemi,
       fontSize: 15,
-      color: tennisColors.violet,
+      color: tennisColors.violetText,
     },
   }),
 );

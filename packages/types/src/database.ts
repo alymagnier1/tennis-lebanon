@@ -837,6 +837,8 @@ export type Database = {
           joined_at: string | null;
           left_at: string | null;
           match_id: string;
+          removed_at: string | null;
+          removed_reason: string | null;
           score_declined_at: string | null;
           status: Database["public"]["Enums"]["participant_status"];
           user_id: string;
@@ -850,6 +852,8 @@ export type Database = {
           joined_at?: string | null;
           left_at?: string | null;
           match_id: string;
+          removed_at?: string | null;
+          removed_reason?: string | null;
           score_declined_at?: string | null;
           status: Database["public"]["Enums"]["participant_status"];
           user_id: string;
@@ -863,6 +867,8 @@ export type Database = {
           joined_at?: string | null;
           left_at?: string | null;
           match_id?: string;
+          removed_at?: string | null;
+          removed_reason?: string | null;
           score_declined_at?: string | null;
           status?: Database["public"]["Enums"]["participant_status"];
           user_id?: string;
@@ -1820,8 +1826,8 @@ export type Database = {
         Returns: string;
       };
       booking_stale_reminders: { Args: never; Returns: Json };
-      cancel_account_deletion: { Args: never; Returns: undefined };
       caller_has_password: { Args: never; Returns: boolean };
+      cancel_account_deletion: { Args: never; Returns: undefined };
       cancel_booking_request: {
         Args: { p_booking_id: string };
         Returns: undefined;
@@ -2467,6 +2473,16 @@ export type Database = {
         };
         Returns: number;
       };
+      preview_match_invite: {
+        Args: { p_token: string };
+        Returns: Database["public"]["CompositeTypes"]["match_invite_preview"];
+        SetofOptions: {
+          from: "*";
+          to: "match_invite_preview";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       propose_booking_alternative: {
         Args: {
           p_booking_id: string;
@@ -2537,6 +2553,10 @@ export type Database = {
       };
       release_external_court: {
         Args: { p_match_id: string; p_reason?: string };
+        Returns: undefined;
+      };
+      remove_match_participant: {
+        Args: { p_match_id: string; p_reason: string; p_user_id: string };
         Returns: undefined;
       };
       report_match_played: {
@@ -2781,6 +2801,16 @@ export type Database = {
       court_request_status: "opened" | "sent" | "not_sent";
       gender: "female" | "male";
       match_format: "singles" | "doubles";
+      match_invite_preview_status:
+        | "ok"
+        | "not_found"
+        | "wrong_recipient"
+        | "revoked"
+        | "already_accepted"
+        | "already_member"
+        | "expired"
+        | "full"
+        | "unavailable";
       match_status:
         | "draft"
         | "open"
@@ -2918,6 +2948,22 @@ export type Database = {
         expires_at: string | null;
         created_at: string | null;
         note: string | null;
+      };
+      match_invite_preview: {
+        invitation_id: string | null;
+        match_id: string | null;
+        format: Database["public"]["Enums"]["match_format"] | null;
+        match_status: Database["public"]["Enums"]["match_status"] | null;
+        creator_display_name: string | null;
+        inviter_display_name: string | null;
+        participant_count: number | null;
+        capacity: number | null;
+        soonest_time: string | null;
+        expires_at: string | null;
+        note: string | null;
+        zones: Json | null;
+        status:
+          Database["public"]["Enums"]["match_invite_preview_status"] | null;
       };
       user_report_queue_row: {
         report_id: string | null;
@@ -3080,6 +3126,17 @@ export const Constants = {
       court_request_status: ["opened", "sent", "not_sent"],
       gender: ["female", "male"],
       match_format: ["singles", "doubles"],
+      match_invite_preview_status: [
+        "ok",
+        "not_found",
+        "wrong_recipient",
+        "revoked",
+        "already_accepted",
+        "already_member",
+        "expired",
+        "full",
+        "unavailable",
+      ],
       match_status: [
         "draft",
         "open",

@@ -10,7 +10,7 @@ import {
   type HubPrimaryActionKind,
 } from "../../lib/hub-action-bar";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { tennisColors } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 export function MatchHubActionBar({
@@ -38,16 +38,22 @@ export function MatchHubActionBar({
   }
 
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+    <View
+      style={[
+        styles.bar,
+        !showPrimary && styles.barQuiet,
+        { paddingBottom: Math.max(insets.bottom, 12) },
+      ]}
+    >
       <View style={[styles.row, { flexDirection: rowDirection }]}>
         {showCancel ? (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={cancelLabel}
             onPress={onCancel}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             style={({ pressed }) => [
               styles.cancelButton,
-              showPrimary ? styles.cancelBesidePrimary : styles.cancelAlone,
               pressed && styles.cancelPressed,
             ]}
           >
@@ -60,9 +66,15 @@ export function MatchHubActionBar({
         {showPrimary && labelKey ? (
           <View style={showCancel ? styles.primaryWrap : styles.primaryAlone}>
             <FigmaPrimaryButton
-              label={t(labelKey)}
+              label={
+                actionKind === "invite"
+                  ? t("matches.invite.invitePlayer")
+                  : t(labelKey)
+              }
               loading={loading}
               onPress={onPress}
+              lime={actionKind === "invite"}
+              compact={actionKind === "invite" && showCancel}
               style={styles.primaryButton}
             />
           </View>
@@ -81,29 +93,21 @@ const styles = createLiveSheet(() =>
       paddingHorizontal: 20,
       paddingTop: 12,
     },
+    barQuiet: {
+      borderTopWidth: 0,
+      backgroundColor: tennisColors.background,
+    },
     row: {
       alignItems: "center",
       gap: 10,
     },
     cancelButton: {
       minHeight: minTouchTargetPx,
-      borderRadius: tennisRadii.md,
-      borderWidth: 1.5,
-      borderColor: tennisColors.danger,
-      backgroundColor: tennisColors.card,
-      alignItems: "center",
       justifyContent: "center",
-      paddingHorizontal: 14,
-    },
-    cancelBesidePrimary: {
-      flexShrink: 0,
-    },
-    cancelAlone: {
-      flex: 1,
+      alignSelf: "flex-start",
     },
     cancelPressed: {
-      opacity: 0.88,
-      backgroundColor: "#FCECEC",
+      opacity: 0.7,
     },
     cancelLabel: {
       fontFamily: tennisFontFamily.bodyMedium,

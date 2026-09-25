@@ -10,6 +10,10 @@ import type { Json } from "@tennis-lebanon/types";
 import { AppText } from "./AppText";
 import { Icon } from "./Icon";
 import { clubBookingModeLabelKey } from "../lib/club-booking-label";
+import {
+  clubAmenityI18nKey,
+  humanizeClubAmenity,
+} from "../lib/club-detail-layout";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { zoneNameFromJson } from "../lib/zones";
 import {
@@ -42,8 +46,6 @@ function bookingBadgeStyle(bookingMode: string): BookingBadgeStyle {
     };
   }
 
-  // `tennisColors.accent` on the old #FEF0E7 was 3.87:1 -- under AA for 11px
-  // badge text. The attention tone is the same clay family at 5.80:1.
   return {
     color: tennisSemantic.attention.text,
     backgroundColor: tennisSemantic.attention.fill,
@@ -58,6 +60,18 @@ function MetaChip({ children }: { children: string }) {
   );
 }
 
+export function ClubDirectoryCardSkeleton() {
+  return (
+    <View style={styles.card} accessibilityElementsHidden>
+      <View style={styles.skeletonHero} />
+      <View style={styles.body}>
+        <View style={styles.skeletonLine} />
+        <View style={styles.skeletonLineShort} />
+      </View>
+    </View>
+  );
+}
+
 export function ClubDirectoryCard({
   club,
   onPress,
@@ -65,7 +79,7 @@ export function ClubDirectoryCard({
   compact = false,
 }: ClubDirectoryCardProps) {
   const { t, i18n } = useTranslation();
-  const { rowDirection, writingDirection } = useLayoutDirection();
+  const { rowDirection, writingDirection, isRtl } = useLayoutDirection();
   const price = formatPriceMinor(club.min_price_minor, club.currency);
   const selectable = selected !== undefined;
   const zone = zoneNameFromJson(
@@ -75,10 +89,17 @@ export function ClubDirectoryCard({
   const bookingBadge = bookingBadgeStyle(club.booking_mode);
   const amenities = compact ? [] : club.amenities.slice(0, 3);
 
+  function amenityLabel(amenity: string): string {
+    const key = clubAmenityI18nKey(amenity);
+    return key ? t(key) : humanizeClubAmenity(amenity);
+  }
+
   return (
     <Pressable
       accessibilityRole={selectable ? "checkbox" : "button"}
-      accessibilityLabel={club.name}
+      accessibilityLabel={
+        club.is_favorite ? `${club.name}, ${t("clubs.favorite")}` : club.name
+      }
       accessibilityState={selectable ? { checked: selected } : undefined}
       onPress={onPress}
       style={({ pressed }) => [
@@ -89,41 +110,41 @@ export function ClubDirectoryCard({
       ]}
     >
       <View style={[styles.hero, compact && styles.heroCompact]}>
-        {/*
-          The scrim is a fixed 80px designed to sit under the badges on the
-          160px hero. The compact hero is 72px, so it covered the whole thing
-          and buried the placeholder -- which is why compact cards read as a
-          blank grey block. The badges carry their own fill, so compact needs
-          no scrim at all.
-        */}
-        {compact ? null : <View style={styles.heroOverlay} />}
         <View style={styles.heroPattern}>
           <Icon
-            name="place"
-            size={compact ? 32 : 48}
-            color={tennisColors.mutedForeground}
+            name="court"
+            size={compact ? 36 : 64}
+            color={tennisColors.white}
           />
         </View>
 
         {selectable ? (
           <View
-            style={[styles.selectMark, selected && styles.selectMarkSelected]}
+            style={[
+              styles.selectMark,
+              isRtl ? styles.selectMarkRtl : styles.selectMarkLtr,
+              selected && styles.selectMarkSelected,
+            ]}
           >
             {selected ? <AppText style={styles.selectCheck}>✓</AppText> : null}
           </View>
         ) : null}
 
         {club.is_favorite ? (
-          <View style={styles.favoriteBadge}>
-            <AppText style={styles.favoriteBadgeText}>
-              {t("clubs.favorite")}
-            </AppText>
+          <View
+            style={[
+              styles.favoriteBadge,
+              isRtl ? styles.favoriteBadgeRtl : styles.favoriteBadgeLtr,
+            ]}
+          >
+            <Icon name="star" size={12} color={tennisColors.limeText} />
           </View>
         ) : null}
 
         <View
           style={[
             styles.bookingBadge,
+            isRtl ? styles.bookingBadgeRtl : styles.bookingBadgeLtr,
             { backgroundColor: bookingBadge.backgroundColor },
           ]}
         >
@@ -153,7 +174,12 @@ export function ClubDirectoryCard({
             </AppText>
           </View>
           {price ? (
-            <View style={styles.priceBlock}>
+            <View
+              style={[
+                styles.priceBlock,
+                { alignItems: isRtl ? "flex-start" : "flex-end" },
+              ]}
+            >
               <AppText style={[styles.price, compact && styles.priceCompact]}>
                 {price}
               </AppText>
@@ -166,11 +192,6 @@ export function ClubDirectoryCard({
           ) : null}
         </View>
 
-        {/*
-          The compact branch used to repeat the booking mode here, so every
-          picker card said "Request booking" twice -- once on the hero badge
-          and again below it.
-        */}
         <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
           <MetaChip>
             {t("clubs.courtCount", { count: club.court_count })}
@@ -183,21 +204,10 @@ export function ClubDirectoryCard({
             {amenities.map((tag) => (
               <View key={tag} style={styles.tag}>
                 <AppText style={styles.tagText} maxLines={1}>
-                  {tag}
+                  {amenityLabel(tag)}
                 </AppText>
               </View>
             ))}
-          </View>
-        ) : null}
-
-        {/*
-          Selection is already carried by the checkbox and the card border, so
-          a third "Selected for this booking" line was restating one boolean
-          three times.
-        */}
-        {!selectable ? (
-          <View style={styles.cta}>
-            <AppText style={styles.ctaLabel}>{t("clubs.viewDetails")}</AppText>
           </View>
         ) : null}
       </View>
@@ -230,33 +240,23 @@ const styles = createLiveSheet(() =>
       opacity: 0.92,
     },
     hero: {
-      height: 160,
-      backgroundColor: tennisColors.muted,
+      height: 148,
+      backgroundColor: tennisColors.photoPlaceholder,
       position: "relative",
       overflow: "hidden",
     },
     heroCompact: {
       height: 72,
     },
-    heroOverlay: {
-      position: "absolute",
-      left: 0,
-      right: 0,
-      bottom: 0,
-      height: 80,
-      backgroundColor: "rgba(0,0,0,0.35)",
-      zIndex: 2,
-    },
     heroPattern: {
       ...StyleSheet.absoluteFill,
       alignItems: "center",
       justifyContent: "center",
-      opacity: 0.35,
+      opacity: 0.28,
     },
     selectMark: {
       position: "absolute",
       top: 10,
-      left: 10,
       zIndex: 4,
       width: 24,
       height: 24,
@@ -266,6 +266,12 @@ const styles = createLiveSheet(() =>
       backgroundColor: "rgba(255,255,255,0.35)",
       alignItems: "center",
       justifyContent: "center",
+    },
+    selectMarkLtr: {
+      left: 10,
+    },
+    selectMarkRtl: {
+      right: 10,
     },
     selectMarkSelected: {
       backgroundColor: tennisColors.primary,
@@ -280,26 +286,33 @@ const styles = createLiveSheet(() =>
     favoriteBadge: {
       position: "absolute",
       top: 12,
-      right: 12,
       zIndex: 3,
-      paddingHorizontal: 12,
-      paddingVertical: 4,
-      borderRadius: tennisRadii.pill,
+      width: 28,
+      height: 28,
+      borderRadius: 14,
       backgroundColor: tennisColors.lime,
+      alignItems: "center",
+      justifyContent: "center",
     },
-    favoriteBadgeText: {
-      fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 11,
-      color: tennisColors.limeText,
+    favoriteBadgeLtr: {
+      right: 12,
+    },
+    favoriteBadgeRtl: {
+      left: 12,
     },
     bookingBadge: {
       position: "absolute",
-      right: 12,
       bottom: 12,
       zIndex: 3,
       paddingHorizontal: 10,
       paddingVertical: 4,
       borderRadius: tennisRadii.pill,
+    },
+    bookingBadgeLtr: {
+      left: 12,
+    },
+    bookingBadgeRtl: {
+      right: 12,
     },
     bookingBadgeText: {
       fontFamily: tennisFontFamily.bodySemi,
@@ -341,7 +354,6 @@ const styles = createLiveSheet(() =>
       color: tennisColors.mutedForeground,
     },
     priceBlock: {
-      alignItems: "flex-end",
       flexShrink: 0,
     },
     price: {
@@ -390,16 +402,20 @@ const styles = createLiveSheet(() =>
       fontSize: 11,
       color: tennisColors.primary,
     },
-    cta: {
-      paddingVertical: 12,
-      borderRadius: tennisRadii.md,
-      backgroundColor: tennisColors.primary,
-      alignItems: "center",
+    skeletonHero: {
+      height: 148,
+      backgroundColor: tennisColors.muted,
     },
-    ctaLabel: {
-      fontFamily: tennisFontFamily.heading,
-      fontSize: 14,
-      color: tennisColors.white,
+    skeletonLine: {
+      height: 14,
+      borderRadius: 7,
+      backgroundColor: tennisColors.muted,
+    },
+    skeletonLineShort: {
+      height: 14,
+      width: "48%",
+      borderRadius: 7,
+      backgroundColor: tennisColors.muted,
     },
   }),
 );

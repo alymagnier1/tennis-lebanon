@@ -94,7 +94,11 @@ export function OnboardingYearField({
           onPress={() => setOpen(false)}
         >
           {/* Swallows taps so a press inside the sheet never closes it. */}
-          <Pressable style={styles.sheet} onPress={() => undefined}>
+          <Pressable
+            accessibilityRole="none"
+            style={styles.sheet}
+            onPress={() => undefined}
+          >
             <AppText style={styles.sheetTitle}>{label}</AppText>
             <FlatList
               data={years}

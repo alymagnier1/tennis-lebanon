@@ -7,7 +7,12 @@ import { AppText } from "../AppText";
 import { HeroScrim } from "./HeroScrim";
 import { useHeroVariant } from "../../providers/HeroVariantProvider";
 import { tennisTextStyles } from "../../theme/tennis-text-styles";
-import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisHeroArt,
+  tennisSpacing,
+} from "../../theme/tennis-tokens";
+import { createLiveSheet } from "../../theme/create-live-sheet";
 import type { HeroFamily } from "../../theme/hero-variant";
 
 const ART = {
@@ -44,7 +49,7 @@ type HeroField = {
 function heroFields(): Record<HeroFamily, HeroField> {
   return {
     green: {
-      ground: tennisColors.heroPlate,
+      ground: tennisHeroArt.heroPlate,
       art: ART.court,
       artShadow: false,
       statusBar: "light",
@@ -76,7 +81,7 @@ function heroFields(): Record<HeroFamily, HeroField> {
       headlineMarginTop: 36,
     },
     light: {
-      ground: tennisColors.heroClay,
+      ground: tennisHeroArt.heroClay,
       art: ART.cut,
       artShadow: true,
       statusBar: "dark",
@@ -85,14 +90,14 @@ function heroFields(): Record<HeroFamily, HeroField> {
         colors: [
           "rgba(232,220,194,0)",
           "rgba(232,220,194,0.9)",
-          tennisColors.heroClay,
+          tennisHeroArt.heroClay,
         ],
         locations: [0, 0.44, 1],
       },
       mark: ART.markDark,
-      wordmark: tennisColors.heroOnLight,
-      ink: tennisColors.heroOnLight,
-      accent: tennisColors.heroGreen,
+      wordmark: tennisHeroArt.heroOnLight,
+      ink: tennisHeroArt.heroOnLight,
+      accent: tennisHeroArt.heroGreen,
       description: "rgba(13,28,20,0.68)",
       display: "display",
       headlineMarginTop: 36,
@@ -217,42 +222,44 @@ export function AuthHeroDescription({ children }: { children: ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    overflow: "hidden",
-  },
-  art: {
-    ...StyleSheet.absoluteFill,
-    width: "100%",
-    height: "100%",
-  },
-  artShadow: {
-    shadowColor: tennisColors.heroInk,
-    shadowOpacity: 0.14,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 8,
-  },
-  content: {
-    flexGrow: 1,
-    paddingHorizontal: tennisSpacing.screenX,
-  },
-  logoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  mark: {
-    width: 34,
-    height: 34,
-  },
-  spacer: {
-    flexGrow: 1,
-    minHeight: 24,
-  },
-  description: {
-    maxWidth: 288,
-    marginBottom: 22,
-  },
-});
+const styles = createLiveSheet(() =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      overflow: "hidden",
+    },
+    art: {
+      ...StyleSheet.absoluteFill,
+      width: "100%",
+      height: "100%",
+    },
+    artShadow: {
+      shadowColor: tennisHeroArt.heroInk,
+      shadowOpacity: 0.14,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 8,
+    },
+    content: {
+      flexGrow: 1,
+      paddingHorizontal: tennisSpacing.screenX,
+    },
+    logoRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    mark: {
+      width: 34,
+      height: 34,
+    },
+    spacer: {
+      flexGrow: 1,
+      minHeight: 24,
+    },
+    description: {
+      maxWidth: 288,
+      marginBottom: 22,
+    },
+  }),
+);

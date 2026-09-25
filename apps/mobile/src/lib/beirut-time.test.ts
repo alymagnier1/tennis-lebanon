@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { beirutLocalToUtcIso, utcIsoToBeirutFields } from "./beirut-time";
+import {
+  beirutLocalToUtcIso,
+  formatHubTitleInBeirut,
+  formatHubVsTimeInBeirut,
+  utcIsoToBeirutFields,
+} from "./beirut-time";
 
 describe("beirut-time", () => {
   // The wizard builds proposed_times from these, so getting the offset wrong
@@ -48,5 +53,24 @@ describe("beirut-time", () => {
         );
       });
     }
+  });
+});
+
+describe("formatHubTitleInBeirut", () => {
+  it("names the weekday and the Beirut clock", () => {
+    expect(
+      formatHubTitleInBeirut("2026-09-19T15:00:00.000Z", "en-US").replace(
+        /\s/g,
+        " ",
+      ),
+    ).toBe("Saturday 6:00 PM");
+  });
+});
+
+describe("formatHubVsTimeInBeirut", () => {
+  it("uses a short weekday and a 24-hour Beirut clock", () => {
+    expect(formatHubVsTimeInBeirut("2026-09-19T15:00:00.000Z", "en-GB")).toBe(
+      "Sat 18:00",
+    );
   });
 });

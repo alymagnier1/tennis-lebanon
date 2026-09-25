@@ -58,37 +58,24 @@ describe("whereSectionHydrated", () => {
       whereSectionHydrated({
         zonesHydrated: false,
         clubsHydrated: true,
-        clubsSettled: true,
       }),
     ).toBe(false);
   });
 
-  it("waits for the club directory before deciding", () => {
+  it("waits for club seeding before deciding", () => {
     expect(
       whereSectionHydrated({
         zonesHydrated: true,
         clubsHydrated: false,
-        clubsSettled: false,
       }),
     ).toBe(false);
   });
 
-  it("is ready once seeding has run", () => {
+  it("is ready once zones and club seeding have both run", () => {
     expect(
       whereSectionHydrated({
         zonesHydrated: true,
         clubsHydrated: true,
-        clubsSettled: false,
-      }),
-    ).toBe(true);
-  });
-
-  it("is ready once the directory settles even with nothing to seed", () => {
-    expect(
-      whereSectionHydrated({
-        zonesHydrated: true,
-        clubsHydrated: false,
-        clubsSettled: true,
       }),
     ).toBe(true);
   });

@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import {
   Animated,
   Easing,
@@ -13,6 +13,7 @@ import {
   Switch,
   View,
   ActivityIndicator,
+  AccessibilityInfo,
 } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { KeyboardAvoider } from "./KeyboardAvoider";
@@ -35,8 +36,6 @@ import { formatTabBadgeCount } from "../lib/match-list-card";
 import { useResponsiveLayout } from "../lib/responsive";
 import { AppText } from "./AppText";
 import { Icon, type IconName } from "./Icon";
-import { SemanticBadge } from "./SemanticBadge";
-import type { MatchListBadge } from "../lib/match-status-tone";
 import { mobileBrand } from "../theme/mobile-brand";
 import {
   tennisColors,
@@ -194,116 +193,6 @@ export function SectionTitle({
           {subtitle}
         </AppText>
       ) : null}
-    </View>
-  );
-}
-
-export function ChipSelect<T extends string>({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label?: string;
-  options: { value: T; label: string }[];
-  value: T;
-  onChange: (value: T) => void;
-}) {
-  const { writingDirection } = useLayoutDirection();
-  const { narrow } = useResponsiveLayout();
-
-  return (
-    <View style={styles.chipSection}>
-      {label ? (
-        <AppText style={[styles.chipSectionLabel, { writingDirection }]}>
-          {label}
-        </AppText>
-      ) : null}
-      <View style={styles.chipGrid}>
-        {options.map((option) => {
-          const selected = option.value === value;
-          return (
-            <Pressable
-              key={option.value}
-              accessibilityRole="radio"
-              accessibilityLabel={option.label}
-              accessibilityState={{ selected }}
-              onPress={() => onChange(option.value)}
-              style={[
-                styles.chip,
-                narrow && styles.chipNarrow,
-                selected && styles.chipSelected,
-              ]}
-            >
-              <AppText
-                style={[
-                  styles.chipText,
-                  selected && styles.chipTextSelected,
-                  { writingDirection },
-                ]}
-                maxLines={2}
-              >
-                {option.label}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
-  );
-}
-
-export function ChipMultiSelect({
-  label,
-  options,
-  values,
-  onToggle,
-}: {
-  label?: string;
-  options: { value: string; label: string }[];
-  values: string[];
-  onToggle: (value: string) => void;
-}) {
-  const { writingDirection } = useLayoutDirection();
-  const { narrow } = useResponsiveLayout();
-
-  return (
-    <View style={styles.chipSection}>
-      {label ? (
-        <AppText style={[styles.chipSectionLabel, { writingDirection }]}>
-          {label}
-        </AppText>
-      ) : null}
-      <View style={styles.chipGrid}>
-        {options.map((option) => {
-          const selected = values.includes(option.value);
-          return (
-            <Pressable
-              key={option.value}
-              accessibilityRole="checkbox"
-              accessibilityLabel={option.label}
-              accessibilityState={{ checked: selected }}
-              onPress={() => onToggle(option.value)}
-              style={[
-                styles.chip,
-                narrow && styles.chipNarrow,
-                selected && styles.chipSelected,
-              ]}
-            >
-              <AppText
-                style={[
-                  styles.chipText,
-                  selected && styles.chipTextSelected,
-                  { writingDirection },
-                ]}
-                maxLines={2}
-              >
-                {option.label}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </View>
     </View>
   );
 }
@@ -501,11 +390,74 @@ export function PlayerInviteAction({
 export { FigmaMatchCard as MatchCard } from "./match/FigmaMatchCard";
 export type { MatchCardProps } from "./match/FigmaMatchCard";
 
+/**
+ * Static grey blocks read the same whether the request is in flight or hung,
+ * which on a slow connection is the difference between waiting and reloading.
+ * The pulse is the only thing saying the app is still trying.
+ *
+ * Honours Reduce Motion: that setting exists partly for people who find
+ * looping animation nauseating, and a skeleton is on screen for as long as the
+ * network takes.
+ */
 export function ListSkeleton({ rows = 3 }: { rows?: number }) {
+  // Lazy state, not useRef().current: the value is read during render to build
+  // the interpolation, which the refs lint rule (rightly) rejects on a ref.
+  const [pulse] = useState(() => new Animated.Value(0));
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
+      if (active) setReduceMotion(enabled);
+    });
+    const subscription = AccessibilityInfo.addEventListener(
+      "reduceMotionChanged",
+      setReduceMotion,
+    );
+    return () => {
+      active = false;
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      pulse.setValue(0);
+      return;
+    }
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 700,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0,
+          duration: 700,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse, reduceMotion]);
+
+  const opacity = reduceMotion
+    ? 1
+    : pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 0.45] });
+
   return (
     <View style={styles.skeletonList}>
       {Array.from({ length: rows }, (_, index) => (
-        <View key={index} style={styles.skeletonCard} />
+        <Animated.View
+          key={index}
+          style={[styles.skeletonCard, { opacity }]}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        />
       ))}
     </View>
   );
@@ -845,17 +797,19 @@ export function AnimatedCollapse({
 
   return (
     <View>
-      {contentHeight === 0 ? (
-        <View
-          pointerEvents="none"
-          style={styles.collapseMeasure}
-          onLayout={(event) =>
-            setContentHeight(event.nativeEvent.layout.height)
-          }
-        >
-          {children}
-        </View>
-      ) : null}
+      {/* Keep measuring: nested collapses (and toggled children) change height
+          after the first layout; a one-shot measure clips them forever. */}
+      <View
+        pointerEvents="none"
+        style={styles.collapseMeasure}
+        onLayout={(event) => {
+          const next = event.nativeEvent.layout.height;
+          if (next <= 0) return;
+          setContentHeight((prev) => (Math.abs(prev - next) < 1 ? prev : next));
+        }}
+      >
+        {children}
+      </View>
       <Animated.View
         style={[
           styles.collapseContainer,
@@ -916,7 +870,7 @@ export function SettingToggle({
         disabled={disabled}
         onValueChange={onValueChange}
         trackColor={{
-          false: colors.neutral[300],
+          false: tennisColors.border,
           true: variant === "card" ? tennisColors.primary : mobileBrand[300],
         }}
         thumbColor={
@@ -924,7 +878,7 @@ export function SettingToggle({
             ? variant === "card"
               ? tennisColors.white
               : mobileBrand[500]
-            : colors.neutral[0]
+            : tennisColors.card
         }
       />
     </View>
@@ -1045,30 +999,30 @@ const styles = createLiveSheet(() =>
       maxWidth: "100%",
     },
     segmentTabBadge: {
-      minWidth: 18,
-      height: 18,
-      borderRadius: 9,
-      paddingHorizontal: 5,
+      minWidth: 22,
+      height: 22,
+      borderRadius: 11,
+      paddingHorizontal: 6,
       backgroundColor: tennisColors.accent,
       alignItems: "center",
       justifyContent: "center",
     },
     segmentTabBadgeNested: {
-      minWidth: 16,
-      height: 16,
-      borderRadius: 8,
-      paddingHorizontal: 4,
+      minWidth: 20,
+      height: 20,
+      borderRadius: 10,
+      paddingHorizontal: 5,
     },
     segmentTabBadgeText: {
       color: tennisColors.white,
-      fontSize: 10,
-      lineHeight: 12,
+      fontSize: 11,
+      lineHeight: 13,
       fontFamily: tennisFontFamily.bodySemi,
     },
     segmentTabActive: {
-      backgroundColor: tennisColors.card,
+      backgroundColor: tennisColors.primary,
       shadowColor: colors.neutral[900],
-      shadowOpacity: 0.06,
+      shadowOpacity: 0.12,
       shadowRadius: 4,
       shadowOffset: { width: 0, height: 1 },
       elevation: 1,
@@ -1077,7 +1031,7 @@ const styles = createLiveSheet(() =>
       borderBottomColor: tennisColors.primary,
     },
     segmentTabText: {
-      color: colors.neutral[700],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.semibold,
       textAlign: "center",
@@ -1091,7 +1045,7 @@ const styles = createLiveSheet(() =>
       flexShrink: 1,
     },
     segmentTabTextActive: {
-      color: tennisColors.primary,
+      color: tennisColors.onPrimary,
       fontFamily: tennisFontFamily.headingSemi,
     },
     segmentTabTextNestedActive: {
@@ -1112,50 +1066,12 @@ const styles = createLiveSheet(() =>
       backgroundColor: tennisColors.primary,
     },
     sectionTitleText: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.lg,
       fontWeight: typography.weight.bold,
     },
-    chipSection: { gap: spacing.sm },
-    chipSectionLabel: {
-      color: colors.neutral[900],
-      fontSize: typography.size.md,
-      fontWeight: typography.weight.semibold,
-    },
-    chipGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: spacing.sm,
-    },
-    chip: {
-      minHeight: minTouchTargetPx,
-      justifyContent: "center",
-      paddingHorizontal: spacing.lg,
-      paddingVertical: spacing.sm,
-      borderWidth: 1,
-      borderColor: colors.neutral[300],
-      borderRadius: radii.lg,
-      backgroundColor: colors.neutral[0],
-      maxWidth: "100%",
-    },
-    chipNarrow: {
-      paddingHorizontal: spacing.md,
-    },
-    chipSelected: {
-      borderColor: mobileBrand[500],
-      backgroundColor: mobileBrand[50],
-    },
-    chipText: {
-      color: colors.neutral[900],
-      fontSize: typography.size.sm,
-      fontWeight: typography.weight.medium,
-    },
-    chipTextSelected: {
-      color: mobileBrand[700],
-      fontWeight: typography.weight.semibold,
-    },
     avatarImage: {
-      backgroundColor: colors.neutral[100],
+      backgroundColor: tennisColors.muted,
     },
     avatarFallback: {
       alignItems: "center",
@@ -1163,7 +1079,7 @@ const styles = createLiveSheet(() =>
       backgroundColor: mobileBrand[100],
     },
     avatarLoading: {
-      backgroundColor: colors.neutral[100],
+      backgroundColor: tennisColors.muted,
     },
     avatarInitials: {
       color: mobileBrand[700],
@@ -1223,8 +1139,8 @@ const styles = createLiveSheet(() =>
       paddingHorizontal: spacing.sm,
       paddingVertical: 3,
       borderRadius: radii.sm,
-      backgroundColor: colors.success[50],
-      color: colors.success[700],
+      backgroundColor: tennisSemantic.positive.fill,
+      color: tennisSemantic.positive.text,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.medium,
     },
@@ -1238,7 +1154,7 @@ const styles = createLiveSheet(() =>
       backgroundColor: tennisColors.primary,
     },
     inviteActionButtonText: {
-      color: colors.neutral[0],
+      color: tennisColors.onPrimary,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.semibold,
     },
@@ -1251,7 +1167,7 @@ const styles = createLiveSheet(() =>
       paddingHorizontal: spacing.sm,
     },
     inviteActionInvitedText: {
-      color: colors.neutral[500],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.medium,
     },
@@ -1270,7 +1186,7 @@ const styles = createLiveSheet(() =>
       gap: spacing.xs,
     },
     matchCardTitle: {
-      color: colors.neutral[500],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.medium,
     },
@@ -1281,22 +1197,22 @@ const styles = createLiveSheet(() =>
       paddingHorizontal: spacing.sm,
       paddingVertical: 3,
       borderRadius: radii.sm,
-      backgroundColor: colors.warning[100],
-      color: colors.warning[700],
+      backgroundColor: tennisSemantic.attention.fill,
+      color: tennisSemantic.attention.text,
       fontSize: typography.size.xs,
       fontWeight: typography.weight.semibold,
     },
     matchCardSubtitle: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.md,
       fontWeight: typography.weight.semibold,
     },
     matchCardMeta: {
-      color: colors.neutral[700],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
     },
     matchCardNote: {
-      color: colors.neutral[700],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
       marginTop: spacing.xs,
     },
@@ -1359,7 +1275,7 @@ const styles = createLiveSheet(() =>
     },
     toolbarText: {
       textAlign: "center",
-      color: colors.neutral[700],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
       fontWeight: typography.weight.medium,
     },
@@ -1381,7 +1297,7 @@ const styles = createLiveSheet(() =>
     },
     sheetContainer: {
       maxHeight: "85%",
-      backgroundColor: colors.neutral[0],
+      backgroundColor: tennisColors.card,
       borderTopLeftRadius: radii.xl,
       borderTopRightRadius: radii.xl,
       paddingTop: spacing.sm,
@@ -1393,12 +1309,12 @@ const styles = createLiveSheet(() =>
       width: 40,
       height: 4,
       borderRadius: radii.full,
-      backgroundColor: colors.neutral[300],
+      backgroundColor: tennisColors.border,
       marginBottom: spacing.lg,
     },
     sheetTitle: {
       textAlign: "center",
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.lg,
       fontWeight: typography.weight.bold,
       marginBottom: spacing.lg,
@@ -1424,12 +1340,12 @@ const styles = createLiveSheet(() =>
     },
     sheetOptionText: { flex: 1, gap: 2, minWidth: 0 },
     sheetOptionLabel: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.md,
       fontWeight: typography.weight.medium,
     },
     sheetOptionDescription: {
-      color: colors.neutral[500],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
     },
     radio: {
@@ -1437,7 +1353,7 @@ const styles = createLiveSheet(() =>
       height: 22,
       borderRadius: radii.full,
       borderWidth: 2,
-      borderColor: colors.neutral[300],
+      borderColor: tennisColors.border,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -1508,12 +1424,12 @@ const styles = createLiveSheet(() =>
       minWidth: 0,
     },
     settingLabel: {
-      color: colors.neutral[900],
+      color: tennisColors.primaryDark,
       fontSize: typography.size.md,
       fontWeight: typography.weight.medium,
     },
     settingDescription: {
-      color: colors.neutral[500],
+      color: tennisColors.mutedForeground,
       fontSize: typography.size.sm,
       lineHeight: 20,
     },

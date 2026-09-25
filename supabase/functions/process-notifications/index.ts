@@ -1,5 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
+  isInvokerAuthorized,
+  isUsableInvokerToken,
+} from "../_shared/invoker-auth.ts";
+import {
   buildExpoPushMessages,
   parseNotificationPayload,
 } from "../_shared/notifications.ts";
@@ -22,11 +26,6 @@ type ExpoTicket = {
 };
 
 const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
-
-function isAuthorized(req: Request, serviceRoleKey: string): boolean {
-  const authHeader = req.headers.get("Authorization");
-  return authHeader === `Bearer ${serviceRoleKey}`;
-}
 
 async function sendExpoPush(
   messages: ReturnType<typeof buildExpoPushMessages>,
@@ -59,12 +58,23 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  // Who may call this, kept apart from what this function calls the database
+  // with. See `_shared/invoker-auth.ts` for why they are no longer the same key.
+  const invokerToken = Deno.env.get("PROCESS_NOTIFICATIONS_TOKEN");
 
   if (!supabaseUrl || !serviceRoleKey) {
     return new Response("Missing Supabase configuration", { status: 500 });
   }
 
-  if (!isAuthorized(req, serviceRoleKey)) {
+  // A 500 with a name, not a 401: an unset secret is a deploy mistake, and
+  // answering every cron run with "Unauthorized" is how the last one hid.
+  if (!isUsableInvokerToken(invokerToken)) {
+    return new Response("PROCESS_NOTIFICATIONS_TOKEN is not configured", {
+      status: 500,
+    });
+  }
+
+  if (!isInvokerAuthorized(req.headers.get("Authorization"), invokerToken)) {
     return new Response("Unauthorized", { status: 401 });
   }
 

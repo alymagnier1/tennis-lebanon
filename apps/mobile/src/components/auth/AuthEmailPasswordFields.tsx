@@ -141,7 +141,7 @@ const styles = createLiveSheet(() =>
     toggleLabel: {
       fontFamily: tennisFontFamily.bodySemi,
       fontSize: 12.5,
-      color: tennisColors.heroGreen,
+      color: tennisColors.linkText,
     },
   }),
 );

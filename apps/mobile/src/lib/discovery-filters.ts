@@ -9,7 +9,10 @@ import {
 } from "./device-storage";
 
 export type PersistedDiscoverFilters = {
-  matchToggles?: Partial<DiscoverMatchToggles>;
+  matchToggles?: Partial<DiscoverMatchToggles> & {
+    /** Dropped from Discover chips; ignored if still on device. */
+    matchIntent?: boolean;
+  };
 };
 
 /**
@@ -18,6 +21,9 @@ export type PersistedDiscoverFilters = {
  * honouring it now would restrict a player who had asked for the opposite. The
  * old key is left to expire rather than migrated — there is nothing worth
  * translating in a value whose sense was reversed.
+ *
+ * `matchIntent` was removed from Discover later; any stored value is ignored so
+ * browse stays open on play intent.
  */
 function storageKey(userId: string): string {
   return deviceStorageKey("discover-filters.v2", userId);
@@ -35,10 +41,8 @@ export async function loadDiscoverFilters(
       ...DEFAULT_DISCOVER_MATCH_TOGGLES,
       ...parsed.matchToggles,
     };
-    // Drop legacy matchFormat if still present in older device storage.
     return {
       matchLevel: merged.matchLevel,
-      matchIntent: merged.matchIntent,
       matchArea: merged.matchArea,
       matchAvailability: merged.matchAvailability,
     };

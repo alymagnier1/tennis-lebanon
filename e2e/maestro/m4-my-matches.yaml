@@ -1,0 +1,14 @@
+appId: com.racketbound.app
+name: M4 my matches and the invite inbox
+---
+- runFlow:
+    file: flows/sign-in.yaml
+    env:
+      EMAIL: ${PLAYER_A_EMAIL}
+      PASSWORD: ${PLAYER_A_PASSWORD}
+- tapOn: "Matches"
+- assertVisible: "My matches"
+- tapOn: "Invites"
+- assertVisible: "Invites"
+- tapOn: "Active"
+- assertVisible: "Active"

@@ -252,6 +252,7 @@ export function ProfileTabDashboard() {
       >
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t("common.cancel")}
           style={styles.modalBackdrop}
           onPress={() => setShowRatingExplainer(false)}
         >

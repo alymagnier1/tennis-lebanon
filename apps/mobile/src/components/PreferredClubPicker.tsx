@@ -6,7 +6,7 @@ import { AppText } from "./AppText";
 import { Icon } from "./Icon";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { zoneNameFromJson } from "../lib/zones";
-import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import { tennisColors } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 import type { Json } from "@tennis-lebanon/types";
 
@@ -28,6 +28,10 @@ function sortClubsFavoritesFirst(
   });
 }
 
+/**
+ * Hub-style name rows in one card (same skeleton as MatchHubPreferredClubs
+ * compact): check + name · area. Favourites still sort first.
+ */
 export function PreferredClubPicker({
   clubs,
   selectedClubIds,
@@ -37,6 +41,7 @@ export function PreferredClubPicker({
   const { t, i18n } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
   const sorted = sortClubsFavoritesFirst(clubs);
+  const locale = i18n.resolvedLanguage ?? i18n.language;
 
   if (sorted.length === 0) {
     return (
@@ -47,60 +52,56 @@ export function PreferredClubPicker({
   }
 
   return (
-    <View style={styles.list}>
-      {sorted.map((club) => {
+    <View style={styles.card}>
+      {sorted.map((club, index) => {
         const selected = selectedClubIds.includes(club.club_id);
         const disabled = !selected && selectedClubIds.length >= maxSelected;
+        const zoneLabel = zoneNameFromJson(club.zone_name_i18n as Json, locale);
 
         return (
-          <Pressable
-            key={club.club_id}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: selected, disabled }}
-            accessibilityLabel={club.name}
-            disabled={disabled}
-            onPress={() => onToggle(club.club_id)}
-            style={({ pressed }) => [
-              styles.row,
-              { flexDirection: rowDirection },
-              selected && styles.rowSelected,
-              disabled && styles.rowDisabled,
-              pressed && !disabled && styles.rowPressed,
-            ]}
-          >
-            <View
-              style={[
-                styles.checkbox,
-                selected && styles.checkboxSelected,
-                disabled && styles.checkboxDisabled,
+          <View key={club.club_id}>
+            {index > 0 ? <View style={styles.divider} /> : null}
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: selected, disabled }}
+              accessibilityLabel={club.name}
+              disabled={disabled}
+              onPress={() => onToggle(club.club_id)}
+              style={({ pressed }) => [
+                styles.row,
+                { flexDirection: rowDirection },
+                selected && styles.rowSelected,
+                disabled && styles.rowDisabled,
+                pressed && !disabled && styles.rowPressed,
               ]}
             >
-              {selected ? (
-                <Icon name="check" size={14} color={tennisColors.white} />
-              ) : null}
-            </View>
-            <View style={styles.textBlock}>
-              <View style={[styles.nameRow, { flexDirection: rowDirection }]}>
+              <View
+                style={[
+                  styles.check,
+                  selected && styles.checkSelected,
+                  disabled && styles.checkDisabled,
+                ]}
+              >
+                {selected ? (
+                  <Icon name="checkMark" size={12} color={tennisColors.white} />
+                ) : null}
+              </View>
+
+              <View style={[styles.main, { flexDirection: rowDirection }]}>
                 <AppText
                   style={[styles.name, { writingDirection }]}
                   maxLines={1}
                 >
                   {club.name}
                 </AppText>
-                {club.is_favorite ? (
-                  <AppText style={styles.favorite}>
-                    {t("clubs.favorite")}
+                {zoneLabel ? (
+                  <AppText style={styles.meta} maxLines={1}>
+                    {zoneLabel}
                   </AppText>
                 ) : null}
               </View>
-              <AppText style={[styles.zone, { writingDirection }]} maxLines={1}>
-                {zoneNameFromJson(
-                  club.zone_name_i18n as Json,
-                  i18n.resolvedLanguage ?? i18n.language,
-                )}
-              </AppText>
-            </View>
-          </Pressable>
+            </Pressable>
+          </View>
         );
       })}
     </View>
@@ -109,67 +110,66 @@ export function PreferredClubPicker({
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
-    list: {
-      gap: 8,
+    card: {
+      backgroundColor: tennisColors.card,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+      overflow: "hidden",
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: tennisColors.border,
     },
     row: {
       alignItems: "center",
-      gap: 12,
+      gap: 10,
       paddingHorizontal: 14,
-      paddingVertical: 12,
-      borderRadius: tennisRadii.md,
-      borderWidth: 1.5,
-      borderColor: tennisColors.border,
-      backgroundColor: tennisColors.card,
+      paddingVertical: 10,
+      minHeight: 48,
     },
     rowSelected: {
-      borderColor: tennisColors.primary,
-      backgroundColor: tennisColors.secondary,
+      backgroundColor: tennisColors.quietFill,
     },
     rowDisabled: {
-      opacity: 0.55,
+      opacity: 0.45,
     },
     rowPressed: {
-      opacity: 0.9,
+      opacity: 0.88,
     },
-    checkbox: {
-      width: 22,
-      height: 22,
+    check: {
+      width: 20,
+      height: 20,
       borderRadius: 6,
       borderWidth: 1.5,
       borderColor: tennisColors.border,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: tennisColors.card,
+      flexShrink: 0,
     },
-    checkboxSelected: {
+    checkSelected: {
       borderColor: tennisColors.primary,
       backgroundColor: tennisColors.primary,
     },
-    checkboxDisabled: {
+    checkDisabled: {
       borderColor: tennisColors.muted,
     },
-    textBlock: {
+    main: {
       flex: 1,
       minWidth: 0,
-      gap: 2,
-    },
-    nameRow: {
       alignItems: "center",
       gap: 8,
     },
     name: {
-      flex: 1,
-      fontFamily: tennisFontFamily.bodySemi,
+      flexShrink: 1,
+      fontFamily: tennisFontFamily.headingMedium,
       fontSize: 15,
+      lineHeight: 19,
       color: tennisColors.primaryDark,
     },
-    favorite: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 11,
-      color: tennisColors.primary,
-    },
-    zone: {
+    meta: {
+      flexShrink: 0,
       fontFamily: tennisFontFamily.body,
       fontSize: 13,
       color: tennisColors.mutedForeground,

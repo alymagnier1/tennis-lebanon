@@ -120,7 +120,6 @@ export default function ZonesScreen() {
           ) : null}
           <FigmaPrimaryButton
             label={t("onboarding.review.finish")}
-            hero
             disabled={draft.zoneIds.length === 0}
             loading={mutation.isPending}
             onPress={() => mutation.mutate()}

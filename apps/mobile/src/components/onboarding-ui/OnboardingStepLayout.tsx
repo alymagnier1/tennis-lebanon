@@ -184,10 +184,10 @@ export const onboardingInputStyle = createLiveSheet(() =>
       paddingVertical: 15,
       fontFamily: tennisFontFamily.body,
       fontSize: 15,
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
     },
     inputFocused: {
-      borderColor: tennisColors.heroGreen,
+      borderColor: tennisColors.primary,
     },
     inputError: {
       borderColor: tennisColors.danger,
@@ -228,7 +228,7 @@ const styles = createLiveSheet(() =>
       backgroundColor: tennisColors.secondary,
     },
     progressSegmentFilled: {
-      backgroundColor: tennisColors.heroGreen,
+      backgroundColor: tennisColors.primary,
     },
     eyebrow: {
       marginBottom: 8,
@@ -259,7 +259,7 @@ const styles = createLiveSheet(() =>
       height: 300,
       borderRadius: 150,
       borderWidth: 2,
-      borderColor: tennisColors.heroGreen,
+      borderColor: tennisColors.primary,
       opacity: 0.05,
       right: -70,
       bottom: -40,
@@ -268,7 +268,7 @@ const styles = createLiveSheet(() =>
       position: "absolute",
       width: 420,
       height: 2,
-      backgroundColor: tennisColors.heroGreen,
+      backgroundColor: tennisColors.primary,
       opacity: 0.05,
       left: -40,
       bottom: 120,

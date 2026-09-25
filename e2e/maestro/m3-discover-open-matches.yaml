@@ -1,0 +1,11 @@
+appId: com.racketbound.app
+name: M3 browse open matches as the second player
+---
+- runFlow:
+    file: flows/sign-in.yaml
+    env:
+      EMAIL: ${PLAYER_B_EMAIL}
+      PASSWORD: ${PLAYER_B_PASSWORD}
+- tapOn: "Discover"
+- tapOn: "Open matches"
+- assertVisible: "Open matches"

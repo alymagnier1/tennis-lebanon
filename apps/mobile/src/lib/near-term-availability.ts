@@ -92,7 +92,7 @@ function formatNearTermDayLabel(
 
 function groupSlotsByDay(
   slots: NearTermAvailabilitySlot[],
-): Array<{ dateKey: string; parts: AvailabilityDayPart[] }> {
+): { dateKey: string; parts: AvailabilityDayPart[] }[] {
   const grouped = new Map<string, AvailabilityDayPart[]>();
 
   for (const slot of slots) {

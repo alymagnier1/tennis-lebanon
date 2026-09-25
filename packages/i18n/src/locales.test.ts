@@ -9,8 +9,18 @@ import {
 import { resources } from "./index";
 
 function leafKeys(value: unknown, prefix = ""): string[] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return [prefix];
+  if (typeof value === "string") {
+    return prefix ? [prefix] : [];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((child, index) =>
+      leafKeys(child, prefix ? `${prefix}.${index}` : String(index)),
+    );
+  }
+
+  if (!value || typeof value !== "object") {
+    return prefix ? [prefix] : [];
   }
 
   return Object.entries(value).flatMap(([key, child]) =>

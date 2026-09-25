@@ -2,17 +2,13 @@ import type { PropsWithChildren, RefObject } from "react";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AppText } from "../AppText";
 import { FigmaBackButton } from "../onboarding-ui";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { stackScreenTopPadding } from "../../lib/stack-screen-padding";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
-import { tennisTextStyles } from "../../theme/tennis-text-styles";
-import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 export function MatchHubLayout({
   title,
-  subtitle,
   statusSlot,
   onBack,
   refreshing = false,
@@ -22,11 +18,12 @@ export function MatchHubLayout({
   footer,
   children,
 }: PropsWithChildren<{
+  /** Announced on the header; time already lives on the vs-card. */
   title: string;
-  subtitle?: string;
   /**
-   * Status badge under the title. The match's state was a 12px grey subtitle,
-   * which made the single most important fact on the page the least visible.
+   * Status badge on the trailing edge. The match's state was a 12px grey
+   * subtitle, which made the single most important fact on the page the
+   * least visible.
    */
   statusSlot?: React.ReactNode;
   onBack: () => void;
@@ -38,7 +35,7 @@ export function MatchHubLayout({
   footer?: React.ReactNode;
 }>) {
   const insets = useSafeAreaInsets();
-  const { writingDirection } = useLayoutDirection();
+  const { rowDirection } = useLayoutDirection();
   const topPadding = stackScreenTopPadding(insets.top);
 
   return (
@@ -46,30 +43,18 @@ export function MatchHubLayout({
       <View
         style={[
           styles.header,
-          { paddingTop: topPadding, paddingHorizontal: tennisSpacing.screenX },
+          {
+            paddingTop: topPadding,
+            paddingHorizontal: tennisSpacing.screenX,
+            flexDirection: rowDirection,
+          },
         ]}
       >
         <FigmaBackButton onPress={onBack} />
-        <View style={tennisTextStyles.titleSubtitleBlock}>
-          <AppText
-            accessibilityRole="header"
-            style={[styles.title, { writingDirection }]}
-            maxLines={2}
-          >
-            {title}
-          </AppText>
-          {subtitle ? (
-            <AppText
-              style={[tennisTextStyles.pageSubtitle, { writingDirection }]}
-              maxLines={2}
-            >
-              {subtitle}
-            </AppText>
-          ) : null}
-          {statusSlot ? (
-            <View style={styles.statusSlot}>{statusSlot}</View>
-          ) : null}
-        </View>
+        <View style={styles.titleBlock} accessibilityLabel={title} accessible />
+        {statusSlot ? (
+          <View style={styles.statusSlot}>{statusSlot}</View>
+        ) : null}
       </View>
 
       <ScrollView
@@ -93,7 +78,15 @@ export function MatchHubLayout({
         {children}
       </ScrollView>
 
-      {dock}
+      {dock ? (
+        <View
+          style={
+            footer ? undefined : { paddingBottom: Math.max(insets.bottom, 8) }
+          }
+        >
+          {dock}
+        </View>
+      ) : null}
       {footer}
     </View>
   );
@@ -106,20 +99,17 @@ const styles = createLiveSheet(() =>
       backgroundColor: tennisColors.background,
     },
     header: {
-      gap: 16,
+      alignItems: "center",
+      gap: 12,
       paddingBottom: 12,
       backgroundColor: tennisColors.background,
     },
-    title: {
-      fontFamily: tennisFontFamily.headingExtra,
-      fontSize: 28,
-      lineHeight: 32,
-      color: tennisColors.primaryDark,
-      letterSpacing: -0.6,
+    titleBlock: {
+      flex: 1,
+      minWidth: 0,
     },
     statusSlot: {
-      alignSelf: "flex-start",
-      marginTop: 6,
+      flexShrink: 0,
     },
     scroll: {
       flex: 1,

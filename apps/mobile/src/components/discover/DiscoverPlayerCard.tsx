@@ -301,7 +301,7 @@ const styles = createLiveSheet(() =>
       borderRadius: 999,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: tennisColors.white,
+      backgroundColor: tennisColors.lime,
     },
     actionPillDark: {
       backgroundColor: tennisColors.violet,

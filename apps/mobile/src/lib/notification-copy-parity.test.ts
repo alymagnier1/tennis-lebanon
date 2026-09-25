@@ -6,6 +6,7 @@ import {
   NOTIFICATION_COPY,
   NOTIFICATION_LOCALES,
   normalizeNotificationLocale,
+  REMOVAL_REASON_COPY,
 } from "../../../../supabase/functions/_shared/notification-copy";
 
 /**
@@ -67,6 +68,28 @@ describe("notification copy parity", () => {
         if (app.title !== push.title)
           mismatches.push(`${locale}.${kind}.title`);
         if (app.body !== push.body) mismatches.push(`${locale}.${kind}.body`);
+      }
+    }
+
+    expect(mismatches).toEqual([]);
+  });
+
+  it("keeps removal reason phrases matched to the hub copy", () => {
+    const mismatches: string[] = [];
+
+    for (const locale of NOTIFICATION_LOCALES) {
+      const bundle = resources[locale].translation as {
+        matches: {
+          hub: { removeReasons: Record<string, string> };
+        };
+      };
+      const hub = bundle.matches.hub.removeReasons;
+      const push = REMOVAL_REASON_COPY[locale];
+
+      for (const code of Object.keys(REMOVAL_REASON_COPY.en)) {
+        if (hub[code] !== push[code]) {
+          mismatches.push(`${locale}.${code}`);
+        }
       }
     }
 

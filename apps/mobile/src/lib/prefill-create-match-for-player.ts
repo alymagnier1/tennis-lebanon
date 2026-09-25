@@ -1,5 +1,4 @@
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
-import type { ProposedTimeInput } from "@tennis-lebanon/domain";
 import {
   playIntentSchema,
   preferredFormatForPlayer,
@@ -8,6 +7,7 @@ import {
   skillRangeFromSelection,
   visibilityFromListOnDiscover,
   type PlayIntent,
+  type ProposedTimeInput,
 } from "@tennis-lebanon/domain";
 import type { Draft } from "./create-match-draft";
 

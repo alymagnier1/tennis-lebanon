@@ -16,6 +16,11 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+# Suffixed variants such as `.env.local.off`, which are switched on and off by
+# renaming. `apps/mobile/.env.local.off` documented itself as ignored by the
+# line above and was not: the suffix falls outside every pattern here, so it
+# was one `git add .` from being committed.
+.env.local.*
 
 # Never commit local secret dumps
 APIS and secrets/

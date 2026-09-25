@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   AppState,
@@ -18,12 +18,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   listMatchMessages,
   sendMatchMessage,
-  type MatchMessageRow,
   markMatchChatRead,
 } from "@tennis-lebanon/api";
 import { AppText } from "./AppText";
 import { Icon } from "./Icon";
-import { formatUtcInBeirut } from "../lib/beirut-time";
+import { ErrorNotice } from "./FormUi";
+import {
+  beirutDateKey,
+  formatShortUtcDateInBeirut,
+  formatUtcTimeInBeirut,
+} from "../lib/beirut-time";
 import { useLayoutDirection } from "../lib/layout-direction";
 import {
   MATCH_CHAT_EMOJIS,
@@ -35,15 +39,21 @@ import {
   MATCH_CHAT_POLL_MS,
   removeMatchChatChannels,
 } from "../lib/match-chat-realtime";
+import { invalidateMatchChatSurfaces } from "../lib/match-chat-queries";
+import {
+  buildMatchChatTranscript,
+  matchChatDayLabel,
+  type MatchChatTranscriptItem,
+} from "../lib/match-chat-transcript";
 import {
   realtimeStatusFrom,
   shouldRefetchAfterStatusChange,
   type RealtimeStatus,
 } from "../lib/realtime-status";
+import { useToast } from "../providers/ToastProvider";
 import { supabase } from "../lib/supabase";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
-import { onboardingInputStyle } from "./onboarding-ui/OnboardingStepLayout";
 
 const HUB_MESSAGE_LIST_HEIGHT = 220;
 
@@ -55,6 +65,13 @@ type MatchChatPanelProps = {
   variant?: "page" | "docked";
 };
 
+function previousBeirutDateKey(dateKey: string): string {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const cursor = new Date(Date.UTC(year!, month! - 1, day!, 12, 0, 0));
+  cursor.setUTCDate(cursor.getUTCDate() - 1);
+  return cursor.toISOString().slice(0, 10);
+}
+
 export function MatchChatPanel({
   matchId,
   enabled,
@@ -65,9 +82,10 @@ export function MatchChatPanel({
   const { writingDirection } = useLayoutDirection();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [draft, setDraft] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
-  const listRef = useRef<FlatList<MatchMessageRow>>(null);
+  const listRef = useRef<FlatList<MatchChatTranscriptItem>>(null);
   const docked = variant === "docked";
 
   const messagesQuery = useQuery({
@@ -76,9 +94,6 @@ export function MatchChatPanel({
     enabled,
   });
 
-  // Reading the thread is what clears the badge. Keyed on the newest message
-  // rather than firing per render, so a poll that returns nothing new does not
-  // re-mark, while a message arriving while you are looking at it does.
   const newestMessageAt = messagesQuery.data?.[0]?.created_at ?? null;
   const markedUpToRef = useRef<string | null>(null);
 
@@ -88,13 +103,19 @@ export function MatchChatPanel({
 
     markedUpToRef.current = newestMessageAt;
     void markMatchChatRead(supabase, matchId)
-      .then(() =>
-        queryClient.invalidateQueries({
+      .then((markedAt) => {
+        if (markedAt) {
+          queryClient.setQueryData(
+            ["match-chat-last-read", matchId, viewerUserId],
+            markedAt,
+          );
+        }
+        invalidateMatchChatSurfaces(queryClient, matchId);
+        void queryClient.invalidateQueries({
           queryKey: ["match-chat-last-read", matchId, viewerUserId],
-        }),
-      )
+        });
+      })
       .catch(() => {
-        // Let the next render try again rather than staying silently unread.
         markedUpToRef.current = null;
       });
   }, [enabled, viewerUserId, matchId, newestMessageAt, queryClient]);
@@ -126,7 +147,12 @@ export function MatchChatPanel({
     const startPolling = () => {
       if (pollTimer) return;
       pollTimer = setInterval(refetch, MATCH_CHAT_POLL_MS);
-      setRealtimeStatus("interrupted");
+    };
+
+    const stopPolling = () => {
+      if (!pollTimer) return;
+      clearInterval(pollTimer);
+      pollTimer = null;
     };
 
     const connect = async () => {
@@ -157,12 +183,21 @@ export function MatchChatPanel({
           statusRef.current = next;
           setRealtimeStatus(next);
 
+          if (next === "interrupted") {
+            startPolling();
+          }
+          if (next === "connected") {
+            stopPolling();
+          }
+
           if (shouldRefetchAfterStatusChange(previous, next)) {
             refetch();
           }
         });
       } catch {
         if (!cancelled) {
+          statusRef.current = "interrupted";
+          setRealtimeStatus("interrupted");
           startPolling();
         }
       }
@@ -181,9 +216,7 @@ export function MatchChatPanel({
     return () => {
       cancelled = true;
       subscription.remove();
-      if (pollTimer) {
-        clearInterval(pollTimer);
-      }
+      stopPolling();
       if (channel) {
         void supabase.removeChannel(channel);
       } else {
@@ -204,15 +237,38 @@ export function MatchChatPanel({
         listRef.current?.scrollToEnd({ animated: true });
       });
     },
+    onError: () => {
+      showToast(t("matches.chat.error"));
+    },
   });
 
   function insertEmoji(emoji: string) {
     setDraft((current) => appendChatEmoji(current, emoji));
   }
 
+  const chronological = useMemo(
+    () => [...(messagesQuery.data ?? [])].reverse(),
+    [messagesQuery.data],
+  );
+
+  const transcript = useMemo(() => {
+    const todayKey = beirutDateKey(new Date().toISOString());
+    const yesterdayKey = previousBeirutDateKey(todayKey);
+    return buildMatchChatTranscript(chronological, (dateKey) =>
+      matchChatDayLabel(dateKey, {
+        todayKey,
+        yesterdayKey,
+        todayLabel: t("discover.today"),
+        yesterdayLabel: t("matches.chat.yesterday"),
+        formatDateKey: (key) =>
+          formatShortUtcDateInBeirut(`${key}T12:00:00.000Z`),
+      }),
+    );
+  }, [chronological, t]);
+
   if (!enabled) return null;
 
-  const messages = [...(messagesQuery.data ?? [])].reverse();
+  const canSend = Boolean(draft.trim()) && !sendMutation.isPending;
 
   const messageList = messagesQuery.isLoading ? (
     <View style={[styles.loading, docked && styles.loadingDocked]}>
@@ -221,34 +277,60 @@ export function MatchChatPanel({
         accessibilityLabel={t("common.loading")}
       />
     </View>
+  ) : messagesQuery.isError ? (
+    <View style={[styles.errorBlock, docked && styles.loadingDocked]}>
+      <ErrorNotice>{t("matches.chat.loadError")}</ErrorNotice>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("common.retry")}
+        onPress={() => void messagesQuery.refetch()}
+        style={styles.retryButton}
+      >
+        <AppText style={styles.retryLabel}>{t("common.retry")}</AppText>
+      </Pressable>
+    </View>
   ) : (
     <FlatList
       ref={listRef}
-      data={messages}
-      keyExtractor={(item) => item.message_id}
+      data={transcript}
+      keyExtractor={(item) => item.key}
       style={docked ? styles.listDocked : styles.list}
       contentContainerStyle={[
         docked ? styles.listContentDocked : styles.listContent,
-        messages.length === 0 ? styles.listContentEmpty : null,
+        transcript.length === 0 ? styles.listContentEmpty : null,
       ]}
       keyboardShouldPersistTaps="handled"
       nestedScrollEnabled
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
       onContentSizeChange={() => {
-        if (messages.length > 0) {
+        if (transcript.length > 0) {
           listRef.current?.scrollToEnd({ animated: false });
         }
       }}
       ListEmptyComponent={
         <AppText style={styles.empty}>{t("matches.chat.empty")}</AppText>
       }
-      renderItem={({ item }) => {
-        const isOwn = viewerUserId === item.author_id;
+      renderItem={({ item, index }) => {
+        if (item.type === "day") {
+          return (
+            <View style={styles.dayRow}>
+              <AppText style={styles.dayLabel}>{item.label}</AppText>
+            </View>
+          );
+        }
+
+        const { message, showSender, groupStart } = item;
+        const isOwn = viewerUserId === message.author_id;
+        const prev = transcript[index - 1];
+        const tightTop =
+          !groupStart && prev?.type === "message" ? styles.bubbleTight : null;
+
         return (
           <View
             style={[
               styles.bubbleRow,
               isOwn ? styles.bubbleRowOwn : styles.bubbleRowOther,
+              groupStart ? styles.bubbleGroupStart : null,
+              tightTop,
             ]}
           >
             <View
@@ -257,25 +339,25 @@ export function MatchChatPanel({
                 isOwn ? styles.bubbleOwn : styles.bubbleOther,
               ]}
             >
-              {!isOwn ? (
+              {!isOwn && showSender ? (
                 <AppText style={styles.sender} maxLines={1}>
-                  {item.author_display_name}
+                  {message.author_display_name}
                 </AppText>
               ) : null}
               <AppText
                 style={[
                   styles.body,
-                  isEmojiOnlyMessage(item.body) && styles.bodyEmojiOnly,
+                  isEmojiOnlyMessage(message.body) && styles.bodyEmojiOnly,
                   { writingDirection },
                   isOwn ? styles.bodyOwn : styles.bodyOther,
                 ]}
               >
-                {item.body}
+                {message.body}
               </AppText>
               <AppText
                 style={[styles.time, isOwn ? styles.timeOwn : styles.timeOther]}
               >
-                {formatUtcInBeirut(item.created_at)}
+                {formatUtcTimeInBeirut(message.created_at)}
               </AppText>
             </View>
           </View>
@@ -283,6 +365,20 @@ export function MatchChatPanel({
       }}
     />
   );
+
+  const reconnectBanner =
+    realtimeStatus === "interrupted" ? (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("matches.chat.reconnecting")}
+        onPress={refetchMessages}
+        style={styles.reconnectingPress}
+      >
+        <AppText style={styles.reconnecting} accessibilityRole="alert">
+          {t("matches.chat.reconnecting")}
+        </AppText>
+      </Pressable>
+    ) : null;
 
   const composer = (
     <View
@@ -347,24 +443,32 @@ export function MatchChatPanel({
           onChangeText={setDraft}
           onFocus={() => setEmojiOpen(false)}
           placeholder={t("matches.chat.placeholder")}
-          style={[onboardingInputStyle.input, styles.input]}
+          placeholderTextColor={tennisColors.mutedForeground}
+          style={[styles.input, { writingDirection }]}
           multiline
         />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("matches.chat.send")}
-          disabled={!draft.trim() || sendMutation.isPending}
+          disabled={!canSend}
           onPress={() => sendMutation.mutate(draft.trim())}
           style={({ pressed }) => [
             styles.sendButton,
-            (!draft.trim() || sendMutation.isPending) && styles.sendDisabled,
-            pressed && draft.trim() ? styles.sendPressed : null,
+            canSend ? styles.sendReady : styles.sendDisabled,
+            pressed && canSend ? styles.sendPressed : null,
           ]}
         >
           {sendMutation.isPending ? (
-            <ActivityIndicator color={tennisColors.white} size="small" />
+            <ActivityIndicator color={tennisColors.onPrimary} size="small" />
           ) : (
-            <AppText style={styles.sendLabel}>{t("matches.chat.send")}</AppText>
+            <AppText
+              style={[
+                styles.sendLabel,
+                !canSend ? styles.sendLabelDisabled : null,
+              ]}
+            >
+              {t("matches.chat.send")}
+            </AppText>
           )}
         </Pressable>
       </View>
@@ -375,11 +479,7 @@ export function MatchChatPanel({
     return (
       <View style={styles.dock}>
         <AppText style={styles.title}>{t("matches.chat.title")}</AppText>
-        {realtimeStatus === "interrupted" ? (
-          <AppText style={styles.reconnecting} accessibilityRole="alert">
-            {t("matches.chat.reconnecting")}
-          </AppText>
-        ) : null}
+        {reconnectBanner}
         {messageList}
         {composer}
       </View>
@@ -388,11 +488,7 @@ export function MatchChatPanel({
 
   return (
     <KeyboardAvoider style={styles.root}>
-      {realtimeStatus === "interrupted" ? (
-        <AppText style={styles.reconnecting} accessibilityRole="alert">
-          {t("matches.chat.reconnecting")}
-        </AppText>
-      ) : null}
+      {reconnectBanner}
       {messageList}
       {composer}
     </KeyboardAvoider>
@@ -427,6 +523,23 @@ const styles = createLiveSheet(() =>
       height: HUB_MESSAGE_LIST_HEIGHT,
       flex: 0,
     },
+    errorBlock: {
+      flex: 1,
+      justifyContent: "center",
+      gap: 12,
+      paddingHorizontal: 16,
+    },
+    retryButton: {
+      alignSelf: "flex-start",
+      minHeight: 44,
+      justifyContent: "center",
+      paddingHorizontal: 4,
+    },
+    retryLabel: {
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 14,
+      color: tennisColors.primary,
+    },
     list: {
       flex: 1,
     },
@@ -445,9 +558,6 @@ const styles = createLiveSheet(() =>
       paddingBottom: 8,
       flexGrow: 1,
     },
-    separator: {
-      height: 8,
-    },
     listContentEmpty: {
       flexGrow: 1,
       justifyContent: "center",
@@ -455,8 +565,23 @@ const styles = createLiveSheet(() =>
     empty: {
       fontFamily: tennisFontFamily.body,
       fontSize: 14,
+      lineHeight: 20,
       color: tennisColors.mutedForeground,
       textAlign: "center",
+      paddingHorizontal: 12,
+    },
+    dayRow: {
+      alignItems: "center",
+      paddingVertical: 12,
+    },
+    dayLabel: {
+      fontFamily: tennisFontFamily.bodyMedium,
+      fontSize: 12,
+      color: tennisColors.mutedForeground,
+    },
+    reconnectingPress: {
+      minHeight: 36,
+      justifyContent: "center",
     },
     reconnecting: {
       fontFamily: tennisFontFamily.body,
@@ -464,9 +589,17 @@ const styles = createLiveSheet(() =>
       color: tennisColors.mutedForeground,
       paddingHorizontal: 16,
       paddingVertical: 6,
+      textDecorationLine: "underline",
     },
     bubbleRow: {
       width: "100%",
+      marginBottom: 4,
+    },
+    bubbleGroupStart: {
+      marginTop: 8,
+    },
+    bubbleTight: {
+      marginTop: 0,
     },
     bubbleRowOwn: {
       alignItems: "flex-end",
@@ -511,7 +644,8 @@ const styles = createLiveSheet(() =>
     },
     time: {
       fontFamily: tennisFontFamily.body,
-      fontSize: 10,
+      fontSize: 11,
+      lineHeight: 14,
       alignSelf: "flex-end",
     },
     timeOwn: {
@@ -563,12 +697,9 @@ const styles = createLiveSheet(() =>
       borderRadius: tennisRadii.md,
       alignItems: "center",
       justifyContent: "center",
-      borderWidth: 1,
-      borderColor: tennisColors.border,
       backgroundColor: tennisColors.card,
     },
     emojiToggleOpen: {
-      borderColor: tennisColors.primary,
       backgroundColor: tennisColors.secondary,
     },
     emojiTogglePressed: {
@@ -577,18 +708,31 @@ const styles = createLiveSheet(() =>
     input: {
       flex: 1,
       maxHeight: 100,
+      minHeight: 44,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: tennisRadii.lg,
+      backgroundColor: tennisColors.card,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 15,
+      lineHeight: 20,
+      color: tennisColors.primaryDark,
     },
     sendButton: {
       minHeight: 44,
       minWidth: 64,
       borderRadius: tennisRadii.md,
-      backgroundColor: tennisColors.primary,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 12,
     },
+    sendReady: {
+      backgroundColor: tennisColors.primary,
+    },
     sendDisabled: {
-      opacity: 0.5,
+      backgroundColor: tennisColors.muted,
     },
     sendPressed: {
       opacity: 0.9,
@@ -596,7 +740,10 @@ const styles = createLiveSheet(() =>
     sendLabel: {
       fontFamily: tennisFontFamily.bodyMedium,
       fontSize: 14,
-      color: tennisColors.white,
+      color: tennisColors.onPrimary,
+    },
+    sendLabelDisabled: {
+      color: tennisColors.mutedForeground,
     },
   }),
 );

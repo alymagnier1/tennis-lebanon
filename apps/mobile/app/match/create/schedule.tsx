@@ -48,10 +48,8 @@ import {
 import {
   createMatchStyles,
   CreateMatchPanel,
-  CreateMatchSection,
   CreateMatchSubsection,
   CreateMatchSubsectionDivider,
-  CreateMatchSummaryValue,
 } from "../../../src/lib/create-match-ui";
 import {
   getCreateMatchDraft,
@@ -141,7 +139,7 @@ export default function CreateMatchScheduleScreen() {
     draft.preferredClubIds ?? [],
   );
   const [notes, setNotes] = useState(draft.notes ?? "");
-  const [showNotes, setShowNotes] = useState(Boolean(draft.notes));
+  const [showNotes, setShowNotes] = useState(Boolean(draft.notes?.trim()));
   const [listOnDiscover, setListOnDiscover] = useState(() =>
     listOnDiscoverFromVisibility(draft.visibility),
   );
@@ -149,16 +147,8 @@ export default function CreateMatchScheduleScreen() {
     draft.requiresCreatorApproval ?? false,
   );
   const [editingWhere, setEditingWhere] = useState(false);
-  const [editingJoin, setEditingJoin] = useState(false);
-  // Captured once, from the profile-hydrated draft. While the host has not
-  // moved off their saved defaults there is nothing to decide here, so the
-  // panel stays a one-line summary instead of two always-open toggles.
-  const [defaultListOnDiscover] = useState(() =>
-    listOnDiscoverFromVisibility(draft.visibility),
-  );
-  const [defaultRequiresApproval] = useState(
-    () => draft.requiresCreatorApproval ?? false,
-  );
+  /** Join settings stay off the When/Where path until the host opens them. */
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
   // Set only when this draft exists to ask one named player. Publishing is the
@@ -231,7 +221,22 @@ export default function CreateMatchScheduleScreen() {
   );
 
   useEffect(() => {
-    if (clubsHydrated || !clubsQuery.data || selectedZoneIds.length === 0) {
+    if (clubsHydrated || !zonesHydrated) {
+      return;
+    }
+
+    // No areas → nothing to seed; mark settled so the summary can decide.
+    if (selectedZoneIds.length === 0) {
+      queueMicrotask(() => setClubsHydrated(true));
+      return;
+    }
+
+    if (clubsQuery.isError) {
+      queueMicrotask(() => setClubsHydrated(true));
+      return;
+    }
+
+    if (!clubsQuery.data) {
       return;
     }
 
@@ -248,8 +253,10 @@ export default function CreateMatchScheduleScreen() {
   }, [
     clubsHydrated,
     clubsQuery.data,
+    clubsQuery.isError,
     draft.preferredClubIds,
     selectedZoneIds.length,
+    zonesHydrated,
   ]);
 
   const effectiveClubIds = useMemo(() => {
@@ -308,7 +315,6 @@ export default function CreateMatchScheduleScreen() {
   const whereHydrated = whereSectionHydrated({
     zonesHydrated,
     clubsHydrated,
-    clubsSettled: clubsQuery.isSuccess || clubsQuery.isError,
   });
 
   // Incomplete Where forces the editor open with editingWhere still false.
@@ -335,11 +341,6 @@ export default function CreateMatchScheduleScreen() {
     if (clubsRequired && effectiveClubIds.length === 0) return;
     setEditingWhere(false);
   }
-
-  const joinSettingsAtDefault =
-    listOnDiscover === defaultListOnDiscover &&
-    requiresApproval === defaultRequiresApproval;
-  const showJoinEditor = editingJoin || !joinSettingsAtDefault;
 
   const joinSummary = [
     listOnDiscover
@@ -465,13 +466,6 @@ export default function CreateMatchScheduleScreen() {
       footer={
         <>
           {publishError ? <ErrorNotice>{publishError}</ErrorNotice> : null}
-          <AppText style={createMatchStyles.hint}>
-            {requestForName
-              ? t("matches.create.sendRequestHint", { name: requestForName })
-              : listOnDiscover
-                ? t("matches.create.publishActionsHint")
-                : t("matches.create.publishPrivateHint")}
-          </AppText>
           <FigmaPrimaryButton
             label={
               requestForName
@@ -544,10 +538,6 @@ export default function CreateMatchScheduleScreen() {
             <ActivityIndicator color={tennisColors.primary} />
           ) : showWhereEditor ? (
             <>
-              <AppText style={createMatchStyles.hint}>
-                {t("matches.create.whereEditDisclaimer")}
-              </AppText>
-
               <CreateMatchSubsection label={t("discover.zonesFilter")}>
                 <FigmaChipMulti
                   options={zoneOptions}
@@ -560,6 +550,15 @@ export default function CreateMatchScheduleScreen() {
 
               <CreateMatchSubsection
                 label={t("matches.create.preferredClubsForMatchTitle")}
+                hint={
+                  selectedZoneIds.length === 0
+                    ? undefined
+                    : t(
+                        clubsRequired
+                          ? "matches.create.preferredClubsRequiredHelp"
+                          : "matches.create.preferredClubsOptionalHelp",
+                      )
+                }
               >
                 {selectedZoneIds.length === 0 ? (
                   <AppText style={createMatchStyles.hint}>
@@ -567,13 +566,6 @@ export default function CreateMatchScheduleScreen() {
                   </AppText>
                 ) : (
                   <>
-                    <AppText style={createMatchStyles.hint}>
-                      {t(
-                        clubsRequired
-                          ? "matches.create.preferredClubsRequiredHelp"
-                          : "matches.create.preferredClubsOptionalHelp",
-                      )}
-                    </AppText>
                     <PreferredClubPicker
                       clubs={clubsQuery.data ?? []}
                       selectedClubIds={effectiveClubIds}
@@ -594,77 +586,122 @@ export default function CreateMatchScheduleScreen() {
             <>
               {/* Same quiet place-rows as a visitor profile: areas as one
                   line, each club on its own — no pill bars or section labels. */}
-              {selectedAreaLabels.length > 0 ? (
-                <View
-                  style={[
-                    createMatchStyles.placeRow,
-                    { flexDirection: rowDirection },
-                  ]}
-                >
-                  <Icon
-                    name="place"
-                    size={14}
-                    color={tennisColors.mutedForeground}
-                  />
-                  <AppText
-                    style={[createMatchStyles.placeLabel, { writingDirection }]}
-                    maxLines={2}
+              <View style={createMatchStyles.placeSummary}>
+                {selectedAreaLabels.length > 0 ? (
+                  <View
+                    style={[
+                      createMatchStyles.placeRow,
+                      { flexDirection: rowDirection },
+                    ]}
                   >
-                    {selectedAreaLabels.join(" · ")}
-                  </AppText>
-                </View>
-              ) : null}
+                    <Icon
+                      name="place"
+                      size={14}
+                      color={tennisColors.mutedForeground}
+                    />
+                    <AppText
+                      style={[
+                        createMatchStyles.placeLabel,
+                        { writingDirection },
+                      ]}
+                      maxLines={2}
+                    >
+                      {selectedAreaLabels.join(" · ")}
+                    </AppText>
+                  </View>
+                ) : null}
 
-              {selectedClubLabels.map((name, index) => (
-                <View
-                  key={effectiveClubIds[index] ?? name}
-                  style={[
-                    createMatchStyles.placeRow,
-                    { flexDirection: rowDirection },
-                  ]}
-                >
-                  <Icon
-                    name="place"
-                    size={14}
-                    color={tennisColors.mutedForeground}
-                  />
-                  <AppText
-                    style={[createMatchStyles.placeLabel, { writingDirection }]}
-                    maxLines={1}
+                {selectedClubLabels.map((name, index) => (
+                  <View
+                    key={effectiveClubIds[index] ?? name}
+                    style={[
+                      createMatchStyles.placeRow,
+                      { flexDirection: rowDirection },
+                    ]}
                   >
-                    {name}
+                    <Icon
+                      name="court"
+                      size={14}
+                      color={tennisColors.mutedForeground}
+                    />
+                    <AppText
+                      style={[
+                        createMatchStyles.placeLabel,
+                        { writingDirection },
+                      ]}
+                      maxLines={1}
+                    >
+                      {name}
+                    </AppText>
+                  </View>
+                ))}
+
+                {effectiveClubIds.length === 0 ? (
+                  <AppText style={createMatchStyles.hint}>
+                    {t("matches.create.preferredClubsNone")}
                   </AppText>
-                </View>
-              ))}
+                ) : null}
 
-              {effectiveClubIds.length === 0 ? (
-                <AppText style={createMatchStyles.hint}>
-                  {t("matches.create.preferredClubsNone")}
-                </AppText>
-              ) : null}
-
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel={t(
-                  "matches.create.whereProfileDefaultsLink",
-                )}
-                onPress={() => router.push("/profile/where-i-play")}
-              >
-                <AppText style={createMatchStyles.profileLink}>
-                  {t("matches.create.whereProfileDefaultsLink")}
-                </AppText>
-              </Pressable>
+                <Pressable
+                  accessibilityRole="link"
+                  accessibilityLabel={t(
+                    "matches.create.whereProfileDefaultsLink",
+                  )}
+                  onPress={() => router.push("/profile/where-i-play")}
+                  style={createMatchStyles.profileLinkWrap}
+                >
+                  <AppText style={createMatchStyles.profileLink}>
+                    {t("matches.create.whereProfileDefaultsLink")}
+                  </AppText>
+                </Pressable>
+              </View>
             </>
           )}
         </CreateMatchPanel>
 
-        <CreateMatchPanel
-          title={t("matches.create.joinSettingsSection")}
-          actionLabel={showJoinEditor ? undefined : t("common.change")}
-          onAction={showJoinEditor ? undefined : () => setEditingJoin(true)}
-        >
-          {showJoinEditor ? (
-            <>
+        <View style={createMatchStyles.advancedCard}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded: showAdvanced }}
+            accessibilityLabel={
+              showAdvanced
+                ? t("matches.create.advancedHide")
+                : t("matches.create.advancedShow")
+            }
+            onPress={() => setShowAdvanced((value) => !value)}
+            style={({ pressed }) => [
+              createMatchStyles.advancedHeader,
+              { flexDirection: rowDirection },
+              pressed && createMatchStyles.advancedHeaderPressed,
+            ]}
+          >
+            <View style={createMatchStyles.advancedHeaderText}>
+              <AppText
+                style={[createMatchStyles.advancedTitle, { writingDirection }]}
+              >
+                {t("matches.create.advancedSection")}
+              </AppText>
+              {!showAdvanced ? (
+                <AppText
+                  style={[
+                    createMatchStyles.advancedSummary,
+                    { writingDirection },
+                  ]}
+                  maxLines={1}
+                >
+                  {joinSummary}
+                </AppText>
+              ) : null}
+            </View>
+            <Icon
+              name={showAdvanced ? "chevronDown" : "chevron"}
+              size={18}
+              color={tennisColors.mutedForeground}
+            />
+          </Pressable>
+
+          <AnimatedCollapse visible={showAdvanced}>
+            <View style={createMatchStyles.advancedBody}>
               <SettingToggle
                 variant="card"
                 label={t("matches.create.listOnDiscover")}
@@ -685,38 +722,41 @@ export default function CreateMatchScheduleScreen() {
                   onValueChange={setRequiresApproval}
                 />
               </AnimatedCollapse>
-            </>
-          ) : (
-            <CreateMatchSummaryValue>
-              <AppText style={createMatchStyles.summaryValue}>
-                {joinSummary}
-              </AppText>
-            </CreateMatchSummaryValue>
-          )}
-        </CreateMatchPanel>
+            </View>
+          </AnimatedCollapse>
+        </View>
 
-        <CreateMatchSection label={t("matches.create.notes")}>
+        <View style={createMatchStyles.notesSection}>
           <Pressable
             accessibilityRole="button"
+            accessibilityState={{ expanded: showNotes }}
+            accessibilityLabel={
+              showNotes
+                ? t("matches.create.notesHide")
+                : t("matches.create.notesAdd")
+            }
             onPress={() => setShowNotes((value) => !value)}
           >
             <AppText style={createMatchStyles.addSlot}>
               {showNotes
                 ? t("matches.create.notesHide")
-                : t("matches.create.notesAdd")}
+                : notes.trim()
+                  ? t("matches.create.notesEdit")
+                  : t("matches.create.notesAdd")}
             </AppText>
           </Pressable>
           <AnimatedCollapse visible={showNotes}>
             <TextInput
               accessibilityLabel={t("matches.create.notes")}
               multiline
+              placeholder={t("matches.create.notesAdd")}
               placeholderTextColor={tennisColors.mutedForeground}
               style={[onboardingInputStyle.input, createMatchStyles.notesInput]}
               value={notes}
               onChangeText={setNotes}
             />
           </AnimatedCollapse>
-        </CreateMatchSection>
+        </View>
       </View>
     </CreateMatchStepLayout>
   );

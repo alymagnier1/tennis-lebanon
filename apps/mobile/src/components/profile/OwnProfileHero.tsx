@@ -278,7 +278,8 @@ const styles = createLiveSheet(() =>
     },
     statLabel: {
       fontFamily: tennisFontFamily.body,
-      fontSize: 10,
+      fontSize: 11,
+      lineHeight: 14,
       color: tennisColors.mutedForeground,
       marginTop: 2,
       textAlign: "center",

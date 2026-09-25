@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="RacketBound">
+  <title>RacketBound</title>
+  <rect width="256" height="256" rx="58" fill="#0C382E"/>
+  <g
+    fill="none"
+    stroke="#FAF9F6"
+    stroke-width="26"
+    stroke-linecap="butt"
+    stroke-linejoin="round"
+  >
+    <path d="M64 72v112"/>
+    <path d="M64 72h40c30 0 50 18 50 42s-20 42-50 42H64"/>
+    <path d="M94 156l68 28"/>
+    <path d="M154 78c36 6 54 26 54 50 0 24-14 40-40 48 30 8 48 28 48 52 0 30-24 46-60 46"/>
+  </g>
+  <circle cx="150" cy="126" r="18" fill="#C8E63B"/>
+  <g fill="none" stroke="#FAF9F6" stroke-width="2" stroke-linecap="round">
+    <path d="M150 111c7 7 7 16 0 30"/>
+    <path d="M138 120c10 6 14 6 24 0"/>
+  </g>
+</svg>

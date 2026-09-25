@@ -24,7 +24,9 @@ Do not modify files unless the user asks to fix findings. Report defects first, 
 - [ ] `discover.loading` misused as loading label (grep `discover.loading`)
 - [ ] Hardcoded hex outside `tennis-tokens` / `tennisSemantic`
 - [ ] Status colour without paired glyph
-- [ ] `StatusBanner` or `danger` text below WCAG AA on known backgrounds
+- [ ] **Walk the screen in dark mode, not just light.** Settings → Appearance → Dark. Every regression this checklist has caught by eye was a light-mode one.
+- [ ] Any foreground/surface token pair below WCAG AA (4.5:1 for text). `src/theme/contrast.test.ts` already asserts the declared pairs in both schemes, so the manual check is for _new_ pairings the table does not know about — and for anything that hardcodes a colour instead of naming a token.
+- [ ] A `tennisHeroArt.*` token used as text on `card` / `background` / `secondary`. Those are fixed artwork colours and do not invert; that is exactly how the secondary-button label ended up at 1.05:1 in dark mode.
 - [ ] Screen with async data but no retry on error
 - [ ] Full-screen spinner hiding static chrome
 
@@ -47,6 +49,12 @@ rg "Alert\.alert" apps/mobile --count
 
 # Hardcoded colours in mobile
 rg "#[0-9a-fA-F]{3,8}" apps/mobile/src --glob "*.tsx"
+
+# Hero-art tokens used as a foreground (should only paint on hero artwork)
+rg "color: tennisHeroArt" apps/mobile
+
+# Token-pair contrast, both schemes
+pnpm --filter mobile exec vitest run src/theme/contrast.test.ts --config vitest.config.ts
 
 # Raw font sizes
 rg "fontSize:\s*\d+" apps/mobile --count

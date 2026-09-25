@@ -160,10 +160,10 @@ export function SkillBandCard({
 }) {
   const palette = tennisSkillBands[band] ?? {
     fill: tennisColors.card,
-    text: tennisColors.heroOnLight,
+    text: tennisColors.primaryDark,
   };
   const ordinal = BAND_ORDER.indexOf(band);
-  const titleColor = selected ? palette.text : tennisColors.heroOnLight;
+  const titleColor = selected ? palette.text : tennisColors.primaryDark;
   const descColor = selected
     ? withAlpha(palette.text, 0.72)
     : tennisColors.mutedForeground;
@@ -399,7 +399,7 @@ const styles = createLiveSheet(() =>
       marginBottom: 28,
     },
     cardSelected: {
-      borderColor: tennisColors.heroGreen,
+      borderColor: tennisColors.primary,
       backgroundColor: tennisSemantic.info.fill,
     },
     checkbox: {
@@ -411,7 +411,7 @@ const styles = createLiveSheet(() =>
       justifyContent: "center",
     },
     checkboxSelected: {
-      backgroundColor: tennisColors.heroGreen,
+      backgroundColor: tennisColors.primary,
     },
     check: {
       color: tennisColors.onPrimary,
@@ -423,7 +423,7 @@ const styles = createLiveSheet(() =>
       fontFamily: tennisFontFamily.bodyMedium,
       fontSize: 13.5,
       lineHeight: 19,
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
     },
     docCard: {
       backgroundColor: tennisColors.card,
@@ -503,8 +503,8 @@ const styles = createLiveSheet(() =>
       position: "relative",
     },
     zoneCardSelected: {
-      backgroundColor: tennisColors.heroGreen,
-      borderColor: tennisColors.heroGreen,
+      backgroundColor: tennisColors.primary,
+      borderColor: tennisColors.primary,
     },
     zoneRing: {
       position: "absolute",
@@ -512,7 +512,7 @@ const styles = createLiveSheet(() =>
       height: 150,
       borderRadius: 75,
       borderWidth: 18,
-      borderColor: tennisColors.heroGreen,
+      borderColor: tennisColors.primary,
       opacity: 0.08,
       right: -30,
       top: -30,
@@ -564,7 +564,7 @@ const styles = createLiveSheet(() =>
       marginBottom: 2,
     },
     chipSoftSelected: {
-      borderColor: tennisColors.heroGreen,
+      borderColor: tennisColors.primary,
       backgroundColor: tennisSemantic.info.fill,
     },
     chipSoftLabel: {

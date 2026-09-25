@@ -20,7 +20,6 @@ import {
   listMatchCourtRequests,
   recordCourtRequestOpened,
 } from "@tennis-lebanon/api";
-import { formatPriceMinor } from "@tennis-lebanon/domain";
 import type { Json } from "@tennis-lebanon/types";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
@@ -44,7 +43,6 @@ import { useConfirmExternalCourt } from "../../hooks/useConfirmExternalCourt";
 import { supabase } from "../../lib/supabase";
 import { useToast } from "../../providers/ToastProvider";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
-import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { MatchHubConfirmedHero } from "./MatchHubConfirmedHero";
 import { HubDestructiveLink } from "./HubSummaryRow";
@@ -55,6 +53,7 @@ type MatchHubPreferredClubsProps = {
   matchId: string;
   isHost?: boolean;
   canConfirmCourt?: boolean;
+  compact?: boolean;
   agreedSlot?: { starts_at: string; ends_at: string } | null;
   booking?: MatchHubBooking | null;
   onRelease?: () => void;
@@ -100,13 +99,14 @@ export function MatchHubPreferredClubs({
   matchId,
   isHost = false,
   canConfirmCourt = false,
+  compact: _compact = false,
   agreedSlot = null,
   booking = null,
   onRelease,
   releasing = false,
 }: MatchHubPreferredClubsProps) {
   const { t, i18n } = useTranslation();
-  const { writingDirection } = useLayoutDirection();
+  const { writingDirection, rowDirection } = useLayoutDirection();
   const queryClient = useQueryClient();
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const [pendingClubId, setPendingClubId] = useState<string | null>(null);
@@ -207,6 +207,7 @@ export function MatchHubPreferredClubs({
   if (clubs.length === 0) return null;
 
   const isConfirmStage = isHost && canConfirmCourt && !settled;
+
   const selectedIndex = clubs.findIndex(
     (club) => club.club_id === (effectiveBooking?.club_id ?? selectedClubId),
   );
@@ -218,17 +219,6 @@ export function MatchHubPreferredClubs({
     Boolean(selectedClubId) &&
     clubQueries[selectedIndex]?.isSuccess === true &&
     !confirmCourt;
-  const payLine = effectiveBooking
-    ? [
-        t("clubs.payAtClub"),
-        formatPriceMinor(
-          effectiveBooking.price_minor,
-          effectiveBooking.currency,
-        ),
-      ]
-        .filter(Boolean)
-        .join(" · ")
-    : null;
 
   const keptClubId = effectiveBooking?.club_id ?? selectedClubId;
   const visibleClubs = settled
@@ -329,8 +319,8 @@ export function MatchHubPreferredClubs({
             : t("matches.hub.preferredClubs")}
       </AppText>
 
-      <View style={styles.list}>
-        {visibleClubs.map((club) => {
+      <View style={styles.compactCard}>
+        {visibleClubs.map((club, rowIndex) => {
           const index = clubs.findIndex((row) => row.club_id === club.club_id);
           const selected = selectedClubId === club.club_id;
           const showMessage =
@@ -343,18 +333,19 @@ export function MatchHubPreferredClubs({
             addressPublic: detail?.address_public,
             zoneNameI18n: (detail?.zone_name_i18n ?? null) as Json,
             locale,
+            areaOnly: true,
           });
-          const courtName = settled ? effectiveBooking?.court_name : undefined;
 
           return (
-            <View
-              key={club.club_id}
-              style={[
-                styles.clubCard,
-                isConfirmStage && selected && styles.clubCardSelected,
-              ]}
-            >
-              <View style={styles.cardBody}>
+            <View key={club.club_id}>
+              {rowIndex > 0 ? <View style={styles.compactDivider} /> : null}
+              <View
+                style={[
+                  styles.compactRow,
+                  { flexDirection: rowDirection },
+                  isConfirmStage && selected && styles.compactRowSelected,
+                ]}
+              >
                 <Pressable
                   accessibilityRole={isConfirmStage ? "radio" : "button"}
                   accessibilityState={isConfirmStage ? { selected } : undefined}
@@ -368,123 +359,75 @@ export function MatchHubPreferredClubs({
                     openClub(club);
                   }}
                   style={({ pressed }) => [
-                    styles.infoColumn,
-                    isConfirmStage && selected && styles.infoColumnSelected,
+                    styles.compactMain,
+                    { flexDirection: rowDirection },
                     pressed && !settled && styles.pressed,
                   ]}
                 >
-                  <View style={styles.titleRow}>
-                    {isConfirmStage ? (
-                      <View
-                        style={[styles.radio, selected && styles.radioSelected]}
-                      >
-                        {selected ? <View style={styles.radioDot} /> : null}
-                      </View>
-                    ) : null}
-                    <View style={styles.titleBlock}>
-                      <AppText
-                        style={[styles.name, { writingDirection }]}
-                        maxLines={2}
-                      >
-                        {club.name}
-                      </AppText>
-                      {courtName ? (
-                        <>
-                          <AppText
-                            style={[styles.courtName, { writingDirection }]}
-                            maxLines={1}
-                          >
-                            {courtName}
-                          </AppText>
-                          {payLine ? (
-                            <AppText
-                              style={[
-                                tennisTextStyles.sectionSubtitle,
-                                { writingDirection },
-                              ]}
-                              maxLines={1}
-                            >
-                              {payLine}
-                            </AppText>
-                          ) : null}
-                        </>
-                      ) : location ? (
-                        <AppText
-                          style={[
-                            tennisTextStyles.sectionSubtitle,
-                            { writingDirection },
-                          ]}
-                          maxLines={1}
-                        >
-                          {location}
-                        </AppText>
-                      ) : null}
+                  {isConfirmStage ? (
+                    <View
+                      style={[styles.radio, selected && styles.radioSelected]}
+                    >
+                      {selected ? <View style={styles.radioDot} /> : null}
                     </View>
-                  </View>
+                  ) : null}
+                  <AppText
+                    style={[styles.compactName, { writingDirection }]}
+                    maxLines={1}
+                  >
+                    {club.name}
+                    {location ? (
+                      <AppText style={styles.compactMeta}>
+                        {` · ${location}`}
+                      </AppText>
+                    ) : null}
+                  </AppText>
                 </Pressable>
 
-                <View style={styles.photoHalf} pointerEvents="none">
-                  <View style={styles.photoSkew}>
-                    <View style={styles.photoInner}>
-                      <View style={styles.photoPlaceholder}>
-                        <Icon
-                          name="place"
-                          size={22}
-                          color={tennisColors.white}
-                        />
-                      </View>
-                    </View>
-                  </View>
-                </View>
-
-                <View style={styles.actionRail} pointerEvents="box-none">
-                  {showMessage ? (
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel={t("matches.hub.contactClub", {
-                        club: club.name,
-                      })}
-                      disabled={loading}
-                      onPress={() => {
-                        void messageClub(club);
-                      }}
-                      style={({ pressed }) => [
-                        styles.actionLink,
-                        pressed && styles.pressed,
-                      ]}
-                    >
-                      <Icon
-                        name="chat"
-                        size={13}
-                        color={tennisColors.primary}
-                      />
-                      <AppText style={styles.messageLabel} maxLines={1}>
-                        {loading
-                          ? t("common.loading")
-                          : t("matches.hub.messageClub")}
-                      </AppText>
-                    </Pressable>
-                  ) : (
-                    <View />
-                  )}
-
+                {showMessage ? (
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={t("matches.hub.openClubDetails", {
+                    accessibilityLabel={t("matches.hub.contactClub", {
                       club: club.name,
                     })}
-                    onPress={() => openClub(club)}
+                    disabled={loading}
+                    onPress={() => {
+                      void messageClub(club);
+                    }}
                     style={({ pressed }) => [
-                      styles.actionLink,
+                      styles.compactMessage,
+                      { flexDirection: rowDirection },
                       pressed && styles.pressed,
                     ]}
                   >
-                    <AppText style={styles.viewClubLabel} maxLines={1}>
-                      {t("clubs.viewDetails")}
+                    <Icon name="chat" size={13} color={tennisColors.primary} />
+                    <AppText style={styles.messageLabel} maxLines={1}>
+                      {loading
+                        ? t("common.loading")
+                        : t("matches.hub.messageClub")}
                     </AppText>
-                    <Icon name="chevron" size={12} color={tennisColors.white} />
                   </Pressable>
-                </View>
+                ) : null}
+
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t("matches.hub.openClubDetails", {
+                    club: club.name,
+                  })}
+                  onPress={() => openClub(club)}
+                  style={({ pressed }) => [
+                    styles.compactChevron,
+                    showMessage && styles.compactChevronAfterMessage,
+                    pressed && styles.pressed,
+                  ]}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Icon
+                    name="chevron"
+                    size={17}
+                    color={tennisColors.mutedForeground}
+                  />
+                </Pressable>
               </View>
             </View>
           );
@@ -606,48 +549,61 @@ export function MatchHubPreferredClubs({
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
-    list: {
-      gap: 10,
-    },
-    clubCard: {
+    compactCard: {
       backgroundColor: tennisColors.card,
-      borderRadius: tennisRadii.lg,
-      borderWidth: 1.5,
+      borderRadius: 18,
+      borderWidth: 1,
       borderColor: tennisColors.border,
       overflow: "hidden",
     },
-    clubCardSelected: {
-      borderColor: tennisColors.primary,
-      borderWidth: 2,
+    compactRow: {
+      alignItems: "center",
+      gap: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      minHeight: 44,
     },
-    cardBody: {
-      flexDirection: "row",
-      alignItems: "stretch",
-      minHeight: 88,
-      position: "relative",
+    compactRowSelected: {
+      backgroundColor: tennisColors.quietFill,
     },
-    infoColumn: {
+    compactDivider: {
+      height: 1,
+      backgroundColor: tennisColors.border,
+    },
+    compactMain: {
       flex: 1,
       minWidth: 0,
-      justifyContent: "flex-start",
-      paddingTop: 12,
-      paddingBottom: 36,
-      paddingStart: 12,
-      paddingEnd: 16,
-      backgroundColor: tennisColors.background,
-    },
-    infoColumnSelected: {
-      backgroundColor: tennisColors.secondary,
-    },
-    titleRow: {
-      flexDirection: "row",
-      alignItems: "flex-start",
+      alignItems: "center",
       gap: 8,
     },
-    titleBlock: {
+    compactName: {
       flex: 1,
       minWidth: 0,
-      gap: 1,
+      fontFamily: tennisFontFamily.headingMedium,
+      fontSize: 15,
+      lineHeight: 19,
+      color: tennisColors.primaryDark,
+    },
+    compactMeta: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
+    compactMessage: {
+      alignItems: "center",
+      gap: 4,
+      minHeight: 44,
+      flexShrink: 0,
+    },
+    compactChevron: {
+      width: 32,
+      height: 32,
+      alignItems: "center",
+      justifyContent: "center",
+      marginStart: 4,
+    },
+    compactChevronAfterMessage: {
+      marginStart: 16,
     },
     radio: {
       width: 18,
@@ -657,7 +613,7 @@ const styles = createLiveSheet(() =>
       borderColor: tennisColors.border,
       alignItems: "center",
       justifyContent: "center",
-      marginTop: 1,
+      flexShrink: 0,
     },
     radioSelected: {
       borderColor: tennisColors.primary,
@@ -668,68 +624,10 @@ const styles = createLiveSheet(() =>
       borderRadius: 4,
       backgroundColor: tennisColors.primary,
     },
-    name: {
-      fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 14,
-      lineHeight: 18,
-      color: tennisColors.primaryDark,
-      letterSpacing: -0.2,
-    },
-    courtName: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 13,
-      lineHeight: 17,
-      color: tennisColors.primaryDark,
-    },
-    actionRail: {
-      position: "absolute",
-      left: 0,
-      right: 0,
-      bottom: 0,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 12,
-      height: 34,
-    },
-    actionLink: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      minHeight: 34,
-    },
     messageLabel: {
       fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 12,
+      fontSize: 13,
       color: tennisColors.primary,
-    },
-    photoHalf: {
-      flex: 1,
-      minWidth: 0,
-      overflow: "hidden",
-      backgroundColor: tennisColors.photoPlaceholder,
-    },
-    photoSkew: {
-      flex: 1,
-      marginLeft: -16,
-      paddingLeft: 16,
-      backgroundColor: tennisColors.photoPlaceholder,
-      transform: [{ skewX: "10deg" }],
-    },
-    photoInner: {
-      flex: 1,
-      transform: [{ skewX: "-10deg" }],
-    },
-    photoPlaceholder: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      paddingBottom: 24,
-    },
-    viewClubLabel: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 12,
-      color: tennisColors.white,
     },
     pressed: {
       opacity: 0.88,

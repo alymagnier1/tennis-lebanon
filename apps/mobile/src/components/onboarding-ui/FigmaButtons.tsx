@@ -15,7 +15,11 @@ import { useLayoutDirection } from "../../lib/layout-direction";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { tennisTextStyles } from "../../theme/tennis-text-styles";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import {
+  tennisColors,
+  tennisHeroArt,
+  tennisRadii,
+} from "../../theme/tennis-tokens";
 
 const PRESS = { transform: [{ scale: 0.985 }], opacity: 0.92 } as const;
 
@@ -31,6 +35,7 @@ export function FigmaPrimaryButton({
   style,
   lime = false,
   hero = false,
+  compact = false,
 }: {
   label: string;
   onPress: () => void;
@@ -41,6 +46,8 @@ export function FigmaPrimaryButton({
   lime?: boolean;
   /** Brand-green fill that does not follow dark-mode lavender. */
   hero?: boolean;
+  /** 44-tall control for in-card pairs. */
+  compact?: boolean;
 }) {
   const inactive = disabled || loading;
   return (
@@ -53,6 +60,7 @@ export function FigmaPrimaryButton({
       }}
       style={({ pressed }) => [
         styles.primary,
+        compact ? styles.compactControl : null,
         lime ? styles.primaryLime : null,
         hero ? styles.primaryHero : null,
         inactive ? styles.primaryDisabled : null,
@@ -69,6 +77,7 @@ export function FigmaPrimaryButton({
           style={[
             tennisTextStyles.buttonLabel,
             styles.primaryLabel,
+            compact ? styles.compactLabel : null,
             lime ? styles.primaryLabelLime : null,
             inactive ? styles.primaryLabelDisabled : null,
           ]}
@@ -89,6 +98,8 @@ export function FigmaSecondaryButton({
   ghostOnLight = false,
   neutral = false,
   leading,
+  style,
+  compact = false,
 }: {
   label: string;
   onPress: () => void;
@@ -99,6 +110,9 @@ export function FigmaSecondaryButton({
   /** Google / quiet outline on the form canvas. */
   neutral?: boolean;
   leading?: ReactNode;
+  style?: ViewStyle;
+  /** 44-tall control for in-card pairs. */
+  compact?: boolean;
 }) {
   const inactive = disabled || loading;
   return (
@@ -111,16 +125,18 @@ export function FigmaSecondaryButton({
       }}
       style={({ pressed }) => [
         styles.secondary,
+        compact ? styles.compactControl : null,
         ghostOnDark ? styles.secondaryGhost : null,
         ghostOnLight ? styles.secondaryGhostLight : null,
         neutral ? styles.secondaryNeutral : null,
         inactive ? styles.secondaryDisabled : null,
+        style,
         ...pressStyle(pressed && !inactive),
       ]}
     >
       {loading ? (
         <ActivityIndicator
-          color={ghostOnDark ? tennisColors.white : tennisColors.heroOnLight}
+          color={ghostOnDark ? tennisColors.white : tennisColors.primaryDark}
         />
       ) : (
         <View style={styles.secondaryRow}>
@@ -129,6 +145,7 @@ export function FigmaSecondaryButton({
             style={[
               tennisTextStyles.buttonLabel,
               styles.secondaryLabel,
+              compact ? styles.compactLabel : null,
               ghostOnDark ? styles.secondaryLabelGhost : null,
               ghostOnLight ? styles.secondaryLabelGhostLight : null,
               inactive ? styles.secondaryLabelDisabled : null,
@@ -225,6 +242,17 @@ export function FigmaCard({
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
+    compactControl: {
+      height: 44,
+      paddingHorizontal: 14,
+      borderRadius: 12,
+    },
+    compactLabel: {
+      fontFamily: tennisFontFamily.headingSemi,
+      fontSize: 14,
+      lineHeight: 18,
+      letterSpacing: -0.1,
+    },
     primary: {
       height: 54,
       borderRadius: tennisRadii.lg,
@@ -237,7 +265,7 @@ const styles = createLiveSheet(() =>
       backgroundColor: tennisColors.lime,
     },
     primaryHero: {
-      backgroundColor: tennisColors.heroGreen,
+      backgroundColor: tennisHeroArt.heroGreen,
     },
     primaryDisabled: {
       backgroundColor: tennisColors.muted,
@@ -284,14 +312,14 @@ const styles = createLiveSheet(() =>
       gap: 10,
     },
     secondaryLabel: {
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
       textAlign: "center",
     },
     secondaryLabelGhost: {
       color: tennisColors.white,
     },
     secondaryLabelGhostLight: {
-      color: tennisColors.heroGreen,
+      color: tennisHeroArt.heroGreen,
     },
     secondaryLabelDisabled: {
       color: tennisColors.mutedForeground,
@@ -308,7 +336,7 @@ const styles = createLiveSheet(() =>
     textBtnLabel: {
       fontFamily: tennisFontFamily.bodySemi,
       fontSize: 13,
-      color: tennisColors.heroGreen,
+      color: tennisColors.linkText,
     },
     textBtnLabelDark: {
       fontFamily: tennisFontFamily.bodyMedium,
@@ -332,7 +360,7 @@ const styles = createLiveSheet(() =>
     backChevron: {
       fontSize: 22,
       lineHeight: 26,
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
       marginTop: -2,
     },
     backChevronDark: {

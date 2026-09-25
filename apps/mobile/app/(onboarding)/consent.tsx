@@ -45,7 +45,6 @@ export default function ConsentScreen() {
       footer={
         <FigmaPrimaryButton
           label={t("common.continue")}
-          hero
           disabled={!complete}
           onPress={() => router.push("/(onboarding)/identity")}
         />

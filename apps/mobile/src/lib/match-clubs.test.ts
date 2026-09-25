@@ -38,6 +38,17 @@ describe("preferredClubLocationLabel", () => {
       }),
     ).toBeNull();
   });
+
+  it("keeps only the area on compact hub rows", () => {
+    expect(
+      preferredClubLocationLabel({
+        addressPublic: "705 Negib Ardati, Beirut, Beirut Governorate",
+        zoneNameI18n: { en: "Beirut" },
+        locale: "en",
+        areaOnly: true,
+      }),
+    ).toBe("Beirut");
+  });
 });
 
 describe("compactJoinedLabel", () => {

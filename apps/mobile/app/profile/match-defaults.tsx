@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import { router, useFocusEffect } from "expo-router";
@@ -29,6 +29,8 @@ import {
 } from "../../src/components/onboarding-ui";
 import { useAuth } from "../../src/providers/AuthProvider";
 import { CreateMatchPanel } from "../../src/lib/create-match-ui";
+import { notify } from "../../src/lib/confirm-action";
+import { skillBandHelpBody } from "../../src/lib/skill-band-help";
 import { supabase } from "../../src/lib/supabase";
 import { tennisColors } from "../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
@@ -284,7 +286,13 @@ export default function MatchDefaultsScreen() {
             </View>
           </CreateMatchPanel>
 
-          <CreateMatchPanel title={t("profile.matchDefaults.levelSection")}>
+          <CreateMatchPanel
+            title={t("profile.matchDefaults.levelSection")}
+            infoAccessibilityLabel={t("matches.create.levelHelpA11y")}
+            onInfo={() =>
+              notify(t("matches.create.levelHelpTitle"), skillBandHelpBody(t))
+            }
+          >
             <LevelRangePicker
               bands={levelOptions}
               selected={selectedBands}

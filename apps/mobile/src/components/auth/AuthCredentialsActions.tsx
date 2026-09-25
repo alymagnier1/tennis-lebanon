@@ -39,7 +39,6 @@ export function AuthCredentialsActions({
         label={primaryLabel}
         onPress={onPrimary}
         loading={primaryLoading}
-        hero
       />
       <AuthGoogleSection
         available={google.available}

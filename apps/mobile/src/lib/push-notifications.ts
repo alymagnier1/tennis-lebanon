@@ -180,13 +180,28 @@ export async function syncDevicePushToken(options?: {
     return "unconfigured";
   }
 
-  const token = await getExpoPushTokenValue();
+  // The background sync swallows whatever this throws, so these reports are the
+  // only trace of why a device never registered -- staging went its whole life
+  // with zero `device_push_tokens` rows and nothing to say why. No token or
+  // device id goes in the context.
+  let token: string | null;
+  try {
+    token = await getExpoPushTokenValue();
+  } catch (error) {
+    void reportError(error, { platform, stage: "expo-push-token" });
+    throw error;
+  }
   if (!token) {
     return "unavailable";
   }
 
   const deviceId = await getStableDeviceId();
-  await registerDevicePushToken(supabase, deviceId, token, platform);
+  try {
+    await registerDevicePushToken(supabase, deviceId, token, platform);
+  } catch (error) {
+    void reportError(error, { platform, stage: "register-device-push-token" });
+    throw error;
+  }
   return "registered";
 }
 

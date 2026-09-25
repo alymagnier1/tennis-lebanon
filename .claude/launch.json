@@ -56,6 +56,15 @@
         "8082"
       ],
       "port": 8082
+    },
+    {
+      "name": "mobile-dev-client",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set NODE_EXTRA_CA_CERTS=%USERPROFILE%\\windows-root-ca.pem && cd /d apps\\mobile && npx expo start --dev-client --port 8081"
+      ],
+      "port": 8081
     }
   ]
 }

@@ -73,14 +73,14 @@ export const tennisTextStyles = createLiveSheet(() =>
       fontSize: 29,
       lineHeight: 32,
       letterSpacing: -0.8,
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
     },
     sectionTitle: {
       fontFamily: tennisFontFamily.heading,
       fontSize: 19,
       lineHeight: 24,
       letterSpacing: -0.4,
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
     },
     wordmark: {
       fontFamily: tennisFontFamily.heading,
@@ -109,7 +109,7 @@ export const tennisTextStyles = createLiveSheet(() =>
       fontFamily: tennisFontFamily.bodyMedium,
       fontSize: 14,
       lineHeight: 20,
-      color: tennisColors.heroOnLight,
+      color: tennisColors.primaryDark,
     },
     eyebrow: {
       fontFamily: tennisFontFamily.bodySemi,

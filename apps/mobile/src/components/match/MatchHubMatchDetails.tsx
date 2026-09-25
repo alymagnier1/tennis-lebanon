@@ -8,7 +8,7 @@ import { AppText } from "../AppText";
 import { Icon } from "../Icon";
 import { matchHubMetaLine } from "../../lib/match-hub-summaries";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { tennisColors } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 export function MatchHubMatchDetails({ hub }: { hub: MatchHubCard }) {

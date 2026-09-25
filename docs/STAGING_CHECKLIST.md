@@ -94,6 +94,23 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 - [ ] Production domain and HTTPS configured
 - [ ] Platform admin routes (`/admin/reports`, `/admin/disputes`) restricted to operators
 - [ ] Login form and booking queue tested on Chrome + Safari
+- [ ] `NEXT_PUBLIC_GET_APP_URL` set in Vercel to the current install page; without it
+      the invite page hides "Get the app" and Android falls back to the bare app scheme
+
+### Invite links
+
+Shared links are `https://racketbound.com/invite#<token>` (see the 2026-09-22
+decision). The page is public and static; the token never reaches the server.
+
+- [ ] `/invite#<token>` from WhatsApp on an Android phone **without** the app:
+      page loads, "Get the app" reaches the install page, and after installing,
+      Back then "Open in the app" opens the invite screen
+- [ ] Same link on a phone **with** the app, signed in: "Open in the app" lands on
+      the invite summary with Accept / Decline, and nothing is joined until Accept
+- [ ] Signed-out path: open the invite, sign up, finish onboarding, and the app
+      returns to the invite rather than Home
+- [ ] `/invite` with no fragment shows "This invite link is incomplete"
+- [ ] Arabic phone: page renders right-to-left
 
 ## 6. Legal and support
 
@@ -117,9 +134,15 @@ missing: `public.invoke_process_notifications()` posts to the Edge Function and
 at all, so every reminder, club nudge and attendance prompt was written to the
 outbox and left there — silently, with no error anywhere.
 
-The job is inert until both Vault secrets exist. Create them **per
-environment** (they differ between staging and production), then confirm the
-first run:
+The job is inert until both Vault secrets exist and the function has the
+matching `PROCESS_NOTIFICATIONS_TOKEN` secret. Set them **per environment**
+(they differ between staging and production).
+
+The token is a dedicated random value, **not** the service_role key (changed
+2026-09-22: on a project with both legacy and `sb_secret_` keys the function's
+`SUPABASE_SERVICE_ROLE_KEY` did not match the key copied from the dashboard,
+and every run was answered 401). It lives in exactly two places, so rotating
+the service key never breaks notifications.
 
 ```sql
 select vault.create_secret(
@@ -127,16 +150,23 @@ select vault.create_secret(
   'process_notifications_url',
   'Edge Function endpoint invoked by tennis_process_notifications'
 );
+-- Generates the token and stores it. Use update_secret if it already exists.
 select vault.create_secret(
-  '<service-role-key>',
+  encode(extensions.gen_random_bytes(32), 'hex'),
   'process_notifications_token',
-  'Service role key used to authenticate the notification sender'
+  'Invoker token for process-notifications; must equal PROCESS_NOTIFICATIONS_TOKEN'
 );
+-- Copy this value into Edge Functions -> Secrets as PROCESS_NOTIFICATIONS_TOKEN.
+select decrypted_secret from vault.decrypted_secrets
+where name = 'process_notifications_token';
 
 -- Non-null request id means it fired; null means the secrets are still missing.
 select public.invoke_process_notifications();
 select * from net._http_response order by created desc limit 5;
 ```
+
+A 500 reading `PROCESS_NOTIFICATIONS_TOKEN is not configured` means the
+function secret is missing; a 401 means the two copies differ.
 
 - [x] Named invoker for `process-notifications` recorded below, with schedule
       and which secret it authenticates with
@@ -154,6 +184,7 @@ select * from net._http_response order by created desc limit 5;
 | Invoker  | `pg_cron` job `tennis_process_notifications` → `invoke_process_notifications` |
 | Schedule | `*/5 * * * *`                                                                 |
 | Secret   | Vault: `process_notifications_url`, `process_notifications_token`             |
+| Checked  | Function secret `PROCESS_NOTIFICATIONS_TOKEN` (same value as the Vault token) |
 
 ### The mobile app needs an Expo project id
 
@@ -168,6 +199,17 @@ silently.
 - [ ] `EAS_PROJECT_ID` set for the build (or present in `app.json`)
 - [ ] `select count(*) from public.device_push_tokens where is_active;` is
       non-zero on staging after a real device signs in
+
+Onboarding no longer asks for notification permission, so **signing in does
+not register a device**. A token is written only after Profile → Notifications
+→ enable, or accepting the in-match push prompt. Registration failures are
+reported to Sentry with `stage: expo-push-token` or
+`stage: register-device-push-token`.
+
+As of 2026-09-22 staging had zero token rows, and every
+`invoke_process_notifications` call was answered **401** — see the dedicated
+invoker token above. Confirm
+`select status_code, count(*) from net._http_response group by 1;` shows 200s.
 
 ### Club staff have no push channel
 
@@ -187,6 +229,32 @@ Reaching club staff out of band needs a decision **before any club depends on a 
 
 - [ ] Channel chosen and recorded in `docs/DECISIONS.md` — **not applicable to cohort 1**
 - [ ] If ops-driven: named owner and expected response time agreed with clubs — **not applicable to cohort 1**
+
+## 7c. Two-player rehearsal (cohort-1 gate)
+
+Two physical Android phones on the current staging APK. **A** is an existing
+player; **B** is a person with no account and the app **not installed**. Tick
+each step only when it happened on the phone, not when the database says so.
+
+- [ ] A signs in with Google and turns on Profile → Notifications
+- [ ] A creates a **flexible** singles match with two proposed times and publishes
+- [ ] A shares the invite to B on WhatsApp; the message shows an
+      `https://racketbound.com/invite#…` link
+- [ ] B taps it: the invite page loads, Get the app installs the APK, Back →
+      Open in the app opens RacketBound on the invite screen
+- [ ] B signs up, confirms the email code, finishes onboarding, and **lands on the
+      invite** (not Home); the summary shows zone and time; Accept joins
+- [ ] B turns on Profile → Notifications; `device_push_tokens` now has two
+      active rows
+- [ ] Both vote Yes on the same slot; **B's phone physically shows** the
+      agreed-time push
+- [ ] A opens the court step, uses the WhatsApp hand-off to the club, then
+      confirms the court was booked; both hubs show the confirmed court
+- [ ] After the start time: both confirm attendance and the same score; the
+      result shows as confirmed and the rematch card appears
+- [ ] `select * from public.unreachable_notification_summary();` reviewed, and
+      Sentry checked for `stage: expo-push-token` / `register-device-push-token`
+- [ ] Anything that surprised either player written down before it is fixed
 
 ## 8. Promotion sign-off
 

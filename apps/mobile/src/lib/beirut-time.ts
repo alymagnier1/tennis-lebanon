@@ -126,7 +126,7 @@ export function formatUtcTimeInBeirut(iso: string): string {
 }
 
 export function formatTodayAvailabilityTime(
-  slots: Array<{ starts_at: string }>,
+  slots: { starts_at: string }[],
   now: Date = new Date(),
 ): string | null {
   const today = beirutDateKey(now.toISOString());
@@ -148,6 +148,37 @@ export function formatShortUtcDateInBeirut(iso: string): string {
     month: "short",
     day: "numeric",
   }).format(new Date(iso));
+}
+
+/** Hub title: weekday and start time in Beirut, e.g. "Saturday 6:00 PM". */
+export function formatHubTitleInBeirut(iso: string, locale?: string): string {
+  const date = new Date(iso);
+  const weekday = new Intl.DateTimeFormat(locale, {
+    timeZone: BEIRUT_TIME_ZONE,
+    weekday: "long",
+  }).format(date);
+  const time = new Intl.DateTimeFormat(locale, {
+    timeZone: BEIRUT_TIME_ZONE,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+  return `${weekday} ${time}`;
+}
+
+/** Vs-card clock: "Sat 18:00". */
+export function formatHubVsTimeInBeirut(iso: string, locale?: string): string {
+  const date = new Date(iso);
+  const weekday = new Intl.DateTimeFormat(locale, {
+    timeZone: BEIRUT_TIME_ZONE,
+    weekday: "short",
+  }).format(date);
+  const time = new Intl.DateTimeFormat(locale, {
+    timeZone: BEIRUT_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(date);
+  return `${weekday} ${time}`;
 }
 
 /** Compact list label: weekday, day-of-month, and start time in Beirut. */

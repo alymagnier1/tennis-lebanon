@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, TextInput, View } from "react-native";
 import { createLiveSheet } from "../../../src/theme/create-live-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -19,6 +13,7 @@ import {
   joinMatch,
   leaveMatch,
   releaseExternalCourt,
+  removeMatchParticipant,
   respondBookingAlternative,
   respondToJoinRequest,
   withdrawJoinRequest,
@@ -35,8 +30,12 @@ import {
   canVoteOnTimes,
   isFixedTimingMode,
   canCreatorCancelMatch,
+  canHostRemoveParticipant,
   canParticipantLeave,
   canParticipantWithdraw,
+  HOST_REMOVAL_REASONS,
+  hostRemovalNeedsStartWarning,
+  isHostRemovalReason,
   leavePolicyMessageKey,
   formatPriceMinor,
   hasUnanimousTimeYes,
@@ -45,7 +44,7 @@ import {
   viewerMayInvite,
 } from "@tennis-lebanon/domain";
 import { spacing, typography } from "@tennis-lebanon/ui";
-import { Avatar, StatusBanner } from "../../../src/components/AppUi";
+import { StatusBanner } from "../../../src/components/AppUi";
 import { MatchChatEntry } from "../../../src/components/MatchChatEntry";
 import { MatchResultPanel } from "../../../src/components/MatchResultPanel";
 import { AppText } from "../../../src/components/AppText";
@@ -65,6 +64,8 @@ import { MatchHubParticipants } from "../../../src/components/match/MatchHubPart
 import { MatchHubMatchDetails } from "../../../src/components/match/MatchHubMatchDetails";
 import { MatchHubMoreSection } from "../../../src/components/match/MatchHubMoreSection";
 import { MatchHubLayout } from "../../../src/components/match/MatchHubLayout";
+import { MatchHubJoinRequestCarousel } from "../../../src/components/match/MatchHubJoinRequestCarousel";
+import { MatchHubInvitedList } from "../../../src/components/match/MatchHubInvitedList";
 import { MatchPushNudge } from "../../../src/components/match/MatchPushNudge";
 import { MatchRematchCard } from "../../../src/components/match/MatchRematchCard";
 import { PlayerProfileSection } from "../../../src/components/player/PlayerProfileSection";
@@ -73,13 +74,21 @@ import {
   FigmaPrimaryButton,
   FigmaSecondaryButton,
 } from "../../../src/components/onboarding-ui";
-import { formatUtcSlotInBeirut } from "../../../src/lib/beirut-time";
-import { confirmAction, notify } from "../../../src/lib/confirm-action";
+import {
+  formatUtcSlotInBeirut,
+  formatHubTitleInBeirut,
+} from "../../../src/lib/beirut-time";
+import {
+  confirmAction,
+  notify,
+  presentRemoveParticipantDialog,
+} from "../../../src/lib/confirm-action";
 import { confirmCancelHostedMatch } from "../../../src/lib/confirm-cancel-hosted-match";
 import {
   joinErrorKey,
   respondRequestErrorKey,
 } from "../../../src/lib/join-error";
+import { removeParticipantErrorKey } from "../../../src/lib/remove-participant-error";
 import { useLayoutDirection } from "../../../src/lib/layout-direction";
 import { exitMatchHub } from "../../../src/lib/navigation";
 import {
@@ -101,18 +110,29 @@ import {
   isHubVsHeroStage,
   isMatchHubChatAvailable,
   isMatchHubChatLocked,
+  joinerHubIntentCopyKey,
+  preferredClubsBeforePeoplePipeline,
   shouldShowAgreedTimeSection,
   shouldShowDiscoveryOverview,
   shouldShowPayAtClubBanner,
   shouldShowTimeAgreedBanner,
+  shouldUseCompactPreferredClubs,
   shouldUsePolishedHubLayout,
 } from "../../../src/lib/match-hub-layout";
 import {
+  hubChromeShowsInReadyHero,
   hubPrimaryActionLabelKey,
   resolveHubChromeAction,
+  resolveHubFooterAction,
   resolveHubPrimaryAction,
   type HubPrimaryActionKind,
 } from "../../../src/lib/hub-action-bar";
+import {
+  hubOpenSpotCount,
+  pickHubSlotOccupant,
+  pickHubVsSides,
+  type HubVsParticipant,
+} from "../../../src/lib/match-hub-ready-hero";
 import {
   CREATE_MATCH_ROUTE,
   matchBookExternalRoute,
@@ -127,6 +147,7 @@ import { useAuth } from "../../../src/providers/AuthProvider";
 import {
   tennisColors,
   tennisRadii,
+  tennisSpacing,
   type SemanticTone,
 } from "../../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../../src/hooks/useTennisFonts";
@@ -166,7 +187,7 @@ type HubRequest = {
 
 export default function MatchHubScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { rowDirection, writingDirection } = useLayoutDirection();
   const { session } = useAuth();
   const queryClient = useQueryClient();
@@ -263,6 +284,16 @@ export default function MatchHubScreen() {
       exitMatchHub();
     },
     onError: () => notify(t("matches.hub.leaveError")),
+  });
+
+  const removePlayerMutation = useMutation({
+    mutationFn: ({ userId, reason }: { userId: string; reason: string }) =>
+      removeMatchParticipant(supabase, id!, userId, reason),
+    onSuccess: () => {
+      invalidate();
+      showToast(t("matches.hub.removeSuccess"));
+    },
+    onError: (error: unknown) => notify(t(removeParticipantErrorKey(error))),
   });
 
   const voteMutation = useMutation({
@@ -425,10 +456,78 @@ export default function MatchHubScreen() {
   const polishedLayout = hub
     ? shouldUsePolishedHubLayout(hub, booking, hasAgreedTime)
     : false;
+  const compactPreferredClubs = shouldUseCompactPreferredClubs({
+    vsHeroStage,
+    canConfirmCourt: showConfirmExternalCourt,
+    courtLocked,
+  });
+  const slotOccupant = hub?.viewer_is_creator
+    ? pickHubSlotOccupant(
+        pendingRequests,
+        hubOpenSpotCount(pickHubVsSides(participants, hub.capacity)),
+      )
+    : null;
+  const heroEndsAt = courtLocked
+    ? (booking?.ends_at ?? null)
+    : (agreedSlot?.ends_at ??
+      proposedTimes.find((slot) => slot.starts_at === heroStartsAt)?.ends_at ??
+      null);
+  const hubTitle = heroStartsAt
+    ? formatHubTitleInBeirut(
+        heroStartsAt,
+        i18n.resolvedLanguage ?? i18n.language,
+      )
+    : t("matches.hub.title");
 
   const showLeave =
     hub?.viewer_status === "accepted" &&
     canParticipantLeave(hub.status, hub.viewer_is_creator);
+
+  const joinerIntentKey = hub
+    ? joinerHubIntentCopyKey({
+        viewerIsCreator: hub.viewer_is_creator,
+        viewerStatus: hub.viewer_status,
+        nextAction: hub.next_action,
+      })
+    : null;
+
+  function handleRemovePlayer(player: HubVsParticipant) {
+    if (!hub) return;
+    if (
+      !canHostRemoveParticipant({
+        viewerIsCreator: hub.viewer_is_creator,
+        matchStatus: hub.status,
+        targetIsCreator: Boolean(player.is_creator),
+        targetStatus: player.status,
+        startsAt: heroStartsAt,
+      })
+    ) {
+      return;
+    }
+
+    presentRemoveParticipantDialog({
+      title: t("matches.hub.removeSheetTitle", { name: player.display_name }),
+      message: t("matches.hub.removeSheetBody"),
+      warning: hostRemovalNeedsStartWarning(heroStartsAt)
+        ? t("matches.hub.removeSheetWarning")
+        : undefined,
+      reasonLabel: t("matches.hub.removeReasonLabel"),
+      reasons: HOST_REMOVAL_REASONS.map((value) => ({
+        value,
+        label: t(`matches.hub.removeReasons.${value}`),
+      })),
+      reasonRequiredMessage: t("matches.hub.removeReasonRequired"),
+      submitLabel: t("matches.hub.removeConfirm"),
+      dismissLabel: t("common.cancel"),
+      onSubmit: async (reason) => {
+        if (!isHostRemovalReason(reason)) return;
+        await removePlayerMutation.mutateAsync({
+          userId: player.user_id,
+          reason,
+        });
+      },
+    });
+  }
 
   const showWithdraw =
     hub?.viewer_status === "accepted" &&
@@ -515,7 +614,9 @@ export default function MatchHubScreen() {
   ]);
 
   function handlePrimaryAction() {
-    switch (primaryActionKind) {
+    const kind =
+      primaryActionKind === "none" && canInvite ? "invite" : primaryActionKind;
+    switch (kind) {
       case "join":
       case "request_join":
         joinMutation.mutate();
@@ -537,16 +638,22 @@ export default function MatchHubScreen() {
 
   const secondaryBannerBody = useMemo(() => {
     if (!hub) return null;
+    const joinerIntent = joinerHubIntentCopyKey({
+      viewerIsCreator: hub.viewer_is_creator,
+      viewerStatus: hub.viewer_status,
+      nextAction: hub.next_action,
+    });
     const messages: string[] = [];
     if (
       shouldShowTimeAgreedBanner(hub.next_action, hub, booking, hasAgreedTime)
     ) {
       messages.push(t("matches.hub.timeAgreed"));
     }
-    if (hub.next_action === "awaiting_club") {
+    // Joiner intent already names awaiting club / court confirmed.
+    if (hub.next_action === "awaiting_club" && !joinerIntent) {
       messages.push(t("matches.hub.awaitingClub"));
     }
-    if (shouldShowPayAtClubBanner(hub.next_action, booking)) {
+    if (shouldShowPayAtClubBanner(hub.next_action, booking) && !joinerIntent) {
       messages.push(t("matches.hub.payAtClub"));
     }
     if (hub.is_stale_warning) {
@@ -679,20 +786,29 @@ export default function MatchHubScreen() {
 
   const hasPreferredClubs =
     Array.isArray(hub?.preferred_clubs) && hub.preferred_clubs.length > 0;
+  const clubsBeforePeople = preferredClubsBeforePeoplePipeline({
+    canConfirmCourt: showConfirmExternalCourt,
+  });
 
   const chromePrimaryKind = resolveHubChromeAction({
     primaryAction: primaryActionKind,
     hasPreferredClubs,
   });
   const primaryActionLabelKey = hubPrimaryActionLabelKey(chromePrimaryKind);
+  // Invite is sticky-footer only — never a filled control on the vs card.
   const actionsInReadyHero = Boolean(
-    vsHeroStage && hub && chromePrimaryKind !== "none",
+    vsHeroStage && hub && hubChromeShowsInReadyHero(chromePrimaryKind),
   );
+  const footerPrimaryKind = resolveHubFooterAction({
+    chromeAction: chromePrimaryKind,
+    actionsInReadyHero,
+    canInvite,
+  });
 
   const [pullRefreshing, setPullRefreshing] = useState(false);
 
   const hubLayoutProps = {
-    title: t("matches.hub.title"),
+    title: hubTitle,
     statusSlot: hub ? (
       <SemanticBadge
         label={t(`matches.status.${hub.status}`)}
@@ -707,12 +823,22 @@ export default function MatchHubScreen() {
       setPullRefreshing(true);
       void hubQuery.refetch().finally(() => setPullRefreshing(false));
     },
+    dock:
+      chatAvailable || chatLocked ? (
+        <View style={styles.chatDock}>
+          <MatchChatEntry
+            matchId={id!}
+            enabled={chatAvailable}
+            locked={chatLocked}
+            viewerUserId={session?.user.id}
+            onPress={() => router.push(matchChatRoute(id!))}
+          />
+        </View>
+      ) : null,
     footer:
-      !actionsInReadyHero &&
-      hub &&
-      (chromePrimaryKind !== "none" || showCancel) ? (
+      hub && (footerPrimaryKind !== "none" || showCancel) ? (
         <MatchHubActionBar
-          actionKind={chromePrimaryKind}
+          actionKind={footerPrimaryKind}
           loading={joinMutation.isPending}
           onPress={handlePrimaryAction}
           cancelLabel={showCancel ? t("matches.hub.cancel") : undefined}
@@ -785,13 +911,26 @@ export default function MatchHubScreen() {
           participants={participants}
           viewerUserId={session?.user.id}
           startsAt={heroStartsAt}
+          endsAt={heroEndsAt}
+          slotOccupant={
+            slotOccupant
+              ? {
+                  user_id: slotOccupant.user_id,
+                  display_name: slotOccupant.display_name,
+                  status: slotOccupant.status,
+                  avatar_path: slotOccupant.avatar_path,
+                }
+              : null
+          }
           onReschedule={
             showReschedule
               ? () => router.push(`/match/${id}/reschedule`)
               : undefined
           }
           primaryLabel={
-            primaryActionLabelKey ? t(primaryActionLabelKey) : undefined
+            chromePrimaryKind !== "invite" && primaryActionLabelKey
+              ? t(primaryActionLabelKey)
+              : undefined
           }
           primaryLoading={
             chromePrimaryKind === "join" || chromePrimaryKind === "request_join"
@@ -799,23 +938,74 @@ export default function MatchHubScreen() {
               : false
           }
           onPrimary={
-            chromePrimaryKind !== "none" ? handlePrimaryAction : undefined
+            chromePrimaryKind !== "none" && chromePrimaryKind !== "invite"
+              ? handlePrimaryAction
+              : undefined
+          }
+          onRemovePlayer={
+            hub.viewer_is_creator ? handleRemovePlayer : undefined
           }
         />
       ) : null}
 
-      {vsHeroStage && hasPreferredClubs ? (
+      {joinerIntentKey ? (
+        <StatusBanner body={t(joinerIntentKey)} tone="info" />
+      ) : null}
+
+      {clubsBeforePeople && vsHeroStage && hasPreferredClubs ? (
         <MatchHubPreferredClubs
           clubs={hub!.preferred_clubs}
           matchId={id!}
           isHost={hub!.viewer_is_creator}
           canConfirmCourt={showConfirmExternalCourt}
+          compact={compactPreferredClubs}
           agreedSlot={agreedSlot ?? null}
           booking={courtLocked ? booking : null}
           releasing={releaseCourtMutation.isPending}
           onRelease={showReleaseCourt ? handleReleaseCourt : undefined}
         />
-      ) : courtLocked && booking ? (
+      ) : null}
+
+      {hub?.viewer_is_creator && pendingRequests.length > 0 ? (
+        <MatchHubJoinRequestCarousel
+          requests={pendingRequests}
+          rosterFull={rosterFull}
+          pendingUserId={
+            respondMutation.isPending ? respondMutation.variables?.userId : null
+          }
+          pendingAccept={
+            respondMutation.isPending ? respondMutation.variables?.accept : null
+          }
+          onApprove={(userId) =>
+            respondMutation.mutate({ userId, accept: true })
+          }
+          onDecline={(userId) =>
+            respondMutation.mutate({ userId, accept: false })
+          }
+        />
+      ) : null}
+
+      {hub?.viewer_is_creator && invitedPlayers.length > 0 ? (
+        <MatchHubInvitedList
+          invited={invitedPlayers}
+          withdrawing={cancelInviteMutation.isPending}
+          onWithdraw={(userId) => cancelInviteMutation.mutate(userId)}
+        />
+      ) : null}
+
+      {!clubsBeforePeople && vsHeroStage && hasPreferredClubs ? (
+        <MatchHubPreferredClubs
+          clubs={hub!.preferred_clubs}
+          matchId={id!}
+          isHost={hub!.viewer_is_creator}
+          canConfirmCourt={showConfirmExternalCourt}
+          compact={compactPreferredClubs}
+          agreedSlot={agreedSlot ?? null}
+          booking={courtLocked ? booking : null}
+          releasing={releaseCourtMutation.isPending}
+          onRelease={showReleaseCourt ? handleReleaseCourt : undefined}
+        />
+      ) : !clubsBeforePeople && courtLocked && booking ? (
         <MatchHubConfirmedHero
           booking={booking}
           matchId={id!}
@@ -864,168 +1054,6 @@ export default function MatchHubScreen() {
         </PlayerProfileSection>
       ) : null}
 
-      {/*
-        The hero shows accepted players and open slots, so an invited player and
-        a slot nobody was asked to fill look the same. Host-only: a decline is
-        the inviter's business, not the roster's.
-      */}
-      {hub?.viewer_is_creator && invitedPlayers.length > 0 ? (
-        <PlayerProfileSection title={t("matches.hub.invitedTitle")}>
-          {invitedPlayers.map((invited) => (
-            <View
-              key={invited.user_id}
-              style={[styles.invitedRow, { flexDirection: rowDirection }]}
-            >
-              <View
-                style={[
-                  styles.invitedIdentity,
-                  { flexDirection: rowDirection },
-                ]}
-              >
-                <Avatar
-                  name={invited.display_name}
-                  avatarPath={invited.avatar_path}
-                  size={32}
-                />
-                <AppText style={styles.participantName} maxLines={1}>
-                  {invited.display_name}
-                </AppText>
-              </View>
-              <View
-                style={[
-                  styles.invitedTrailing,
-                  { flexDirection: rowDirection },
-                ]}
-              >
-                {/*
-                  `critical`, not `neutral`. `TONE_ICONS` maps both `neutral`
-                  and `info` to the `info` glyph, so the two opposite answers a
-                  host can get back rendered as near-identical pills.
-                */}
-                <SemanticBadge
-                  label={
-                    invited.status === "declined"
-                      ? t("matches.hub.invitedDeclined")
-                      : invited.status === "superseded"
-                        ? t("matches.hub.invitedOnHold")
-                        : t("matches.hub.invitedWaiting")
-                  }
-                  tone={
-                    invited.status === "declined"
-                      ? "critical"
-                      : invited.status === "superseded"
-                        ? "neutral"
-                        : "info"
-                  }
-                />
-                {/*
-                  Only on an offer still outstanding. A decline is the invitee's
-                  answer and the record of it; clearing that off the hub would
-                  be a different feature, and `cancel_match_invite` refuses it.
-                */}
-                {invited.status !== "declined" ? (
-                  <HubDestructiveLink
-                    label={t("matches.hub.cancelInvite")}
-                    disabled={cancelInviteMutation.isPending}
-                    onPress={() => cancelInviteMutation.mutate(invited.user_id)}
-                  />
-                ) : null}
-              </View>
-            </View>
-          ))}
-        </PlayerProfileSection>
-      ) : null}
-
-      {hub?.viewer_is_creator && pendingRequests.length > 0 ? (
-        <PlayerProfileSection
-          title={
-            rosterFull
-              ? t("matches.hub.waitlist")
-              : t("matches.hub.pendingRequests")
-          }
-        >
-          {rosterFull ? (
-            <AppText style={[styles.timeMeta, { writingDirection }]}>
-              {t("matches.hub.waitlistHint")}
-            </AppText>
-          ) : null}
-          {pendingRequests.map((request) => (
-            <View key={request.user_id} style={styles.requestCard}>
-              {/*
-                Accepting a stranger is a decision about a person, and a name is
-                thin grounds for it — the profile behind this carries level,
-                areas and matches played. Avatar and name are one target rather
-                than the avatar alone: a 40px circle is under the touch minimum,
-                the same reasoning as the roster rows. The accept and decline
-                buttons stay outside it, so opening a profile cannot be
-                mistaken for answering.
-              */}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("discover.openPlayerProfile", {
-                  name: request.display_name,
-                })}
-                onPress={() =>
-                  router.push({
-                    pathname: "/player/[id]",
-                    params: { id: request.user_id },
-                  })
-                }
-                style={({ pressed }) => [
-                  styles.requestIdentity,
-                  { flexDirection: rowDirection },
-                  pressed && styles.requestIdentityPressed,
-                ]}
-              >
-                <Avatar
-                  name={request.display_name}
-                  avatarPath={request.avatar_path}
-                  size={40}
-                />
-                <AppText style={styles.participantName} maxLines={1}>
-                  {request.display_name}
-                </AppText>
-              </Pressable>
-              {request.join_note ? (
-                <AppText
-                  style={[styles.requestNote, { writingDirection }]}
-                  maxLines={4}
-                >
-                  {t("matches.invite.noteQuote", { note: request.join_note })}
-                </AppText>
-              ) : null}
-              <View
-                style={[styles.requestActions, { flexDirection: rowDirection }]}
-              >
-                <View style={styles.inlineAction}>
-                  <FigmaPrimaryButton
-                    label={t("matches.hub.approve")}
-                    disabled={rosterFull}
-                    onPress={() =>
-                      respondMutation.mutate({
-                        userId: request.user_id,
-                        accept: true,
-                      })
-                    }
-                  />
-                </View>
-                <View style={styles.inlineAction}>
-                  <FigmaSecondaryButton
-                    label={t("matches.hub.reject")}
-                    onPress={() =>
-                      respondMutation.mutate({
-                        userId: request.user_id,
-                        accept: false,
-                      })
-                    }
-                  />
-                </View>
-              </View>
-            </View>
-          ))}
-        </PlayerProfileSection>
-      ) : null}
-
       {hub && session?.user.id ? (
         <MatchResultPanel
           matchId={id!}
@@ -1038,6 +1066,24 @@ export default function MatchHubScreen() {
         <MatchRematchCard
           opponents={rematchOpponents}
           onRematch={handleRematch}
+        />
+      ) : null}
+
+      {showLeave ? (
+        <HubDestructiveLink
+          label={t("matches.hub.leave")}
+          onPress={() =>
+            confirmAction({
+              title: t("matches.hub.leave"),
+              message: t(
+                leavePolicyMessageKey(hub!.status, hasAcceptedBooking),
+                { hours: 24 },
+              ),
+              confirmLabel: t("matches.hub.leave"),
+              cancelLabel: t("common.cancel"),
+              onConfirm: () => leaveMutation.mutate(),
+            })
+          }
         />
       ) : null}
 
@@ -1160,7 +1206,10 @@ export default function MatchHubScreen() {
           />
         ) : null}
 
-        {canInvite && !actionsInReadyHero ? (
+        {canInvite &&
+        footerPrimaryKind !== "invite" &&
+        !actionsInReadyHero &&
+        pendingRequests.length === 0 ? (
           <FigmaSecondaryButton
             label={t("matches.invite.invitePlayers")}
             onPress={() => router.push(matchInviteRoute(String(id)))}
@@ -1224,66 +1273,20 @@ export default function MatchHubScreen() {
             }
           />
         ) : null}
-
-        {showLeave ? (
-          <HubDestructiveLink
-            label={t("matches.hub.leave")}
-            onPress={() =>
-              confirmAction({
-                title: t("matches.hub.leave"),
-                message: t(
-                  leavePolicyMessageKey(hub!.status, hasAcceptedBooking),
-                  { hours: 24 },
-                ),
-                confirmLabel: t("matches.hub.leave"),
-                cancelLabel: t("common.cancel"),
-                onConfirm: () => leaveMutation.mutate(),
-              })
-            }
-          />
-        ) : null}
-
-        {showCancel && actionsInReadyHero ? (
-          <HubDestructiveLink
-            label={t("matches.hub.cancel")}
-            onPress={handleCancelMatch}
-          />
-        ) : null}
       </MatchHubMoreSection>
-
-      <MatchChatEntry
-        matchId={id!}
-        enabled={chatAvailable}
-        locked={chatLocked}
-        viewerUserId={session?.user.id}
-        onPress={() => router.push(matchChatRoute(id!))}
-      />
     </MatchHubLayout>
   );
 }
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
-    participantRow: {
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: spacing.md,
-      paddingVertical: spacing.xs,
-    },
-    participantText: {
-      flex: 1,
-      minWidth: 0,
-      gap: 2,
-    },
-    participantName: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      color: tennisColors.primaryDark,
-      fontSize: typography.size.md,
-    },
-    participantMeta: {
-      fontFamily: tennisFontFamily.body,
-      color: tennisColors.mutedForeground,
-      fontSize: typography.size.sm,
+    chatDock: {
+      borderTopWidth: 1,
+      borderTopColor: tennisColors.border,
+      backgroundColor: tennisColors.background,
+      paddingHorizontal: tennisSpacing.screenX,
+      paddingTop: 12,
+      paddingBottom: 8,
     },
     timeCard: {
       borderWidth: 1.5,
@@ -1306,41 +1309,6 @@ const styles = createLiveSheet(() =>
     voteRow: {
       flexWrap: "wrap",
       gap: spacing.sm,
-    },
-    requestIdentity: {
-      alignItems: "center",
-      gap: spacing.sm,
-    },
-    requestIdentityPressed: {
-      opacity: 0.7,
-    },
-    invitedIdentity: {
-      alignItems: "center",
-      gap: spacing.sm,
-      flexShrink: 1,
-    },
-    invitedRow: {
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: spacing.sm,
-      paddingVertical: spacing.xs,
-    },
-    invitedTrailing: {
-      alignItems: "center",
-      gap: spacing.sm,
-    },
-    requestCard: {
-      gap: spacing.sm,
-      paddingBottom: spacing.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: tennisColors.border,
-    },
-    requestNote: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: typography.size.sm,
-      lineHeight: 20,
-      color: tennisColors.mutedForeground,
-      fontStyle: "italic",
     },
     joinNoteWrap: {
       gap: spacing.xs,
@@ -1369,9 +1337,6 @@ const styles = createLiveSheet(() =>
       fontSize: typography.size.xs,
       lineHeight: 16,
       color: tennisColors.mutedForeground,
-    },
-    requestActions: {
-      gap: spacing.sm,
     },
     inlineActions: {
       flexDirection: "row",

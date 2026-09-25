@@ -72,7 +72,7 @@ export function weekdayCompactLabels(
 /** Per-weekday blocks for profile chips; falls back when RPC omits `by_weekday`. */
 export function publicAvailabilityByWeekday(
   summary: PublicPlayerAvailabilitySummary | undefined,
-): Array<{ weekday: number; day_parts: AvailabilityDayPart[] }> {
+): { weekday: number; day_parts: AvailabilityDayPart[] }[] {
   if (!summary) return [];
 
   if (summary.by_weekday.length > 0) {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -39,9 +39,9 @@ import { DiscoverPlayerCardRow } from "../../src/components/discover/DiscoverPla
 import {
   PrimaryButton,
   Screen,
+  ScreenError,
   SecondaryButton,
   type ScreenVirtualizedListProps,
-  formStyles,
 } from "../../src/components/FormUi";
 import { trackDiscoverViewed } from "../../src/lib/analytics";
 import { startNewMatchCreate } from "../../src/lib/create-match-guard";
@@ -340,7 +340,6 @@ export default function DiscoverScreen() {
   const relaxFilters = () => {
     setMatchToggles({
       matchLevel: false,
-      matchIntent: false,
       matchArea: false,
       matchAvailability: false,
     });
@@ -492,13 +491,11 @@ export default function DiscoverScreen() {
       {showListSkeleton ? <ListSkeleton rows={4} /> : null}
 
       {activeQuery.isError || ownProfileQuery.isError ? (
-        <View>
-          <Text style={formStyles.errorText}>{t("discover.error")}</Text>
-          <PrimaryButton
-            label={t("common.retry")}
-            onPress={() => void activeQuery.refetch()}
-          />
-        </View>
+        <ScreenError
+          message={t("discover.error")}
+          retryLabel={t("common.retry")}
+          onRetry={() => void activeQuery.refetch()}
+        />
       ) : null}
 
       {segment === "players" &&

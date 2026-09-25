@@ -25,6 +25,7 @@ export const CRITICAL_FLOW_KEY_PREFIXES = [
   "clubs.",
   "settings.",
   "account.",
+  "policies.",
   "rtlCheck.",
 ] as const;
 
@@ -63,7 +64,14 @@ export function flattenLocaleStrings(
     return prefix ? { [prefix]: value } : {};
   }
 
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
+  if (Array.isArray(value)) {
+    return value.reduce<Record<string, string>>((acc, child, index) => {
+      const childPrefix = prefix ? `${prefix}.${index}` : String(index);
+      return { ...acc, ...flattenLocaleStrings(child, childPrefix) };
+    }, {});
+  }
+
+  if (!value || typeof value !== "object") {
     return {};
   }
 

@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.110.8",
     "@tennis-lebanon/api": "workspace:*",
     "@tennis-lebanon/config": "workspace:*",
+    "@tennis-lebanon/domain": "workspace:*",
     "@tennis-lebanon/i18n": "workspace:*",
     "@tennis-lebanon/ui": "workspace:*",
     "i18next": "^25.6.1",

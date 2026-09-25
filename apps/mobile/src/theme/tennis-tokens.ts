@@ -25,26 +25,32 @@ export const tennisColorsLight = {
   card: "#FFFFFF",
   secondary: "#E3EDE6",
   muted: "#ECF0EE",
-  mutedForeground: "#627068",
+  // Darkened from #627068, which was 4.34:1 on `secondary`.
+  mutedForeground: "#5C6A62",
   border: "#E9EBE8",
   accent: "#C4521A",
   /** Club photo stand-in (clay court) until real images exist. */
   photoPlaceholder: "#E09A5C",
   violet: "#7C3AED",
+  /** Violet as *text*; the fill above carries `onViolet`. */
+  violetText: "#7C3AED",
   onViolet: "#FFFFFF",
   danger: "#B91C1C",
+  /** Soft well behind destructive icons (Settings account rows). */
+  dangerSoft: "#FEF0E7",
   white: "#FFFFFF",
   heroOverlay: "rgba(255,255,255,0.12)",
   heroBorder: "rgba(255,255,255,0.15)",
-  // Hero grounds — full-bleed onboarding art fields, scheme-independent.
-  heroGreen: "#0C382E",
-  heroGreenDeep: "#0A2D25",
-  heroGreenLift: "#124436",
-  heroPlate: "#3F7A5C",
-  heroInk: "#0A1F18",
-  heroMint: "#A7C7AF",
-  heroClay: "#E8DCC2",
-  heroOnLight: "#0D1C14",
+  /** Quiet metadata chips on the vs card — not lime, not pressable. */
+  quietFill: "#EFF3EE",
+  linkUnderline: "#B8C4BC",
+  /**
+   * Accent/link text on a normal surface. Same value as `primary` here, but a
+   * separate token because dark mode cannot reuse `primary`: a lavender dark
+   * enough to carry a white label (#6D4FE0) is too dark to *be* text on a dark
+   * surface (3.08:1 on `card`). See the dark palette.
+   */
+  linkText: "#0C382E",
 } as const;
 
 /**
@@ -52,7 +58,12 @@ export const tennisColorsLight = {
  * CTAs and selected chrome use the mock lavender so lime stays on skill chips.
  */
 export const tennisColorsDark = {
-  primary: "#8B6DFF",
+  /**
+   * Fill that carries the white `onPrimary` label. Darkened from the mock's
+   * #8B6DFF (2026-08-23), which measured 3.67:1 against white — below AA for a
+   * 16px bold button label, which is not WCAG "large text". #6D4FE0 is 5.46:1.
+   */
+  primary: "#6D4FE0",
   primaryDark: "#F3F4F0",
   onPrimary: "#FFFFFF",
   lime: "#C8E63B",
@@ -66,20 +77,45 @@ export const tennisColorsDark = {
   accent: "#E07A3D",
   /** Warm olive charcoal — same role as light clay, without a glowing orange slab. */
   photoPlaceholder: "#2C2E26",
-  violet: "#8B6DFF",
+  // Fill only. White on #8B6DFF was 3.67:1 -- the unread count pill is 11px.
+  violet: "#6D4FE0",
+  /** Violet as *text*, kept light enough to read on every dark surface. */
+  violetText: "#9B80FF",
   onViolet: "#FFFFFF",
   danger: "#F87171",
+  /** Soft well behind destructive icons on dark surfaces. */
+  dangerSoft: "#3A2420",
   white: "#FFFFFF",
   heroOverlay: "rgba(255,255,255,0.08)",
   heroBorder: "rgba(255,255,255,0.12)",
-  // Same hero values as light — onboarding art must not invert with the scheme.
+  quietFill: "#252722",
+  linkUnderline: "#4A524C",
+  /**
+   * Lighter than `primary` on purpose: this is text, not a fill. The smallest
+   * step up from #8B6DFF that clears 4.5:1 on every dark surface — #8B6DFF
+   * itself falls to 4.12:1 on `secondary`. Worst case here is 4.98:1.
+   */
+  linkText: "#9B80FF",
+} as const;
+
+/**
+ * Onboarding hero art — full-bleed grounds, plates, and the ink that sits on
+ * them. Deliberately outside `tennisColors`: these are properties of fixed
+ * artwork, not of the active scheme, so they must not invert with dark mode.
+ *
+ * Never use these as a foreground on `card` / `background` / `secondary`. They
+ * used to live in both palettes with identical values, which let `heroOnLight`
+ * (#0D1C14) be used as body ink — invisible at 1.05:1 on the dark card. Keeping
+ * them in their own namespace makes that mistake a type error instead.
+ */
+export const tennisHeroArt = {
   heroGreen: "#0C382E",
   heroGreenDeep: "#0A2D25",
-  heroGreenLift: "#124436",
   heroPlate: "#3F7A5C",
   heroInk: "#0A1F18",
   heroMint: "#A7C7AF",
   heroClay: "#E8DCC2",
+  /** Ink for text sitting on `heroClay` / `heroPlate`, never on a scheme surface. */
   heroOnLight: "#0D1C14",
 } as const;
 
@@ -155,7 +191,8 @@ export const tennisSemanticDark: Record<SemanticTone, SemanticToneTokens> = {
   positive: { fill: "#143328", text: "#86EFAC", border: "#1A4A32" },
   attention: { fill: "#3A2418", text: "#F4C7A8", border: "#5A3828" },
   critical: { fill: "#3A1818", text: "#FECACA", border: "#5A2828" },
-  actionable: { fill: "#8B6DFF", text: "#FFFFFF", border: "#7A5CF0" },
+  // Fill tracks dark `primary`: white on #8B6DFF was 3.67:1, below AA.
+  actionable: { fill: "#6D4FE0", text: "#FFFFFF", border: "#7A5CF0" },
 };
 
 const DANGER_TEXT_LIGHT = "#B91C1C";

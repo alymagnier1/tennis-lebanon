@@ -21,6 +21,7 @@ export const env = loadClientEnv(
       process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
     EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID:
       process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    EXPO_PUBLIC_INVITE_BASE_URL: process.env.EXPO_PUBLIC_INVITE_BASE_URL,
   },
   "EXPO_PUBLIC_",
 );

@@ -34,6 +34,13 @@ export function resolveHubPrimaryAction(input: {
     return "none";
   }
 
+  // Approve lives on the request carousel. Returning invite here would put a
+  // second filled control on a screen whose job is answering the person who
+  // already asked.
+  if (input.nextAction === "manage_requests") {
+    return "none";
+  }
+
   if (input.showRequestCourt) {
     return "request_court";
   }
@@ -100,4 +107,36 @@ export function resolveHubChromeAction(input: {
   }
 
   return input.primaryAction;
+}
+
+/**
+ * Footer Invite sits beside Cancel while recruiting, including
+ * `manage_requests` — Approve stays on the request card, Invite is the
+ * leftover seat.
+ *
+ * Callers must pass `actionsInReadyHero: false` when the chrome action is
+ * `invite`: the vs card never renders Invite as a filled control (Frame B).
+ */
+export function resolveHubFooterAction(input: {
+  chromeAction: HubPrimaryActionKind;
+  actionsInReadyHero: boolean;
+  canInvite: boolean;
+}): HubPrimaryActionKind {
+  if (
+    input.canInvite &&
+    (input.chromeAction === "none" || input.chromeAction === "invite")
+  ) {
+    return "invite";
+  }
+  if (input.actionsInReadyHero) {
+    return "none";
+  }
+  return input.chromeAction;
+}
+
+/** True when the vs-hero may show a filled primary (never Invite — that is footer). */
+export function hubChromeShowsInReadyHero(
+  chromeAction: HubPrimaryActionKind,
+): boolean {
+  return chromeAction !== "none" && chromeAction !== "invite";
 }

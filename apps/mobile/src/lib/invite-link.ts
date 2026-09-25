@@ -1,7 +1,14 @@
 import { Share } from "react-native";
+import { buildInviteWebUrl } from "@tennis-lebanon/domain";
+import { env } from "./env";
 
+/**
+ * The https link to the public invite page, not the app scheme: a shared link
+ * is often opened by somebody who does not have the app yet, and
+ * `tennislebanon://` does nothing for them. The page hands off to the app.
+ */
 export function buildMatchInviteUrl(token: string): string {
-  return `tennislebanon:///invite/${token}`;
+  return buildInviteWebUrl(env.INVITE_BASE_URL, token);
 }
 
 /**
