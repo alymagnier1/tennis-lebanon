@@ -254,6 +254,15 @@ each step only when it happened on the phone, not when the database says so.
       result shows as confirmed and the rematch card appears
 - [ ] `select * from public.unreachable_notification_summary();` reviewed, and
       Sentry checked for `stage: expo-push-token` / `register-device-push-token`
+- [ ] Invite edge cases on the phone (migration 108): Decline on a **shared** link
+      leaves the screen with no error and the link still works for someone else;
+      Decline on an **addressed** invite records the refusal; a player **blocked**
+      by the host sees "This invite link is not valid" and no match details; a
+      player outside the match's level sees the level message, not Accept
+- [ ] One recoverable failure: turn data off mid-flow, turn it back on, and the
+      screen recovers without restarting the app
+- [ ] Recorded: APK build id and commit, each phone's model and Android version,
+      the backend state (migration version, function version), and every failure
 - [ ] Anything that surprised either player written down before it is fixed
 
 ## 7d. Retire the legacy Supabase keys (before any real player)
@@ -264,11 +273,26 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       `SUPABASE_SERVICE_ROLE_KEY` deleted (the code never reads it); redeployed
 - [ ] `select left(content::text, 200) from net._http_response order by created desc limit 1;`
       shows `"keySource":"secret"`
+- [ ] EAS environment variable `EXPO_PUBLIC_SUPABASE_ANON_KEY` holds the publishable
+      key in every EAS environment, not only the staging profile's `eas.json`
+- [ ] Inventory confirmed: every EAS profile and update environment, installed
+      builds, Vercel (Production and Preview), cron / `pg_net`, CI, local `.env`
 - [ ] New EAS build (publishable key from `eas.json`) installed on every test phone
+      and a **focused compatibility check** passed on it: sign-in, a match hub,
+      an invite preview, and the sender returning 200. Do not wait for the full
+      §7c rehearsal — retire first, then rehearse against the final configuration
 - [ ] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
       sign-in, a match hub and the sender (200) still work
-- [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait ≥ 1 hour →
-      **Revoke** the legacy secret. Only then is the leaked 2026-09-22 key worthless
+- [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
+      access-token lifetime **plus 15 minutes** (1 h 15 min at the default 1 h; read
+      the actual value in Auth settings) → **Revoke** the legacy secret. Rotation
+      without revocation leaves the old key valid. In an active incident, revoking
+      immediately and accepting a session interruption is also acceptable. Only
+      after revocation is the leaked 2026-09-22 key worthless
+- [ ] Recorded: the cutoff time; logs reviewed for unexpected privileged activity
+      during the exposure window (2026-09-22 → cutoff); rejection of the retired
+      key verified through a controlled check — never by pasting the key into
+      chat or logs
 
 ## 8. Promotion sign-off
 

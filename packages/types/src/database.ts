@@ -2810,7 +2810,8 @@ export type Database = {
         | "already_member"
         | "expired"
         | "full"
-        | "unavailable";
+        | "unavailable"
+        | "skill_out_of_range";
       match_status:
         | "draft"
         | "open"
@@ -2964,6 +2965,7 @@ export type Database = {
         zones: Json | null;
         status:
           Database["public"]["Enums"]["match_invite_preview_status"] | null;
+        is_addressed: boolean | null;
       };
       user_report_queue_row: {
         report_id: string | null;
@@ -3136,6 +3138,7 @@ export const Constants = {
         "expired",
         "full",
         "unavailable",
+        "skill_out_of_range",
       ],
       match_status: [
         "draft",

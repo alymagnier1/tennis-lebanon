@@ -1361,6 +1361,7 @@
         "notFound": "Ce lien d'invitation n'est pas valide. Demandez-en un nouveau à l'organisateur.",
         "revoked": "L'organisateur a retiré cette invitation.",
         "unavailable": "Ce match n'accepte plus de joueurs.",
+        "skillOutOfRange": "Ce match est réservé à des joueurs d’un autre niveau : vous ne pouvez pas le rejoindre avec ce lien.",
         "wrongRecipient": "Cette invitation a été envoyée à quelqu'un d'autre. Demandez à l'organisateur de vous inviter directement."
       }
     },
