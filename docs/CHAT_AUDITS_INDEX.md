@@ -23,6 +23,14 @@ Audits and review outputs from the **Steve-Jobs-Design-Audit** chat session (Aug
 
 **Follow-up work shipped:** Cohort-1 threshold block added to `PILOT_50_PLAYER_LAUNCH.md`; stale partner-club / club-response framing propagated across eight docs; ops owner named (Ali Moghnieh).
 
+## Release readiness (Sep 2026)
+
+| Audit                        | Author | Verdict         | Date           | File                                                                                                   |
+| ---------------------------- | ------ | --------------- | -------------- | ------------------------------------------------------------------------------------------------------ |
+| Release readiness / security | GPT    | NOT DONE (4/10) | pre 2026-09-22 | [`audits/RELEASE_READINESS_AUDIT_GPT_2026-09-22.md`](audits/RELEASE_READINESS_AUDIT_GPT_2026-09-22.md) |
+
+Carries a **Status as of 2026-09-25** column added after the fact: two findings are already closed (Maestro package, invite generator), the pilot-gate one is structural and the P0 migration drift is local-only — staging is contiguous 001→105. Read the status column before working the list.
+
 ## Manual rehearsal (Phase 0.3 / 0.4)
 
 | Artifact                          | Date       | File                                                                     |
