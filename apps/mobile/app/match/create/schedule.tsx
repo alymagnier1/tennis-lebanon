@@ -492,6 +492,7 @@ export default function CreateMatchScheduleScreen() {
             loading={isPublishing}
             disabled={capReached}
             onPress={() => handlePublish("hub")}
+            testID="create-publish"
           />
         </>
       }

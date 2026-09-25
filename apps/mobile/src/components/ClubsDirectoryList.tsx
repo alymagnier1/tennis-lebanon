@@ -106,9 +106,10 @@ export function ClubsDirectoryList({
 
   return (
     <View style={formStyles.stack}>
-      {clubs.map((club) => (
+      {clubs.map((club, index) => (
         <ClubDirectoryCard
           key={club.club_id}
+          testID={`club-card-${index}`}
           club={club}
           compact={compact}
           onPress={() => handlePress(club.club_id)}

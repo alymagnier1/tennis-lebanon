@@ -31,6 +31,8 @@ type ClubDirectoryCardProps = {
   selected?: boolean;
   /** Shorter hero and denser body for pickers and booking flows. */
   compact?: boolean;
+  /** Stable handle for E2E flows. */
+  testID?: string;
 };
 
 type BookingBadgeStyle = {
@@ -77,6 +79,7 @@ export function ClubDirectoryCard({
   onPress,
   selected,
   compact = false,
+  testID,
 }: ClubDirectoryCardProps) {
   const { t, i18n } = useTranslation();
   const { rowDirection, writingDirection, isRtl } = useLayoutDirection();
@@ -96,6 +99,7 @@ export function ClubDirectoryCard({
 
   return (
     <Pressable
+      testID={testID}
       accessibilityRole={selectable ? "checkbox" : "button"}
       accessibilityLabel={
         club.is_favorite ? `${club.name}, ${t("clubs.favorite")}` : club.name
