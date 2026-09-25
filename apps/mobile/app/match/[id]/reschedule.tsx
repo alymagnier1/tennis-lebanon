@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { rescheduleMatchTime } from "@tennis-lebanon/api";
 import {
-  addMinutes,
   dayKey,
   SlotPicker,
   type DurationMinutes,
@@ -17,7 +16,7 @@ import {
   FigmaSubpageHero,
 } from "../../../src/components/onboarding-ui";
 import { notify } from "../../../src/lib/confirm-action";
-import { beirutLocalToUtcIso } from "../../../src/lib/beirut-time";
+import { slotWindowUtc } from "../../../src/lib/slot-window";
 import {
   goBackOrReplace,
   MATCHES_TAB_ROUTE,
@@ -44,13 +43,11 @@ export default function RescheduleMatchScreen() {
     goBackOrReplace(id ? matchHubRoute(id) : MATCHES_TAB_ROUTE);
 
   const rescheduleMutation = useMutation({
-    mutationFn: () =>
-      rescheduleMatchTime(
-        supabase,
-        id!,
-        beirutLocalToUtcIso(day, startTime),
-        beirutLocalToUtcIso(day, addMinutes(startTime, duration)),
-      ),
+    mutationFn: () => {
+      // Start plus duration, so a slot past midnight ends after it starts.
+      const window = slotWindowUtc({ day, startTime, duration });
+      return rescheduleMatchTime(supabase, id!, window.startsAt, window.endsAt);
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
       notify(t("matches.hub.rescheduleSuccess"));
