@@ -1642,7 +1642,15 @@
     "deleteError": "We could not submit your deletion request. Please try again.",
     "passwordCheckError": "We could not check your password options. Tap to try again.",
     "supportOpenError": "We could not open email. Write to {{email}} instead.",
-    "versionFooter": "RacketBound v{{version}} · Made in Lebanon 🇱🇧"
+    "versionFooter": "RacketBound v{{version}} · Made in Lebanon 🇱🇧",
+    "buildInfo": "Runtime {{runtime}} · {{channel}} · {{source}}",
+    "buildInfoUpdate": "Update {{id}}",
+    "buildInfoDisabled": "Live updates off (development build)",
+    "buildSource": {
+      "update": "downloaded update",
+      "embedded": "built-in bundle",
+      "disabled": "updates off"
+    }
   },
   "account": {
     "unavailableTitle": "Account unavailable",

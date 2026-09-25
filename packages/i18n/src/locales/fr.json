@@ -1503,7 +1503,15 @@
     "deleteError": "Impossible d’envoyer votre demande de suppression. Veuillez réessayer.",
     "passwordCheckError": "Impossible de vérifier vos options de mot de passe. Appuyez pour réessayer.",
     "supportOpenError": "Impossible d’ouvrir l’e-mail. Écrivez à {{email}} à la place.",
-    "versionFooter": "RacketBound v{{version}} · Fabriqué au Liban 🇱🇧"
+    "versionFooter": "RacketBound v{{version}} · Fabriqué au Liban 🇱🇧",
+    "buildInfo": "Runtime {{runtime}} · {{channel}} · {{source}}",
+    "buildInfoUpdate": "Mise à jour {{id}}",
+    "buildInfoDisabled": "Mises à jour à distance désactivées (build de développement)",
+    "buildSource": {
+      "update": "mise à jour téléchargée",
+      "embedded": "bundle intégré",
+      "disabled": "mises à jour désactivées"
+    }
   },
   "account": {
     "unavailableTitle": "Compte indisponible",

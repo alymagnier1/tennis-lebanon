@@ -306,19 +306,27 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
 - [x] `select left(content::text, 200) from net._http_response order by created desc limit 1;`
       shows `"keySource":"secret"`
   - Verified 2026-09-25: `"keySource":"secret"` from function v4.
-- [ ] EAS environment variable `EXPO_PUBLIC_SUPABASE_ANON_KEY` holds the publishable
+- [x] EAS environment variable `EXPO_PUBLIC_SUPABASE_ANON_KEY` holds the publishable
       key in every EAS environment, not only the staging profile's `eas.json`
-  - **Unticked 2026-09-25.** Reported done, but an update exported with
-    `eas env:exec preview` inlined the legacy anon JWT, so the **preview**
-    environment still holds it. Builds are unaffected (the `eas.json` staging value
-    wins); updates must set the key explicitly (§4) until every environment is
-    fixed.
+  - Unticked 2026-09-25: an update exported through `eas env:exec preview` had
+    inlined the legacy anon JWT.
+  - Verified 2026-09-26 after the founder's fix: preview and production hold the
+    publishable key for the staging project (development sets none; it reads the
+    local `.env`), and a test bundle exported through preview carries the
+    publishable key and no JWT. Nothing was published by that check.
 - [ ] Inventory confirmed: every EAS profile and update environment, installed
       builds, Vercel (Production and Preview), cron / `pg_net`, CI, local `.env`
 - [ ] New EAS build (publishable key from `eas.json`) installed on every test phone
-      and a **focused compatibility check** passed on it: sign-in, a match hub,
-      an invite preview, and the sender returning 200. Do not wait for the full
-      §7c rehearsal — retire first, then rehearse against the final configuration
+- [ ] **The running update confirmed, not assumed.** Updates download in the
+      background and run after a full restart, so opening the app twice proves
+      nothing. Settings → the line under the version must read
+      `Runtime 0.1.0 · staging · downloaded update` and `Update <id>`, where `<id>`
+      equals the latest Android update ID on the EAS dashboard
+- [ ] **Focused compatibility check** on that build: fresh sign-in, a session
+      refresh (background the app past the token lifetime, or sign out and in),
+      open a match hub, open an invite preview, one reversible write, and the sender
+      returning 200. Do not wait for the full §7c rehearsal — retire first, then
+      repeat this check, then rehearse against the final configuration
 - [ ] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
       sign-in, a match hub and the sender (200) still work
 - [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
