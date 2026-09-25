@@ -1,0 +1,26 @@
+# Part 2: the second player finds the host's match on Discover and joins.
+appId: com.racketbound.app
+name: L2 joiner finds the match and joins
+---
+- runFlow:
+    file: ../flows/sign-in.yaml
+    env:
+      EMAIL: ${PLAYER_B_EMAIL}
+      PASSWORD: ${PLAYER_B_PASSWORD}
+- tapOn: "Discover"
+- tapOn: "Open matches"
+# Open-match cards are headed by the host's display name.
+- scrollUntilVisible:
+    element:
+      text: ${PLAYER_A_NAME}
+    direction: DOWN
+    timeout: 30000
+- tapOn:
+    text: ${PLAYER_A_NAME}
+    index: 0
+- tapOn:
+    id: "hub-action-join"
+# Singles with two players is a full roster on an agreed time.
+- extendedWaitUntil:
+    visible: "Ready to book"
+    timeout: 20000
