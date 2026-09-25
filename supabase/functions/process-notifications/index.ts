@@ -7,6 +7,7 @@ import {
   buildExpoPushMessages,
   parseNotificationPayload,
 } from "../_shared/notifications.ts";
+import { resolveServiceKey } from "../_shared/service-key.ts";
 
 type DueNotification = {
   notification_id: string;
@@ -57,12 +58,16 @@ Deno.serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  // The new secret key when present; see `_shared/service-key.ts`.
+  const serviceKey = resolveServiceKey({
+    secretKeys: Deno.env.get("SUPABASE_SECRET_KEYS"),
+    legacyServiceRoleKey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+  });
   // Who may call this, kept apart from what this function calls the database
   // with. See `_shared/invoker-auth.ts` for why they are no longer the same key.
   const invokerToken = Deno.env.get("PROCESS_NOTIFICATIONS_TOKEN");
 
-  if (!supabaseUrl || !serviceRoleKey) {
+  if (!supabaseUrl || !serviceKey) {
     return new Response("Missing Supabase configuration", { status: 500 });
   }
 
@@ -78,7 +83,7 @@ Deno.serve(async (req) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+  const supabase = createClient(supabaseUrl, serviceKey.key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
@@ -172,6 +177,9 @@ Deno.serve(async (req) => {
       failed,
       skipped,
       unreachable,
+      // Which key type, never the key: lets `net._http_response` show whether
+      // the legacy service_role key can be switched off yet.
+      keySource: serviceKey.source,
     }),
     {
       status: 200,

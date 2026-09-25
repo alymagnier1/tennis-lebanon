@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-25 — Staging moves to publishable and secret keys, then retires the legacy pair
+
+- Status: accepted
+- Context: staging's legacy `service_role` key appeared in a chat screenshot on 2026-09-22. Supabase no longer allows rotating the legacy `anon`, `service_role` or JWT secret; the documented remedy for a leaked `service_role` key is to replace it with a secret key and deactivate the legacy keys. The leaked key is itself a JWT signed by the legacy secret, so it stays usable until that secret is revoked.
+- Decision: two phases. **Phase 1 (no downtime, both key types live):** the mobile build and the dashboard use the `sb_publishable_...` key — the env var keeps its `SUPABASE_ANON_KEY` name, only the value changes; `process-notifications` reads `SUPABASE_SECRET_KEYS.default` for its database calls and reports `keySource` in its response; the unused Vercel `SUPABASE_SERVICE_ROLE_KEY` is deleted. **Phase 2 (once the new build is on the test phones, before any real player):** deactivate the legacy API keys, migrate to JWT signing keys, rotate, wait at least an hour for active sessions to pick up new tokens, then revoke the legacy JWT secret. Both phase-2 steps are reversible in the dashboard.
+- Alternatives considered: keep the legacy keys until Supabase retires them at the end of 2026 (rejected — a leaked key that bypasses RLS stays valid for months); rename the env var to `SUPABASE_PUBLISHABLE_KEY` (deferred — touches every env source for no behavioural gain).
+- Consequences: installed builds carrying the legacy anon key stop working at phase 2, so it waits for the new build. Verified before switching: the publishable key behaves identically to the legacy anon key for signed-out Auth and PostgREST calls, with or without the key repeated in `Authorization`.
+- Owner: Founder
+
 ## 2026-09-22 — The notification sender authenticates with its own token
 
 - Status: accepted

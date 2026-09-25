@@ -256,6 +256,20 @@ each step only when it happened on the phone, not when the database says so.
       Sentry checked for `stage: expo-push-token` / `register-device-push-token`
 - [ ] Anything that surprised either player written down before it is fixed
 
+## 7d. Retire the legacy Supabase keys (before any real player)
+
+See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
+
+- [ ] Vercel: `NEXT_PUBLIC_SUPABASE_ANON_KEY` holds the `sb_publishable_...` key;
+      `SUPABASE_SERVICE_ROLE_KEY` deleted (the code never reads it); redeployed
+- [ ] `select left(content::text, 200) from net._http_response order by created desc limit 1;`
+      shows `"keySource":"secret"`
+- [ ] New EAS build (publishable key from `eas.json`) installed on every test phone
+- [ ] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
+      sign-in, a match hub and the sender (200) still work
+- [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait ≥ 1 hour →
+      **Revoke** the legacy secret. Only then is the leaked 2026-09-22 key worthless
+
 ## 8. Promotion sign-off
 
 | Role              | Name | Date | Notes |
