@@ -98,16 +98,16 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
       the app version (2026-09-25 decision), so a missed bump lets an `eas update`
       reach a build that cannot run it. JS-only changes ship with `eas update`
 - [ ] **Publishing an `eas update`:** an update bakes in `EXPO_PUBLIC_*` from where
-      it is exported, and does **not** read `eas.json`'s build-profile `env`. Export
-      with `.env` files off and the staging profile's values set explicitly, with a
-      cleared Metro cache, then inspect before publishing:
-      `EXPO_NO_DOTENV=1` + the `build.staging.env` values from `apps/mobile/eas.json`
-      (+ `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`) → `npx expo export --platform android
-    --output-dir dist --clear` → confirm the bundle has the staging URL and the
-      `sb_publishable_` key and no `eyJ…` JWT or `127.0.0.1` → `eas update
-    --skip-bundler --input-dir dist --channel staging --platform android
-    --environment preview`. Without `--clear`, Metro reused a bundle with the old
-      key inlined (2026-09-25)
+      it is exported, and does **not** read `eas.json`'s build-profile `env`. So:
+  1. Set `EXPO_NO_DOTENV=1`, the `build.staging.env` values from
+     `apps/mobile/eas.json`, and `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`.
+  2. Export with a cleared cache (without it, Metro reused a bundle with the old
+     key inlined on 2026-09-25):
+     `npx expo export --platform android --output-dir dist --clear`
+  3. Check the bundle: staging URL and the `sb_publishable_` key present; no
+     `eyJ…` JWT and no `127.0.0.1`.
+  4. Publish exactly that bundle:
+     `eas update --skip-bundler --input-dir dist --channel staging --platform android --environment preview`
   - First update published this way 2026-09-25: group `f90371b1-d80e-48a7-83a6-84b2538e183c`,
     runtime `0.1.0`, commit `8058d5a`, bundle checked before upload.
 - [ ] Deep links and magic-link redirect URLs match staging/production Supabase auth settings
