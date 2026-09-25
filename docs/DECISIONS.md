@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-25 — Runtime version follows the app version, not the fingerprint
+
+- Status: accepted
+- Context: `1e0bd3d` added `expo-updates` with the `fingerprint` runtime-version policy, reasoning that `version` was stuck at `0.0.0` so `appVersion` carried no signal. The first EAS build with it (`c5db2d83`) failed in `CONFIGURE_EXPO_UPDATES`: the fingerprint computed on the Windows machine that started the build (`b284c30…`) differed from EAS's (`5a29c2e…`) in 235 entries. pnpm shortens virtual-store directory names to 60 characters on Windows and 120 on Linux, so the same packages at the same hashes sit at different paths, and the fingerprint hashes paths. Every build started from this machine would fail the same way.
+- Decision: `runtimeVersion: { policy: "appVersion" }`, and `version` moves to `0.1.0` so it carries a signal from now on. **Bump `version` whenever native code changes** — any native dependency added, removed or upgraded, a config plugin, the Expo SDK, `app.json` native fields — and cut a build; JS-only changes ship with `eas update` on the same version.
+- Alternatives considered: keep `fingerprint` and align pnpm's `virtual-store-dir-max-length` across platforms (rejected for now — 177 further config-plugin entries appeared only on the local side, the fix was unproven, and each attempt costs a queued EAS build); `.fingerprintignore` for `node_modules` (rejected — ignores exactly the native changes the policy exists to catch).
+- Consequences: protection against shipping an update to an incompatible binary now depends on the bump rule, not automation — recorded in `docs/STAGING_CHECKLIST.md` §4. Revisit fingerprint once builds run from CI on Linux, where both sides compute the same paths.
+- Owner: Founder
+
 ## 2026-09-25 — An invite preview agrees with acceptance, and hides everything from a blocked player
 
 - Status: accepted

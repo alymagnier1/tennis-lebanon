@@ -3,9 +3,9 @@
     "name": "RacketBound",
     "slug": "tennis-lebanon",
     "scheme": "tennislebanon",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "runtimeVersion": {
-      "policy": "fingerprint"
+      "policy": "appVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/7e52c1bd-5a92-42a0-8b08-ace7d6a96542"

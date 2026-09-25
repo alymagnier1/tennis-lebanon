@@ -83,6 +83,11 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 
 - [ ] EAS build profiles (`development`, `preview`, `production`) reviewed
 - [ ] App version/build number incremented
+- [ ] **Native change since the last build?** (a native dependency added, removed or
+      upgraded, a config plugin, the Expo SDK, `app.json` native fields) → bump
+      `version` in `apps/mobile/app.json` before building. The runtime version is
+      the app version (2026-09-25 decision), so a missed bump lets an `eas update`
+      reach a build that cannot run it. JS-only changes ship with `eas update`
 - [ ] Deep links and magic-link redirect URLs match staging/production Supabase auth settings
 - [ ] Push notification credentials configured for the target environment
 - [ ] TestFlight / Play internal track build uploaded ≥1–2 weeks before pilot start
