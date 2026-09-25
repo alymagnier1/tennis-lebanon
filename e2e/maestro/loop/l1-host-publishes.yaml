@@ -1,0 +1,23 @@
+# Part 1 of the core loop. Run the three files in order: l1 → l2 → l3.
+# Preconditions are in ../README.md (singles defaults, fewer than three active
+# hosted matches).
+appId: com.racketbound.app
+name: L1 host publishes a fixed singles match
+---
+- runFlow:
+    file: ../flows/sign-in.yaml
+    env:
+      EMAIL: ${PLAYER_A_EMAIL}
+      PASSWORD: ${PLAYER_A_PASSWORD}
+- tapOn:
+    id: "tab-create-match"
+- extendedWaitUntil:
+    visible: "Create new match"
+    timeout: 15000
+# The default slot (two days out, 6 PM) is kept. A schedule-conflict banner
+# may appear; it is advisory and does not block publishing.
+- tapOn:
+    id: "create-publish"
+- extendedWaitUntil:
+    visible: "Open for players"
+    timeout: 20000

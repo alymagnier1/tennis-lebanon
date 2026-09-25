@@ -162,6 +162,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                   <View style={styles.actions}>
                     <FigmaPrimaryButton
                       label={dialog.options.confirmLabel}
+                      testID="confirm-dialog-confirm"
                       onPress={() => {
                         const { onConfirm } = dialog.options;
                         // Run confirm before dismiss so the underlying screen can
@@ -173,6 +174,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                     />
                     <FigmaSecondaryButton
                       label={dialog.options.cancelLabel}
+                      testID="confirm-dialog-cancel"
                       onPress={() => {
                         const { onCancel } = dialog.options;
                         onCancel?.();

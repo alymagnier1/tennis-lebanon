@@ -6,13 +6,12 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addMatchTimeOption } from "@tennis-lebanon/api";
 import {
-  addMinutes,
   dayKey,
   SlotPicker,
   type DurationMinutes,
 } from "../../../src/components/SlotPicker";
 import { PrimaryButton, Screen } from "../../../src/components/FormUi";
-import { beirutLocalToUtcIso } from "../../../src/lib/beirut-time";
+import { slotWindowUtc } from "../../../src/lib/slot-window";
 import { supabase } from "../../../src/lib/supabase";
 
 export default function AddMatchTimeScreen() {
@@ -24,13 +23,11 @@ export default function AddMatchTimeScreen() {
   const [duration, setDuration] = useState<DurationMinutes>(90);
 
   const addMutation = useMutation({
-    mutationFn: () =>
-      addMatchTimeOption(
-        supabase,
-        id!,
-        beirutLocalToUtcIso(day, startTime),
-        beirutLocalToUtcIso(day, addMinutes(startTime, duration)),
-      ),
+    mutationFn: () => {
+      // Start plus duration, so a slot past midnight ends after it starts.
+      const window = slotWindowUtc({ day, startTime, duration });
+      return addMatchTimeOption(supabase, id!, window.startsAt, window.endsAt);
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["match-hub", id] });
       notify(t("matches.hub.addTimeSuccess"));

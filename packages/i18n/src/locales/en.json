@@ -939,6 +939,9 @@
   },
   "matches": {
     "create": {
+      "timeConflictTitle": "You're already playing then",
+      "timeConflictBody": "You agreed to a match on {{time}}. You can still publish this one, but you can only play one of them.",
+      "timeConflictView": "View that match",
       "cta": "Create a match",
       "organiseCta": "Organise a match",
       "title": "Set up a match",

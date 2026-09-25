@@ -73,6 +73,7 @@ export function MatchHubActionBar({
               }
               loading={loading}
               onPress={onPress}
+              testID={`hub-action-${actionKind}`}
               lime={actionKind === "invite"}
               compact={actionKind === "invite" && showCancel}
               style={styles.primaryButton}

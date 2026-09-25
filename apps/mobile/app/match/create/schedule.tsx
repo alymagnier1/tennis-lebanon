@@ -4,6 +4,7 @@ import { Redirect, router, useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
+  listAgreedTimeConflicts,
   listMyMatches,
   suggestMatchTimes,
   getActiveZones,
@@ -34,7 +35,6 @@ import {
 } from "../../../src/components/onboarding-ui";
 import { ErrorNotice } from "../../../src/components/FormUi";
 import {
-  addMinutes,
   dayKey,
   nearestDuration,
   SlotPicker,
@@ -42,9 +42,10 @@ import {
   type SlotAvailability,
 } from "../../../src/components/SlotPicker";
 import {
-  beirutLocalToUtcIso,
+  formatUtcSlotInBeirut,
   utcIsoToBeirutFields,
 } from "../../../src/lib/beirut-time";
+import { slotWindowUtc } from "../../../src/lib/slot-window";
 import {
   createMatchStyles,
   CreateMatchPanel,
@@ -71,7 +72,7 @@ import {
 import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
 import { usePublishMatch } from "../../../src/hooks/usePublishMatch";
 import { showMatchCapAlert } from "../../../src/lib/create-match-guard";
-import { MATCHES_ROUTE } from "../../../src/lib/routes";
+import { MATCHES_ROUTE, matchHubRoute } from "../../../src/lib/routes";
 import { supabase } from "../../../src/lib/supabase";
 import { tennisColors } from "../../../src/theme/tennis-tokens";
 
@@ -352,13 +353,7 @@ export default function CreateMatchScheduleScreen() {
   ].join(" · ");
 
   useEffect(() => {
-    const proposedTimes = slots.map((slot) => {
-      const endTime = addMinutes(slot.startTime, slot.duration);
-      return {
-        startsAt: beirutLocalToUtcIso(slot.day, slot.startTime),
-        endsAt: beirutLocalToUtcIso(slot.day, endTime),
-      };
-    });
+    const proposedTimes = slots.map(slotWindowUtc);
 
     updateCreateMatchDraft({
       zoneIds: selectedZoneIds,
@@ -378,6 +373,28 @@ export default function CreateMatchScheduleScreen() {
     slots,
     timingMode,
   ]);
+
+  // A match the host has already agreed to play at this hour. Advisory only:
+  // `join_match` refuses a joiner who would double-book, but a host offering
+  // the same evening on two listings is recruiting and plays at most one
+  // (migration 090), so publishing stays possible. A failed check shows
+  // nothing rather than an error — it guards nothing the server relies on.
+  const slotWindow = useMemo(
+    () => (slots[0] ? slotWindowUtc(slots[0]) : null),
+    [slots],
+  );
+  const conflictsQuery = useQuery({
+    queryKey: [
+      "agreed-time-conflicts",
+      slotWindow?.startsAt,
+      slotWindow?.endsAt,
+    ],
+    queryFn: () => listAgreedTimeConflicts(supabase, slotWindow!),
+    enabled: Boolean(slotWindow),
+    staleTime: 30_000,
+  });
+  // The RPC orders by start time, so the first is the soonest clash.
+  const timeConflict = conflictsQuery.data?.[0] ?? null;
 
   const suggestionsQuery = useQuery({
     queryKey: ["match-time-suggestions", selectedZoneIds, draft.format],
@@ -475,6 +492,7 @@ export default function CreateMatchScheduleScreen() {
             loading={isPublishing}
             disabled={capReached}
             onPress={() => handlePublish("hub")}
+            testID="create-publish"
           />
         </>
       }
@@ -511,6 +529,26 @@ export default function CreateMatchScheduleScreen() {
               />
             </View>
           ))}
+          {timeConflict ? (
+            <StatusBanner
+              tone="attention"
+              title={t("matches.create.timeConflictTitle")}
+              body={t("matches.create.timeConflictBody", {
+                time: formatUtcSlotInBeirut(
+                  timeConflict.starts_at,
+                  timeConflict.ends_at,
+                ),
+              })}
+              actions={
+                <FigmaSecondaryButton
+                  label={t("matches.create.timeConflictView")}
+                  onPress={() =>
+                    router.push(matchHubRoute(timeConflict.match_id))
+                  }
+                />
+              }
+            />
+          ) : null}
         </CreateMatchPanel>
 
         <CreateMatchPanel

@@ -41,7 +41,8 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 | PostHog          | Disabled or staging project | Enabled only after consent copy approved |
 
 - [ ] Staging and production use **separate** Supabase projects (Frankfurt `eu-central-1` per `docs/ARCHITECTURE.md`)
-- [ ] No service-role key in mobile or browser bundles
+- [x] No service-role key in mobile or browser bundles
+  - Verified 2026-09-25: the live dashboard `/login` and `/invite` bundles carry the publishable key and no JWT; `eas.json` staging carries only the publishable key.
 - [ ] No `security definer` function left at the default grant. A function in
       `public` with no explicit ACL is callable by `anon` through PostgREST, and
       `security definer` runs it with RLS bypassed — that combination publishes
@@ -73,7 +74,8 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 
 ## 3. Database and migrations
 
-- [ ] All migrations applied to staging in order (`supabase db push` or CI deploy)
+- [x] All migrations applied to staging in order (`supabase db push` or CI deploy)
+  - Verified 2026-09-25: staging `schema_migrations` is 001→108 (105–108 applied with `supabase db push`).
 - [ ] Staging smoke: four workflows in `docs/PILOT_OPERATIONS.md` rehearsed
 - [ ] Backup/restore drill completed within last 30 days (`docs/BACKUP_RESTORE.md`)
 - [ ] `platform_policy_settings`, lifecycle cron (`process-notifications`), and RLS spot-check documented
@@ -89,14 +91,16 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
       the app version (2026-09-25 decision), so a missed bump lets an `eas update`
       reach a build that cannot run it. JS-only changes ship with `eas update`
 - [ ] Deep links and magic-link redirect URLs match staging/production Supabase auth settings
-- [ ] Push notification credentials configured for the target environment
+- [x] Push notification credentials configured for the target environment
+  - Confirmed by the founder 2026-09-25: FCM V1 service account key present in EAS credentials for `com.racketbound.app`.
 - [ ] TestFlight / Play internal track build uploaded ≥1–2 weeks before pilot start
 - [ ] Arabic + English smoke on physical devices (Settings → RTL layout check)
 
 ## 5. Dashboard release
 
 - [ ] Vercel preview URL smoke-tested with club-staff flows
-- [ ] Production domain and HTTPS configured
+- [x] Production domain and HTTPS configured
+  - Verified 2026-09-25: `racketbound.com` A record → Vercel, HTTPS live, `www` redirects to the apex, production tracks `staging`.
 - [ ] Platform admin routes (`/admin/reports`, `/admin/disputes`) restricted to operators
 - [ ] Login form and booking queue tested on Chrome + Safari
 - [ ] `NEXT_PUBLIC_GET_APP_URL` set in Vercel to the current install page; without it
@@ -177,8 +181,9 @@ function secret is missing; a 401 means the two copies differ.
       and which secret it authenticates with
 - [x] `select * from cron.job where jobname = 'tennis_process_notifications';`
       shows the job active on staging (`*/5 * * * *`, verified 2026-08-30)
-- [ ] Both Vault secrets created in the target environment, and
+- [x] Both Vault secrets created in the target environment, and
       `select public.invoke_process_notifications();` returned a request id
+  - Verified 2026-09-22/25: invoker returns request ids and the function answers 200 (dedicated `PROCESS_NOTIFICATIONS_TOKEN`).
 - [ ] Verified on staging that **one push notification physically arrives** on a
       real device, not merely that the function returned 200
 - [ ] `select * from public.unreachable_notification_summary();` reviewed after
@@ -201,7 +206,8 @@ reads it from `EAS_PROJECT_ID`; `eas init` writes it into `app.json` instead.
 A build missing it now reports to Sentry once per session rather than failing
 silently.
 
-- [ ] `EAS_PROJECT_ID` set for the build (or present in `app.json`)
+- [x] `EAS_PROJECT_ID` set for the build (or present in `app.json`)
+  - Verified: `extra.eas.projectId` is in `app.json`.
 - [ ] `select count(*) from public.device_push_tokens where is_active;` is
       non-zero on staging after a real device signs in
 
@@ -274,12 +280,15 @@ each step only when it happened on the phone, not when the database says so.
 
 See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
 
-- [ ] Vercel: `NEXT_PUBLIC_SUPABASE_ANON_KEY` holds the `sb_publishable_...` key;
+- [x] Vercel: `NEXT_PUBLIC_SUPABASE_ANON_KEY` holds the `sb_publishable_...` key;
       `SUPABASE_SERVICE_ROLE_KEY` deleted (the code never reads it); redeployed
-- [ ] `select left(content::text, 200) from net._http_response order by created desc limit 1;`
+  - Verified 2026-09-25: publishable key in the live bundle, no legacy JWT; service-role variable removed by the founder; redeployed.
+- [x] `select left(content::text, 200) from net._http_response order by created desc limit 1;`
       shows `"keySource":"secret"`
-- [ ] EAS environment variable `EXPO_PUBLIC_SUPABASE_ANON_KEY` holds the publishable
+  - Verified 2026-09-25: `"keySource":"secret"` from function v4.
+- [x] EAS environment variable `EXPO_PUBLIC_SUPABASE_ANON_KEY` holds the publishable
       key in every EAS environment, not only the staging profile's `eas.json`
+  - Confirmed by the founder 2026-09-25.
 - [ ] Inventory confirmed: every EAS profile and update environment, installed
       builds, Vercel (Production and Preview), cron / `pg_net`, CI, local `.env`
 - [ ] New EAS build (publishable key from `eas.json`) installed on every test phone

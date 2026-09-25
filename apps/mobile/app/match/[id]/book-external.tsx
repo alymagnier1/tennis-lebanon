@@ -15,17 +15,16 @@ import {
   figmaFormStyles,
 } from "../../../src/components/onboarding-ui";
 import {
-  addMinutes,
   dayKey,
   nearestDuration,
   SlotPicker,
   type DurationMinutes,
 } from "../../../src/components/SlotPicker";
 import {
-  beirutLocalToUtcIso,
   formatUtcSlotInBeirut,
   utcIsoToBeirutFields,
 } from "../../../src/lib/beirut-time";
+import { slotWindowUtc } from "../../../src/lib/slot-window";
 import { CreateMatchPanel } from "../../../src/lib/create-match-ui";
 import { clubIdsFromList } from "../../../src/lib/match-clubs";
 import { useClubsDirectory } from "../../../src/hooks/useClubsDirectory";
@@ -137,14 +136,9 @@ export default function MatchBookExternalScreen() {
     [slot, agreedSlot],
   );
 
-  const startsAt = beirutLocalToUtcIso(
-    effectiveSlot.day,
-    effectiveSlot.startTime,
-  );
-  const endsAt = beirutLocalToUtcIso(
-    effectiveSlot.day,
-    addMinutes(effectiveSlot.startTime, effectiveSlot.duration),
-  );
+  // Start plus duration, so a late court that runs past midnight still ends
+  // after it starts (see `slotWindowUtc`).
+  const { startsAt, endsAt } = slotWindowUtc(effectiveSlot);
 
   const timeChanged = agreedSlot
     ? new Date(startsAt).getTime() !==
@@ -276,6 +270,7 @@ export default function MatchBookExternalScreen() {
           disabled={!canConfirm}
           loading={confirmMutation.isPending}
           onPress={handleConfirm}
+          testID="court-confirm"
         />
       </View>
     </Screen>

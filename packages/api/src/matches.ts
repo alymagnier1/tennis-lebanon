@@ -517,6 +517,36 @@ export async function castMatchTimeVote(
   if (error) throw error;
 }
 
+/** A match the caller has agreed to play whose agreed time overlaps a window. */
+export type AgreedTimeConflict = {
+  match_id: string;
+  starts_at: string;
+  ends_at: string;
+};
+
+/**
+ * The caller's live, agreed commitments that overlap `[startsAt, endsAt)`.
+ *
+ * Joining is blocked on these server-side (`join_match`, migration 090);
+ * hosting is only warned about, because a host offering the same evening on
+ * two listings is recruiting and will play at most one. This is the read the
+ * create screen warns from. Proposed-but-unagreed slots never count.
+ */
+export async function listAgreedTimeConflicts(
+  client: TennisSupabaseClient,
+  window: { startsAt: string; endsAt: string; excludeMatchId?: string },
+): Promise<AgreedTimeConflict[]> {
+  const { data, error } = await client.rpc("viewer_agreed_time_conflicts", {
+    p_starts_at: window.startsAt,
+    p_ends_at: window.endsAt,
+    ...(window.excludeMatchId
+      ? { p_exclude_match_id: window.excludeMatchId }
+      : {}),
+  });
+  if (error) throw error;
+  return (data ?? []) as AgreedTimeConflict[];
+}
+
 export async function withdrawMatchTimeOption(
   client: TennisSupabaseClient,
   timeOptionId: string,

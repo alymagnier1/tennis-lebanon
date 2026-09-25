@@ -36,6 +36,7 @@ export function FigmaPrimaryButton({
   lime = false,
   hero = false,
   compact = false,
+  testID,
 }: {
   label: string;
   onPress: () => void;
@@ -48,10 +49,13 @@ export function FigmaPrimaryButton({
   hero?: boolean;
   /** 44-tall control for in-card pairs. */
   compact?: boolean;
+  /** Stable handle for E2E flows, so a copy change does not break them. */
+  testID?: string;
 }) {
   const inactive = disabled || loading;
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
       accessibilityState={{ disabled: inactive }}
       onPress={() => {
@@ -100,6 +104,7 @@ export function FigmaSecondaryButton({
   leading,
   style,
   compact = false,
+  testID,
 }: {
   label: string;
   onPress: () => void;
@@ -113,10 +118,13 @@ export function FigmaSecondaryButton({
   style?: ViewStyle;
   /** 44-tall control for in-card pairs. */
   compact?: boolean;
+  /** Stable handle for E2E flows, so a copy change does not break them. */
+  testID?: string;
 }) {
   const inactive = disabled || loading;
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
       accessibilityState={{ disabled: inactive }}
       onPress={() => {

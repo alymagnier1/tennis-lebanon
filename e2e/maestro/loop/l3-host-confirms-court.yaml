@@ -1,0 +1,39 @@
+# Part 3: the host records the court they booked with the club off-app
+# (the cohort-1 WhatsApp path) and the match is confirmed.
+appId: com.racketbound.app
+name: L3 host confirms the court
+---
+- runFlow:
+    file: ../flows/sign-in.yaml
+    env:
+      EMAIL: ${PLAYER_A_EMAIL}
+      PASSWORD: ${PLAYER_A_PASSWORD}
+- tapOn: "Matches"
+- tapOn: "Active"
+- tapOn:
+    text: ".*${PLAYER_B_NAME}.*"
+    index: 0
+- tapOn:
+    id: "hub-action-confirm_external_court"
+- extendedWaitUntil:
+    visible: "Confirm your court"
+    timeout: 15000
+# The agreed time is prefilled; take the first club offered (the match's
+# preferred clubs are listed first).
+- scrollUntilVisible:
+    element:
+      id: "club-card-0"
+    direction: DOWN
+- tapOn:
+    id: "club-card-0"
+- scrollUntilVisible:
+    element:
+      id: "court-confirm"
+    direction: DOWN
+- tapOn:
+    id: "court-confirm"
+- tapOn:
+    id: "confirm-dialog-confirm"
+- extendedWaitUntil:
+    visible: "Confirmed"
+    timeout: 20000
