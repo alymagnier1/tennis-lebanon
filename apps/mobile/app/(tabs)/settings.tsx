@@ -10,6 +10,7 @@ import {
 import { createLiveSheet } from "../../src/theme/create-live-sheet";
 import * as Linking from "expo-linking";
 import Constants from "expo-constants";
+import * as Updates from "expo-updates";
 import { router, useFocusEffect } from "expo-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -24,6 +25,7 @@ import {
 } from "../../src/components/onboarding-ui";
 import { PlayerProfileSection } from "../../src/components/player/PlayerProfileSection";
 import { ProfileMenuRow } from "../../src/components/profile/ProfileMenuRow";
+import { describeBuildInfo } from "../../src/lib/build-info";
 import { env } from "../../src/lib/env";
 import { applyLocale } from "../../src/lib/locale-sync";
 import { goBackOrReplace, PROFILE_TAB_ROUTE } from "../../src/lib/navigation";
@@ -63,6 +65,13 @@ export default function SettingsScreen() {
 
   const appVersion =
     Constants.expoConfig?.version ?? Constants.nativeAppVersion ?? "1.0.0";
+  const buildInfo = describeBuildInfo({
+    isEnabled: Updates.isEnabled,
+    isEmbeddedLaunch: Updates.isEmbeddedLaunch,
+    runtimeVersion: Updates.runtimeVersion,
+    channel: Updates.channel,
+    updateId: Updates.updateId,
+  });
 
   /**
    * Offered only to accounts that cannot already be opened with a password,
@@ -369,6 +378,22 @@ export default function SettingsScreen() {
             <AppText style={styles.version}>
               {t("settings.versionFooter", { version: appVersion })}
             </AppText>
+            {/* Selectable so a tester can copy it into a bug report, and
+                compare the update ID with the EAS dashboard. */}
+            <AppText selectable style={styles.version}>
+              {buildInfo.source === "disabled"
+                ? t("settings.buildInfoDisabled")
+                : t("settings.buildInfo", {
+                    runtime: buildInfo.runtime ?? "—",
+                    channel: buildInfo.channel ?? "—",
+                    source: t(`settings.buildSource.${buildInfo.source}`),
+                  })}
+            </AppText>
+            {buildInfo.updateId ? (
+              <AppText selectable style={styles.version}>
+                {t("settings.buildInfoUpdate", { id: buildInfo.updateId })}
+              </AppText>
+            ) : null}
           </View>
         </View>
       </ScrollView>

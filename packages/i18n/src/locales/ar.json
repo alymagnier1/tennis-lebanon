@@ -1503,7 +1503,15 @@
     "deleteError": "تعذّر إرسال طلب الحذف. حاول مرة أخرى.",
     "passwordCheckError": "تعذّر التحقق من خيارات كلمة المرور. اضغط للمحاولة مجددًا.",
     "supportOpenError": "تعذّر فتح البريد. راسل {{email}} بدلًا من ذلك.",
-    "versionFooter": "RacketBound v{{version}} · صُنع في لبنان 🇱🇧"
+    "versionFooter": "RacketBound v{{version}} · صُنع في لبنان 🇱🇧",
+    "buildInfo": "بيئة التشغيل {{runtime}} · {{channel}} · {{source}}",
+    "buildInfoUpdate": "التحديث {{id}}",
+    "buildInfoDisabled": "التحديثات عن بُعد متوقفة (نسخة تطوير)",
+    "buildSource": {
+      "update": "تحديث مُنزَّل",
+      "embedded": "الحزمة المدمجة",
+      "disabled": "التحديثات متوقفة"
+    }
   },
   "account": {
     "unavailableTitle": "الحساب غير متاح",
