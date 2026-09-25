@@ -800,6 +800,9 @@
   },
   "matches": {
     "create": {
+      "timeConflictTitle": "Vous jouez déjà à cette heure-là",
+      "timeConflictBody": "Vous avez accepté un match le {{time}}. Vous pouvez quand même publier celui-ci, mais vous ne pourrez jouer qu’à l’un des deux.",
+      "timeConflictView": "Voir ce match",
       "cta": "Créer un match",
       "organiseCta": "Organiser un match",
       "title": "Configurer un match",

@@ -11,6 +11,7 @@ import {
   declineMatchInvitation,
   getMatchHub,
   joinMatch,
+  listAgreedTimeConflicts,
   listMyMatchInvites,
   listMyMatches,
   listMyCompletedMatches,
@@ -299,5 +300,58 @@ describe("matches API wrappers", () => {
       p_starts_at: "2030-01-01T10:00:00.000Z",
       p_ends_at: "2030-01-01T11:30:00.000Z",
     });
+  });
+
+  it("reads agreed-time conflicts for a window without excluding a match", async () => {
+    const { client, rpc } = createMockClient();
+    const rows = [
+      {
+        match_id: "m-1",
+        starts_at: "2030-01-01T16:00:00.000Z",
+        ends_at: "2030-01-01T17:30:00.000Z",
+      },
+    ];
+    rpc.mockResolvedValue({ data: rows, error: null });
+
+    await expect(
+      listAgreedTimeConflicts(client, {
+        startsAt: "2030-01-01T16:30:00.000Z",
+        endsAt: "2030-01-01T18:00:00.000Z",
+      }),
+    ).resolves.toEqual(rows);
+    expect(rpc).toHaveBeenCalledWith("viewer_agreed_time_conflicts", {
+      p_starts_at: "2030-01-01T16:30:00.000Z",
+      p_ends_at: "2030-01-01T18:00:00.000Z",
+    });
+  });
+
+  it("passes the match to exclude and treats no rows as no conflicts", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    await expect(
+      listAgreedTimeConflicts(client, {
+        startsAt: "2030-01-01T16:30:00.000Z",
+        endsAt: "2030-01-01T18:00:00.000Z",
+        excludeMatchId: "m-2",
+      }),
+    ).resolves.toEqual([]);
+    expect(rpc).toHaveBeenCalledWith("viewer_agreed_time_conflicts", {
+      p_starts_at: "2030-01-01T16:30:00.000Z",
+      p_ends_at: "2030-01-01T18:00:00.000Z",
+      p_exclude_match_id: "m-2",
+    });
+  });
+
+  it("surfaces an RPC error from the conflict read", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
+
+    await expect(
+      listAgreedTimeConflicts(client, {
+        startsAt: "2030-01-01T16:30:00.000Z",
+        endsAt: "2030-01-01T18:00:00.000Z",
+      }),
+    ).rejects.toEqual({ message: "boom" });
   });
 });
