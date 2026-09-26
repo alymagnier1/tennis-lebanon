@@ -228,8 +228,9 @@ silently.
 
 - [x] `EAS_PROJECT_ID` set for the build (or present in `app.json`)
   - Verified: `extra.eas.projectId` is in `app.json`.
-- [ ] `select count(*) from public.device_push_tokens where is_active;` is
+- [x] `select count(*) from public.device_push_tokens where is_active;` is
       non-zero on staging after a real device signs in
+  - Verified 2026-09-26: **1** active token (phone A). Emulator cannot add a second.
 
 Onboarding no longer asks for notification permission, so **signing in does
 not register a device**. A token is written only after Profile → Notifications
