@@ -385,8 +385,10 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       after retirement, against the final key configuration. Never log the
       tokens themselves
   - Pre-retirement: start after T3; needs ≥1 h signed in. Do post-retirement again.
-- [ ] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
+- [x] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
       sign-in, a match hub and the sender (200) still work
+  - Verified 2026-09-26: founder disabled JWT-based API keys on staging; phone A
+    match hub OK. Sender rechecked same session.
 - [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
       access-token lifetime **plus 15 minutes** (1 h 15 min at the default 1 h; read
       the actual value in Auth settings) → **Revoke** the legacy secret. Rotation
