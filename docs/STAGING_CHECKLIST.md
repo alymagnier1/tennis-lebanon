@@ -86,6 +86,7 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 
 - [x] All migrations applied to staging in order (`supabase db push` or CI deploy)
   - Verified 2026-09-25: staging `schema_migrations` is 001→108 (105–108 applied with `supabase db push`).
+  - Verified 2026-09-26: `110` applied with `supabase db push` after #27 merged (17:13); staging is 001→110.
   - Verified 2026-09-26: `109` applied with `supabase db push` after #19 merged; staging is 001→109 and the new `register_device_push_token` is live, still `authenticated`-only.
 - [ ] Staging smoke: four workflows in `docs/PILOT_OPERATIONS.md` rehearsed
 - [ ] Backup/restore drill completed within last 30 days (`docs/BACKUP_RESTORE.md`)
@@ -206,8 +207,8 @@ function secret is missing; a 401 means the two copies differ.
       and which secret it authenticates with
 - [x] `select * from cron.job where jobname = 'tennis_process_notifications';`
       shows the job active on staging (`*/5 * * * *`, verified 2026-08-30)
-  - Migration `110` (2026-09-26) moves it to `*/3 * * * *`; re-check this query
-    on staging once `110` is applied.
+  - Migration `110` (2026-09-26) moves it to `*/3 * * * *`. Verified 17:13 after
+    applying it: one job, `*/3 * * * *`, active, same command. Runs at 17:15 and 17:18 returned 200 with the secret key, three minutes apart (17:18 is not on the old five-minute schedule).
 - [x] Both Vault secrets created in the target environment, and
       `select public.invoke_process_notifications();` returned a request id
   - Verified 2026-09-22/25: invoker returns request ids and the function answers 200 (dedicated `PROCESS_NOTIFICATIONS_TOKEN`).
@@ -397,9 +398,9 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       `Runtime 0.1.0 · staging · downloaded update` and `Update <id>`, where `<id>`
       equals the latest Android update ID on the EAS dashboard
   - Verified 2026-09-26 on phone A and emulator: Update `01a0dcac…`.
-  - Latest: update `01a0ddf2…` (offline fix) published 2026-09-26 16:40, after
-    `01a0dd7a…` (this-device sign-out, 14:30). Confirm it is running before the
-    remaining §7c rehearsal.
+  - Latest: update `01a0de11…` (foreground network re-check) published 2026-09-26
+    17:15, after `01a0ddf2…` (offline probe, 16:40) and `01a0dd7a…` (this-device
+    sign-out, 14:30). Confirm it is running before the remaining §7c rehearsal.
 - [x] **Focused compatibility check** on that build: fresh sign-in, open a match
       hub, open an invite preview, one reversible write, and the sender returning 200. Do not wait for the full §7c rehearsal — retire first, then repeat this
       check, then rehearse against the final configuration
