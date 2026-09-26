@@ -45,6 +45,7 @@ import {
   formatUtcSlotInBeirut,
   utcIsoToBeirutFields,
 } from "../../../src/lib/beirut-time";
+import { agreedTimeConflictsQueryOptions } from "../../../src/lib/agreed-time-conflicts-query";
 import { slotWindowUtc } from "../../../src/lib/slot-window";
 import {
   createMatchStyles,
@@ -74,6 +75,7 @@ import { usePublishMatch } from "../../../src/hooks/usePublishMatch";
 import { showMatchCapAlert } from "../../../src/lib/create-match-guard";
 import { MATCHES_ROUTE, matchHubRoute } from "../../../src/lib/routes";
 import { supabase } from "../../../src/lib/supabase";
+import { useAuth } from "../../../src/providers/AuthProvider";
 import { tennisColors } from "../../../src/theme/tennis-tokens";
 
 const MAX_PREFERRED_CLUBS = 3;
@@ -114,6 +116,7 @@ function slotsFromDraft(): SlotDraft[] {
 
 export default function CreateMatchScheduleScreen() {
   const { t, i18n } = useTranslation();
+  const { session } = useAuth();
   const { rowDirection, writingDirection } = useLayoutDirection();
   // The draft is module state with no subscription, so returning from the
   // per-match overrides screen would otherwise leave the summary bar, the
@@ -383,16 +386,14 @@ export default function CreateMatchScheduleScreen() {
     () => (slots[0] ? slotWindowUtc(slots[0]) : null),
     [slots],
   );
-  const conflictsQuery = useQuery({
-    queryKey: [
-      "agreed-time-conflicts",
-      slotWindow?.startsAt,
-      slotWindow?.endsAt,
-    ],
-    queryFn: () => listAgreedTimeConflicts(supabase, slotWindow!),
-    enabled: Boolean(slotWindow),
-    staleTime: 30_000,
-  });
+  // Keyed by account as well as slot: see `agreedTimeConflictsQueryOptions`.
+  const conflictsQuery = useQuery(
+    agreedTimeConflictsQueryOptions({
+      userId: session?.user.id,
+      window: slotWindow,
+      fetchConflicts: (window) => listAgreedTimeConflicts(supabase, window),
+    }),
+  );
   // The RPC orders by start time, so the first is the soonest clash.
   const timeConflict = conflictsQuery.data?.[0] ?? null;
 
