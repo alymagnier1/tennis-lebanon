@@ -21,7 +21,7 @@ Interactive checklist used during the run: Cursor canvas
 | `process-notifications` | v4; cron `*/5 * * * *`; join pushes marked `sent_at` |
 | Active push tokens | 1 (phone only) |
 
-Device model / Android version for the physical phone: **not recorded this session** — fill in before treating the log as complete.
+Device model / Android version for the physical phone: **not recorded this session** — fill in before ticking the checklist “Recorded: … model and Android version” row.
 
 ## Passed on this hardware
 
