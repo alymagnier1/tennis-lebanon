@@ -267,20 +267,33 @@ Two physical Android phones on the current staging APK. **A** is an existing
 player; **B** is a person with no account and the app **not installed**. Tick
 each step only when it happened on the phone, not when the database says so.
 
+An emulator cannot stand in for either phone here. Push registration requires
+`Device.isDevice` (`apps/mobile/src/lib/push-notifications.ts`), so an emulator
+never writes a token row. That is expected, not an FCM fault.
+
+The create screen publishes **fixed-time** matches only (`timingMode` is fixed
+and one slot is kept, `apps/mobile/app/match/create/schedule.tsx`), so this
+rehearsal follows the fixed journey. Pushes that journey actually produces:
+`match_participant_joined` to the host when B accepts, and
+`match_court_confirmed` ("Court confirmed") to every other accepted player when
+A confirms the court.
+
 - [ ] A signs in with Google and turns on Profile → Notifications
-- [ ] A creates a **flexible** singles match with two proposed times and publishes
+- [ ] A creates a singles match at one fixed time and publishes; the schedule
+      conflict banner appears only when A already has an agreed match then
 - [ ] A shares the invite to B on WhatsApp; the message shows an
       `https://racketbound.com/invite#…` link
 - [ ] B taps it: the invite page loads, Get the app installs the APK, Back →
       Open in the app opens RacketBound on the invite screen
 - [ ] B signs up, confirms the email code, finishes onboarding, and **lands on the
       invite** (not Home); the summary shows zone and time; Accept joins
+- [ ] **A's phone physically shows** the `match_participant_joined` push for B
+      joining
 - [ ] B turns on Profile → Notifications; `device_push_tokens` now has two
-      active rows
-- [ ] Both vote Yes on the same slot; **B's phone physically shows** the
-      agreed-time push
+      active rows, one per phone
 - [ ] A opens the court step, uses the WhatsApp hand-off to the club, then
-      confirms the court was booked; both hubs show the confirmed court
+      confirms the court was booked; both hubs show the confirmed court and
+      **B's phone physically shows** the "Court confirmed" push
 - [ ] After the start time: both confirm attendance and the same score; the
       result shows as confirmed and the rematch card appears
 - [ ] `select * from public.unreachable_notification_summary();` reviewed, and
@@ -295,6 +308,21 @@ each step only when it happened on the phone, not when the database says so.
 - [ ] Recorded: APK build id and commit, each phone's model and Android version,
       the backend state (migration version, function version), and every failure
 - [ ] Anything that surprised either player written down before it is fixed
+
+Two paths this rehearsal does **not** cover, and must not be ticked from it:
+
+- Accepting a shared invite joins directly. It is not a join request, so it
+  proves nothing about a host approving one.
+- A fixed-match run never votes, so it proves nothing about flexible voting or
+  the agreed-time push.
+
+- [ ] Join request and approval on two phones: A publishes with Discover listing
+      and "requires approval" on; B requests from Discover; **A's phone shows**
+      the join-request push; A approves; **B's phone shows** the request-accepted
+      push
+- [ ] Flexible time voting: either recorded as out of cohort-1 scope in
+      `docs/DECISIONS.md`, or a supported way to create a flexible match specified
+      and tested separately. The create screen cannot publish one today
 
 ## 7d. Retire the legacy Supabase keys (before any real player)
 
@@ -322,11 +350,16 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       nothing. Settings → the line under the version must read
       `Runtime 0.1.0 · staging · downloaded update` and `Update <id>`, where `<id>`
       equals the latest Android update ID on the EAS dashboard
-- [ ] **Focused compatibility check** on that build: fresh sign-in, a session
-      refresh (background the app past the token lifetime, or sign out and in),
-      open a match hub, open an invite preview, one reversible write, and the sender
-      returning 200. Do not wait for the full §7c rehearsal — retire first, then
-      repeat this check, then rehearse against the final configuration
+- [ ] **Focused compatibility check** on that build: fresh sign-in, open a match
+      hub, open an invite preview, one reversible write, and the sender returning 200. Do not wait for the full §7c rehearsal — retire first, then repeat this
+      check, then rehearse against the final configuration
+- [ ] **Session refresh**, recorded separately from the fresh sign-in (signing
+      out and in makes a new session and never uses the refresh token): leave a
+      phone signed in past the access-token lifetime, bring the app to the
+      foreground, then open a match hub without being asked to sign in. Auth logs
+      show a successful `refresh_token` grant for that user at that time. Repeat
+      after retirement, against the final key configuration. Never log the
+      tokens themselves
 - [ ] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
       sign-in, a match hub and the sender (200) still work
 - [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
