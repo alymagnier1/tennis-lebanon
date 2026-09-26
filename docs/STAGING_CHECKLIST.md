@@ -31,8 +31,11 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 - [x] `pnpm db:test` passes on the release commit
   - Verified 2026-09-25 on `8058d5a`: clean `pnpm db:reset` (001→108), then
     81 files / 351 tests.
-- [ ] No open critical/high security findings — **open**: the staging
+- [x] No open critical/high security findings — **open**: the staging
       `service_role` key exposed on 2026-09-22 stays valid until §7d is done
+  - Closed 2026-09-26: the exposed key is retired (§7d, legacy JWT secret revoked
+    15:47:19) and the logs show it was never used. Open review findings are P2 or
+    lower (`docs/audits/REHEARSAL_PARTIAL_2026-09-26.md`).
 - [x] Database types regenerated if migrations changed: `pnpm db:types`
   - Verified 2026-09-25 on `8058d5a`: regenerating from 001→108 leaves
     `packages/types` unchanged.
@@ -372,8 +375,18 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
     publishable key for the staging project (development sets none; it reads the
     local `.env`), and a test bundle exported through preview carries the
     publishable key and no JWT. Nothing was published by that check.
-- [ ] Inventory confirmed: every EAS profile and update environment, installed
+- [x] Inventory confirmed: every EAS profile and update environment, installed
       builds, Vercel (Production and Preview), cron / `pg_net`, CI, local `.env`
+  - Confirmed 2026-09-26: EAS preview/production env and `eas.json` staging hold
+    the publishable key; build `168b2257` was built from `eas.json`; Vercel holds
+    the publishable key (Production verified in the live bundle 09-25) and no
+    service-role variable; the cron invoker uses its own
+    token and the sender the `sb_secret` key; CI holds no Supabase secrets. No
+    request was rejected for a legacy API key after the deactivation, so nothing
+    in use still sends one.
+  - Local, not in git: the root `.env` and `apps/mobile/.env` still carry the
+    legacy staging `anon` key, which no longer works. Swap in the publishable key
+    before running locally against staging.
 - [ ] New EAS build (publishable key from `eas.json`) installed on every test phone
 - [x] **The running update confirmed, not assumed.** Updates download in the
       background and run after a full restart, so opening the app twice proves
@@ -390,14 +403,20 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
   - The T3 sign-in used a **different account** from the rehearsal's A. That
     exposed the push-token bug fixed by migration `109`: the new account could
     not register the phone's token.
-- [ ] **Session refresh**, recorded separately from the fresh sign-in (signing
+  - Repeated after the revoke (2026-09-26): fresh sign-in (emulator 15:51), match
+    hub (phone 15:51 and 16:08), sender 200 (15:50). Not yet repeated: an invite
+    preview and one reversible write (handover T5–T6).
+- [x] **Session refresh**, recorded separately from the fresh sign-in (signing
       out and in makes a new session and never uses the refresh token): leave a
       phone signed in past the access-token lifetime, bring the app to the
       foreground, then open a match hub without being asked to sign in. Auth logs
       show a successful `refresh_token` grant for that user at that time. Repeat
       after retirement, against the final key configuration. Never log the
       tokens themselves
-  - Pre-retirement: start after T3; needs ≥1 h signed in. Do post-retirement again.
+  - Verified 2026-09-26 before retirement: at 14:57:04 the phone's session renewed
+    (`refresh_token` grant, 200) and a match hub loaded without a sign-in prompt.
+  - Verified 2026-09-26 after retirement: at 16:08:37 the renewal returned 200 and
+    the match hub loaded with a token signed by the new key (ES256, `74cd036a…`).
 - [x] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
       sign-in, a match hub and the sender (200) still work
   - Done 2026-09-26 (recorded 12:54): founder disabled the JWT-based API keys on staging.
@@ -405,16 +424,32 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
     (through 13:10); no 401/403 anywhere.
   - Sign-in verified 2026-09-26 13:52: fresh Google sign-ins succeeded on the
     emulator and on the phone (auth logs, 200), with no 401/403.
-- [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
+- [x] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
       access-token lifetime **plus 15 minutes** (1 h 15 min at the default 1 h; read
       the actual value in Auth settings) → **Revoke** the legacy secret. Rotation
       without revocation leaves the old key valid. In an active incident, revoking
       immediately and accepting a session interruption is also acceptable. Only
       after revocation is the leaked 2026-09-22 key worthless
-- [ ] Recorded: the cutoff time; logs reviewed for unexpected privileged activity
+  - Done 2026-09-26: migrated and rotated before 14:19 (current key ECC
+    `74cd036a…`); legacy `4d017fdb…` revoked at **15:47:19** Beirut (12:47:19 UTC),
+    over 1 h 15 min after the rotation (access-token expiry 3600 s). Afterwards
+    every device request carried a token signed by the new key, and none was
+    rejected.
+- [x] Recorded: the cutoff time; logs reviewed for unexpected privileged activity
       during the exposure window (2026-09-22 → cutoff); rejection of the retired
       key verified through a controlled check — never by pasting the key into
       chat or logs
+  - Cutoff: 2026-09-26 15:47:19 Beirut.
+  - Exposure began 2026-09-22 about 23:14 Beirut; edge logs are kept from 20:06
+    that day, so the whole window is covered. Every request carrying a
+    `service_role` JWT, as API key or bearer, from exposure to cutoff: **none**.
+    The logs do record roles for that period (`anon`, `authenticated`,
+    `supabase_admin`), and the sender used the `sb_secret` key throughout.
+  - Controlled check after the cutoff with a made-up HS256 token, never the real
+    key: data API 401 (`PGRST301`, no suitable key), Auth admin 403 ("signing
+    method HS256 is invalid"), Storage rejected, legacy-format API key 401
+    ("Invalid API key"). The leaked key is an HS256 token, so it is rejected
+    everywhere.
 
 ## 8. Promotion sign-off
 
