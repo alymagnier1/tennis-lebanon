@@ -83,6 +83,7 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 
 - [x] All migrations applied to staging in order (`supabase db push` or CI deploy)
   - Verified 2026-09-25: staging `schema_migrations` is 001→108 (105–108 applied with `supabase db push`).
+  - Verified 2026-09-26: `109` applied with `supabase db push` after #19 merged; staging is 001→109 and the new `register_device_push_token` is live, still `authenticated`-only.
 - [ ] Staging smoke: four workflows in `docs/PILOT_OPERATIONS.md` rehearsed
 - [ ] Backup/restore drill completed within last 30 days (`docs/BACKUP_RESTORE.md`)
 - [ ] `platform_policy_settings`, lifecycle cron (`process-notifications`), and RLS spot-check documented
@@ -228,13 +229,15 @@ silently.
 
 - [x] `EAS_PROJECT_ID` set for the build (or present in `app.json`)
   - Verified: `extra.eas.projectId` is in `app.json`.
-- [ ] `select count(*) from public.device_push_tokens where is_active;` is
+- [x] `select count(*) from public.device_push_tokens where is_active;` is
       non-zero on staging after a real device signs in
   - 2026-09-26: **1** active token (phone A) during the partial rehearsal.
   - Unticked 2026-09-26 13:14: **0** active. At 12:47 the phone signed in as a
     different account and every registration since has failed with 409
-    (`device_push_tokens_token_key`). Fixed by migration `109`; re-check after it
-    is applied and the phone is brought to the foreground.
+    (`device_push_tokens_token_key`). Fixed by migration `109`.
+  - Re-verified 2026-09-26 13:53 after `109`: **1** active token, the phone's.
+    Its first registration after the fix (13:52:40) returned 200 where the same
+    account-switch case had returned 409, and replaced the stale row.
 
 Onboarding no longer asks for notification permission, so **signing in does
 not register a device**. A token is written only after Profile → Notifications
@@ -393,13 +396,13 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       after retirement, against the final key configuration. Never log the
       tokens themselves
   - Pre-retirement: start after T3; needs ≥1 h signed in. Do post-retirement again.
-- [ ] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
+- [x] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
       sign-in, a match hub and the sender (200) still work
   - Done 2026-09-26 (recorded 12:54): founder disabled the JWT-based API keys on staging.
     Afterwards match hubs loaded (200, through 13:08) and the sender answered 200
     (through 13:10); no 401/403 anywhere.
-  - Open: **no sign-in has happened since** (last one 12:47, before the
-    deactivation). Tick after one fresh sign-in succeeds.
+  - Sign-in verified 2026-09-26 13:52: fresh Google sign-ins succeeded on the
+    emulator and on the phone (auth logs, 200), with no 401/403.
 - [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
       access-token lifetime **plus 15 minutes** (1 h 15 min at the default 1 h; read
       the actual value in Auth settings) → **Revoke** the legacy secret. Rotation
