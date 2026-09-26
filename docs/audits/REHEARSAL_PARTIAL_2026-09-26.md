@@ -51,8 +51,8 @@ Device model / Android version for the physical phone: **not recorded this sessi
 ## Surprises / findings (write before fix)
 
 1. **Cancelled-match invite copy.** Reopening an invite for a match PB already joined, after cancel, shows “You are already in this match” → hub shows cancelled. Membership is checked before match status. Easy to confuse with a _new_ same-time match invite if WhatsApp still has the old bubble. Tokens checked: `d67dad03…` → cancelled X; `2fc61249…` → open Y.
-2. **Invite web page strips `#token`.** After load, address bar becomes `/invite` and the token lives in tab `sessionStorage`. Same-tab “Open in the app” can reopen the previous token.
-3. **False offline on emulator.** Banner keys off `Network.isInternetReachable`; `Boolean(null)` marks offline and pauses React Query while Wi‑Fi/Google still work (`apps/mobile/app/_layout.tsx`). Treat `null` as unknown/online.
+2. **Invite web page strips `#token`.** After load, address bar becomes `/invite` and the token lives in tab `sessionStorage`. Same-tab “Open in the app” can reopen the previous token. _Fixed 2026-09-26 (#25): the page now follows `hashchange`._
+3. **False offline on emulator.** Banner keys off `Network.isInternetReachable`; `Boolean(null)` marks offline and pauses React Query while Wi‑Fi/Google still work (`apps/mobile/app/_layout.tsx`). Treat `null` as unknown/online. _Fixed 2026-09-26 (#25), with a corrected cause: on Android the value is never `null`; it is `false` when Android has not validated the network or a VPN reports zero bandwidth. The founder's phone later showed the banner from a different cause (a stale state after the app was in the background), which #25 does not fix; see the handover._
 4. **Al Riyadi booking phone** `+961 1 740 255` is a landline; WhatsApp offers SMS invite — not an app SMS feature. Staging club numbers should be WhatsApp mobiles.
 5. **Invite screen has no in-app back** — Accept / Decline only (Decline leaves shared links).
 6. **No profile photo → initials** (`AM` for Ali Mogh) — expected, not a missing avatar bug.
