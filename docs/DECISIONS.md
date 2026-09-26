@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-26 — Signing out ends this device's session only
+
+- Status: accepted
+- Context: `AuthProvider.signOut` called `supabase.auth.signOut()` with no scope, and Supabase's default is `global`: it ends every session the account has. On staging the emulator signed out, and the phone, signed in to the same account, had its next refresh refused ("Refresh Token Not Found") and was signed out 30 seconds later without doing anything.
+- Decision: sign out with `scope: "local"` through `signOutThisDevice` (`apps/mobile/src/lib/sign-out.ts`), which keeps the existing order — deactivate this device's push token while the session still exists, forget the cached Google account, then end the session. Every mobile sign-out, including the one after an account-deletion request, goes through it. The web dashboard is unchanged.
+- Alternatives considered: keep `global` (safest after a lost phone, but surprising for anyone using two devices, and it signs out a phone that did nothing); `local` plus a "sign out everywhere" action in Settings (the eventual answer for a lost device; not needed for cohort 1, so not built).
+- Consequences: after a deletion request, the account's other devices are no longer signed out; the server already refuses them (`assert_authenticated_caller`) and they land on "account unavailable". Signing out elsewhere no longer ends a lost device's session; it stays signed in until someone revokes the account's sessions from the Supabase dashboard (Supabase does not expire refresh tokens by default). JS-only; reaches phones with the next EAS update.
+- Owner: Founder
+
 ## 2026-09-26 — A push token follows the signed-in account, and its stale row is deleted
 
 - Status: accepted

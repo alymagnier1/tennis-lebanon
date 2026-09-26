@@ -17,6 +17,7 @@ import {
   markPasswordRecoveryPending,
 } from "../lib/password-recovery";
 import { unregisterDevicePushToken } from "../lib/push-notifications";
+import { signOutThisDevice } from "../lib/sign-out";
 import { supabase } from "../lib/supabase";
 
 type Profile = Awaited<ReturnType<typeof getOwnProfile>>;
@@ -87,14 +88,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
     await queryClient.invalidateQueries({ queryKey: ["own-profile"] });
   }, [queryClient]);
 
-  const signOut = useCallback(async () => {
-    await unregisterDevicePushToken().catch(() => undefined);
-    // Without this the next attempt silently reuses the same Google account
-    // instead of offering the picker, so "use another email" cannot switch.
-    await forgetGoogleAccount();
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  }, []);
+  const signOut = useCallback(
+    () =>
+      signOutThisDevice({
+        auth: supabase.auth,
+        unregisterPushToken: unregisterDevicePushToken,
+        forgetGoogleAccount,
+      }),
+    [],
+  );
 
   const value = useMemo<AuthContextValue>(
     () => ({
