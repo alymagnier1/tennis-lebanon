@@ -181,7 +181,7 @@ export const tennisChatLight: TennisChatTokens = {
   composerField: "#FFFFFF",
   bubbleShadow: "#0B141A",
   doodleInk: "#6E7560",
-  doodleOpacity: 0.16,
+  doodleOpacity: 0.12,
   senderNames: [
     "#B4235A",
     "#0B6BCB",
@@ -204,7 +204,7 @@ export const tennisChatDark: TennisChatTokens = {
   composerField: "#1F221C",
   bubbleShadow: "#000000",
   doodleInk: "#FFFFFF",
-  doodleOpacity: 0.07,
+  doodleOpacity: 0.05,
   senderNames: [
     "#F9A8D4",
     "#93C5FD",

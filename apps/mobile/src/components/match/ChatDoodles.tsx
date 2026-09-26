@@ -4,10 +4,11 @@ import { tennisChat } from "../../theme/tennis-tokens";
 /**
  * The tennis doodle wallpaper behind the match chat, as in WhatsApp's chats.
  *
- * One small transparent tile (`chat-doodles.png`, 240dp, white strokes) repeated
- * across the screen and tinted per colour scheme, so it stays crisp at any size
- * and costs ~70 KB at @3x. Our own artwork -- balls, rackets, net, court,
- * trophy, clock, pin, speech bubble -- drawn for this app on 2026-09-26.
+ * One phone-shaped sheet of line art (`chat-doodles.webp`, 851x1847, the
+ * founder's artwork, 2026-09-26) stored as a white-on-transparent mask and
+ * tinted per colour scheme, so the same file serves light and dark mode.
+ * `cover` fills the chat area; the sheet is about a phone's aspect ratio, so
+ * little is cropped.
  *
  * Chat only: a pattern behind Home or the match hub would fight their hierarchy.
  * Decorative, so hidden from screen readers and never touchable.
@@ -21,8 +22,8 @@ export function ChatDoodles() {
       style={StyleSheet.absoluteFill}
     >
       <Image
-        source={require("../../../assets/chat-doodles.png")}
-        resizeMode="repeat"
+        source={require("../../../assets/chat-doodles.webp")}
+        resizeMode="cover"
         style={{
           width: "100%",
           height: "100%",
