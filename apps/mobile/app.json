@@ -34,7 +34,8 @@
         {
           "photosPermission": "Allow RacketBound to access your photos so you can set a profile picture."
         }
-      ]
+      ],
+      "./plugins/with-android-abis"
     ],
     "experiments": {
       "typedRoutes": true
