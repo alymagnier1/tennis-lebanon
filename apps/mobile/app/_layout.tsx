@@ -26,6 +26,11 @@ import { OfflineBanner } from "../src/components/OfflineBanner";
 import { ToastProvider } from "../src/providers/ToastProvider";
 import { ConfirmDialogProvider } from "../src/providers/ConfirmDialogProvider";
 import { installDeepLinkCapture } from "../src/lib/deep-link-buffer";
+import {
+  createBackendProbe,
+  createOnlineBridge,
+} from "../src/lib/connectivity";
+import { env } from "../src/lib/env";
 import { tennisColors } from "../src/theme/tennis-tokens";
 
 /*
@@ -60,15 +65,21 @@ focusManager.setEventListener((handleFocus) => {
 // request made with no signal did not wait, it burned the one configured retry
 // and surfaced as "couldn't load". Pilot players are on Lebanese mobile data,
 // where losing signal for a minute is ordinary, so queries should pause and
-// resume rather than fail.
-onlineManager.setEventListener((setOnline) => {
-  const subscription = Network.addNetworkStateListener(
-    ({ isInternetReachable }) => {
-      setOnline(Boolean(isInternetReachable));
+// resume rather than fail. Android's "validated" flag alone is not trusted:
+// see `createOnlineBridge`.
+onlineManager.setEventListener((setOnline) =>
+  createOnlineBridge({
+    subscribe: (listener) => {
+      const subscription = Network.addNetworkStateListener(listener);
+      return () => subscription.remove();
     },
-  );
-  return () => subscription.remove();
-});
+    probe: createBackendProbe({
+      baseUrl: env.SUPABASE_URL,
+      apiKey: env.SUPABASE_ANON_KEY,
+    }),
+    setOnline,
+  }),
+);
 
 export default function RootLayout() {
   const fontsLoaded = useTennisFonts();

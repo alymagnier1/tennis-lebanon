@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-26 — "Offline" means our backend is unreachable, not that Android's check failed
+
+- Status: accepted
+- Context: React Query's `onlineManager` was fed `Boolean(isInternetReachable)` from `expo-network`. On Android that value is the network's VALIDATED capability — Android's own probe to Google's servers — and it is also forced to `false` when a VPN reports zero downstream bandwidth, which local-VPN security and ad-blocking apps do. The app then showed "You're offline" and paused every query while the network worked: seen on the emulator during the partial rehearsal, and on the founder's phone at 16:27 on 09-26, when that phone's push-token call and realtime socket (neither goes through React Query) both succeeded. The flag cannot simply be ignored: it also drops when a weak mobile connection stalls, and pausing then is the reason the bridge exists.
+- Decision: `createOnlineBridge` (`apps/mobile/src/lib/connectivity.ts`). No connection is offline; a validated or unknown network is online; a connected but unvalidated network is settled by probing the backend's unauthenticated `/auth/v1/health` with the public key (5 s timeout), re-probing every 15 s while it stays unverified. The previous answer stands while a probe is in flight, so a reconnect does not flash the banner.
+- Alternatives considered: treat unvalidated as online (fixes the false banner, but a stalled mobile connection goes back to failing requests instead of pausing); keep the flag and debounce it (a persistent failure, like a VPN, stays offline forever); `networkMode: "always"` (removes pausing everywhere).
+- Consequences: one small request to Supabase per unverified network event and every 15 s while unverified; none on a normal validated network. Tests cover the emulator/VPN case, the stalled case with retry, a lost connection, a stale probe losing to a newer event, and the probe's error handling. JS-only.
+- Owner: Founder
+
 ## 2026-09-26 — Signing out ends this device's session only
 
 - Status: accepted
