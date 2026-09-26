@@ -404,8 +404,9 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
     exposed the push-token bug fixed by migration `109`: the new account could
     not register the phone's token.
   - Repeated after the revoke (2026-09-26): fresh sign-in (emulator 15:51), match
-    hub (phone 15:51 and 16:08), sender 200 (15:50). Not yet repeated: an invite
-    preview and one reversible write (handover T5–T6).
+    hub (phone 15:51 and 16:08), sender 200 (15:50), an invite preview (a link
+    the emulator's account created, opened on the phone at 16:18 and 16:19, 200)
+    and a profile save (phone 16:20, 204). No request rejected after 15:50.
 - [x] **Session refresh**, recorded separately from the fresh sign-in (signing
       out and in makes a new session and never uses the refresh token): leave a
       phone signed in past the access-token lifetime, bring the app to the
