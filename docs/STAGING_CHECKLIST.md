@@ -212,8 +212,12 @@ function secret is missing; a 401 means the two copies differ.
 - [x] Both Vault secrets created in the target environment, and
       `select public.invoke_process_notifications();` returned a request id
   - Verified 2026-09-22/25: invoker returns request ids and the function answers 200 (dedicated `PROCESS_NOTIFICATIONS_TOKEN`).
-- [ ] Verified on staging that **one push notification physically arrives** on a
+- [x] Verified on staging that **one push notification physically arrives** on a
       real device, not merely that the function returned 200
+  - Verified 2026-09-26 on the founder's **locked** phone: a chat message from the
+    emulator's account created a `match_message` notification at 17:34:49; the
+    17:36:00 sender run (`process-notifications` v6, high priority) sent it to
+    Expo; it appeared on the phone at about 17:36 (founder's report).
 - [ ] `select * from public.unreachable_notification_summary();` reviewed after
       a staging rehearsal
 
