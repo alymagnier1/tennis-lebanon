@@ -31,8 +31,8 @@ import { useLayoutDirection } from "../../src/lib/layout-direction";
 import type { HeroFamily } from "../../src/theme/hero-variant";
 
 const ART = {
-  court: require("../../assets/onboarding/hero-court.png"),
-  racket: require("../../assets/onboarding/hero-racket-cream.png"),
+  court: require("../../assets/onboarding/hero-court.webp"),
+  racket: require("../../assets/onboarding/hero-racket-cream.webp"),
 } as const;
 
 type DoneField = {
