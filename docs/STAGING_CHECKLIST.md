@@ -319,9 +319,11 @@ A confirms the court.
 - [x] One recoverable failure: turn data off mid-flow, turn it back on, and the
       screen recovers without restarting the app
   - Verified 2026-09-26 on phone A.
-- [x] Recorded: APK build id and commit, each phone's model and Android version,
+- [ ] Recorded: APK build id and commit, each phone's model and Android version,
       the backend state (migration version, function version), and every failure
-  - `docs/audits/REHEARSAL_PARTIAL_2026-09-26.md` (phone model/OS still TBD).
+  - Partial 2026-09-26: build/update/migration/findings in
+    `docs/audits/REHEARSAL_PARTIAL_2026-09-26.md`. **Phone model and Android
+    version still TBD** — leave unticked until filled in.
 - [x] Anything that surprised either player written down before it is fixed
   - Findings in that audit (false offline on emulator, cancelled-invite copy,
     invite hash stripping, landline WhatsApp, bell vs OS push).
