@@ -532,7 +532,13 @@ export function MatchChatPanel({
           ) : (
             // The arrow points the way the text runs, as in WhatsApp.
             <View style={isRtl ? styles.mirrored : null}>
-              <Icon name="send" size={20} color={tennisColors.onPrimary} />
+              <Icon
+                name="send"
+                size={20}
+                color={
+                  canSend ? tennisColors.onPrimary : "rgba(255,255,255,0.5)"
+                }
+              />
             </View>
           )}
         </Pressable>
@@ -851,9 +857,9 @@ const styles = createLiveSheet(() =>
       justifyContent: "center",
       backgroundColor: tennisColors.primary,
     },
-    sendDisabled: {
-      opacity: 0.45,
-    },
+    // Solid, not faded: a see-through button showed the wallpaper through it.
+    // Only the arrow dims (`canSend`).
+    sendDisabled: {},
     sendPressed: {
       opacity: 0.85,
     },
