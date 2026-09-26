@@ -7,7 +7,8 @@ import { useTranslation } from "react-i18next";
 import {
   buildInviteOpenAppUrl,
   detectInvitePlatform,
-  parseInviteFragment,
+  readInviteToken,
+  watchInviteToken,
   type InvitePlatform,
 } from "@tennis-lebanon/domain";
 import {
@@ -34,30 +35,6 @@ const APP_COLORS = {
   mutedForeground: "#5C6A62",
 } as const;
 
-/**
- * Survives "Get the app" and Back in the same tab, which a stripped fragment
- * would not. Session-scoped and never sent anywhere.
- */
-const TOKEN_SESSION_KEY = "racketbound.invite-token";
-
-type TokenSource = { token: string | null; inAddressBar: boolean };
-
-/** Pure read: the fragment first, then the copy kept for this tab. */
-function readInviteToken(): TokenSource {
-  const fromHash = parseInviteFragment(window.location.hash);
-  if (fromHash) return { token: fromHash, inAddressBar: true };
-
-  try {
-    const stored = window.sessionStorage.getItem(TOKEN_SESSION_KEY);
-    return {
-      token: stored ? parseInviteFragment(stored) : null,
-      inAddressBar: false,
-    };
-  } catch {
-    return { token: null, inAddressBar: false };
-  }
-}
-
 function browserLocale(): SupportedLocale {
   const tags = navigator.languages?.length
     ? navigator.languages
@@ -72,24 +49,17 @@ function browserLocale(): SupportedLocale {
 /** Client-only: rendered through `InviteLandingClient`, never on the server. */
 export function InviteLanding() {
   const { i18n } = useTranslation();
-  const [{ token, inAddressBar }] = useState(readInviteToken);
+  // The token is kept for the tab (it survives "Get the app" and Back) and
+  // follows every later invite link opened in the same tab; see
+  // `watchInviteToken`. Session-scoped and never sent anywhere.
+  const [token, setToken] = useState(() => readInviteToken(window));
   const [platform] = useState(() => detectInvitePlatform(navigator.userAgent));
   const [locale] = useState(browserLocale);
   // A fixed translator rather than `changeLanguage`: the first paint is already
   // in the visitor's language, and the dashboard's shared instance is untouched.
   const t = i18n.getFixedT(locale);
 
-  useEffect(() => {
-    if (!token || !inAddressBar) return;
-    try {
-      window.sessionStorage.setItem(TOKEN_SESSION_KEY, token);
-    } catch {
-      // Private mode or storage disabled: Back will lose the token, nothing worse.
-    }
-    // Out of the address bar, which is where history, screenshots and error
-    // reports read the URL from.
-    window.history.replaceState(null, "", window.location.pathname);
-  }, [token, inAddressBar]);
+  useEffect(() => watchInviteToken(window, setToken), []);
 
   const getAppUrl = env.GET_APP_URL || null;
   const direction = getTextDirection(locale);

@@ -5,8 +5,12 @@ import {
   buildInviteOpenAppUrl,
   buildInviteWebUrl,
   detectInvitePlatform,
+  INVITE_TOKEN_SESSION_KEY,
   isInviteToken,
   parseInviteFragment,
+  readInviteToken,
+  watchInviteToken,
+  type InviteTokenHost,
 } from "./invite-links";
 
 const TOKEN = "0123456789abcdef0123456789abcdef0123456789abcdef";
@@ -152,5 +156,122 @@ describe("buildInviteOpenAppUrl", () => {
 
   it("returns null on desktop, where there is no app to open", () => {
     expect(buildInviteOpenAppUrl(TOKEN, "desktop", GET_APP)).toBeNull();
+  });
+});
+
+/** A tab: an address bar, session storage, and fragment navigation. */
+function fakeTab(url: { pathname?: string; hash?: string } = {}) {
+  const store = new Map<string, string>();
+  let listener: (() => void) | null = null;
+  const host: InviteTokenHost = {
+    location: { pathname: url.pathname ?? "/invite", hash: url.hash ?? "" },
+    sessionStorage: {
+      getItem: (key) => store.get(key) ?? null,
+      setItem: (key, value) => void store.set(key, value),
+    },
+    history: {
+      replaceState: (_data, _unused, next) => {
+        host.location.hash = "";
+        host.location.pathname = next;
+      },
+    },
+    addEventListener: (_type, next) => {
+      listener = next;
+    },
+    removeEventListener: (_type, next) => {
+      if (listener === next) listener = null;
+    },
+  };
+  /** Opening a link in this tab when only the fragment differs: no reload. */
+  const openFragment = (hash: string) => {
+    host.location.hash = hash;
+    listener?.();
+  };
+  return { host, store, openFragment, listening: () => listener !== null };
+}
+
+const OTHER = "fedcba9876543210fedcba9876543210fedcba9876543210";
+
+describe("watchInviteToken", () => {
+  it("adopts a token from the address bar, keeps it for the tab and hides it", () => {
+    const tab = fakeTab({ hash: `#${TOKEN}` });
+    const seen: string[] = [];
+
+    watchInviteToken(tab.host, (token) => seen.push(token));
+
+    expect(seen).toEqual([TOKEN]);
+    expect(tab.store.get(INVITE_TOKEN_SESSION_KEY)).toBe(TOKEN);
+    expect(tab.host.location.hash).toBe("");
+    expect(tab.host.location.pathname).toBe("/invite");
+  });
+
+  it("switches to a second invite opened in the same tab", () => {
+    const tab = fakeTab({ hash: `#${TOKEN}` });
+    const seen: string[] = [];
+    watchInviteToken(tab.host, (token) => seen.push(token));
+
+    tab.openFragment(`#${OTHER}`);
+
+    expect(seen).toEqual([TOKEN, OTHER]);
+    expect(tab.store.get(INVITE_TOKEN_SESSION_KEY)).toBe(OTHER);
+    expect(readInviteToken(tab.host)).toBe(OTHER);
+  });
+
+  it("ignores a fragment that is not a token and keeps the current invite", () => {
+    const tab = fakeTab({ hash: `#${TOKEN}` });
+    const seen: string[] = [];
+    watchInviteToken(tab.host, (token) => seen.push(token));
+
+    tab.openFragment("#not-a-token");
+
+    expect(seen).toEqual([TOKEN]);
+    expect(tab.store.get(INVITE_TOKEN_SESSION_KEY)).toBe(TOKEN);
+  });
+
+  it("stops listening when the page goes away", () => {
+    const tab = fakeTab({ hash: `#${TOKEN}` });
+    const stop = watchInviteToken(tab.host, () => undefined);
+
+    stop();
+
+    expect(tab.listening()).toBe(false);
+  });
+
+  it("still switches invites when session storage is unavailable", () => {
+    const tab = fakeTab({ hash: `#${TOKEN}` });
+    tab.host.sessionStorage.setItem = () => {
+      throw new Error("SecurityError");
+    };
+    const seen: string[] = [];
+    watchInviteToken(tab.host, (token) => seen.push(token));
+
+    tab.openFragment(`#${OTHER}`);
+
+    expect(seen).toEqual([TOKEN, OTHER]);
+  });
+});
+
+describe("readInviteToken", () => {
+  it("prefers the address bar over the tab's stored copy", () => {
+    const tab = fakeTab({ hash: `#${OTHER}` });
+    tab.store.set(INVITE_TOKEN_SESSION_KEY, TOKEN);
+
+    expect(readInviteToken(tab.host)).toBe(OTHER);
+  });
+
+  it("falls back to the stored copy after Back from Get the app", () => {
+    const tab = fakeTab();
+    tab.store.set(INVITE_TOKEN_SESSION_KEY, TOKEN);
+
+    expect(readInviteToken(tab.host)).toBe(TOKEN);
+  });
+
+  it("returns null when storage throws", () => {
+    const tab = fakeTab();
+    tab.host.sessionStorage.getItem = () => {
+      throw new Error("SecurityError");
+    };
+
+    expect(readInviteToken(tab.host)).toBeNull();
   });
 });
