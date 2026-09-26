@@ -2,6 +2,24 @@
 
 Record decisions using this template:
 
+## 2026-09-26 — Pushes go out at high priority, every three minutes
+
+- Status: accepted
+- Context: on the founder's phone, pushes arrived only once the phone was picked up. `buildExpoPushMessages` set no `priority`, and Expo then sends Android pushes at "normal" priority, which its documentation says "won't open network connections on sleeping devices" and may be delayed to save battery. The sender itself ran every five minutes (`060`), so a due push could also wait up to five minutes before it left.
+- Decision: every message is built by `expoPushMessage` (`supabase/functions/_shared/expo-push-message.ts`), which sets `priority: "high"`. No `channelId`: a channel the app never created would hide the notification, and Expo's default channel shows it. Migration `110` reschedules `tennis_process_notifications` to `*/3 * * * *` — the founder's choice between one and five minutes.
+- Alternatives considered: high priority for some kinds only (every push the app sends is shown to the player and is about a match, so nothing here is the low-value traffic Android throttles high priority for); every minute (1,440 runs a day for a pilot of a few dozen players); an immediate send triggered by each insert (removes the wait entirely, but a second delivery path to keep idempotent alongside the cron).
+- Consequences: high-priority messages can wake a sleeping phone, which costs it a little battery per push. 480 sender runs a day instead of 288. Takes effect only after `process-notifications` is redeployed and `110` is applied.
+- Owner: Founder
+
+## 2026-09-26 — The network is re-checked on every return to the foreground
+
+- Status: accepted
+- Context: the founder's phone showed "You're offline" for 16 minutes on a working network, with no VPN and no network change: at 16:27:27 its push-token call and realtime socket succeeded, yet no query ran until a restart. The online state only changed on `expo-network` events. Android blocks a background app's network to save battery; the library reports that as no connection, and reports nothing when the block lifts, so the answer given in the background was never revisited. The previous entry's probe does not help there, because a missing connection is offline without asking.
+- Decision: `createOnlineBridge` also reads the network on every `AppState` change to `active` (`Network.getNetworkStateAsync`). Online is taken at its word; anything short of it — including "no connection", which can still carry the block for a moment — is settled by the backend probe, retried every 15 s while it fails. A network event that lands during the read wins over it.
+- Alternatives considered: handle Android's blocked-status callback (`expo-network` does not expose it); restart queries on focus regardless of the network (still leaves the banner and `onlineManager` wrong).
+- Consequences: one network read per return to the foreground, and at most one probe when the reading is not online. JS-only.
+- Owner: Founder
+
 ## 2026-09-26 — "Offline" means our backend is unreachable, not that Android's check failed
 
 - Status: accepted
