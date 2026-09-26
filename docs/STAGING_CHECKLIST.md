@@ -367,14 +367,16 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
 - [ ] Inventory confirmed: every EAS profile and update environment, installed
       builds, Vercel (Production and Preview), cron / `pg_net`, CI, local `.env`
 - [ ] New EAS build (publishable key from `eas.json`) installed on every test phone
-- [ ] **The running update confirmed, not assumed.** Updates download in the
+- [x] **The running update confirmed, not assumed.** Updates download in the
       background and run after a full restart, so opening the app twice proves
       nothing. Settings → the line under the version must read
       `Runtime 0.1.0 · staging · downloaded update` and `Update <id>`, where `<id>`
       equals the latest Android update ID on the EAS dashboard
-- [ ] **Focused compatibility check** on that build: fresh sign-in, open a match
+  - Verified 2026-09-26 on phone A and emulator: Update `01a0dcac…`.
+- [x] **Focused compatibility check** on that build: fresh sign-in, open a match
       hub, open an invite preview, one reversible write, and the sender returning 200. Do not wait for the full §7c rehearsal — retire first, then repeat this
       check, then rehearse against the final configuration
+  - Verified 2026-09-26: T3–T6 on phone A; sender returning 200 (checked same day).
 - [ ] **Session refresh**, recorded separately from the fresh sign-in (signing
       out and in makes a new session and never uses the refresh token): leave a
       phone signed in past the access-token lifetime, bring the app to the
@@ -382,6 +384,7 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       show a successful `refresh_token` grant for that user at that time. Repeat
       after retirement, against the final key configuration. Never log the
       tokens themselves
+  - Pre-retirement: start after T3; needs ≥1 h signed in. Do post-retirement again.
 - [ ] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
       sign-in, a match hub and the sender (200) still work
 - [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
