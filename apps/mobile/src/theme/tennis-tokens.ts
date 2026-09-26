@@ -162,6 +162,9 @@ export type TennisChatTokens = {
   dayPillText: string;
   composerField: string;
   bubbleShadow: string;
+  /** Tint and strength of the tennis doodle pattern over the wallpaper. */
+  doodleInk: string;
+  doodleOpacity: number;
   /** Sender names in a group, one per participant; stable per author. */
   senderNames: readonly string[];
 };
@@ -177,6 +180,8 @@ export const tennisChatLight: TennisChatTokens = {
   dayPillText: "#54656F",
   composerField: "#FFFFFF",
   bubbleShadow: "#0B141A",
+  doodleInk: "#6E7560",
+  doodleOpacity: 0.16,
   senderNames: [
     "#B4235A",
     "#0B6BCB",
@@ -198,6 +203,8 @@ export const tennisChatDark: TennisChatTokens = {
   dayPillText: "#B3B8AF",
   composerField: "#1F221C",
   bubbleShadow: "#000000",
+  doodleInk: "#FFFFFF",
+  doodleOpacity: 0.07,
   senderNames: [
     "#F9A8D4",
     "#93C5FD",

@@ -21,6 +21,7 @@ import {
   markMatchChatRead,
 } from "@tennis-lebanon/api";
 import { AppText } from "./AppText";
+import { ChatDoodles } from "./match/ChatDoodles";
 import { Icon } from "./Icon";
 import { ErrorNotice } from "./FormUi";
 import {
@@ -552,6 +553,7 @@ export function MatchChatPanel({
 
   return (
     <KeyboardAvoider style={styles.root}>
+      <ChatDoodles />
       {reconnectBanner}
       {messageList}
       {composer}
