@@ -278,22 +278,33 @@ rehearsal follows the fixed journey. Pushes that journey actually produces:
 `match_court_confirmed` ("Court confirmed") to every other accepted player when
 A confirms the court.
 
-- [ ] A signs in with Google and turns on Profile → Notifications
-- [ ] A creates a singles match at one fixed time and publishes; the schedule
+- [x] A signs in with Google and turns on Profile → Notifications
+  - Partial 2026-09-26: physical phone A; notifications on; 1 active token.
+    See `docs/audits/REHEARSAL_PARTIAL_2026-09-26.md`.
+- [x] A creates a singles match at one fixed time and publishes; the schedule
       conflict banner appears only when A already has an agreed match then
-- [ ] A shares the invite to B on WhatsApp; the message shows an
+  - Partial 2026-09-26: fixed-time publish on update `01a0dcac…`.
+- [x] A shares the invite to B on WhatsApp; the message shows an
       `https://racketbound.com/invite#…` link
+  - Partial 2026-09-26: link format confirmed.
 - [ ] B taps it: the invite page loads, Get the app installs the APK, Back →
       Open in the app opens RacketBound on the invite screen
+  - Unticked: cold install not walked (B already had the app / account).
 - [ ] B signs up, confirms the email code, finishes onboarding, and **lands on the
       invite** (not Home); the summary shows zone and time; Accept joins
-- [ ] **A's phone physically shows** the `match_participant_joined` push for B
+  - Unticked: cold sign-up path not walked. Accept-from-existing-account passed
+    on emulator B (not a substitute for this row).
+- [x] **A's phone physically shows** the `match_participant_joined` push for B
       joining
+  - Verified 2026-09-26: OS push on phone A after cron (~5 min).
 - [ ] B turns on Profile → Notifications; `device_push_tokens` now has two
       active rows, one per phone
+  - Unticked: emulator cannot register; still 1 token.
 - [ ] A opens the court step, uses the WhatsApp hand-off to the club, then
       confirms the court was booked; both hubs show the confirmed court and
       **B's phone physically shows** the "Court confirmed" push
+  - Partial 2026-09-26: hand-off + confirm + both hubs OK; B OS push not
+      proved (emulator). Al Riyadi landline triggered WhatsApp SMS invite UI.
 - [ ] After the start time: both confirm attendance and the same score; the
       result shows as confirmed and the rematch card appears
 - [ ] `select * from public.unreachable_notification_summary();` reviewed, and
@@ -303,11 +314,17 @@ A confirms the court.
       Decline on an **addressed** invite records the refusal; a player **blocked**
       by the host sees "This invite link is not valid" and no match details; a
       player outside the match's level sees the level message, not Accept
-- [ ] One recoverable failure: turn data off mid-flow, turn it back on, and the
+  - Partial 2026-09-26: shared Decline, addressed Decline, and out-of-level
+      passed. **Blocked** skipped. Full row stays open until blocked is done.
+- [x] One recoverable failure: turn data off mid-flow, turn it back on, and the
       screen recovers without restarting the app
-- [ ] Recorded: APK build id and commit, each phone's model and Android version,
+  - Verified 2026-09-26 on phone A.
+- [x] Recorded: APK build id and commit, each phone's model and Android version,
       the backend state (migration version, function version), and every failure
-- [ ] Anything that surprised either player written down before it is fixed
+  - `docs/audits/REHEARSAL_PARTIAL_2026-09-26.md` (phone model/OS still TBD).
+- [x] Anything that surprised either player written down before it is fixed
+  - Findings in that audit (false offline on emulator, cancelled-invite copy,
+    invite hash stripping, landline WhatsApp, bell vs OS push).
 
 Two paths this rehearsal does **not** cover, and must not be ticked from it:
 
@@ -320,6 +337,8 @@ Two paths this rehearsal does **not** cover, and must not be ticked from it:
       and "requires approval" on; B requests from Discover; **A's phone shows**
       the join-request push; A approves; **B's phone shows** the request-accepted
       push
+  - Partial 2026-09-26: request + approve + **A** OS `match_join_request` push
+      proved. B request-accepted OS push not proved (emulator). Row stays open.
 - [ ] Flexible time voting: either recorded as out of cohort-1 scope in
       `docs/DECISIONS.md`, or a supported way to create a flexible match specified
       and tested separately. The create screen cannot publish one today
