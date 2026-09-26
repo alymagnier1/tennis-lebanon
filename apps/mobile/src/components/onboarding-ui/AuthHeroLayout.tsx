@@ -16,8 +16,8 @@ import { createLiveSheet } from "../../theme/create-live-sheet";
 import type { HeroFamily } from "../../theme/hero-variant";
 
 const ART = {
-  court: require("../../../assets/onboarding/mid-lines-court.png"),
-  cut: require("../../../assets/onboarding/mid-lines-cut.png"),
+  court: require("../../../assets/onboarding/mid-lines-court.webp"),
+  cut: require("../../../assets/onboarding/mid-lines-cut.webp"),
   markLime: require("../../../assets/onboarding/rb-icon-lime.png"),
   markDark: require("../../../assets/onboarding/rb-icon-dark.png"),
 } as const;
