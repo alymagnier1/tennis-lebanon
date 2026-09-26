@@ -5,6 +5,9 @@ import {
   normalizeNotificationLocale,
   type NotificationLocale,
 } from "./notification-copy.ts";
+import { expoPushMessage, type ExpoPushMessage } from "./expo-push-message.ts";
+
+export type { ExpoPushMessage };
 
 export type NotificationParams = {
   name?: string;
@@ -172,16 +175,6 @@ export function resolveNotificationCopy(input: {
   return { title, body };
 }
 
-export type ExpoPushMessage = {
-  to: string;
-  title: string;
-  body: string;
-  data: {
-    deepLink: string;
-    kind: string;
-  };
-};
-
 export function buildExpoPushMessages(input: {
   kind: string;
   payload: NotificationPayload;
@@ -195,13 +188,15 @@ export function buildExpoPushMessages(input: {
     payload: input.payload,
   });
 
-  return input.tokens.map((token) => ({
-    to: token,
-    title,
-    body,
-    data: {
-      deepLink,
-      kind: input.kind,
-    },
-  }));
+  return input.tokens.map((token) =>
+    expoPushMessage({
+      to: token,
+      title,
+      body,
+      data: {
+        deepLink,
+        kind: input.kind,
+      },
+    }),
+  );
 }
