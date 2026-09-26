@@ -73,6 +73,13 @@ onlineManager.setEventListener((setOnline) =>
       const subscription = Network.addNetworkStateListener(listener);
       return () => subscription.remove();
     },
+    subscribeForeground: (onForeground) => {
+      const subscription = AppState.addEventListener("change", (state) => {
+        if (state === "active") onForeground();
+      });
+      return () => subscription.remove();
+    },
+    readState: () => Network.getNetworkStateAsync(),
     probe: createBackendProbe({
       baseUrl: env.SUPABASE_URL,
       apiKey: env.SUPABASE_ANON_KEY,

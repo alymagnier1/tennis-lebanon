@@ -163,9 +163,10 @@ decision). The page is public and static; the token never reaches the server.
 
 Migration `060_process_notifications_invoker.sql` adds the caller that was
 missing: `public.invoke_process_notifications()` posts to the Edge Function and
-`pg_cron` runs it every five minutes. Before that migration nothing invoked it
-at all, so every reminder, club nudge and attendance prompt was written to the
-outbox and left there — silently, with no error anywhere.
+`pg_cron` runs it every three minutes (five until migration `110`). Before
+`060` nothing invoked it at all, so every reminder, club nudge and attendance
+prompt was written to the outbox and left there — silently, with no error
+anywhere.
 
 The job is inert until both Vault secrets exist and the function has the
 matching `PROCESS_NOTIFICATIONS_TOKEN` secret. Set them **per environment**
@@ -205,6 +206,8 @@ function secret is missing; a 401 means the two copies differ.
       and which secret it authenticates with
 - [x] `select * from cron.job where jobname = 'tennis_process_notifications';`
       shows the job active on staging (`*/5 * * * *`, verified 2026-08-30)
+  - Migration `110` (2026-09-26) moves it to `*/3 * * * *`; re-check this query
+    on staging once `110` is applied.
 - [x] Both Vault secrets created in the target environment, and
       `select public.invoke_process_notifications();` returned a request id
   - Verified 2026-09-22/25: invoker returns request ids and the function answers 200 (dedicated `PROCESS_NOTIFICATIONS_TOKEN`).
@@ -216,7 +219,7 @@ function secret is missing; a 401 means the two copies differ.
 | Setting  | Value                                                                         |
 | -------- | ----------------------------------------------------------------------------- |
 | Invoker  | `pg_cron` job `tennis_process_notifications` → `invoke_process_notifications` |
-| Schedule | `*/5 * * * *`                                                                 |
+| Schedule | `*/3 * * * *` (migration `110`; `*/5` before)                                 |
 | Secret   | Vault: `process_notifications_url`, `process_notifications_token`             |
 | Checked  | Function secret `PROCESS_NOTIFICATIONS_TOKEN` (same value as the Vault token) |
 

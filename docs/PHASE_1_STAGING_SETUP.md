@@ -94,7 +94,7 @@ Success = the link arrives in the inbox and opens the app on a phone.
 
 ## 9. Create the notification Vault secrets
 
-Migration `060` already built the invoker: `invoke_process_notifications` posts to the Edge Function and `pg_cron` runs it every five minutes. It is a deliberate no-op until these two secrets exist, which is why applying the migration to an unconfigured project is safe.
+Migration `060` already built the invoker: `invoke_process_notifications` posts to the Edge Function and `pg_cron` runs it every three minutes (every five until migration `110`). It is a deliberate no-op until these two secrets exist, which is why applying the migration to an unconfigured project is safe.
 
 ```sql
 select vault.create_secret(

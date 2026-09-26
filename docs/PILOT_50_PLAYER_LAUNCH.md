@@ -145,14 +145,14 @@ Local Expo (`pnpm dev:mobile`) is **not** usable for 50 testers. You need instal
 
 Without this, reminders and stale-match nudges are written to the outbox and **never delivered**.
 
-| #   | Task                        | Success criterion                                                                                                                                                                                 |
-| --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 5.1 | Deploy edge function        | `supabase functions deploy process-notifications` to staging                                                                                                                                      |
-| 5.2 | Create the Vault secrets    | `process_notifications_url` and `process_notifications_token` — migration `060` already built the invoker and runs it on `pg_cron` every five minutes, but is a deliberate no-op until both exist |
-| 5.3 | Confirm the cron is running | `select * from cron.job` shows `tennis_process_notifications`; `sent_at` starts being set on outbox rows                                                                                          |
-| 5.4 | Verify pg_cron enqueue      | Staging DB has scheduled lifecycle jobs (`expire_stale_matches`, etc.)                                                                                                                            |
-| 5.5 | **Physical push test**      | One notification arrives on a real device after a test event — not just HTTP 200                                                                                                                  |
-| 5.6 | Record invoker in checklist | Fill table in `docs/STAGING_CHECKLIST.md` §7b                                                                                                                                                     |
+| #   | Task                        | Success criterion                                                                                                                                                                                          |
+| --- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 5.1 | Deploy edge function        | `supabase functions deploy process-notifications` to staging                                                                                                                                               |
+| 5.2 | Create the Vault secrets    | `process_notifications_url` and `process_notifications_token` — migration `060` already built the invoker and runs it on `pg_cron` every three minutes (`110`), but is a deliberate no-op until both exist |
+| 5.3 | Confirm the cron is running | `select * from cron.job` shows `tennis_process_notifications`; `sent_at` starts being set on outbox rows                                                                                                   |
+| 5.4 | Verify pg_cron enqueue      | Staging DB has scheduled lifecycle jobs (`expire_stale_matches`, etc.)                                                                                                                                     |
+| 5.5 | **Physical push test**      | One notification arrives on a real device after a test event — not just HTTP 200                                                                                                                           |
+| 5.6 | Record invoker in checklist | Fill table in `docs/STAGING_CHECKLIST.md` §7b                                                                                                                                                              |
 
 ---
 
@@ -347,7 +347,7 @@ Do not promise these until post-pilot evidence:
 | Setting  | Value                                                                         |
 | -------- | ----------------------------------------------------------------------------- |
 | Invoker  | `pg_cron` job `tennis_process_notifications` → `invoke_process_notifications` |
-| Schedule | `*/5 * * * *`                                                                 |
+| Schedule | `*/3 * * * *` (migration `110`)                                               |
 | Secret   | service role (server only)                                                    |
 
 **Go-live approval:**
