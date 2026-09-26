@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-26 — A push token follows the signed-in account, and its stale row is deleted
+
+- Status: accepted
+- Context: on staging a phone signed out (its `device_push_tokens` row deactivated) and signed in with a different Google account 14 seconds later. `register_device_push_token` returned 409: it switched the old owner's row off, but an inactive row still holds the token and the table has a table-wide `unique(token)`, so the insert for the new owner hit `device_push_tokens_token_key`. From then on the phone had no active token and received no push. Any shared phone, and any tester switching accounts, would hit it.
+- Decision: migration `109` deletes rows holding the token under a different account or device id before the upsert, instead of deactivating them. A push token row describes an install, not an operational event; the only readers filter on `is_active` (`021`, `061`), and account deletion already deletes these rows (`102`), so nothing is lost that anything reads.
+- Alternatives considered: drop `unique(token)` for a partial unique index on active rows (keeps history, but two statements must agree on which row is live, and a second index to reason about for no reader); reassign the old row to the new owner in place (conflicts with the new owner's own `(user_id, device_id)` row when they used this phone before, so it needs the delete anyway).
+- Consequences: stuck phones heal on their next sync (sign-in or app foreground); no data fix. pgTAP `109_push_token_account_switch_test.sql` covers sign-out then switch, switch without a server-side sign-out, and reinstall with a new device id.
+- Owner: Founder
+
 ## 2026-09-25 — Runtime version follows the app version, not the fingerprint
 
 - Status: accepted
