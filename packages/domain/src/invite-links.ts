@@ -90,3 +90,67 @@ export function buildInviteOpenAppUrl(
   }
   return buildInviteAppUrl(token);
 }
+
+/** Where the invite page keeps the token for this browser tab. */
+export const INVITE_TOKEN_SESSION_KEY = "racketbound.invite-token";
+
+/**
+ * The parts of `window` the invite page uses, so the tracking below runs and
+ * is tested without a browser. Reading `sessionStorage` itself can throw when
+ * storage is disabled, so it is only touched inside a `try`.
+ */
+export type InviteTokenHost = {
+  location: { hash: string; pathname: string };
+  readonly sessionStorage: {
+    getItem(key: string): string | null;
+    setItem(key: string, value: string): void;
+  };
+  history: { replaceState(data: null, unused: string, url: string): void };
+  addEventListener(type: "hashchange", listener: () => void): void;
+  removeEventListener(type: "hashchange", listener: () => void): void;
+};
+
+/** The fragment first, then the copy kept for this tab (Back from "Get the app"). */
+export function readInviteToken(host: InviteTokenHost): string | null {
+  const fromHash = parseInviteFragment(host.location.hash);
+  if (fromHash) return fromHash;
+  try {
+    const stored = host.sessionStorage.getItem(INVITE_TOKEN_SESSION_KEY);
+    return stored ? parseInviteFragment(stored) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Keeps the page's token in step with its address bar, now and on every later
+ * link opened in the same tab.
+ *
+ * A token that arrives in the fragment is kept for the tab and removed from
+ * the address bar (history, screenshots and error reports read the URL). That
+ * leaves the tab on plain `/invite`, so the next invite link opened there only
+ * changes the fragment: the browser does not reload, and a page that read the
+ * token once kept showing -- and opening -- the previous invite (2026-09-26
+ * rehearsal). `hashchange` delivers the new one.
+ */
+export function watchInviteToken(
+  host: InviteTokenHost,
+  onToken: (token: string) => void,
+): () => void {
+  const adoptFromAddressBar = () => {
+    const token = parseInviteFragment(host.location.hash);
+    // A fragment that is not a token is a broken link, not a new invite.
+    if (!token) return;
+    try {
+      host.sessionStorage.setItem(INVITE_TOKEN_SESSION_KEY, token);
+    } catch {
+      // Private mode or storage disabled: Back will lose the token, nothing worse.
+    }
+    host.history.replaceState(null, "", host.location.pathname);
+    onToken(token);
+  };
+
+  adoptFromAddressBar();
+  host.addEventListener("hashchange", adoptFromAddressBar);
+  return () => host.removeEventListener("hashchange", adoptFromAddressBar);
+}
