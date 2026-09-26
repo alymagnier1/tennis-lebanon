@@ -27,6 +27,13 @@ export type OnlineBridgeDeps = {
   /** Resolves true when our backend answered; never rejects. */
   probe: () => Promise<boolean>;
   setOnline: (online: boolean) => void;
+  /**
+   * Called when the app returns to the foreground. Paired with `readState`,
+   * it re-checks the network then; see `createOnlineBridge`.
+   */
+  subscribeForeground?: (onForeground: () => void) => () => void;
+  /** A fresh reading of the network, for the foreground re-check. */
+  readState?: () => Promise<NetworkSnapshot>;
   /** How often to ask again while the network stays unverified. */
   retryMs?: number;
   schedule?: (run: () => void, ms: number) => () => void;
@@ -40,11 +47,21 @@ export type OnlineBridgeDeps = {
  * pauses queries as before, while a network whose only fault is Google's
  * check stops being reported offline. The previous answer stands while a
  * probe is in flight, so a reconnect does not flash the offline banner.
+ *
+ * Events alone are not enough. To save battery Android blocks a background
+ * app's network access; `expo-network` then reports no connection, and when
+ * the block lifts it reports nothing. A phone that went "offline" in the
+ * background stayed offline in the foreground on a working network until the
+ * app restarted (2026-09-26, 16 minutes). So the network is read again on
+ * every return to the foreground, and anything short of online is settled by
+ * the probe -- the reading can still carry the block for a moment.
  */
 export function createOnlineBridge({
   subscribe,
   probe,
   setOnline,
+  subscribeForeground,
+  readState,
   retryMs = 15_000,
   schedule = (run, ms) => {
     const timer = setTimeout(run, ms);
@@ -70,21 +87,44 @@ export function createOnlineBridge({
     });
   };
 
-  const unsubscribe = subscribe((state) => {
+  const settle = (state: NetworkSnapshot, onReturn: boolean) => {
     generation += 1;
     stopRetry();
     const kind = classifyNetwork(state);
-    if (kind === "unverified") {
+    if (kind === "online") {
+      setOnline(true);
+    } else if (kind === "unverified" || onReturn) {
       verify(generation);
     } else {
-      setOnline(kind === "online");
+      setOnline(false);
     }
-  });
+  };
+
+  const unsubscribe = subscribe((state) => settle(state, false));
+
+  const unsubscribeForeground =
+    subscribeForeground && readState
+      ? subscribeForeground(() => {
+          const requested = generation;
+          void readState().then(
+            (state) => {
+              // A network event arrived meanwhile; it is newer than this reading.
+              if (requested !== generation) return;
+              settle(state, true);
+            },
+            () => {
+              if (requested !== generation) return;
+              settle({ isInternetReachable: false }, true);
+            },
+          );
+        })
+      : () => undefined;
 
   return () => {
     generation += 1;
     stopRetry();
     unsubscribe();
+    unsubscribeForeground();
   };
 }
 

@@ -170,3 +170,131 @@ describe("createBackendProbe", () => {
     await expect(probe()).resolves.toBe(false);
   });
 });
+
+describe("createOnlineBridge on return to the foreground", () => {
+  function foregroundHarness(options: {
+    reading: () => Promise<NetworkSnapshot>;
+    probeResults?: boolean[];
+  }) {
+    let emit: (state: NetworkSnapshot) => void = () => undefined;
+    let foreground: () => void = () => undefined;
+    let foregroundListening = false;
+    const pending: (() => void)[] = [];
+    const results = [...(options.probeResults ?? [])];
+    const setOnline = vi.fn();
+    const probe = vi.fn(async () => results.shift() ?? false);
+    const stop = createOnlineBridge({
+      subscribe: (listener) => {
+        emit = listener;
+        return () => undefined;
+      },
+      subscribeForeground: (onForeground) => {
+        foreground = onForeground;
+        foregroundListening = true;
+        return () => {
+          foregroundListening = false;
+        };
+      },
+      readState: options.reading,
+      probe,
+      setOnline,
+      schedule: (run) => {
+        pending.push(run);
+        return () => undefined;
+      },
+    });
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+    return {
+      emit: (s: NetworkSnapshot) => emit(s),
+      foreground: () => foreground(),
+      listening: () => foregroundListening,
+      setOnline,
+      probe,
+      pending,
+      flush,
+      stop,
+    };
+  }
+
+  it("clears a stale offline left from the background (the founder's phone, 2026-09-26)", async () => {
+    const h = foregroundHarness({
+      reading: async () => ({ isConnected: true, isInternetReachable: true }),
+    });
+    h.emit({ isConnected: false, isInternetReachable: false });
+    expect(h.setOnline).toHaveBeenLastCalledWith(false);
+
+    h.foreground();
+    await h.flush();
+
+    expect(h.setOnline).toHaveBeenLastCalledWith(true);
+    expect(h.probe).not.toHaveBeenCalled();
+  });
+
+  it("settles a reading that still says no connection with the probe", async () => {
+    const h = foregroundHarness({
+      reading: async () => ({ isConnected: false, isInternetReachable: false }),
+      probeResults: [true],
+    });
+    h.emit({ isConnected: false, isInternetReachable: false });
+
+    h.foreground();
+    await h.flush();
+    await h.flush();
+
+    expect(h.probe).toHaveBeenCalledOnce();
+    expect(h.setOnline).toHaveBeenLastCalledWith(true);
+  });
+
+  it("stays offline, and keeps asking, when the probe fails too", async () => {
+    const h = foregroundHarness({
+      reading: async () => ({ isConnected: false, isInternetReachable: false }),
+      probeResults: [false],
+    });
+
+    h.foreground();
+    await h.flush();
+    await h.flush();
+
+    expect(h.setOnline).toHaveBeenLastCalledWith(false);
+    expect(h.pending).toHaveLength(1);
+  });
+
+  it("lets a network event that lands during the re-read win", async () => {
+    let resolveReading: (state: NetworkSnapshot) => void = () => undefined;
+    const h = foregroundHarness({
+      reading: () => new Promise((resolve) => (resolveReading = resolve)),
+    });
+
+    h.foreground();
+    h.emit({ isConnected: true, isInternetReachable: true });
+    resolveReading({ isConnected: false, isInternetReachable: false });
+    await h.flush();
+
+    expect(h.setOnline.mock.calls).toEqual([[true]]);
+    expect(h.probe).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the probe when the network cannot be read", async () => {
+    const h = foregroundHarness({
+      reading: async () => {
+        throw new Error("native module unavailable");
+      },
+      probeResults: [true],
+    });
+
+    h.foreground();
+    await h.flush();
+    await h.flush();
+
+    expect(h.probe).toHaveBeenCalledOnce();
+    expect(h.setOnline).toHaveBeenLastCalledWith(true);
+  });
+
+  it("stops listening for the foreground when the bridge stops", () => {
+    const h = foregroundHarness({ reading: async () => ({}) });
+
+    h.stop();
+
+    expect(h.listening()).toBe(false);
+  });
+});
