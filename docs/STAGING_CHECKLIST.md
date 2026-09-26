@@ -407,7 +407,7 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
     sign-out, 14:30). Confirm it is running before the remaining §7c rehearsal.
   - Founder's phone shows `Update 01a0de11…` in Settings (2026-09-26, after two
     full restarts). The emulator is not yet confirmed.
-  - Since 21:1x the channel serves `01a0deeb…`, a **preview of unmerged PRs #31
+  - Since 21:2x the channel serves `01a0def9…`, a **preview of unmerged PRs #31
     and #33** (chat restyle, buttons above the navigation bar); the emulator runs
     it. Merge or drop them before relying on this row.
 - [x] **Focused compatibility check** on that build: fresh sign-in, open a match
