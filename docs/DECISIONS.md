@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-26 — The APK carries ARM code only, and the bundle only what it uses
+
+- Status: accepted
+- Context: build `168b2257` was 116 MB. About 76 MB of it was React Native's native libraries compiled four times — arm64-v8a, armeabi-v7a, x86, x86_64 — and a phone uses exactly one. The JS bundle's assets were 19.5 MB: 11.2 MB of fonts, because `@expo/vector-icons` and `@expo-google-fonts/*` were imported from their index files, which `require` every icon set and every weight and italic (47 font files; the app uses 8 text weights and 2 icon sets), plus 8 MB of full-screen onboarding PNGs.
+- Decision: (1) `apps/mobile/plugins/with-android-abis.js` sets `reactNativeArchitectures=armeabi-v7a,arm64-v8a`. The test emulator reports `x86_64,arm64-v8a` (Android's ARM translation), so it still runs the app, more slowly; armeabi-v7a stays for older 32-bit phones. (2) Fonts and icons are imported one weight or set at a time, and an ESLint `no-restricted-imports` rule rejects the package roots. (3) The four onboarding images are **lossless** WebP: transparency and every visible pixel verified identical.
+- Alternatives considered: keep x86_64 for the emulator (19 MB more for every tester); lossy WebP at quality 75–95 (5 MB smaller than lossless, but every setting showed banding rings and colour tints in the racket image's sky once the contrast was stretched, and softened the print texture — the originals' grain was acting as dither); R8 code shrinking for the 18 MB of dex (larger saving, but reflection-related crashes are only caught by testing every screen — deferred); a Play AAB split per device (the real answer for players, ~30–40 MB downloads; needs Play Console setup).
+- Consequences: expected next APK about 65 MB, from 116. **No runtime version bump**: the plugin changes which CPU types are compiled, not which native code exists, so an update built for one 0.1.0 build runs on the other; bumping before a new build is installed would also strand every installed phone without updates. The fonts and images are JS assets, so they also ship by `eas update`. Nothing changes until the next EAS build, which was deliberately not started.
+- Owner: Founder
+
 ## 2026-09-26 — Pushes go out at high priority, every three minutes
 
 - Status: accepted
