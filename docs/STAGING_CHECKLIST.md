@@ -401,6 +401,8 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
   - Latest: update `01a0de11…` (foreground network re-check) published 2026-09-26
     17:15, after `01a0ddf2…` (offline probe, 16:40) and `01a0dd7a…` (this-device
     sign-out, 14:30). Confirm it is running before the remaining §7c rehearsal.
+  - Founder's phone shows `Update 01a0de11…` in Settings (2026-09-26, after two
+    full restarts). The emulator is not yet confirmed.
 - [x] **Focused compatibility check** on that build: fresh sign-in, open a match
       hub, open an invite preview, one reversible write, and the sender returning 200. Do not wait for the full §7c rehearsal — retire first, then repeat this
       check, then rehearse against the final configuration
