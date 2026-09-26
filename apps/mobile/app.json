@@ -12,6 +12,12 @@
     },
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/brand/racketbound-icon.png",
+    "splash": {
+      "image": "./assets/brand/racketbound-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#054F3B"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.racketbound.app"
@@ -19,10 +25,15 @@
     "android": {
       "package": "com.racketbound.app",
       "googleServicesFile": "./google-services.json",
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/brand/racketbound-adaptive-fg.png",
+        "backgroundColor": "#054F3B"
+      }
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "favicon": "./assets/brand/racketbound-icon.png"
     },
     "plugins": [
       "expo-router",
