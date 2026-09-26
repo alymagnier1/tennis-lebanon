@@ -394,8 +394,9 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       `Runtime 0.1.0 · staging · downloaded update` and `Update <id>`, where `<id>`
       equals the latest Android update ID on the EAS dashboard
   - Verified 2026-09-26 on phone A and emulator: Update `01a0dcac…`.
-  - Update `01a0dd7a…` (this-device sign-out) published 2026-09-26 14:30. Confirm
-    it is running before the remaining §7c rehearsal.
+  - Latest: update `01a0ddf2…` (offline fix) published 2026-09-26 16:40, after
+    `01a0dd7a…` (this-device sign-out, 14:30). Confirm it is running before the
+    remaining §7c rehearsal.
 - [x] **Focused compatibility check** on that build: fresh sign-in, open a match
       hub, open an invite preview, one reversible write, and the sender returning 200. Do not wait for the full §7c rehearsal — retire first, then repeat this
       check, then rehearse against the final configuration
