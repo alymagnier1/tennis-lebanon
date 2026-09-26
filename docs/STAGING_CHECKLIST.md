@@ -230,6 +230,11 @@ silently.
   - Verified: `extra.eas.projectId` is in `app.json`.
 - [ ] `select count(*) from public.device_push_tokens where is_active;` is
       non-zero on staging after a real device signs in
+  - 2026-09-26: **1** active token (phone A) during the partial rehearsal.
+  - Unticked 2026-09-26 13:14: **0** active. At 12:47 the phone signed in as a
+    different account and every registration since has failed with 409
+    (`device_push_tokens_token_key`). Fixed by migration `109`; re-check after it
+    is applied and the phone is brought to the foreground.
 
 Onboarding no longer asks for notification permission, so **signing in does
 not register a device**. A token is written only after Profile → Notifications
@@ -278,22 +283,34 @@ rehearsal follows the fixed journey. Pushes that journey actually produces:
 `match_court_confirmed` ("Court confirmed") to every other accepted player when
 A confirms the court.
 
-- [ ] A signs in with Google and turns on Profile → Notifications
+- [x] A signs in with Google and turns on Profile → Notifications
+  - Partial 2026-09-26: physical phone A; notifications on; 1 active token.
+    See `docs/audits/REHEARSAL_PARTIAL_2026-09-26.md`.
 - [ ] A creates a singles match at one fixed time and publishes; the schedule
       conflict banner appears only when A already has an agreed match then
-- [ ] A shares the invite to B on WhatsApp; the message shows an
+  - Partial 2026-09-26: fixed-time publish on update `01a0dcac…` passed. The
+    conflict banner was not checked, so the row stays open.
+- [x] A shares the invite to B on WhatsApp; the message shows an
       `https://racketbound.com/invite#…` link
+  - Partial 2026-09-26: link format confirmed.
 - [ ] B taps it: the invite page loads, Get the app installs the APK, Back →
       Open in the app opens RacketBound on the invite screen
+  - Unticked: cold install not walked (B already had the app / account).
 - [ ] B signs up, confirms the email code, finishes onboarding, and **lands on the
       invite** (not Home); the summary shows zone and time; Accept joins
-- [ ] **A's phone physically shows** the `match_participant_joined` push for B
+  - Unticked: cold sign-up path not walked. Accept-from-existing-account passed
+    on emulator B (not a substitute for this row).
+- [x] **A's phone physically shows** the `match_participant_joined` push for B
       joining
+  - Verified 2026-09-26: OS push on phone A after cron (~5 min).
 - [ ] B turns on Profile → Notifications; `device_push_tokens` now has two
       active rows, one per phone
+  - Unticked: emulator cannot register; still 1 token.
 - [ ] A opens the court step, uses the WhatsApp hand-off to the club, then
       confirms the court was booked; both hubs show the confirmed court and
       **B's phone physically shows** the "Court confirmed" push
+  - Partial 2026-09-26: hand-off + confirm + both hubs OK; B OS push not
+    proved (emulator). Al Riyadi landline triggered WhatsApp SMS invite UI.
 - [ ] After the start time: both confirm attendance and the same score; the
       result shows as confirmed and the rematch card appears
 - [ ] `select * from public.unreachable_notification_summary();` reviewed, and
@@ -303,11 +320,19 @@ A confirms the court.
       Decline on an **addressed** invite records the refusal; a player **blocked**
       by the host sees "This invite link is not valid" and no match details; a
       player outside the match's level sees the level message, not Accept
-- [ ] One recoverable failure: turn data off mid-flow, turn it back on, and the
+  - Partial 2026-09-26: shared Decline, addressed Decline, and out-of-level
+    passed. **Blocked** skipped. Full row stays open until blocked is done.
+- [x] One recoverable failure: turn data off mid-flow, turn it back on, and the
       screen recovers without restarting the app
+  - Verified 2026-09-26 on phone A.
 - [ ] Recorded: APK build id and commit, each phone's model and Android version,
       the backend state (migration version, function version), and every failure
-- [ ] Anything that surprised either player written down before it is fixed
+  - Partial 2026-09-26: build/update/migration/findings in
+    `docs/audits/REHEARSAL_PARTIAL_2026-09-26.md`. **Phone model and Android
+    version still TBD** — leave unticked until filled in.
+- [x] Anything that surprised either player written down before it is fixed
+  - Findings in that audit (false offline on emulator, cancelled-invite copy,
+    invite hash stripping, landline WhatsApp, bell vs OS push).
 
 Two paths this rehearsal does **not** cover, and must not be ticked from it:
 
@@ -320,6 +345,8 @@ Two paths this rehearsal does **not** cover, and must not be ticked from it:
       and "requires approval" on; B requests from Discover; **A's phone shows**
       the join-request push; A approves; **B's phone shows** the request-accepted
       push
+  - Partial 2026-09-26: request + approve + **A** OS `match_join_request` push
+    proved. B request-accepted OS push not proved (emulator). Row stays open.
 - [ ] Flexible time voting: either recorded as out of cohort-1 scope in
       `docs/DECISIONS.md`, or a supported way to create a flexible match specified
       and tested separately. The create screen cannot publish one today
@@ -345,14 +372,19 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
 - [ ] Inventory confirmed: every EAS profile and update environment, installed
       builds, Vercel (Production and Preview), cron / `pg_net`, CI, local `.env`
 - [ ] New EAS build (publishable key from `eas.json`) installed on every test phone
-- [ ] **The running update confirmed, not assumed.** Updates download in the
+- [x] **The running update confirmed, not assumed.** Updates download in the
       background and run after a full restart, so opening the app twice proves
       nothing. Settings → the line under the version must read
       `Runtime 0.1.0 · staging · downloaded update` and `Update <id>`, where `<id>`
       equals the latest Android update ID on the EAS dashboard
-- [ ] **Focused compatibility check** on that build: fresh sign-in, open a match
+  - Verified 2026-09-26 on phone A and emulator: Update `01a0dcac…`.
+- [x] **Focused compatibility check** on that build: fresh sign-in, open a match
       hub, open an invite preview, one reversible write, and the sender returning 200. Do not wait for the full §7c rehearsal — retire first, then repeat this
       check, then rehearse against the final configuration
+  - Verified 2026-09-26: T3–T6 on phone A; sender returning 200 (checked same day).
+  - The T3 sign-in used a **different account** from the rehearsal's A. That
+    exposed the push-token bug fixed by migration `109`: the new account could
+    not register the phone's token.
 - [ ] **Session refresh**, recorded separately from the fresh sign-in (signing
       out and in makes a new session and never uses the refresh token): leave a
       phone signed in past the access-token lifetime, bring the app to the
@@ -360,8 +392,14 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       show a successful `refresh_token` grant for that user at that time. Repeat
       after retirement, against the final key configuration. Never log the
       tokens themselves
+  - Pre-retirement: start after T3; needs ≥1 h signed in. Do post-retirement again.
 - [ ] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
       sign-in, a match hub and the sender (200) still work
+  - Done 2026-09-26 (recorded 12:54): founder disabled the JWT-based API keys on staging.
+    Afterwards match hubs loaded (200, through 13:08) and the sender answered 200
+    (through 13:10); no 401/403 anywhere.
+  - Open: **no sign-in has happened since** (last one 12:47, before the
+    deactivation). Tick after one fresh sign-in succeeds.
 - [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
       access-token lifetime **plus 15 minutes** (1 h 15 min at the default 1 h; read
       the actual value in Auth settings) → **Revoke** the legacy secret. Rotation
