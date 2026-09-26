@@ -9,17 +9,17 @@ Interactive checklist used during the run: Cursor canvas
 
 ## Environment
 
-| Item | Value |
-| ---- | ----- |
-| Date | 2026-09-26 |
-| Roles | PA = physical phone (host); PB = emulator (joiner) |
-| EAS build | `168b2257-439f-4868-8acf-70f668009537` |
-| Runtime / channel | `0.1.0` · staging |
+| Item                           | Value                                                     |
+| ------------------------------ | --------------------------------------------------------- |
+| Date                           | 2026-09-26                                                |
+| Roles                          | PA = physical phone (host); PB = emulator (joiner)        |
+| EAS build                      | `168b2257-439f-4868-8acf-70f668009537`                    |
+| Runtime / channel              | `0.1.0` · staging                                         |
 | EAS update (confirmed on both) | `01a0dcac-e8d8-75f6-94db-e69a2e1e7a5a` (commit `e6f7bf7`) |
-| Staging project | `rvdzalxavpcijbiikkjz` |
-| Migrations | 001→108 |
-| `process-notifications` | v4; cron `*/5 * * * *`; join pushes marked `sent_at` |
-| Active push tokens | 1 (phone only) |
+| Staging project                | `rvdzalxavpcijbiikkjz`                                    |
+| Migrations                     | 001→108                                                   |
+| `process-notifications`        | v4; cron `*/5 * * * *`; join pushes marked `sent_at`      |
+| Active push tokens             | 1 (phone only) during the run; 0 after 12:47 (finding 8)  |
 
 Device model / Android version for the physical phone: **not recorded this session** — fill in before ticking the checklist “Recorded: … model and Android version” row.
 
@@ -50,13 +50,14 @@ Device model / Android version for the physical phone: **not recorded this sessi
 
 ## Surprises / findings (write before fix)
 
-1. **Cancelled-match invite copy.** Reopening an invite for a match PB already joined, after cancel, shows “You are already in this match” → hub shows cancelled. Membership is checked before match status. Easy to confuse with a *new* same-time match invite if WhatsApp still has the old bubble. Tokens checked: `d67dad03…` → cancelled X; `2fc61249…` → open Y.
+1. **Cancelled-match invite copy.** Reopening an invite for a match PB already joined, after cancel, shows “You are already in this match” → hub shows cancelled. Membership is checked before match status. Easy to confuse with a _new_ same-time match invite if WhatsApp still has the old bubble. Tokens checked: `d67dad03…` → cancelled X; `2fc61249…` → open Y.
 2. **Invite web page strips `#token`.** After load, address bar becomes `/invite` and the token lives in tab `sessionStorage`. Same-tab “Open in the app” can reopen the previous token.
 3. **False offline on emulator.** Banner keys off `Network.isInternetReachable`; `Boolean(null)` marks offline and pauses React Query while Wi‑Fi/Google still work (`apps/mobile/app/_layout.tsx`). Treat `null` as unknown/online.
 4. **Al Riyadi booking phone** `+961 1 740 255` is a landline; WhatsApp offers SMS invite — not an app SMS feature. Staging club numbers should be WhatsApp mobiles.
 5. **Invite screen has no in-app back** — Accept / Decline only (Decline leaves shared links).
 6. **No profile photo → initials** (`AM` for Ali Mogh) — expected, not a missing avatar bug.
 7. **Home bell can light before OS push** — outbox row exists; Expo delivery waits for the 5‑minute cron.
+8. **Switching accounts on the phone stopped its push** (found in review, from logs). At 12:47 the phone signed out and signed in with a different Google account for T3. `register_device_push_token` returned 409 (`duplicate key value violates unique constraint "device_push_tokens_token_key"`) then and on every foreground after. The old row was only deactivated and still held the token. Active tokens went to 0. Fixed by migration `109`.
 
 ## Verdict
 

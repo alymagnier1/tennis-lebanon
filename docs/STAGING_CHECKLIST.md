@@ -228,9 +228,13 @@ silently.
 
 - [x] `EAS_PROJECT_ID` set for the build (or present in `app.json`)
   - Verified: `extra.eas.projectId` is in `app.json`.
-- [x] `select count(*) from public.device_push_tokens where is_active;` is
+- [ ] `select count(*) from public.device_push_tokens where is_active;` is
       non-zero on staging after a real device signs in
-  - Verified 2026-09-26: **1** active token (phone A). Emulator cannot add a second.
+  - 2026-09-26: **1** active token (phone A) during the partial rehearsal.
+  - Unticked 2026-09-26 13:14: **0** active. At 12:47 the phone signed in as a
+    different account and every registration since has failed with 409
+    (`device_push_tokens_token_key`). Fixed by migration `109`; re-check after it
+    is applied and the phone is brought to the foreground.
 
 Onboarding no longer asks for notification permission, so **signing in does
 not register a device**. A token is written only after Profile → Notifications
@@ -282,9 +286,10 @@ A confirms the court.
 - [x] A signs in with Google and turns on Profile → Notifications
   - Partial 2026-09-26: physical phone A; notifications on; 1 active token.
     See `docs/audits/REHEARSAL_PARTIAL_2026-09-26.md`.
-- [x] A creates a singles match at one fixed time and publishes; the schedule
+- [ ] A creates a singles match at one fixed time and publishes; the schedule
       conflict banner appears only when A already has an agreed match then
-  - Partial 2026-09-26: fixed-time publish on update `01a0dcac…`.
+  - Partial 2026-09-26: fixed-time publish on update `01a0dcac…` passed. The
+    conflict banner was not checked, so the row stays open.
 - [x] A shares the invite to B on WhatsApp; the message shows an
       `https://racketbound.com/invite#…` link
   - Partial 2026-09-26: link format confirmed.
@@ -305,7 +310,7 @@ A confirms the court.
       confirms the court was booked; both hubs show the confirmed court and
       **B's phone physically shows** the "Court confirmed" push
   - Partial 2026-09-26: hand-off + confirm + both hubs OK; B OS push not
-      proved (emulator). Al Riyadi landline triggered WhatsApp SMS invite UI.
+    proved (emulator). Al Riyadi landline triggered WhatsApp SMS invite UI.
 - [ ] After the start time: both confirm attendance and the same score; the
       result shows as confirmed and the rematch card appears
 - [ ] `select * from public.unreachable_notification_summary();` reviewed, and
@@ -316,7 +321,7 @@ A confirms the court.
       by the host sees "This invite link is not valid" and no match details; a
       player outside the match's level sees the level message, not Accept
   - Partial 2026-09-26: shared Decline, addressed Decline, and out-of-level
-      passed. **Blocked** skipped. Full row stays open until blocked is done.
+    passed. **Blocked** skipped. Full row stays open until blocked is done.
 - [x] One recoverable failure: turn data off mid-flow, turn it back on, and the
       screen recovers without restarting the app
   - Verified 2026-09-26 on phone A.
@@ -341,7 +346,7 @@ Two paths this rehearsal does **not** cover, and must not be ticked from it:
       the join-request push; A approves; **B's phone shows** the request-accepted
       push
   - Partial 2026-09-26: request + approve + **A** OS `match_join_request` push
-      proved. B request-accepted OS push not proved (emulator). Row stays open.
+    proved. B request-accepted OS push not proved (emulator). Row stays open.
 - [ ] Flexible time voting: either recorded as out of cohort-1 scope in
       `docs/DECISIONS.md`, or a supported way to create a flexible match specified
       and tested separately. The create screen cannot publish one today
@@ -377,6 +382,9 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       hub, open an invite preview, one reversible write, and the sender returning 200. Do not wait for the full §7c rehearsal — retire first, then repeat this
       check, then rehearse against the final configuration
   - Verified 2026-09-26: T3–T6 on phone A; sender returning 200 (checked same day).
+  - The T3 sign-in used a **different account** from the rehearsal's A. That
+    exposed the push-token bug fixed by migration `109`: the new account could
+    not register the phone's token.
 - [ ] **Session refresh**, recorded separately from the fresh sign-in (signing
       out and in makes a new session and never uses the refresh token): leave a
       phone signed in past the access-token lifetime, bring the app to the
@@ -385,10 +393,13 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
       after retirement, against the final key configuration. Never log the
       tokens themselves
   - Pre-retirement: start after T3; needs ≥1 h signed in. Do post-retirement again.
-- [x] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
+- [ ] Supabase → Settings → API Keys: legacy `anon` and `service_role` **deactivated**;
       sign-in, a match hub and the sender (200) still work
-  - Verified 2026-09-26: founder disabled JWT-based API keys on staging; phone A
-    match hub OK. Sender rechecked same session.
+  - Done 2026-09-26 (recorded 12:54): founder disabled the JWT-based API keys on staging.
+    Afterwards match hubs loaded (200, through 13:08) and the sender answered 200
+    (through 13:10); no 401/403 anywhere.
+  - Open: **no sign-in has happened since** (last one 12:47, before the
+    deactivation). Tick after one fresh sign-in succeeds.
 - [ ] Supabase → Settings → JWT Keys: **Migrate JWT secret** → **Rotate** → wait the
       access-token lifetime **plus 15 minutes** (1 h 15 min at the default 1 h; read
       the actual value in Auth settings) → **Revoke** the legacy secret. Rotation
