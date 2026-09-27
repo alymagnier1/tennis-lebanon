@@ -2,6 +2,7 @@ import { useState } from "react";
 import { notify } from "../../lib/confirm-action";
 import {
   Alert,
+  Animated,
   Modal,
   Pressable,
   ScrollView,
@@ -41,6 +42,7 @@ import { supabase } from "../../lib/supabase";
 import { CLUBS_ROUTE } from "../../lib/routes";
 import { zoneLabelFromList } from "../../lib/zones";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { useModalFadeIn } from "../../hooks/useModalFadeIn";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 async function fetchOwnZones() {
@@ -60,6 +62,7 @@ export function ProfileTabDashboard() {
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const [showRatingExplainer, setShowRatingExplainer] = useState(false);
+  const ratingExplainerFade = useModalFadeIn(showRatingExplainer);
   const locale = i18n.resolvedLanguage ?? i18n.language;
 
   const playerProfileQuery = useQuery({
@@ -247,32 +250,37 @@ export function ProfileTabDashboard() {
       <Modal
         visible={showRatingExplainer}
         transparent
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setShowRatingExplainer(false)}
+        onShow={ratingExplainerFade.onShow}
       >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("common.cancel")}
-          style={styles.modalBackdrop}
-          onPress={() => setShowRatingExplainer(false)}
+        <Animated.View
+          style={[styles.modalFade, { opacity: ratingExplainerFade.opacity }]}
         >
           <Pressable
-            accessibilityRole="none"
-            onPress={(event) => event.stopPropagation()}
-            style={styles.modalCard}
+            accessibilityRole="button"
+            accessibilityLabel={t("common.cancel")}
+            style={styles.modalBackdrop}
+            onPress={() => setShowRatingExplainer(false)}
           >
-            <AppText style={styles.modalTitle}>
-              {t("profile.ratingExplainerTitle")}
-            </AppText>
-            <AppText style={styles.modalBody}>
-              {t("profile.ratingExplainerBody")}
-            </AppText>
-            <FigmaPrimaryButton
-              label={t("common.cancel")}
-              onPress={() => setShowRatingExplainer(false)}
-            />
+            <Pressable
+              accessibilityRole="none"
+              onPress={(event) => event.stopPropagation()}
+              style={styles.modalCard}
+            >
+              <AppText style={styles.modalTitle}>
+                {t("profile.ratingExplainerTitle")}
+              </AppText>
+              <AppText style={styles.modalBody}>
+                {t("profile.ratingExplainerBody")}
+              </AppText>
+              <FigmaPrimaryButton
+                label={t("common.cancel")}
+                onPress={() => setShowRatingExplainer(false)}
+              />
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </Animated.View>
       </Modal>
     </View>
   );
@@ -301,6 +309,9 @@ const styles = createLiveSheet(() =>
       borderWidth: 1.5,
       borderColor: tennisColors.border,
       overflow: "hidden",
+    },
+    modalFade: {
+      flex: 1,
     },
     modalBackdrop: {
       flex: 1,

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FlatList, Modal, Pressable, StyleSheet } from "react-native";
+import { Animated, FlatList, Modal, Pressable, StyleSheet } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
@@ -7,6 +7,7 @@ import { Icon } from "../Icon";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { useModalFadeIn } from "../../hooks/useModalFadeIn";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 const ROW_HEIGHT = 52;
@@ -42,6 +43,7 @@ export function OnboardingYearField({
   const { t } = useTranslation();
   const { rowDirection } = useLayoutDirection();
   const [open, setOpen] = useState(false);
+  const fade = useModalFadeIn(open);
 
   // Newest first: the youngest eligible year is the one most people need, and
   // it puts the eligibility boundary at the top where it reads as a rule.
@@ -83,69 +85,74 @@ export function OnboardingYearField({
 
       <Modal
         transparent
-        animationType="fade"
+        animationType="none"
         visible={open}
         onRequestClose={() => setOpen(false)}
+        onShow={fade.onShow}
       >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("common.cancel")}
-          style={styles.backdrop}
-          onPress={() => setOpen(false)}
-        >
-          {/* Swallows taps so a press inside the sheet never closes it. */}
+        <Animated.View style={[styles.fade, { opacity: fade.opacity }]}>
           <Pressable
-            accessibilityRole="none"
-            style={styles.sheet}
-            onPress={() => undefined}
+            accessibilityRole="button"
+            accessibilityLabel={t("common.cancel")}
+            style={styles.backdrop}
+            onPress={() => setOpen(false)}
           >
-            <AppText style={styles.sheetTitle}>{label}</AppText>
-            <FlatList
-              data={years}
-              keyExtractor={(year) => String(year)}
-              initialScrollIndex={selectedIndex > 0 ? selectedIndex : undefined}
-              getItemLayout={(_, index) => ({
-                length: ROW_HEIGHT,
-                offset: ROW_HEIGHT * index,
-                index,
-              })}
-              renderItem={({ item }) => {
-                const selected = String(item) === value;
-                return (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    onPress={() => {
-                      onChange(String(item));
-                      setOpen(false);
-                    }}
-                    style={({ pressed }) => [
-                      styles.row,
-                      { flexDirection: rowDirection },
-                      selected && styles.rowSelected,
-                      pressed && styles.rowPressed,
-                    ]}
-                  >
-                    <AppText
-                      style={
-                        selected ? styles.rowLabelSelected : styles.rowLabel
-                      }
+            {/* Swallows taps so a press inside the sheet never closes it. */}
+            <Pressable
+              accessibilityRole="none"
+              style={styles.sheet}
+              onPress={() => undefined}
+            >
+              <AppText style={styles.sheetTitle}>{label}</AppText>
+              <FlatList
+                data={years}
+                keyExtractor={(year) => String(year)}
+                initialScrollIndex={
+                  selectedIndex > 0 ? selectedIndex : undefined
+                }
+                getItemLayout={(_, index) => ({
+                  length: ROW_HEIGHT,
+                  offset: ROW_HEIGHT * index,
+                  index,
+                })}
+                renderItem={({ item }) => {
+                  const selected = String(item) === value;
+                  return (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityState={{ selected }}
+                      onPress={() => {
+                        onChange(String(item));
+                        setOpen(false);
+                      }}
+                      style={({ pressed }) => [
+                        styles.row,
+                        { flexDirection: rowDirection },
+                        selected && styles.rowSelected,
+                        pressed && styles.rowPressed,
+                      ]}
                     >
-                      {item}
-                    </AppText>
-                    {selected ? (
-                      <Icon
-                        name="check"
-                        size={18}
-                        color={tennisColors.primary}
-                      />
-                    ) : null}
-                  </Pressable>
-                );
-              }}
-            />
+                      <AppText
+                        style={
+                          selected ? styles.rowLabelSelected : styles.rowLabel
+                        }
+                      >
+                        {item}
+                      </AppText>
+                      {selected ? (
+                        <Icon
+                          name="check"
+                          size={18}
+                          color={tennisColors.primary}
+                        />
+                      ) : null}
+                    </Pressable>
+                  );
+                }}
+              />
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </Animated.View>
       </Modal>
     </>
   );
@@ -176,6 +183,9 @@ const styles = createLiveSheet(() =>
       fontFamily: tennisFontFamily.body,
       fontSize: 15,
       color: tennisColors.mutedForeground,
+    },
+    fade: {
+      flex: 1,
     },
     backdrop: {
       flex: 1,

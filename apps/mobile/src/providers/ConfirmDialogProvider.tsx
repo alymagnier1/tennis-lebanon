@@ -5,7 +5,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Modal, Pressable, StyleSheet, View, Platform } from "react-native";
+import {
+  Animated,
+  Modal,
+  Pressable,
+  StyleSheet,
+  View,
+  Platform,
+} from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
@@ -13,6 +20,7 @@ import {
   FigmaPrimaryButton,
   FigmaSecondaryButton,
 } from "../components/onboarding-ui/FigmaButtons";
+import { useModalFadeIn } from "../hooks/useModalFadeIn";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 import { useLayoutDirection } from "../lib/layout-direction";
 import {
@@ -96,6 +104,8 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
     presentRemoveParticipant,
   ]);
 
+  const { opacity, onShow } = useModalFadeIn(dialog !== null);
+
   const value = useMemo(() => ({ visible: dialog !== null }), [dialog]);
 
   return (
@@ -104,11 +114,18 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
       {/* Mount only while open so this portal stacks above any earlier Modal
           (e.g. BottomSheet). A always-mounted Modal stays under a later sheet. */}
       {dialog !== null ? (
-        <Modal animationType="none" transparent visible onRequestClose={close}>
-          <View
+        <Modal
+          animationType="none"
+          transparent
+          visible
+          onRequestClose={close}
+          onShow={onShow}
+        >
+          <Animated.View
             style={[
               styles.backdrop,
               Platform.OS === "web" ? styles.backdropWeb : null,
+              { opacity },
             ]}
           >
             <Pressable
@@ -201,7 +218,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                 />
               ) : null}
             </View>
-          </View>
+          </Animated.View>
         </Modal>
       ) : null}
     </ConfirmDialogVisibilityContext.Provider>

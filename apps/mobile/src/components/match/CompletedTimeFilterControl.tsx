@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import {
+  Animated,
   Modal,
   Pressable,
   StyleSheet,
@@ -17,6 +18,7 @@ import {
 } from "../../lib/completed-match-time-filter";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { useModalFadeIn } from "../../hooks/useModalFadeIn";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 type MenuAnchor = {
@@ -37,6 +39,9 @@ export function CompletedTimeFilterControl({
   const triggerRef = useRef<RNView>(null);
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState<MenuAnchor | null>(null);
+  const menuVisible = open && anchor != null;
+  // Short: the trigger squares its corners the moment the menu opens.
+  const menuFade = useModalFadeIn(menuVisible, 100);
 
   function close() {
     setOpen(false);
@@ -83,10 +88,14 @@ export function CompletedTimeFilterControl({
       <Modal
         transparent
         animationType="none"
-        visible={open && anchor != null}
+        visible={menuVisible}
         onRequestClose={close}
+        onShow={menuFade.onShow}
       >
-        <View style={styles.modalRoot} pointerEvents="box-none">
+        <Animated.View
+          style={[styles.modalRoot, { opacity: menuFade.opacity }]}
+          pointerEvents="box-none"
+        >
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t("common.cancel")}
@@ -138,7 +147,7 @@ export function CompletedTimeFilterControl({
               })}
             </View>
           ) : null}
-        </View>
+        </Animated.View>
       </Modal>
     </>
   );
