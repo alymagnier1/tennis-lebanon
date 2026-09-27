@@ -5,7 +5,6 @@ import {
   Easing,
   Image,
   Keyboard,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -17,6 +16,7 @@ import {
 } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { KeyboardAvoider } from "./KeyboardAvoider";
+import { AppOverlay } from "../providers/OverlayProvider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   colors,
@@ -587,10 +587,9 @@ export function BottomSheet({
   );
 
   /*
-   * The fade-in waits for `onShow`: on Android the content mounts before the
-   * dialog window has its final size, and fading from the first frame shows it
-   * jump into place. A reopen during the fade-out keeps the same window, so
-   * `onShow` will not fire again and the fade starts straight away.
+   * The fade-in waits for `onShow`, the frame after the sheet's layer is on
+   * screen. A reopen during the fade-out keeps the same layer, so `onShow`
+   * will not fire again and the fade starts straight away.
    */
   const handleModalShow = useCallback(() => {
     modalShownRef.current = true;
@@ -620,7 +619,7 @@ export function BottomSheet({
   }, [fadeTo, visible]);
 
   // The confirm dialog brings its own dim; cross-fade so neither a double dim
-  // nor an undimmed frame shows while its window comes up.
+  // nor an undimmed frame shows while it comes up.
   useEffect(() => {
     Animated.timing(ownDim, {
       toValue: confirmDialogVisible ? 0 : 1,
@@ -683,14 +682,7 @@ export function BottomSheet({
   }
 
   return (
-    <Modal
-      // Draw under the status and navigation bars like the app does, so the
-      // dim covers them; otherwise Android paints the popup window's own white
-      // navigation bar (founder, 2026-09-27).
-      statusBarTranslucent
-      navigationBarTranslucent
-      animationType="none"
-      transparent
+    <AppOverlay
       visible={rendered}
       onRequestClose={onClose}
       onShow={handleModalShow}
@@ -723,7 +715,9 @@ export function BottomSheet({
               ),
               paddingBottom:
                 Math.max(insets.bottom, spacing.xl) +
-                (Platform.OS === "ios" ? 0 : keyboardHeight),
+                // In the app's own window the keyboard avoider lifts the sheet
+                // on Android and iOS; only the web needs the height added.
+                (Platform.OS === "web" ? keyboardHeight : 0),
               maxHeight: keyboardHeight > 0 ? "92%" : "85%",
             },
           ]}
@@ -748,7 +742,7 @@ export function BottomSheet({
           {footer ? <View style={styles.sheetFooter}>{footer}</View> : null}
         </Animated.View>
       </KeyboardAvoider>
-    </Modal>
+    </AppOverlay>
   );
 }
 

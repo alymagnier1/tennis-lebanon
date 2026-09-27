@@ -3,7 +3,6 @@ import { notify } from "../../lib/confirm-action";
 import {
   Alert,
   Animated,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -43,6 +42,7 @@ import { CLUBS_ROUTE } from "../../lib/routes";
 import { zoneLabelFromList } from "../../lib/zones";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { useModalFadeIn } from "../../hooks/useModalFadeIn";
+import { AppOverlay } from "../../providers/OverlayProvider";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 async function fetchOwnZones() {
@@ -247,13 +247,8 @@ export function ProfileTabDashboard() {
         <ProfileSettingsFab onPress={() => router.push("/(tabs)/settings")} />
       </View>
 
-      <Modal
-        // Under the system bars so the dim covers them (see BottomSheet).
-        statusBarTranslucent
-        navigationBarTranslucent
+      <AppOverlay
         visible={showRatingExplainer}
-        transparent
-        animationType="none"
         onRequestClose={() => setShowRatingExplainer(false)}
         onShow={ratingExplainerFade.onShow}
       >
@@ -284,7 +279,7 @@ export function ProfileTabDashboard() {
             </Pressable>
           </Pressable>
         </Animated.View>
-      </Modal>
+      </AppOverlay>
     </View>
   );
 }

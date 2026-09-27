@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Animated, FlatList, Modal, Pressable, StyleSheet } from "react-native";
+import { Animated, FlatList, Pressable, StyleSheet } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
@@ -8,6 +8,7 @@ import { useLayoutDirection } from "../../lib/layout-direction";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { useModalFadeIn } from "../../hooks/useModalFadeIn";
+import { AppOverlay } from "../../providers/OverlayProvider";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 const ROW_HEIGHT = 52;
@@ -83,12 +84,7 @@ export function OnboardingYearField({
         />
       </Pressable>
 
-      <Modal
-        // Under the system bars so the dim covers them (see BottomSheet).
-        statusBarTranslucent
-        navigationBarTranslucent
-        transparent
-        animationType="none"
+      <AppOverlay
         visible={open}
         onRequestClose={() => setOpen(false)}
         onShow={fade.onShow}
@@ -156,7 +152,7 @@ export function OnboardingYearField({
             </Pressable>
           </Pressable>
         </Animated.View>
-      </Modal>
+      </AppOverlay>
     </>
   );
 }

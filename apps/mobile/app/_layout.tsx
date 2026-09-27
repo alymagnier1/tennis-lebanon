@@ -25,6 +25,7 @@ import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
 import { OfflineBanner } from "../src/components/OfflineBanner";
 import { ToastProvider } from "../src/providers/ToastProvider";
 import { ConfirmDialogProvider } from "../src/providers/ConfirmDialogProvider";
+import { OverlayProvider } from "../src/providers/OverlayProvider";
 import { installDeepLinkCapture } from "../src/lib/deep-link-buffer";
 import {
   createBackendProbe,
@@ -127,30 +128,34 @@ export default function RootLayout() {
                   <UnreadMessagesWatcher />
                   <OnboardingProvider>
                     <HeroVariantProvider>
-                      {/* Above the Stack so the bar is visible on whatever
+                      {/* Popups draw into this layer, inside every provider
+                          above, instead of opening their own window. */}
+                      <OverlayProvider>
+                        {/* Above the Stack so the bar is visible on whatever
                           screen the player happens to be on when signal
                           drops, rather than per-screen. */}
-                      <OfflineBanner />
-                      <Stack screenOptions={{ headerShown: false }}>
-                        <Stack.Screen name="index" />
-                        <Stack.Screen name="(public)" />
-                        <Stack.Screen name="(auth)" />
-                        <Stack.Screen name="(onboarding)" />
-                        <Stack.Screen name="(tabs)" />
-                        <Stack.Screen name="player/[id]" />
-                        <Stack.Screen name="profile/availability" />
-                        <Stack.Screen name="profile/edit" />
-                        <Stack.Screen name="profile/match-defaults" />
-                        <Stack.Screen name="profile/notifications" />
-                        <Stack.Screen name="profile/where-i-play" />
-                        <Stack.Screen name="profile/tennis-preferences" />
-                        <Stack.Screen name="notifications" />
-                        <Stack.Screen name="match/[id]" />
-                        <Stack.Screen name="match/create" />
-                        <Stack.Screen name="clubs/[id]" />
-                        <Stack.Screen name="invite/[token]" />
-                        <Stack.Screen name="policies" />
-                      </Stack>
+                        <OfflineBanner />
+                        <Stack screenOptions={{ headerShown: false }}>
+                          <Stack.Screen name="index" />
+                          <Stack.Screen name="(public)" />
+                          <Stack.Screen name="(auth)" />
+                          <Stack.Screen name="(onboarding)" />
+                          <Stack.Screen name="(tabs)" />
+                          <Stack.Screen name="player/[id]" />
+                          <Stack.Screen name="profile/availability" />
+                          <Stack.Screen name="profile/edit" />
+                          <Stack.Screen name="profile/match-defaults" />
+                          <Stack.Screen name="profile/notifications" />
+                          <Stack.Screen name="profile/where-i-play" />
+                          <Stack.Screen name="profile/tennis-preferences" />
+                          <Stack.Screen name="notifications" />
+                          <Stack.Screen name="match/[id]" />
+                          <Stack.Screen name="match/create" />
+                          <Stack.Screen name="clubs/[id]" />
+                          <Stack.Screen name="invite/[token]" />
+                          <Stack.Screen name="policies" />
+                        </Stack>
+                      </OverlayProvider>
                     </HeroVariantProvider>
                   </OnboardingProvider>
                 </AuthProvider>

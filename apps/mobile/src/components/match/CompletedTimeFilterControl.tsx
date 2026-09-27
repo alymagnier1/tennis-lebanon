@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import {
   Animated,
-  Modal,
   Pressable,
   StyleSheet,
   View,
@@ -19,6 +18,7 @@ import {
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { useModalFadeIn } from "../../hooks/useModalFadeIn";
+import { AppOverlay } from "../../providers/OverlayProvider";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 type MenuAnchor = {
@@ -94,12 +94,7 @@ export function CompletedTimeFilterControl({
         </Pressable>
       </View>
 
-      <Modal
-        // Under the system bars so the dim covers them (see BottomSheet).
-        statusBarTranslucent
-        navigationBarTranslucent
-        transparent
-        animationType="none"
+      <AppOverlay
         visible={menuVisible}
         onRequestClose={close}
         onShow={menuFade.onShow}
@@ -169,7 +164,7 @@ export function CompletedTimeFilterControl({
             </View>
           ) : null}
         </Animated.View>
-      </Modal>
+      </AppOverlay>
     </>
   );
 }

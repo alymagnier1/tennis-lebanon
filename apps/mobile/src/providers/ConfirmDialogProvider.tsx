@@ -5,14 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  Animated,
-  Modal,
-  Pressable,
-  StyleSheet,
-  View,
-  Platform,
-} from "react-native";
+import { Animated, Pressable, StyleSheet, View, Platform } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
@@ -21,6 +14,12 @@ import {
   FigmaSecondaryButton,
 } from "../components/onboarding-ui/FigmaButtons";
 import { useModalFadeIn } from "../hooks/useModalFadeIn";
+import { KeyboardAvoider } from "../components/KeyboardAvoider";
+import {
+  ModalBackground,
+  OverlayLayer,
+  useOverlayBackAndShow,
+} from "./OverlayProvider";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 import { useLayoutDirection } from "../lib/layout-direction";
 import {
@@ -104,131 +103,127 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
     presentRemoveParticipant,
   ]);
 
-  const { opacity, onShow } = useModalFadeIn(dialog !== null);
+  const dialogOpen = dialog !== null;
+  const { opacity, onShow } = useModalFadeIn(dialogOpen);
+  useOverlayBackAndShow(dialogOpen, close, onShow);
 
   const value = useMemo(() => ({ visible: dialog !== null }), [dialog]);
 
   return (
     <ConfirmDialogVisibilityContext.Provider value={value}>
-      {children}
-      {/* Mount only while open so this portal stacks above any earlier Modal
-          (e.g. BottomSheet). A always-mounted Modal stays under a later sheet. */}
+      <ModalBackground hidden={dialogOpen}>{children}</ModalBackground>
+      {/* A layer in the app's own window, not a Modal: a Modal's separate
+          window repainted the navigation bar white (see OverlayProvider).
+          Drawn after the app and its overlay layer, so a dialog opened over a
+          bottom sheet stays above it. */}
       {dialog !== null ? (
-        <Modal
-          // Draw under the status and navigation bars like the app does, so the
-          // dim covers them; otherwise Android paints the popup window's own white
-          // navigation bar (founder, 2026-09-27).
-          statusBarTranslucent
-          navigationBarTranslucent
-          animationType="none"
-          transparent
-          visible
-          onRequestClose={close}
-          onShow={onShow}
-        >
-          {/* One layer while fading: without it Android fades each child on its
+        <OverlayLayer>
+          {/* The cancel-match reason field must stay above the keyboard. */}
+          <KeyboardAvoider style={styles.keyboardRoot}>
+            {/* One layer while fading: without it Android fades each child on its
               own, but not the card's elevation shadow, which then showed as a
               dark ghost before the dialog appeared (2026-09-27). */}
-          <Animated.View
-            needsOffscreenAlphaCompositing
-            style={[
-              styles.backdrop,
-              Platform.OS === "web" ? styles.backdropWeb : null,
-              { opacity },
-            ]}
-          >
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Close"
-              onPress={close}
-              style={StyleSheet.absoluteFill}
-            />
-            <View
+            <Animated.View
+              needsOffscreenAlphaCompositing
               style={[
-                styles.card,
-                {
-                  marginTop: insets.top + 24,
-                  marginBottom: insets.bottom + 24,
-                },
+                styles.backdrop,
+                Platform.OS === "web" ? styles.backdropWeb : null,
+                { opacity },
               ]}
             >
-              {dialog.kind === "notify" ? (
-                <>
-                  <AppText
-                    accessibilityRole="header"
-                    style={[styles.title, { writingDirection }]}
-                  >
-                    {dialog.title}
-                  </AppText>
-                  {dialog.message ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                onPress={close}
+                style={StyleSheet.absoluteFill}
+              />
+              <View
+                style={[
+                  styles.card,
+                  {
+                    marginTop: insets.top + 24,
+                    marginBottom: insets.bottom + 24,
+                  },
+                ]}
+              >
+                {dialog.kind === "notify" ? (
+                  <>
+                    <AppText
+                      accessibilityRole="header"
+                      style={[styles.title, { writingDirection }]}
+                    >
+                      {dialog.title}
+                    </AppText>
+                    {dialog.message ? (
+                      <AppText
+                        style={[styles.message, { writingDirection }]}
+                        maxLines={16}
+                      >
+                        {dialog.message}
+                      </AppText>
+                    ) : null}
+                  </>
+                ) : null}
+
+                {dialog.kind === "choose" ? (
+                  <>
+                    <AppText
+                      accessibilityRole="header"
+                      style={[styles.title, { writingDirection }]}
+                    >
+                      {dialog.options.title}
+                    </AppText>
                     <AppText
                       style={[styles.message, { writingDirection }]}
-                      maxLines={16}
+                      maxLines={6}
                     >
-                      {dialog.message}
+                      {dialog.options.message}
                     </AppText>
-                  ) : null}
-                </>
-              ) : null}
+                    <View style={styles.actions}>
+                      <FigmaPrimaryButton
+                        label={dialog.options.confirmLabel}
+                        testID="confirm-dialog-confirm"
+                        onPress={() => {
+                          const { onConfirm } = dialog.options;
+                          // Run confirm before dismiss so the underlying screen can
+                          // settle while the modal still covers it (avoids a one-
+                          // frame flash of the pre-confirm UI).
+                          onConfirm();
+                          close();
+                        }}
+                      />
+                      <FigmaSecondaryButton
+                        label={dialog.options.cancelLabel}
+                        testID="confirm-dialog-cancel"
+                        onPress={() => {
+                          const { onCancel } = dialog.options;
+                          onCancel?.();
+                          close();
+                        }}
+                      />
+                    </View>
+                  </>
+                ) : null}
 
-              {dialog.kind === "choose" ? (
-                <>
-                  <AppText
-                    accessibilityRole="header"
-                    style={[styles.title, { writingDirection }]}
-                  >
-                    {dialog.options.title}
-                  </AppText>
-                  <AppText
-                    style={[styles.message, { writingDirection }]}
-                    maxLines={6}
-                  >
-                    {dialog.options.message}
-                  </AppText>
-                  <View style={styles.actions}>
-                    <FigmaPrimaryButton
-                      label={dialog.options.confirmLabel}
-                      testID="confirm-dialog-confirm"
-                      onPress={() => {
-                        const { onConfirm } = dialog.options;
-                        // Run confirm before dismiss so the underlying screen can
-                        // settle while the modal still covers it (avoids a one-
-                        // frame flash of the pre-confirm UI).
-                        onConfirm();
-                        close();
-                      }}
-                    />
-                    <FigmaSecondaryButton
-                      label={dialog.options.cancelLabel}
-                      testID="confirm-dialog-cancel"
-                      onPress={() => {
-                        const { onCancel } = dialog.options;
-                        onCancel?.();
-                        close();
-                      }}
-                    />
-                  </View>
-                </>
-              ) : null}
+                {dialog.kind === "cancelMatch" ? (
+                  <CancelMatchDialogPanel
+                    options={dialog.options}
+                    writingDirection={writingDirection}
+                    onClose={close}
+                  />
+                ) : null}
 
-              {dialog.kind === "cancelMatch" ? (
-                <CancelMatchDialogPanel
-                  options={dialog.options}
-                  writingDirection={writingDirection}
-                  onClose={close}
-                />
-              ) : null}
-
-              {dialog.kind === "removeParticipant" ? (
-                <RemoveParticipantDialogPanel
-                  options={dialog.options}
-                  writingDirection={writingDirection}
-                  onClose={close}
-                />
-              ) : null}
-            </View>
-          </Animated.View>
-        </Modal>
+                {dialog.kind === "removeParticipant" ? (
+                  <RemoveParticipantDialogPanel
+                    options={dialog.options}
+                    writingDirection={writingDirection}
+                    onClose={close}
+                  />
+                ) : null}
+              </View>
+            </Animated.View>
+          </KeyboardAvoider>
+        </OverlayLayer>
       ) : null}
     </ConfirmDialogVisibilityContext.Provider>
   );
@@ -236,6 +231,9 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
+    keyboardRoot: {
+      flex: 1,
+    },
     backdrop: {
       flex: 1,
       backgroundColor: "rgba(13, 28, 20, 0.45)",
