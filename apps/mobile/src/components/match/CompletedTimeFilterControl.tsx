@@ -92,7 +92,9 @@ export function CompletedTimeFilterControl({
         onRequestClose={close}
         onShow={menuFade.onShow}
       >
+        {/* One layer while fading, so the menu's shadow fades with it. */}
         <Animated.View
+          needsOffscreenAlphaCompositing
           style={[styles.modalRoot, { opacity: menuFade.opacity }]}
           pointerEvents="box-none"
         >

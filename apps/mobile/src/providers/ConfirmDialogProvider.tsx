@@ -121,7 +121,11 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
           onRequestClose={close}
           onShow={onShow}
         >
+          {/* One layer while fading: without it Android fades each child on its
+              own, but not the card's elevation shadow, which then showed as a
+              dark ghost before the dialog appeared (2026-09-27). */}
           <Animated.View
+            needsOffscreenAlphaCompositing
             style={[
               styles.backdrop,
               Platform.OS === "web" ? styles.backdropWeb : null,
