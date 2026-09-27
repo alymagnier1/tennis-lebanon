@@ -39,6 +39,15 @@ export function CompletedTimeFilterControl({
   const triggerRef = useRef<RNView>(null);
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState<MenuAnchor | null>(null);
+  // Where the popup window's content starts, in the same coordinates as the
+  // trigger's measureInWindow. Android measures from below the status bar;
+  // a popup drawn under the bars starts above that, so without this the menu
+  // sat one status bar too high (2026-09-27).
+  const modalRootRef = useRef<RNView>(null);
+  const [modalOrigin, setModalOrigin] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const menuVisible = open && anchor != null;
   // Short: the trigger squares its corners the moment the menu opens.
   const menuFade = useModalFadeIn(menuVisible, 100);
@@ -97,6 +106,13 @@ export function CompletedTimeFilterControl({
       >
         {/* One layer while fading, so the menu's shadow fades with it. */}
         <Animated.View
+          ref={modalRootRef}
+          collapsable={false}
+          onLayout={() =>
+            modalRootRef.current?.measureInWindow((x, y) =>
+              setModalOrigin({ x, y }),
+            )
+          }
           needsOffscreenAlphaCompositing
           style={[styles.modalRoot, { opacity: menuFade.opacity }]}
           pointerEvents="box-none"
@@ -107,13 +123,13 @@ export function CompletedTimeFilterControl({
             onPress={close}
             style={StyleSheet.absoluteFill}
           />
-          {anchor ? (
+          {anchor && modalOrigin ? (
             <View
               style={[
                 styles.menu,
                 {
-                  top: anchor.y,
-                  left: anchor.x,
+                  top: anchor.y - modalOrigin.y,
+                  left: anchor.x - modalOrigin.x,
                   width: anchor.width,
                 },
               ]}
