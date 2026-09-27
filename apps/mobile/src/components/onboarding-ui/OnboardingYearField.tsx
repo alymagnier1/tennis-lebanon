@@ -84,6 +84,9 @@ export function OnboardingYearField({
       </Pressable>
 
       <Modal
+        // Under the system bars so the dim covers them (see BottomSheet).
+        statusBarTranslucent
+        navigationBarTranslucent
         transparent
         animationType="none"
         visible={open}

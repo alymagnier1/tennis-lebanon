@@ -684,6 +684,11 @@ export function BottomSheet({
 
   return (
     <Modal
+      // Draw under the status and navigation bars like the app does, so the
+      // dim covers them; otherwise Android paints the popup window's own white
+      // navigation bar (founder, 2026-09-27).
+      statusBarTranslucent
+      navigationBarTranslucent
       animationType="none"
       transparent
       visible={rendered}

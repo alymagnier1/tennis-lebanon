@@ -248,6 +248,9 @@ export function ProfileTabDashboard() {
       </View>
 
       <Modal
+        // Under the system bars so the dim covers them (see BottomSheet).
+        statusBarTranslucent
+        navigationBarTranslucent
         visible={showRatingExplainer}
         transparent
         animationType="none"

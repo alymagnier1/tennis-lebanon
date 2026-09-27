@@ -86,6 +86,9 @@ export function CompletedTimeFilterControl({
       </View>
 
       <Modal
+        // Under the system bars so the dim covers them (see BottomSheet).
+        statusBarTranslucent
+        navigationBarTranslucent
         transparent
         animationType="none"
         visible={menuVisible}
