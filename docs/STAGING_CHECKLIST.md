@@ -407,9 +407,12 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
     sign-out, 14:30). Confirm it is running before the remaining §7c rehearsal.
   - Founder's phone shows `Update 01a0de11…` in Settings (2026-09-26, after two
     full restarts). The emulator is not yet confirmed.
-  - Since 21:2x the channel serves `01a0def9…`, a **preview of unmerged PRs #31
-    and #33** (chat restyle, buttons above the navigation bar); the emulator runs
-    it. Merge or drop them before relying on this row.
+  - Since 09-27 the channel serves `01a0e1fa…`, a **preview of unmerged PRs #31
+    and #33** (chat restyle; every sticky bottom control floored against a
+    confirmed `insets.bottom = 0` bug — see DECISIONS 2026-09-27). The emulator
+    cannot reproduce that bug (gesture nav reports a real inset), so it only
+    confirms no regression, not the fix itself. Merge or drop #31/#33 before
+    relying on this row.
 - [x] **Focused compatibility check** on that build: fresh sign-in, open a match
       hub, open an invite preview, one reversible write, and the sender returning 200. Do not wait for the full §7c rehearsal — retire first, then repeat this
       check, then rehearse against the final configuration
