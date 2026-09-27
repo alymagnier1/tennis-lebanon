@@ -10,6 +10,7 @@ import {
   type HubPrimaryActionKind,
 } from "../../lib/hub-action-bar";
 import { useLayoutDirection } from "../../lib/layout-direction";
+import { stackScreenBottomPadding } from "../../lib/stack-screen-padding";
 import { tennisColors } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
@@ -42,7 +43,9 @@ export function MatchHubActionBar({
       style={[
         styles.bar,
         !showPrimary && styles.barQuiet,
-        { paddingBottom: Math.max(insets.bottom, 12) },
+        {
+          paddingBottom: Math.max(stackScreenBottomPadding(insets.bottom), 12),
+        },
       ]}
     >
       <View style={[styles.row, { flexDirection: rowDirection }]}>

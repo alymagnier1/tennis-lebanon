@@ -22,6 +22,7 @@ import {
   MATCHES_TAB_ROUTE,
 } from "../../../src/lib/navigation";
 import { matchHubRoute } from "../../../src/lib/routes";
+import { stackScreenBottomPadding } from "../../../src/lib/stack-screen-padding";
 import { supabase } from "../../../src/lib/supabase";
 import { createLiveSheet } from "../../../src/theme/create-live-sheet";
 import { tennisColors } from "../../../src/theme/tennis-tokens";
@@ -68,7 +69,12 @@ export default function RescheduleMatchScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: Math.max(insets.bottom, 24) },
+          {
+            paddingBottom: Math.max(
+              stackScreenBottomPadding(insets.bottom),
+              24,
+            ),
+          },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}

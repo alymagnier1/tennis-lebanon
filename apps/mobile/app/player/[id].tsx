@@ -26,6 +26,7 @@ import { tennisColors, tennisSpacing } from "../../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitPlayerProfile } from "../../src/lib/navigation";
+import { stackScreenBottomPadding } from "../../src/lib/stack-screen-padding";
 
 export default function PlayerDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -114,7 +115,7 @@ export default function PlayerDetailScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 24 },
+          { paddingBottom: stackScreenBottomPadding(insets.bottom) + 24 },
         ]}
         showsVerticalScrollIndicator={false}
       >

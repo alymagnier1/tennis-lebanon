@@ -1,3 +1,5 @@
+import { stackScreenBottomPadding } from "./stack-screen-padding";
+
 /** Keep in sync with `TennisTabBar` layout (for full-screen overlays only). */
 export const TAB_BAR_TOP_PADDING = 12;
 export const TAB_BAR_ICON_WELL_HEIGHT = 44;
@@ -11,7 +13,10 @@ export function bottomTabBarHeight(safeAreaBottom: number): number {
     TAB_BAR_ICON_WELL_HEIGHT +
     TAB_BAR_LABEL_GAP +
     TAB_BAR_LABEL_HEIGHT +
-    Math.max(safeAreaBottom, TAB_BAR_BOTTOM_PADDING_MIN)
+    Math.max(
+      stackScreenBottomPadding(safeAreaBottom),
+      TAB_BAR_BOTTOM_PADDING_MIN,
+    )
   );
 }
 

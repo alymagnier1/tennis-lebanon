@@ -24,6 +24,7 @@ import {
 import { CancelMatchDialogPanel } from "./CancelMatchDialogPanel";
 import { RemoveParticipantDialogPanel } from "./RemoveParticipantDialogPanel";
 import { ConfirmDialogVisibilityContext } from "./confirm-dialog-visibility";
+import { stackScreenBottomPadding } from "../lib/stack-screen-padding";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 
 type NotifyState = {
@@ -122,7 +123,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                 styles.card,
                 {
                   marginTop: insets.top + 24,
-                  marginBottom: insets.bottom + 24,
+                  marginBottom: stackScreenBottomPadding(insets.bottom) + 24,
                 },
               ]}
             >
