@@ -167,7 +167,8 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
     hasHeroAction: nextActions.length > 0,
     upcomingCount: upcomingMatches.length,
     openMatchCount: openMatchPicks.matches.length,
-    freeSlotCount: liquidityOffers.offers.length,
+    // The same days Home's tabs show, so "free slots exist" and the tabs agree.
+    freeSlotCount: liquidityOffers.days.length,
     openMatchesReady:
       !openMatchPicks.matchesQuery.isPending &&
       !openMatchPicks.clubsQuery.isPending,

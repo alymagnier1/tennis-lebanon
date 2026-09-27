@@ -1,15 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppText } from "../AppText";
 import { ScreenError } from "../FormUi";
 import { SlideIn } from "../SlideIn";
-import { HomeFreePlayersCarousel } from "./HomeFreePlayersCarousel";
+import {
+  HomeFreePlayersCarousel,
+  HomeFreePlayersSkeleton,
+} from "./HomeFreePlayersCarousel";
 import { trackLiquiditySignalViewed } from "../../lib/analytics";
-import { peakLiquidity } from "../../lib/availability-liquidity";
-import { type PingSlot } from "../../lib/availability-ping";
+import {
+  peakLiquidity,
+  type LiquidityDay,
+} from "../../lib/availability-liquidity";
 import { adjacentLiquidityOfferStartsAt } from "../../lib/home-free-players-carousel";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { weekdayIndexFromBeirutDateKey } from "../../lib/near-term-availability";
@@ -23,57 +28,55 @@ import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 /**
- * The next few hours anyone is free, and the people behind the one you pick.
+ * Who is free today, tomorrow and the day after, and the people behind the
+ * day you pick.
  *
- * Two revisions worth remembering. The blocks used to be full-width rows that
+ * Revisions worth remembering. The blocks used to be full-width rows that
  * opened `/free-block`, a screen running the same query against the same RPC as
  * the Discover tab — a second discovery surface reachable only from here. They
- * are now a chip row that selects, and the players sit directly beneath.
+ * became a tab row that selects, with the players directly beneath.
  *
- * And the counts are gone from the chips. "5 free" was a proxy for the people,
+ * The counts are gone from the tabs. "5 free" was a proxy for the people,
  * printed because there was no room to show them; now that the carousel shows
- * actual faces, the number competes with the thing it stood in for. Whoever
- * wants the full list taps through to Discover, where the count is the length
- * of the list.
+ * actual faces, the number competes with the thing it stood in for.
+ *
+ * The tabs are days, not day parts (2026-09-27): "Tomorrow · Afternoon" fitted
+ * two tabs on a phone and made the player choose twice.
  *
  * An empty week is not rendered here. First-run Home already has one play CTA;
  * stacking "add when you play" on top of it taught emptiness twice.
  */
 export function HomeFreeSlots() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage ?? i18n.language;
   const { rowDirection, writingDirection, isRtl } = useLayoutDirection();
   const [selectedStartsAt, setSelectedStartsAt] = useState<string | null>(null);
   // Which side the next set of cards enters from; 0 until the player moves.
   const [enterFrom, setEnterFrom] = useState<-1 | 0 | 1>(0);
   // The tab highlight moves at once; the cards change only once the new
-  // tab's players are loaded, so the section never collapses in between.
+  // day's players are loaded, so the section never collapses in between.
   const [shownStartsAt, setShownStartsAt] = useState<string | null>(null);
   const latestRequestRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
   const ownZonesQuery = useQuery(ownPreferredZoneIdsQueryOptions);
-  const chipScrollRef = useRef<ScrollView>(null);
-  const [chipScrollWidth, setChipScrollWidth] = useState(0);
-  const [chipLayouts, setChipLayouts] = useState<
-    Record<string, { x: number; width: number }>
-  >({});
   const {
     query: liquidityQuery,
     rows: liquidityRows,
-    offers,
+    days,
   } = useHomeLiquidityOffers();
 
-  // Every tab's players up front: there are only a few tabs, and a tab whose
-  // players are fetched on switch showed an empty gap, then popped in.
+  // Every day's players up front: a tab whose players were fetched on switch
+  // showed an empty gap, then popped in.
   const ownZoneIds = ownZonesQuery.data;
   const zonesReady = ownZonesQuery.isSuccess;
   useEffect(() => {
     if (!zonesReady) return;
-    for (const offer of offers) {
+    for (const day of days) {
       void queryClient.prefetchQuery(
-        homeFreePlayersQueryOptions(offer, ownZoneIds),
+        homeFreePlayersQueryOptions(day, ownZoneIds),
       );
     }
-  }, [offers, ownZoneIds, queryClient, zonesReady]);
+  }, [days, ownZoneIds, queryClient, zonesReady]);
 
   // Fired once per mount, and deliberately fired when empty too: a tap-through
   // rate is meaningless without knowing how often a player was shown any demand.
@@ -89,54 +92,44 @@ export function HomeFreeSlots() {
     });
   }, [liquidityQuery.data, liquidityRows]);
 
-  function slotParts(slot: PingSlot): { day: string; part: string } {
-    const day =
-      slot.dayOffset === 0
-        ? t("discover.today")
-        : slot.dayOffset === 1
-          ? t("discover.tomorrow")
-          : t(
-              `availability.weekdaysShort.${weekdayIndexFromBeirutDateKey(slot.dateKey)}`,
-            );
-
-    return { day, part: t(`availability.blocks.${slot.part}`) };
+  function dayLabel(day: LiquidityDay): string {
+    if (day.dayOffset === 0) return t("discover.today");
+    if (day.dayOffset === 1) return t("discover.tomorrow");
+    const weekday = t(
+      `availability.weekdays.${weekdayIndexFromBeirutDateKey(day.dateKey)}`,
+    );
+    // French weekdays are lower case mid-sentence; a tab starts one.
+    return weekday.charAt(0).toLocaleUpperCase(locale) + weekday.slice(1);
   }
 
-  function slotLabel(slot: PingSlot): string {
-    const { day, part } = slotParts(slot);
-    // Composed here rather than through a key, matching
-    // formatNearTermAvailabilitySlots: both halves are already translated, so a
-    // key would be pure interpolation and identical across locales, which the
-    // parity guard rejects.
-    return `${day} · ${part}`;
-  }
+  const title = (
+    <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
+      {t("home.free.busiestTitle")}
+    </AppText>
+  );
 
-  // Keep the selected tab in view when a swipe on the cards changes it. Left
-  // to right only: the RTL row is reversed and its offsets are unverified.
-  const selectedLayout = selectedStartsAt
-    ? chipLayouts[selectedStartsAt]
-    : undefined;
-  useEffect(() => {
-    if (isRtl || !selectedLayout || chipScrollWidth <= 0) return;
-    chipScrollRef.current?.scrollTo({
-      x: Math.max(
-        0,
-        selectedLayout.x + selectedLayout.width / 2 - chipScrollWidth / 2,
-      ),
-      animated: true,
-    });
-  }, [chipScrollWidth, isRtl, selectedLayout]);
-
+  // Hold the section's space while the days load, so Home does not render
+  // without it and then push everything below down.
   if (liquidityQuery.isPending) {
-    return null;
+    return (
+      <View style={styles.root} accessibilityElementsHidden>
+        {title}
+        <View style={[styles.tabRow, { flexDirection: rowDirection }]}>
+          {[0, 1, 2].map((index) => (
+            <AppText key={index} style={[styles.tabLabel, styles.tabSkeleton]}>
+              {" "}
+            </AppText>
+          ))}
+        </View>
+        <HomeFreePlayersSkeleton />
+      </View>
+    );
   }
 
   if (liquidityQuery.isError) {
     return (
       <View style={styles.root}>
-        <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
-          {t("home.free.busiestTitle")}
-        </AppText>
+        {title}
         <ScreenError
           message={t("home.loadError")}
           retryLabel={t("common.retry")}
@@ -146,21 +139,19 @@ export function HomeFreeSlots() {
     );
   }
 
-  if (offers.length === 0) {
+  if (days.length === 0) {
     return null;
   }
 
   // Derived rather than stored, so a refreshed list that no longer contains the
-  // chosen block falls back to the soonest instead of selecting nothing.
+  // chosen day falls back to the soonest instead of selecting nothing.
   const selected =
-    offers.find((offer) => offer.startsAt === selectedStartsAt) ?? offers[0]!;
-
-  const shown =
-    offers.find((offer) => offer.startsAt === shownStartsAt) ?? selected;
+    days.find((day) => day.startsAt === selectedStartsAt) ?? days[0]!;
+  const shown = days.find((day) => day.startsAt === shownStartsAt) ?? selected;
 
   function showWhenLoaded(startsAt: string) {
-    const offer = offers.find((candidate) => candidate.startsAt === startsAt);
-    if (!offer) return;
+    const day = days.find((candidate) => candidate.startsAt === startsAt);
+    if (!day) return;
     latestRequestRef.current = startsAt;
     const reveal = () => {
       // A later switch wins over this one.
@@ -171,59 +162,39 @@ export function HomeFreeSlots() {
       return;
     }
     void queryClient
-      .ensureQueryData(homeFreePlayersQueryOptions(offer, ownZoneIds))
+      .ensureQueryData(homeFreePlayersQueryOptions(day, ownZoneIds))
       .then(reveal, reveal);
   }
 
-  function selectAdjacentOffer(direction: "next" | "prev") {
-    const nextStartsAt = adjacentLiquidityOfferStartsAt(
-      offers,
-      selected.startsAt,
-      direction,
-    );
-    if (nextStartsAt) {
-      setEnterFrom(direction === "next" ? 1 : -1);
-      setSelectedStartsAt(nextStartsAt);
-      showWhenLoaded(nextStartsAt);
-    }
-  }
-
-  function selectOffer(startsAt: string) {
-    if (startsAt === selected.startsAt) return;
-    const from = offers.findIndex(
-      (offer) => offer.startsAt === selected.startsAt,
-    );
-    const to = offers.findIndex((offer) => offer.startsAt === startsAt);
-    setEnterFrom(to > from ? 1 : -1);
+  function selectDay(startsAt: string, from: -1 | 1) {
+    setEnterFrom(from);
     setSelectedStartsAt(startsAt);
     showWhenLoaded(startsAt);
   }
 
+  function selectAdjacentDay(direction: "next" | "prev") {
+    const nextStartsAt = adjacentLiquidityOfferStartsAt(
+      days,
+      selected.startsAt,
+      direction,
+    );
+    if (nextStartsAt) selectDay(nextStartsAt, direction === "next" ? 1 : -1);
+  }
+
+  const selectedIndex = days.indexOf(selected);
+
   return (
     <View style={styles.root}>
-      <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
-        {t("home.free.busiestTitle")}
-      </AppText>
+      {title}
 
-      <ScrollView
-        ref={chipScrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        onLayout={(event) => setChipScrollWidth(event.nativeEvent.layout.width)}
-        style={styles.chipScroll}
-        contentContainerStyle={[
-          styles.chipRow,
-          { flexDirection: rowDirection },
-        ]}
-      >
-        {offers.map((offer) => {
-          const label = slotLabel(offer);
-          const { day, part } = slotParts(offer);
-          const isSelected = offer.startsAt === selected.startsAt;
+      <View style={[styles.tabRow, { flexDirection: rowDirection }]}>
+        {days.map((day, index) => {
+          const label = dayLabel(day);
+          const isSelected = day === selected;
 
           return (
             <Pressable
-              key={offer.startsAt}
+              key={day.startsAt}
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
               // react-native-web does not emit aria-selected for role="button",
@@ -233,54 +204,37 @@ export function HomeFreeSlots() {
                   ? t("home.free.chipSelectedLabel", { slot: label })
                   : t("home.free.chipLabel", { slot: label })
               }
-              onPress={() => selectOffer(offer.startsAt)}
-              onLayout={(event) => {
-                const { x, width } = event.nativeEvent.layout;
-                setChipLayouts((current) =>
-                  current[offer.startsAt]?.x === x &&
-                  current[offer.startsAt]?.width === width
-                    ? current
-                    : { ...current, [offer.startsAt]: { x, width } },
-                );
+              onPress={() => {
+                if (!isSelected) {
+                  selectDay(day.startsAt, index > selectedIndex ? 1 : -1);
+                }
               }}
               hitSlop={{ top: 8, bottom: 8 }}
               style={({ pressed }) => [
-                styles.chip,
-                isSelected && styles.chipSelected,
-                pressed && styles.chipPressed,
+                styles.tab,
+                pressed && styles.tabPressed,
               ]}
             >
-              {/* Two lines, day over time of day: one line ("Tomorrow ·
-                  Afternoon") fitted only two tabs on a phone. */}
               <AppText
-                style={[styles.chipDay, isSelected && styles.chipDaySelected]}
+                style={[styles.tabLabel, isSelected && styles.tabLabelSelected]}
                 maxLines={1}
               >
-                {day}
-              </AppText>
-              <AppText
-                style={[
-                  styles.chipLabel,
-                  isSelected && styles.chipLabelSelected,
-                ]}
-                maxLines={1}
-              >
-                {part}
+                {label}
               </AppText>
             </Pressable>
           );
         })}
-      </ScrollView>
+      </View>
 
       <SlideIn key={shown.startsAt} from={enterFrom} isRtl={isRtl}>
         <HomeFreePlayersCarousel
           block={{
             startsAt: shown.startsAt,
             endsAt: shown.endsAt,
-            label: slotLabel(shown),
+            label: dayLabel(shown),
           }}
-          onScrollPastEnd={() => selectAdjacentOffer("next")}
-          onScrollPastStart={() => selectAdjacentOffer("prev")}
+          onScrollPastEnd={() => selectAdjacentDay("next")}
+          onScrollPastStart={() => selectAdjacentDay("prev")}
         />
       </SlideIn>
     </View>
@@ -292,49 +246,34 @@ const styles = createLiveSheet(() =>
     root: {
       gap: tennisSpacing.sectionTitleContent,
     },
-    // Text tabs rather than filled pills. Three of them sit directly above the
-    // cards they switch, so a filled chip would carry more weight than the
-    // players it is selecting between; the accent alone marks the active one.
-    // flexGrow: 0 stops a horizontal ScrollView on web from taking a full
-    // line-box of leftover height between the title and the cards.
-    chipScroll: {
-      flexGrow: 0,
-      flexShrink: 0,
-    },
-    chipRow: {
+    // Text tabs rather than filled pills. They sit directly above the cards
+    // they switch, so a filled chip would carry more weight than the players
+    // it is selecting between; the accent alone marks the active one.
+    tabRow: {
       gap: 20,
-      alignItems: "flex-start",
+      alignItems: "center",
     },
-    chip: {
+    tab: {
       justifyContent: "center",
-      alignItems: "flex-start",
       paddingHorizontal: 2,
-      paddingVertical: 0,
-      backgroundColor: "transparent",
     },
-    chipSelected: {
-      backgroundColor: "transparent",
-    },
-    chipPressed: {
+    tabPressed: {
       opacity: 0.7,
     },
-    chipDay: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 12,
-      lineHeight: 16,
-      color: tennisColors.mutedForeground,
-    },
-    chipDaySelected: {
-      color: tennisColors.violetText,
-    },
-    chipLabel: {
+    tabLabel: {
       fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 13,
+      fontSize: 14,
+      lineHeight: 20,
       color: tennisColors.mutedForeground,
     },
-    chipLabelSelected: {
+    tabLabelSelected: {
       color: tennisColors.violetText,
       fontFamily: tennisFontFamily.bodySemi,
+    },
+    tabSkeleton: {
+      width: 64,
+      borderRadius: 4,
+      backgroundColor: tennisColors.muted,
     },
   }),
 );

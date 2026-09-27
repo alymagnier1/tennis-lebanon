@@ -117,6 +117,12 @@ export function HomeFreePlayersCarousel({
 
   const players = playersQuery.data ?? [];
 
+  // Hold the cards' space while they load: rendering nothing collapsed the
+  // section and moved everything below up, then back down (2026-09-27).
+  if (playersQuery.isPending && !ownZonesQuery.isError) {
+    return <HomeFreePlayersSkeleton />;
+  }
+
   if (players.length === 0) {
     return null;
   }
@@ -484,6 +490,52 @@ export function HomeFreePlayersCarousel({
   );
 }
 
+/**
+ * Two placeholder cards with the real card's layout and text styles, so the
+ * real cards replace them without the section changing height.
+ */
+export function HomeFreePlayersSkeleton() {
+  const { rowDirection } = useLayoutDirection();
+  const card = (key: number) => (
+    <View key={key} style={styles.card}>
+      <View style={[styles.header, { flexDirection: rowDirection }]}>
+        <View style={styles.skeletonAvatar} />
+        <View style={styles.identity}>
+          <AppText style={[styles.name, styles.skeletonBar, { width: 120 }]}>
+            {" "}
+          </AppText>
+          <AppText style={[styles.level, styles.skeletonBar, { width: 72 }]}>
+            {" "}
+          </AppText>
+        </View>
+      </View>
+      <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
+        <AppText style={[styles.metaText, styles.skeletonBar, { width: 140 }]}>
+          {" "}
+        </AppText>
+      </View>
+      <View style={[styles.detailSlot, { flexDirection: rowDirection }]}>
+        <AppText style={[styles.detailText, styles.skeletonBar]}>{" "}</AppText>
+      </View>
+    </View>
+  );
+
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[
+        styles.root,
+        styles.skeletonStrip,
+        { flexDirection: rowDirection },
+      ]}
+    >
+      {card(0)}
+      {card(1)}
+    </View>
+  );
+}
+
 function firstZoneLabel(zones: unknown, locale: string): string {
   const full = zoneLabelFromList(zones, locale);
   if (!full) return "";
@@ -494,6 +546,23 @@ const styles = createLiveSheet(() =>
   StyleSheet.create({
     root: {
       gap: 0,
+    },
+    skeletonStrip: {
+      gap: HOME_FREE_PLAYER_CARD_GAP,
+      overflow: "hidden",
+    },
+    skeletonAvatar: {
+      width: CARD_AVATAR,
+      height: CARD_AVATAR,
+      borderRadius: CARD_AVATAR / 2,
+      backgroundColor: tennisColors.muted,
+    },
+    // Same text styles as the card, so each bar is exactly one line high.
+    skeletonBar: {
+      alignSelf: "flex-start",
+      borderRadius: 4,
+      backgroundColor: tennisColors.muted,
+      color: "transparent",
     },
     scroll: {
       flexGrow: 0,
