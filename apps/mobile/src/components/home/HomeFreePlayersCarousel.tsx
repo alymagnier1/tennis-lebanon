@@ -38,6 +38,8 @@ import {
 } from "../../lib/home-free-players-carousel";
 import { clubNamesFromList } from "../../lib/match-clubs";
 import { useLayoutDirection } from "../../lib/layout-direction";
+import { useScreenReaderEnabled } from "../../hooks/useScreenReaderEnabled";
+import { SnapStrip, type SnapStripRelease } from "../SnapStrip";
 import { zoneLabelFromList } from "../../lib/zones";
 import { supabase } from "../../lib/supabase";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
@@ -107,6 +109,11 @@ export function HomeFreePlayersCarousel({
   // Native RTL mirrors the strip and its offsets; not verified on Android, so
   // Arabic keeps the original edge (bounce and fling rewind only).
   const leadingSlack = isRtl ? 0 : HOME_FREE_PLAYER_LEADING_SLACK_PX;
+  const screenReaderEnabled = useScreenReaderEnabled();
+  // A screen reader must be able to scroll a focused card into view, and
+  // native RTL is unverified here, so both keep the ScrollView.
+  const useSnapStrip =
+    Platform.OS === "android" && !isRtl && !screenReaderEnabled;
 
   const ownZonesQuery = useQuery({
     queryKey: ["own-preferred-zone-ids"],
@@ -279,6 +286,189 @@ export function HomeFreePlayersCarousel({
     settleIntoRestingRange(event);
   };
 
+  const items = (
+    <>
+      {players.map((player) => {
+        const areaLabel = firstZoneLabel(player.zones, locale);
+        const detail = homeFreePlayerDetailLine({
+          about: player.bio ?? "",
+          clubNames: clubNamesFromList(player.favorite_clubs),
+        });
+
+        return (
+          <Pressable
+            key={player.user_id}
+            accessibilityRole="button"
+            accessibilityLabel={t("discover.openPlayerProfile", {
+              name: player.display_name,
+            })}
+            onPress={() => openProfile(player)}
+            style={({ pressed }) => [
+              styles.card,
+              webItemSnap,
+              pressed && styles.pressed,
+            ]}
+          >
+            <View style={[styles.header, { flexDirection: rowDirection }]}>
+              <Avatar
+                name={player.display_name}
+                avatarPath={player.avatar_path}
+                size={CARD_AVATAR}
+              />
+              <View style={styles.identity}>
+                <AppText
+                  style={[styles.name, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {player.display_name}
+                </AppText>
+                <AppText
+                  style={[styles.level, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {t(`skillBandsShort.${player.skill_band}`)}
+                </AppText>
+              </View>
+            </View>
+
+            <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
+              {areaLabel ? (
+                <View
+                  style={[styles.metaItem, { flexDirection: rowDirection }]}
+                >
+                  <Icon
+                    name="place"
+                    size={13}
+                    color={tennisColors.mutedForeground}
+                  />
+                  <AppText
+                    style={[styles.metaText, { writingDirection }]}
+                    maxLines={1}
+                  >
+                    {areaLabel}
+                  </AppText>
+                </View>
+              ) : null}
+              {detail.metaClubLabel ? (
+                <View
+                  style={[styles.metaItem, { flexDirection: rowDirection }]}
+                >
+                  <Icon
+                    name="court"
+                    size={13}
+                    color={tennisColors.mutedForeground}
+                  />
+                  <AppText
+                    style={[styles.metaText, { writingDirection }]}
+                    maxLines={1}
+                  >
+                    {detail.metaClubLabel}
+                  </AppText>
+                </View>
+              ) : null}
+            </View>
+
+            <View style={[styles.detailSlot, { flexDirection: rowDirection }]}>
+              {detail.kind === "clubs" ? (
+                <Icon
+                  name="court"
+                  size={13}
+                  color={tennisColors.mutedForeground}
+                />
+              ) : null}
+              {detail.text ? (
+                <AppText
+                  style={[styles.detailText, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {detail.text}
+                </AppText>
+              ) : null}
+            </View>
+          </Pressable>
+        );
+      })}
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("home.free.viewAllForSlot", {
+          slot: block.label,
+        })}
+        onPress={() =>
+          router.push({
+            pathname: "/(tabs)/discover",
+            params: {
+              segment: "players",
+              freeFrom: block.startsAt,
+              freeTo: block.endsAt,
+            },
+          })
+        }
+        style={({ pressed }) => [
+          styles.seeAll,
+          webEndItemSnap,
+          { flexDirection: rowDirection },
+          pressed && styles.pressed,
+        ]}
+      >
+        <AppText style={[styles.seeAllLabel, { writingDirection }]}>
+          {t("home.free.viewAll")}
+        </AppText>
+      </Pressable>
+    </>
+  );
+
+  /**
+   * Android, left to right, screen reader off: the strip settles itself (see
+   * `SnapStrip`). React Native's own snapping stops dead on a fast swipe.
+   */
+  const handleStripRelease = (release: SnapStripRelease): boolean => {
+    const lastIndex = release.offsets.length - 1;
+    if (
+      onScrollPastEnd &&
+      homeFreePlayerShouldAdvanceOffer({
+        offsetX: release.position,
+        contentWidth: release.contentWidth,
+        viewportWidth: release.viewportWidth,
+        velocityX: release.velocity,
+        wasAtEnd: release.startIndex === lastIndex,
+      })
+    ) {
+      onScrollPastEnd();
+      return true;
+    }
+    if (
+      onScrollPastStart &&
+      homeFreePlayerShouldRewindOffer({
+        offsetX: release.position,
+        velocityX: release.velocity,
+        wasAtStart: release.startIndex === 0,
+      })
+    ) {
+      onScrollPastStart();
+      return true;
+    }
+    return false;
+  };
+
+  if (useSnapStrip) {
+    return (
+      <View style={styles.root}>
+        <SnapStrip
+          offsetsFor={(contentWidth, viewportWidth) =>
+            homeFreePlayerSnapOffsets(players.length, {
+              maxOffsetX: Math.max(0, contentWidth - viewportWidth),
+            })
+          }
+          onRelease={handleStripRelease}
+          contentStyle={styles.strip}
+        >
+          {items}
+        </SnapStrip>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -319,135 +509,8 @@ export function HomeFreePlayersCarousel({
         ]}
         contentContainerStyle={[styles.strip, { paddingStart: leadingSlack }]}
       >
-        {players.map((player) => {
-          const areaLabel = firstZoneLabel(player.zones, locale);
-          const detail = homeFreePlayerDetailLine({
-            about: player.bio ?? "",
-            clubNames: clubNamesFromList(player.favorite_clubs),
-          });
+        {items}
 
-          return (
-            <Pressable
-              key={player.user_id}
-              accessibilityRole="button"
-              accessibilityLabel={t("discover.openPlayerProfile", {
-                name: player.display_name,
-              })}
-              onPress={() => openProfile(player)}
-              style={({ pressed }) => [
-                styles.card,
-                webItemSnap,
-                pressed && styles.pressed,
-              ]}
-            >
-              <View style={[styles.header, { flexDirection: rowDirection }]}>
-                <Avatar
-                  name={player.display_name}
-                  avatarPath={player.avatar_path}
-                  size={CARD_AVATAR}
-                />
-                <View style={styles.identity}>
-                  <AppText
-                    style={[styles.name, { writingDirection }]}
-                    maxLines={1}
-                  >
-                    {player.display_name}
-                  </AppText>
-                  <AppText
-                    style={[styles.level, { writingDirection }]}
-                    maxLines={1}
-                  >
-                    {t(`skillBandsShort.${player.skill_band}`)}
-                  </AppText>
-                </View>
-              </View>
-
-              <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
-                {areaLabel ? (
-                  <View
-                    style={[styles.metaItem, { flexDirection: rowDirection }]}
-                  >
-                    <Icon
-                      name="place"
-                      size={13}
-                      color={tennisColors.mutedForeground}
-                    />
-                    <AppText
-                      style={[styles.metaText, { writingDirection }]}
-                      maxLines={1}
-                    >
-                      {areaLabel}
-                    </AppText>
-                  </View>
-                ) : null}
-                {detail.metaClubLabel ? (
-                  <View
-                    style={[styles.metaItem, { flexDirection: rowDirection }]}
-                  >
-                    <Icon
-                      name="court"
-                      size={13}
-                      color={tennisColors.mutedForeground}
-                    />
-                    <AppText
-                      style={[styles.metaText, { writingDirection }]}
-                      maxLines={1}
-                    >
-                      {detail.metaClubLabel}
-                    </AppText>
-                  </View>
-                ) : null}
-              </View>
-
-              <View
-                style={[styles.detailSlot, { flexDirection: rowDirection }]}
-              >
-                {detail.kind === "clubs" ? (
-                  <Icon
-                    name="court"
-                    size={13}
-                    color={tennisColors.mutedForeground}
-                  />
-                ) : null}
-                {detail.text ? (
-                  <AppText
-                    style={[styles.detailText, { writingDirection }]}
-                    maxLines={1}
-                  >
-                    {detail.text}
-                  </AppText>
-                ) : null}
-              </View>
-            </Pressable>
-          );
-        })}
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("home.free.viewAllForSlot", {
-            slot: block.label,
-          })}
-          onPress={() =>
-            router.push({
-              pathname: "/(tabs)/discover",
-              params: {
-                segment: "players",
-                freeFrom: block.startsAt,
-                freeTo: block.endsAt,
-              },
-            })
-          }
-          style={({ pressed }) => [
-            styles.seeAll,
-            webEndItemSnap,
-            { flexDirection: rowDirection },
-            pressed && styles.pressed,
-          ]}
-        >
-          <AppText style={[styles.seeAllLabel, { writingDirection }]}>
-            {t("home.free.viewAll")}
-          </AppText>
-        </Pressable>
         {/* Slack past View all so web (no rubber-band) can keep scrolling. */}
         <View
           accessibilityElementsHidden
