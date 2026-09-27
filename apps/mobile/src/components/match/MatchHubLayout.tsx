@@ -4,7 +4,10 @@ import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FigmaBackButton } from "../onboarding-ui";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { stackScreenTopPadding } from "../../lib/stack-screen-padding";
+import {
+  stackScreenBottomPadding,
+  stackScreenTopPadding,
+} from "../../lib/stack-screen-padding";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 
 export function MatchHubLayout({
@@ -64,7 +67,10 @@ export function MatchHubLayout({
           styles.content,
           {
             paddingHorizontal: tennisSpacing.screenX,
-            paddingBottom: dock || footer ? 24 : insets.bottom + 24,
+            paddingBottom:
+              dock || footer
+                ? 24
+                : stackScreenBottomPadding(insets.bottom) + 24,
           },
         ]}
         keyboardShouldPersistTaps="handled"
@@ -81,7 +87,14 @@ export function MatchHubLayout({
       {dock ? (
         <View
           style={
-            footer ? undefined : { paddingBottom: Math.max(insets.bottom, 8) }
+            footer
+              ? undefined
+              : {
+                  paddingBottom: Math.max(
+                    stackScreenBottomPadding(insets.bottom),
+                    8,
+                  ),
+                }
           }
         >
           {dock}

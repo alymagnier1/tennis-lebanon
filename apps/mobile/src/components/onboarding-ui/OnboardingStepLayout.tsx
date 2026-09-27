@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
 import { FigmaBackButton } from "./FigmaButtons";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
+import { stackScreenBottomPadding } from "../../lib/stack-screen-padding";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { useTranslation } from "react-i18next";
@@ -125,7 +126,7 @@ export function OnboardingStepLayout({
     styles.root,
     {
       paddingTop: insets.top + 36,
-      paddingBottom: insets.bottom + 30,
+      paddingBottom: stackScreenBottomPadding(insets.bottom) + 30,
     },
   ];
   const content = (
