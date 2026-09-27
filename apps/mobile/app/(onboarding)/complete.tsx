@@ -28,7 +28,6 @@ import {
 } from "../../src/theme/tennis-tokens";
 import { tennisTextStyles } from "../../src/theme/tennis-text-styles";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
-import { stackScreenBottomPadding } from "../../src/lib/stack-screen-padding";
 import type { HeroFamily } from "../../src/theme/hero-variant";
 
 const ART = {
@@ -315,7 +314,7 @@ export default function OnboardingCompleteScreen() {
       <View
         style={{
           paddingHorizontal: tennisSpacing.screenX,
-          paddingBottom: stackScreenBottomPadding(insets.bottom) + 34,
+          paddingBottom: insets.bottom + 34,
         }}
       >
         <FigmaPrimaryButton

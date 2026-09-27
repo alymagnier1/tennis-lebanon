@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { HeroScrim } from "./HeroScrim";
 import { useHeroVariant } from "../../providers/HeroVariantProvider";
-import { stackScreenBottomPadding } from "../../lib/stack-screen-padding";
 import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import {
   tennisColors,
@@ -148,7 +147,7 @@ export function AuthHeroLayout({
           styles.content,
           {
             paddingTop: insets.top + 36,
-            paddingBottom: stackScreenBottomPadding(insets.bottom) + 34,
+            paddingBottom: insets.bottom + 34,
           },
         ]}
         keyboardShouldPersistTaps="handled"

@@ -51,7 +51,6 @@ import { useLayoutDirection } from "../../src/lib/layout-direction";
 import { exitClubDetail } from "../../src/lib/navigation";
 import { preferredClubLocationLabel } from "../../src/lib/match-clubs";
 import { matchHubRoute } from "../../src/lib/routes";
-import { stackScreenBottomPadding } from "../../src/lib/stack-screen-padding";
 import { supabase } from "../../src/lib/supabase";
 import { openWhatsAppBooking } from "../../src/lib/whatsapp-booking";
 import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
@@ -488,7 +487,7 @@ export default function ClubDetailScreen() {
             styles.footer,
             {
               paddingHorizontal: tennisSpacing.screenX,
-              paddingBottom: stackScreenBottomPadding(insets.bottom) + 12,
+              paddingBottom: insets.bottom + 12,
             },
           ]}
         >

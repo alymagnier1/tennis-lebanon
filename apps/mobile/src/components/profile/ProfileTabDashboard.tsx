@@ -40,7 +40,6 @@ import {
 import { supabase } from "../../lib/supabase";
 import { CLUBS_ROUTE } from "../../lib/routes";
 import { zoneLabelFromList } from "../../lib/zones";
-import { stackScreenBottomPadding } from "../../lib/stack-screen-padding";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
@@ -165,7 +164,7 @@ export function ProfileTabDashboard() {
       <ScrollView
         style={styles.screen}
         contentContainerStyle={{
-          paddingBottom: stackScreenBottomPadding(insets.bottom) + 80,
+          paddingBottom: insets.bottom + 80,
         }}
         showsVerticalScrollIndicator={false}
       >

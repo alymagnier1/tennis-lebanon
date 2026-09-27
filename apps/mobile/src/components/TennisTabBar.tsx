@@ -24,7 +24,6 @@ import {
   TAB_BAR_LABEL_HEIGHT,
   TAB_BAR_TOP_PADDING,
 } from "../lib/tab-bar-metrics";
-import { stackScreenBottomPadding } from "../lib/stack-screen-padding";
 import { supabase } from "../lib/supabase";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 import {
@@ -192,12 +191,7 @@ export function TennisTabBar({
     <View
       style={[
         styles.bar,
-        {
-          paddingBottom: Math.max(
-            stackScreenBottomPadding(insets.bottom),
-            TAB_BAR_BOTTOM_PADDING_MIN,
-          ),
-        },
+        { paddingBottom: Math.max(insets.bottom, TAB_BAR_BOTTOM_PADDING_MIN) },
       ]}
     >
       <View style={styles.barRow}>

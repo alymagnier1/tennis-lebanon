@@ -18,10 +18,7 @@ import {
 } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  stackScreenBottomPadding,
-  stackScreenTopPadding,
-} from "../lib/stack-screen-padding";
+import { stackScreenTopPadding } from "../lib/stack-screen-padding";
 import {
   colors,
   elevation,
@@ -179,7 +176,7 @@ export function Screen({
   if (fixedHeader) {
     const body = renderVirtualizedBody(
       edgePadding,
-      Math.max(stackScreenBottomPadding(insets.bottom), spacing.lg),
+      Math.max(insets.bottom, spacing.lg),
       true,
     );
 
@@ -207,10 +204,7 @@ export function Screen({
               !contentGrow && styles.screenCompact,
               {
                 paddingHorizontal: edgePadding,
-                paddingBottom: Math.max(
-                  stackScreenBottomPadding(insets.bottom),
-                  spacing.lg,
-                ),
+                paddingBottom: Math.max(insets.bottom, spacing.lg),
               },
             ]}
             keyboardShouldPersistTaps="handled"
@@ -225,7 +219,7 @@ export function Screen({
 
   const body = renderVirtualizedBody(
     edgePadding,
-    Math.max(stackScreenBottomPadding(insets.bottom), spacing.lg),
+    Math.max(insets.bottom, spacing.lg),
   );
 
   if (body) {
@@ -240,10 +234,7 @@ export function Screen({
         !contentGrow && styles.screenCompact,
         {
           paddingHorizontal: edgePadding,
-          paddingBottom: Math.max(
-            stackScreenBottomPadding(insets.bottom),
-            spacing.lg,
-          ),
+          paddingBottom: Math.max(insets.bottom, spacing.lg),
         },
         stackTopPadding !== undefined && { paddingTop: stackTopPadding },
       ]}

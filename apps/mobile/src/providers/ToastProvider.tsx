@@ -13,7 +13,6 @@ import { createLiveSheet } from "../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { useTennisTheme } from "./ThemeProvider";
-import { stackScreenBottomPadding } from "../lib/stack-screen-padding";
 import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
@@ -61,10 +60,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {message ? (
         <View
           pointerEvents="box-none"
-          style={[
-            styles.host,
-            { bottom: stackScreenBottomPadding(insets.bottom) + 72 },
-          ]}
+          style={[styles.host, { bottom: insets.bottom + 72 }]}
         >
           <Pressable
             accessibilityRole="alert"
