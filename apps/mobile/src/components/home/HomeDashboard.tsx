@@ -23,9 +23,7 @@ import {
 } from "@tennis-lebanon/api";
 import {
   isProvisionalPlayerRating,
-  PROVISIONAL_RATING_MATCH_THRESHOLD,
   ratedMatchesUntilRatingUnlock,
-  ratingUnlockProgress,
 } from "@tennis-lebanon/domain";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
@@ -33,6 +31,7 @@ import { EmptyState, ListSkeleton, MatchCard, Avatar } from "../AppUi";
 import { ScreenError } from "../FormUi";
 import { CountBadge } from "../CountBadge";
 import { HomeFreeSlots } from "./HomeFreeSlots";
+import { HomeRatingCard } from "./HomeRatingCard";
 import { HomeOpenMatches } from "./HomeOpenMatches";
 import { HomeNextActionsCarousel } from "./HomeNextActionsCarousel";
 import { FigmaPrimaryButton, FigmaSecondaryButton } from "../onboarding-ui";
@@ -72,16 +71,8 @@ import { PROFILE_TAB_ROUTE } from "../../lib/navigation";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../providers/AuthProvider";
 import { notify } from "../../lib/confirm-action";
-import {
-  profileScreenMatchesStatLabel,
-  profileScreenRatingStatHint,
-  profileScreenRatingStatValue,
-} from "../../lib/profile-screen-copy";
-import {
-  tennisColors,
-  tennisRadii,
-  tennisSpacing,
-} from "../../theme/tennis-tokens";
+import { profileScreenRatingStatValue } from "../../lib/profile-screen-copy";
+import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useHomeOpenMatchPicks } from "../../hooks/useHomeOpenMatchPicks";
@@ -198,12 +189,6 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
         playerProfile.internal_rating,
       )
     : profileScreenRatingStatValue(0, 0);
-  const ratingStatLabel = playerProfile
-    ? isProvisionalPlayerRating(playerProfile.rated_match_count)
-      ? (profileScreenRatingStatHint(playerProfile.rated_match_count, t) ??
-        t("rating.ownRatingLabel"))
-      : t("rating.ownRatingLabel")
-    : t("rating.ownRatingLabel");
 
   /**
    * "7 played / 0 of 5 rated" is honest but reads as a broken counter without the
@@ -343,90 +328,22 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
           </Pressable>
         </View>
 
-        {showRatingProgress ? (
-          <View
-            accessible
-            accessibilityRole="progressbar"
-            accessibilityLabel={t("home.ratingProgress.title")}
-            accessibilityValue={{
-              min: 0,
-              max: PROVISIONAL_RATING_MATCH_THRESHOLD,
-              now: ratedMatchCount,
-              text: t("home.ratingProgress.remaining", {
-                count: ratingRemaining,
-              }),
-            }}
-            style={styles.ratingProgress}
-          >
-            <View style={styles.ratingTrack}>
-              <View
-                style={[
-                  styles.ratingFill,
-                  { width: `${ratingUnlockProgress(ratedMatchCount) * 100}%` },
-                ]}
-              />
-            </View>
-            <AppText style={[styles.ratingProgressHint, { writingDirection }]}>
-              {t("home.ratingProgress.remaining", {
-                count: ratingRemaining,
-              })}
-            </AppText>
-
-            {awaitingScore > 0 ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t(
-                  "home.ratingProgress.awaitingScoreAction",
-                )}
-                onPress={() => router.push(MATCHES_ROUTE)}
-                style={({ pressed }) => [pressed && { opacity: 0.85 }]}
-              >
-                <AppText
-                  style={[styles.ratingProgressLink, { writingDirection }]}
-                >
-                  {t("home.ratingProgress.awaitingScore", {
-                    pending: awaitingScore,
-                  })}
-                </AppText>
-              </Pressable>
-            ) : null}
-          </View>
-        ) : null}
-
-        <View style={[styles.homeStats, { flexDirection: rowDirection }]}>
-          <View style={styles.homeStatCell}>
-            <AppText style={styles.homeStatValue}>{matchesPlayed}</AppText>
-            <AppText style={[styles.homeStatLabel, { writingDirection }]}>
-              {profileScreenMatchesStatLabel(matchesPlayed, t)}
-            </AppText>
-          </View>
-          <View style={styles.homeStatDivider} />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("profile.ratingExplainerTitle")}
-            onPress={() =>
+        {playerProfile ? (
+          <HomeRatingCard
+            provisional={showRatingProgress}
+            ratedMatchCount={ratedMatchCount}
+            remaining={ratingRemaining}
+            ratingValue={ratingStatValue}
+            awaitingScore={awaitingScore}
+            onExplain={() =>
               notify(
                 t("profile.ratingExplainerTitle"),
                 t("profile.ratingExplainerBody"),
               )
             }
-            style={styles.homeStatCell}
-          >
-            <View
-              style={[styles.homeStatValueRow, { flexDirection: rowDirection }]}
-            >
-              <AppText style={styles.homeStatValue}>{ratingStatValue}</AppText>
-              <Icon
-                name="info"
-                size={12}
-                color={tennisColors.mutedForeground}
-              />
-            </View>
-            <AppText style={[styles.homeStatLabel, { writingDirection }]}>
-              {ratingStatLabel}
-            </AppText>
-          </Pressable>
-        </View>
+            onOpenAwaitingScore={() => router.push(MATCHES_ROUTE)}
+          />
+        ) : null}
       </View>
 
       <View style={styles.body}>
@@ -635,80 +552,6 @@ const styles = createLiveSheet(() =>
       alignItems: "center",
       justifyContent: "center",
       overflow: "visible",
-    },
-    ratingProgress: {
-      marginTop: 14,
-      gap: 8,
-    },
-    ratingTrack: {
-      height: 10,
-      borderRadius: 5,
-      overflow: "hidden",
-      backgroundColor: tennisColors.secondary,
-      borderWidth: 1,
-      borderColor: tennisColors.border,
-    },
-    ratingFill: {
-      height: "100%",
-      borderRadius: 4,
-      backgroundColor: tennisColors.violet,
-    },
-    ratingProgressHint: {
-      fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 13,
-      lineHeight: 18,
-      color: tennisColors.primaryDark,
-    },
-    homeStats: {
-      marginTop: 10,
-      borderRadius: tennisRadii.md,
-      borderWidth: 1,
-      borderColor: tennisColors.border,
-      backgroundColor: tennisColors.card,
-      overflow: "hidden",
-    },
-    homeStatCell: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      paddingVertical: 8,
-      paddingHorizontal: 6,
-      minHeight: 44,
-    },
-    homeStatDivider: {
-      width: 1,
-      backgroundColor: tennisColors.border,
-      marginVertical: 8,
-    },
-    homeStatValueRow: {
-      alignItems: "center",
-      gap: 4,
-    },
-    // The number is what this card exists to show, so it reads larger than the
-    // section titles around it. It used to be 14px under an 18px title, with a
-    // 10px caption, which inverted the hierarchy and made the stats look like
-    // a footnote on the player's own summary.
-    homeStatValue: {
-      fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 22,
-      lineHeight: 26,
-      color: tennisColors.primaryDark,
-      letterSpacing: -0.4,
-    },
-    homeStatLabel: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 12,
-      lineHeight: 16,
-      color: tennisColors.mutedForeground,
-      marginTop: 1,
-      textAlign: "center",
-    },
-    ratingProgressLink: {
-      fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 13,
-      lineHeight: 18,
-      color: tennisColors.violetText,
-      textDecorationLine: "underline",
     },
     body: {
       paddingHorizontal: tennisSpacing.screenX,
