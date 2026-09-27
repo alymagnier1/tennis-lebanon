@@ -44,7 +44,7 @@ import {
   MATCHES_TAB_ROUTE,
 } from "../../../src/lib/navigation";
 import { matchHubRoute } from "../../../src/lib/routes";
-import { stackScreenBottomPadding } from "../../../src/lib/stack-screen-padding";
+import { pinnedBottomPadding } from "../../../src/lib/stack-screen-padding";
 import {
   buildMatchInviteUrl,
   matchInviteErrorKey,
@@ -526,12 +526,7 @@ export default function MatchInvitePlayersScreen() {
       <View
         style={[
           styles.footer,
-          {
-            paddingBottom: Math.max(
-              stackScreenBottomPadding(insets.bottom),
-              12,
-            ),
-          },
+          { paddingBottom: pinnedBottomPadding(insets.bottom, 12) },
         ]}
       >
         <AppText style={[styles.footerHint, { writingDirection }]}>

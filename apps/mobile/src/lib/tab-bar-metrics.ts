@@ -1,11 +1,12 @@
-import { stackScreenBottomPadding } from "./stack-screen-padding";
+import { pinnedBottomPadding } from "./stack-screen-padding";
 
 /** Keep in sync with `TennisTabBar` layout (for full-screen overlays only). */
 export const TAB_BAR_TOP_PADDING = 12;
 export const TAB_BAR_ICON_WELL_HEIGHT = 44;
 export const TAB_BAR_LABEL_GAP = 4;
 export const TAB_BAR_LABEL_HEIGHT = 13;
-export const TAB_BAR_BOTTOM_PADDING_MIN = 8;
+/** Space between the tab labels and the system navigation bar. */
+export const TAB_BAR_BOTTOM_GAP = 8;
 
 export function bottomTabBarHeight(safeAreaBottom: number): number {
   return (
@@ -13,10 +14,7 @@ export function bottomTabBarHeight(safeAreaBottom: number): number {
     TAB_BAR_ICON_WELL_HEIGHT +
     TAB_BAR_LABEL_GAP +
     TAB_BAR_LABEL_HEIGHT +
-    Math.max(
-      stackScreenBottomPadding(safeAreaBottom),
-      TAB_BAR_BOTTOM_PADDING_MIN,
-    )
+    pinnedBottomPadding(safeAreaBottom, TAB_BAR_BOTTOM_GAP)
   );
 }
 

@@ -10,22 +10,23 @@ export function stackScreenTopPadding(safeAreaTop: number): number {
 }
 
 /**
- * `useSafeAreaInsets().bottom` can report `0` on a phone that is actually
- * showing the classic 3-button Android navigation bar. Confirmed on the
- * founder's phone (2026-09-27): the tab bar, the invite page's buttons, the
- * match hub's action bar and the create-match footer all sat flush against
- * the on-screen nav buttons, with no gap at all -- every one of them was
- * trusting `insets.bottom` for that clearance.
+ * Bottom padding for a control pinned to the bottom of the screen: clear the
+ * system navigation area, then leave `gap` so the control never rests on the
+ * bar's top edge.
  *
- * Every sticky bottom control floors through this instead of using the inset
- * directly. A genuine `0` (gesture navigation, iOS with a home button) is
- * indistinguishable from the bug from inside the app, so the floor applies
- * whenever the inset reads as missing -- it only ever adds space, never
- * removes the breathing room a screen already asks for on top of it.
+ * `Math.max(safeAreaBottom, gap)` looked equivalent and is not. Wherever the
+ * bar is taller than the gap it adds nothing, so on the founder's phone
+ * (3-button navigation, a 48dp bar) the tab bar, the invite page's buttons and
+ * the match hub's action bar all sat exactly on the bar (2026-09-27).
+ *
+ * Adapts to every phone: no bar (hidden, iPhone SE) gets `gap`, as before; a
+ * gesture handle or iPhone home indicator gets its inset plus `gap`; a
+ * 3-button bar gets its full height plus `gap`. Pass the old minimum as `gap`
+ * and a phone without a bar sees no change at all.
  */
-export const ANDROID_NAV_FALLBACK_BOTTOM = 48;
-
-/** Bottom inset for sticky footers, tab bars and stack-screen bottoms. */
-export function stackScreenBottomPadding(safeAreaBottom: number): number {
-  return safeAreaBottom > 0 ? safeAreaBottom : ANDROID_NAV_FALLBACK_BOTTOM;
+export function pinnedBottomPadding(
+  safeAreaBottom: number,
+  gap: number,
+): number {
+  return safeAreaBottom + gap;
 }

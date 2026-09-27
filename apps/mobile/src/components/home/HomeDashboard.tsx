@@ -87,7 +87,6 @@ import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useHomeOpenMatchPicks } from "../../hooks/useHomeOpenMatchPicks";
 import { useHomeLiquidityOffers } from "../../hooks/useHomeLiquidityOffers";
 import { homeFirstPlayKind } from "../../lib/home-first-play";
-import { stackScreenBottomPadding } from "../../lib/stack-screen-padding";
 
 export function HomeDashboard({ displayName }: { displayName: string }) {
   const { t, i18n } = useTranslation();
@@ -282,11 +281,7 @@ export function HomeDashboard({ displayName }: { displayName: string }) {
       style={styles.screen}
       contentContainerStyle={[
         styles.content,
-        {
-          paddingBottom:
-            stackScreenBottomPadding(insets.bottom) +
-            tennisSpacing.screenBottom,
-        },
+        { paddingBottom: insets.bottom + tennisSpacing.screenBottom },
       ]}
       stickyHeaderIndices={[0]}
       refreshControl={
