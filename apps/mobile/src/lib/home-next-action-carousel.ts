@@ -25,6 +25,39 @@ export function homeNextActionSnapOffsets(
   return offsets;
 }
 
+/**
+ * Strip padding after the last card. Without it the last snap offset sits one
+ * peek past the scrollable end, and the snap stops dead against the edge
+ * instead of easing in.
+ */
+export const HOME_NEXT_ACTION_END_PADDING = HOME_NEXT_ACTION_PEEK;
+
+/**
+ * Stops for dot `index`: 1 while its card is snapped, 0 a full page away.
+ * Mirrored for the negative offsets RTL reports on web.
+ */
+export function homeNextActionDotProgressRange(
+  index: number,
+  cardWidth: number,
+): { inputRange: number[]; outputRange: number[] } {
+  const interval = homeNextActionSnapInterval(cardWidth);
+  const at = index * interval;
+  if (index === 0) {
+    return { inputRange: [-interval, 0, interval], outputRange: [0, 1, 0] };
+  }
+  return {
+    inputRange: [
+      -at - interval,
+      -at,
+      -at + interval,
+      at - interval,
+      at,
+      at + interval,
+    ],
+    outputRange: [0, 1, 0, 0, 1, 0],
+  };
+}
+
 export function homeNextActionPageIndex(
   offsetX: number,
   cardWidth: number,

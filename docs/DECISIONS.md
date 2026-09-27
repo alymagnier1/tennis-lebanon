@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-27 — Home next-action cards are one tap target, not a card with a button
+
+- Status: accepted
+- Context: Each Home next-action card had an icon, a one-line title, a two-line body and a trailing violet button. On a ~360pt phone the card is ~284pt wide, and the button (~88pt) plus the icon left the title ~117pt. "Add when you play" needs ~125pt at default size, so it was cut mid-word, and worse at large text or in French.
+- Decision: The whole card is the control. The button is replaced by a trailing chevron, the button's label moves to the accessibility hint, and the title may wrap to two lines. Rematch keeps its custom press handler.
+- Alternatives considered: removing the icon and wrapping the title while keeping the button (keeps the loudest CTA, but still tight at large text); stacking the button under the text (never truncates, but every card at the top of Home grows much taller); shorter copy only (fixes English, not French or large text).
+- Consequences: The primary action is carried by the card's tone colour and chevron rather than a filled button, which is quieter; worth checking in cohort A that people still tap it. Carousel swipes still work because a press fires only without a drag.
+- Owner: Founder/product validation
+
 ## 2026-09-26 — The APK carries ARM code only, and the bundle only what it uses
 
 - Status: accepted
