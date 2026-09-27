@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppText } from "../AppText";
 import { ScreenError } from "../FormUi";
 import { SlideIn } from "../SlideIn";
@@ -13,6 +14,10 @@ import { adjacentLiquidityOfferStartsAt } from "../../lib/home-free-players-caro
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { weekdayIndexFromBeirutDateKey } from "../../lib/near-term-availability";
 import { useHomeLiquidityOffers } from "../../hooks/useHomeLiquidityOffers";
+import {
+  homeFreePlayersQueryOptions,
+  ownPreferredZoneIdsQueryOptions,
+} from "../../lib/home-free-players-query";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
@@ -40,6 +45,12 @@ export function HomeFreeSlots() {
   const [selectedStartsAt, setSelectedStartsAt] = useState<string | null>(null);
   // Which side the next set of cards enters from; 0 until the player moves.
   const [enterFrom, setEnterFrom] = useState<-1 | 0 | 1>(0);
+  // The tab highlight moves at once; the cards change only once the new
+  // tab's players are loaded, so the section never collapses in between.
+  const [shownStartsAt, setShownStartsAt] = useState<string | null>(null);
+  const latestRequestRef = useRef<string | null>(null);
+  const queryClient = useQueryClient();
+  const ownZonesQuery = useQuery(ownPreferredZoneIdsQueryOptions);
   const chipScrollRef = useRef<ScrollView>(null);
   const [chipScrollWidth, setChipScrollWidth] = useState(0);
   const [chipLayouts, setChipLayouts] = useState<
@@ -50,6 +61,19 @@ export function HomeFreeSlots() {
     rows: liquidityRows,
     offers,
   } = useHomeLiquidityOffers();
+
+  // Every tab's players up front: there are only a few tabs, and a tab whose
+  // players are fetched on switch showed an empty gap, then popped in.
+  const ownZoneIds = ownZonesQuery.data;
+  const zonesReady = ownZonesQuery.isSuccess;
+  useEffect(() => {
+    if (!zonesReady) return;
+    for (const offer of offers) {
+      void queryClient.prefetchQuery(
+        homeFreePlayersQueryOptions(offer, ownZoneIds),
+      );
+    }
+  }, [offers, ownZoneIds, queryClient, zonesReady]);
 
   // Fired once per mount, and deliberately fired when empty too: a tap-through
   // rate is meaningless without knowing how often a player was shown any demand.
@@ -131,6 +155,26 @@ export function HomeFreeSlots() {
   const selected =
     offers.find((offer) => offer.startsAt === selectedStartsAt) ?? offers[0]!;
 
+  const shown =
+    offers.find((offer) => offer.startsAt === shownStartsAt) ?? selected;
+
+  function showWhenLoaded(startsAt: string) {
+    const offer = offers.find((candidate) => candidate.startsAt === startsAt);
+    if (!offer) return;
+    latestRequestRef.current = startsAt;
+    const reveal = () => {
+      // A later switch wins over this one.
+      if (latestRequestRef.current === startsAt) setShownStartsAt(startsAt);
+    };
+    if (!zonesReady) {
+      reveal();
+      return;
+    }
+    void queryClient
+      .ensureQueryData(homeFreePlayersQueryOptions(offer, ownZoneIds))
+      .then(reveal, reveal);
+  }
+
   function selectAdjacentOffer(direction: "next" | "prev") {
     const nextStartsAt = adjacentLiquidityOfferStartsAt(
       offers,
@@ -140,6 +184,7 @@ export function HomeFreeSlots() {
     if (nextStartsAt) {
       setEnterFrom(direction === "next" ? 1 : -1);
       setSelectedStartsAt(nextStartsAt);
+      showWhenLoaded(nextStartsAt);
     }
   }
 
@@ -151,6 +196,7 @@ export function HomeFreeSlots() {
     const to = offers.findIndex((offer) => offer.startsAt === startsAt);
     setEnterFrom(to > from ? 1 : -1);
     setSelectedStartsAt(startsAt);
+    showWhenLoaded(startsAt);
   }
 
   return (
@@ -226,12 +272,12 @@ export function HomeFreeSlots() {
         })}
       </ScrollView>
 
-      <SlideIn key={selected.startsAt} from={enterFrom} isRtl={isRtl}>
+      <SlideIn key={shown.startsAt} from={enterFrom} isRtl={isRtl}>
         <HomeFreePlayersCarousel
           block={{
-            startsAt: selected.startsAt,
-            endsAt: selected.endsAt,
-            label: slotLabel(selected),
+            startsAt: shown.startsAt,
+            endsAt: shown.endsAt,
+            label: slotLabel(shown),
           }}
           onScrollPastEnd={() => selectAdjacentOffer("next")}
           onScrollPastStart={() => selectAdjacentOffer("prev")}

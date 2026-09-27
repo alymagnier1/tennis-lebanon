@@ -13,15 +13,7 @@ import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import {
-  discoverCompatiblePlayers,
-  listOwnPreferredZoneIds,
-  type CompatiblePlayerCard,
-} from "@tennis-lebanon/api";
-import {
-  MAX_LEVEL_WINDOW,
-  resolveDiscoverFiltersFromProfile,
-} from "@tennis-lebanon/domain";
+import { type CompatiblePlayerCard } from "@tennis-lebanon/api";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { Avatar } from "../AppUi";
@@ -41,12 +33,13 @@ import { useLayoutDirection } from "../../lib/layout-direction";
 import { useScreenReaderEnabled } from "../../hooks/useScreenReaderEnabled";
 import { SnapStrip, type SnapStripRelease } from "../SnapStrip";
 import { zoneLabelFromList } from "../../lib/zones";
-import { supabase } from "../../lib/supabase";
+import {
+  homeFreePlayersQueryOptions,
+  ownPreferredZoneIdsQueryOptions,
+} from "../../lib/home-free-players-query";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
-/** Enough to feel like a choice, few enough that the rest is worth a tap through. */
-const CARD_LIMIT = 5;
 const CARD_AVATAR = 48;
 
 const webStripSnap: ViewStyle | undefined =
@@ -115,42 +108,11 @@ export function HomeFreePlayersCarousel({
   const useSnapStrip =
     Platform.OS === "android" && !isRtl && !screenReaderEnabled;
 
-  const ownZonesQuery = useQuery({
-    queryKey: ["own-preferred-zone-ids"],
-    queryFn: () => listOwnPreferredZoneIds(supabase),
-    staleTime: 60_000,
-  });
+  const ownZonesQuery = useQuery(ownPreferredZoneIdsQueryOptions);
 
   const playersQuery = useQuery({
-    queryKey: [
-      "home-free-players",
-      block.startsAt,
-      block.endsAt,
-      ownZonesQuery.data,
-    ],
-    queryFn: () =>
-      // Same eligibility as Discover with Level/Intent/Availability off and
-      // Area matching the liquidity count (viewer's own zones). A hard-coded
-      // `levelWindow: 4` used to look wider than Discover's Level chip, which
-      // only sorts — but View-all still opened the Matches tab, so the same
-      // person looked absent. Keep the window at MAX and open Players.
-      discoverCompatiblePlayers(supabase, {
-        ...resolveDiscoverFiltersFromProfile({
-          toggles: {
-            matchLevel: false,
-            matchArea: Boolean(ownZonesQuery.data?.length),
-            matchAvailability: false,
-          },
-          playIntent: "either",
-          ownZoneIds: ownZonesQuery.data,
-        }),
-        levelWindow: MAX_LEVEL_WINDOW,
-        limit: CARD_LIMIT,
-        freeFrom: block.startsAt,
-        freeTo: block.endsAt,
-      }),
+    ...homeFreePlayersQueryOptions(block, ownZonesQuery.data),
     enabled: ownZonesQuery.isSuccess,
-    staleTime: 60_000,
   });
 
   const players = playersQuery.data ?? [];
