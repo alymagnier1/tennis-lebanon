@@ -5,6 +5,7 @@ import {
   senderColorIndex,
   timestampSpacer,
 } from "./match-chat-layout";
+import { ANDROID_NAV_FALLBACK_BOTTOM } from "./stack-screen-padding";
 
 describe("composerBottomPadding", () => {
   it("clears the navigation bar while the keyboard is closed", () => {
@@ -13,10 +14,10 @@ describe("composerBottomPadding", () => {
     ).toBe(48);
   });
 
-  it("keeps a minimum on phones with no navigation bar inset", () => {
+  it("floors to the nav-bar height when the inset reads as missing (the confirmed 2026-09-27 bug)", () => {
     expect(
       composerBottomPadding({ bottomInset: 0, keyboardVisible: false }),
-    ).toBe(10);
+    ).toBe(ANDROID_NAV_FALLBACK_BOTTOM);
   });
 
   it("drops the navigation-bar padding while the keyboard is open (the reported gap)", () => {

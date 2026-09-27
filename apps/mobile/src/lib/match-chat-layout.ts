@@ -1,3 +1,5 @@
+import { stackScreenBottomPadding } from "./stack-screen-padding";
+
 /**
  * Layout rules for the match chat, kept out of the component so they can be
  * tested without rendering.
@@ -14,13 +16,19 @@ export const COMPOSER_GAP_ABOVE_KEYBOARD = 6;
  * the composer to the keyboard's top edge, and the keyboard covers the bar --
  * so padding for the bar as well left an empty strip between the message box
  * and the keyboard (reported 2026-09-26).
+ *
+ * `bottomInset` itself can lie: the founder's phone reported `0` while its
+ * 3-button navigation bar was still on screen, on several other screens
+ * (2026-09-27). `stackScreenBottomPadding` floors that same case here too, so
+ * the send button does not end up flush with the nav bar the way the tab bar
+ * and the create-match footer did.
  */
 export function composerBottomPadding(input: {
   bottomInset: number;
   keyboardVisible: boolean;
 }): number {
   if (input.keyboardVisible) return COMPOSER_GAP_ABOVE_KEYBOARD;
-  return Math.max(input.bottomInset, 10);
+  return Math.max(stackScreenBottomPadding(input.bottomInset), 10);
 }
 
 /**
