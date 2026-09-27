@@ -4,6 +4,7 @@ import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
 import { AppText } from "../AppText";
 import { ScreenError } from "../FormUi";
+import { SlideIn } from "../SlideIn";
 import { HomeFreePlayersCarousel } from "./HomeFreePlayersCarousel";
 import { trackLiquiditySignalViewed } from "../../lib/analytics";
 import { peakLiquidity } from "../../lib/availability-liquidity";
@@ -35,8 +36,15 @@ import { tennisFontFamily } from "../../hooks/useTennisFonts";
  */
 export function HomeFreeSlots() {
   const { t } = useTranslation();
-  const { rowDirection, writingDirection } = useLayoutDirection();
+  const { rowDirection, writingDirection, isRtl } = useLayoutDirection();
   const [selectedStartsAt, setSelectedStartsAt] = useState<string | null>(null);
+  // Which side the next set of cards enters from; 0 until the player moves.
+  const [enterFrom, setEnterFrom] = useState<-1 | 0 | 1>(0);
+  const chipScrollRef = useRef<ScrollView>(null);
+  const [chipScrollWidth, setChipScrollWidth] = useState(0);
+  const [chipLayouts, setChipLayouts] = useState<
+    Record<string, { x: number; width: number }>
+  >({});
   const {
     query: liquidityQuery,
     rows: liquidityRows,
@@ -57,8 +65,8 @@ export function HomeFreeSlots() {
     });
   }, [liquidityQuery.data, liquidityRows]);
 
-  function slotLabel(slot: PingSlot): string {
-    const dayLabel =
+  function slotParts(slot: PingSlot): { day: string; part: string } {
+    const day =
       slot.dayOffset === 0
         ? t("discover.today")
         : slot.dayOffset === 1
@@ -67,12 +75,33 @@ export function HomeFreeSlots() {
               `availability.weekdaysShort.${weekdayIndexFromBeirutDateKey(slot.dateKey)}`,
             );
 
+    return { day, part: t(`availability.blocks.${slot.part}`) };
+  }
+
+  function slotLabel(slot: PingSlot): string {
+    const { day, part } = slotParts(slot);
     // Composed here rather than through a key, matching
     // formatNearTermAvailabilitySlots: both halves are already translated, so a
     // key would be pure interpolation and identical across locales, which the
     // parity guard rejects.
-    return `${dayLabel} · ${t(`availability.blocks.${slot.part}`)}`;
+    return `${day} · ${part}`;
   }
+
+  // Keep the selected tab in view when a swipe on the cards changes it. Left
+  // to right only: the RTL row is reversed and its offsets are unverified.
+  const selectedLayout = selectedStartsAt
+    ? chipLayouts[selectedStartsAt]
+    : undefined;
+  useEffect(() => {
+    if (isRtl || !selectedLayout || chipScrollWidth <= 0) return;
+    chipScrollRef.current?.scrollTo({
+      x: Math.max(
+        0,
+        selectedLayout.x + selectedLayout.width / 2 - chipScrollWidth / 2,
+      ),
+      animated: true,
+    });
+  }, [chipScrollWidth, isRtl, selectedLayout]);
 
   if (liquidityQuery.isPending) {
     return null;
@@ -109,8 +138,19 @@ export function HomeFreeSlots() {
       direction,
     );
     if (nextStartsAt) {
+      setEnterFrom(direction === "next" ? 1 : -1);
       setSelectedStartsAt(nextStartsAt);
     }
+  }
+
+  function selectOffer(startsAt: string) {
+    if (startsAt === selected.startsAt) return;
+    const from = offers.findIndex(
+      (offer) => offer.startsAt === selected.startsAt,
+    );
+    const to = offers.findIndex((offer) => offer.startsAt === startsAt);
+    setEnterFrom(to > from ? 1 : -1);
+    setSelectedStartsAt(startsAt);
   }
 
   return (
@@ -120,8 +160,10 @@ export function HomeFreeSlots() {
       </AppText>
 
       <ScrollView
+        ref={chipScrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
+        onLayout={(event) => setChipScrollWidth(event.nativeEvent.layout.width)}
         style={styles.chipScroll}
         contentContainerStyle={[
           styles.chipRow,
@@ -130,6 +172,7 @@ export function HomeFreeSlots() {
       >
         {offers.map((offer) => {
           const label = slotLabel(offer);
+          const { day, part } = slotParts(offer);
           const isSelected = offer.startsAt === selected.startsAt;
 
           return (
@@ -144,7 +187,16 @@ export function HomeFreeSlots() {
                   ? t("home.free.chipSelectedLabel", { slot: label })
                   : t("home.free.chipLabel", { slot: label })
               }
-              onPress={() => setSelectedStartsAt(offer.startsAt)}
+              onPress={() => selectOffer(offer.startsAt)}
+              onLayout={(event) => {
+                const { x, width } = event.nativeEvent.layout;
+                setChipLayouts((current) =>
+                  current[offer.startsAt]?.x === x &&
+                  current[offer.startsAt]?.width === width
+                    ? current
+                    : { ...current, [offer.startsAt]: { x, width } },
+                );
+              }}
               hitSlop={{ top: 8, bottom: 8 }}
               style={({ pressed }) => [
                 styles.chip,
@@ -152,6 +204,14 @@ export function HomeFreeSlots() {
                 pressed && styles.chipPressed,
               ]}
             >
+              {/* Two lines, day over time of day: one line ("Tomorrow ·
+                  Afternoon") fitted only two tabs on a phone. */}
+              <AppText
+                style={[styles.chipDay, isSelected && styles.chipDaySelected]}
+                maxLines={1}
+              >
+                {day}
+              </AppText>
               <AppText
                 style={[
                   styles.chipLabel,
@@ -159,23 +219,24 @@ export function HomeFreeSlots() {
                 ]}
                 maxLines={1}
               >
-                {label}
+                {part}
               </AppText>
             </Pressable>
           );
         })}
       </ScrollView>
 
-      <HomeFreePlayersCarousel
-        key={selected.startsAt}
-        block={{
-          startsAt: selected.startsAt,
-          endsAt: selected.endsAt,
-          label: slotLabel(selected),
-        }}
-        onScrollPastEnd={() => selectAdjacentOffer("next")}
-        onScrollPastStart={() => selectAdjacentOffer("prev")}
-      />
+      <SlideIn key={selected.startsAt} from={enterFrom} isRtl={isRtl}>
+        <HomeFreePlayersCarousel
+          block={{
+            startsAt: selected.startsAt,
+            endsAt: selected.endsAt,
+            label: slotLabel(selected),
+          }}
+          onScrollPastEnd={() => selectAdjacentOffer("next")}
+          onScrollPastStart={() => selectAdjacentOffer("prev")}
+        />
+      </SlideIn>
     </View>
   );
 }
@@ -195,11 +256,12 @@ const styles = createLiveSheet(() =>
       flexShrink: 0,
     },
     chipRow: {
-      gap: 16,
-      alignItems: "center",
+      gap: 20,
+      alignItems: "flex-start",
     },
     chip: {
       justifyContent: "center",
+      alignItems: "flex-start",
       paddingHorizontal: 2,
       paddingVertical: 0,
       backgroundColor: "transparent",
@@ -209,6 +271,15 @@ const styles = createLiveSheet(() =>
     },
     chipPressed: {
       opacity: 0.7,
+    },
+    chipDay: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 12,
+      lineHeight: 16,
+      color: tennisColors.mutedForeground,
+    },
+    chipDaySelected: {
+      color: tennisColors.violetText,
     },
     chipLabel: {
       fontFamily: tennisFontFamily.bodyMedium,
