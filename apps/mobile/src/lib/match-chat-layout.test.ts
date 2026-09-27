@@ -7,10 +7,10 @@ import {
 } from "./match-chat-layout";
 
 describe("composerBottomPadding", () => {
-  it("clears the navigation bar while the keyboard is closed", () => {
+  it("leaves a gap above the navigation bar while the keyboard is closed", () => {
     expect(
       composerBottomPadding({ bottomInset: 48, keyboardVisible: false }),
-    ).toBe(48);
+    ).toBe(58);
   });
 
   it("keeps a minimum on phones with no navigation bar inset", () => {

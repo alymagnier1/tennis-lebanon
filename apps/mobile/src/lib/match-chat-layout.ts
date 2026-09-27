@@ -1,3 +1,5 @@
+import { pinnedBottomPadding } from "./stack-screen-padding";
+
 /**
  * Layout rules for the match chat, kept out of the component so they can be
  * tested without rendering.
@@ -14,13 +16,16 @@ export const COMPOSER_GAP_ABOVE_KEYBOARD = 6;
  * the composer to the keyboard's top edge, and the keyboard covers the bar --
  * so padding for the bar as well left an empty strip between the message box
  * and the keyboard (reported 2026-09-26).
+ *
+ * Closed, it is the bar plus a gap, not `Math.max(bar, gap)`: the latter sat
+ * the composer on the edge of a 3-button bar (see `pinnedBottomPadding`).
  */
 export function composerBottomPadding(input: {
   bottomInset: number;
   keyboardVisible: boolean;
 }): number {
   if (input.keyboardVisible) return COMPOSER_GAP_ABOVE_KEYBOARD;
-  return Math.max(input.bottomInset, 10);
+  return pinnedBottomPadding(input.bottomInset, 10);
 }
 
 /**
