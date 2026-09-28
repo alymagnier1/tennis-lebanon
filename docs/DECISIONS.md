@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-28 — The new icon and splash ship in app version 0.2.0
+
+- Status: accepted
+- Context: Cursor's brand refresh set an app icon, an adaptive icon and a splash screen, but the build config on `staging` had no icon at all (builds used Expo's default), the adaptive foreground filled 66% of the canvas so round launcher masks would clip the logo's corners, and the top-level `splash` key does nothing in SDK 56 (splash needs the `expo-splash-screen` plugin, which was not installed). Icons and splash are compiled into the APK; an `eas update` cannot change them.
+- Decision: adaptive foreground rebuilt with the logo at 42% of the canvas (every pixel inside the 66/108 safe circle); splash via `expo-splash-screen` with a logo-only image on `#054F3B`; app version 0.1.0 → 0.2.0.
+- Alternatives considered: keep 0.1.0 (the runtime version is the app version, and `expo-splash-screen` adds native code, so a 0.1.0 update could otherwise reach a build without it, or the reverse).
+- Consequences: nothing changes until a new EAS build is installed. After this merges, `eas update` from `staging` targets runtime 0.2.0 and reaches only the new build; phones on the 0.1.0 build keep their last 0.1.0 update until they install it. Verified with a local `expo prebuild`: splash theme on `#054F3B` with the new logo, adaptive icon, ARM-only ABIs, versionName 0.2.0.
+- Owner: Founder
+
 ## 2026-09-26 — The APK carries ARM code only, and the bundle only what it uses
 
 - Status: accepted

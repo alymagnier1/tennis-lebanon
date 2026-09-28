@@ -3,7 +3,7 @@
     "name": "RacketBound",
     "slug": "tennis-lebanon",
     "scheme": "tennislebanon",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -13,11 +13,6 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/brand/racketbound-icon.png",
-    "splash": {
-      "image": "./assets/brand/racketbound-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#054F3B"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.racketbound.app"
@@ -46,7 +41,15 @@
           "photosPermission": "Allow RacketBound to access your photos so you can set a profile picture."
         }
       ],
-      "./plugins/with-android-abis"
+      "./plugins/with-android-abis",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/brand/racketbound-splash-logo.png",
+          "imageWidth": 160,
+          "backgroundColor": "#054F3B"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
