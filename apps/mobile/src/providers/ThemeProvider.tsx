@@ -7,7 +7,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import { Appearance, StatusBar, View, useColorScheme } from "react-native";
+import { Appearance, StatusBar, View } from "react-native";
 import {
   persistAppearancePreference,
   readAppearancePreference,
@@ -31,14 +31,10 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: PropsWithChildren) {
-  const systemScheme = useColorScheme();
   const [preference, setPreferenceState] =
-    useState<AppearancePreference>("system");
+    useState<AppearancePreference>("light");
 
-  const scheme = resolveAppearance(
-    preference,
-    systemScheme === "dark" ? "dark" : "light",
-  );
+  const scheme = resolveAppearance(preference);
 
   setActiveTennisScheme(scheme);
 
@@ -56,12 +52,9 @@ export function ThemeProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     try {
-      // "unspecified" hands the scheme back to the phone. Returning early for
-      // "system" left the last Light / Dark forced, so System did nothing
-      // after either had been picked (founder, 2026-09-28).
-      Appearance.setColorScheme(
-        preference === "system" ? "unspecified" : preference,
-      );
+      // Always explicit, so the phone's own dark mode never overrides the
+      // player's choice (System was removed, 2026-09-28).
+      Appearance.setColorScheme(preference);
     } catch {
       // Older runtimes and web ignore an explicit scheme.
     }
@@ -103,7 +96,7 @@ export function useTennisTheme(): ThemeContextValue {
   if (!value) {
     const active = getActiveTennisTheme();
     return {
-      preference: "system",
+      preference: "light",
       scheme: active.scheme,
       colors: active.colors,
       setPreference: () => undefined,

@@ -196,11 +196,6 @@ export default function SettingsScreen() {
           <PlayerProfileSection title={settingsScreenAppearanceTitle(t)}>
             <View style={[styles.chips, { flexDirection: rowDirection }]}>
               <ChipButton
-                label={t("settingsAppearanceSystem")}
-                selected={preference === "system"}
-                onPress={() => setPreference("system")}
-              />
-              <ChipButton
                 label={t("settingsAppearanceLight")}
                 selected={preference === "light"}
                 onPress={() => setPreference("light")}
