@@ -230,18 +230,11 @@ export default function MatchHubScreen() {
         wantsNote ? sanitizePlayerNote(joinNote) : null,
       );
     },
-    // `join_match` answers with the row it wrote, so an approval-gated match
-    // reports `requested` rather than `accepted`. Saying "you joined" to
-    // someone still waiting on the host is what made the pending state read as
-    // a confirmed one.
-    onSuccess: async (participantStatus) => {
+    // No toast: the status banner confirms both "joined" and "requested" once
+    // the hub refetches.
+    onSuccess: async () => {
       setJoinNote("");
       await invalidate();
-      notify(
-        participantStatus === "requested"
-          ? t("matches.hub.requestSentSuccess")
-          : t("matches.hub.joinSuccess"),
-      );
     },
     onError: (error: unknown) => notify(t(joinErrorKey(error))),
   });

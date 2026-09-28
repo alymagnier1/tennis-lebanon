@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   getExpoPushTokenAsync: vi.fn(),
   registerDevicePushToken: vi.fn(),
+  deactivateDevicePushToken: vi.fn(),
   reportError: vi.fn(),
+  deviceValues: new Map<string, string>(),
 }));
 
 vi.mock("react-native", () => ({
@@ -32,7 +34,19 @@ vi.mock("./native-notifications", () => ({
 
 vi.mock("@tennis-lebanon/api", () => ({
   registerDevicePushToken: mocks.registerDevicePushToken,
-  deactivateDevicePushToken: vi.fn(),
+  deactivateDevicePushToken: mocks.deactivateDevicePushToken,
+}));
+
+vi.mock("./device-storage", () => ({
+  readDeviceValue: vi.fn(
+    async (key: string) => mocks.deviceValues.get(key) ?? null,
+  ),
+  writeDeviceValue: vi.fn(async (key: string, value: string) => {
+    mocks.deviceValues.set(key, value);
+  }),
+  removeDeviceValue: vi.fn(async (key: string) => {
+    mocks.deviceValues.delete(key);
+  }),
 }));
 
 vi.mock("./device-id", () => ({
@@ -48,6 +62,7 @@ const EXPO_TOKEN = "ExponentPushToken[abcdefghijklmnopqrstuv]";
 describe("syncDevicePushToken", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.deviceValues.clear();
   });
 
   it("registers the token when permission is already granted", async () => {
@@ -101,5 +116,45 @@ describe("syncDevicePushToken", () => {
     const context = JSON.stringify(mocks.reportError.mock.calls[0]?.[1]);
     expect(context).not.toContain(EXPO_TOKEN);
     expect(context).not.toContain("device-1");
+  });
+});
+
+describe("pausing push on this phone", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.deviceValues.clear();
+    mocks.getExpoPushTokenAsync.mockResolvedValue({ data: EXPO_TOKEN });
+    mocks.registerDevicePushToken.mockResolvedValue("row-id");
+  });
+
+  it("removes the phone's token from the server", async () => {
+    const { pauseDevicePush } = await import("./push-notifications");
+
+    await pauseDevicePush();
+
+    expect(mocks.deactivateDevicePushToken).toHaveBeenCalledWith(
+      {},
+      "device-1",
+    );
+  });
+
+  it("keeps the launch sync from registering again", async () => {
+    const { pauseDevicePush, syncDevicePushToken } =
+      await import("./push-notifications");
+    await pauseDevicePush();
+
+    await expect(syncDevicePushToken()).resolves.toBe("paused");
+    expect(mocks.registerDevicePushToken).not.toHaveBeenCalled();
+  });
+
+  it("ends when the player turns push back on", async () => {
+    const { pauseDevicePush, syncDevicePushToken, isDevicePushPaused } =
+      await import("./push-notifications");
+    await pauseDevicePush();
+
+    await expect(
+      syncDevicePushToken({ requestPermission: true }),
+    ).resolves.toBe("registered");
+    await expect(isDevicePushPaused()).resolves.toBe(false);
   });
 });

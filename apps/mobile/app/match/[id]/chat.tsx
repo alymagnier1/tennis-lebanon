@@ -36,7 +36,7 @@ export default function MatchChatScreen() {
   const { t } = useTranslation();
   const { session } = useAuth();
   const insets = useSafeAreaInsets();
-  const { writingDirection } = useLayoutDirection();
+  const { writingDirection, rowDirection } = useLayoutDirection();
   const topPadding = stackScreenTopPadding(insets.top);
 
   const hubQuery = useQuery({
@@ -67,25 +67,26 @@ export default function MatchChatScreen() {
 
   return (
     <View style={styles.root}>
+      {/* One row, as in WhatsApp: back, then who and when. */}
       <View
         style={[
           styles.header,
-          { paddingTop: topPadding, paddingHorizontal: tennisSpacing.screenX },
+          { paddingTop: topPadding, flexDirection: rowDirection },
         ]}
       >
         <FigmaBackButton onPress={() => router.back()} />
-        <View style={tennisTextStyles.titleSubtitleBlock}>
+        <View style={[tennisTextStyles.titleSubtitleBlock, styles.headerText]}>
           <AppText
             accessibilityRole="header"
             style={[styles.title, { writingDirection }]}
-            maxLines={2}
+            maxLines={1}
           >
             {t("matches.chat.title")}
           </AppText>
           {subtitle ? (
             <AppText
               style={[styles.subtitle, { writingDirection }]}
-              maxLines={2}
+              maxLines={1}
             >
               {subtitle}
             </AppText>
@@ -142,22 +143,28 @@ const styles = createLiveSheet(() =>
       backgroundColor: tennisColors.background,
     },
     header: {
-      gap: 12,
-      paddingBottom: 8,
+      alignItems: "center",
+      gap: 10,
+      paddingHorizontal: 12,
+      paddingBottom: 10,
+      backgroundColor: tennisColors.background,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: tennisColors.border,
     },
+    headerText: {
+      flex: 1,
+    },
     title: {
       fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 24,
-      lineHeight: 30,
+      fontSize: 18,
+      lineHeight: 23,
       color: tennisColors.primaryDark,
-      letterSpacing: -0.4,
+      letterSpacing: -0.2,
     },
     subtitle: {
       fontFamily: tennisFontFamily.body,
-      fontSize: 14,
-      lineHeight: 20,
+      fontSize: 13,
+      lineHeight: 18,
       color: tennisColors.mutedForeground,
     },
     centered: {

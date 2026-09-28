@@ -14,7 +14,7 @@ import type {
  */
 export type PushSettingsTone = "on" | "off" | "blocked" | "unsupported";
 
-export type PushSettingsAction = "enable" | "openSettings" | "none";
+export type PushSettingsAction = "enable" | "disable" | "openSettings" | "none";
 
 export type PushSettingsView = {
   tone: PushSettingsTone;
@@ -63,11 +63,22 @@ export function derivePushSettingsView(input: {
       };
     }
 
+    // Turned off in the app: allowed by the OS, but this phone stays quiet.
+    if (registration === "paused") {
+      return {
+        tone: "off",
+        statusKey: "notifications.settings.statusOff",
+        detailKey: "notifications.settings.detailPaused",
+        action: "enable",
+      };
+    }
+
     return {
       tone: "on",
       statusKey: "notifications.settings.statusOn",
       detailKey: "notifications.settings.detailOn",
-      action: "none",
+      // On had no way off but the phone's settings (founder, 2026-09-28).
+      action: "disable",
     };
   }
 
