@@ -25,6 +25,7 @@ import { ProfileMenuRow } from "./ProfileMenuRow";
 import { ProfileSettingsFab } from "./ProfileSettingsFab";
 import { ProfileSkillBandSection } from "./ProfileSkillBandSection";
 import { useAuth } from "../../providers/AuthProvider";
+import { useOwnAvatarActions } from "../../hooks/useOwnAvatarActions";
 import {
   profileScreenAboutTitle,
   profileScreenEditLabel,
@@ -54,6 +55,7 @@ async function fetchOwnZones() {
 export function ProfileTabDashboard() {
   const { t, i18n } = useTranslation();
   const { profile, session } = useAuth();
+  const avatar = useOwnAvatarActions();
   const insets = useSafeAreaInsets();
   const [showRatingExplainer, setShowRatingExplainer] = useState(false);
   const ratingExplainerFade = useModalFadeIn(showRatingExplainer);
@@ -113,9 +115,10 @@ export function ProfileTabDashboard() {
           ratingLabel={ratingLabel}
           editLabel={profileScreenEditLabel(t)}
           avatarEditLabel={t("profile.avatarEditLabel")}
-          avatarUploading={false}
-          // Photo, name, about and languages are all edited on one page now.
-          onAvatarPress={() => router.push("/profile/edit")}
+          avatarUploading={avatar.busy}
+          // Straight to the photo picker (founder, 2026-09-28). Removing a
+          // photo lives on Edit profile with the rest of the public profile.
+          onAvatarPress={avatar.change}
           onEdit={() => router.push("/profile/edit")}
           onRatingInfo={() => setShowRatingExplainer(true)}
         />

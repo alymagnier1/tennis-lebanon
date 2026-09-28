@@ -40,6 +40,7 @@ import { tennisColors } from "../../src/theme/tennis-tokens";
 
 const languages: SupportedLanguage[] = ["en", "ar", "fr"];
 const BIO_MAX_LENGTH = 300;
+const PHOTO_SIZE = 104;
 
 /**
  * Everything other players see about you, in one place: photo, name, about
@@ -118,51 +119,60 @@ export default function EditProfileScreen() {
     >
       {submitError ? <ErrorNotice>{t("profile.saveError")}</ErrorNotice> : null}
 
-      <View style={[styles.photoRow, { flexDirection: rowDirection }]}>
-        <Avatar
-          name={displayName}
-          avatarPath={profile?.avatar_path}
-          size={72}
-        />
-        <View style={styles.photoActions}>
-          {avatar.busy ? (
-            <ActivityIndicator color={tennisColors.violet} />
-          ) : (
-            <>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("profile.avatarChange")}
-                onPress={avatar.change}
-                hitSlop={{ top: 8, bottom: 8 }}
-                style={({ pressed }) => [
-                  styles.photoButton,
-                  { flexDirection: rowDirection },
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Icon name="camera" size={16} color={tennisColors.violetText} />
-                <AppText style={[styles.photoChange, { writingDirection }]}>
-                  {t("profile.avatarChange")}
-                </AppText>
-              </Pressable>
-              {profile?.avatar_path ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t("profile.avatarRemove")}
-                  onPress={avatar.remove}
-                  hitSlop={{ top: 8, bottom: 8 }}
-                  style={({ pressed }) => [
-                    styles.photoButton,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <AppText style={[styles.photoRemove, { writingDirection }]}>
-                    {t("profile.avatarRemove")}
-                  </AppText>
-                </Pressable>
-              ) : null}
-            </>
-          )}
+      {/* Centred photo; tapping it changes it, as on the Profile tab. The
+          two actions sit under it as matching pills (founder, 2026-09-28:
+          two different text links beside a small photo looked messy). */}
+      <View style={styles.photoBlock}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("profile.avatarChange")}
+          disabled={avatar.busy}
+          onPress={avatar.change}
+          style={({ pressed }) => [pressed && styles.pressed]}
+        >
+          <Avatar
+            name={displayName}
+            avatarPath={profile?.avatar_path}
+            size={PHOTO_SIZE}
+          />
+          <View style={styles.photoBadge}>
+            {avatar.busy ? (
+              <ActivityIndicator size="small" color={tennisColors.onPrimary} />
+            ) : (
+              <Icon name="camera" size={16} color={tennisColors.onPrimary} />
+            )}
+          </View>
+        </Pressable>
+
+        <View style={[styles.photoActions, { flexDirection: rowDirection }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("profile.avatarChange")}
+            disabled={avatar.busy}
+            onPress={avatar.change}
+            style={({ pressed }) => [styles.pill, pressed && styles.pressed]}
+          >
+            <AppText style={styles.pillLabel}>
+              {t("profile.avatarChange")}
+            </AppText>
+          </Pressable>
+          {profile?.avatar_path ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("profile.avatarRemove")}
+              disabled={avatar.busy}
+              onPress={avatar.remove}
+              style={({ pressed }) => [
+                styles.pill,
+                styles.pillQuiet,
+                pressed && styles.pressed,
+              ]}
+            >
+              <AppText style={[styles.pillLabel, styles.pillLabelQuiet]}>
+                {t("profile.avatarRemove")}
+              </AppText>
+            </Pressable>
+          ) : null}
         </View>
       </View>
 
@@ -234,28 +244,47 @@ export default function EditProfileScreen() {
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
-    photoRow: {
+    photoBlock: {
       alignItems: "center",
-      gap: 16,
-      marginBottom: 8,
+      gap: 14,
+      marginBottom: 12,
+    },
+    photoBadge: {
+      position: "absolute",
+      right: 0,
+      bottom: 0,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: tennisColors.primary,
+      borderWidth: 2,
+      borderColor: tennisColors.background,
     },
     photoActions: {
-      gap: 4,
-      alignItems: "flex-start",
+      gap: 10,
+      justifyContent: "center",
     },
-    photoButton: {
+    pill: {
       minHeight: minTouchTargetPx,
+      paddingHorizontal: 18,
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
       alignItems: "center",
-      gap: 6,
+      justifyContent: "center",
     },
-    photoChange: {
+    pillQuiet: {
+      backgroundColor: "transparent",
+    },
+    pillLabel: {
       fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 15,
-      color: tennisColors.violetText,
-    },
-    photoRemove: {
-      fontFamily: tennisFontFamily.body,
       fontSize: 14,
+      color: tennisColors.primaryDark,
+    },
+    pillLabelQuiet: {
       color: tennisColors.mutedForeground,
     },
     bioInput: {
