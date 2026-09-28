@@ -32,6 +32,7 @@ import { useAvatarUrl } from "../lib/use-avatar-url";
 import { buildCardAccessibilityLabel } from "../lib/card-accessibility";
 import { useConfirmDialogVisible } from "../providers/confirm-dialog-visibility";
 import { useLayoutDirection } from "../lib/layout-direction";
+import { pinnedBottomPadding } from "../lib/stack-screen-padding";
 import { formatTabBadgeCount } from "../lib/match-list-card";
 import { useResponsiveLayout } from "../lib/responsive";
 import { AppText } from "./AppText";
@@ -714,7 +715,7 @@ export function BottomSheet({
                 insets.right,
               ),
               paddingBottom:
-                Math.max(insets.bottom, spacing.xl) +
+                pinnedBottomPadding(insets.bottom, spacing.xl) +
                 // In the app's own window the keyboard avoider lifts the sheet
                 // on Android and iOS; only the web needs the height added.
                 (Platform.OS === "web" ? keyboardHeight : 0),

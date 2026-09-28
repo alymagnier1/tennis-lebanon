@@ -4,7 +4,10 @@ import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FigmaBackButton } from "../onboarding-ui";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { stackScreenTopPadding } from "../../lib/stack-screen-padding";
+import {
+  pinnedBottomPadding,
+  stackScreenTopPadding,
+} from "../../lib/stack-screen-padding";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 
 export function MatchHubLayout({
@@ -81,7 +84,9 @@ export function MatchHubLayout({
       {dock ? (
         <View
           style={
-            footer ? undefined : { paddingBottom: Math.max(insets.bottom, 8) }
+            footer
+              ? undefined
+              : { paddingBottom: pinnedBottomPadding(insets.bottom, 8) }
           }
         >
           {dock}

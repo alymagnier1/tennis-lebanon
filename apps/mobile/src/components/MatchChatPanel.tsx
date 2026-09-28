@@ -21,6 +21,7 @@ import {
   markMatchChatRead,
 } from "@tennis-lebanon/api";
 import { AppText } from "./AppText";
+import { ChatDoodles } from "./match/ChatDoodles";
 import { Icon } from "./Icon";
 import { ErrorNotice } from "./FormUi";
 import {
@@ -50,9 +51,15 @@ import {
   shouldRefetchAfterStatusChange,
   type RealtimeStatus,
 } from "../lib/realtime-status";
+import {
+  composerBottomPadding,
+  senderColorIndex,
+  timestampSpacer,
+} from "../lib/match-chat-layout";
 import { useToast } from "../providers/ToastProvider";
 import { supabase } from "../lib/supabase";
-import { tennisColors, tennisRadii } from "../theme/tennis-tokens";
+import { useKeyboardVisible } from "../hooks/useKeyboardVisible";
+import { tennisChat, tennisColors } from "../theme/tennis-tokens";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
 const HUB_MESSAGE_LIST_HEIGHT = 220;
@@ -79,8 +86,9 @@ export function MatchChatPanel({
   variant = "page",
 }: MatchChatPanelProps) {
   const { t } = useTranslation();
-  const { writingDirection } = useLayoutDirection();
+  const { writingDirection, isRtl, rowDirection } = useLayoutDirection();
   const insets = useSafeAreaInsets();
+  const keyboardVisible = useKeyboardVisible();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const [draft, setDraft] = useState("");
@@ -307,57 +315,109 @@ export function MatchChatPanel({
         }
       }}
       ListEmptyComponent={
-        <AppText style={styles.empty}>{t("matches.chat.empty")}</AppText>
+        <View style={styles.dayRow}>
+          <View style={styles.dayPill}>
+            <AppText style={styles.empty}>{t("matches.chat.empty")}</AppText>
+          </View>
+        </View>
       }
-      renderItem={({ item, index }) => {
+      renderItem={({ item }) => {
         if (item.type === "day") {
           return (
             <View style={styles.dayRow}>
-              <AppText style={styles.dayLabel}>{item.label}</AppText>
+              <View style={styles.dayPill}>
+                <AppText style={styles.dayLabel}>{item.label}</AppText>
+              </View>
             </View>
           );
         }
 
         const { message, showSender, groupStart } = item;
         const isOwn = viewerUserId === message.author_id;
-        const prev = transcript[index - 1];
-        const tightTop =
-          !groupStart && prev?.type === "message" ? styles.bubbleTight : null;
+        // As in WhatsApp, the layout mirrors in Arabic: the viewer's own
+        // messages sit on the right in English and French, on the left in
+        // Arabic, and everyone else's opposite.
+        const onRight = isOwn !== isRtl;
+        const emojiOnly = isEmojiOnlyMessage(message.body);
+        const tailed = groupStart && !emojiOnly;
+        const time = formatUtcTimeInBeirut(message.created_at);
+        const senderColor =
+          tennisChat.senderNames[
+            senderColorIndex(message.author_id, tennisChat.senderNames.length)
+          ];
 
         return (
           <View
             style={[
               styles.bubbleRow,
-              isOwn ? styles.bubbleRowOwn : styles.bubbleRowOther,
+              onRight ? styles.bubbleRowRight : styles.bubbleRowLeft,
               groupStart ? styles.bubbleGroupStart : null,
-              tightTop,
             ]}
           >
             <View
+              // One stop for screen readers: sender, message and time together.
+              accessible
               style={[
                 styles.bubble,
-                isOwn ? styles.bubbleOwn : styles.bubbleOther,
+                emojiOnly
+                  ? styles.bubbleEmojiOnly
+                  : isOwn
+                    ? styles.bubbleOwn
+                    : styles.bubbleOther,
+                tailed
+                  ? onRight
+                    ? styles.bubbleTailRight
+                    : styles.bubbleTailLeft
+                  : null,
               ]}
             >
+              {tailed ? (
+                <View
+                  style={[
+                    styles.tail,
+                    onRight ? styles.tailRight : styles.tailLeft,
+                    {
+                      borderTopColor: isOwn
+                        ? tennisChat.ownBubble
+                        : tennisChat.otherBubble,
+                    },
+                  ]}
+                />
+              ) : null}
               {!isOwn && showSender ? (
-                <AppText style={styles.sender} maxLines={1}>
+                <AppText
+                  style={[
+                    styles.sender,
+                    { color: senderColor, writingDirection },
+                  ]}
+                  maxLines={1}
+                >
                   {message.author_display_name}
                 </AppText>
               ) : null}
               <AppText
                 style={[
                   styles.body,
-                  isEmojiOnlyMessage(message.body) && styles.bodyEmojiOnly,
+                  emojiOnly && styles.bodyEmojiOnly,
                   { writingDirection },
-                  isOwn ? styles.bodyOwn : styles.bodyOther,
                 ]}
               >
                 {message.body}
+                {emojiOnly ? null : (
+                  <AppText style={styles.timeSpacer}>
+                    {timestampSpacer(time)}
+                  </AppText>
+                )}
               </AppText>
               <AppText
-                style={[styles.time, isOwn ? styles.timeOwn : styles.timeOther]}
+                style={[
+                  styles.time,
+                  emojiOnly ? styles.timeEmojiOnly : styles.timeInBubble,
+                  !emojiOnly && (isRtl ? styles.timeLeft : styles.timeRight),
+                  { color: isOwn ? tennisChat.ownMeta : tennisChat.otherMeta },
+                ]}
               >
-                {formatUtcTimeInBeirut(message.created_at)}
+                {time}
               </AppText>
             </View>
           </View>
@@ -385,7 +445,14 @@ export function MatchChatPanel({
       style={[
         styles.composerWrap,
         docked ? styles.composerDocked : null,
-        !docked ? { paddingBottom: Math.max(insets.bottom, 10) } : null,
+        !docked
+          ? {
+              paddingBottom: composerBottomPadding({
+                bottomInset: insets.bottom,
+                keyboardVisible,
+              }),
+            }
+          : null,
       ]}
     >
       {emojiOpen ? (
@@ -413,62 +480,66 @@ export function MatchChatPanel({
         </ScrollView>
       ) : null}
 
-      <View style={styles.composer}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            emojiOpen
-              ? t("matches.chat.emojiPickerClose")
-              : t("matches.chat.emojiPicker")
-          }
-          accessibilityState={{ expanded: emojiOpen }}
-          onPress={() => setEmojiOpen((open) => !open)}
-          style={({ pressed }) => [
-            styles.emojiToggle,
-            emojiOpen && styles.emojiToggleOpen,
-            pressed && styles.emojiTogglePressed,
-          ]}
-        >
-          <Icon
-            name={emojiOpen ? "close" : "emoji"}
-            size={22}
-            color={
-              emojiOpen ? tennisColors.primary : tennisColors.mutedForeground
+      <View style={[styles.composer, { flexDirection: rowDirection }]}>
+        <View style={[styles.field, { flexDirection: rowDirection }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              emojiOpen
+                ? t("matches.chat.emojiPickerClose")
+                : t("matches.chat.emojiPicker")
             }
+            accessibilityState={{ expanded: emojiOpen }}
+            onPress={() => setEmojiOpen((open) => !open)}
+            style={({ pressed }) => [
+              styles.emojiToggle,
+              pressed && styles.emojiTogglePressed,
+            ]}
+          >
+            <Icon
+              name={emojiOpen ? "close" : "emoji"}
+              size={24}
+              color={
+                emojiOpen ? tennisColors.linkText : tennisColors.mutedForeground
+              }
+            />
+          </Pressable>
+          <TextInput
+            accessibilityLabel={t("matches.chat.placeholder")}
+            value={draft}
+            onChangeText={setDraft}
+            onFocus={() => setEmojiOpen(false)}
+            placeholder={t("matches.chat.placeholder")}
+            placeholderTextColor={tennisColors.mutedForeground}
+            style={[styles.input, { writingDirection }]}
+            multiline
           />
-        </Pressable>
-        <TextInput
-          accessibilityLabel={t("matches.chat.placeholder")}
-          value={draft}
-          onChangeText={setDraft}
-          onFocus={() => setEmojiOpen(false)}
-          placeholder={t("matches.chat.placeholder")}
-          placeholderTextColor={tennisColors.mutedForeground}
-          style={[styles.input, { writingDirection }]}
-          multiline
-        />
+        </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("matches.chat.send")}
+          accessibilityState={{ disabled: !canSend }}
           disabled={!canSend}
           onPress={() => sendMutation.mutate(draft.trim())}
           style={({ pressed }) => [
             styles.sendButton,
-            canSend ? styles.sendReady : styles.sendDisabled,
+            !canSend ? styles.sendDisabled : null,
             pressed && canSend ? styles.sendPressed : null,
           ]}
         >
           {sendMutation.isPending ? (
             <ActivityIndicator color={tennisColors.onPrimary} size="small" />
           ) : (
-            <AppText
-              style={[
-                styles.sendLabel,
-                !canSend ? styles.sendLabelDisabled : null,
-              ]}
-            >
-              {t("matches.chat.send")}
-            </AppText>
+            // The arrow points the way the text runs, as in WhatsApp.
+            <View style={isRtl ? styles.mirrored : null}>
+              <Icon
+                name="send"
+                size={20}
+                color={
+                  canSend ? tennisColors.onPrimary : "rgba(255,255,255,0.5)"
+                }
+              />
+            </View>
           )}
         </Pressable>
       </View>
@@ -488,6 +559,7 @@ export function MatchChatPanel({
 
   return (
     <KeyboardAvoider style={styles.root}>
+      <ChatDoodles />
       {reconnectBanner}
       {messageList}
       {composer}
@@ -495,10 +567,22 @@ export function MatchChatPanel({
   );
 }
 
+/** A function, not a constant: the sheet is rebuilt per colour scheme. */
+function bubbleShadow() {
+  return {
+    shadowColor: tennisChat.bubbleShadow,
+    shadowOpacity: 0.13,
+    shadowRadius: 1,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
+  } as const;
+}
+
 const styles = createLiveSheet(() =>
   StyleSheet.create({
     root: {
       flex: 1,
+      backgroundColor: tennisChat.wallpaper,
     },
     dock: {
       backgroundColor: tennisColors.card,
@@ -548,9 +632,9 @@ const styles = createLiveSheet(() =>
       flexGrow: 0,
     },
     listContent: {
-      paddingHorizontal: 16,
+      paddingHorizontal: 14,
       paddingTop: 8,
-      paddingBottom: 16,
+      paddingBottom: 8,
     },
     listContentDocked: {
       paddingHorizontal: 16,
@@ -564,20 +648,28 @@ const styles = createLiveSheet(() =>
     },
     empty: {
       fontFamily: tennisFontFamily.body,
-      fontSize: 14,
-      lineHeight: 20,
-      color: tennisColors.mutedForeground,
+      fontSize: 13,
+      lineHeight: 18,
+      color: tennisChat.dayPillText,
       textAlign: "center",
-      paddingHorizontal: 12,
     },
     dayRow: {
       alignItems: "center",
-      paddingVertical: 12,
+      paddingVertical: 8,
+    },
+    dayPill: {
+      ...bubbleShadow(),
+      maxWidth: "85%",
+      backgroundColor: tennisChat.dayPill,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 5,
     },
     dayLabel: {
       fontFamily: tennisFontFamily.bodyMedium,
       fontSize: 12,
-      color: tennisColors.mutedForeground,
+      lineHeight: 16,
+      color: tennisChat.dayPillText,
     },
     reconnectingPress: {
       minHeight: 36,
@@ -593,157 +685,186 @@ const styles = createLiveSheet(() =>
     },
     bubbleRow: {
       width: "100%",
-      marginBottom: 4,
+      marginTop: 2,
     },
     bubbleGroupStart: {
       marginTop: 8,
     },
-    bubbleTight: {
-      marginTop: 0,
-    },
-    bubbleRowOwn: {
+    bubbleRowRight: {
       alignItems: "flex-end",
     },
-    bubbleRowOther: {
+    bubbleRowLeft: {
       alignItems: "flex-start",
     },
     bubble: {
-      maxWidth: "85%",
-      borderRadius: tennisRadii.lg,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      gap: 4,
+      ...bubbleShadow(),
+      maxWidth: "80%",
+      borderRadius: 8,
+      paddingHorizontal: 9,
+      paddingTop: 6,
+      paddingBottom: 8,
     },
     bubbleOwn: {
-      backgroundColor: tennisColors.primary,
-      borderBottomRightRadius: 4,
+      backgroundColor: tennisChat.ownBubble,
     },
     bubbleOther: {
-      backgroundColor: tennisColors.muted,
-      borderBottomLeftRadius: 4,
+      backgroundColor: tennisChat.otherBubble,
+    },
+    // Big emoji stand on the wallpaper without a bubble, as in WhatsApp.
+    bubbleEmojiOnly: {
+      backgroundColor: "transparent",
+      shadowOpacity: 0,
+      elevation: 0,
+      paddingHorizontal: 2,
+    },
+    // The first bubble in a run has a tail at its top corner.
+    bubbleTailRight: {
+      borderTopRightRadius: 0,
+    },
+    bubbleTailLeft: {
+      borderTopLeftRadius: 0,
+    },
+    tail: {
+      position: "absolute",
+      top: 0,
+      width: 0,
+      height: 0,
+      borderTopWidth: 10,
+    },
+    tailRight: {
+      right: -7,
+      borderRightWidth: 8,
+      borderRightColor: "transparent",
+    },
+    tailLeft: {
+      left: -7,
+      borderLeftWidth: 8,
+      borderLeftColor: "transparent",
     },
     sender: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 11,
-      color: tennisColors.mutedForeground,
+      fontFamily: tennisFontFamily.bodySemi,
+      fontSize: 13,
+      lineHeight: 18,
+      marginBottom: 1,
     },
     body: {
       fontFamily: tennisFontFamily.body,
-      fontSize: 14,
+      fontSize: 15,
       lineHeight: 20,
+      color: tennisChat.bubbleText,
     },
     bodyEmojiOnly: {
-      fontSize: 28,
-      lineHeight: 34,
+      fontSize: 40,
+      lineHeight: 48,
     },
-    bodyOwn: {
-      color: tennisColors.white,
-    },
-    bodyOther: {
-      color: tennisColors.primaryDark,
+    timeSpacer: {
+      fontSize: 15,
+      lineHeight: 20,
     },
     time: {
       fontFamily: tennisFontFamily.body,
       fontSize: 11,
       lineHeight: 14,
+    },
+    timeInBubble: {
+      position: "absolute",
+      bottom: 5,
+    },
+    timeRight: {
+      right: 8,
+    },
+    timeLeft: {
+      left: 8,
+    },
+    timeEmojiOnly: {
       alignSelf: "flex-end",
-    },
-    timeOwn: {
-      color: tennisColors.white,
-      opacity: 0.85,
-    },
-    timeOther: {
-      color: tennisColors.mutedForeground,
+      overflow: "hidden",
+      marginTop: 2,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 8,
+      backgroundColor: tennisChat.dayPill,
     },
     composerWrap: {
-      borderTopWidth: 1,
-      borderTopColor: tennisColors.border,
-      backgroundColor: tennisColors.background,
-      paddingTop: 8,
+      paddingTop: 6,
+      paddingHorizontal: 8,
     },
     composerDocked: {
       backgroundColor: tennisColors.card,
       paddingBottom: 10,
     },
     emojiTray: {
-      paddingHorizontal: 12,
-      paddingBottom: 8,
+      paddingHorizontal: 4,
+      paddingBottom: 6,
       gap: 4,
       alignItems: "center",
     },
     emojiChip: {
-      minWidth: 40,
-      minHeight: 40,
-      borderRadius: tennisRadii.md,
+      minWidth: 44,
+      minHeight: 44,
+      borderRadius: 22,
       alignItems: "center",
       justifyContent: "center",
     },
     emojiChipPressed: {
-      backgroundColor: tennisColors.muted,
+      backgroundColor: tennisChat.composerField,
     },
     emojiGlyph: {
       fontSize: 24,
       lineHeight: 30,
     },
     composer: {
-      flexDirection: "row",
       alignItems: "flex-end",
-      gap: 8,
-      paddingHorizontal: 16,
+      gap: 6,
+    },
+    // WhatsApp's rounded message field, with the emoji button inside it.
+    field: {
+      ...bubbleShadow(),
+      flex: 1,
+      alignItems: "flex-end",
+      minHeight: 48,
+      borderRadius: 24,
+      paddingHorizontal: 2,
+      backgroundColor: tennisChat.composerField,
     },
     emojiToggle: {
       width: 44,
-      height: 44,
-      borderRadius: tennisRadii.md,
+      height: 48,
+      borderRadius: 22,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: tennisColors.card,
-    },
-    emojiToggleOpen: {
-      backgroundColor: tennisColors.secondary,
     },
     emojiTogglePressed: {
-      opacity: 0.88,
+      opacity: 0.6,
     },
     input: {
       flex: 1,
-      maxHeight: 100,
-      minHeight: 44,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      borderRadius: tennisRadii.lg,
-      backgroundColor: tennisColors.card,
-      borderWidth: 1,
-      borderColor: tennisColors.border,
+      minHeight: 48,
+      maxHeight: 120,
+      paddingTop: 13,
+      paddingBottom: 13,
+      paddingHorizontal: 4,
       fontFamily: tennisFontFamily.body,
-      fontSize: 15,
-      lineHeight: 20,
-      color: tennisColors.primaryDark,
+      fontSize: 16,
+      lineHeight: 22,
+      color: tennisChat.bubbleText,
     },
     sendButton: {
-      minHeight: 44,
-      minWidth: 64,
-      borderRadius: tennisRadii.md,
+      width: 48,
+      height: 48,
+      borderRadius: 24,
       alignItems: "center",
       justifyContent: "center",
-      paddingHorizontal: 12,
-    },
-    sendReady: {
       backgroundColor: tennisColors.primary,
     },
-    sendDisabled: {
-      backgroundColor: tennisColors.muted,
-    },
+    // Solid, not faded: a see-through button showed the wallpaper through it.
+    // Only the arrow dims (`canSend`).
+    sendDisabled: {},
     sendPressed: {
-      opacity: 0.9,
+      opacity: 0.85,
     },
-    sendLabel: {
-      fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 14,
-      color: tennisColors.onPrimary,
-    },
-    sendLabelDisabled: {
-      color: tennisColors.mutedForeground,
+    mirrored: {
+      transform: [{ scaleX: -1 }],
     },
   }),
 );
