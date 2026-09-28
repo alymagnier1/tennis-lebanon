@@ -2,6 +2,24 @@
 
 Record decisions using this template:
 
+## 2026-09-27 — Popups are layers in the app's window, not React Native Modals
+
+- Status: accepted
+- Context: on the founder's phone (3-button navigation, light mode) the navigation bar turned white whenever a popup opened. A React Native `Modal` is a separate Android window with its own navigation bar. React Native configures that window itself (`enableEdgeToEdge` in `WindowUtil.kt`): contrast enforced, and dark buttons whenever the system is in light mode, which Android backs with a white scrim on a 3-button bar. The app's own window uses light buttons on a grey scrim, so every popup flipped the bar. `statusBarTranslucent` / `navigationBarTranslucent` did not help (that path is what applies these settings), and no JavaScript API reaches the popup window's bar. The same separate window caused the day's other popup bugs: content drawn before the window had its size, and a menu placed with coordinates measured in the other window.
+- Decision: `OverlayProvider` wraps the navigator, inside every app-wide provider, and draws popups as full-screen layers in the app's own window. `AppOverlay` replaces `Modal` with the same `visible` / `onRequestClose` / `onShow` props, for the bottom sheet, the rating explainer, the birth-year picker and the completed-time menu. The confirm dialog sits above the provider and draws its own layer after the app, so a dialog over a sheet stays on top. Android back closes the newest popup first (`BackHandler` runs the newest listener first); the app behind an open popup is hidden from TalkBack and VoiceOver, as the separate window hid it.
+- Alternatives considered: make the app's own bar match the popups (dark buttons on a white bar in light mode) — a small config change, but it needs a new native build and changes the bar on every screen; keep `Modal` and accept the flash.
+- Consequences: one window and one navigation bar, which never changes colour. Keyboard avoidance now happens in the main window: the bottom sheet no longer adds the keyboard height itself on Android (the keyboard avoider does), only on the web. New popups must use `AppOverlay`, not `Modal`.
+- Owner: Founder
+
+## 2026-09-27 — Home next-action cards are one tap target, not a card with a button
+
+- Status: accepted
+- Context: Each Home next-action card had an icon, a one-line title, a two-line body and a trailing violet button. On a ~360pt phone the card is ~284pt wide, and the button (~88pt) plus the icon left the title ~117pt. "Add when you play" needs ~125pt at default size, so it was cut mid-word, and worse at large text or in French.
+- Decision: The whole card is the control. The button is replaced by a trailing chevron, the button's label moves to the accessibility hint, and the title may wrap to two lines. Rematch keeps its custom press handler.
+- Alternatives considered: removing the icon and wrapping the title while keeping the button (keeps the loudest CTA, but still tight at large text); stacking the button under the text (never truncates, but every card at the top of Home grows much taller); shorter copy only (fixes English, not French or large text).
+- Consequences: The primary action is carried by the card's tone colour and chevron rather than a filled button, which is quieter; worth checking in cohort A that people still tap it. Carousel swipes still work because a press fires only without a drag.
+- Owner: Founder/product validation
+
 ## 2026-09-26 — The APK carries ARM code only, and the bundle only what it uses
 
 - Status: accepted

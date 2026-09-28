@@ -91,6 +91,59 @@ export function pickUpcomingBlocks(
     .slice(0, limit);
 }
 
+/** One Home tab: a day someone is free, spanning its free blocks. */
+export type LiquidityDay = {
+  dayOffset: number;
+  dateKey: string;
+  /** Start of the day's first free block. */
+  startsAt: string;
+  /** End of the day's last free block. */
+  endsAt: string;
+  /** The most players free in any one block that day (not a sum: a player
+   * free all day is in every block). */
+  playerCount: number;
+};
+
+/**
+ * Today, tomorrow and the day after, each only when someone is free that day.
+ *
+ * The founder asked for day tabs without the time of day (2026-09-27): three
+ * tabs of "Tomorrow · Afternoon" did not fit a phone, and splitting a day into
+ * parts made the player pick twice. The window runs from the day's first free
+ * block to its last, and the players query matches anyone with an hour free
+ * anywhere inside it, so a day tab lists everyone its blocks counted.
+ */
+export function pickUpcomingDays(
+  rows: LiquidityRow[],
+  lastDayOffset = 2,
+): LiquidityDay[] {
+  const byDay = new Map<string, LiquidityDay>();
+  for (const row of rows) {
+    if (row.dayOffset > lastDayOffset) continue;
+    const day = byDay.get(row.dateKey);
+    if (!day) {
+      byDay.set(row.dateKey, {
+        dayOffset: row.dayOffset,
+        dateKey: row.dateKey,
+        startsAt: row.startsAt,
+        endsAt: row.endsAt,
+        playerCount: row.playerCount,
+      });
+      continue;
+    }
+    if (Date.parse(row.startsAt) < Date.parse(day.startsAt)) {
+      day.startsAt = row.startsAt;
+    }
+    if (Date.parse(row.endsAt) > Date.parse(day.endsAt)) {
+      day.endsAt = row.endsAt;
+    }
+    day.playerCount = Math.max(day.playerCount, row.playerCount);
+  }
+  return [...byDay.values()].sort(
+    (left, right) => left.dayOffset - right.dayOffset,
+  );
+}
+
 /** Busiest block in the horizon — the denominator for whether this ever fires. */
 export function peakLiquidity(rows: LiquidityRow[]): number {
   return rows.reduce((peak, row) => Math.max(peak, row.playerCount), 0);

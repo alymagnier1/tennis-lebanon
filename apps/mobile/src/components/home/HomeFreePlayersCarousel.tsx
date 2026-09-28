@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -13,15 +13,7 @@ import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import {
-  discoverCompatiblePlayers,
-  listOwnPreferredZoneIds,
-  type CompatiblePlayerCard,
-} from "@tennis-lebanon/api";
-import {
-  MAX_LEVEL_WINDOW,
-  resolveDiscoverFiltersFromProfile,
-} from "@tennis-lebanon/domain";
+import { type CompatiblePlayerCard } from "@tennis-lebanon/api";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { Avatar } from "../AppUi";
@@ -29,7 +21,7 @@ import { Icon } from "../Icon";
 import {
   HOME_FREE_PLAYER_CARD_GAP,
   HOME_FREE_PLAYER_CARD_WIDTH,
-  HOME_FREE_PLAYER_SNAP_INTERVAL,
+  HOME_FREE_PLAYER_LEADING_SLACK_PX,
   HOME_FREE_PLAYER_TRAILING_SLACK_PX,
   homeFreePlayerDetailLine,
   homeFreePlayerShouldAdvanceOffer,
@@ -38,13 +30,16 @@ import {
 } from "../../lib/home-free-players-carousel";
 import { clubNamesFromList } from "../../lib/match-clubs";
 import { useLayoutDirection } from "../../lib/layout-direction";
+import { useScreenReaderEnabled } from "../../hooks/useScreenReaderEnabled";
+import { SnapStrip, type SnapStripRelease } from "../SnapStrip";
 import { zoneLabelFromList } from "../../lib/zones";
-import { supabase } from "../../lib/supabase";
+import {
+  homeFreePlayersQueryOptions,
+  ownPreferredZoneIdsQueryOptions,
+} from "../../lib/home-free-players-query";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
-/** Enough to feel like a choice, few enough that the rest is worth a tap through. */
-const CARD_LIMIT = 5;
 const CARD_AVATAR = 48;
 
 const webStripSnap: ViewStyle | undefined =
@@ -54,6 +49,11 @@ const webStripSnap: ViewStyle | undefined =
 const webItemSnap: ViewStyle | undefined =
   Platform.OS === "web"
     ? ({ scrollSnapAlign: "start", scrollSnapStop: "always" } as ViewStyle)
+    : undefined;
+/** View all rests flush with the viewport end, short of the trailing slack. */
+const webEndItemSnap: ViewStyle | undefined =
+  Platform.OS === "web"
+    ? ({ scrollSnapAlign: "end", scrollSnapStop: "always" } as ViewStyle)
     : undefined;
 
 type FreeBlock = {
@@ -91,50 +91,37 @@ export function HomeFreePlayersCarousel({
 }: HomeFreePlayersCarouselProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? i18n.language;
-  const { rowDirection, writingDirection } = useLayoutDirection();
+  const { rowDirection, writingDirection, isRtl } = useLayoutDirection();
+  const scrollRef = useRef<ScrollView>(null);
   const edgeRef = useRef({ atStart: true, atEnd: false });
   const gestureStartEdgeRef = useRef({ atStart: true, atEnd: false });
   const advancedRef = useRef(false);
+  const positionedRef = useRef(false);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const [stripWidth, setStripWidth] = useState(0);
+  // Native RTL mirrors the strip and its offsets; not verified on Android, so
+  // Arabic keeps the original edge (bounce and fling rewind only).
+  const leadingSlack = isRtl ? 0 : HOME_FREE_PLAYER_LEADING_SLACK_PX;
+  const screenReaderEnabled = useScreenReaderEnabled();
+  // A screen reader must be able to scroll a focused card into view, and
+  // native RTL is unverified here, so both keep the ScrollView.
+  const useSnapStrip =
+    Platform.OS === "android" && !isRtl && !screenReaderEnabled;
 
-  const ownZonesQuery = useQuery({
-    queryKey: ["own-preferred-zone-ids"],
-    queryFn: () => listOwnPreferredZoneIds(supabase),
-    staleTime: 60_000,
-  });
+  const ownZonesQuery = useQuery(ownPreferredZoneIdsQueryOptions);
 
   const playersQuery = useQuery({
-    queryKey: [
-      "home-free-players",
-      block.startsAt,
-      block.endsAt,
-      ownZonesQuery.data,
-    ],
-    queryFn: () =>
-      // Same eligibility as Discover with Level/Intent/Availability off and
-      // Area matching the liquidity count (viewer's own zones). A hard-coded
-      // `levelWindow: 4` used to look wider than Discover's Level chip, which
-      // only sorts — but View-all still opened the Matches tab, so the same
-      // person looked absent. Keep the window at MAX and open Players.
-      discoverCompatiblePlayers(supabase, {
-        ...resolveDiscoverFiltersFromProfile({
-          toggles: {
-            matchLevel: false,
-            matchArea: Boolean(ownZonesQuery.data?.length),
-            matchAvailability: false,
-          },
-          playIntent: "either",
-          ownZoneIds: ownZonesQuery.data,
-        }),
-        levelWindow: MAX_LEVEL_WINDOW,
-        limit: CARD_LIMIT,
-        freeFrom: block.startsAt,
-        freeTo: block.endsAt,
-      }),
+    ...homeFreePlayersQueryOptions(block, ownZonesQuery.data),
     enabled: ownZonesQuery.isSuccess,
-    staleTime: 60_000,
   });
 
   const players = playersQuery.data ?? [];
+
+  // Hold the cards' space while they load: rendering nothing collapsed the
+  // section and moved everything below up, then back down (2026-09-27).
+  if (playersQuery.isPending && !ownZonesQuery.isError) {
+    return <HomeFreePlayersSkeleton />;
+  }
 
   if (players.length === 0) {
     return null;
@@ -143,15 +130,53 @@ export function HomeFreePlayersCarousel({
   const openProfile = (player: CompatiblePlayerCard) =>
     router.push({ pathname: "/player/[id]", params: { id: player.user_id } });
 
+  const restingEndX =
+    stripWidth > 0 && viewportWidth > 0
+      ? Math.max(
+          leadingSlack,
+          stripWidth - viewportWidth - HOME_FREE_PLAYER_TRAILING_SLACK_PX,
+        )
+      : undefined;
+
+  const positionPastLeadingSlack = () => {
+    if (positionedRef.current) return;
+    positionedRef.current = true;
+    if (leadingSlack > 0) {
+      scrollRef.current?.scrollTo({ x: leadingSlack, y: 0, animated: false });
+    }
+  };
+
+  /** Released inside either slack without switching windows: ease back. */
+  const settleIntoRestingRange = (
+    event: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    if (advancedRef.current) return;
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const end = Math.max(
+      leadingSlack,
+      contentSize.width -
+        layoutMeasurement.width -
+        HOME_FREE_PLAYER_TRAILING_SLACK_PX,
+    );
+    const x = contentOffset.x;
+    if (leadingSlack > 0 && x < leadingSlack - 1) {
+      scrollRef.current?.scrollTo({ x: leadingSlack, y: 0, animated: true });
+    } else if (x > end + 1) {
+      scrollRef.current?.scrollTo({ x: end, y: 0, animated: true });
+    }
+  };
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
     const maxX = Math.max(0, contentSize.width - layoutMeasurement.width);
     edgeRef.current = {
-      atStart: contentOffset.x <= 2,
+      atStart: contentOffset.x <= leadingSlack + 2,
       atEnd: contentOffset.x >= maxX - HOME_FREE_PLAYER_TRAILING_SLACK_PX - 2,
     };
 
-    if (advancedRef.current) return;
+    // Until the strip has been moved past the leading slack, an offset of 0
+    // is just the initial layout, not a pull.
+    if (advancedRef.current || !positionedRef.current) return;
 
     // Bounce / trailing slack past the end — do not require a prior "at end".
     if (
@@ -174,6 +199,7 @@ export function HomeFreePlayersCarousel({
       homeFreePlayerShouldRewindOffer({
         offsetX: contentOffset.x,
         wasAtStart: false,
+        leadingSlackPx: leadingSlack,
       })
     ) {
       advancedRef.current = true;
@@ -217,166 +243,242 @@ export function HomeFreePlayersCarousel({
         offsetX: contentOffset.x,
         velocityX,
         wasAtStart: atStart,
+        leadingSlackPx: leadingSlack,
       })
     ) {
       advancedRef.current = true;
       onScrollPastStart();
+      return;
     }
+
+    settleIntoRestingRange(event);
   };
+
+  const items = (
+    <>
+      {players.map((player) => {
+        const areaLabel = firstZoneLabel(player.zones, locale);
+        const detail = homeFreePlayerDetailLine({
+          about: player.bio ?? "",
+          clubNames: clubNamesFromList(player.favorite_clubs),
+        });
+
+        return (
+          <Pressable
+            key={player.user_id}
+            accessibilityRole="button"
+            accessibilityLabel={t("discover.openPlayerProfile", {
+              name: player.display_name,
+            })}
+            onPress={() => openProfile(player)}
+            style={({ pressed }) => [
+              styles.card,
+              webItemSnap,
+              pressed && styles.pressed,
+            ]}
+          >
+            <View style={[styles.header, { flexDirection: rowDirection }]}>
+              <Avatar
+                name={player.display_name}
+                avatarPath={player.avatar_path}
+                size={CARD_AVATAR}
+              />
+              <View style={styles.identity}>
+                <AppText
+                  style={[styles.name, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {player.display_name}
+                </AppText>
+                <AppText
+                  style={[styles.level, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {t(`skillBandsShort.${player.skill_band}`)}
+                </AppText>
+              </View>
+            </View>
+
+            <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
+              {areaLabel ? (
+                <View
+                  style={[styles.metaItem, { flexDirection: rowDirection }]}
+                >
+                  <Icon
+                    name="place"
+                    size={13}
+                    color={tennisColors.mutedForeground}
+                  />
+                  <AppText
+                    style={[styles.metaText, { writingDirection }]}
+                    maxLines={1}
+                  >
+                    {areaLabel}
+                  </AppText>
+                </View>
+              ) : null}
+              {detail.metaClubLabel ? (
+                <View
+                  style={[styles.metaItem, { flexDirection: rowDirection }]}
+                >
+                  <Icon
+                    name="court"
+                    size={13}
+                    color={tennisColors.mutedForeground}
+                  />
+                  <AppText
+                    style={[styles.metaText, { writingDirection }]}
+                    maxLines={1}
+                  >
+                    {detail.metaClubLabel}
+                  </AppText>
+                </View>
+              ) : null}
+            </View>
+
+            <View style={[styles.detailSlot, { flexDirection: rowDirection }]}>
+              {detail.kind === "clubs" ? (
+                <Icon
+                  name="court"
+                  size={13}
+                  color={tennisColors.mutedForeground}
+                />
+              ) : null}
+              {detail.text ? (
+                <AppText
+                  style={[styles.detailText, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {detail.text}
+                </AppText>
+              ) : null}
+            </View>
+          </Pressable>
+        );
+      })}
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("home.free.viewAllForSlot", {
+          slot: block.label,
+        })}
+        onPress={() =>
+          router.push({
+            pathname: "/(tabs)/discover",
+            params: {
+              segment: "players",
+              freeFrom: block.startsAt,
+              freeTo: block.endsAt,
+            },
+          })
+        }
+        style={({ pressed }) => [
+          styles.seeAll,
+          webEndItemSnap,
+          { flexDirection: rowDirection },
+          pressed && styles.pressed,
+        ]}
+      >
+        <AppText style={[styles.seeAllLabel, { writingDirection }]}>
+          {t("home.free.viewAll")}
+        </AppText>
+      </Pressable>
+    </>
+  );
+
+  /**
+   * Android, left to right, screen reader off: the strip settles itself (see
+   * `SnapStrip`). React Native's own snapping stops dead on a fast swipe.
+   */
+  const handleStripRelease = (release: SnapStripRelease): boolean => {
+    const lastIndex = release.offsets.length - 1;
+    if (
+      onScrollPastEnd &&
+      homeFreePlayerShouldAdvanceOffer({
+        offsetX: release.position,
+        contentWidth: release.contentWidth,
+        viewportWidth: release.viewportWidth,
+        velocityX: release.velocity,
+        wasAtEnd: release.startIndex === lastIndex,
+      })
+    ) {
+      onScrollPastEnd();
+      return true;
+    }
+    if (
+      onScrollPastStart &&
+      homeFreePlayerShouldRewindOffer({
+        offsetX: release.position,
+        velocityX: release.velocity,
+        wasAtStart: release.startIndex === 0,
+      })
+    ) {
+      onScrollPastStart();
+      return true;
+    }
+    return false;
+  };
+
+  if (useSnapStrip) {
+    return (
+      <View style={styles.root}>
+        <SnapStrip
+          offsetsFor={(contentWidth, viewportWidth) =>
+            homeFreePlayerSnapOffsets(players.length, {
+              maxOffsetX: Math.max(0, contentWidth - viewportWidth),
+            })
+          }
+          onRelease={handleStripRelease}
+          contentStyle={styles.strip}
+        >
+          {items}
+        </SnapStrip>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
       <ScrollView
+        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
         snapToAlignment="start"
-        snapToInterval={HOME_FREE_PLAYER_SNAP_INTERVAL}
-        snapToOffsets={homeFreePlayerSnapOffsets(players.length)}
+        snapToOffsets={homeFreePlayerSnapOffsets(players.length, {
+          leadingSlackPx: leadingSlack,
+          maxOffsetX: restingEndX,
+        })}
+        // The slack at either end is room to pull into, never a resting spot.
+        snapToStart={leadingSlack === 0}
+        snapToEnd={false}
+        contentOffset={{ x: leadingSlack, y: 0 }}
         disableIntervalMomentum
         bounces
         alwaysBounceHorizontal
         overScrollMode="always"
+        onLayout={(event) => {
+          const width = event.nativeEvent.layout.width;
+          if (width !== viewportWidth) setViewportWidth(width);
+        }}
+        onContentSizeChange={(width) => {
+          if (width !== stripWidth) setStripWidth(width);
+          positionPastLeadingSlack();
+        }}
         onScroll={handleScroll}
         onScrollBeginDrag={handleScrollBeginDrag}
         onScrollEndDrag={handleScrollEndDrag}
+        onMomentumScrollEnd={settleIntoRestingRange}
         scrollEventThrottle={16}
         style={[
           styles.scroll,
           webStripSnap,
           Platform.OS === "web" ? { direction: writingDirection } : null,
         ]}
-        contentContainerStyle={styles.strip}
+        contentContainerStyle={[styles.strip, { paddingStart: leadingSlack }]}
       >
-        {players.map((player) => {
-          const areaLabel = firstZoneLabel(player.zones, locale);
-          const detail = homeFreePlayerDetailLine({
-            about: player.bio ?? "",
-            clubNames: clubNamesFromList(player.favorite_clubs),
-          });
+        {items}
 
-          return (
-            <Pressable
-              key={player.user_id}
-              accessibilityRole="button"
-              accessibilityLabel={t("discover.openPlayerProfile", {
-                name: player.display_name,
-              })}
-              onPress={() => openProfile(player)}
-              style={({ pressed }) => [
-                styles.card,
-                webItemSnap,
-                pressed && styles.pressed,
-              ]}
-            >
-              <View style={[styles.header, { flexDirection: rowDirection }]}>
-                <Avatar
-                  name={player.display_name}
-                  avatarPath={player.avatar_path}
-                  size={CARD_AVATAR}
-                />
-                <View style={styles.identity}>
-                  <AppText
-                    style={[styles.name, { writingDirection }]}
-                    maxLines={1}
-                  >
-                    {player.display_name}
-                  </AppText>
-                  <AppText
-                    style={[styles.level, { writingDirection }]}
-                    maxLines={1}
-                  >
-                    {t(`skillBandsShort.${player.skill_band}`)}
-                  </AppText>
-                </View>
-              </View>
-
-              <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
-                {areaLabel ? (
-                  <View
-                    style={[styles.metaItem, { flexDirection: rowDirection }]}
-                  >
-                    <Icon
-                      name="place"
-                      size={13}
-                      color={tennisColors.mutedForeground}
-                    />
-                    <AppText
-                      style={[styles.metaText, { writingDirection }]}
-                      maxLines={1}
-                    >
-                      {areaLabel}
-                    </AppText>
-                  </View>
-                ) : null}
-                {detail.metaClubLabel ? (
-                  <View
-                    style={[styles.metaItem, { flexDirection: rowDirection }]}
-                  >
-                    <Icon
-                      name="court"
-                      size={13}
-                      color={tennisColors.mutedForeground}
-                    />
-                    <AppText
-                      style={[styles.metaText, { writingDirection }]}
-                      maxLines={1}
-                    >
-                      {detail.metaClubLabel}
-                    </AppText>
-                  </View>
-                ) : null}
-              </View>
-
-              <View
-                style={[styles.detailSlot, { flexDirection: rowDirection }]}
-              >
-                {detail.kind === "clubs" ? (
-                  <Icon
-                    name="court"
-                    size={13}
-                    color={tennisColors.mutedForeground}
-                  />
-                ) : null}
-                {detail.text ? (
-                  <AppText
-                    style={[styles.detailText, { writingDirection }]}
-                    maxLines={1}
-                  >
-                    {detail.text}
-                  </AppText>
-                ) : null}
-              </View>
-            </Pressable>
-          );
-        })}
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("home.free.viewAllForSlot", {
-            slot: block.label,
-          })}
-          onPress={() =>
-            router.push({
-              pathname: "/(tabs)/discover",
-              params: {
-                segment: "players",
-                freeFrom: block.startsAt,
-                freeTo: block.endsAt,
-              },
-            })
-          }
-          style={({ pressed }) => [
-            styles.seeAll,
-            webItemSnap,
-            { flexDirection: rowDirection },
-            pressed && styles.pressed,
-          ]}
-        >
-          <AppText style={[styles.seeAllLabel, { writingDirection }]}>
-            {t("home.free.viewAll")}
-          </AppText>
-        </Pressable>
         {/* Slack past View all so web (no rubber-band) can keep scrolling. */}
         <View
           accessibilityElementsHidden
@@ -384,6 +486,52 @@ export function HomeFreePlayersCarousel({
           style={styles.trailingSlack}
         />
       </ScrollView>
+    </View>
+  );
+}
+
+/**
+ * Two placeholder cards with the real card's layout and text styles, so the
+ * real cards replace them without the section changing height.
+ */
+export function HomeFreePlayersSkeleton() {
+  const { rowDirection } = useLayoutDirection();
+  const card = (key: number) => (
+    <View key={key} style={styles.card}>
+      <View style={[styles.header, { flexDirection: rowDirection }]}>
+        <View style={styles.skeletonAvatar} />
+        <View style={styles.identity}>
+          <AppText style={[styles.name, styles.skeletonBar, { width: 120 }]}>
+            {" "}
+          </AppText>
+          <AppText style={[styles.level, styles.skeletonBar, { width: 72 }]}>
+            {" "}
+          </AppText>
+        </View>
+      </View>
+      <View style={[styles.metaRow, { flexDirection: rowDirection }]}>
+        <AppText style={[styles.metaText, styles.skeletonBar, { width: 140 }]}>
+          {" "}
+        </AppText>
+      </View>
+      <View style={[styles.detailSlot, { flexDirection: rowDirection }]}>
+        <AppText style={[styles.detailText, styles.skeletonBar]}>{" "}</AppText>
+      </View>
+    </View>
+  );
+
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[
+        styles.root,
+        styles.skeletonStrip,
+        { flexDirection: rowDirection },
+      ]}
+    >
+      {card(0)}
+      {card(1)}
     </View>
   );
 }
@@ -398,6 +546,23 @@ const styles = createLiveSheet(() =>
   StyleSheet.create({
     root: {
       gap: 0,
+    },
+    skeletonStrip: {
+      gap: HOME_FREE_PLAYER_CARD_GAP,
+      overflow: "hidden",
+    },
+    skeletonAvatar: {
+      width: CARD_AVATAR,
+      height: CARD_AVATAR,
+      borderRadius: CARD_AVATAR / 2,
+      backgroundColor: tennisColors.muted,
+    },
+    // Same text styles as the card, so each bar is exactly one line high.
+    skeletonBar: {
+      alignSelf: "flex-start",
+      borderRadius: 4,
+      backgroundColor: tennisColors.muted,
+      color: "transparent",
     },
     scroll: {
       flexGrow: 0,

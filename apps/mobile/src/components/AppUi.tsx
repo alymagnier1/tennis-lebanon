@@ -1,11 +1,10 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Easing,
   Image,
   Keyboard,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -17,6 +16,7 @@ import {
 } from "react-native";
 import { createLiveSheet } from "../theme/create-live-sheet";
 import { KeyboardAvoider } from "./KeyboardAvoider";
+import { AppOverlay } from "../providers/OverlayProvider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   colors,
@@ -546,6 +546,7 @@ export function ToolbarRow({
 }
 
 const SHEET_FADE_MS = 200;
+const SHEET_SHOW_FALLBACK_MS = 300;
 
 export function BottomSheet({
   visible,
@@ -565,31 +566,68 @@ export function BottomSheet({
   const confirmDialogVisible = useConfirmDialogVisible();
   const [rendered, setRendered] = useState(visible);
   const [opacity] = useState(() => new Animated.Value(visible ? 1 : 0));
+  const [ownDim] = useState(
+    () => new Animated.Value(confirmDialogVisible ? 0 : 1),
+  );
+  const backdropOpacity = useMemo(
+    () => Animated.multiply(opacity, ownDim),
+    [opacity, ownDim],
+  );
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const modalShownRef = useRef(false);
+
+  const fadeTo = useCallback(
+    (toValue: number, onDone?: Animated.EndCallback) => {
+      Animated.timing(opacity, {
+        toValue,
+        duration: SHEET_FADE_MS,
+        useNativeDriver: true,
+      }).start(onDone);
+    },
+    [opacity],
+  );
+
+  /*
+   * The fade-in waits for `onShow`, the frame after the sheet's layer is on
+   * screen. A reopen during the fade-out keeps the same layer, so `onShow`
+   * will not fire again and the fade starts straight away.
+   */
+  const handleModalShow = useCallback(() => {
+    modalShownRef.current = true;
+    if (visible) {
+      requestAnimationFrame(() => fadeTo(1));
+    }
+  }, [fadeTo, visible]);
 
   useEffect(() => {
     if (visible) {
       void Promise.resolve().then(() => {
         setRendered(true);
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: SHEET_FADE_MS,
-          useNativeDriver: true,
-        }).start();
+        if (modalShownRef.current) {
+          fadeTo(1);
+        }
       });
-      return;
+      const fallback = setTimeout(() => fadeTo(1), SHEET_SHOW_FALLBACK_MS);
+      return () => clearTimeout(fallback);
     }
 
-    Animated.timing(opacity, {
-      toValue: 0,
-      duration: SHEET_FADE_MS,
-      useNativeDriver: true,
-    }).start(({ finished }) => {
+    fadeTo(0, ({ finished }) => {
       if (finished) {
+        modalShownRef.current = false;
         setRendered(false);
       }
     });
-  }, [opacity, visible]);
+  }, [fadeTo, visible]);
+
+  // The confirm dialog brings its own dim; cross-fade so neither a double dim
+  // nor an undimmed frame shows while it comes up.
+  useEffect(() => {
+    Animated.timing(ownDim, {
+      toValue: confirmDialogVisible ? 0 : 1,
+      duration: SHEET_FADE_MS,
+      useNativeDriver: true,
+    }).start();
+  }, [confirmDialogVisible, ownDim]);
 
   /*
    * Cleared on the way out rather than on the way in. Resetting synchronously in
@@ -645,11 +683,10 @@ export function BottomSheet({
   }
 
   return (
-    <Modal
-      animationType="none"
-      transparent
+    <AppOverlay
       visible={rendered}
       onRequestClose={onClose}
+      onShow={handleModalShow}
     >
       <KeyboardAvoider
         style={styles.sheetRoot}
@@ -657,12 +694,7 @@ export function BottomSheet({
       >
         <Animated.View
           pointerEvents={confirmDialogVisible ? "none" : "auto"}
-          style={[
-            styles.sheetBackdrop,
-            {
-              opacity: confirmDialogVisible ? 0 : opacity,
-            },
-          ]}
+          style={[styles.sheetBackdrop, { opacity: backdropOpacity }]}
         >
           <Pressable
             accessibilityRole="button"
@@ -684,7 +716,9 @@ export function BottomSheet({
               ),
               paddingBottom:
                 pinnedBottomPadding(insets.bottom, spacing.xl) +
-                (Platform.OS === "ios" ? 0 : keyboardHeight),
+                // In the app's own window the keyboard avoider lifts the sheet
+                // on Android and iOS; only the web needs the height added.
+                (Platform.OS === "web" ? keyboardHeight : 0),
               maxHeight: keyboardHeight > 0 ? "92%" : "85%",
             },
           ]}
@@ -709,7 +743,7 @@ export function BottomSheet({
           {footer ? <View style={styles.sheetFooter}>{footer}</View> : null}
         </Animated.View>
       </KeyboardAvoider>
-    </Modal>
+    </AppOverlay>
   );
 }
 

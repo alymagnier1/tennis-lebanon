@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   peakLiquidity,
   pickUpcomingBlocks,
+  pickUpcomingDays,
   toLiquidityRows,
   type LiquidityRow,
 } from "./availability-liquidity";
@@ -179,5 +180,58 @@ describe("peakLiquidity", () => {
 
   it("is zero with nothing to show", () => {
     expect(peakLiquidity([] as LiquidityRow[])).toBe(0);
+  });
+});
+
+describe("pickUpcomingDays", () => {
+  const row = (
+    dayOffset: number,
+    part: "morning" | "afternoon" | "evening",
+    startsAt: string,
+    endsAt: string,
+    playerCount: number,
+  ) => ({
+    dayOffset,
+    part,
+    dateKey: `2026-09-${27 + dayOffset}`,
+    startsAt,
+    endsAt,
+    playerCount,
+  });
+
+  it("makes one tab per day, spanning its first to last free block", () => {
+    const days = pickUpcomingDays([
+      row(1, "evening", "2026-09-28T14:00:00Z", "2026-09-28T19:00:00Z", 2),
+      row(1, "morning", "2026-09-28T04:00:00Z", "2026-09-28T09:00:00Z", 3),
+      row(0, "evening", "2026-09-27T14:00:00Z", "2026-09-27T19:00:00Z", 1),
+    ]);
+    expect(days).toEqual([
+      {
+        dayOffset: 0,
+        dateKey: "2026-09-27",
+        startsAt: "2026-09-27T14:00:00Z",
+        endsAt: "2026-09-27T19:00:00Z",
+        playerCount: 1,
+      },
+      {
+        dayOffset: 1,
+        dateKey: "2026-09-28",
+        startsAt: "2026-09-28T04:00:00Z",
+        endsAt: "2026-09-28T19:00:00Z",
+        playerCount: 3,
+      },
+    ]);
+  });
+
+  it("stops after the day after tomorrow", () => {
+    const days = pickUpcomingDays([
+      row(2, "morning", "2026-09-29T04:00:00Z", "2026-09-29T09:00:00Z", 1),
+      row(3, "morning", "2026-09-30T04:00:00Z", "2026-09-30T09:00:00Z", 5),
+    ]);
+    expect(days.map((day) => day.dayOffset)).toEqual([2]);
+  });
+
+  it("skips a day nobody is free", () => {
+    expect(pickUpcomingDays([])).toEqual([]);
   });
 });

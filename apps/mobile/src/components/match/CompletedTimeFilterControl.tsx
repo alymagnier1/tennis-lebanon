@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import {
-  Modal,
+  Animated,
   Pressable,
   StyleSheet,
   View,
@@ -17,6 +17,8 @@ import {
 } from "../../lib/completed-match-time-filter";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
+import { useModalFadeIn } from "../../hooks/useModalFadeIn";
+import { AppOverlay } from "../../providers/OverlayProvider";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 type MenuAnchor = {
@@ -37,6 +39,18 @@ export function CompletedTimeFilterControl({
   const triggerRef = useRef<RNView>(null);
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState<MenuAnchor | null>(null);
+  // Where the popup window's content starts, in the same coordinates as the
+  // trigger's measureInWindow. Android measures from below the status bar;
+  // a popup drawn under the bars starts above that, so without this the menu
+  // sat one status bar too high (2026-09-27).
+  const modalRootRef = useRef<RNView>(null);
+  const [modalOrigin, setModalOrigin] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const menuVisible = open && anchor != null;
+  // Short: the trigger squares its corners the moment the menu opens.
+  const menuFade = useModalFadeIn(menuVisible, 100);
 
   function close() {
     setOpen(false);
@@ -80,26 +94,37 @@ export function CompletedTimeFilterControl({
         </Pressable>
       </View>
 
-      <Modal
-        transparent
-        animationType="none"
-        visible={open && anchor != null}
+      <AppOverlay
+        visible={menuVisible}
         onRequestClose={close}
+        onShow={menuFade.onShow}
       >
-        <View style={styles.modalRoot} pointerEvents="box-none">
+        {/* One layer while fading, so the menu's shadow fades with it. */}
+        <Animated.View
+          ref={modalRootRef}
+          collapsable={false}
+          onLayout={() =>
+            modalRootRef.current?.measureInWindow((x, y) =>
+              setModalOrigin({ x, y }),
+            )
+          }
+          needsOffscreenAlphaCompositing
+          style={[styles.modalRoot, { opacity: menuFade.opacity }]}
+          pointerEvents="box-none"
+        >
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t("common.cancel")}
             onPress={close}
             style={StyleSheet.absoluteFill}
           />
-          {anchor ? (
+          {anchor && modalOrigin ? (
             <View
               style={[
                 styles.menu,
                 {
-                  top: anchor.y,
-                  left: anchor.x,
+                  top: anchor.y - modalOrigin.y,
+                  left: anchor.x - modalOrigin.x,
                   width: anchor.width,
                 },
               ]}
@@ -138,8 +163,8 @@ export function CompletedTimeFilterControl({
               })}
             </View>
           ) : null}
-        </View>
-      </Modal>
+        </Animated.View>
+      </AppOverlay>
     </>
   );
 }

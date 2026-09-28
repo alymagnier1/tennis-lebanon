@@ -11,16 +11,37 @@ export const HOME_FREE_PLAYER_OVERSCROLL_PX = 40;
 export const HOME_FREE_PLAYER_END_FLING_VX = 0.35;
 /** Trailing strip slack so web (no bounce) can scroll past "View all". */
 export const HOME_FREE_PLAYER_TRAILING_SLACK_PX = 56;
+/**
+ * Leading slack before the first card; the strip opens scrolled past it.
+ * Android clamps the offset at 0 and derives fling velocity from offset
+ * changes, so without room to pull into, a rewind could never register.
+ */
+export const HOME_FREE_PLAYER_LEADING_SLACK_PX = 56;
 
 /**
  * Start offsets for each player card plus the trailing "View all" tile.
  * Interval is card width + strip gap so native snap and CSS scroll-snap stay aligned.
+ *
+ * `maxOffsetX` is the last resting offset (scrollable end minus trailing
+ * slack). Offsets past it are pulled back to it: a snap target inside the
+ * slack would land the strip in the advance zone and switch windows on its
+ * own.
  */
-export function homeFreePlayerSnapOffsets(playerCount: number): number[] {
+export function homeFreePlayerSnapOffsets(
+  playerCount: number,
+  options: { leadingSlackPx?: number; maxOffsetX?: number } = {},
+): number[] {
   const count = Math.max(0, playerCount);
+  const leading = options.leadingSlackPx ?? 0;
+  const max = options.maxOffsetX;
   const offsets: number[] = [];
   for (let index = 0; index <= count; index += 1) {
-    offsets.push(index * HOME_FREE_PLAYER_SNAP_INTERVAL);
+    const raw = leading + index * HOME_FREE_PLAYER_SNAP_INTERVAL;
+    const offset =
+      max === undefined ? raw : Math.max(leading, Math.min(raw, max));
+    if (offsets[offsets.length - 1] !== offset) {
+      offsets.push(offset);
+    }
   }
   return offsets;
 }
@@ -74,13 +95,16 @@ export function homeFreePlayerShouldRewindOffer(input: {
   offsetX: number;
   velocityX?: number;
   wasAtStart: boolean;
+  /** Offset of the first card; pulling this far back into slack counts. */
+  leadingSlackPx?: number;
 }): boolean {
-  if (input.offsetX <= -HOME_FREE_PLAYER_OVERSCROLL_PX) {
+  const start = input.leadingSlackPx ?? 0;
+  if (input.offsetX <= start - HOME_FREE_PLAYER_OVERSCROLL_PX) {
     return true;
   }
   if (
     input.wasAtStart &&
-    input.offsetX <= 2 &&
+    input.offsetX <= start + 2 &&
     (input.velocityX ?? 0) < -HOME_FREE_PLAYER_END_FLING_VX
   ) {
     return true;
