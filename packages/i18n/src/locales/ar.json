@@ -27,7 +27,7 @@
   "profileScreenPreferredAreasTitle": "المناطق المفضلة",
   "profileScreenZonesError": "اختر منطقة واحدة على الأقل.",
   "settingsScreenPreferences": "التفضيلات",
-  "settingsScreenLanguage": "اللغة",
+  "settingsScreenLanguage": "لغة التطبيق",
   "settingsScreenAppearance": "المظهر",
   "settingsAppearanceSystem": "النظام",
   "settingsAppearanceLight": "فاتح",
@@ -656,7 +656,9 @@
       "firstRunTitle": "أين تلعب؟",
       "firstRunDescription": "اختر مناطقك والنوادي التي يسعدك اللعب فيها. تُملأ تلقائيًا في كل مباراة تنظمها، فتختارها مرة واحدة فقط.",
       "firstRunSkip": "تخطَّ الآن"
-    }
+    },
+    "languagesHint": "تظهر في ملفك ليعرف اللاعبون بأي لغة يراسلونك.",
+    "bioEmptyAction": "أضف بضع كلمات عن طريقة لعبك"
   },
   "discover": {
     "title": "استكشاف",
@@ -1511,7 +1513,9 @@
       "update": "تحديث مُنزَّل",
       "embedded": "الحزمة المدمجة",
       "disabled": "التحديثات متوقفة"
-    }
+    },
+    "signedInWithGoogle": "تم تسجيل الدخول عبر Google",
+    "signedInWithEmail": "تم تسجيل الدخول عبر البريد الإلكتروني"
   },
   "account": {
     "unavailableTitle": "الحساب غير متاح",

@@ -27,7 +27,7 @@
   "profileScreenPreferredAreasTitle": "Preferred areas",
   "profileScreenZonesError": "Choose at least one area.",
   "settingsScreenPreferences": "Preferences",
-  "settingsScreenLanguage": "Language",
+  "settingsScreenLanguage": "App language",
   "settingsScreenAppearance": "Appearance",
   "settingsAppearanceSystem": "System",
   "settingsAppearanceLight": "Light",
@@ -795,7 +795,9 @@
       "firstRunTitle": "Where do you play?",
       "firstRunDescription": "Pick your areas and the clubs you would happily play at. They pre-fill every match you host, so you only choose them once.",
       "firstRunSkip": "Skip for now"
-    }
+    },
+    "languagesHint": "Shown on your profile so players know which language to write to you in.",
+    "bioEmptyAction": "Add a few words about how you like to play"
   },
   "discover": {
     "title": "Discover",
@@ -1650,7 +1652,9 @@
       "update": "downloaded update",
       "embedded": "built-in bundle",
       "disabled": "updates off"
-    }
+    },
+    "signedInWithGoogle": "Signed in with Google",
+    "signedInWithEmail": "Signed in with email"
   },
   "account": {
     "unavailableTitle": "Account unavailable",

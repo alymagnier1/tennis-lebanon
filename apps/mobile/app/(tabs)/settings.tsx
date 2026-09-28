@@ -34,6 +34,7 @@ import {
   settingsScreenAppearanceTitle,
   settingsScreenLanguageTitle,
   settingsScreenPreferencesTitle,
+  settingsSignInMethod,
 } from "../../src/lib/settings-screen-copy";
 import { useLayoutDirection } from "../../src/lib/layout-direction";
 import {
@@ -52,7 +53,11 @@ import { tennisFontFamily } from "../../src/hooks/useTennisFonts";
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
-  const { refreshProfile, signOut } = useAuth();
+  const { refreshProfile, signOut, session } = useAuth();
+  const signInEmail = session?.user.email ?? null;
+  const signInMethod = settingsSignInMethod(
+    session?.user.app_metadata?.providers,
+  );
   const { preference, setPreference } = useTennisTheme();
   const { family, setFamily } = useHeroVariant();
   const { rowDirection } = useLayoutDirection();
@@ -251,6 +256,21 @@ export default function SettingsScreen() {
             title={settingsScreenAccountTitle(t)}
             variant="grouped"
           >
+            {/* Which account this is. Shown only here, to the player
+                themselves; other players never see an email. */}
+            {signInEmail ? (
+              <ProfileMenuRow
+                icon={
+                  <Icon name="mail" size={16} color={tennisColors.primary} />
+                }
+                label={
+                  signInMethod === "google"
+                    ? t("settings.signedInWithGoogle")
+                    : t("settings.signedInWithEmail")
+                }
+                subtitle={signInEmail}
+              />
+            ) : null}
             {passwordQuery.isPending ? (
               <ProfileMenuRow
                 icon={

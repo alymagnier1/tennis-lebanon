@@ -27,7 +27,7 @@
   "profileScreenPreferredAreasTitle": "Zones préférées",
   "profileScreenZonesError": "Choisissez au moins une zone.",
   "settingsScreenPreferences": "Préférences",
-  "settingsScreenLanguage": "Langue",
+  "settingsScreenLanguage": "Langue de l'application",
   "settingsScreenAppearance": "Apparence",
   "settingsAppearanceSystem": "Système",
   "settingsAppearanceLight": "Clair",
@@ -656,7 +656,9 @@
       "firstRunTitle": "Où jouez-vous ?",
       "firstRunDescription": "Choisissez vos zones et les clubs où vous joueriez volontiers. Ils préremplissent chaque match que vous organisez, vous ne les choisissez qu'une fois.",
       "firstRunSkip": "Passer pour l'instant"
-    }
+    },
+    "languagesHint": "Affiché sur votre profil pour que les joueurs sachent dans quelle langue vous écrire.",
+    "bioEmptyAction": "Ajoutez quelques mots sur votre façon de jouer"
   },
   "discover": {
     "title": "Découvrir",
@@ -1511,7 +1513,9 @@
       "update": "mise à jour téléchargée",
       "embedded": "bundle intégré",
       "disabled": "mises à jour désactivées"
-    }
+    },
+    "signedInWithGoogle": "Connecté avec Google",
+    "signedInWithEmail": "Connecté par e-mail"
   },
   "account": {
     "unavailableTitle": "Compte indisponible",
