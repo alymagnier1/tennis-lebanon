@@ -55,11 +55,13 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    if (preference === "system") {
-      return;
-    }
     try {
-      Appearance.setColorScheme(preference);
+      // "unspecified" hands the scheme back to the phone. Returning early for
+      // "system" left the last Light / Dark forced, so System did nothing
+      // after either had been picked (founder, 2026-09-28).
+      Appearance.setColorScheme(
+        preference === "system" ? "unspecified" : preference,
+      );
     } catch {
       // Older runtimes and web ignore an explicit scheme.
     }
