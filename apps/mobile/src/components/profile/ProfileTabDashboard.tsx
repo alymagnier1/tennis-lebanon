@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { notify } from "../../lib/confirm-action";
 import {
-  Alert,
   Animated,
   Pressable,
   ScrollView,
@@ -12,9 +10,8 @@ import { createLiveSheet } from "../../theme/create-live-sheet";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
-  clearOwnAvatar,
   getOwnPlayerProfile,
   listMyCompletedMatches,
 } from "@tennis-lebanon/api";
@@ -24,12 +21,11 @@ import { Icon } from "../Icon";
 import { PlayerProfileSection } from "../player/PlayerProfileSection";
 import { FigmaPrimaryButton } from "../onboarding-ui";
 import { OwnProfileHero } from "./OwnProfileHero";
-import { ProfileBioEditor } from "./ProfileBioEditor";
 import { ProfileMenuRow } from "./ProfileMenuRow";
 import { ProfileSettingsFab } from "./ProfileSettingsFab";
 import { ProfileSkillBandSection } from "./ProfileSkillBandSection";
 import { useAuth } from "../../providers/AuthProvider";
-import { pickAndUploadOwnAvatar } from "../../lib/pick-own-avatar";
+import { useOwnAvatarActions } from "../../hooks/useOwnAvatarActions";
 import {
   profileScreenAboutTitle,
   profileScreenEditLabel,
@@ -58,8 +54,8 @@ async function fetchOwnZones() {
 
 export function ProfileTabDashboard() {
   const { t, i18n } = useTranslation();
-  const { profile, session, refreshProfile } = useAuth();
-  const queryClient = useQueryClient();
+  const { profile, session } = useAuth();
+  const avatar = useOwnAvatarActions();
   const insets = useSafeAreaInsets();
   const [showRatingExplainer, setShowRatingExplainer] = useState(false);
   const ratingExplainerFade = useModalFadeIn(showRatingExplainer);
@@ -99,69 +95,6 @@ export function ProfileTabDashboard() {
       : t("rating.ownRatingLabel")
     : t("rating.ownRatingLabel");
 
-  async function refreshAvatarViews() {
-    await Promise.all([
-      refreshProfile(),
-      queryClient.invalidateQueries({ queryKey: ["own-player-profile"] }),
-      queryClient.invalidateQueries({ queryKey: ["avatar-url"] }),
-      queryClient.invalidateQueries({ queryKey: ["discover-players"] }),
-    ]);
-  }
-
-  const avatarMutation = useMutation({
-    mutationFn: pickAndUploadOwnAvatar,
-    onSuccess: async (result) => {
-      if (result.status === "success") {
-        await refreshAvatarViews();
-        return;
-      }
-
-      if (result.status === "permission_denied") {
-        notify(t("profile.avatarPermissionDenied"));
-      }
-    },
-    onError: () => {
-      notify(t("profile.avatarUploadError"));
-    },
-  });
-
-  const removeAvatarMutation = useMutation({
-    mutationFn: () => clearOwnAvatar(supabase),
-    onSuccess: refreshAvatarViews,
-    onError: () => {
-      notify(t("profile.avatarRemoveError"));
-    },
-  });
-
-  // With a photo already set, going straight to the picker would leave no way
-  // back to the initials placeholder.
-  function handleAvatarPress() {
-    if (!profile?.avatar_path) {
-      avatarMutation.mutate();
-      return;
-    }
-
-    // KNOWN GAP — silent on web. `Alert.alert` is a no-op under
-    // react-native-web, so this sheet never opens there. It is the only dialog
-    // left on `Alert` because it offers three outcomes (change / remove /
-    // cancel) and every shared helper collapses to two: `chooseAction` would
-    // either drop "remove" or make dismissing the sheet delete the photo.
-    // Fixing it properly means giving the dialog a real third action rather
-    // than degrading it here. Not in the cohort-1 rehearsal path.
-    Alert.alert(t("profile.avatarEditLabel"), undefined, [
-      {
-        text: t("profile.avatarChange"),
-        onPress: () => avatarMutation.mutate(),
-      },
-      {
-        text: t("profile.avatarRemove"),
-        style: "destructive",
-        onPress: () => removeAvatarMutation.mutate(),
-      },
-      { text: t("common.cancel"), style: "cancel" },
-    ]);
-  }
-
   return (
     <View style={styles.root}>
       <ScrollView
@@ -182,18 +115,31 @@ export function ProfileTabDashboard() {
           ratingLabel={ratingLabel}
           editLabel={profileScreenEditLabel(t)}
           avatarEditLabel={t("profile.avatarEditLabel")}
-          avatarUploading={
-            avatarMutation.isPending || removeAvatarMutation.isPending
-          }
-          onAvatarPress={handleAvatarPress}
+          avatarUploading={avatar.busy}
+          // Straight to the photo picker (founder, 2026-09-28). Removing a
+          // photo lives on Edit profile with the rest of the public profile.
+          onAvatarPress={avatar.change}
           onEdit={() => router.push("/profile/edit")}
           onRatingInfo={() => setShowRatingExplainer(true)}
         />
 
         <View style={styles.body}>
           <PlayerProfileSection title={profileScreenAboutTitle(t)}>
-            {profile && playerProfile ? (
-              <ProfileBioEditor bio={playerProfile.bio} />
+            {/* Shown here, edited on Edit profile with the rest of what
+                other players see. */}
+            {playerProfile?.bio ? (
+              <AppText style={styles.bio}>{playerProfile.bio}</AppText>
+            ) : playerProfile ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("profile.bioEmptyAction")}
+                onPress={() => router.push("/profile/edit")}
+                style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+              >
+                <AppText style={styles.bioEmpty}>
+                  {t("profile.bioEmptyAction")}
+                </AppText>
+              </Pressable>
             ) : null}
           </PlayerProfileSection>
 
@@ -300,6 +246,18 @@ const styles = createLiveSheet(() =>
       paddingHorizontal: 20,
       paddingTop: 20,
       gap: 16,
+    },
+    bio: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 22,
+      color: tennisColors.primaryDark,
+    },
+    bioEmpty: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 14,
+      lineHeight: 22,
+      color: tennisColors.violetText,
     },
     menuCard: {
       backgroundColor: tennisColors.card,

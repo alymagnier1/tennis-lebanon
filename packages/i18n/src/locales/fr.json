@@ -27,9 +27,8 @@
   "profileScreenPreferredAreasTitle": "Zones préférées",
   "profileScreenZonesError": "Choisissez au moins une zone.",
   "settingsScreenPreferences": "Préférences",
-  "settingsScreenLanguage": "Langue",
+  "settingsScreenLanguage": "Langue de l'application",
   "settingsScreenAppearance": "Apparence",
-  "settingsAppearanceSystem": "Système",
   "settingsAppearanceLight": "Clair",
   "settingsAppearanceDark": "Sombre",
   "settingsOnboardingHero": "Visuel d'accueil",
@@ -655,8 +654,13 @@
       "editLink": "Définir dans Profil → Où je joue",
       "firstRunTitle": "Où jouez-vous ?",
       "firstRunDescription": "Choisissez vos zones et les clubs où vous joueriez volontiers. Ils préremplissent chaque match que vous organisez, vous ne les choisissez qu'une fois.",
-      "firstRunSkip": "Passer pour l'instant"
-    }
+      "firstRunSkip": "Passer pour l'instant",
+      "clubsInfoBody": "Vos clubs favoris sont ceux où vous aimez jouer. Ils sont présélectionnés quand vous créez un match, l'accueil vous montre d'abord les matchs ouverts dans ces clubs, et les autres joueurs les voient sur votre profil.",
+      "favoriteCountNone": "Aucun club favori pour le moment",
+      "clubsInfoLabel": "À propos des clubs favoris"
+    },
+    "languagesHint": "Affiché sur votre profil pour que les joueurs sachent dans quelle langue vous écrire.",
+    "bioEmptyAction": "Ajoutez quelques mots sur votre façon de jouer"
   },
   "discover": {
     "title": "Découvrir",
@@ -1511,7 +1515,9 @@
       "update": "mise à jour téléchargée",
       "embedded": "bundle intégré",
       "disabled": "mises à jour désactivées"
-    }
+    },
+    "signedInWithGoogle": "Connecté avec Google",
+    "signedInWithEmail": "Connecté par e-mail"
   },
   "account": {
     "unavailableTitle": "Compte indisponible",
@@ -1571,7 +1577,10 @@
       "openSystemSettings": "Ouvrir les réglages de l'appareil",
       "enableError": "Nous n'avons pas pu activer les notifications sur cet appareil.",
       "centerHint": "Tout ce qui vous est envoyé est conservé ici, que les notifications push soient activées ou non.",
-      "openCenter": "Ouvrir les notifications"
+      "openCenter": "Ouvrir les notifications",
+      "disable": "Désactiver sur ce téléphone",
+      "disableError": "Nous n'avons pas pu désactiver les notifications sur ce téléphone.",
+      "detailPaused": "Les notifications push sont désactivées sur ce téléphone. Tout ce qui vous est envoyé reste dans votre liste de notifications."
     },
     "kinds": {
       "match_invitation": {

@@ -11,7 +11,11 @@ export type TennisColorName = keyof typeof tennisColorsLight;
 
 export type TennisColorTokens = { readonly [K in TennisColorName]: string };
 
-export type AppearancePreference = "system" | "light" | "dark";
+/**
+ * Light or Dark only. "System" (follow the phone) was removed at the
+ * founder's request (2026-09-28); a stored "system" reads as Light.
+ */
+export type AppearancePreference = "light" | "dark";
 
 export type ResolvedAppearance = "light" | "dark";
 
@@ -318,12 +322,8 @@ export function setActiveTennisScheme(scheme: ResolvedAppearance): void {
 
 export function resolveAppearance(
   preference: AppearancePreference,
-  systemScheme: ResolvedAppearance | null | undefined,
 ): ResolvedAppearance {
-  if (preference === "light" || preference === "dark") {
-    return preference;
-  }
-  return systemScheme === "dark" ? "dark" : "light";
+  return preference;
 }
 
 function live<T extends object>(read: () => T): T {

@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-09-28 — Edit profile is what others see; Settings is what only you see
+
+- Status: accepted
+- Context: Edit profile held only the display name and "Languages you speak", so it felt empty, and its language chips looked like a duplicate of Settings' app language (the same three choices under the same word). The photo was changed through a three-way `Alert` behind the Profile tab's avatar (silent on the web), and the bio was edited inline on the Profile tab. Settings never showed which account the player was signed in with.
+- Decision: Edit profile holds everything other players see: photo (change / remove as buttons), display name, about, and languages you speak with a line saying why they are shown. The Profile tab shows the about text and sends taps on the photo or an empty about to Edit profile. Settings renames its section to "App language" and opens Account with a read-only "Signed in with Google / email" row and the address, shown to the player only.
+- Alternatives considered: account fields such as email in Edit profile (mixes private sign-in data into the page about what others see); letting players change their email now (needs a confirmation email and a way back into the app, and a Google account's address cannot be changed from here — deferred until a tester asks).
+- Consequences: one place to edit one's public profile, and the `Alert`-based photo menu with its web gap is gone. `updateOwnProfile` now carries a bio the player actually edited; an empty about is saved as none. The email appears only in Settings and is never shown to other players.
+- Owner: Founder
+
 ## 2026-09-27 — Popups are layers in the app's window, not React Native Modals
 
 - Status: accepted
