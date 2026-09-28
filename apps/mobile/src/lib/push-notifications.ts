@@ -15,6 +15,11 @@ import { getStableDeviceId } from "./device-id";
 import { getNativeNotifications } from "./native-notifications";
 import { reportError } from "./sentry";
 import { supabase } from "./supabase";
+import {
+  readDeviceValue,
+  removeDeviceValue,
+  writeDeviceValue,
+} from "./device-storage";
 
 export type PushRegistrationResult =
   | "registered"
@@ -23,7 +28,9 @@ export type PushRegistrationResult =
   | "unconfigured"
   /** Simulator, web, or a device that returned no token. */
   | "unavailable"
-  | "skipped";
+  | "skipped"
+  /** The player turned push off on this phone (Notification settings). */
+  | "paused";
 
 export type PushPermissionStatus =
   | "granted"
@@ -153,12 +160,42 @@ export async function getExpoPushTokenValue(): Promise<string | null> {
   return isValidExpoPushToken(value) ? value : null;
 }
 
+/**
+ * Push turned off in the app, for this phone only. The OS permission cannot be
+ * revoked from inside an app, so without this the only way off was the
+ * phone's settings (founder, 2026-09-28). Per device, not per account: it is
+ * about this phone buzzing.
+ */
+const PUSH_PAUSED_KEY = "tennis-lebanon.push-paused";
+
+export async function isDevicePushPaused(): Promise<boolean> {
+  return (await readDeviceValue(PUSH_PAUSED_KEY).catch(() => null)) === "1";
+}
+
+/**
+ * Stops push on this phone: remembers the choice, then removes the phone's
+ * token from the server so the sender has nowhere to deliver. The in-app
+ * notification list is unaffected.
+ */
+export async function pauseDevicePush(): Promise<void> {
+  await writeDeviceValue(PUSH_PAUSED_KEY, "1");
+  await unregisterDevicePushToken();
+}
+
 export async function syncDevicePushToken(options?: {
+  /** An explicit "turn on": asks the OS if needed, and ends a pause. */
   requestPermission?: boolean;
 }): Promise<PushRegistrationResult> {
   const platform = getPushPlatform();
   if (!platform) {
     return "unavailable";
+  }
+
+  if (options?.requestPermission) {
+    await removeDeviceValue(PUSH_PAUSED_KEY).catch(() => undefined);
+  } else if (await isDevicePushPaused()) {
+    // The launch and foreground syncs must not quietly turn it back on.
+    return "paused";
   }
 
   if (options?.requestPermission) {

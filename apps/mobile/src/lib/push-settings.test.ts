@@ -20,13 +20,26 @@ describe("derivePushSettingsView", () => {
     ).toMatchObject({ tone: "blocked", action: "openSettings" });
   });
 
-  it("reports notifications as on once a device is registered", () => {
+  it("reports notifications as on once a device is registered, with a way to turn them off", () => {
     expect(
       derivePushSettingsView({
         permission: { status: "granted", canAskAgain: false },
         registration: "registered",
       }),
-    ).toMatchObject({ tone: "on", action: "none" });
+    ).toMatchObject({ tone: "on", action: "disable" });
+  });
+
+  it("shows push turned off in the app as off, with a way back on", () => {
+    expect(
+      derivePushSettingsView({
+        permission: { status: "granted", canAskAgain: false },
+        registration: "paused",
+      }),
+    ).toMatchObject({
+      tone: "off",
+      detailKey: "notifications.settings.detailPaused",
+      action: "enable",
+    });
   });
 
   it("does not claim notifications are on when the build has no project id", () => {

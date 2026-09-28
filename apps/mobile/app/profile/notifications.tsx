@@ -16,6 +16,7 @@ import { PlayerProfileSection } from "../../src/components/player/PlayerProfileS
 import { goBackOrReplace, SETTINGS_TAB_ROUTE } from "../../src/lib/navigation";
 import {
   getPushPermissionState,
+  pauseDevicePush,
   openSystemNotificationSettings,
   syncDevicePushToken,
   type PushPermissionState,
@@ -46,6 +47,8 @@ export default function NotificationSettingsScreen() {
     useState<PushRegistrationResult | null>(null);
   const [enabling, setEnabling] = useState(false);
   const [enableFailed, setEnableFailed] = useState(false);
+  const [disabling, setDisabling] = useState(false);
+  const [disableFailed, setDisableFailed] = useState(false);
 
   /**
    * Re-read on every focus, not just on mount: the recovery path for a blocked
@@ -83,6 +86,19 @@ export default function NotificationSettingsScreen() {
     } finally {
       setEnabling(false);
       setPermission(await getPushPermissionState());
+    }
+  };
+
+  const disable = async () => {
+    setDisabling(true);
+    setDisableFailed(false);
+    try {
+      await pauseDevicePush();
+      setRegistration("paused");
+    } catch {
+      setDisableFailed(true);
+    } finally {
+      setDisabling(false);
     }
   };
 
@@ -124,11 +140,25 @@ export default function NotificationSettingsScreen() {
                   />
                 ) : null}
 
+                {view.action === "disable" ? (
+                  <FigmaSecondaryButton
+                    label={t("notifications.settings.disable")}
+                    onPress={() => void disable()}
+                    loading={disabling}
+                  />
+                ) : null}
+
                 {view.action === "openSettings" ? (
                   <FigmaSecondaryButton
                     label={t("notifications.settings.openSystemSettings")}
                     onPress={() => void openSystemNotificationSettings()}
                   />
+                ) : null}
+
+                {disableFailed ? (
+                  <ErrorNotice>
+                    {t("notifications.settings.disableError")}
+                  </ErrorNotice>
                 ) : null}
 
                 {enableFailed ? (
