@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -33,215 +33,1089 @@
         --act-border: #d5e39a;
         --clay-on-dark: #f2a36b;
         --ease: cubic-bezier(0.16, 1, 0.3, 1);
-        --shadow-sm: 0 1px 2px rgba(13, 28, 20, 0.05), 0 2px 8px rgba(13, 28, 20, 0.04);
+        --shadow-sm:
+          0 1px 2px rgba(13, 28, 20, 0.05), 0 2px 8px rgba(13, 28, 20, 0.04);
         --shadow-md: 0 4px 12px rgba(13, 17, 23, 0.06);
-        --shadow-lg: 0 2px 4px rgba(10, 45, 37, 0.1), 0 12px 24px rgba(10, 45, 37, 0.18);
+        --shadow-lg:
+          0 2px 4px rgba(10, 45, 37, 0.1), 0 12px 24px rgba(10, 45, 37, 0.18);
       }
-      * { box-sizing: border-box; }
-      ::selection { background: var(--lime); color: var(--ink); }
+      * {
+        box-sizing: border-box;
+      }
+      ::selection {
+        background: var(--lime);
+        color: var(--ink);
+      }
       body {
-        margin: 0; padding: 40px 16px 72px;
-        background: #e3e9e4; color: var(--ink);
-        font-family: Inter, sans-serif; -webkit-font-smoothing: antialiased;
+        margin: 0;
+        padding: 40px 16px 72px;
+        background: #e3e9e4;
+        color: var(--ink);
+        font-family: Inter, sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
-      button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
-      a { color: inherit; text-decoration: none; }
-      :focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; border-radius: 12px; }
+      button {
+        font: inherit;
+        color: inherit;
+        border: 0;
+        background: none;
+        padding: 0;
+        cursor: pointer;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      :focus-visible {
+        outline: 2px solid var(--violet);
+        outline-offset: 2px;
+        border-radius: 12px;
+      }
 
-      .intro { max-width: 900px; margin: 0 auto 32px; }
-      .intro h1 { margin: 0; font-family: Outfit, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.03em; color: var(--green); }
-      .intro p { margin: 6px 0 0; font-size: 15px; line-height: 22px; color: var(--ink-2); }
-      .stage { display: flex; flex-wrap: wrap; gap: 48px; justify-content: center; align-items: flex-start; }
-      .col { width: 390px; }
-      .label { margin: 0 0 12px; font-family: Outfit, sans-serif; font-weight: 700; font-size: 17px; color: var(--green); }
-      .label small { font-family: Inter, sans-serif; font-weight: 500; font-size: 13px; color: var(--ink-2); margin-left: 6px; }
-      .rationale { margin: 16px 4px 0; padding: 0; list-style: none; font-size: 13px; line-height: 19px; color: #3d4a42; }
-      .rationale li { padding-left: 16px; position: relative; margin-top: 8px; }
-      .rationale li::before { content: ""; position: absolute; left: 2px; top: 7px; width: 6px; height: 6px; border-radius: 3px; background: var(--green); }
+      .intro {
+        max-width: 900px;
+        margin: 0 auto 32px;
+      }
+      .intro h1 {
+        margin: 0;
+        font-family: Outfit, sans-serif;
+        font-weight: 800;
+        font-size: 28px;
+        letter-spacing: -0.03em;
+        color: var(--green);
+      }
+      .intro p {
+        margin: 6px 0 0;
+        font-size: 15px;
+        line-height: 22px;
+        color: var(--ink-2);
+      }
+      .stage {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 48px;
+        justify-content: center;
+        align-items: flex-start;
+      }
+      .col {
+        width: 390px;
+      }
+      .label {
+        margin: 0 0 12px;
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 17px;
+        color: var(--green);
+      }
+      .label small {
+        font-family: Inter, sans-serif;
+        font-weight: 500;
+        font-size: 13px;
+        color: var(--ink-2);
+        margin-left: 6px;
+      }
+      .rationale {
+        margin: 16px 4px 0;
+        padding: 0;
+        list-style: none;
+        font-size: 13px;
+        line-height: 19px;
+        color: #3d4a42;
+      }
+      .rationale li {
+        padding-left: 16px;
+        position: relative;
+        margin-top: 8px;
+      }
+      .rationale li::before {
+        content: "";
+        position: absolute;
+        left: 2px;
+        top: 7px;
+        width: 6px;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--green);
+      }
 
       .device {
-        width: 390px; height: 844px; border-radius: 44px; overflow: hidden;
-        border: 10px solid #0b0f0c; background: var(--cream);
-        display: flex; flex-direction: column; box-shadow: 0 30px 80px rgba(13, 28, 20, 0.25);
+        width: 390px;
+        height: 844px;
+        border-radius: 44px;
+        overflow: hidden;
+        border: 10px solid #0b0f0c;
+        background: var(--cream);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 30px 80px rgba(13, 28, 20, 0.25);
       }
-      .status { display: flex; justify-content: space-between; padding: 12px 24px 4px; font-family: Outfit, sans-serif; font-weight: 600; font-size: 15px; }
-      .scroll { flex: 1; overflow-y: auto; scrollbar-width: none; }
-      .scroll::-webkit-scrollbar { display: none; }
-      .content { padding: 8px 16px 32px; }
+      .status {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 24px 4px;
+        font-family: Outfit, sans-serif;
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .scroll {
+        flex: 1;
+        overflow-y: auto;
+        scrollbar-width: none;
+      }
+      .scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .content {
+        padding: 8px 16px 32px;
+      }
 
-      .rise { animation: rise 560ms var(--ease) both; }
-      .d1 { animation-delay: 60ms; } .d2 { animation-delay: 140ms; } .d3 { animation-delay: 220ms; } .d4 { animation-delay: 300ms; }
-      @keyframes rise { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
-      @media (prefers-reduced-motion: reduce) { .rise { animation: none; } }
-      .press { transition: transform 160ms var(--ease); }
-      .press:active { transform: scale(0.98); }
+      .rise {
+        animation: rise 560ms var(--ease) both;
+      }
+      .d1 {
+        animation-delay: 60ms;
+      }
+      .d2 {
+        animation-delay: 140ms;
+      }
+      .d3 {
+        animation-delay: 220ms;
+      }
+      .d4 {
+        animation-delay: 300ms;
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translate3d(0, 10px, 0);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .rise {
+          animation: none;
+        }
+      }
+      .press {
+        transition: transform 160ms var(--ease);
+      }
+      .press:active {
+        transform: scale(0.98);
+      }
 
       /* ---------- Header (ref 5) ---------- */
-      .top { display: flex; align-items: center; gap: 12px; min-height: 56px; }
-      .me { flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; }
-      .avatar { width: 52px; height: 52px; border-radius: 50%; flex: none; display: grid; place-items: center; font-family: Outfit, sans-serif; font-weight: 700; font-size: 19px; }
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 56px;
+      }
+      .me {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        flex: none;
+        display: grid;
+        place-items: center;
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 19px;
+      }
       .avatar.photo {
         background:
           radial-gradient(circle at 64% 56%, #c8e63b 0 7px, transparent 8px),
           radial-gradient(circle at 38% 72%, #8a7355 0 13px, transparent 14px),
           #c4b49a;
       }
-      .hello { margin: 0; font-family: Outfit, sans-serif; font-weight: 800; font-size: 26px; line-height: 30px; letter-spacing: -0.03em; }
-      .standing { display: inline-flex; align-items: center; gap: 10px; min-height: 28px; font-size: 14px; color: var(--ink-2); }
-      .standing b { font-family: Outfit, sans-serif; font-weight: 700; font-size: 15px; color: var(--ink); }
-      .pips { display: inline-flex; gap: 3px; }
-      .pips i { width: 11px; height: 4px; border-radius: 2px; background: #d7dcd8; }
-      .pips i.on { background: var(--violet); }
-      .info { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #9aa59f; color: #7b867f; font-size: 10px; font-weight: 700; display: inline-grid; place-items: center; font-family: Georgia, serif; font-style: italic; }
-      .bell { width: 48px; height: 48px; border-radius: 50%; flex: none; position: relative; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); }
-      .bell .dot { position: absolute; top: 2px; right: 0; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--violet); color: #fff; border: 2px solid var(--surface); font-size: 10px; font-weight: 600; display: grid; place-items: center; }
+      .hello {
+        margin: 0;
+        font-family: Outfit, sans-serif;
+        font-weight: 800;
+        font-size: 26px;
+        line-height: 30px;
+        letter-spacing: -0.03em;
+      }
+      .standing {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 28px;
+        font-size: 14px;
+        color: var(--ink-2);
+      }
+      .standing b {
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--ink);
+      }
+      .pips {
+        display: inline-flex;
+        gap: 3px;
+      }
+      .pips i {
+        width: 11px;
+        height: 4px;
+        border-radius: 2px;
+        background: #d7dcd8;
+      }
+      .pips i.on {
+        background: var(--violet);
+      }
+      .info {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1.5px solid #9aa59f;
+        color: #7b867f;
+        font-size: 10px;
+        font-weight: 700;
+        display: inline-grid;
+        place-items: center;
+        font-family: Georgia, serif;
+        font-style: italic;
+      }
+      .bell {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        flex: none;
+        position: relative;
+        display: grid;
+        place-items: center;
+        background: var(--surface);
+        border: 1px solid var(--line);
+      }
+      .bell .dot {
+        position: absolute;
+        top: 2px;
+        right: 0;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background: var(--violet);
+        color: #fff;
+        border: 2px solid var(--surface);
+        font-size: 10px;
+        font-weight: 600;
+        display: grid;
+        place-items: center;
+      }
 
       /* ---------- Sections ---------- */
-      .sec { margin-top: 28px; }
-      .sec-head { display: flex; align-items: center; justify-content: space-between; min-height: 44px; margin-bottom: 6px; }
-      h2 { margin: 0; font-family: Outfit, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
-      .link { min-height: 44px; display: inline-flex; align-items: center; font-size: 15px; font-weight: 600; color: var(--violet); }
+      .sec {
+        margin-top: 28px;
+      }
+      .sec-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 44px;
+        margin-bottom: 6px;
+      }
+      h2 {
+        margin: 0;
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: -0.02em;
+      }
+      .link {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--violet);
+      }
 
       /* ---------- Attention row (ref 4) ---------- */
-      .next { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 14px 12px 12px; border-radius: 16px; border: 1.5px solid; }
-      .next + .next { margin-top: 8px; }
-      .next.att { background: var(--att-fill); border-color: var(--att-border); color: var(--att-text); }
-      .next.act { background: var(--act-fill); border-color: var(--act-border); color: var(--green); }
-      .next .copy { flex: 1; min-width: 0; }
-      .next strong { display: block; font-size: 16px; font-weight: 600; line-height: 20px; }
-      .next .facts { display: block; margin-top: 2px; font-size: 13px; line-height: 18px; opacity: 0.92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .seats { display: flex; gap: 4px; flex: none; }
-      .seat { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; font-family: Outfit, sans-serif; font-weight: 700; font-size: 15px; }
-      .seat.taken { background: var(--green); color: var(--lime); }
-      .seat.open { border: 1.5px dashed currentColor; background: rgba(255, 255, 255, 0.5); font-size: 18px; font-weight: 500; }
-      .seat.icon { background: rgba(255, 255, 255, 0.65); }
-      .chev { flex: none; opacity: 0.8; }
+      .next {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 64px;
+        padding: 12px 14px 12px 12px;
+        border-radius: 16px;
+        border: 1.5px solid;
+      }
+      .next + .next {
+        margin-top: 8px;
+      }
+      .next.att {
+        background: var(--att-fill);
+        border-color: var(--att-border);
+        color: var(--att-text);
+      }
+      .next.act {
+        background: var(--act-fill);
+        border-color: var(--act-border);
+        color: var(--green);
+      }
+      .next .copy {
+        flex: 1;
+        min-width: 0;
+      }
+      .next strong {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 20px;
+      }
+      .next .facts {
+        display: block;
+        margin-top: 2px;
+        font-size: 13px;
+        line-height: 18px;
+        opacity: 0.92;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .seats {
+        display: flex;
+        gap: 4px;
+        flex: none;
+      }
+      .seat {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .seat.taken {
+        background: var(--green);
+        color: var(--lime);
+      }
+      .seat.open {
+        border: 1.5px dashed currentColor;
+        background: rgba(255, 255, 255, 0.5);
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .seat.icon {
+        background: rgba(255, 255, 255, 0.65);
+      }
+      .chev {
+        flex: none;
+        opacity: 0.8;
+      }
 
       /* ---------- To do: one item shown, the rest behind one quiet line ---------- */
-      .todo { margin-top: 20px; background: var(--surface); border-radius: 18px; box-shadow: var(--shadow-sm); overflow: hidden; }
-      .todo-row { display: flex; align-items: center; gap: 10px; min-height: 68px; padding: 12px 14px 12px 12px; }
-      .todo-row .copy { flex: 1; min-width: 0; }
-      .todo-row strong { display: block; font-size: 16px; font-weight: 600; line-height: 20px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .todo-row .facts { display: block; margin-top: 2px; font-size: 13px; line-height: 18px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .seats.sm .seat { width: 32px; height: 32px; border-radius: 10px; font-size: 13px; }
-      .seats.sm .seat.open { color: var(--att-text); background: var(--att-fill); border-color: var(--att-text); font-size: 16px; }
-      .seats.sm .seat.act { background: var(--act-fill); color: var(--green); }
-      .small-cta { flex: none; min-height: 36px; padding: 0 16px; border-radius: 999px; position: relative; display: inline-flex; align-items: center; justify-content: center; background: var(--lime); color: var(--ink); font-family: Outfit, sans-serif; font-weight: 700; font-size: 14px; }
-      .small-cta::after { content: ""; position: absolute; inset: -4px 0; }
-      .todo-more { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px 0 16px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 14px; font-weight: 500; }
-      .todo-more .t { flex: 1; }
-      .mini { display: flex; }
-      .mini i { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--act-fill); color: var(--green); box-shadow: 0 0 0 2px var(--surface); }
-      .mini i + i { margin-left: -6px; }
+      .todo {
+        margin-top: 20px;
+        background: var(--surface);
+        border-radius: 18px;
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+      }
+      .todo-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 68px;
+        padding: 12px 14px 12px 12px;
+      }
+      .todo-row .copy {
+        flex: 1;
+        min-width: 0;
+      }
+      .todo-row strong {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 20px;
+        color: var(--ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .todo-row .facts {
+        display: block;
+        margin-top: 2px;
+        font-size: 13px;
+        line-height: 18px;
+        color: var(--ink-2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .seats.sm .seat {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        font-size: 13px;
+      }
+      .seats.sm .seat.open {
+        color: var(--att-text);
+        background: var(--att-fill);
+        border-color: var(--att-text);
+        font-size: 16px;
+      }
+      .seats.sm .seat.act {
+        background: var(--act-fill);
+        color: var(--green);
+      }
+      .small-cta {
+        flex: none;
+        min-height: 36px;
+        padding: 0 16px;
+        border-radius: 999px;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--lime);
+        color: var(--ink);
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .small-cta::after {
+        content: "";
+        position: absolute;
+        inset: -4px 0;
+      }
+      .todo-more {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+        padding: 0 14px 0 16px;
+        border-top: 1px solid var(--line);
+        color: var(--ink-2);
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .todo-more .t {
+        flex: 1;
+      }
+      .mini {
+        display: flex;
+      }
+      .mini i {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: var(--act-fill);
+        color: var(--green);
+        box-shadow: 0 0 0 2px var(--surface);
+      }
+      .mini i + i {
+        margin-left: -6px;
+      }
 
       /* ---------- Match card (ref 1) ---------- */
       .board {
-        position: relative; overflow: hidden; margin-top: 20px;
-        display: flex; align-items: stretch; gap: 8px;
-        padding: 16px 16px 16px 18px; border-radius: 22px;
-        background: linear-gradient(160deg, var(--green) 0%, var(--green-deep) 100%);
-        color: #fff; box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+        margin-top: 20px;
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+        padding: 16px 16px 16px 18px;
+        border-radius: 22px;
+        background: linear-gradient(
+          160deg,
+          var(--green) 0%,
+          var(--green-deep) 100%
+        );
+        color: #fff;
+        box-shadow: var(--shadow-lg);
       }
       .board::before {
-        content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.08;
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.08;
         background:
           linear-gradient(#fff, #fff) 73% 0 / 1.5px 100% no-repeat,
           linear-gradient(#fff, #fff) 0 50% / 100% 1.5px no-repeat;
         mask-image: linear-gradient(90deg, transparent 40%, #000 100%);
       }
-      .board .l { position: relative; flex: 1; min-width: 0; }
-      .board .r { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px; }
-      .eyebrow { white-space: nowrap; font-size: 12px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--mint); }
-      .clock { margin-top: 2px; font-family: Outfit, sans-serif; font-weight: 800; font-size: 44px; line-height: 48px; letter-spacing: -0.04em; color: var(--lime); }
-      .clock small { font-size: 17px; font-weight: 700; letter-spacing: 0; margin-left: 4px; }
-      .board-sub { margin-top: 6px; font-size: 14px; line-height: 20px; color: rgba(255, 255, 255, 0.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .board-sub .need { color: var(--clay-on-dark); font-weight: 600; }
-      .board-sub .ok { color: var(--mint); font-weight: 600; }
-      .bseats { display: flex; gap: 6px; }
-      .bseat { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; font-family: Outfit, sans-serif; font-weight: 700; font-size: 15px; }
-      .bseat.you { background: var(--lime); color: var(--ink); }
-      .bseat.them { color: #fff; }
-      .bseat.open { border: 1.5px dashed rgba(242, 163, 107, 0.9); color: var(--clay-on-dark); font-size: 18px; font-weight: 500; }
-      .cta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px; border-radius: 999px; background: var(--lime); color: var(--ink); font-family: Outfit, sans-serif; font-weight: 700; font-size: 17px; }
-      .chev-dark { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.1); color: #fff; }
+      .board .l {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+      }
+      .board .r {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .eyebrow {
+        white-space: nowrap;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--mint);
+      }
+      .clock {
+        margin-top: 2px;
+        font-family: Outfit, sans-serif;
+        font-weight: 800;
+        font-size: 44px;
+        line-height: 48px;
+        letter-spacing: -0.04em;
+        color: var(--lime);
+      }
+      .clock small {
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0;
+        margin-left: 4px;
+      }
+      .board-sub {
+        margin-top: 6px;
+        font-size: 14px;
+        line-height: 20px;
+        color: rgba(255, 255, 255, 0.88);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .board-sub .need {
+        color: var(--clay-on-dark);
+        font-weight: 600;
+      }
+      .board-sub .ok {
+        color: var(--mint);
+        font-weight: 600;
+      }
+      .bseats {
+        display: flex;
+        gap: 6px;
+      }
+      .bseat {
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .bseat.you {
+        background: var(--lime);
+        color: var(--ink);
+      }
+      .bseat.them {
+        color: #fff;
+      }
+      .bseat.open {
+        border: 1.5px dashed rgba(242, 163, 107, 0.9);
+        color: var(--clay-on-dark);
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 24px;
+        border-radius: 999px;
+        background: var(--lime);
+        color: var(--ink);
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 17px;
+      }
+      .chev-dark {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+      }
 
       /* ---------- Who's free (ref 2) ---------- */
-      .seg { display: flex; padding: 4px; margin: 0 0 14px; border-radius: 14px; background: var(--quiet); }
-      .seg button { flex: 1; min-height: 44px; border-radius: 10px; font-size: 15px; font-weight: 500; color: var(--ink-2); }
-      .seg button[aria-selected="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: var(--shadow-sm); }
-      .rail { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px 8px; }
-      .rail::-webkit-scrollbar { display: none; }
-      .tile { flex: none; width: 300px; scroll-snap-align: start; padding: 18px 18px 16px; border-radius: 22px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm); }
-      .tile .who { display: flex; align-items: center; gap: 14px; }
-      .tile .id { min-width: 0; }
-      .tile .av { width: 68px; height: 68px; flex: none; border-radius: 50%; display: grid; place-items: center; font-family: Outfit, sans-serif; font-weight: 700; font-size: 26px; color: #fff; }
-      .tile .n { display: block; font-family: Outfit, sans-serif; font-weight: 700; font-size: 20px; line-height: 24px; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .tile .lv { display: block; margin-top: 2px; font-size: 15px; line-height: 20px; color: var(--ink-2); }
-      .tile .fact { display: block; margin-top: 8px; font-size: 15px; line-height: 20px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .tile .who + .fact { margin-top: 14px; }
-      .tile .fact svg { vertical-align: -4px; margin-right: 8px; color: var(--ink-2); }
-      .nudge { display: flex; align-items: center; gap: 12px; min-height: 56px; margin-top: 12px; padding: 10px 12px 10px 14px; border-radius: 14px; border: 1.5px dashed #c9d3cd; }
-      .nudge .ic { width: 32px; height: 32px; border-radius: 10px; flex: none; display: grid; place-items: center; background: var(--quiet); color: var(--green); }
-      .nudge .tx { flex: 1; min-width: 0; font-size: 13px; line-height: 18px; color: var(--ink-2); }
-      .nudge .tx b { display: block; font-size: 15px; line-height: 20px; color: var(--ink); font-weight: 600; }
-      .nudge .go { flex: none; min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; font-size: 15px; color: var(--violet); }
+      .seg {
+        display: flex;
+        padding: 4px;
+        margin: 0 0 14px;
+        border-radius: 14px;
+        background: var(--quiet);
+      }
+      .seg button {
+        flex: 1;
+        min-height: 44px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--ink-2);
+      }
+      .seg button[aria-selected="true"] {
+        background: var(--surface);
+        color: var(--ink);
+        font-weight: 600;
+        box-shadow: var(--shadow-sm);
+      }
+      .rail {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        margin: 0 -16px;
+        padding: 2px 16px 8px;
+      }
+      .rail::-webkit-scrollbar {
+        display: none;
+      }
+      .tile {
+        flex: none;
+        width: 300px;
+        scroll-snap-align: start;
+        padding: 18px 18px 16px;
+        border-radius: 22px;
+        background: var(--surface);
+        box-shadow:
+          inset 0 0 0 1px var(--line),
+          var(--shadow-sm);
+      }
+      .tile .who {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .tile .id {
+        min-width: 0;
+      }
+      .tile .av {
+        width: 68px;
+        height: 68px;
+        flex: none;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 26px;
+        color: #fff;
+      }
+      .tile .n {
+        display: block;
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 20px;
+        line-height: 24px;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .tile .lv {
+        display: block;
+        margin-top: 2px;
+        font-size: 15px;
+        line-height: 20px;
+        color: var(--ink-2);
+      }
+      .tile .fact {
+        display: block;
+        margin-top: 8px;
+        font-size: 15px;
+        line-height: 20px;
+        color: var(--ink-2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .tile .who + .fact {
+        margin-top: 14px;
+      }
+      .tile .fact svg {
+        vertical-align: -4px;
+        margin-right: 8px;
+        color: var(--ink-2);
+      }
+      .nudge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 56px;
+        margin-top: 12px;
+        padding: 10px 12px 10px 14px;
+        border-radius: 14px;
+        border: 1.5px dashed #c9d3cd;
+      }
+      .nudge .ic {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        background: var(--quiet);
+        color: var(--green);
+      }
+      .nudge .tx {
+        flex: 1;
+        min-width: 0;
+        font-size: 13px;
+        line-height: 18px;
+        color: var(--ink-2);
+      }
+      .nudge .tx b {
+        display: block;
+        font-size: 15px;
+        line-height: 20px;
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .nudge .go {
+        flex: none;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--violet);
+      }
 
       /* ---------- Open matches (ref 3) ---------- */
-      .omatch { padding: 16px; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow-md); }
-      .omatch + .omatch { margin-top: 12px; }
-      .omatch .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-      .omatch strong { display: block; font-family: Outfit, sans-serif; font-weight: 700; font-size: 19px; line-height: 24px; letter-spacing: -0.01em; }
-      .omatch .sub { display: block; margin-top: 2px; font-size: 15px; color: var(--ink); }
-      .tag { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
-      .tag.ok { background: var(--secondary); color: var(--green); }
-      .tag.att { background: var(--att-fill); color: var(--att-text); }
-      .omatch .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
-      .host { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink-2); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .host .av { width: 32px; height: 32px; border-radius: 8px; flex: none; display: grid; place-items: center; font-family: Outfit, sans-serif; font-weight: 700; font-size: 13px; color: #fff; }
-      .host b { color: var(--ink); font-weight: 600; }
-      .join { flex: none; min-height: 48px; min-width: 110px; padding: 0 20px; border-radius: 999px; background: var(--lime); color: var(--ink); font-family: Outfit, sans-serif; font-weight: 600; font-size: 16px; }
+      .omatch {
+        padding: 16px;
+        background: var(--surface);
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+      }
+      .omatch + .omatch {
+        margin-top: 12px;
+      }
+      .omatch .row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .omatch strong {
+        display: block;
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 19px;
+        line-height: 24px;
+        letter-spacing: -0.01em;
+      }
+      .omatch .sub {
+        display: block;
+        margin-top: 2px;
+        font-size: 15px;
+        color: var(--ink);
+      }
+      .tag {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .tag.ok {
+        background: var(--secondary);
+        color: var(--green);
+      }
+      .tag.att {
+        background: var(--att-fill);
+        color: var(--att-text);
+      }
+      .omatch .foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .host {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: var(--ink-2);
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .host .av {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        font-family: Outfit, sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        color: #fff;
+      }
+      .host b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .join {
+        flex: none;
+        min-height: 48px;
+        min-width: 110px;
+        padding: 0 20px;
+        border-radius: 999px;
+        background: var(--lime);
+        color: var(--ink);
+        font-family: Outfit, sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+      }
 
       /* ---------- Tab bar ---------- */
-      .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); align-items: end; padding: 6px 4px 16px; background: rgba(250, 249, 246, 0.94); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
-      .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; color: var(--ink-2); position: relative; }
-      .tab.on { color: var(--green); font-weight: 600; }
-      .well { width: 48px; height: 32px; border-radius: 12px; display: grid; place-items: center; }
-      .tab.on .well { background: var(--secondary); }
-      .fab { width: 58px; height: 58px; margin-bottom: 6px; justify-self: center; border-radius: 18px; background: var(--green); color: var(--lime); display: grid; place-items: center; box-shadow: 0 8px 18px rgba(12, 56, 46, 0.3); }
-      .tab .badge { position: absolute; top: -2px; right: 14px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--clay); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+      .tabbar {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        align-items: end;
+        padding: 6px 4px 16px;
+        background: rgba(250, 249, 246, 0.94);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid var(--line);
+      }
+      .tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        font-size: 11px;
+        color: var(--ink-2);
+        position: relative;
+      }
+      .tab.on {
+        color: var(--green);
+        font-weight: 600;
+      }
+      .well {
+        width: 48px;
+        height: 32px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+      }
+      .tab.on .well {
+        background: var(--secondary);
+      }
+      .fab {
+        width: 58px;
+        height: 58px;
+        margin-bottom: 6px;
+        justify-self: center;
+        border-radius: 18px;
+        background: var(--green);
+        color: var(--lime);
+        display: grid;
+        place-items: center;
+        box-shadow: 0 8px 18px rgba(12, 56, 46, 0.3);
+      }
+      .tab .badge {
+        position: absolute;
+        top: -2px;
+        right: 14px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 8px;
+        background: var(--clay);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+      }
     </style>
   </head>
   <body>
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 7H3s3 0 3-7"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
-      <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
-      <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
-      <symbol id="i-vote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4M9 15l2 2 4-4"/></symbol>
-      <symbol id="i-score" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></symbol>
-      <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
-      <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.2"/></symbol>
-      <symbol id="i-court" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="3.5" width="16" height="17" rx="1.5"/><path d="M4 12h16M8 3.5v17M16 3.5v17"/></symbol>
-      <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></symbol>
-      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></symbol>
-      <symbol id="i-ball" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M5.5 6.5c3 2.5 3 8.5 0 11M18.5 6.5c-3 2.5-3 8.5 0 11"/></symbol>
-      <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.2"/><path d="M5 19c1.4-3 3.8-4.5 7-4.5S17.6 16 19 19"/></symbol>
-      <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol
+        id="i-bell"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+      >
+        <path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 7H3s3 0 3-7" />
+        <path d="M10 19a2 2 0 0 0 4 0" />
+      </symbol>
+      <symbol
+        id="i-chev"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M9 6l6 6-6 6" />
+      </symbol>
+      <symbol
+        id="i-check"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M5 12.5l4.5 4.5L19 7.5" />
+      </symbol>
+      <symbol
+        id="i-vote"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.9"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="4" y="5" width="16" height="15" rx="3" />
+        <path d="M4 10h16M9 3v4M15 3v4M9 15l2 2 4-4" />
+      </symbol>
+      <symbol
+        id="i-score"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.9"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M8.5 12.5l2.5 2.5 4.5-5" />
+      </symbol>
+      <symbol
+        id="i-clock"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      >
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 7.5V12l3 2" />
+      </symbol>
+      <symbol
+        id="i-pin"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.9"
+      >
+        <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" />
+        <circle cx="12" cy="10" r="2.2" />
+      </symbol>
+      <symbol
+        id="i-court"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.9"
+      >
+        <rect x="4" y="3.5" width="16" height="17" rx="1.5" />
+        <path d="M4 12h16M8 3.5v17M16 3.5v17" />
+      </symbol>
+      <symbol
+        id="i-home"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+      >
+        <path
+          d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"
+        />
+      </symbol>
+      <symbol
+        id="i-search"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+      >
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="M16 16l4 4" />
+      </symbol>
+      <symbol
+        id="i-ball"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+      >
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M5.5 6.5c3 2.5 3 8.5 0 11M18.5 6.5c-3 2.5-3 8.5 0 11" />
+      </symbol>
+      <symbol
+        id="i-user"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+      >
+        <circle cx="12" cy="8" r="3.2" />
+        <path d="M5 19c1.4-3 3.8-4.5 7-4.5S17.6 16 19 19" />
+      </symbol>
+      <symbol
+        id="i-plus"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+      >
+        <path d="M12 5v14M5 12h14" />
+      </symbol>
     </svg>
 
     <header class="intro">
       <h1>Home — v5</h1>
       <p>
-        Built from your five reference snapshots: the header with rating steps, the
-        green match card, the compact Who's free tiles and the Open matches cards.
-        To-dos collapse into one white card: the most urgent item with its action,
-        and a quiet "N more to do" line only when there is more than one.
+        Built from your five reference snapshots: the header with rating steps,
+        the green match card, the compact Who's free tiles and the Open matches
+        cards. To-dos collapse into one white card: the most urgent item with
+        its action, and a quiet "N more to do" line only when there is more than
+        one.
       </p>
     </header>
 
     <div class="stage">
       <!-- ===================== NEW PLAYER ===================== -->
       <div class="col">
-        <p class="label">New player <small>hosting tomorrow, no hours set</small></p>
+        <p class="label">
+          New player <small>hosting tomorrow, no hours set</small>
+        </p>
         <div class="device">
           <div class="status"><span>9:41</span><span>49%</span></div>
           <div class="scroll">
@@ -249,26 +1123,42 @@
               <header class="top rise">
                 <div class="me">
                   <div class="avatar photo" aria-hidden="true"></div>
-                  <div style="min-width:0">
+                  <div style="min-width: 0">
                     <h1 class="hello">Hello, Aly</h1>
-                    <button class="standing" aria-label="Advanced. Rating unlocks after 5 confirmed results, 0 so far. How rating works.">
+                    <button
+                      class="standing"
+                      aria-label="Advanced. Rating unlocks after 5 confirmed results, 0 so far. How rating works."
+                    >
                       Advanced
-                      <span class="pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                      <span class="pips" aria-hidden="true"
+                        ><i></i><i></i><i></i><i></i><i></i
+                      ></span>
                       <span class="info" aria-hidden="true">i</span>
                     </button>
                   </div>
                 </div>
-                <button class="bell press" aria-label="Notifications"><svg width="22" height="22"><use href="#i-bell"/></svg></button>
+                <button class="bell press" aria-label="Notifications">
+                  <svg width="22" height="22"><use href="#i-bell" /></svg>
+                </button>
               </header>
 
-              <a class="board rise d1 press" href="#" aria-label="Your match tomorrow at 6:30 PM, singles in Beirut, 1 spot left. Invite a player.">
+              <a
+                class="board rise d1 press"
+                href="#"
+                aria-label="Your match tomorrow at 6:30 PM, singles in Beirut, 1 spot left. Invite a player."
+              >
                 <div class="l">
                   <div class="eyebrow">Your match · Tomorrow</div>
                   <div class="clock">6:30<small>PM</small></div>
-                  <div class="board-sub">Singles · Beirut · <span class="need">1 spot left</span></div>
+                  <div class="board-sub">
+                    Singles · Beirut · <span class="need">1 spot left</span>
+                  </div>
                 </div>
                 <div class="r">
-                  <div class="bseats" aria-hidden="true"><span class="bseat you">A</span><span class="bseat open">+</span></div>
+                  <div class="bseats" aria-hidden="true">
+                    <span class="bseat you">A</span
+                    ><span class="bseat open">+</span>
+                  </div>
                   <span class="cta">Invite</span>
                 </div>
               </a>
@@ -281,126 +1171,284 @@
                   <button role="tab" aria-selected="false">Fri</button>
                 </div>
                 <div class="rail">
-                  <a class="tile press" href="#" aria-label="Hasan K., Upper intermediate, Beirut. Plays at Al Riyadi, JDK, Renaissance and The Private Club.">
+                  <a
+                    class="tile press"
+                    href="#"
+                    aria-label="Hasan K., Upper intermediate, Beirut. Plays at Al Riyadi, JDK, Renaissance and The Private Club."
+                  >
                     <div class="who">
-                      <div class="av" style="background:#245c78">H</div>
-                      <div class="id"><span class="n">Hasan K.</span><span class="lv">Upper int.</span></div>
+                      <div class="av" style="background: #245c78">H</div>
+                      <div class="id">
+                        <span class="n">Hasan K.</span
+                        ><span class="lv">Upper int.</span>
+                      </div>
                     </div>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-pin"/></svg>Beirut</span>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-ball"/></svg>Al Riyadi · JDK · Renaissance · The Private Club</span>
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-pin" /></svg
+                      >Beirut</span
+                    >
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-ball" /></svg
+                      >Al Riyadi · JDK · Renaissance · The Private Club</span
+                    >
                   </a>
-                  <a class="tile press" href="#" aria-label="Karim S., Advanced, Jounieh. Plays at ATCL.">
+                  <a
+                    class="tile press"
+                    href="#"
+                    aria-label="Karim S., Advanced, Jounieh. Plays at ATCL."
+                  >
                     <div class="who">
-                      <div class="av" style="background:#0b6bcb">K</div>
-                      <div class="id"><span class="n">Karim S.</span><span class="lv">Advanced</span></div>
+                      <div class="av" style="background: #0b6bcb">K</div>
+                      <div class="id">
+                        <span class="n">Karim S.</span
+                        ><span class="lv">Advanced</span>
+                      </div>
                     </div>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-pin"/></svg>Jounieh</span>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-ball"/></svg>ATCL</span>
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-pin" /></svg
+                      >Jounieh</span
+                    >
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-ball" /></svg
+                      >ATCL</span
+                    >
                   </a>
-                  <a class="tile press" href="#" aria-label="Nadine H., Improving, Jounieh. Plays at ATCL and Jounieh TC.">
+                  <a
+                    class="tile press"
+                    href="#"
+                    aria-label="Nadine H., Improving, Jounieh. Plays at ATCL and Jounieh TC."
+                  >
                     <div class="who">
-                      <div class="av" style="background:#0f766e">N</div>
-                      <div class="id"><span class="n">Nadine H.</span><span class="lv">Improving</span></div>
+                      <div class="av" style="background: #0f766e">N</div>
+                      <div class="id">
+                        <span class="n">Nadine H.</span
+                        ><span class="lv">Improving</span>
+                      </div>
                     </div>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-pin"/></svg>Jounieh</span>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-ball"/></svg>ATCL · Jounieh TC</span>
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-pin" /></svg
+                      >Jounieh</span
+                    >
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-ball" /></svg
+                      >ATCL · Jounieh TC</span
+                    >
                   </a>
-                  <a class="tile all press" href="#">See everyone free tomorrow</a>
+                  <a class="tile all press" href="#"
+                    >See everyone free tomorrow</a
+                  >
                 </div>
                 <a class="nudge press" href="#">
-                  <span class="ic"><svg width="16" height="16"><use href="#i-clock"/></svg></span>
-                  <span class="tx"><b>Add when you play</b>So players like these can find you</span>
+                  <span class="ic"
+                    ><svg width="16" height="16"><use href="#i-clock" /></svg
+                  ></span>
+                  <span class="tx"
+                    ><b>Add when you play</b>So players like these can find
+                    you</span
+                  >
                   <span class="go">Add</span>
                 </a>
               </section>
 
               <section class="sec rise d3">
-                <div class="sec-head"><h2>Open matches</h2><a class="link" href="#">View all</a></div>
+                <div class="sec-head">
+                  <h2>Open matches</h2>
+                  <a class="link" href="#">View all</a>
+                </div>
                 <article class="omatch">
                   <div class="row">
-                    <div><strong>Tomorrow · 7:00 PM</strong><span class="sub">Singles · Beirut</span></div>
+                    <div>
+                      <strong>Tomorrow · 7:00 PM</strong
+                      ><span class="sub">Singles · Beirut</span>
+                    </div>
                     <span class="tag att">1 spot left</span>
                   </div>
                   <div class="foot">
-                    <div class="host"><div class="av" style="background:#0e7490">M</div><span><b>mahdi</b> · Upper int.+</span></div>
-                    <button class="join press" aria-label="Join mahdi's singles, tomorrow 7 PM">Join</button>
+                    <div class="host">
+                      <div class="av" style="background: #0e7490">M</div>
+                      <span><b>mahdi</b> · Upper int.+</span>
+                    </div>
+                    <button
+                      class="join press"
+                      aria-label="Join mahdi's singles, tomorrow 7 PM"
+                    >
+                      Join
+                    </button>
                   </div>
                 </article>
                 <article class="omatch">
                   <div class="row">
-                    <div><strong>Thu · 8:00 PM</strong><span class="sub">Doubles · Hazmieh</span></div>
-                    <span class="tag ok"><svg width="13" height="13"><use href="#i-check"/></svg>Court booked</span>
+                    <div>
+                      <strong>Thu · 8:00 PM</strong
+                      ><span class="sub">Doubles · Hazmieh</span>
+                    </div>
+                    <span class="tag ok"
+                      ><svg width="13" height="13"><use href="#i-check" /></svg
+                      >Court booked</span
+                    >
                   </div>
                   <div class="foot">
-                    <div class="host"><div class="av" style="background:#6d28d9">T</div><span><b>Tarek</b> · Advanced</span></div>
-                    <button class="join press" aria-label="Join Tarek's doubles, Thursday 8 PM">Join</button>
+                    <div class="host">
+                      <div class="av" style="background: #6d28d9">T</div>
+                      <span><b>Tarek</b> · Advanced</span>
+                    </div>
+                    <button
+                      class="join press"
+                      aria-label="Join Tarek's doubles, Thursday 8 PM"
+                    >
+                      Join
+                    </button>
                   </div>
                 </article>
               </section>
             </main>
           </div>
           <nav class="tabbar" aria-label="Tabs">
-            <div class="tab on"><div class="well"><svg width="20" height="20"><use href="#i-home"/></svg></div>Home</div>
-            <div class="tab"><div class="well"><svg width="20" height="20"><use href="#i-search"/></svg></div>Discover</div>
-            <div class="fab" aria-label="Create match"><svg width="26" height="26"><use href="#i-plus"/></svg></div>
-            <div class="tab"><div class="well"><svg width="20" height="20"><use href="#i-ball"/></svg></div>Matches<span class="badge">1</span></div>
-            <div class="tab"><div class="well"><svg width="20" height="20"><use href="#i-user"/></svg></div>Profile</div>
+            <div class="tab on">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-home" /></svg>
+              </div>
+              Home
+            </div>
+            <div class="tab">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-search" /></svg>
+              </div>
+              Discover
+            </div>
+            <div class="fab" aria-label="Create match">
+              <svg width="26" height="26"><use href="#i-plus" /></svg>
+            </div>
+            <div class="tab">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-ball" /></svg>
+              </div>
+              Matches<span class="badge">1</span>
+            </div>
+            <div class="tab">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-user" /></svg>
+              </div>
+              Profile
+            </div>
           </nav>
         </div>
         <ul class="rationale">
-          <li><b>The hosted match is the next match</b>, so it gets the green card with Invite. No peach row here: that would say the same thing twice.</li>
-          <li><b>Who's free cards</b>: big face beside first name and last initial and level; then area, then every preferred club on one line, cut with "…" when it runs out. The day tab already says when they're free.</li>
-          <li><b>One quiet reminder</b> under Who's free, only until hours are set.</li>
+          <li>
+            <b>The hosted match is the next match</b>, so it gets the green card
+            with Invite. No peach row here: that would say the same thing twice.
+          </li>
+          <li>
+            <b>Who's free cards</b>: big face beside first name and last initial
+            and level; then area, then every preferred club on one line, cut
+            with "…" when it runs out. The day tab already says when they're
+            free.
+          </li>
+          <li>
+            <b>One quiet reminder</b> under Who's free, only until hours are
+            set.
+          </li>
         </ul>
       </div>
 
       <!-- ===================== BUSY PLAYER ===================== -->
       <div class="col">
-        <p class="label">Busy player <small>rating earned, things to do</small></p>
+        <p class="label">
+          Busy player <small>rating earned, things to do</small>
+        </p>
         <div class="device">
           <div class="status"><span>9:41</span><span>82%</span></div>
           <div class="scroll">
             <main class="content">
               <header class="top rise">
                 <div class="me">
-                  <div class="avatar" style="background:var(--green);color:var(--lime)" aria-hidden="true">R</div>
-                  <div style="min-width:0">
+                  <div
+                    class="avatar"
+                    style="background: var(--green); color: var(--lime)"
+                    aria-hidden="true"
+                  >
+                    R
+                  </div>
+                  <div style="min-width: 0">
                     <h1 class="hello">Hello, Rami</h1>
-                    <button class="standing" aria-label="Intermediate, rating 1284. How rating works.">
-                      Intermediate <b>1284</b> <span class="info" aria-hidden="true">i</span>
+                    <button
+                      class="standing"
+                      aria-label="Intermediate, rating 1284. How rating works."
+                    >
+                      Intermediate <b>1284</b>
+                      <span class="info" aria-hidden="true">i</span>
                     </button>
                   </div>
                 </div>
-                <button class="bell press" aria-label="Notifications, 3 unread"><svg width="22" height="22"><use href="#i-bell"/></svg><span class="dot">3</span></button>
+                <button class="bell press" aria-label="Notifications, 3 unread">
+                  <svg width="22" height="22"><use href="#i-bell" /></svg
+                  ><span class="dot">3</span>
+                </button>
               </header>
 
               <section class="todo rise d1" aria-label="To do, 3 items">
                 <div class="todo-row">
-                  <div class="seats sm" aria-hidden="true"><span class="seat taken">R</span><span class="seat open">+</span></div>
-                  <a class="copy" href="#" aria-label="Saturday doubles needs 1 more player. Saturday 10 AM, Mont La Salle.">
+                  <div class="seats sm" aria-hidden="true">
+                    <span class="seat taken">R</span
+                    ><span class="seat open">+</span>
+                  </div>
+                  <a
+                    class="copy"
+                    href="#"
+                    aria-label="Saturday doubles needs 1 more player. Saturday 10 AM, Mont La Salle."
+                  >
                     <strong>Needs 1 player</strong>
                     <span class="facts">Sat 10 AM · Mont La Salle</span>
                   </a>
-                  <button class="small-cta press" aria-label="Invite a player to Saturday doubles">Invite</button>
+                  <button
+                    class="small-cta press"
+                    aria-label="Invite a player to Saturday doubles"
+                  >
+                    Invite
+                  </button>
                 </div>
-                <a class="todo-more press" href="#" aria-label="2 more to do: vote on a time, confirm a score. Opens Matches.">
+                <a
+                  class="todo-more press"
+                  href="#"
+                  aria-label="2 more to do: vote on a time, confirm a score. Opens Matches."
+                >
                   <span class="mini" aria-hidden="true">
-                    <i><svg width="13" height="13"><use href="#i-vote"/></svg></i><i><svg width="13" height="13"><use href="#i-score"/></svg></i>
+                    <i
+                      ><svg width="13" height="13">
+                        <use href="#i-vote" /></svg></i
+                    ><i
+                      ><svg width="13" height="13"><use href="#i-score" /></svg
+                    ></i>
                   </span>
                   <span class="t">2 more to do</span>
-                  <svg class="chev" width="18" height="18" aria-hidden="true"><use href="#i-chev"/></svg>
+                  <svg class="chev" width="18" height="18" aria-hidden="true">
+                    <use href="#i-chev" />
+                  </svg>
                 </a>
               </section>
 
-              <a class="board rise d2 press" href="#" aria-label="Next up: Thursday 6:30 PM, singles versus Karim at City Complex. Court booked.">
+              <a
+                class="board rise d2 press"
+                href="#"
+                aria-label="Next up: Thursday 6:30 PM, singles versus Karim at City Complex. Court booked."
+              >
                 <div class="l">
                   <div class="eyebrow">Next up · Thursday</div>
                   <div class="clock">6:30<small>PM</small></div>
-                  <div class="board-sub">vs Karim · City Complex · <span class="ok">Booked</span></div>
+                  <div class="board-sub">
+                    vs Karim · City Complex · <span class="ok">Booked</span>
+                  </div>
                 </div>
                 <div class="r">
-                  <div class="bseats" aria-hidden="true"><span class="bseat you">R</span><span class="bseat them" style="background:#0b6bcb">K</span></div>
-                  <span class="chev-dark" aria-hidden="true"><svg width="20" height="20"><use href="#i-chev"/></svg></span>
+                  <div class="bseats" aria-hidden="true">
+                    <span class="bseat you">R</span
+                    ><span class="bseat them" style="background: #0b6bcb"
+                      >K</span
+                    >
+                  </div>
+                  <span class="chev-dark" aria-hidden="true"
+                    ><svg width="20" height="20"><use href="#i-chev" /></svg
+                  ></span>
                 </div>
               </a>
 
@@ -412,71 +1460,170 @@
                   <button role="tab" aria-selected="false">Thu</button>
                 </div>
                 <div class="rail">
-                  <a class="tile press" href="#" aria-label="Lina F., Intermediate, Achrafieh. Plays at Al Riyadi.">
+                  <a
+                    class="tile press"
+                    href="#"
+                    aria-label="Lina F., Intermediate, Achrafieh. Plays at Al Riyadi."
+                  >
                     <div class="who">
-                      <div class="av" style="background:#b4235a">L</div>
-                      <div class="id"><span class="n">Lina F.</span><span class="lv">Intermediate</span></div>
+                      <div class="av" style="background: #b4235a">L</div>
+                      <div class="id">
+                        <span class="n">Lina F.</span
+                        ><span class="lv">Intermediate</span>
+                      </div>
                     </div>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-pin"/></svg>Achrafieh</span>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-ball"/></svg>Al Riyadi</span>
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-pin" /></svg
+                      >Achrafieh</span
+                    >
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-ball" /></svg
+                      >Al Riyadi</span
+                    >
                   </a>
-                  <a class="tile press" href="#" aria-label="Jad M., Intermediate, Hazmieh. Plays at JDK and Renaissance.">
+                  <a
+                    class="tile press"
+                    href="#"
+                    aria-label="Jad M., Intermediate, Hazmieh. Plays at JDK and Renaissance."
+                  >
                     <div class="who">
-                      <div class="av" style="background:#9a4a00">J</div>
-                      <div class="id"><span class="n">Jad M.</span><span class="lv">Intermediate</span></div>
+                      <div class="av" style="background: #9a4a00">J</div>
+                      <div class="id">
+                        <span class="n">Jad M.</span
+                        ><span class="lv">Intermediate</span>
+                      </div>
                     </div>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-pin"/></svg>Hazmieh</span>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-ball"/></svg>JDK · Renaissance</span>
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-pin" /></svg
+                      >Hazmieh</span
+                    >
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-ball" /></svg
+                      >JDK · Renaissance</span
+                    >
                   </a>
-                  <a class="tile press" href="#" aria-label="Nadine H., Improving, Jounieh. Plays at ATCL and Jounieh TC.">
+                  <a
+                    class="tile press"
+                    href="#"
+                    aria-label="Nadine H., Improving, Jounieh. Plays at ATCL and Jounieh TC."
+                  >
                     <div class="who">
-                      <div class="av" style="background:#0f766e">N</div>
-                      <div class="id"><span class="n">Nadine H.</span><span class="lv">Improving</span></div>
+                      <div class="av" style="background: #0f766e">N</div>
+                      <div class="id">
+                        <span class="n">Nadine H.</span
+                        ><span class="lv">Improving</span>
+                      </div>
                     </div>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-pin"/></svg>Jounieh</span>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-ball"/></svg>ATCL · Jounieh TC</span>
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-pin" /></svg
+                      >Jounieh</span
+                    >
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-ball" /></svg
+                      >ATCL · Jounieh TC</span
+                    >
                   </a>
                   <a class="tile all press" href="#">See everyone free today</a>
                 </div>
               </section>
 
               <section class="sec rise d4">
-                <div class="sec-head"><h2>Open matches</h2><a class="link" href="#">View all</a></div>
+                <div class="sec-head">
+                  <h2>Open matches</h2>
+                  <a class="link" href="#">View all</a>
+                </div>
                 <article class="omatch">
                   <div class="row">
-                    <div><strong>Fri · 6:00 PM</strong><span class="sub">Doubles · Jounieh</span></div>
-                    <span class="tag ok"><svg width="13" height="13"><use href="#i-check"/></svg>Court booked</span>
+                    <div>
+                      <strong>Fri · 6:00 PM</strong
+                      ><span class="sub">Doubles · Jounieh</span>
+                    </div>
+                    <span class="tag ok"
+                      ><svg width="13" height="13"><use href="#i-check" /></svg
+                      >Court booked</span
+                    >
                   </div>
                   <div class="foot">
-                    <div class="host"><div class="av" style="background:#0f766e">N</div><span><b>Nadine</b> · Intermediate</span></div>
-                    <button class="join press" aria-label="Join Nadine's doubles, Friday 6 PM">Join</button>
+                    <div class="host">
+                      <div class="av" style="background: #0f766e">N</div>
+                      <span><b>Nadine</b> · Intermediate</span>
+                    </div>
+                    <button
+                      class="join press"
+                      aria-label="Join Nadine's doubles, Friday 6 PM"
+                    >
+                      Join
+                    </button>
                   </div>
                 </article>
                 <article class="omatch">
                   <div class="row">
-                    <div><strong>Sun · 9:00 AM</strong><span class="sub">Singles · Beirut</span></div>
+                    <div>
+                      <strong>Sun · 9:00 AM</strong
+                      ><span class="sub">Singles · Beirut</span>
+                    </div>
                     <span class="tag att">1 spot left</span>
                   </div>
                   <div class="foot">
-                    <div class="host"><div class="av" style="background:#6d28d9">T</div><span><b>Tarek</b> · Upper int.</span></div>
-                    <button class="join press" aria-label="Join Tarek's singles, Sunday 9 AM">Join</button>
+                    <div class="host">
+                      <div class="av" style="background: #6d28d9">T</div>
+                      <span><b>Tarek</b> · Upper int.</span>
+                    </div>
+                    <button
+                      class="join press"
+                      aria-label="Join Tarek's singles, Sunday 9 AM"
+                    >
+                      Join
+                    </button>
                   </div>
                 </article>
               </section>
             </main>
           </div>
           <nav class="tabbar" aria-label="Tabs">
-            <div class="tab on"><div class="well"><svg width="20" height="20"><use href="#i-home"/></svg></div>Home</div>
-            <div class="tab"><div class="well"><svg width="20" height="20"><use href="#i-search"/></svg></div>Discover</div>
-            <div class="fab" aria-label="Create match"><svg width="26" height="26"><use href="#i-plus"/></svg></div>
-            <div class="tab"><div class="well"><svg width="20" height="20"><use href="#i-ball"/></svg></div>Matches<span class="badge">2</span></div>
-            <div class="tab"><div class="well"><svg width="20" height="20"><use href="#i-user"/></svg></div>Profile</div>
+            <div class="tab on">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-home" /></svg>
+              </div>
+              Home
+            </div>
+            <div class="tab">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-search" /></svg>
+              </div>
+              Discover
+            </div>
+            <div class="fab" aria-label="Create match">
+              <svg width="26" height="26"><use href="#i-plus" /></svg>
+            </div>
+            <div class="tab">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-ball" /></svg>
+              </div>
+              Matches<span class="badge">2</span>
+            </div>
+            <div class="tab">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-user" /></svg>
+              </div>
+              Profile
+            </div>
           </nav>
         </div>
         <ul class="rationale">
-          <li><b>One to-do, not three.</b> Only the most urgent item shows, with its action right there. The rest sit behind "2 more to do", which opens the list in Matches.</li>
-          <li><b>The green card is always the very next match.</b> Booked, so a chevron instead of a button.</li>
-          <li><b>Rating earned</b>: the number replaces the steps; the (i) still explains it.</li>
+          <li>
+            <b>One to-do, not three.</b> Only the most urgent item shows, with
+            its action right there. The rest sit behind "2 more to do", which
+            opens the list in Matches.
+          </li>
+          <li>
+            <b>The green card is always the very next match.</b> Booked, so a
+            chevron instead of a button.
+          </li>
+          <li>
+            <b>Rating earned</b>: the number replaces the steps; the (i) still
+            explains it.
+          </li>
         </ul>
       </div>
 
@@ -489,39 +1636,80 @@
             <main class="content">
               <header class="top rise">
                 <div class="me">
-                  <div class="avatar" style="background:#b4235a;color:#fff" aria-hidden="true">L</div>
-                  <div style="min-width:0">
+                  <div
+                    class="avatar"
+                    style="background: #b4235a; color: #fff"
+                    aria-hidden="true"
+                  >
+                    L
+                  </div>
+                  <div style="min-width: 0">
                     <h1 class="hello">Hello, Lina</h1>
-                    <button class="standing" aria-label="Intermediate. Rating unlocks after 5 confirmed results, 3 so far. How rating works.">
+                    <button
+                      class="standing"
+                      aria-label="Intermediate. Rating unlocks after 5 confirmed results, 3 so far. How rating works."
+                    >
                       Intermediate
-                      <span class="pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>
+                      <span class="pips" aria-hidden="true"
+                        ><i class="on"></i><i class="on"></i><i class="on"></i
+                        ><i></i><i></i
+                      ></span>
                       <span class="info" aria-hidden="true">i</span>
                     </button>
                   </div>
                 </div>
-                <button class="bell press" aria-label="Notifications, 1 unread"><svg width="22" height="22"><use href="#i-bell"/></svg><span class="dot">1</span></button>
+                <button class="bell press" aria-label="Notifications, 1 unread">
+                  <svg width="22" height="22"><use href="#i-bell" /></svg
+                  ><span class="dot">1</span>
+                </button>
               </header>
 
               <section class="todo rise d1" aria-label="To do, 1 item">
                 <div class="todo-row">
-                  <div class="seats sm" aria-hidden="true"><span class="seat act"><svg width="18" height="18"><use href="#i-score"/></svg></span></div>
-                  <a class="copy" href="#" aria-label="Confirm the score of your match versus Maya on Sunday: 6-4, 6-3.">
+                  <div class="seats sm" aria-hidden="true">
+                    <span class="seat act"
+                      ><svg width="18" height="18"><use href="#i-score" /></svg
+                    ></span>
+                  </div>
+                  <a
+                    class="copy"
+                    href="#"
+                    aria-label="Confirm the score of your match versus Maya on Sunday: 6-4, 6-3."
+                  >
                     <strong>Confirm the score</strong>
                     <span class="facts">vs Maya · Sun · 6–4, 6–3</span>
                   </a>
-                  <button class="small-cta press" aria-label="Confirm score 6-4, 6-3 versus Maya">Confirm</button>
+                  <button
+                    class="small-cta press"
+                    aria-label="Confirm score 6-4, 6-3 versus Maya"
+                  >
+                    Confirm
+                  </button>
                 </div>
               </section>
 
-              <a class="board rise d2 press" href="#" aria-label="Next up: Friday 7 PM, singles versus Nadine at Al Riyadi. Court booked.">
+              <a
+                class="board rise d2 press"
+                href="#"
+                aria-label="Next up: Friday 7 PM, singles versus Nadine at Al Riyadi. Court booked."
+              >
                 <div class="l">
                   <div class="eyebrow">Next up · Friday</div>
                   <div class="clock">7:00<small>PM</small></div>
-                  <div class="board-sub">vs Nadine · Al Riyadi · <span class="ok">Booked</span></div>
+                  <div class="board-sub">
+                    vs Nadine · Al Riyadi · <span class="ok">Booked</span>
+                  </div>
                 </div>
                 <div class="r">
-                  <div class="bseats" aria-hidden="true"><span class="bseat you">L</span><span class="bseat them" style="background:#0f766e">N</span></div>
-                  <span class="chev-dark" aria-hidden="true"><svg width="20" height="20"><use href="#i-chev"/></svg></span>
+                  <div class="bseats" aria-hidden="true">
+                    <span class="bseat you">L</span
+                    ><span class="bseat them" style="background: #0f766e"
+                      >N</span
+                    >
+                  </div>
+                  <span class="chev-dark" aria-hidden="true"
+                    ><svg width="20" height="20"><use href="#i-chev" /></svg
+                  ></span>
                 </div>
               </a>
 
@@ -533,61 +1721,149 @@
                   <button role="tab" aria-selected="false">Thu</button>
                 </div>
                 <div class="rail">
-                  <a class="tile press" href="#" aria-label="Jad M., Intermediate, Hazmieh. Plays at JDK and Renaissance.">
+                  <a
+                    class="tile press"
+                    href="#"
+                    aria-label="Jad M., Intermediate, Hazmieh. Plays at JDK and Renaissance."
+                  >
                     <div class="who">
-                      <div class="av" style="background:#9a4a00">J</div>
-                      <div class="id"><span class="n">Jad M.</span><span class="lv">Intermediate</span></div>
+                      <div class="av" style="background: #9a4a00">J</div>
+                      <div class="id">
+                        <span class="n">Jad M.</span
+                        ><span class="lv">Intermediate</span>
+                      </div>
                     </div>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-pin"/></svg>Hazmieh</span>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-ball"/></svg>JDK · Renaissance</span>
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-pin" /></svg
+                      >Hazmieh</span
+                    >
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-ball" /></svg
+                      >JDK · Renaissance</span
+                    >
                   </a>
-                  <a class="tile press" href="#" aria-label="Rami A., Intermediate, Beirut. Plays at City Complex.">
+                  <a
+                    class="tile press"
+                    href="#"
+                    aria-label="Rami A., Intermediate, Beirut. Plays at City Complex."
+                  >
                     <div class="who">
-                      <div class="av" style="background:var(--green);color:var(--lime)">R</div>
-                      <div class="id"><span class="n">Rami A.</span><span class="lv">Intermediate</span></div>
+                      <div
+                        class="av"
+                        style="background: var(--green); color: var(--lime)"
+                      >
+                        R
+                      </div>
+                      <div class="id">
+                        <span class="n">Rami A.</span
+                        ><span class="lv">Intermediate</span>
+                      </div>
                     </div>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-pin"/></svg>Beirut</span>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-ball"/></svg>City Complex</span>
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-pin" /></svg
+                      >Beirut</span
+                    >
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-ball" /></svg
+                      >City Complex</span
+                    >
                   </a>
-                  <a class="tile press" href="#" aria-label="Nadine H., Improving, Jounieh. Plays at ATCL and Jounieh TC.">
+                  <a
+                    class="tile press"
+                    href="#"
+                    aria-label="Nadine H., Improving, Jounieh. Plays at ATCL and Jounieh TC."
+                  >
                     <div class="who">
-                      <div class="av" style="background:#0f766e">N</div>
-                      <div class="id"><span class="n">Nadine H.</span><span class="lv">Improving</span></div>
+                      <div class="av" style="background: #0f766e">N</div>
+                      <div class="id">
+                        <span class="n">Nadine H.</span
+                        ><span class="lv">Improving</span>
+                      </div>
                     </div>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-pin"/></svg>Jounieh</span>
-                    <span class="fact"><svg width="18" height="18"><use href="#i-ball"/></svg>ATCL · Jounieh TC</span>
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-pin" /></svg
+                      >Jounieh</span
+                    >
+                    <span class="fact"
+                      ><svg width="18" height="18"><use href="#i-ball" /></svg
+                      >ATCL · Jounieh TC</span
+                    >
                   </a>
                   <a class="tile all press" href="#">See everyone free today</a>
                 </div>
               </section>
 
               <section class="sec rise d4">
-                <div class="sec-head"><h2>Open matches</h2><a class="link" href="#">View all</a></div>
+                <div class="sec-head">
+                  <h2>Open matches</h2>
+                  <a class="link" href="#">View all</a>
+                </div>
                 <article class="omatch">
                   <div class="row">
-                    <div><strong>Sun · 9:00 AM</strong><span class="sub">Singles · Beirut</span></div>
+                    <div>
+                      <strong>Sun · 9:00 AM</strong
+                      ><span class="sub">Singles · Beirut</span>
+                    </div>
                     <span class="tag att">1 spot left</span>
                   </div>
                   <div class="foot">
-                    <div class="host"><div class="av" style="background:#6d28d9">T</div><span><b>Tarek</b> · Upper int.</span></div>
-                    <button class="join press" aria-label="Join Tarek's singles, Sunday 9 AM">Join</button>
+                    <div class="host">
+                      <div class="av" style="background: #6d28d9">T</div>
+                      <span><b>Tarek</b> · Upper int.</span>
+                    </div>
+                    <button
+                      class="join press"
+                      aria-label="Join Tarek's singles, Sunday 9 AM"
+                    >
+                      Join
+                    </button>
                   </div>
                 </article>
               </section>
             </main>
           </div>
           <nav class="tabbar" aria-label="Tabs">
-            <div class="tab on"><div class="well"><svg width="20" height="20"><use href="#i-home"/></svg></div>Home</div>
-            <div class="tab"><div class="well"><svg width="20" height="20"><use href="#i-search"/></svg></div>Discover</div>
-            <div class="fab" aria-label="Create match"><svg width="26" height="26"><use href="#i-plus"/></svg></div>
-            <div class="tab"><div class="well"><svg width="20" height="20"><use href="#i-ball"/></svg></div>Matches<span class="badge">1</span></div>
-            <div class="tab"><div class="well"><svg width="20" height="20"><use href="#i-user"/></svg></div>Profile</div>
+            <div class="tab on">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-home" /></svg>
+              </div>
+              Home
+            </div>
+            <div class="tab">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-search" /></svg>
+              </div>
+              Discover
+            </div>
+            <div class="fab" aria-label="Create match">
+              <svg width="26" height="26"><use href="#i-plus" /></svg>
+            </div>
+            <div class="tab">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-ball" /></svg>
+              </div>
+              Matches<span class="badge">1</span>
+            </div>
+            <div class="tab">
+              <div class="well">
+                <svg width="20" height="20"><use href="#i-user" /></svg>
+              </div>
+              Profile
+            </div>
           </nav>
         </div>
         <ul class="rationale">
-          <li><b>One item, so no "more" line.</b> The card is just the row. With zero to-dos the card disappears and the match card moves up.</li>
-          <li><b>Confirm right from Home.</b> The score is shown on the row, so one tap confirms it; tapping the text opens the match to dispute.</li>
-          <li><b>Rating steps at 3 of 5</b>: this confirmation fills the fourth.</li>
+          <li>
+            <b>One item, so no "more" line.</b> The card is just the row. With
+            zero to-dos the card disappears and the match card moves up.
+          </li>
+          <li>
+            <b>Confirm right from Home.</b> The score is shown on the row, so
+            one tap confirms it; tapping the text opens the match to dispute.
+          </li>
+          <li>
+            <b>Rating steps at 3 of 5</b>: this confirmation fills the fourth.
+          </li>
         </ul>
       </div>
     </div>
