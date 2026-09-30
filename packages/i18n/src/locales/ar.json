@@ -539,7 +539,23 @@
     "liquidityDiscover": "ابحث عن لاعبين",
     "liquidityClubs": "تصفح النوادي",
     "liquidityClubsHint": "دليل النوادي والحجز عبر واتساب",
+    "todo": {
+      "more_one": "مهمة واحدة أخرى",
+      "more_other": "{{count}} مهام أخرى",
+      "moreA11y_one": "مهمة واحدة أخرى. يفتح مبارياتك.",
+      "moreA11y_other": "{{count}} مهام أخرى. يفتح مبارياتك."
+    },
+    "board": {
+      "eyebrow": "مباراتك · {{day}}",
+      "eyebrowNoTime": "مباراتك"
+    },
+    "nudge": {
+      "availabilityBody": "ليجدك لاعبون مثل هؤلاء",
+      "add": "أضف",
+      "choose": "اختر"
+    },
     "free": {
+      "whosFreeTitle": "من المتاح",
       "busiestTitle": "متاح لك",
       "chipLabel": "لاعبون متاحون {{slot}}",
       "chipSelectedLabel": "عرض اللاعبين المتاحين {{slot}}",

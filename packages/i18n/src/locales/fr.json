@@ -539,7 +539,23 @@
     "liquidityDiscover": "Trouver des joueurs",
     "liquidityClubs": "Parcourir les clubs",
     "liquidityClubsHint": "Annuaire des clubs et réservation WhatsApp",
+    "todo": {
+      "more_one": "Encore {{count}} chose à faire",
+      "more_other": "Encore {{count}} choses à faire",
+      "moreA11y_one": "Encore {{count}} chose à faire. Ouvre vos matchs.",
+      "moreA11y_other": "Encore {{count}} choses à faire. Ouvre vos matchs."
+    },
+    "board": {
+      "eyebrow": "Votre match · {{day}}",
+      "eyebrowNoTime": "Votre match"
+    },
+    "nudge": {
+      "availabilityBody": "Pour que des joueurs comme eux vous trouvent",
+      "add": "Ajouter",
+      "choose": "Choisir"
+    },
     "free": {
+      "whosFreeTitle": "Qui est libre",
       "busiestTitle": "Disponible pour vous",
       "chipLabel": "Joueurs libres {{slot}}",
       "chipSelectedLabel": "Affichage des joueurs libres {{slot}}",

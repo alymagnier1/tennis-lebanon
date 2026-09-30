@@ -540,7 +540,23 @@
     "liquidityDiscover": "Find players",
     "liquidityClubs": "Browse clubs",
     "liquidityClubsHint": "Club directory and WhatsApp booking",
+    "todo": {
+      "more_one": "{{count}} more to do",
+      "more_other": "{{count}} more to do",
+      "moreA11y_one": "{{count}} more to do. Opens your matches.",
+      "moreA11y_other": "{{count}} more to do. Opens your matches."
+    },
+    "board": {
+      "eyebrow": "Your match · {{day}}",
+      "eyebrowNoTime": "Your match"
+    },
+    "nudge": {
+      "availabilityBody": "So players like these can find you",
+      "add": "Add",
+      "choose": "Choose"
+    },
     "free": {
+      "whosFreeTitle": "Who's free",
       "busiestTitle": "Available for you",
       "chipLabel": "Players free {{slot}}",
       "chipSelectedLabel": "Showing players free {{slot}}",

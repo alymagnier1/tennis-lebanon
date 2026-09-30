@@ -29,6 +29,7 @@ import {
   homeFreePlayerSnapOffsets,
 } from "../../lib/home-free-players-carousel";
 import { clubNamesFromList } from "../../lib/match-clubs";
+import { shortPlayerName } from "../../lib/home-v5";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { useScreenReaderEnabled } from "../../hooks/useScreenReaderEnabled";
 import { SnapStrip, type SnapStripRelease } from "../SnapStrip";
@@ -41,6 +42,7 @@ import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 const CARD_AVATAR = 48;
+const TILE_V5_AVATAR = 68;
 
 const webStripSnap: ViewStyle | undefined =
   Platform.OS === "web"
@@ -63,8 +65,11 @@ type FreeBlock = {
   label: string;
 };
 
+export type HomeFreePlayersLayout = "classic" | "v5";
+
 type HomeFreePlayersCarouselProps = {
   block: FreeBlock;
+  layout?: HomeFreePlayersLayout;
   /** Past the trailing "View all" card → next time-window chip. */
   onScrollPastEnd?: () => void;
   /** Past the first card toward the leading edge → previous chip. */
@@ -86,6 +91,7 @@ type HomeFreePlayersCarouselProps = {
  */
 export function HomeFreePlayersCarousel({
   block,
+  layout = "classic",
   onScrollPastEnd,
   onScrollPastStart,
 }: HomeFreePlayersCarouselProps) {
@@ -120,7 +126,7 @@ export function HomeFreePlayersCarousel({
   // Hold the cards' space while they load: rendering nothing collapsed the
   // section and moved everything below up, then back down (2026-09-27).
   if (playersQuery.isPending && !ownZonesQuery.isError) {
-    return <HomeFreePlayersSkeleton />;
+    return <HomeFreePlayersSkeleton layout={layout} />;
   }
 
   if (players.length === 0) {
@@ -257,6 +263,16 @@ export function HomeFreePlayersCarousel({
   const items = (
     <>
       {players.map((player) => {
+        if (layout === "v5") {
+          return (
+            <FreePlayerTileV5
+              key={player.user_id}
+              player={player}
+              locale={locale}
+              onPress={() => openProfile(player)}
+            />
+          );
+        }
         const areaLabel = firstZoneLabel(player.zones, locale);
         const detail = homeFreePlayerDetailLine({
           about: player.bio ?? "",
@@ -374,6 +390,7 @@ export function HomeFreePlayersCarousel({
         }
         style={({ pressed }) => [
           styles.seeAll,
+          layout === "v5" && styles.seeAllV5,
           webEndItemSnap,
           { flexDirection: rowDirection },
           pressed && styles.pressed,
@@ -494,8 +511,40 @@ export function HomeFreePlayersCarousel({
  * Two placeholder cards with the real card's layout and text styles, so the
  * real cards replace them without the section changing height.
  */
-export function HomeFreePlayersSkeleton() {
+export function HomeFreePlayersSkeleton({
+  layout = "classic",
+}: {
+  layout?: HomeFreePlayersLayout;
+} = {}) {
   const { rowDirection } = useLayoutDirection();
+  const tileV5 = (key: number) => (
+    <View key={key} style={styles.tileV5}>
+      <View style={[styles.whoV5, { flexDirection: rowDirection }]}>
+        <View style={[styles.skeletonAvatar, styles.skeletonAvatarV5]} />
+        <View style={styles.identity}>
+          <AppText style={[styles.nameV5, styles.skeletonBar, { width: 110 }]}>
+            {" "}
+          </AppText>
+          <AppText style={[styles.levelV5, styles.skeletonBar, { width: 90 }]}>
+            {" "}
+          </AppText>
+        </View>
+      </View>
+      <AppText
+        style={[
+          styles.factV5,
+          styles.skeletonBar,
+          styles.firstFactV5,
+          { width: 120 },
+        ]}
+      >
+        {" "}
+      </AppText>
+      <AppText style={[styles.factV5, styles.skeletonBar, { width: 200 }]}>
+        {" "}
+      </AppText>
+    </View>
+  );
   const card = (key: number) => (
     <View key={key} style={styles.card}>
       <View style={[styles.header, { flexDirection: rowDirection }]}>
@@ -530,9 +579,97 @@ export function HomeFreePlayersSkeleton() {
         { flexDirection: rowDirection },
       ]}
     >
-      {card(0)}
-      {card(1)}
+      {layout === "v5" ? [tileV5(0), tileV5(1)] : [card(0), card(1)]}
     </View>
+  );
+}
+
+/**
+ * Home v5 tile: a big face beside first name and initial, then the area and
+ * every preferred club on their own lines. No free-time line — the day tabs
+ * above already say when.
+ */
+function FreePlayerTileV5({
+  player,
+  locale,
+  onPress,
+}: {
+  player: CompatiblePlayerCard;
+  locale: string;
+  onPress: () => void;
+}) {
+  const { t } = useTranslation();
+  const { rowDirection, writingDirection } = useLayoutDirection();
+  const name = shortPlayerName(player.display_name);
+  const level = t(`skillBands.${player.skill_band}`);
+  const areaLabel = firstZoneLabel(player.zones, locale);
+  const clubs = clubNamesFromList(player.favorite_clubs);
+  const clubsLabel = clubs.join(" · ");
+  const a11yLabel = [
+    name,
+    level,
+    areaLabel,
+    clubs.length > 0 ? clubs.join(", ") : "",
+  ]
+    .filter(Boolean)
+    .join(". ");
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={a11yLabel}
+      accessibilityHint={t("discover.openPlayerProfile", { name })}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.tileV5,
+        webItemSnap,
+        pressed && styles.pressed,
+      ]}
+    >
+      <View style={[styles.whoV5, { flexDirection: rowDirection }]}>
+        <Avatar
+          name={player.display_name}
+          avatarPath={player.avatar_path}
+          size={TILE_V5_AVATAR}
+        />
+        <View style={styles.identity}>
+          <AppText style={[styles.nameV5, { writingDirection }]} maxLines={1}>
+            {name}
+          </AppText>
+          <AppText style={[styles.levelV5, { writingDirection }]} maxLines={1}>
+            {level}
+          </AppText>
+        </View>
+      </View>
+      {areaLabel ? (
+        <View
+          style={[
+            styles.factRowV5,
+            styles.firstFactV5,
+            { flexDirection: rowDirection },
+          ]}
+        >
+          <Icon name="place" size={18} color={tennisColors.mutedForeground} />
+          <AppText style={[styles.factV5, { writingDirection }]} maxLines={1}>
+            {areaLabel}
+          </AppText>
+        </View>
+      ) : null}
+      {clubsLabel ? (
+        <View
+          style={[
+            styles.factRowV5,
+            !areaLabel && styles.firstFactV5,
+            { flexDirection: rowDirection },
+          ]}
+        >
+          <Icon name="court" size={18} color={tennisColors.mutedForeground} />
+          <AppText style={[styles.factV5, { writingDirection }]} maxLines={1}>
+            {clubsLabel}
+          </AppText>
+        </View>
+      ) : null}
+    </Pressable>
   );
 }
 
@@ -659,6 +796,62 @@ const styles = createLiveSheet(() =>
     },
     trailingSlack: {
       width: HOME_FREE_PLAYER_TRAILING_SLACK_PX,
+    },
+    seeAllV5: {
+      borderRadius: 22,
+    },
+    skeletonAvatarV5: {
+      width: TILE_V5_AVATAR,
+      height: TILE_V5_AVATAR,
+      borderRadius: TILE_V5_AVATAR / 2,
+    },
+    tileV5: {
+      width: HOME_FREE_PLAYER_CARD_WIDTH,
+      paddingTop: 18,
+      paddingHorizontal: 18,
+      paddingBottom: 16,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: tennisColors.border,
+      backgroundColor: tennisColors.card,
+      shadowColor: "#0C382E",
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 1,
+    },
+    whoV5: {
+      alignItems: "center",
+      gap: 14,
+    },
+    nameV5: {
+      fontFamily: tennisFontFamily.heading,
+      fontSize: 20,
+      lineHeight: 26,
+      color: tennisColors.primaryDark,
+    },
+    levelV5: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 15,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
+    },
+    factRowV5: {
+      alignItems: "center",
+      gap: 6,
+      marginTop: 4,
+      minWidth: 0,
+    },
+    firstFactV5: {
+      marginTop: 14,
+    },
+    factV5: {
+      flex: 1,
+      minWidth: 0,
+      fontFamily: tennisFontFamily.body,
+      fontSize: 15,
+      lineHeight: 20,
+      color: tennisColors.mutedForeground,
     },
   }),
 );
