@@ -6,9 +6,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppText } from "../AppText";
 import { ScreenError } from "../FormUi";
 import { SlideIn } from "../SlideIn";
+import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import {
   HomeFreePlayersCarousel,
   HomeFreePlayersSkeleton,
+  type HomeFreePlayersLayout,
 } from "./HomeFreePlayersCarousel";
 import { trackLiquiditySignalViewed } from "../../lib/analytics";
 import {
@@ -46,7 +48,13 @@ import { tennisFontFamily } from "../../hooks/useTennisFonts";
  * An empty week is not rendered here. First-run Home already has one play CTA;
  * stacking "add when you play" on top of it taught emptiness twice.
  */
-export function HomeFreeSlots() {
+export function HomeFreeSlots({
+  layout = "classic",
+}: {
+  /** "v5": "Who's free" with a segmented day control and the tall player tiles. */
+  layout?: HomeFreePlayersLayout;
+} = {}) {
+  const isV5 = layout === "v5";
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const { rowDirection, writingDirection, isRtl } = useLayoutDirection();
@@ -104,7 +112,7 @@ export function HomeFreeSlots() {
 
   const title = (
     <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
-      {t("home.free.busiestTitle")}
+      {t(isV5 ? "home.free.whosFreeTitle" : "home.free.busiestTitle")}
     </AppText>
   );
 
@@ -114,14 +122,19 @@ export function HomeFreeSlots() {
     return (
       <View style={styles.root} accessibilityElementsHidden>
         {title}
-        <View style={[styles.tabRow, { flexDirection: rowDirection }]}>
-          {[0, 1, 2].map((index) => (
+        <View
+          style={[
+            isV5 ? [styles.segment, styles.segmentSkeleton] : styles.tabRow,
+            { flexDirection: rowDirection },
+          ]}
+        >
+          {(isV5 ? [] : [0, 1, 2]).map((index) => (
             <AppText key={index} style={[styles.tabLabel, styles.tabSkeleton]}>
               {" "}
             </AppText>
           ))}
         </View>
-        <HomeFreePlayersSkeleton />
+        <HomeFreePlayersSkeleton layout={layout} />
       </View>
     );
   }
@@ -187,7 +200,12 @@ export function HomeFreeSlots() {
     <View style={styles.root}>
       {title}
 
-      <View style={[styles.tabRow, { flexDirection: rowDirection }]}>
+      <View
+        style={[
+          isV5 ? styles.segment : styles.tabRow,
+          { flexDirection: rowDirection },
+        ]}
+      >
         {days.map((day, index) => {
           const label = dayLabel(day);
           const isSelected = day === selected;
@@ -209,14 +227,21 @@ export function HomeFreeSlots() {
                   selectDay(day.startsAt, index > selectedIndex ? 1 : -1);
                 }
               }}
-              hitSlop={{ top: 8, bottom: 8 }}
+              hitSlop={isV5 ? undefined : { top: 8, bottom: 8 }}
               style={({ pressed }) => [
-                styles.tab,
+                isV5 ? styles.segmentButton : styles.tab,
+                isV5 && isSelected && styles.segmentButtonSelected,
                 pressed && styles.tabPressed,
               ]}
             >
               <AppText
-                style={[styles.tabLabel, isSelected && styles.tabLabelSelected]}
+                style={[
+                  styles.tabLabel,
+                  isSelected &&
+                    (isV5
+                      ? styles.segmentLabelSelected
+                      : styles.tabLabelSelected),
+                ]}
                 maxLines={1}
               >
                 {label}
@@ -233,6 +258,7 @@ export function HomeFreeSlots() {
             endsAt: shown.endsAt,
             label: dayLabel(shown),
           }}
+          layout={layout}
           onScrollPastEnd={() => selectAdjacentDay("next")}
           onScrollPastStart={() => selectAdjacentDay("prev")}
         />
@@ -274,6 +300,35 @@ const styles = createLiveSheet(() =>
       width: 64,
       borderRadius: 4,
       backgroundColor: tennisColors.muted,
+    },
+    segment: {
+      padding: 4,
+      gap: 4,
+      borderRadius: 14,
+      backgroundColor: tennisColors.muted,
+    },
+    segmentSkeleton: {
+      height: 52,
+    },
+    segmentButton: {
+      flex: 1,
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 8,
+      borderRadius: 10,
+    },
+    segmentButtonSelected: {
+      backgroundColor: tennisColors.card,
+      shadowColor: tennisColors.primary,
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 1,
+    },
+    segmentLabelSelected: {
+      color: tennisColors.primaryDark,
+      fontFamily: tennisFontFamily.bodySemi,
     },
   }),
 );

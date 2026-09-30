@@ -19,7 +19,7 @@ import { AppText } from "../AppText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
-const ACTION_ICONS: Record<HomeNextAction["kind"], IconName> = {
+export const ACTION_ICONS: Record<HomeNextAction["kind"], IconName> = {
   invite: "notifications",
   vote: "matches",
   booking: "place",
