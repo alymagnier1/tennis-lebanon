@@ -161,6 +161,31 @@ export function openMatchSoonestSlot(
   return best;
 }
 
+/** An accepted player on an open listing: public card fields only. */
+export type OpenMatchParticipant = {
+  display_name: string;
+  avatar_path: string | null;
+};
+
+export function normalizeOpenMatchParticipants(
+  value: unknown,
+): OpenMatchParticipant[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    if (!entry || typeof entry !== "object") return [];
+    const record = entry as Record<string, unknown>;
+    const name = record.display_name;
+    if (typeof name !== "string") return [];
+    const avatarPath = record.avatar_path;
+    return [
+      {
+        display_name: name,
+        avatar_path: typeof avatarPath === "string" ? avatarPath : null,
+      },
+    ];
+  });
+}
+
 export type OpenMatchCard = {
   match_id: string;
   format: string;
@@ -185,16 +210,23 @@ export type OpenMatchCard = {
   /** The host secured a court before filling the roster. */
   court_secured: boolean;
   court_club_name: string | null;
+  /** Accepted players, host first. Omits anyone blocked with the viewer. */
+  participants: OpenMatchParticipant[];
 };
 
-type DiscoverOpenMatchCardRow = Omit<OpenMatchCard, "proposed_times"> & {
+type DiscoverOpenMatchCardRow = Omit<
+  OpenMatchCard,
+  "proposed_times" | "participants"
+> & {
   proposed_times?: unknown;
+  participants?: unknown;
 };
 
 function normalizeOpenMatchCard(row: DiscoverOpenMatchCardRow): OpenMatchCard {
   return {
     ...row,
     proposed_times: normalizeOpenMatchProposedTimes(row.proposed_times),
+    participants: normalizeOpenMatchParticipants(row.participants),
   };
 }
 

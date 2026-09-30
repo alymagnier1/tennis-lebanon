@@ -277,87 +277,94 @@ export function HomeDashboardV5({ displayName }: { displayName: string }) {
         <RefreshControl refreshing={isRefreshing} onRefresh={refresh} />
       }
     >
-      <View style={[styles.header, { flexDirection: rowDirection }]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("tabs.profile")}
-          onPress={() => router.push(PROFILE_TAB_ROUTE)}
-          hitSlop={4}
-        >
-          <Avatar
-            name={displayName}
-            avatarPath={profile?.avatar_path}
-            size={52}
-          />
-        </Pressable>
-        <View style={styles.headerText}>
-          <AppText
-            accessibilityRole="header"
-            style={[styles.hello, { writingDirection }]}
-            maxLines={1}
+      <View style={styles.headerBlock}>
+        <View style={[styles.header, { flexDirection: rowDirection }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("tabs.profile")}
+            onPress={() => router.push(PROFILE_TAB_ROUTE)}
+            hitSlop={4}
           >
-            {t("home.greeting", { name: displayName })}
-          </AppText>
-          {playerProfile ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={standingA11y}
-              onPress={() =>
-                notify(
-                  t("profile.ratingExplainerTitle"),
-                  t("profile.ratingExplainerBody"),
-                )
-              }
-              style={[styles.standing, { flexDirection: rowDirection }]}
-            >
-              <AppText style={styles.standingText} maxLines={1}>
-                {bandLabel}
-                {provisional ? null : (
-                  <AppText style={styles.standingRating}>
-                    {` ${ratingValue}`}
-                  </AppText>
-                )}
-              </AppText>
-              {provisional ? (
-                <View style={[styles.pips, { flexDirection: rowDirection }]}>
-                  {ratingPips(
-                    ratedMatchCount,
-                    PROVISIONAL_RATING_MATCH_THRESHOLD,
-                  ).map((on, index) => (
-                    <View
-                      key={index}
-                      style={[styles.pip, on && styles.pipOn]}
-                    />
-                  ))}
-                </View>
-              ) : null}
-              <Icon
-                name="info"
-                size={16}
-                color={tennisColors.mutedForeground}
-              />
-            </Pressable>
-          ) : null}
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("notifications.centerTitle")}
-          onPress={() => router.push("/notifications")}
-          style={styles.bell}
-        >
-          <Icon
-            name="notifications"
-            size={22}
-            color={tennisColors.primaryDark}
-          />
-          {unreadCount > 0 ? (
-            <CountBadge
-              label={formatTabBadgeCount(unreadCount) ?? String(unreadCount)}
-              tone="violet"
-              style={{ borderColor: tennisColors.card }}
+            <Avatar
+              name={displayName}
+              avatarPath={profile?.avatar_path}
+              size={52}
             />
-          ) : null}
-        </Pressable>
+          </Pressable>
+          <View style={styles.headerText}>
+            <AppText
+              accessibilityRole="header"
+              style={[styles.hello, { writingDirection }]}
+              maxLines={1}
+            >
+              {t("home.greeting", { name: displayName })}
+            </AppText>
+            {playerProfile ? (
+              <AppText
+                style={[styles.standingText, { writingDirection }]}
+                maxLines={1}
+              >
+                {bandLabel}
+              </AppText>
+            ) : null}
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("notifications.centerTitle")}
+            onPress={() => router.push("/notifications")}
+            style={styles.bell}
+          >
+            <Icon
+              name="notifications"
+              size={22}
+              color={tennisColors.primaryDark}
+            />
+            {unreadCount > 0 ? (
+              <CountBadge
+                label={formatTabBadgeCount(unreadCount) ?? String(unreadCount)}
+                tone="violet"
+                style={{ borderColor: tennisColors.card }}
+              />
+            ) : null}
+          </Pressable>
+        </View>
+
+        {playerProfile ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={standingA11y}
+            onPress={() =>
+              notify(
+                t("profile.ratingExplainerTitle"),
+                t("profile.ratingExplainerBody"),
+              )
+            }
+            style={[styles.standing, { flexDirection: rowDirection }]}
+          >
+            {provisional ? (
+              <View style={[styles.pips, { flexDirection: rowDirection }]}>
+                {ratingPips(
+                  ratedMatchCount,
+                  PROVISIONAL_RATING_MATCH_THRESHOLD,
+                ).map((on, index) => (
+                  <View key={index} style={[styles.pip, on && styles.pipOn]} />
+                ))}
+              </View>
+            ) : null}
+            <AppText style={styles.standingRating} maxLines={1}>
+              {provisional
+                ? t("home.ratingProgress.short", {
+                    done: Math.min(
+                      ratedMatchCount,
+                      PROVISIONAL_RATING_MATCH_THRESHOLD,
+                    ),
+                    threshold: PROVISIONAL_RATING_MATCH_THRESHOLD,
+                  })
+                : ratingValue}
+            </AppText>
+            <Icon name="info" size={20} color={tennisColors.mutedForeground} />
+          </Pressable>
+        ) : null}
       </View>
 
       {bodyError ? (
@@ -439,6 +446,9 @@ const styles = createLiveSheet(() =>
       paddingHorizontal: tennisSpacing.screenX,
       gap: tennisSpacing.section,
     },
+    headerBlock: {
+      gap: 8,
+    },
     header: {
       alignItems: "center",
       gap: 12,
@@ -455,30 +465,31 @@ const styles = createLiveSheet(() =>
       color: tennisColors.primaryDark,
     },
     standing: {
-      alignSelf: "flex-start",
       alignItems: "center",
-      gap: 8,
-      minHeight: 28,
+      gap: 12,
+      minHeight: 44,
     },
     standingText: {
-      flexShrink: 1,
       fontFamily: tennisFontFamily.body,
       fontSize: 14,
       color: tennisColors.mutedForeground,
     },
     standingRating: {
-      fontFamily: tennisFontFamily.bodySemi,
+      fontFamily: tennisFontFamily.headingExtra,
+      fontSize: 22,
+      lineHeight: 28,
       color: tennisColors.primaryDark,
     },
     pips: {
-      gap: 3,
+      flex: 1,
+      gap: 6,
       alignItems: "center",
     },
     pip: {
-      width: 11,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: tennisColors.border,
+      flex: 1,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: tennisColors.linkUnderline,
     },
     pipOn: {
       backgroundColor: tennisColors.violet,

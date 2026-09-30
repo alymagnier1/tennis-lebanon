@@ -71,6 +71,33 @@ describe("discovery API wrappers", () => {
     });
   });
 
+  it("normalizes the open-match roster and defaults it when absent", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({
+      data: [
+        {
+          match_id: "m1",
+          participants: [
+            { display_name: "Bassem", avatar_path: "a/b.jpg" },
+            { display_name: "Aly", avatar_path: null },
+            { avatar_path: "no-name.jpg" },
+            null,
+          ],
+        },
+        { match_id: "m2" },
+      ],
+      error: null,
+    });
+
+    const [withRoster, withoutRoster] = await discoverOpenMatches(client);
+
+    expect(withRoster?.participants).toEqual([
+      { display_name: "Bassem", avatar_path: "a/b.jpg" },
+      { display_name: "Aly", avatar_path: null },
+    ]);
+    expect(withoutRoster?.participants).toEqual([]);
+  });
+
   it("loads a public player card via RPC", async () => {
     const { client, rpc } = createMockClient();
     rpc.mockResolvedValue({

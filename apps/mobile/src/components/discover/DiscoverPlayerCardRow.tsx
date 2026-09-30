@@ -3,9 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { listMyMatches, type CompatiblePlayerCard } from "@tennis-lebanon/api";
 import { DiscoverPlayerCard } from "./DiscoverPlayerCard";
-import { formatMatchesPlayedLabel } from "../../lib/matches-played-label";
 import { publicPlayerLevelChip } from "../../lib/player-level-label";
-import { discoverPlayerAvailabilityTags } from "../../lib/discover-availability-tag";
+import { discoverPlayerAvailabilityLine } from "../../lib/discover-availability-tag";
 import { openAskToPlayFlow } from "../../lib/create-match-guard";
 import { clubNamesFromList } from "../../lib/match-clubs";
 import { supabase } from "../../lib/supabase";
@@ -47,11 +46,7 @@ export function DiscoverPlayerCardRow({
       name={player.display_name}
       locationLabel={zoneLabelFromList(player.zones, locale)}
       levelBadgeLabel={publicPlayerLevelChip(player, t)}
-      matchesPlayedLabel={formatMatchesPlayedLabel(
-        player.completed_match_count,
-        t,
-      )}
-      availabilityTags={discoverPlayerAvailabilityTags(
+      availabilityLabel={discoverPlayerAvailabilityLine(
         player,
         showOverlapAvailability,
         t,

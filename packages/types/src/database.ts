@@ -2886,6 +2886,7 @@ export type Database = {
         preferred_clubs: Json | null;
         court_secured: boolean | null;
         court_club_name: string | null;
+        participants: Json | null;
       };
       disputed_result_queue_row: {
         result_id: string | null;

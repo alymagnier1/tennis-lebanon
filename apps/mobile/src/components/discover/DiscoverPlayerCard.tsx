@@ -7,7 +7,6 @@ import { AppText } from "../AppText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useLayoutDirection } from "../../lib/layout-direction";
-import { joinedListTypeSize } from "../../lib/match-clubs";
 import { skillBandColor, skillBandFill } from "../../lib/skill-band-theme";
 import { useTennisTheme } from "../../providers/ThemeProvider";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
@@ -17,25 +16,17 @@ function FooterMetaItem({
   label,
   writingDirection,
   rowDirection,
-  fontSize,
-  lineHeight,
 }: {
   icon: IconName;
   label: string;
   writingDirection: "ltr" | "rtl";
   rowDirection: "row" | "row-reverse";
-  fontSize?: number;
-  lineHeight?: number;
 }) {
   return (
     <View style={[styles.footerMetaItem, { flexDirection: rowDirection }]}>
       <Icon name={icon} size={16} color={tennisColors.mutedForeground} />
       <AppText
-        style={[
-          styles.footerMetaText,
-          { writingDirection },
-          fontSize != null ? { fontSize, lineHeight } : null,
-        ]}
+        style={[styles.footerMetaText, { writingDirection }]}
         maxLines={1}
       >
         {label}
@@ -49,9 +40,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   name,
   locationLabel,
   levelBadgeLabel,
-  matchesPlayedLabel,
-  formatTag,
-  availabilityTags,
+  availabilityLabel,
   clubsTag,
   profileAccessibilityLabel,
   primaryLabel,
@@ -64,9 +53,8 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   name: string;
   locationLabel: string;
   levelBadgeLabel: string;
-  matchesPlayedLabel: string;
-  formatTag?: string | null;
-  availabilityTags: string[];
+  /** One line, e.g. "Available Thu · Fri". */
+  availabilityLabel?: string | null;
   clubsTag?: string | null;
   profileAccessibilityLabel: string;
   primaryLabel: string;
@@ -81,8 +69,6 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   const isDark = scheme === "dark";
   const bandColor = skillBandColor(player.skill_band);
   const bandFill = skillBandFill(player.skill_band);
-  const availabilityLabel = availabilityTags.filter(Boolean).join(" · ");
-  const clubCount = clubsTag ? clubsTag.split(" · ").filter(Boolean).length : 0;
 
   return (
     <View style={styles.card}>
@@ -97,18 +83,12 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
             <Avatar
               name={name}
               avatarPath={player.avatar_path}
-              size={64}
+              size={72}
               borderRadius={14}
             />
             <View style={styles.identity}>
               <AppText style={[styles.name, { writingDirection }]} maxLines={1}>
                 {name}
-              </AppText>
-              <AppText
-                style={[styles.matchesPlayed, { writingDirection }]}
-                maxLines={1}
-              >
-                {matchesPlayedLabel}
               </AppText>
               {locationLabel ? (
                 <AppText
@@ -116,6 +96,14 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
                   maxLines={1}
                 >
                   {locationLabel}
+                </AppText>
+              ) : null}
+              {clubsTag ? (
+                <AppText
+                  style={[styles.area, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {clubsTag}
                 </AppText>
               ) : null}
             </View>
@@ -130,29 +118,12 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
 
       <View style={[styles.actionFooter, { flexDirection: rowDirection }]}>
         <View style={styles.footerMeta}>
-          {formatTag ? (
-            <FooterMetaItem
-              icon="court"
-              label={formatTag}
-              writingDirection={writingDirection}
-              rowDirection={rowDirection}
-            />
-          ) : null}
           {availabilityLabel ? (
             <FooterMetaItem
               icon="clock"
               label={availabilityLabel}
               writingDirection={writingDirection}
               rowDirection={rowDirection}
-            />
-          ) : null}
-          {clubsTag ? (
-            <FooterMetaItem
-              icon="court"
-              label={clubsTag}
-              writingDirection={writingDirection}
-              rowDirection={rowDirection}
-              {...joinedListTypeSize(clubCount)}
             />
           ) : null}
         </View>
@@ -178,7 +149,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
             accessibilityLabel={primaryLabel}
             disabled={primaryLoading || primaryDisabled}
             onPress={onPrimaryPress}
-            hitSlop={{ top: 6, bottom: 6 }}
+            hitSlop={{ top: 8, bottom: 8 }}
             style={({ pressed }) => [
               styles.actionPill,
               isDark && styles.actionPillDark,
@@ -222,82 +193,76 @@ const styles = createLiveSheet(() =>
       elevation: 3,
     },
     body: {
-      paddingHorizontal: 16,
-      paddingVertical: 14,
+      padding: 12,
     },
     bodyPressed: {
       opacity: 0.94,
     },
     header: {
-      alignItems: "flex-start",
+      alignItems: "center",
       gap: 12,
     },
     identity: {
       flex: 1,
       minWidth: 0,
-      paddingTop: 2,
-      gap: 2,
+      gap: 1,
     },
     name: {
-      fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 16,
+      fontFamily: tennisFontFamily.heading,
+      fontSize: 18,
+      lineHeight: 23,
       color: tennisColors.primaryDark,
-    },
-    matchesPlayed: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 12,
-      color: tennisColors.mutedForeground,
+      letterSpacing: -0.2,
     },
     area: {
+      flexShrink: 1,
       fontFamily: tennisFontFamily.body,
-      fontSize: 11,
+      fontSize: 13,
+      lineHeight: 18,
       color: tennisColors.mutedForeground,
     },
     levelBadge: {
       alignSelf: "flex-start",
       borderRadius: tennisRadii.pill,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
+      paddingHorizontal: 12,
+      paddingVertical: 5,
       flexShrink: 0,
     },
     levelBadgeText: {
       fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 11,
+      fontSize: 13,
     },
     actionFooter: {
       alignItems: "center",
       gap: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      backgroundColor: tennisColors.muted,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: tennisColors.border,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      backgroundColor: tennisColors.cardFooter,
     },
     footerMeta: {
       flex: 1,
       minWidth: 0,
-      gap: 6,
     },
     footerMetaItem: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 6,
+      gap: 5,
       flexShrink: 1,
       maxWidth: "100%",
     },
     footerMetaText: {
       fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 14,
-      lineHeight: 18,
+      fontSize: 14.5,
+      lineHeight: 19,
       color: tennisColors.mutedForeground,
       flexShrink: 1,
     },
     actionPill: {
       flexShrink: 0,
-      minHeight: 36,
-      minWidth: 120,
-      paddingHorizontal: 14,
-      paddingVertical: 8,
+      minHeight: 34,
+      minWidth: 112,
+      paddingHorizontal: 18,
+      paddingVertical: 4,
       borderRadius: 999,
       alignItems: "center",
       justifyContent: "center",
@@ -319,7 +284,7 @@ const styles = createLiveSheet(() =>
     },
     actionPillText: {
       fontFamily: tennisFontFamily.headingSemi,
-      fontSize: 13,
+      fontSize: 15,
       letterSpacing: -0.1,
       color: tennisColors.limeText,
       textAlign: "center",

@@ -7,7 +7,7 @@ import { Icon, type IconName } from "./Icon";
 import { useLayoutDirection } from "../lib/layout-direction";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 
-const TONE_ICONS: Record<SemanticTone, IconName> = {
+export const SEMANTIC_TONE_ICONS: Record<SemanticTone, IconName> = {
   neutral: "info",
   info: "info",
   positive: "check",
@@ -37,7 +37,7 @@ export function SemanticBadge({
         },
       ]}
     >
-      <Icon name={TONE_ICONS[tone]} size={12} color={palette.text} />
+      <Icon name={SEMANTIC_TONE_ICONS[tone]} size={12} color={palette.text} />
       <AppText
         style={[styles.label, { color: palette.text, writingDirection }]}
         maxLines={1}

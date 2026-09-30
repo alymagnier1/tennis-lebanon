@@ -20,14 +20,12 @@ import {
 import {
   DEFAULT_DISCOVER_MATCH_TOGGLES,
   type DiscoverMatchToggles,
-  canShowJoinAction,
   resolveDiscoverFiltersFromProfile,
   type PlayIntent,
 } from "@tennis-lebanon/domain";
 import {
   EmptyState,
   ListSkeleton,
-  MatchCard,
   SegmentTabs,
 } from "../../src/components/AppUi";
 import { DiscoverMatchChips } from "../../src/components/discover/DiscoverMatchChips";
@@ -68,15 +66,7 @@ import { useAuth } from "../../src/providers/AuthProvider";
 import { notify } from "../../src/lib/confirm-action";
 import { joinErrorKey } from "../../src/lib/join-error";
 import { supabase } from "../../src/lib/supabase";
-import {
-  compactJoinedLabel,
-  clubNamesFromList,
-  matchCardAreaLabel,
-} from "../../src/lib/match-clubs";
-import { opponentAvatarColor } from "../../src/lib/match-card-status";
-import { matchHubLevelSummary } from "../../src/lib/match-hub-summaries";
-import { openMatchCardDateTimeLabel } from "../../src/lib/open-match-card-time";
-import { openMatchScarcityBadges } from "../../src/lib/open-match-scarcity";
+import { OpenMatchListCard } from "../../src/components/match/OpenMatchListCard";
 
 type DiscoverSegment = "players" | "matches";
 
@@ -370,51 +360,15 @@ export default function DiscoverScreen() {
         keyExtractor: (match) => (match as OpenMatchCard).match_id,
         renderItem: ({ item }) => {
           const match = item as OpenMatchCard;
-          const preferredClubLabel = compactJoinedLabel(
-            clubNamesFromList(match.preferred_clubs),
-            2,
-          );
-          const areaLabel = matchCardAreaLabel(
-            match.zones,
-            i18n.resolvedLanguage ?? i18n.language,
-            { compact: true },
-          );
-          const dateTimeLabel = openMatchCardDateTimeLabel(match);
-          const joinAction = canShowJoinAction({
-            matchStatus: match.status,
-            requiresCreatorApproval: match.requires_creator_approval,
-          });
-          const joinLabel =
-            joinAction === "join"
-              ? t("matches.list.action.join")
-              : joinAction === "request"
-                ? t("matches.list.action.requestJoin")
-                : undefined;
           return (
-            <MatchCard
-              status={match.status}
-              statusLabel={t(`matches.status.${match.status}`)}
-              actionLabel={joinLabel}
-              onActionPress={
-                joinAction === "none"
-                  ? undefined
-                  : () => joinMutation.mutate(match.match_id)
+            <OpenMatchListCard
+              match={match}
+              locale={i18n.resolvedLanguage ?? i18n.language}
+              onJoinPress={() => joinMutation.mutate(match.match_id)}
+              joinLoading={
+                joinMutation.isPending &&
+                joinMutation.variables === match.match_id
               }
-              actionTone="actionable"
-              dateTimeLabel={dateTimeLabel}
-              headline={match.creator_display_name}
-              hostName={match.creator_display_name}
-              hostAvatarPath={match.creator_avatar_path}
-              hostAvatarColor={opponentAvatarColor(match.creator_display_name)}
-              formatChip={t(`formats.${match.format}`)}
-              locationChip={preferredClubLabel}
-              areaChip={areaLabel}
-              levelChip={matchHubLevelSummary(match, t)}
-              badges={openMatchScarcityBadges(match, {
-                oneSpotLeft: t("discover.spotsRemaining", { count: 1 }),
-                courtSecured: t("discover.courtSecuredBadge"),
-              })}
-              note={match.notes ?? undefined}
               onPress={() =>
                 router.push({
                   pathname: "/match/[id]",
@@ -430,11 +384,11 @@ export default function DiscoverScreen() {
     return undefined;
   }, [
     filteredPlayers,
+    joinMutation,
     locale,
     matchToggles.matchAvailability,
     sortedMatches,
     segment,
-    t,
     i18n.resolvedLanguage,
     i18n.language,
   ]);
