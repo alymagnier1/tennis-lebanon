@@ -29,6 +29,8 @@ export const tennisColorsLight = {
   card: "#FFFFFF",
   secondary: "#E3EDE6",
   muted: "#ECF0EE",
+  /** Action strip under a card's body (Discover player cards). */
+  cardFooter: "#F3F6F4",
   // Darkened from #627068, which was 4.34:1 on `secondary`.
   mutedForeground: "#5C6A62",
   border: "#E9EBE8",
@@ -76,6 +78,7 @@ export const tennisColorsDark = {
   card: "#1C1E19",
   secondary: "#252722",
   muted: "#161814",
+  cardFooter: "#161814",
   mutedForeground: "#A8AAA4",
   border: "#2E322C",
   accent: "#E07A3D",

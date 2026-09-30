@@ -134,11 +134,20 @@ export function formatNearTermAvailabilitySlots(
 }
 
 /** One compact weekday chip per near-term day (no day-part text). */
+/** Beirut weekday index (0 = Sunday) of each day the slots cover, in order. */
+export function nearTermAvailabilityWeekdays(
+  slots: NearTermAvailabilitySlot[],
+): number[] {
+  return groupSlotsByDay(slots).map(({ dateKey }) =>
+    weekdayIndexFromBeirutDateKey(dateKey),
+  );
+}
+
 export function formatNearTermAvailabilityDayChips(
   slots: NearTermAvailabilitySlot[],
   t: TFunction,
 ): string[] {
-  return groupSlotsByDay(slots).map(({ dateKey }) =>
-    t(`availability.weekdaysCompact.${weekdayIndexFromBeirutDateKey(dateKey)}`),
+  return nearTermAvailabilityWeekdays(slots).map((weekday) =>
+    t(`availability.weekdaysCompact.${weekday}`),
   );
 }

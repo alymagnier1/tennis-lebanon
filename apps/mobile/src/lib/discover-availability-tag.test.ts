@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { TFunction } from "i18next";
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
-import { discoverPlayerAvailabilityTags } from "./discover-availability-tag";
+import {
+  discoverPlayerAvailabilityLine,
+  discoverPlayerAvailabilityTags,
+} from "./discover-availability-tag";
 import { formatNearTermAvailabilitySlots } from "./near-term-availability";
 
 function player(
@@ -48,29 +51,28 @@ function player(
 
 describe("discoverPlayerAvailabilityTags", () => {
   const t = vi.fn((key: string) => {
-    if (key === "availability.weekdaysCompact.0") return "Sun";
-    if (key === "availability.weekdaysCompact.1") return "M";
-    if (key === "availability.weekdaysCompact.2") return "T";
-    if (key === "availability.weekdaysCompact.4") return "Th";
-    if (key === "availability.weekdaysCompact.5") return "F";
-    if (key === "availability.weekdaysCompact.6") return "Sat";
+    const [, style, weekday] = key.split(".");
+    const short = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const compact = ["Sun", "M", "T", "W", "Th", "F", "Sat"];
+    if (style === "weekdaysShort") return short[Number(weekday)];
+    if (style === "weekdaysCompact") return compact[Number(weekday)];
     return key;
   }) as unknown as TFunction;
 
-  it("shows one compact day chip per shared near-term overlap day", () => {
+  it("spells out each shared near-term overlap day", () => {
     // 2026-08-04 is a Tuesday in Asia/Beirut.
-    expect(discoverPlayerAvailabilityTags(player(), true, t)).toEqual(["T"]);
+    expect(discoverPlayerAvailabilityTags(player(), true, t)).toEqual(["Tue"]);
   });
 
   it("shows the player's near-term days when the overlap chip is off", () => {
     // 2026-08-07 is a Friday in Asia/Beirut.
-    expect(discoverPlayerAvailabilityTags(player(), false, t)).toEqual(["F"]);
+    expect(discoverPlayerAvailabilityTags(player(), false, t)).toEqual(["Fri"]);
   });
 
-  it("falls back to usual weekdays as separate compact chips", () => {
+  it("falls back to usual weekdays, one label per day", () => {
     const distant = player({
       near_term_overlap_slots: [],
-      availability_weekdays: [0, 6],
+      availability_weekdays: [6, 0],
       availability_day_parts: ["evening"],
     });
 
@@ -78,6 +80,52 @@ describe("discoverPlayerAvailabilityTags", () => {
       "Sun",
       "Sat",
     ]);
+  });
+
+  it("compacts the labels when more than three days would not fit", () => {
+    const busy = player({
+      near_term_overlap_slots: [],
+      availability_weekdays: [1, 2, 4, 5],
+      availability_day_parts: ["evening"],
+    });
+
+    expect(discoverPlayerAvailabilityTags(busy, true, t)).toEqual([
+      "M",
+      "T",
+      "Th",
+      "F",
+    ]);
+  });
+
+  it("builds one availability line for the card", () => {
+    const tLine = ((key: string, options?: { days?: string }) =>
+      key === "discover.availableOn"
+        ? `Available ${options?.days}`
+        : (t as unknown as (k: string) => string)(key)) as unknown as TFunction;
+
+    expect(
+      discoverPlayerAvailabilityLine(
+        player({
+          near_term_overlap_slots: [],
+          availability_weekdays: [5, 4],
+          availability_day_parts: ["evening"],
+        }),
+        true,
+        tLine,
+      ),
+    ).toBe("Available Thu · Fri");
+    expect(
+      discoverPlayerAvailabilityLine(
+        player({
+          near_term_slots: [],
+          near_term_overlap_slots: [],
+          availability_weekdays: [],
+          availability_day_parts: [],
+        }),
+        true,
+        tLine,
+      ),
+    ).toBeNull();
   });
 
   it("shows nothing when there is neither an overlap nor a pattern", () => {

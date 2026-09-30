@@ -51,6 +51,10 @@ export const IDENTICAL_LOCALE_ALLOWLIST = new Set([
   // every locale, the way any product name does.
   "common.appName",
   "notifications.fallbackTitle",
+  // Two numbers and a slash ("0/5"); nothing in it to translate.
+  "home.ratingProgress.short",
+  // A plus sign and a count ("+2").
+  "discover.rosterMore",
 ]);
 
 const ARABIC_SCRIPT = /[\u0600-\u06FF]/;

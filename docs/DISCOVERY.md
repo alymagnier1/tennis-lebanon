@@ -40,6 +40,7 @@ Safe to return to any authenticated, eligible viewer:
 - `zone` names/slugs (from `match_zones`, not addresses)
 - `proposed_times`: `{ id, starts_at, ends_at }[]` (non-withdrawn options only)
 - `participant_summary`: count accepted, capacity (2 or 4), creator display name + avatar
+- `participants`: accepted players only, host first, each `{ display_name, avatar_path }` — the fields the public player card already shows. Requested and invited players are never listed, and anyone blocked in either direction with the viewer is omitted (the count still includes them).
 - `compatibility_hints`: coarse flags only, e.g. `level_fit`, `zone_overlap`, `availability_overlap` (boolean)
 
 Do **not** return: match notes for private matches, non-public participant PII beyond public card fields, invite tokens, internal ratings.
