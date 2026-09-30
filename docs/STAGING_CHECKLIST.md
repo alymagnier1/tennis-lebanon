@@ -86,6 +86,7 @@ select public.cancel_match(id, 'test reset') from public.matches           -- 3 
 
 - [x] All migrations applied to staging in order (`supabase db push` or CI deploy)
   - Verified 2026-09-25: staging `schema_migrations` is 001→108 (105–108 applied with `supabase db push`).
+  - Verified 2026-10-01: `113` applied with `supabase db push` after #38 merged (dry run listed only `113`); staging is 001→110, 113. `111` (landing-page waitlist) is unmerged and `112` is unused, so `111` will land out of order: fine with `apply_migration`, needs `--include-all` with `db push`. Checked live: `discover_open_match_card` ends in `participants`, `discover_open_matches` builds it, EXECUTE is still `authenticated` only.
   - Verified 2026-09-26: `110` applied with `supabase db push` after #27 merged (17:13); staging is 001→110.
   - Verified 2026-09-26: `109` applied with `supabase db push` after #19 merged; staging is 001→109 and the new `register_device_push_token` is live, still `authenticated`-only.
 - [ ] Staging smoke: four workflows in `docs/PILOT_OPERATIONS.md` rehearsed
