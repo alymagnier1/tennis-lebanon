@@ -6,6 +6,8 @@ Product: **RacketBound** — adult racket matchmaking in Lebanon (tennis first, 
 
 Source tokens live in `apps/mobile/src/theme/tennis-tokens.ts`. Prefer those hex values over inventing a new palette.
 
+Brand-wide rules (name, logo, colour, type, voice, web and store) live in [BRAND_GUIDELINES.md](BRAND_GUIDELINES.md). This file goes deeper on the Welcome and auth screens only.
+
 ---
 
 ## 1. Chosen aesthetic
@@ -160,8 +162,8 @@ Do **not** invent a new colour story. Do **not** redesign post-auth onboarding i
 
 ## 9. Quick checklist before accepting a design
 
-- [ ] Welcome is dark court green; forms are light (or clearly quieter)
-- [ ] Lime is accent, not wallpaper
+- [x] Welcome is dark court green; forms are light (or clearly quieter)
+- [x] Lime is accent, not wallpaper
 - [ ] No photography as full background
 - [ ] No blue/red/cream alternate brand system
 - [ ] Motif stays bottom-weighted; headline area clear

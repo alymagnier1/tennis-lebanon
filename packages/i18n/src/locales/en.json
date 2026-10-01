@@ -27,9 +27,8 @@
   "profileScreenPreferredAreasTitle": "Preferred areas",
   "profileScreenZonesError": "Choose at least one area.",
   "settingsScreenPreferences": "Preferences",
-  "settingsScreenLanguage": "Language",
+  "settingsScreenLanguage": "App language",
   "settingsScreenAppearance": "Appearance",
-  "settingsAppearanceSystem": "System",
   "settingsAppearanceLight": "Light",
   "settingsAppearanceDark": "Dark",
   "settingsOnboardingHero": "Onboarding hero",
@@ -493,6 +492,7 @@
     "ratingProgress": {
       "title": "Your rating",
       "progress": "{{done}} of {{threshold}} confirmed results",
+      "short": "{{done}}/{{threshold}}",
       "remaining_one": "{{count}} more match until your rating is visible.",
       "remaining_other": "{{count}} more matches until your rating is visible.",
       "awaitingScore": "A match counts once its score is confirmed. Yours waiting: {{pending}}.",
@@ -541,7 +541,23 @@
     "liquidityDiscover": "Find players",
     "liquidityClubs": "Browse clubs",
     "liquidityClubsHint": "Club directory and WhatsApp booking",
+    "todo": {
+      "more_one": "{{count}} more to do",
+      "more_other": "{{count}} more to do",
+      "moreA11y_one": "{{count}} more to do. Opens your matches.",
+      "moreA11y_other": "{{count}} more to do. Opens your matches."
+    },
+    "board": {
+      "eyebrow": "Your match · {{day}}",
+      "eyebrowNoTime": "Your match"
+    },
+    "nudge": {
+      "availabilityBody": "So players like these can find you",
+      "add": "Add",
+      "choose": "Choose"
+    },
     "free": {
+      "whosFreeTitle": "Who's free",
       "busiestTitle": "Available for you",
       "chipLabel": "Players free {{slot}}",
       "chipSelectedLabel": "Showing players free {{slot}}",
@@ -613,7 +629,10 @@
       "openSystemSettings": "Open device settings",
       "enableError": "We could not turn on notifications on this device.",
       "centerHint": "Everything sent to you is kept here, whether or not push is on.",
-      "openCenter": "Open notifications"
+      "openCenter": "Open notifications",
+      "disable": "Turn off on this phone",
+      "disableError": "We could not turn off notifications on this phone.",
+      "detailPaused": "Push is off on this phone. Everything sent to you still appears in your notification list."
     },
     "kinds": {
       "match_invitation": {
@@ -794,8 +813,13 @@
       "editLink": "Set in Profile → Where I play",
       "firstRunTitle": "Where do you play?",
       "firstRunDescription": "Pick your areas and the clubs you would happily play at. They pre-fill every match you host, so you only choose them once.",
-      "firstRunSkip": "Skip for now"
-    }
+      "firstRunSkip": "Skip for now",
+      "clubsInfoBody": "Your favourite clubs are where you like to play. They are picked for you when you create a match, Home shows you open matches at them first, and other players see them on your profile.",
+      "favoriteCountNone": "No favourite clubs yet",
+      "clubsInfoLabel": "About favourite clubs"
+    },
+    "languagesHint": "Shown on your profile so players know which language to write to you in.",
+    "bioEmptyAction": "Add a few words about how you like to play"
   },
   "discover": {
     "title": "Discover",
@@ -843,6 +867,7 @@
     "relaxFilters": "Show everyone",
     "matchesPlayed_one": "1 match played",
     "matchesPlayed_other": "{{count}} matches played",
+    "availableOn": "Available {{days}}",
     "openPlayerProfile": "View {{name}}'s profile",
     "loading": "Searching for matches and players…",
     "error": "We could not load discovery results.",
@@ -861,6 +886,9 @@
     "spotsRemaining_one": "1 spot left",
     "spotsRemaining_other": "{{count}} spots left",
     "courtSecuredBadge": "Court secured",
+    "rosterMore": "+{{count}}",
+    "rosterA11y_one": "{{name}} and 1 other player",
+    "rosterA11y_other": "{{name}} and {{count}} other players",
     "overlapHint": "Times overlap this week",
     "zoneHint": "Plays in your areas",
     "levelHint": "Similar level",
@@ -1191,7 +1219,7 @@
       "requestSentSuccess": "Request sent. The host will let you know.",
       "requestPendingBanner": "You have asked to join. The host will let you know.",
       "joinerIntentAwaitingPlayers": "You're in. Waiting for more players.",
-      "joinerIntentHostBooking": "You're in. The host is booking the court.",
+      "joinerIntentHostBooking": "You're in. Next, the host requests a court.",
       "joinerIntentVote": "You're in. Vote on a time that works for everyone.",
       "joinerIntentAwaitingClub": "You're in. Waiting for the club to confirm the court.",
       "joinerIntentCourtConfirmed": "You're in. Court confirmed — see you there.",
@@ -1280,7 +1308,7 @@
       "rescheduleTitle": "Change the time",
       "rescheduleDescription": "Agree the new time in chat first. Everyone who joined will be told it moved.",
       "rescheduleConfirm": "Move this match",
-      "rescheduleSuccess": "The match time was updated.",
+      "rescheduleSuccess": "Time changed. Everyone in the match has been notified.",
       "rescheduleError": "We could not change the time.",
       "rescheduleLocked": "A court has already been requested. Withdraw the booking first.",
       "awaitingPlayers": "Waiting for players to join",
@@ -1650,7 +1678,9 @@
       "update": "downloaded update",
       "embedded": "built-in bundle",
       "disabled": "updates off"
-    }
+    },
+    "signedInWithGoogle": "Signed in with Google",
+    "signedInWithEmail": "Signed in with email"
   },
   "account": {
     "unavailableTitle": "Account unavailable",

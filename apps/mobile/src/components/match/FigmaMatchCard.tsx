@@ -5,7 +5,10 @@ import { AppText } from "../AppText";
 import { SemanticBadge } from "../SemanticBadge";
 import { Icon, type IconName } from "../Icon";
 import type { MatchListBadge } from "../../lib/match-status-tone";
-import { matchCardStatusVisual } from "../../lib/match-card-status";
+import {
+  matchCardStatusVisual,
+  opponentAvatarColor,
+} from "../../lib/match-card-status";
 import { initialsFromName } from "../../lib/avatar-url";
 import { useAvatarUrl } from "../../lib/use-avatar-url";
 import { useLayoutDirection } from "../../lib/layout-direction";
@@ -28,6 +31,10 @@ export type MatchCardProps = {
   hostName?: string;
   hostAvatarPath?: string | null;
   hostAvatarColor?: string;
+  /** Everyone already in an open listing, host first. Stacks from two players. */
+  hostRoster?: { name: string; avatarPath?: string | null }[];
+  /** "+2" beside the host's name, and how a screen reader says it. */
+  hostOthers?: { label: string; accessibilityLabel: string };
   formatChip?: string;
   locationChip?: string;
   areaChip?: string;
@@ -76,30 +83,77 @@ function MatchCardAvatar({
   avatarPath,
   backgroundColor,
   textColor = "#FFFFFF",
+  size,
 }: {
   name: string;
   avatarPath?: string | null;
   backgroundColor: string;
   textColor?: string;
+  size?: number;
 }) {
   const avatarQuery = useAvatarUrl(avatarPath ?? null);
   const uri = avatarQuery.data;
+  const sized = size
+    ? { width: size, height: size, borderRadius: Math.round(size * 0.24) }
+    : null;
 
   if (uri) {
     return (
       <Image
         accessibilityLabel={name}
         source={{ uri }}
-        style={styles.avatarImage}
+        style={[styles.avatarImage, sized]}
       />
     );
   }
 
   return (
-    <View style={[styles.avatar, { backgroundColor }]}>
-      <AppText style={[styles.avatarText, { color: textColor }]} maxLines={1}>
+    <View style={[styles.avatar, sized, { backgroundColor }]}>
+      <AppText
+        style={[
+          styles.avatarText,
+          size ? { fontSize: Math.round(size * 0.3) } : null,
+          { color: textColor },
+        ]}
+        maxLines={1}
+      >
         {initialsFromName(name)}
       </AppText>
+    </View>
+  );
+}
+
+const ROSTER_AVATAR_SIZE = 44;
+const ROSTER_AVATAR_OVERLAP = 14;
+
+function RosterAvatarStack({
+  roster,
+  rowDirection,
+}: {
+  roster: NonNullable<MatchCardProps["hostRoster"]>;
+  rowDirection: "row" | "row-reverse";
+}) {
+  const overlapSide = rowDirection === "row" ? "marginLeft" : "marginRight";
+
+  return (
+    <View style={[styles.rosterStack, { flexDirection: rowDirection }]}>
+      {roster.map((player, index) => (
+        <View
+          key={`${player.name}-${index}`}
+          style={[
+            styles.rosterAvatarRing,
+            { zIndex: roster.length - index },
+            index > 0 && { [overlapSide]: -ROSTER_AVATAR_OVERLAP },
+          ]}
+        >
+          <MatchCardAvatar
+            name={player.name}
+            avatarPath={player.avatarPath}
+            backgroundColor={opponentAvatarColor(player.name)}
+            size={ROSTER_AVATAR_SIZE}
+          />
+        </View>
+      ))}
     </View>
   );
 }
@@ -151,6 +205,8 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
   hostName,
   hostAvatarPath,
   hostAvatarColor = "#7C3AED",
+  hostRoster,
+  hostOthers,
   formatChip,
   locationChip,
   areaChip,
@@ -180,7 +236,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
   const accessibilityLabel = buildCardAccessibilityLabel([
     actionLabel ?? statusLabel,
     dateTimeLabel,
-    headline,
+    hostOthers?.accessibilityLabel ?? headline,
     ...(badges?.map((entry) => entry.label) ?? []),
     formatChip,
     locationChip,
@@ -230,6 +286,9 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
     </>
   );
 
+  const hostSubtitle =
+    levelChip || [formatChip, areaChip].filter(Boolean).join(" · ");
+
   const body = (
     <>
       {scoreBanner ? (
@@ -252,84 +311,74 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
             <View
               style={[styles.hostIdentity, { flexDirection: rowDirection }]}
             >
-              <MatchCardAvatar
-                name={hostName!}
-                avatarPath={hostAvatarPath}
-                backgroundColor={hostAvatarColor}
-              />
+              {hostRoster && hostRoster.length > 1 ? (
+                <RosterAvatarStack
+                  roster={hostRoster}
+                  rowDirection={rowDirection}
+                />
+              ) : (
+                <MatchCardAvatar
+                  name={hostName!}
+                  avatarPath={hostAvatarPath}
+                  backgroundColor={hostAvatarColor}
+                />
+              )}
               <View style={styles.hostCopy}>
-                <AppText
-                  style={[
-                    styles.headline,
-                    styles.hostName,
-                    { writingDirection },
-                  ]}
-                  maxLines={1}
-                >
-                  {headline}
-                </AppText>
-              </View>
-              {levelChip || formatChip || areaChip ? (
                 <View
-                  style={[
-                    styles.hostSideMeta,
-                    {
-                      alignItems:
-                        rowDirection === "row" ? "flex-end" : "flex-start",
-                    },
-                  ]}
+                  style={[styles.hostNameRow, { flexDirection: rowDirection }]}
                 >
-                  {levelChip ? (
+                  <View
+                    style={[
+                      styles.hostNameGroup,
+                      { flexDirection: rowDirection },
+                    ]}
+                  >
                     <AppText
                       style={[
-                        styles.hostSideText,
-                        {
-                          writingDirection,
-                          textAlign: rowDirection === "row" ? "right" : "left",
-                        },
+                        styles.headline,
+                        styles.hostName,
+                        { writingDirection },
                       ]}
-                      maxLines={2}
+                      maxLines={1}
                     >
-                      {levelChip}
+                      {headline}
                     </AppText>
-                  ) : (
-                    <>
-                      {formatChip ? (
-                        <AppText
-                          style={[
-                            styles.hostSideText,
-                            {
-                              writingDirection,
-                              textAlign:
-                                rowDirection === "row" ? "right" : "left",
-                            },
-                          ]}
-                          maxLines={1}
-                        >
-                          {formatChip}
-                        </AppText>
-                      ) : null}
-                      {areaChip ? (
-                        <AppText
-                          style={[
-                            styles.hostSideText,
-                            {
-                              writingDirection,
-                              textAlign:
-                                rowDirection === "row" ? "right" : "left",
-                            },
-                          ]}
-                          maxLines={1}
-                        >
-                          {areaChip}
-                        </AppText>
-                      ) : null}
-                    </>
-                  )}
+                    {hostOthers ? (
+                      <AppText
+                        style={[
+                          styles.headline,
+                          styles.hostName,
+                          styles.hostOthers,
+                        ]}
+                        maxLines={1}
+                      >
+                        {hostOthers.label}
+                      </AppText>
+                    ) : null}
+                  </View>
+                  {badges && badges.length > 0 ? (
+                    <View style={styles.hostBadges}>
+                      {badges.map((entry) => (
+                        <SemanticBadge
+                          key={entry.label}
+                          label={entry.label}
+                          tone={entry.tone}
+                        />
+                      ))}
+                    </View>
+                  ) : null}
                 </View>
-              ) : null}
+                {hostSubtitle ? (
+                  <AppText
+                    style={[styles.hostSideText, { writingDirection }]}
+                    maxLines={2}
+                  >
+                    {hostSubtitle}
+                  </AppText>
+                ) : null}
+              </View>
             </View>
-            {metaBelow}
+            {statusChip}
           </View>
         ) : showPlayerRow ? (
           <View style={styles.vsBlock}>
@@ -386,7 +435,13 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
   const hasFooterMeta = Boolean(dateTimeLabel || locationChip);
   const actionBar =
     actionLabel || hasFooterMeta || onDismiss ? (
-      <View style={[styles.actionFooter, { flexDirection: rowDirection }]}>
+      <View
+        style={[
+          styles.actionFooter,
+          showHostOnly && styles.actionFooterHost,
+          { flexDirection: rowDirection },
+        ]}
+      >
         {hasFooterMeta ? (
           <View style={styles.footerMeta}>
             {dateTimeLabel ? (
@@ -426,6 +481,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
             hitSlop={{ top: 6, bottom: 6 }}
             style={({ pressed }) => [
               styles.actionPill,
+              showHostOnly && styles.actionPillHost,
               isDark && styles.actionPillDark,
               pressed && actionHandler && styles.actionPillPressed,
             ]}
@@ -433,6 +489,7 @@ export const FigmaMatchCard = memo(function FigmaMatchCard({
             <AppText
               style={[
                 styles.actionPillText,
+                showHostOnly && styles.actionPillTextHost,
                 { writingDirection },
                 isDark && styles.actionPillTextDark,
               ]}
@@ -577,20 +634,42 @@ const styles = createLiveSheet(() =>
       flex: 1,
       minWidth: 0,
     },
-    hostName: {
-      minWidth: 0,
+    hostNameRow: {
+      alignItems: "flex-start",
+      gap: 8,
     },
-    hostSideMeta: {
+    hostNameGroup: {
+      flex: 1,
+      minWidth: 0,
+      gap: 5,
+    },
+    hostName: {
       flexShrink: 1,
-      maxWidth: "46%",
-      alignSelf: "flex-start",
-      paddingTop: 2,
-      gap: 1,
+      minWidth: 0,
+      fontSize: 18,
+      lineHeight: 23,
+    },
+    hostOthers: {
+      flexShrink: 0,
+    },
+    rosterStack: {
+      flexShrink: 0,
+      alignItems: "center",
+    },
+    rosterAvatarRing: {
+      borderWidth: 2,
+      borderColor: tennisColors.card,
+      borderRadius: Math.round(ROSTER_AVATAR_SIZE * 0.24) + 2,
+    },
+    hostBadges: {
+      flexShrink: 0,
+      maxWidth: "60%",
+      gap: 4,
     },
     hostSideText: {
       fontFamily: tennisFontFamily.body,
-      fontSize: 13,
-      lineHeight: 17,
+      fontSize: 14,
+      lineHeight: 19,
       color: tennisColors.mutedForeground,
     },
     centerColumn: {
@@ -680,6 +759,14 @@ const styles = createLiveSheet(() =>
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: tennisColors.border,
     },
+    actionFooterHost: {
+      marginHorizontal: 16,
+      paddingHorizontal: 0,
+      paddingTop: 14,
+      paddingBottom: 16,
+      backgroundColor: tennisColors.card,
+      borderTopWidth: 1,
+    },
     footerMeta: {
       flex: 1,
       minWidth: 0,
@@ -714,6 +801,14 @@ const styles = createLiveSheet(() =>
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: tennisColors.lime,
+    },
+    actionPillHost: {
+      minHeight: 48,
+      minWidth: 128,
+      paddingHorizontal: 20,
+    },
+    actionPillTextHost: {
+      fontSize: 16,
     },
     actionPillDark: {
       backgroundColor: tennisColors.violet,

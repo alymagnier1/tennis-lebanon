@@ -29,6 +29,7 @@ const ICONS = {
   warning: "alert-circle-outline",
   chat: "chatbubble-ellipses-outline",
   emoji: "happy-outline",
+  send: "send",
   add: "add",
   close: "close",
   filter: "options-outline",

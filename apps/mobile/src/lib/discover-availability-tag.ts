@@ -1,14 +1,23 @@
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
 import type { TFunction } from "i18next";
-import { formatNearTermAvailabilityDayChips } from "./near-term-availability";
-import {
-  sortAvailabilityDayParts,
-  weekdayCompactLabels,
-} from "./public-availability-summary";
+import { nearTermAvailabilityWeekdays } from "./near-term-availability";
+import { sortAvailabilityDayParts } from "./public-availability-summary";
+
+/** Up to this many days read as "Thu · Fri"; more fall back to "M · T · Th". */
+const SHORT_DAY_NAME_LIMIT = 3;
+
+function dayLabels(weekdays: number[], t: TFunction): string[] {
+  const style =
+    weekdays.length <= SHORT_DAY_NAME_LIMIT
+      ? "weekdaysShort"
+      : "weekdaysCompact";
+  return weekdays.map((weekday) => t(`availability.${style}.${weekday}`));
+}
 
 /**
- * Compact weekday chips for Discover player cards — one chip per day
- * (e.g. M, T, Th), never a comma-joined string.
+ * Weekday labels for Discover player cards — one per day, never a
+ * comma-joined string. Spelled out ("Thu") when there are few enough to fit
+ * the card's line, compact ("Th") otherwise.
  */
 export function discoverPlayerAvailabilityTags(
   player: CompatiblePlayerCard,
@@ -19,9 +28,9 @@ export function discoverPlayerAvailabilityTags(
     ? player.near_term_overlap_slots
     : player.near_term_slots;
 
-  const nearTerm = formatNearTermAvailabilityDayChips(slots, t);
-  if (nearTerm.length > 0) {
-    return nearTerm;
+  const nearTermDays = nearTermAvailabilityWeekdays(slots);
+  if (nearTermDays.length > 0) {
+    return dayLabels(nearTermDays, t);
   }
 
   // Discovery matches across the full horizon while these chips only cover the
@@ -34,5 +43,19 @@ export function discoverPlayerAvailabilityTags(
     return [];
   }
 
-  return weekdayCompactLabels(player.availability_weekdays, t);
+  return dayLabels(
+    [...player.availability_weekdays].sort((a, b) => a - b),
+    t,
+  );
+}
+
+/** The card's availability line ("Available Thu · Fri"), or null with no days. */
+export function discoverPlayerAvailabilityLine(
+  player: CompatiblePlayerCard,
+  showOverlap: boolean,
+  t: TFunction,
+): string | null {
+  const days = discoverPlayerAvailabilityTags(player, showOverlap, t);
+  if (days.length === 0) return null;
+  return t("discover.availableOn", { days: days.join(" · ") });
 }

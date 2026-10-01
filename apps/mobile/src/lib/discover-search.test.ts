@@ -63,6 +63,7 @@ function match(
     created_at: "2026-08-01T00:00:00.000Z",
     court_secured: false,
     court_club_name: null,
+    participants: [],
     ...overrides,
   };
 }

@@ -250,8 +250,8 @@ const styles = createLiveSheet(() =>
       gap: 10,
     },
     mark: {
-      width: 34,
-      height: 34,
+      width: 40,
+      height: 40,
     },
     spacer: {
       flexGrow: 1,

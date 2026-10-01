@@ -68,7 +68,7 @@ export function InviteLanding() {
     <main lang={locale} dir={direction} style={pageStyle}>
       <div style={cardStyle}>
         <Image
-          src="/brand/racketbound-lockup.svg"
+          src="/brand/racketbound-lockup.png"
           alt="RacketBound"
           width={184}
           height={46}

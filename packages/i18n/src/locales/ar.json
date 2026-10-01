@@ -27,9 +27,8 @@
   "profileScreenPreferredAreasTitle": "المناطق المفضلة",
   "profileScreenZonesError": "اختر منطقة واحدة على الأقل.",
   "settingsScreenPreferences": "التفضيلات",
-  "settingsScreenLanguage": "اللغة",
+  "settingsScreenLanguage": "لغة التطبيق",
   "settingsScreenAppearance": "المظهر",
-  "settingsAppearanceSystem": "النظام",
   "settingsAppearanceLight": "فاتح",
   "settingsAppearanceDark": "داكن",
   "settingsOnboardingHero": "شاشة الترحيب",
@@ -493,6 +492,7 @@
     "ratingProgress": {
       "title": "تقييمك",
       "progress": "{{done}} من {{threshold}} نتائج مؤكدة",
+      "short": "{{done}}/{{threshold}}",
       "remaining_one": "يتبقى مباراة واحدة حتى يظهر تقييمك.",
       "remaining_other": "يتبقى {{count}} مباريات حتى يظهر تقييمك.",
       "awaitingScore": "تُحتسب المباراة بعد تأكيد نتيجتها. مبارياتك المنتظِرة: {{pending}}.",
@@ -540,7 +540,23 @@
     "liquidityDiscover": "ابحث عن لاعبين",
     "liquidityClubs": "تصفح النوادي",
     "liquidityClubsHint": "دليل النوادي والحجز عبر واتساب",
+    "todo": {
+      "more_one": "مهمة واحدة أخرى",
+      "more_other": "{{count}} مهام أخرى",
+      "moreA11y_one": "مهمة واحدة أخرى. يفتح مبارياتك.",
+      "moreA11y_other": "{{count}} مهام أخرى. يفتح مبارياتك."
+    },
+    "board": {
+      "eyebrow": "مباراتك · {{day}}",
+      "eyebrowNoTime": "مباراتك"
+    },
+    "nudge": {
+      "availabilityBody": "ليجدك لاعبون مثل هؤلاء",
+      "add": "أضف",
+      "choose": "اختر"
+    },
     "free": {
+      "whosFreeTitle": "من المتاح",
       "busiestTitle": "متاح لك",
       "chipLabel": "لاعبون متاحون {{slot}}",
       "chipSelectedLabel": "عرض اللاعبين المتاحين {{slot}}",
@@ -655,8 +671,13 @@
       "editLink": "الإعداد في الملف الشخصي → أين ألعب",
       "firstRunTitle": "أين تلعب؟",
       "firstRunDescription": "اختر مناطقك والنوادي التي يسعدك اللعب فيها. تُملأ تلقائيًا في كل مباراة تنظمها، فتختارها مرة واحدة فقط.",
-      "firstRunSkip": "تخطَّ الآن"
-    }
+      "firstRunSkip": "تخطَّ الآن",
+      "clubsInfoBody": "أنديتك المفضّلة هي الأماكن التي تحب اللعب فيها. تُختار لك تلقائياً عند إنشاء مباراة، وتعرض لك الصفحة الرئيسية المباريات المفتوحة فيها أولاً، ويراها اللاعبون الآخرون في ملفك.",
+      "favoriteCountNone": "لا توجد أندية مفضّلة بعد",
+      "clubsInfoLabel": "عن الأندية المفضّلة"
+    },
+    "languagesHint": "تظهر في ملفك ليعرف اللاعبون بأي لغة يراسلونك.",
+    "bioEmptyAction": "أضف بضع كلمات عن طريقة لعبك"
   },
   "discover": {
     "title": "استكشاف",
@@ -704,6 +725,7 @@
     "relaxFilters": "عرض الجميع",
     "matchesPlayed_one": "مباراة واحدة لُعبت",
     "matchesPlayed_other": "{{count}} مباراة لُعبت",
+    "availableOn": "متاح {{days}}",
     "openPlayerProfile": "عرض ملف {{name}}",
     "loading": "جارٍ البحث عن اللاعبين والمباريات…",
     "error": "تعذّر تحميل نتائج الاستكشاف.",
@@ -718,6 +740,9 @@
     "toggleOverlap": "أدرج لاعبين بلا تداخل",
     "createMatchSoon": "إنشاء مباراة (قريبًا في المرحلة 3)",
     "courtSecuredBadge": "الملعب محجوز",
+    "rosterMore": "+{{count}}",
+    "rosterA11y_one": "{{name}} ولاعب آخر",
+    "rosterA11y_other": "{{name}} و{{count}} لاعبين آخرين",
     "overlapHint": "أوقات متداخلة هذا الأسبوع",
     "zoneHint": "يلعب في مناطقك",
     "levelHint": "مستوى مشابه",
@@ -1043,7 +1068,7 @@
       "requestSentSuccess": "أُرسل الطلب. سيردّ عليك المنظّم.",
       "requestPendingBanner": "طلبت الانضمام. سيردّ عليك المضيف.",
       "joinerIntentAwaitingPlayers": "أنت ضمن المباراة. بانتظار المزيد من اللاعبين.",
-      "joinerIntentHostBooking": "أنت ضمن المباراة. المضيف يحجز الملعب.",
+      "joinerIntentHostBooking": "أنت ضمن المباراة. الخطوة التالية: يطلب المضيف ملعباً.",
       "joinerIntentVote": "أنت ضمن المباراة. صوّت على وقت يناسب الجميع.",
       "joinerIntentAwaitingClub": "أنت ضمن المباراة. بانتظار تأكيد النادي للملعب.",
       "joinerIntentCourtConfirmed": "أنت ضمن المباراة. تم تأكيد الملعب — نراك هناك.",
@@ -1132,7 +1157,7 @@
       "rescheduleTitle": "تغيير الوقت",
       "rescheduleDescription": "اتفقوا على الوقت الجديد في المحادثة أولاً. سيتم إبلاغ كل من انضم بالتغيير.",
       "rescheduleConfirm": "نقل هذه المباراة",
-      "rescheduleSuccess": "تم تحديث وقت المباراة.",
+      "rescheduleSuccess": "تم تغيير الوقت. تم إبلاغ جميع اللاعبين في المباراة.",
       "rescheduleError": "تعذر تغيير الوقت.",
       "rescheduleLocked": "تم طلب ملعب بالفعل. اسحب الحجز أولاً.",
       "awaitingPlayers": "في انتظار انضمام اللاعبين",
@@ -1511,7 +1536,9 @@
       "update": "تحديث مُنزَّل",
       "embedded": "الحزمة المدمجة",
       "disabled": "التحديثات متوقفة"
-    }
+    },
+    "signedInWithGoogle": "تم تسجيل الدخول عبر Google",
+    "signedInWithEmail": "تم تسجيل الدخول عبر البريد الإلكتروني"
   },
   "account": {
     "unavailableTitle": "الحساب غير متاح",
@@ -1571,7 +1598,10 @@
       "openSystemSettings": "فتح إعدادات الجهاز",
       "enableError": "تعذّر تفعيل الإشعارات على هذا الجهاز.",
       "centerHint": "كل ما يُرسل إليك محفوظ هنا، سواء كانت الإشعارات الفورية مفعّلة أم لا.",
-      "openCenter": "فتح الإشعارات"
+      "openCenter": "فتح الإشعارات",
+      "disable": "إيقاف على هذا الهاتف",
+      "disableError": "تعذّر إيقاف الإشعارات على هذا الهاتف.",
+      "detailPaused": "الإشعارات متوقفة على هذا الهاتف. يبقى كل ما يُرسل إليك في قائمة الإشعارات."
     },
     "kinds": {
       "match_invitation": {

@@ -2,13 +2,12 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAvailabilityLiquidity } from "@tennis-lebanon/api";
 import {
-  pickUpcomingBlocks,
+  pickUpcomingDays,
   toLiquidityRows,
 } from "../lib/availability-liquidity";
 import { supabase } from "../lib/supabase";
 
 export const HOME_LIQUIDITY_HORIZON_DAYS = 7;
-export const HOME_LIQUIDITY_OFFER_LIMIT = 3;
 
 export function useHomeLiquidityOffers() {
   const nowIso = useMemo(() => new Date().toISOString(), []);
@@ -25,10 +24,8 @@ export function useHomeLiquidityOffers() {
     [query.data, nowIso],
   );
 
-  const offers = useMemo(
-    () => pickUpcomingBlocks(rows, HOME_LIQUIDITY_OFFER_LIMIT),
-    [rows],
-  );
+  // Home's tabs: today, tomorrow and the day after, each only if someone is free.
+  const days = useMemo(() => pickUpcomingDays(rows), [rows]);
 
-  return { query, rows, offers, nowIso };
+  return { query, rows, days, nowIso };
 }

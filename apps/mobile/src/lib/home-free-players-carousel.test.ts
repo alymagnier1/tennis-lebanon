@@ -21,6 +21,26 @@ describe("homeFreePlayerSnapOffsets", () => {
   it("still includes a View all offset when there are no cards", () => {
     expect(homeFreePlayerSnapOffsets(0)).toEqual([0]);
   });
+
+  it("shifts every offset past the leading slack", () => {
+    expect(homeFreePlayerSnapOffsets(2, { leadingSlackPx: 56 })).toEqual([
+      56, 368, 680,
+    ]);
+  });
+
+  it("pulls View all back to the last resting offset instead of the slack", () => {
+    // 3 cards on a 334px viewport: View all at 56 + 936 = 992 would sit past
+    // the resting end, inside the trailing slack.
+    expect(
+      homeFreePlayerSnapOffsets(3, { leadingSlackPx: 56, maxOffsetX: 826 }),
+    ).toEqual([56, 368, 680, 826]);
+  });
+
+  it("drops offsets that collapse onto the resting end", () => {
+    expect(
+      homeFreePlayerSnapOffsets(3, { leadingSlackPx: 56, maxOffsetX: 600 }),
+    ).toEqual([56, 368, 600]);
+  });
 });
 
 describe("adjacentLiquidityOfferStartsAt", () => {
@@ -111,6 +131,37 @@ describe("homeFreePlayerShouldRewindOffer", () => {
         offsetX: 0,
         velocityX: -0.5,
         wasAtStart: true,
+      }),
+    ).toBe(true);
+  });
+
+  it("rewinds once the leading slack is pulled into view", () => {
+    expect(
+      homeFreePlayerShouldRewindOffer({
+        offsetX: 10,
+        wasAtStart: false,
+        leadingSlackPx: 56,
+      }),
+    ).toBe(true);
+  });
+
+  it("does not rewind while parked on the first card", () => {
+    expect(
+      homeFreePlayerShouldRewindOffer({
+        offsetX: 56,
+        wasAtStart: true,
+        leadingSlackPx: 56,
+      }),
+    ).toBe(false);
+  });
+
+  it("rewinds on a backward fling from the first card", () => {
+    expect(
+      homeFreePlayerShouldRewindOffer({
+        offsetX: 50,
+        velocityX: -0.5,
+        wasAtStart: true,
+        leadingSlackPx: 56,
       }),
     ).toBe(true);
   });

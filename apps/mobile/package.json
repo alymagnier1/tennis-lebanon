@@ -31,6 +31,7 @@
     "expo-notifications": "~56.0.25",
     "expo-router": "~56.2.20",
     "expo-secure-store": "~56.0.4",
+    "expo-splash-screen": "~56.0.15",
     "expo-status-bar": "~56.0.4",
     "expo-updates": "~56.0.27",
     "i18next": "^26.3.6",
@@ -57,8 +58,8 @@
   },
   "scripts": {
     "dev": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "lint": "eslint .",

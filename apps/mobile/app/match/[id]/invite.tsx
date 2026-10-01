@@ -36,14 +36,14 @@ import {
   FigmaSubpageHero,
 } from "../../../src/components/onboarding-ui";
 import { clubNamesFromList } from "../../../src/lib/match-clubs";
-import { formatMatchesPlayedLabel } from "../../../src/lib/matches-played-label";
 import { publicPlayerLevelChip } from "../../../src/lib/player-level-label";
-import { discoverPlayerAvailabilityTags } from "../../../src/lib/discover-availability-tag";
+import { discoverPlayerAvailabilityLine } from "../../../src/lib/discover-availability-tag";
 import {
   goBackOrReplace,
   MATCHES_TAB_ROUTE,
 } from "../../../src/lib/navigation";
 import { matchHubRoute } from "../../../src/lib/routes";
+import { pinnedBottomPadding } from "../../../src/lib/stack-screen-padding";
 import {
   buildMatchInviteUrl,
   matchInviteErrorKey,
@@ -256,11 +256,7 @@ export default function MatchInvitePlayersScreen() {
         name={player.display_name}
         locationLabel={zoneLabelFromList(player.zones, locale)}
         levelBadgeLabel={publicPlayerLevelChip(player, t)}
-        matchesPlayedLabel={formatMatchesPlayedLabel(
-          player.completed_match_count,
-          t,
-        )}
-        availabilityTags={discoverPlayerAvailabilityTags(player, false, t)}
+        availabilityLabel={discoverPlayerAvailabilityLine(player, false, t)}
         clubsTag={
           clubNamesFromList(player.favorite_clubs).slice(0, 2).join(" · ") ||
           null
@@ -523,7 +519,10 @@ export default function MatchInvitePlayersScreen() {
       )}
 
       <View
-        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}
+        style={[
+          styles.footer,
+          { paddingBottom: pinnedBottomPadding(insets.bottom, 12) },
+        ]}
       >
         <AppText style={[styles.footerHint, { writingDirection }]}>
           {isDraft

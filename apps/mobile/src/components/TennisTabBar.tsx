@@ -18,12 +18,13 @@ import {
   matchTabBadgeCounts,
 } from "../lib/match-list-card";
 import {
-  TAB_BAR_BOTTOM_PADDING_MIN,
+  TAB_BAR_BOTTOM_GAP,
   TAB_BAR_ICON_WELL_HEIGHT,
   TAB_BAR_LABEL_GAP,
   TAB_BAR_LABEL_HEIGHT,
   TAB_BAR_TOP_PADDING,
 } from "../lib/tab-bar-metrics";
+import { pinnedBottomPadding } from "../lib/stack-screen-padding";
 import { supabase } from "../lib/supabase";
 import { tennisFontFamily } from "../hooks/useTennisFonts";
 import {
@@ -191,7 +192,9 @@ export function TennisTabBar({
     <View
       style={[
         styles.bar,
-        { paddingBottom: Math.max(insets.bottom, TAB_BAR_BOTTOM_PADDING_MIN) },
+        {
+          paddingBottom: pinnedBottomPadding(insets.bottom, TAB_BAR_BOTTOM_GAP),
+        },
       ]}
     >
       <View style={styles.barRow}>

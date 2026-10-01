@@ -201,15 +201,23 @@ export default function WhereIPlayScreen() {
 
           <CreateMatchPanel
             title={t("profile.whereIPlay.clubsSection")}
-            description={t("profile.whereIPlay.clubsHint")}
+            onInfo={() =>
+              notify(
+                t("profile.whereIPlay.clubsSection"),
+                t("profile.whereIPlay.clubsInfoBody"),
+              )
+            }
+            infoAccessibilityLabel={t("profile.whereIPlay.clubsInfoLabel")}
           >
-            {favoriteCount > 0 ? (
-              <AppText style={styles.summary}>
-                {t("profile.whereIPlay.favoriteCount", {
-                  count: favoriteCount,
-                })}
-              </AppText>
-            ) : null}
+            {/* Always one line, so adding the first favourite changes the
+                text instead of pushing the club cards down (2026-09-28). */}
+            <AppText style={styles.summary}>
+              {favoriteCount > 0
+                ? t("profile.whereIPlay.favoriteCount", {
+                    count: favoriteCount,
+                  })
+                : t("profile.whereIPlay.favoriteCountNone")}
+            </AppText>
 
             {selectedZoneIds.length === 0 ? (
               <AppText style={styles.muted}>

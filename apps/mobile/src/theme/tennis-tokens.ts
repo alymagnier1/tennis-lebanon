@@ -11,7 +11,11 @@ export type TennisColorName = keyof typeof tennisColorsLight;
 
 export type TennisColorTokens = { readonly [K in TennisColorName]: string };
 
-export type AppearancePreference = "system" | "light" | "dark";
+/**
+ * Light or Dark only. "System" (follow the phone) was removed at the
+ * founder's request (2026-09-28); a stored "system" reads as Light.
+ */
+export type AppearancePreference = "light" | "dark";
 
 export type ResolvedAppearance = "light" | "dark";
 
@@ -25,6 +29,8 @@ export const tennisColorsLight = {
   card: "#FFFFFF",
   secondary: "#E3EDE6",
   muted: "#ECF0EE",
+  /** Action strip under a card's body (Discover player cards). */
+  cardFooter: "#F3F6F4",
   // Darkened from #627068, which was 4.34:1 on `secondary`.
   mutedForeground: "#5C6A62",
   border: "#E9EBE8",
@@ -72,6 +78,7 @@ export const tennisColorsDark = {
   card: "#1C1E19",
   secondary: "#252722",
   muted: "#161814",
+  cardFooter: "#161814",
   mutedForeground: "#A8AAA4",
   border: "#2E322C",
   accent: "#E07A3D",
@@ -144,6 +151,77 @@ export const tennisBrandDark: TennisBrandTokens = {
   whatsappFill: "#14302C",
 };
 
+/**
+ * Match chat, styled after WhatsApp: a warm wallpaper, pale-green bubbles for
+ * the viewer, plain bubbles for everyone else. Every text colour here clears
+ * 4.5:1 on the surface it sits on (checked 2026-09-26; lowest is a sender name
+ * at 5.28:1 on a light bubble). The bubbles themselves are separated from the
+ * wallpaper by hue and shadow, as in WhatsApp, not by contrast.
+ */
+export type TennisChatTokens = {
+  wallpaper: string;
+  ownBubble: string;
+  otherBubble: string;
+  bubbleText: string;
+  ownMeta: string;
+  otherMeta: string;
+  dayPill: string;
+  dayPillText: string;
+  composerField: string;
+  bubbleShadow: string;
+  /** Tint and strength of the tennis doodle pattern over the wallpaper. */
+  doodleInk: string;
+  doodleOpacity: number;
+  /** Sender names in a group, one per participant; stable per author. */
+  senderNames: readonly string[];
+};
+
+export const tennisChatLight: TennisChatTokens = {
+  wallpaper: "#EFEAE2",
+  ownBubble: "#D9FDD3",
+  otherBubble: "#FFFFFF",
+  bubbleText: "#111B21",
+  ownMeta: "#4F6358",
+  otherMeta: "#5E6B72",
+  dayPill: "#FFFFFF",
+  dayPillText: "#54656F",
+  composerField: "#FFFFFF",
+  bubbleShadow: "#0B141A",
+  doodleInk: "#6E7560",
+  doodleOpacity: 0.12,
+  senderNames: [
+    "#B4235A",
+    "#0B6BCB",
+    "#9A4A00",
+    "#6D28D9",
+    "#0F766E",
+    "#A1467E",
+  ],
+};
+
+export const tennisChatDark: TennisChatTokens = {
+  wallpaper: "#0B0E08",
+  ownBubble: "#1D3B2A",
+  otherBubble: "#1F221C",
+  bubbleText: "#E9EDEF",
+  ownMeta: "#A9BCB0",
+  otherMeta: "#A3A9A0",
+  dayPill: "#1F221C",
+  dayPillText: "#B3B8AF",
+  composerField: "#1F221C",
+  bubbleShadow: "#000000",
+  doodleInk: "#FFFFFF",
+  doodleOpacity: 0.05,
+  senderNames: [
+    "#F9A8D4",
+    "#93C5FD",
+    "#FCD34D",
+    "#C4B5FD",
+    "#5EEAD4",
+    "#FDBA74",
+  ],
+};
+
 /** Ordinal skill-band ramp — separate from match status semantics */
 export const tennisSkillBandsLight: Record<
   string,
@@ -202,6 +280,7 @@ type ActiveTennisTheme = {
   scheme: ResolvedAppearance;
   colors: TennisColorTokens;
   brand: TennisBrandTokens;
+  chat: TennisChatTokens;
   skillBands: Record<string, { fill: string; text: string }>;
   semantic: Record<SemanticTone, SemanticToneTokens>;
   dangerText: string;
@@ -213,6 +292,7 @@ function themeFor(scheme: ResolvedAppearance): ActiveTennisTheme {
       scheme,
       colors: tennisColorsDark,
       brand: tennisBrandDark,
+      chat: tennisChatDark,
       skillBands: tennisSkillBandsDark,
       semantic: tennisSemanticDark,
       dangerText: DANGER_TEXT_DARK,
@@ -222,6 +302,7 @@ function themeFor(scheme: ResolvedAppearance): ActiveTennisTheme {
     scheme,
     colors: tennisColorsLight,
     brand: tennisBrandLight,
+    chat: tennisChatLight,
     skillBands: tennisSkillBandsLight,
     semantic: tennisSemanticLight,
     dangerText: DANGER_TEXT_LIGHT,
@@ -244,12 +325,8 @@ export function setActiveTennisScheme(scheme: ResolvedAppearance): void {
 
 export function resolveAppearance(
   preference: AppearancePreference,
-  systemScheme: ResolvedAppearance | null | undefined,
 ): ResolvedAppearance {
-  if (preference === "light" || preference === "dark") {
-    return preference;
-  }
-  return systemScheme === "dark" ? "dark" : "light";
+  return preference;
 }
 
 function live<T extends object>(read: () => T): T {
@@ -277,6 +354,8 @@ function live<T extends object>(read: () => T): T {
 export const tennisColors: TennisColorTokens = live(() => activeTheme.colors);
 
 export const tennisBrand: TennisBrandTokens = live(() => activeTheme.brand);
+
+export const tennisChat: TennisChatTokens = live(() => activeTheme.chat);
 
 export const tennisSkillBands: Record<string, { fill: string; text: string }> =
   live(() => activeTheme.skillBands);

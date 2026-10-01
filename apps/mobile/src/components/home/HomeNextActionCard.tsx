@@ -11,7 +11,6 @@ import {
 import { homeNextActionRoute } from "../../lib/routes";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import {
-  tennisColors,
   tennisSemantic,
   type SemanticTone,
   tennisRadii,
@@ -20,7 +19,7 @@ import { AppText } from "../AppText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
-const ACTION_ICONS: Record<HomeNextAction["kind"], IconName> = {
+export const ACTION_ICONS: Record<HomeNextAction["kind"], IconName> = {
   invite: "notifications",
   vote: "matches",
   booking: "place",
@@ -48,59 +47,51 @@ export function HomeNextActionCard({
   const tone: SemanticTone = homeNextActionTone(action.kind);
   const palette = tennisSemantic[tone];
   const actionLabel = t(homeNextActionLabelKey(action.kind));
+  const title = t(action.titleKey, action.params);
+  const body = t(action.bodyKey, action.params);
 
+  // No trailing button: on ~360pt phones or large text the title needs that
+  // width, so the whole card is the control.
   return (
-    <View
-      style={[
+    <Pressable
+      accessibilityRole="button"
+      // A label replaces the children's text for screen readers, so the body
+      // has to be in it or it is never announced.
+      accessibilityLabel={`${title}. ${body}`}
+      accessibilityHint={actionLabel}
+      onPress={() => {
+        if (onPress) {
+          onPress(action);
+          return;
+        }
+        router.push(homeNextActionRoute(action.kind, action.matchId));
+      }}
+      style={({ pressed }) => [
         styles.card,
         { backgroundColor: palette.fill, borderColor: palette.border },
         { flexDirection: rowDirection },
+        pressed && styles.cardPressed,
       ]}
     >
-      <View style={[styles.leading, { flexDirection: rowDirection }]}>
-        <View style={[styles.iconWrap, { backgroundColor: palette.border }]}>
-          <Icon
-            name={ACTION_ICONS[action.kind]}
-            size={16}
-            color={palette.text}
-          />
-        </View>
-        <View style={styles.textBlock}>
-          <AppText
-            style={[styles.title, { color: palette.text, writingDirection }]}
-            maxLines={1}
-          >
-            {t(action.titleKey, action.params)}
-          </AppText>
-          <AppText
-            style={[styles.body, { color: palette.text, writingDirection }]}
-            maxLines={2}
-          >
-            {t(action.bodyKey, action.params)}
-          </AppText>
-        </View>
+      <View style={[styles.iconWrap, { backgroundColor: palette.border }]}>
+        <Icon name={ACTION_ICONS[action.kind]} size={16} color={palette.text} />
       </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={actionLabel}
-        onPress={() => {
-          if (onPress) {
-            onPress(action);
-            return;
-          }
-          router.push(homeNextActionRoute(action.kind, action.matchId));
-        }}
-        style={({ pressed }) => [
-          styles.button,
-          { backgroundColor: tennisColors.violet },
-          pressed && styles.buttonPressed,
-        ]}
-      >
-        <AppText style={styles.buttonLabel} maxLines={1}>
-          {actionLabel}
+      <View style={styles.textBlock}>
+        <AppText
+          style={[styles.title, { color: palette.text, writingDirection }]}
+          maxLines={2}
+        >
+          {title}
         </AppText>
-      </Pressable>
-    </View>
+        <AppText
+          style={[styles.body, { color: palette.text, writingDirection }]}
+          maxLines={2}
+        >
+          {body}
+        </AppText>
+      </View>
+      <Icon name="chevron" size={18} color={palette.text} />
+    </Pressable>
   );
 }
 
@@ -108,18 +99,16 @@ const styles = createLiveSheet(() =>
   StyleSheet.create({
     card: {
       width: "100%",
+      minHeight: minTouchTargetPx,
       borderWidth: 1.5,
       borderRadius: tennisRadii.md,
-      paddingVertical: 10,
+      paddingVertical: 12,
       paddingHorizontal: 12,
       alignItems: "center",
       gap: 10,
     },
-    leading: {
-      flex: 1,
-      minWidth: 0,
-      alignItems: "center",
-      gap: 10,
+    cardPressed: {
+      opacity: 0.85,
     },
     iconWrap: {
       width: 32,
@@ -144,23 +133,6 @@ const styles = createLiveSheet(() =>
       fontSize: 12,
       lineHeight: 16,
       opacity: 0.9,
-    },
-    button: {
-      minHeight: minTouchTargetPx,
-      minWidth: 72,
-      paddingHorizontal: 14,
-      borderRadius: tennisRadii.md,
-      alignItems: "center",
-      justifyContent: "center",
-      flexShrink: 0,
-    },
-    buttonPressed: {
-      opacity: 0.9,
-    },
-    buttonLabel: {
-      fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 13,
-      color: tennisColors.onViolet,
     },
   }),
 );

@@ -7,6 +7,7 @@ import { canShowJoinAction } from "@tennis-lebanon/domain";
 import { AppText } from "../AppText";
 import { ListSkeleton, MatchCard } from "../AppUi";
 import { ScreenError } from "../FormUi";
+import { OpenMatchListCard } from "../match/OpenMatchListCard";
 import {
   compactJoinedLabel,
   clubNamesFromList,
@@ -15,6 +16,7 @@ import {
 import { opponentAvatarColor } from "../../lib/match-card-status";
 import { matchHubLevelSummary } from "../../lib/match-hub-summaries";
 import { openMatchCardDateTimeLabel } from "../../lib/open-match-card-time";
+import { openMatchRosterProps } from "../../lib/open-match-roster";
 import { openMatchScarcityBadges } from "../../lib/open-match-scarcity";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { discoverOpenMatchesRoute, matchHubRoute } from "../../lib/routes";
@@ -55,10 +57,10 @@ function OpenMatchHomeCard({
       actionLabel={joinLabel}
       actionTone="actionable"
       dateTimeLabel={dateTimeLabel}
-      headline={match.creator_display_name}
       hostName={match.creator_display_name}
       hostAvatarPath={match.creator_avatar_path}
       hostAvatarColor={opponentAvatarColor(match.creator_display_name)}
+      {...openMatchRosterProps(match, t)}
       formatChip={t(`formats.${match.format}`)}
       locationChip={preferredClubLabel}
       areaChip={areaLabel}
@@ -76,7 +78,13 @@ function OpenMatchHomeCard({
   );
 }
 
-export function HomeOpenMatches() {
+export function HomeOpenMatches({
+  layout = "classic",
+}: {
+  /** "v5": plain "Open matches" title and the shared open-match list card. */
+  layout?: "classic" | "v5";
+} = {}) {
+  const isV5 = layout === "v5";
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const { rowDirection, writingDirection } = useLayoutDirection();
@@ -122,7 +130,9 @@ export function HomeOpenMatches() {
           style={[tennisTextStyles.sectionTitle, { writingDirection, flex: 1 }]}
           maxLines={1}
         >
-          {t("home.openMatches.titleCount", { count: matches.length })}
+          {isV5
+            ? t("home.openMatches.title")
+            : t("home.openMatches.titleCount", { count: matches.length })}
         </AppText>
         <Pressable
           accessibilityRole="button"
@@ -140,13 +150,22 @@ export function HomeOpenMatches() {
         </Pressable>
       </View>
       <View style={styles.stack}>
-        {matches.map((openMatch) => (
-          <OpenMatchHomeCard
-            key={openMatch.match_id}
-            match={openMatch}
-            locale={locale}
-          />
-        ))}
+        {matches.map((openMatch) =>
+          isV5 ? (
+            <OpenMatchListCard
+              key={openMatch.match_id}
+              match={openMatch}
+              locale={locale}
+              onPress={() => router.push(matchHubRoute(openMatch.match_id))}
+            />
+          ) : (
+            <OpenMatchHomeCard
+              key={openMatch.match_id}
+              match={openMatch}
+              locale={locale}
+            />
+          ),
+        )}
       </View>
     </View>
   );

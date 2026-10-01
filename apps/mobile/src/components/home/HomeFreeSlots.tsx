@@ -1,47 +1,90 @@
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import { useTranslation } from "react-i18next";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppText } from "../AppText";
 import { ScreenError } from "../FormUi";
-import { HomeFreePlayersCarousel } from "./HomeFreePlayersCarousel";
+import { SlideIn } from "../SlideIn";
+import { minTouchTargetPx } from "@tennis-lebanon/ui";
+import {
+  HomeFreePlayersCarousel,
+  HomeFreePlayersSkeleton,
+  type HomeFreePlayersLayout,
+} from "./HomeFreePlayersCarousel";
 import { trackLiquiditySignalViewed } from "../../lib/analytics";
-import { peakLiquidity } from "../../lib/availability-liquidity";
-import { type PingSlot } from "../../lib/availability-ping";
+import {
+  peakLiquidity,
+  type LiquidityDay,
+} from "../../lib/availability-liquidity";
 import { adjacentLiquidityOfferStartsAt } from "../../lib/home-free-players-carousel";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { weekdayIndexFromBeirutDateKey } from "../../lib/near-term-availability";
 import { useHomeLiquidityOffers } from "../../hooks/useHomeLiquidityOffers";
+import {
+  homeFreePlayersQueryOptions,
+  ownPreferredZoneIdsQueryOptions,
+} from "../../lib/home-free-players-query";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 import { tennisTextStyles } from "../../theme/tennis-text-styles";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 
 /**
- * The next few hours anyone is free, and the people behind the one you pick.
+ * Who is free today, tomorrow and the day after, and the people behind the
+ * day you pick.
  *
- * Two revisions worth remembering. The blocks used to be full-width rows that
+ * Revisions worth remembering. The blocks used to be full-width rows that
  * opened `/free-block`, a screen running the same query against the same RPC as
  * the Discover tab — a second discovery surface reachable only from here. They
- * are now a chip row that selects, and the players sit directly beneath.
+ * became a tab row that selects, with the players directly beneath.
  *
- * And the counts are gone from the chips. "5 free" was a proxy for the people,
+ * The counts are gone from the tabs. "5 free" was a proxy for the people,
  * printed because there was no room to show them; now that the carousel shows
- * actual faces, the number competes with the thing it stood in for. Whoever
- * wants the full list taps through to Discover, where the count is the length
- * of the list.
+ * actual faces, the number competes with the thing it stood in for.
+ *
+ * The tabs are days, not day parts (2026-09-27): "Tomorrow · Afternoon" fitted
+ * two tabs on a phone and made the player choose twice.
  *
  * An empty week is not rendered here. First-run Home already has one play CTA;
  * stacking "add when you play" on top of it taught emptiness twice.
  */
-export function HomeFreeSlots() {
-  const { t } = useTranslation();
-  const { rowDirection, writingDirection } = useLayoutDirection();
+export function HomeFreeSlots({
+  layout = "classic",
+}: {
+  /** "v5": "Who's free" with a segmented day control and the tall player tiles. */
+  layout?: HomeFreePlayersLayout;
+} = {}) {
+  const isV5 = layout === "v5";
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage ?? i18n.language;
+  const { rowDirection, writingDirection, isRtl } = useLayoutDirection();
   const [selectedStartsAt, setSelectedStartsAt] = useState<string | null>(null);
+  // Which side the next set of cards enters from; 0 until the player moves.
+  const [enterFrom, setEnterFrom] = useState<-1 | 0 | 1>(0);
+  // The tab highlight moves at once; the cards change only once the new
+  // day's players are loaded, so the section never collapses in between.
+  const [shownStartsAt, setShownStartsAt] = useState<string | null>(null);
+  const latestRequestRef = useRef<string | null>(null);
+  const queryClient = useQueryClient();
+  const ownZonesQuery = useQuery(ownPreferredZoneIdsQueryOptions);
   const {
     query: liquidityQuery,
     rows: liquidityRows,
-    offers,
+    days,
   } = useHomeLiquidityOffers();
+
+  // Every day's players up front: a tab whose players were fetched on switch
+  // showed an empty gap, then popped in.
+  const ownZoneIds = ownZonesQuery.data;
+  const zonesReady = ownZonesQuery.isSuccess;
+  useEffect(() => {
+    if (!zonesReady) return;
+    for (const day of days) {
+      void queryClient.prefetchQuery(
+        homeFreePlayersQueryOptions(day, ownZoneIds),
+      );
+    }
+  }, [days, ownZoneIds, queryClient, zonesReady]);
 
   // Fired once per mount, and deliberately fired when empty too: a tap-through
   // rate is meaningless without knowing how often a player was shown any demand.
@@ -57,33 +100,49 @@ export function HomeFreeSlots() {
     });
   }, [liquidityQuery.data, liquidityRows]);
 
-  function slotLabel(slot: PingSlot): string {
-    const dayLabel =
-      slot.dayOffset === 0
-        ? t("discover.today")
-        : slot.dayOffset === 1
-          ? t("discover.tomorrow")
-          : t(
-              `availability.weekdaysShort.${weekdayIndexFromBeirutDateKey(slot.dateKey)}`,
-            );
-
-    // Composed here rather than through a key, matching
-    // formatNearTermAvailabilitySlots: both halves are already translated, so a
-    // key would be pure interpolation and identical across locales, which the
-    // parity guard rejects.
-    return `${dayLabel} · ${t(`availability.blocks.${slot.part}`)}`;
+  function dayLabel(day: LiquidityDay): string {
+    if (day.dayOffset === 0) return t("discover.today");
+    if (day.dayOffset === 1) return t("discover.tomorrow");
+    const weekday = t(
+      `availability.weekdays.${weekdayIndexFromBeirutDateKey(day.dateKey)}`,
+    );
+    // French weekdays are lower case mid-sentence; a tab starts one.
+    return weekday.charAt(0).toLocaleUpperCase(locale) + weekday.slice(1);
   }
 
+  const title = (
+    <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
+      {t(isV5 ? "home.free.whosFreeTitle" : "home.free.busiestTitle")}
+    </AppText>
+  );
+
+  // Hold the section's space while the days load, so Home does not render
+  // without it and then push everything below down.
   if (liquidityQuery.isPending) {
-    return null;
+    return (
+      <View style={styles.root} accessibilityElementsHidden>
+        {title}
+        <View
+          style={[
+            isV5 ? [styles.segment, styles.segmentSkeleton] : styles.tabRow,
+            { flexDirection: rowDirection },
+          ]}
+        >
+          {(isV5 ? [] : [0, 1, 2]).map((index) => (
+            <AppText key={index} style={[styles.tabLabel, styles.tabSkeleton]}>
+              {" "}
+            </AppText>
+          ))}
+        </View>
+        <HomeFreePlayersSkeleton layout={layout} />
+      </View>
+    );
   }
 
   if (liquidityQuery.isError) {
     return (
       <View style={styles.root}>
-        <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
-          {t("home.free.busiestTitle")}
-        </AppText>
+        {title}
         <ScreenError
           message={t("home.loadError")}
           retryLabel={t("common.retry")}
@@ -93,48 +152,67 @@ export function HomeFreeSlots() {
     );
   }
 
-  if (offers.length === 0) {
+  if (days.length === 0) {
     return null;
   }
 
   // Derived rather than stored, so a refreshed list that no longer contains the
-  // chosen block falls back to the soonest instead of selecting nothing.
+  // chosen day falls back to the soonest instead of selecting nothing.
   const selected =
-    offers.find((offer) => offer.startsAt === selectedStartsAt) ?? offers[0]!;
+    days.find((day) => day.startsAt === selectedStartsAt) ?? days[0]!;
+  const shown = days.find((day) => day.startsAt === shownStartsAt) ?? selected;
 
-  function selectAdjacentOffer(direction: "next" | "prev") {
+  function showWhenLoaded(startsAt: string) {
+    const day = days.find((candidate) => candidate.startsAt === startsAt);
+    if (!day) return;
+    latestRequestRef.current = startsAt;
+    const reveal = () => {
+      // A later switch wins over this one.
+      if (latestRequestRef.current === startsAt) setShownStartsAt(startsAt);
+    };
+    if (!zonesReady) {
+      reveal();
+      return;
+    }
+    void queryClient
+      .ensureQueryData(homeFreePlayersQueryOptions(day, ownZoneIds))
+      .then(reveal, reveal);
+  }
+
+  function selectDay(startsAt: string, from: -1 | 1) {
+    setEnterFrom(from);
+    setSelectedStartsAt(startsAt);
+    showWhenLoaded(startsAt);
+  }
+
+  function selectAdjacentDay(direction: "next" | "prev") {
     const nextStartsAt = adjacentLiquidityOfferStartsAt(
-      offers,
+      days,
       selected.startsAt,
       direction,
     );
-    if (nextStartsAt) {
-      setSelectedStartsAt(nextStartsAt);
-    }
+    if (nextStartsAt) selectDay(nextStartsAt, direction === "next" ? 1 : -1);
   }
+
+  const selectedIndex = days.indexOf(selected);
 
   return (
     <View style={styles.root}>
-      <AppText style={[tennisTextStyles.sectionTitle, { writingDirection }]}>
-        {t("home.free.busiestTitle")}
-      </AppText>
+      {title}
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.chipScroll}
-        contentContainerStyle={[
-          styles.chipRow,
+      <View
+        style={[
+          isV5 ? styles.segment : styles.tabRow,
           { flexDirection: rowDirection },
         ]}
       >
-        {offers.map((offer) => {
-          const label = slotLabel(offer);
-          const isSelected = offer.startsAt === selected.startsAt;
+        {days.map((day, index) => {
+          const label = dayLabel(day);
+          const isSelected = day === selected;
 
           return (
             <Pressable
-              key={offer.startsAt}
+              key={day.startsAt}
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
               // react-native-web does not emit aria-selected for role="button",
@@ -144,18 +222,25 @@ export function HomeFreeSlots() {
                   ? t("home.free.chipSelectedLabel", { slot: label })
                   : t("home.free.chipLabel", { slot: label })
               }
-              onPress={() => setSelectedStartsAt(offer.startsAt)}
-              hitSlop={{ top: 8, bottom: 8 }}
+              onPress={() => {
+                if (!isSelected) {
+                  selectDay(day.startsAt, index > selectedIndex ? 1 : -1);
+                }
+              }}
+              hitSlop={isV5 ? undefined : { top: 8, bottom: 8 }}
               style={({ pressed }) => [
-                styles.chip,
-                isSelected && styles.chipSelected,
-                pressed && styles.chipPressed,
+                isV5 ? styles.segmentButton : styles.tab,
+                isV5 && isSelected && styles.segmentButtonSelected,
+                pressed && styles.tabPressed,
               ]}
             >
               <AppText
                 style={[
-                  styles.chipLabel,
-                  isSelected && styles.chipLabelSelected,
+                  styles.tabLabel,
+                  isSelected &&
+                    (isV5
+                      ? styles.segmentLabelSelected
+                      : styles.tabLabelSelected),
                 ]}
                 maxLines={1}
               >
@@ -164,18 +249,20 @@ export function HomeFreeSlots() {
             </Pressable>
           );
         })}
-      </ScrollView>
+      </View>
 
-      <HomeFreePlayersCarousel
-        key={selected.startsAt}
-        block={{
-          startsAt: selected.startsAt,
-          endsAt: selected.endsAt,
-          label: slotLabel(selected),
-        }}
-        onScrollPastEnd={() => selectAdjacentOffer("next")}
-        onScrollPastStart={() => selectAdjacentOffer("prev")}
-      />
+      <SlideIn key={shown.startsAt} from={enterFrom} isRtl={isRtl}>
+        <HomeFreePlayersCarousel
+          block={{
+            startsAt: shown.startsAt,
+            endsAt: shown.endsAt,
+            label: dayLabel(shown),
+          }}
+          layout={layout}
+          onScrollPastEnd={() => selectAdjacentDay("next")}
+          onScrollPastStart={() => selectAdjacentDay("prev")}
+        />
+      </SlideIn>
     </View>
   );
 }
@@ -185,38 +272,62 @@ const styles = createLiveSheet(() =>
     root: {
       gap: tennisSpacing.sectionTitleContent,
     },
-    // Text tabs rather than filled pills. Three of them sit directly above the
-    // cards they switch, so a filled chip would carry more weight than the
-    // players it is selecting between; the accent alone marks the active one.
-    // flexGrow: 0 stops a horizontal ScrollView on web from taking a full
-    // line-box of leftover height between the title and the cards.
-    chipScroll: {
-      flexGrow: 0,
-      flexShrink: 0,
-    },
-    chipRow: {
-      gap: 16,
+    // Text tabs rather than filled pills. They sit directly above the cards
+    // they switch, so a filled chip would carry more weight than the players
+    // it is selecting between; the accent alone marks the active one.
+    tabRow: {
+      gap: 20,
       alignItems: "center",
     },
-    chip: {
+    tab: {
       justifyContent: "center",
       paddingHorizontal: 2,
-      paddingVertical: 0,
-      backgroundColor: "transparent",
     },
-    chipSelected: {
-      backgroundColor: "transparent",
-    },
-    chipPressed: {
+    tabPressed: {
       opacity: 0.7,
     },
-    chipLabel: {
+    tabLabel: {
       fontFamily: tennisFontFamily.bodyMedium,
-      fontSize: 13,
+      fontSize: 14,
+      lineHeight: 20,
       color: tennisColors.mutedForeground,
     },
-    chipLabelSelected: {
+    tabLabelSelected: {
       color: tennisColors.violetText,
+      fontFamily: tennisFontFamily.bodySemi,
+    },
+    tabSkeleton: {
+      width: 64,
+      borderRadius: 4,
+      backgroundColor: tennisColors.muted,
+    },
+    segment: {
+      padding: 4,
+      gap: 4,
+      borderRadius: 14,
+      backgroundColor: tennisColors.muted,
+    },
+    segmentSkeleton: {
+      height: 52,
+    },
+    segmentButton: {
+      flex: 1,
+      minHeight: minTouchTargetPx,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 8,
+      borderRadius: 10,
+    },
+    segmentButtonSelected: {
+      backgroundColor: tennisColors.card,
+      shadowColor: tennisColors.primary,
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 1,
+    },
+    segmentLabelSelected: {
+      color: tennisColors.primaryDark,
       fontFamily: tennisFontFamily.bodySemi,
     },
   }),

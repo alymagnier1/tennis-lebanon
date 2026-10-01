@@ -27,9 +27,8 @@
   "profileScreenPreferredAreasTitle": "Zones préférées",
   "profileScreenZonesError": "Choisissez au moins une zone.",
   "settingsScreenPreferences": "Préférences",
-  "settingsScreenLanguage": "Langue",
+  "settingsScreenLanguage": "Langue de l'application",
   "settingsScreenAppearance": "Apparence",
-  "settingsAppearanceSystem": "Système",
   "settingsAppearanceLight": "Clair",
   "settingsAppearanceDark": "Sombre",
   "settingsOnboardingHero": "Visuel d'accueil",
@@ -493,6 +492,7 @@
     "ratingProgress": {
       "title": "Votre note",
       "progress": "{{done}} sur {{threshold}} résultats confirmés",
+      "short": "{{done}}/{{threshold}}",
       "remaining_one": "Encore {{count}} match avant que votre note s'affiche.",
       "remaining_other": "Encore {{count}} matchs avant que votre note s'affiche.",
       "awaitingScore": "Un match compte dès que son score est confirmé. Les vôtres en attente : {{pending}}.",
@@ -540,7 +540,23 @@
     "liquidityDiscover": "Trouver des joueurs",
     "liquidityClubs": "Parcourir les clubs",
     "liquidityClubsHint": "Annuaire des clubs et réservation WhatsApp",
+    "todo": {
+      "more_one": "Encore {{count}} chose à faire",
+      "more_other": "Encore {{count}} choses à faire",
+      "moreA11y_one": "Encore {{count}} chose à faire. Ouvre vos matchs.",
+      "moreA11y_other": "Encore {{count}} choses à faire. Ouvre vos matchs."
+    },
+    "board": {
+      "eyebrow": "Votre match · {{day}}",
+      "eyebrowNoTime": "Votre match"
+    },
+    "nudge": {
+      "availabilityBody": "Pour que des joueurs comme eux vous trouvent",
+      "add": "Ajouter",
+      "choose": "Choisir"
+    },
     "free": {
+      "whosFreeTitle": "Qui est libre",
       "busiestTitle": "Disponible pour vous",
       "chipLabel": "Joueurs libres {{slot}}",
       "chipSelectedLabel": "Affichage des joueurs libres {{slot}}",
@@ -655,8 +671,13 @@
       "editLink": "Définir dans Profil → Où je joue",
       "firstRunTitle": "Où jouez-vous ?",
       "firstRunDescription": "Choisissez vos zones et les clubs où vous joueriez volontiers. Ils préremplissent chaque match que vous organisez, vous ne les choisissez qu'une fois.",
-      "firstRunSkip": "Passer pour l'instant"
-    }
+      "firstRunSkip": "Passer pour l'instant",
+      "clubsInfoBody": "Vos clubs favoris sont ceux où vous aimez jouer. Ils sont présélectionnés quand vous créez un match, l'accueil vous montre d'abord les matchs ouverts dans ces clubs, et les autres joueurs les voient sur votre profil.",
+      "favoriteCountNone": "Aucun club favori pour le moment",
+      "clubsInfoLabel": "À propos des clubs favoris"
+    },
+    "languagesHint": "Affiché sur votre profil pour que les joueurs sachent dans quelle langue vous écrire.",
+    "bioEmptyAction": "Ajoutez quelques mots sur votre façon de jouer"
   },
   "discover": {
     "title": "Découvrir",
@@ -704,6 +725,7 @@
     "relaxFilters": "Tout afficher",
     "matchesPlayed_one": "{{count}} match joué",
     "matchesPlayed_other": "{{count}} matchs joués",
+    "availableOn": "Disponible {{days}}",
     "openPlayerProfile": "Voir le profil de {{name}}",
     "loading": "Recherche de joueurs et de matchs…",
     "error": "Impossible de charger les résultats.",
@@ -718,6 +740,9 @@
     "toggleOverlap": "Inclure sans chevauchement",
     "createMatchSoon": "Créer un match (bientôt à l'étape 3)",
     "courtSecuredBadge": "Court réservé",
+    "rosterMore": "+{{count}}",
+    "rosterA11y_one": "{{name}} et 1 autre joueur",
+    "rosterA11y_other": "{{name}} et {{count}} autres joueurs",
     "overlapHint": "Créneaux qui se chevauchent cette semaine",
     "zoneHint": "Joue dans vos zones",
     "levelHint": "Niveau similaire",
@@ -1043,7 +1068,7 @@
       "requestSentSuccess": "Demande envoyée. L’hôte vous répondra.",
       "requestPendingBanner": "Vous avez demandé à rejoindre. L'organisateur vous répondra.",
       "joinerIntentAwaitingPlayers": "Vous êtes dans le match. En attente d'autres joueurs.",
-      "joinerIntentHostBooking": "Vous êtes dans le match. L'hôte réserve le court.",
+      "joinerIntentHostBooking": "Vous êtes dans le match. L'hôte va maintenant demander un court.",
       "joinerIntentVote": "Vous êtes dans le match. Votez pour un horaire qui convient à tous.",
       "joinerIntentAwaitingClub": "Vous êtes dans le match. En attente de la confirmation du club.",
       "joinerIntentCourtConfirmed": "Vous êtes dans le match. Court confirmé — à bientôt.",
@@ -1132,7 +1157,7 @@
       "rescheduleTitle": "Changer l’horaire",
       "rescheduleDescription": "Mettez-vous d’accord dans la discussion d’abord. Les joueurs inscrits seront prévenus du changement.",
       "rescheduleConfirm": "Déplacer ce match",
-      "rescheduleSuccess": "L’horaire du match a été mis à jour.",
+      "rescheduleSuccess": "Horaire modifié. Tous les joueurs du match ont été prévenus.",
       "rescheduleError": "Nous n’avons pas pu changer l’horaire.",
       "rescheduleLocked": "Un court a déjà été demandé. Annulez la réservation d’abord.",
       "awaitingPlayers": "En attente de joueurs",
@@ -1511,7 +1536,9 @@
       "update": "mise à jour téléchargée",
       "embedded": "bundle intégré",
       "disabled": "mises à jour désactivées"
-    }
+    },
+    "signedInWithGoogle": "Connecté avec Google",
+    "signedInWithEmail": "Connecté par e-mail"
   },
   "account": {
     "unavailableTitle": "Compte indisponible",
@@ -1571,7 +1598,10 @@
       "openSystemSettings": "Ouvrir les réglages de l'appareil",
       "enableError": "Nous n'avons pas pu activer les notifications sur cet appareil.",
       "centerHint": "Tout ce qui vous est envoyé est conservé ici, que les notifications push soient activées ou non.",
-      "openCenter": "Ouvrir les notifications"
+      "openCenter": "Ouvrir les notifications",
+      "disable": "Désactiver sur ce téléphone",
+      "disableError": "Nous n'avons pas pu désactiver les notifications sur ce téléphone.",
+      "detailPaused": "Les notifications push sont désactivées sur ce téléphone. Tout ce qui vous est envoyé reste dans votre liste de notifications."
     },
     "kinds": {
       "match_invitation": {

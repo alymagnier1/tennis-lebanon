@@ -24,7 +24,8 @@ export function ProfileMenuRow({
   value?: string | null;
   /** Alias for value — prefer for descriptive hints. */
   subtitle?: string | null;
-  onPress: () => void;
+  /** Without it the row is information only: no button role, no chevron. */
+  onPress?: () => void;
   showDivider?: boolean;
   showChevron?: boolean;
   tone?: "default" | "danger";
@@ -35,21 +36,8 @@ export function ProfileMenuRow({
   const detail = subtitle ?? value ?? null;
   const a11yLabel = detail ? `${label}. ${detail}` : label;
 
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={a11yLabel}
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.row,
-        { flexDirection: rowDirection },
-        pressed && !disabled && styles.rowPressed,
-        disabled && styles.rowDisabled,
-        showDivider && styles.rowDivider,
-      ]}
-    >
+  const content = (
+    <>
       <View
         style={[styles.iconCircle, isDanger ? styles.iconCircleDanger : null]}
       >
@@ -71,13 +59,48 @@ export function ProfileMenuRow({
           </AppText>
         ) : null}
       </View>
-      {showChevron ? (
+      {showChevron && onPress ? (
         <Icon
           name="chevron"
           size={14}
           color={isDanger ? tennisColors.danger : tennisColors.mutedForeground}
         />
       ) : null}
+    </>
+  );
+
+  if (!onPress) {
+    return (
+      <View
+        accessible
+        accessibilityLabel={a11yLabel}
+        style={[
+          styles.row,
+          { flexDirection: rowDirection },
+          showDivider && styles.rowDivider,
+        ]}
+      >
+        {content}
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={a11yLabel}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.row,
+        { flexDirection: rowDirection },
+        pressed && !disabled && styles.rowPressed,
+        disabled && styles.rowDisabled,
+        showDivider && styles.rowDivider,
+      ]}
+    >
+      {content}
     </Pressable>
   );
 }
