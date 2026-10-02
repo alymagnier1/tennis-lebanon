@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-10-02 — The Beirut signup route uses its own Supabase secret key on Vercel
+
+- Status: accepted
+- Context: `/api/prelaunch-signup` writes to `prelaunch_signups`, which the public cannot read or write, so it needs a privileged key on the server. On 2026-09-25 the unused `SUPABASE_SERVICE_ROLE_KEY` was deleted from Vercel after the legacy service key leaked, and the legacy keys were later deactivated. The route reads the server-only `SUPABASE_SERVICE_ROLE_KEY` and returns 503 without it, so the live page refused every signup.
+- Decision: a new Supabase secret key, `dashboard_waitlist` (id `9e3a3652-6ff9-465b-af7e-ffe6af3e7e56`), is stored on Vercel production only, as a _sensitive_ variable under the name the code already reads. It is not the `default` secret key the notification sender uses. Preview deployments have no key, so their signup route returns 503.
+- Alternatives considered: reusing the `default` secret key (rejected — revoking it after a leak would also stop notifications); a Supabase Edge Function holding the key (rejected for now — a second deploy path for one insert); renaming the variable to `SUPABASE_SECRET_KEY` (a code change for a name only; worth doing with the next change to the route).
+- Consequences: the Vercel project holds a key that bypasses RLS again. It is used only by the signup route, never reaches the page, and can be revoked on its own in Supabase → API Keys without touching notifications or the app. The key is also the salt for the hashed IP addresses, so rotating it resets the hourly rate-limit buckets. Rotating it means creating a new key, updating Vercel, redeploying, then deleting the old key.
+- Owner: Founder
+
 ## 2026-10-02 — Skill levels are one word each: Beginner, Improving, Intermediate, Advanced, Expert
 
 - Status: accepted
