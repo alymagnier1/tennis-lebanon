@@ -5,7 +5,7 @@
   "description": "Tennis Lebanon MVP monorepo (mobile app, club dashboard, shared packages).",
   "packageManager": "pnpm@10.34.5",
   "engines": {
-    "node": ">=20.19.0 <21.0.0"
+    "node": ">=24.11.0 <25.0.0"
   },
   "scripts": {
     "dev": "dotenv -e .env -- turbo run dev",
