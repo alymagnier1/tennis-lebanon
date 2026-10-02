@@ -97,7 +97,7 @@ describe("discoverPlayerAvailabilityTags", () => {
     ]);
   });
 
-  it("builds one availability line for the card", () => {
+  it("shows the days alone and keeps the full sentence for screen readers", () => {
     const tLine = ((key: string, options?: { days?: string }) =>
       key === "discover.availableOn"
         ? `Available ${options?.days}`
@@ -113,7 +113,10 @@ describe("discoverPlayerAvailabilityTags", () => {
         true,
         tLine,
       ),
-    ).toBe("Available Thu · Fri");
+    ).toEqual({
+      text: "Thu · Fri",
+      accessibilityLabel: "Available Thu · Fri",
+    });
     expect(
       discoverPlayerAvailabilityLine(
         player({

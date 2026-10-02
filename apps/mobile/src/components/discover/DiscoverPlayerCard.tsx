@@ -14,16 +14,23 @@ import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 function FooterMetaItem({
   icon,
   label,
+  accessibilityLabel,
   writingDirection,
   rowDirection,
 }: {
   icon: IconName;
   label: string;
+  accessibilityLabel: string;
   writingDirection: "ltr" | "rtl";
   rowDirection: "row" | "row-reverse";
 }) {
   return (
-    <View style={[styles.footerMetaItem, { flexDirection: rowDirection }]}>
+    <View
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={accessibilityLabel}
+      style={[styles.footerMetaItem, { flexDirection: rowDirection }]}
+    >
       <Icon name={icon} size={16} color={tennisColors.mutedForeground} />
       <AppText
         style={[styles.footerMetaText, { writingDirection }]}
@@ -40,7 +47,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   name,
   locationLabel,
   levelBadgeLabel,
-  availabilityLabel,
+  availability,
   clubsTag,
   profileAccessibilityLabel,
   primaryLabel,
@@ -53,8 +60,8 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   name: string;
   locationLabel: string;
   levelBadgeLabel: string;
-  /** One line, e.g. "Available Thu · Fri". */
-  availabilityLabel?: string | null;
+  /** Days beside the clock ("Thu · Fri"); the label adds "Available". */
+  availability?: { text: string; accessibilityLabel: string } | null;
   clubsTag?: string | null;
   profileAccessibilityLabel: string;
   primaryLabel: string;
@@ -87,9 +94,23 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
               borderRadius={14}
             />
             <View style={styles.identity}>
-              <AppText style={[styles.name, { writingDirection }]} maxLines={1}>
-                {name}
-              </AppText>
+              <View style={[styles.nameRow, { flexDirection: rowDirection }]}>
+                <AppText
+                  style={[styles.name, { writingDirection }]}
+                  maxLines={1}
+                >
+                  {name}
+                </AppText>
+                <View
+                  style={[styles.levelBadge, { backgroundColor: bandFill }]}
+                >
+                  <AppText
+                    style={[styles.levelBadgeText, { color: bandColor }]}
+                  >
+                    {levelBadgeLabel}
+                  </AppText>
+                </View>
+              </View>
               {locationLabel ? (
                 <AppText
                   style={[styles.area, { writingDirection }]}
@@ -107,21 +128,17 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
                 </AppText>
               ) : null}
             </View>
-            <View style={[styles.levelBadge, { backgroundColor: bandFill }]}>
-              <AppText style={[styles.levelBadgeText, { color: bandColor }]}>
-                {levelBadgeLabel}
-              </AppText>
-            </View>
           </View>
         </View>
       </Pressable>
 
       <View style={[styles.actionFooter, { flexDirection: rowDirection }]}>
         <View style={styles.footerMeta}>
-          {availabilityLabel ? (
+          {availability ? (
             <FooterMetaItem
               icon="clock"
-              label={availabilityLabel}
+              label={availability.text}
+              accessibilityLabel={availability.accessibilityLabel}
               writingDirection={writingDirection}
               rowDirection={rowDirection}
             />
@@ -207,7 +224,13 @@ const styles = createLiveSheet(() =>
       minWidth: 0,
       gap: 1,
     },
+    nameRow: {
+      alignItems: "center",
+      gap: 8,
+    },
     name: {
+      flex: 1,
+      minWidth: 0,
       fontFamily: tennisFontFamily.heading,
       fontSize: 18,
       lineHeight: 23,
@@ -222,10 +245,9 @@ const styles = createLiveSheet(() =>
       color: tennisColors.mutedForeground,
     },
     levelBadge: {
-      alignSelf: "flex-start",
       borderRadius: tennisRadii.pill,
       paddingHorizontal: 12,
-      paddingVertical: 5,
+      paddingVertical: 3,
       flexShrink: 0,
     },
     levelBadgeText: {

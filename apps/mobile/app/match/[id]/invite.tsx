@@ -256,7 +256,7 @@ export default function MatchInvitePlayersScreen() {
         name={player.display_name}
         locationLabel={zoneLabelFromList(player.zones, locale)}
         levelBadgeLabel={publicPlayerLevelChip(player, t)}
-        availabilityLabel={discoverPlayerAvailabilityLine(player, false, t)}
+        availability={discoverPlayerAvailabilityLine(player, false, t)}
         clubsTag={
           clubNamesFromList(player.favorite_clubs).slice(0, 2).join(" · ") ||
           null

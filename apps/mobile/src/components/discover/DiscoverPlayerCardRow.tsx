@@ -46,7 +46,7 @@ export function DiscoverPlayerCardRow({
       name={player.display_name}
       locationLabel={zoneLabelFromList(player.zones, locale)}
       levelBadgeLabel={publicPlayerLevelChip(player, t)}
-      availabilityLabel={discoverPlayerAvailabilityLine(
+      availability={discoverPlayerAvailabilityLine(
         player,
         showOverlapAvailability,
         t,
