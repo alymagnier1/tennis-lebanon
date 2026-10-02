@@ -51,9 +51,7 @@ export function DiscoverPlayerCardRow({
         showOverlapAvailability,
         t,
       )}
-      clubsTag={
-        clubNamesFromList(player.favorite_clubs).slice(0, 2).join(" · ") || null
-      }
+      clubs={clubNamesFromList(player.favorite_clubs)}
       profileAccessibilityLabel={t("discover.openPlayerProfile", {
         name: player.display_name,
       })}

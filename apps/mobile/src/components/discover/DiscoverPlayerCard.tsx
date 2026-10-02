@@ -1,13 +1,15 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
 import { Avatar } from "../AppUi";
 import { AppText } from "../AppText";
+import { FirstFitText } from "../FirstFitText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { shortPlayerName } from "../../lib/home-v5";
 import { useLayoutDirection } from "../../lib/layout-direction";
+import { clubLineCandidates } from "../../lib/match-clubs";
 import { skillBandColor, skillBandFill } from "../../lib/skill-band-theme";
 import { useTennisTheme } from "../../providers/ThemeProvider";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
@@ -43,56 +45,13 @@ function FooterMetaItem({
   );
 }
 
-/**
- * The full name when it fits on the line, otherwise "Alexandra J.". The full
- * name is measured off-screen at its natural width; the visible line still
- * ellipsizes if even the short form is too long.
- */
-function FittingName({
-  name,
-  writingDirection,
-}: {
-  name: string;
-  writingDirection: "ltr" | "rtl";
-}) {
-  const [slotWidth, setSlotWidth] = useState(0);
-  const [fullWidth, setFullWidth] = useState(0);
-  const tooLong = slotWidth > 0 && fullWidth > slotWidth + 0.5;
-  const shown = tooLong ? shortPlayerName(name) : name;
-
-  return (
-    <View
-      style={styles.nameSlot}
-      onLayout={(event) => setSlotWidth(event.nativeEvent.layout.width)}
-    >
-      <AppText style={[styles.name, { writingDirection }]} maxLines={1}>
-        {shown}
-      </AppText>
-      <View
-        style={styles.nameMeasure}
-        pointerEvents="none"
-        aria-hidden
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-      >
-        <AppText
-          style={styles.name}
-          onLayout={(event) => setFullWidth(event.nativeEvent.layout.width)}
-        >
-          {name}
-        </AppText>
-      </View>
-    </View>
-  );
-}
-
 export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   player,
   name,
   locationLabel,
   levelBadgeLabel,
   availability,
-  clubsTag,
+  clubs = [],
   profileAccessibilityLabel,
   primaryLabel,
   primaryLoading = false,
@@ -106,7 +65,8 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   levelBadgeLabel: string;
   /** Days beside the clock ("Thu · Fri"); the label adds "Available". */
   availability?: { text: string; accessibilityLabel: string } | null;
-  clubsTag?: string | null;
+  /** Preferred club names; as many as fit are shown, then "+N". */
+  clubs?: string[];
   profileAccessibilityLabel: string;
   primaryLabel: string;
   primaryLoading?: boolean;
@@ -120,6 +80,8 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   const isDark = scheme === "dark";
   const bandColor = skillBandColor(player.skill_band);
   const bandFill = skillBandFill(player.skill_band);
+  const nameCandidates = [...new Set([name, shortPlayerName(name)])];
+  const clubCandidates = clubLineCandidates(clubs);
 
   return (
     <View style={styles.card}>
@@ -139,7 +101,11 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
             />
             <View style={styles.identity}>
               <View style={[styles.nameRow, { flexDirection: rowDirection }]}>
-                <FittingName name={name} writingDirection={writingDirection} />
+                <FirstFitText
+                  candidates={nameCandidates}
+                  style={[styles.name, { writingDirection }]}
+                  containerStyle={styles.nameSlot}
+                />
                 <View
                   style={[styles.levelBadge, { backgroundColor: bandFill }]}
                 >
@@ -158,13 +124,13 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
                   {locationLabel}
                 </AppText>
               ) : null}
-              {clubsTag ? (
-                <AppText
+              {clubCandidates.length > 0 ? (
+                <FirstFitText
+                  candidates={clubCandidates}
+                  suffix={clubs.length > 1 ? `+${clubs.length - 1}` : undefined}
                   style={[styles.area, { writingDirection }]}
-                  maxLines={1}
-                >
-                  {clubsTag}
-                </AppText>
+                  rowDirection={rowDirection}
+                />
               ) : null}
             </View>
           </View>
@@ -269,16 +235,6 @@ const styles = createLiveSheet(() =>
     },
     nameSlot: {
       flex: 1,
-      minWidth: 0,
-      overflow: "hidden",
-    },
-    nameMeasure: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: 10000,
-      flexDirection: "row",
-      opacity: 0,
     },
     name: {
       fontFamily: tennisFontFamily.heading,
