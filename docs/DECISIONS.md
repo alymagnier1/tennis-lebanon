@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-10-02 — The repo runs on Node 24
+
+- Status: accepted
+- Context: Vercel retired Node 20 and failed every dashboard deployment until the project setting moved to 24.x (2026-10-01, PR #32's preview). The repo still pinned Node 20: `.nvmrc` `20.19.5` (which CI reads through `node-version-file`), root `engines` `>=20.19.0 <21.0.0`, and `@types/node` `^20` in the dashboard and config packages. Node 20 is past end of life, and local, CI and Vercel were now on different majors.
+- Decision: `.nvmrc` pins `24.21.0` (the current Node 24 LTS, "Krypton"); root `engines` is `>=24.11.0 <25.0.0` (24.11 is the first 24.x LTS); `@types/node` is `^24` in `apps/dashboard` and `packages/config`. The lockfile change is only `@types/node` 20.19.43 → 24.19.0.
+- Alternatives considered: Node 22 (still supported, but Vercel's message names 24, and moving twice costs more than moving once); pinning `24` instead of an exact patch (CI would drift with every release, which is what the exact pin was there to stop); also pinning `node` in `eas.json` build profiles (EAS Build has never been pinned; changing the native build image is a separate, untested change for the next native build).
+- Consequences: local development needs Node 24 (`nvm install 24.21.0` then `nvm use 24.21.0`); pnpm only warns on an engines mismatch, so Node 20 still installs but is no longer the tested version. Verified on 24.14.0: typecheck, lint, all tests, `format:check`, `db:validate`, a production `next build` of the dashboard, and an Android `expo export`. CI runs on 24.21.0 from `.nvmrc`. EAS cloud builds still use the image's default Node until `eas.json` pins one.
+- Owner: Founder
+
 ## 2026-09-28 — The new icon and splash ship in app version 0.2.0
 
 - Status: accepted
