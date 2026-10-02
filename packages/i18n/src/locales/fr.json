@@ -450,17 +450,17 @@
   },
   "skillBands": {
     "beginner": "Débutant",
-    "improving": "Intermédiaire inférieur",
+    "improving": "En progrès",
     "intermediate": "Intermédiaire",
-    "advanced": "Intermédiaire supérieur",
-    "competitive": "Avancé"
+    "advanced": "Avancé",
+    "competitive": "Expert"
   },
   "skillBandsShort": {
     "beginner": "Débutant",
-    "improving": "Inter. inf.",
+    "improving": "En progrès",
     "intermediate": "Intermédiaire",
-    "advanced": "Inter. sup.",
-    "competitive": "Avancé"
+    "advanced": "Avancé",
+    "competitive": "Expert"
   },
   "rating": {
     "provisionalBadge": "Provisoire",

@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-10-02 — Skill levels are one word each: Beginner, Improving, Intermediate, Advanced, Expert
+
+- Status: accepted
+- Context: the five bands were shown as Beginner, Lower intermediate, Intermediate, Upper intermediate and Advanced. The two-word labels were cut off on player tiles, cards and filter chips, needed abbreviations ("Lower int.", "Upper int.", and `متوسط−` / `متوسط+` in Arabic), and were easy to confuse with plain Intermediate. The founder also asked whether numbered levels ("Level 1") would be clearer.
+- Decision: display labels only, in `skillBands` and `skillBandsShort` for all three locales. English: Beginner, Improving, Intermediate, Advanced, Expert. French: Débutant, En progrès, Intermédiaire, Avancé, Expert. Arabic: مبتدئ، في تحسّن، متوسط، متقدم، خبير. The full and short labels are now the same. The `skill_band` enum (`beginner`, `improving`, `intermediate`, `advanced`, `competitive`), the onboarding descriptions, matching and stored data are unchanged.
+- Alternatives considered: numbered levels (players who know NTRP would read "Level 3" as NTRP 3.0, which is lower than this band, and a level number would sit beside the Elo-style rating once a player is established); "Competitive" for the top band, matching the enum (rejected because play style already uses Social / Competitive / Either, so a player's tags would read "Competitive · Competitive"); keeping Advanced at the top with "Experienced" as level 4 (nobody's label would move, but Experienced below Advanced is not an obvious order).
+- Consequences: the word "Advanced" moves down one band. Players at the top band (`competitive`) now see Expert instead of Advanced, and `advanced` players see Advanced instead of Upper intermediate; nobody's level changes. Testers at those two bands should get a one-line note. The French and Arabic labels need a native speaker's check. Text only, so it ships as an `eas update` with no new build.
+- Owner: Founder
+
 ## 2026-10-02 — The repo runs on Node 24
 
 - Status: accepted
