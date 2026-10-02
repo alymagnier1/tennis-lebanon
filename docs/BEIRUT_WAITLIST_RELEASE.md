@@ -47,6 +47,16 @@ pnpm --filter dashboard build
 
 The integration test is opt-in (`route.integration.ts`) and expects seeded local Supabase and Docker. It refuses a non-loopback Supabase URL. The concurrency script also targets the named local Docker container only.
 
+## Deployed — 2 October 2026
+
+Steps 1–4 and the signup part of step 6 below are done on staging and `racketbound.com`:
+
+- `supabase db push` applied only 114 and 115; `beirut_prune_signup_attempts` is active hourly on staging.
+- `SUPABASE_SERVICE_ROLE_KEY` on Vercel production holds the dedicated secret key `dashboard_waitlist` (DECISIONS 2026-10-02), as a sensitive variable; `NEXT_PUBLIC_SUPPORT_EMAIL` was already set. Production was redeployed.
+- A controlled HTTPS signup, its exact repeat, and the same contact with a new idempotency key all returned `{ok:true}` and left one row. No auth user or profile was created. The test row (`Test`, `waitlist-test@example.com`) is kept for the founder to see in `/admin/prelaunch`.
+
+Still open: viewing the queue as an operator, a submission from a physical phone, the failure path (details kept after an error) on the live site, and the notice review in step 3.
+
 ## Deployment remains
 
 1. Confirm the intended hosted project and inspect `supabase migration list` and `supabase db push --dry-run`. Staging was at 001→110, 113 on 2 October 2026, so the dry run should list only 114 and 115.
