@@ -491,6 +491,13 @@
     "advanced": "متقدم",
     "competitive": "خبير"
   },
+  "skillBandsRange": {
+    "beginner": "مبتدئ",
+    "improving": "في تحسّن",
+    "intermediate": "متوسط",
+    "advanced": "متقدم",
+    "competitive": "خبير"
+  },
   "rating": {
     "provisionalBadge": "مبدئي",
     "ownBand": "فئة المهارة",

@@ -49,13 +49,21 @@ export function discoverPlayerAvailabilityTags(
   );
 }
 
-/** The card's availability line ("Available Thu · Fri"), or null with no days. */
+/**
+ * The card's availability line: the days alone beside the clock icon
+ * ("Thu · Fri"), and the full sentence for screen readers
+ * ("Available Thu · Fri"). Null with no days.
+ */
 export function discoverPlayerAvailabilityLine(
   player: CompatiblePlayerCard,
   showOverlap: boolean,
   t: TFunction,
-): string | null {
+): { text: string; accessibilityLabel: string } | null {
   const days = discoverPlayerAvailabilityTags(player, showOverlap, t);
   if (days.length === 0) return null;
-  return t("discover.availableOn", { days: days.join(" · ") });
+  const text = days.join(" · ");
+  return {
+    text,
+    accessibilityLabel: t("discover.availableOn", { days: text }),
+  };
 }

@@ -35,6 +35,19 @@ export function compactJoinedLabel(
   return `${shown} +${clean.length - maxVisible}`;
 }
 
+/**
+ * Every way to show a club list on one line, longest first:
+ * "A · B · C", "A · B +1", "A +2". The card shows the first that fits.
+ */
+export function clubLineCandidates(names: string[]): string[] {
+  const clean = names.map((name) => name.trim()).filter(Boolean);
+  const candidates: string[] = [];
+  for (let visible = clean.length; visible >= 1; visible -= 1) {
+    candidates.push(compactJoinedLabel(clean, visible)!);
+  }
+  return candidates;
+}
+
 /** Smaller type when several names must share one footer line. */
 export function joinedListTypeSize(count: number): {
   fontSize: number;

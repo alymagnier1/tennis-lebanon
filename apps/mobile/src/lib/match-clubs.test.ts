@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  clubLineCandidates,
   compactJoinedLabel,
   joinedListTypeSize,
   matchCardAreaLabel,
@@ -7,6 +8,23 @@ import {
   preferredClubLocationLabel,
   zonesWithoutPreferredClub,
 } from "./match-clubs";
+
+describe("clubLineCandidates", () => {
+  it("goes from every club down to one club and a count", () => {
+    expect(
+      clubLineCandidates(["The Private Club", "Renaissance", "Al Riyadi"]),
+    ).toEqual([
+      "The Private Club · Renaissance · Al Riyadi",
+      "The Private Club · Renaissance +1",
+      "The Private Club +2",
+    ]);
+  });
+
+  it("has one candidate for one club and none for no clubs", () => {
+    expect(clubLineCandidates([" JDK "])).toEqual(["JDK"]);
+    expect(clubLineCandidates(["", "  "])).toEqual([]);
+  });
+});
 
 describe("preferredClubLocationLabel", () => {
   it("prefers the public address", () => {

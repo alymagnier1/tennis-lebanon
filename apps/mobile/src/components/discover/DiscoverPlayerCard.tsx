@@ -4,9 +4,12 @@ import { createLiveSheet } from "../../theme/create-live-sheet";
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
 import { Avatar } from "../AppUi";
 import { AppText } from "../AppText";
+import { FirstFitText } from "../FirstFitText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
+import { shortPlayerName } from "../../lib/home-v5";
 import { useLayoutDirection } from "../../lib/layout-direction";
+import { clubLineCandidates } from "../../lib/match-clubs";
 import { skillBandColor, skillBandFill } from "../../lib/skill-band-theme";
 import { useTennisTheme } from "../../providers/ThemeProvider";
 import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
@@ -14,16 +17,23 @@ import { tennisColors, tennisRadii } from "../../theme/tennis-tokens";
 function FooterMetaItem({
   icon,
   label,
+  accessibilityLabel,
   writingDirection,
   rowDirection,
 }: {
   icon: IconName;
   label: string;
+  accessibilityLabel: string;
   writingDirection: "ltr" | "rtl";
   rowDirection: "row" | "row-reverse";
 }) {
   return (
-    <View style={[styles.footerMetaItem, { flexDirection: rowDirection }]}>
+    <View
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={accessibilityLabel}
+      style={[styles.footerMetaItem, { flexDirection: rowDirection }]}
+    >
       <Icon name={icon} size={16} color={tennisColors.mutedForeground} />
       <AppText
         style={[styles.footerMetaText, { writingDirection }]}
@@ -40,8 +50,8 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   name,
   locationLabel,
   levelBadgeLabel,
-  availabilityLabel,
-  clubsTag,
+  availability,
+  clubs = [],
   profileAccessibilityLabel,
   primaryLabel,
   primaryLoading = false,
@@ -53,9 +63,10 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   name: string;
   locationLabel: string;
   levelBadgeLabel: string;
-  /** One line, e.g. "Available Thu · Fri". */
-  availabilityLabel?: string | null;
-  clubsTag?: string | null;
+  /** Days beside the clock ("Thu · Fri"); the label adds "Available". */
+  availability?: { text: string; accessibilityLabel: string } | null;
+  /** Preferred club names; as many as fit are shown, then "+N". */
+  clubs?: string[];
   profileAccessibilityLabel: string;
   primaryLabel: string;
   primaryLoading?: boolean;
@@ -69,6 +80,8 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
   const isDark = scheme === "dark";
   const bandColor = skillBandColor(player.skill_band);
   const bandFill = skillBandFill(player.skill_band);
+  const nameCandidates = [...new Set([name, shortPlayerName(name)])];
+  const clubCandidates = clubLineCandidates(clubs);
 
   return (
     <View style={styles.card}>
@@ -87,9 +100,22 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
               borderRadius={14}
             />
             <View style={styles.identity}>
-              <AppText style={[styles.name, { writingDirection }]} maxLines={1}>
-                {name}
-              </AppText>
+              <View style={[styles.nameRow, { flexDirection: rowDirection }]}>
+                <FirstFitText
+                  candidates={nameCandidates}
+                  style={[styles.name, { writingDirection }]}
+                  containerStyle={styles.nameSlot}
+                />
+                <View
+                  style={[styles.levelBadge, { backgroundColor: bandFill }]}
+                >
+                  <AppText
+                    style={[styles.levelBadgeText, { color: bandColor }]}
+                  >
+                    {levelBadgeLabel}
+                  </AppText>
+                </View>
+              </View>
               {locationLabel ? (
                 <AppText
                   style={[styles.area, { writingDirection }]}
@@ -98,19 +124,14 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
                   {locationLabel}
                 </AppText>
               ) : null}
-              {clubsTag ? (
-                <AppText
+              {clubCandidates.length > 0 ? (
+                <FirstFitText
+                  candidates={clubCandidates}
+                  suffix={clubs.length > 1 ? `+${clubs.length - 1}` : undefined}
                   style={[styles.area, { writingDirection }]}
-                  maxLines={1}
-                >
-                  {clubsTag}
-                </AppText>
+                  rowDirection={rowDirection}
+                />
               ) : null}
-            </View>
-            <View style={[styles.levelBadge, { backgroundColor: bandFill }]}>
-              <AppText style={[styles.levelBadgeText, { color: bandColor }]}>
-                {levelBadgeLabel}
-              </AppText>
             </View>
           </View>
         </View>
@@ -118,10 +139,11 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
 
       <View style={[styles.actionFooter, { flexDirection: rowDirection }]}>
         <View style={styles.footerMeta}>
-          {availabilityLabel ? (
+          {availability ? (
             <FooterMetaItem
               icon="clock"
-              label={availabilityLabel}
+              label={availability.text}
+              accessibilityLabel={availability.accessibilityLabel}
               writingDirection={writingDirection}
               rowDirection={rowDirection}
             />
@@ -207,6 +229,13 @@ const styles = createLiveSheet(() =>
       minWidth: 0,
       gap: 1,
     },
+    nameRow: {
+      alignItems: "center",
+      gap: 8,
+    },
+    nameSlot: {
+      flex: 1,
+    },
     name: {
       fontFamily: tennisFontFamily.heading,
       fontSize: 18,
@@ -222,10 +251,9 @@ const styles = createLiveSheet(() =>
       color: tennisColors.mutedForeground,
     },
     levelBadge: {
-      alignSelf: "flex-start",
       borderRadius: tennisRadii.pill,
       paddingHorizontal: 12,
-      paddingVertical: 5,
+      paddingVertical: 3,
       flexShrink: 0,
     },
     levelBadgeText: {
