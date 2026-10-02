@@ -38,6 +38,15 @@ Record decisions using this template:
 - Consequences: The primary action is carried by the card's tone colour and chevron rather than a filled button, which is quieter; worth checking in cohort A that people still tap it. Carousel swipes still work because a press fires only without a drag.
 - Owner: Founder/product validation
 
+## 2026-09-27 — Pinned bottom controls add a gap on top of the navigation bar
+
+- Status: accepted
+- Context: on the founder's phone (3-button navigation) the invite page's buttons, the tab bar and the match hub's action bar sat exactly on the navigation bar's top edge. Measured in the screenshots: the bar is ~48dp and each control ends on it with 0 px to spare, so the safe-area inset was reported correctly (a zero inset would have put them ~50 px behind the bar). These sites used `Math.max(insets.bottom, N)`, which is the bar's height alone once the bar is taller than `N`: no gap.
+- Decision: `pinnedBottomPadding(inset, gap)` = `inset + gap` in `apps/mobile/src/lib/stack-screen-padding.ts`, with `gap` set to each site's old `N`. Used by the tab bar, the match hub action bar and dock, the invite footer, the bottom sheet, the generic `Screen`, the reschedule scroll, and the chat composer (keyboard closed).
+- Alternatives considered: floor a zero inset to 48dp (committed as `3c2d321`, reverted as `c2bd3cb`). It rested on a wrong diagnosis: it changed nothing on the phone that reported the problem, and it added 48dp of empty space on phones with no bar (bar hidden, iPhone SE). Cursor's local `fix/bottom-safe-area` took the same approach.
+- Consequences: a phone with no bar sees no change. A gesture handle, an iPhone home indicator and a 3-button bar each get their own height plus the gap, so pinned controls sit slightly higher on every phone that has one. Sites already written as `inset + N` are untouched. The emulator uses gesture navigation, so only the founder's phone can confirm the 3-button case.
+- Owner: Founder
+
 ## 2026-09-26 — The APK carries ARM code only, and the bundle only what it uses
 
 - Status: accepted

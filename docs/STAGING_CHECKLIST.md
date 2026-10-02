@@ -408,6 +408,8 @@ See the 2026-09-25 decision. Phase 1 is in the repo; phase 2 is dashboard-only.
     sign-out, 14:30). Confirm it is running before the remaining §7c rehearsal.
   - Founder's phone shows `Update 01a0de11…` in Settings (2026-09-26, after two
     full restarts). The emulator is not yet confirmed.
+  - Since 09-27 the channel serves `01a0e8d3…`, a **preview of unmerged PRs
+    #31, #33, #34 and #35**. Merge or drop them before relying on this row.
 - [x] **Focused compatibility check** on that build: fresh sign-in, open a match
       hub, open an invite preview, one reversible write, and the sender returning 200. Do not wait for the full §7c rehearsal — retire first, then repeat this
       check, then rehearse against the final configuration

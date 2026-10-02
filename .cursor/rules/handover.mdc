@@ -1,0 +1,14 @@
+---
+description: Where the project stands and what is in flight — read before any task
+globs:
+alwaysApply: true
+---
+
+# Read the handover first
+
+Before planning or changing anything, read `docs/HANDOVER_2026-09-26.md` — its **Start here** and **In flight** sections at minimum. Then follow `CLAUDE.md`.
+
+- `docs/STAGING_CHECKLIST.md` is the release truth. Tick a row only with dated evidence; keep unverified items unticked.
+- Branch from `origin/staging` and open PRs into `staging`. Never commit onto a branch whose PR is already merged.
+- Do not publish an EAS update from `staging` while a preview from an unmerged PR is live on the `staging` channel (see **In flight**).
+- When the state changes (a merge, a deploy, an update, a migration), update the handover in the same PR.
