@@ -46,14 +46,12 @@ export function DiscoverPlayerCardRow({
       name={player.display_name}
       locationLabel={zoneLabelFromList(player.zones, locale)}
       levelBadgeLabel={publicPlayerLevelChip(player, t)}
-      availabilityLabel={discoverPlayerAvailabilityLine(
+      availability={discoverPlayerAvailabilityLine(
         player,
         showOverlapAvailability,
         t,
       )}
-      clubsTag={
-        clubNamesFromList(player.favorite_clubs).slice(0, 2).join(" · ") || null
-      }
+      clubs={clubNamesFromList(player.favorite_clubs)}
       profileAccessibilityLabel={t("discover.openPlayerProfile", {
         name: player.display_name,
       })}

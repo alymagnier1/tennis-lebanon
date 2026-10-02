@@ -6,11 +6,12 @@ import { canShowJoinAction } from "@tennis-lebanon/domain";
 import { minTouchTargetPx } from "@tennis-lebanon/ui";
 import { AppText } from "../AppText";
 import { Avatar } from "../AppUi";
+import { FirstFitText } from "../FirstFitText";
 import { Icon } from "../Icon";
 import { SEMANTIC_TONE_ICONS } from "../SemanticBadge";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import {
-  compactJoinedLabel,
+  clubLineCandidates,
   clubNamesFromList,
   matchCardAreaLabel,
 } from "../../lib/match-clubs";
@@ -82,11 +83,9 @@ export const OpenMatchListCard = memo(function OpenMatchListCard({
   const areaLabel = matchCardAreaLabel(match.zones, locale, { compact: true });
   const dateTimeLabel =
     openMatchCardDateTimeLabel(match) ?? t("home.noTimeYet");
-  const clubsLabel = compactJoinedLabel(
-    clubNamesFromList(match.preferred_clubs),
-    1,
-  );
-  const facts = [t(`formats.${match.format}`), areaLabel, clubsLabel]
+  const clubNames = clubNamesFromList(match.preferred_clubs);
+  const clubCandidates = clubLineCandidates(clubNames);
+  const facts = [t(`formats.${match.format}`), areaLabel]
     .filter(Boolean)
     .join(" · ");
   const roster = openMatchRosterProps(match, t);
@@ -94,10 +93,9 @@ export const OpenMatchListCard = memo(function OpenMatchListCard({
   const hostLine = roster.hostOthers
     ? `${hostName} ${roster.hostOthers.label}`
     : hostName;
-  const level = matchHubLevelSummary(
-    { min_skill: match.min_skill, max_skill: match.max_skill },
-    t,
-  );
+  const levelRange = { min_skill: match.min_skill, max_skill: match.max_skill };
+  const level = matchHubLevelSummary(levelRange, t);
+  const spokenLevel = matchHubLevelSummary(levelRange, t, { spoken: true });
   const badge = openMatchScarcityBadges(match, {
     oneSpotLeft: t("discover.spotsRemaining", { count: 1 }),
     courtSecured: t("discover.courtSecuredBadge"),
@@ -116,7 +114,8 @@ export const OpenMatchListCard = memo(function OpenMatchListCard({
   const accessibilityLabel = [
     dateTimeLabel,
     facts,
-    [roster.hostOthers?.accessibilityLabel ?? hostName, level]
+    clubNames.join(", "),
+    [roster.hostOthers?.accessibilityLabel ?? hostName, spokenLevel]
       .filter(Boolean)
       .join(", "),
     badge?.label,
@@ -126,34 +125,45 @@ export const OpenMatchListCard = memo(function OpenMatchListCard({
     .join(". ");
 
   const top = (
-    <View style={[styles.top, { flexDirection: rowDirection }]}>
-      <View style={styles.topText}>
+    <View style={styles.topText}>
+      <View style={[styles.top, { flexDirection: rowDirection }]}>
         <AppText style={[styles.time, { writingDirection }]} maxLines={1}>
           {dateTimeLabel}
         </AppText>
-        <AppText style={[styles.facts, { writingDirection }]} maxLines={2}>
-          {facts}
-        </AppText>
-      </View>
-      {badge && badgePalette ? (
-        <View
-          style={[
-            styles.tag,
-            { flexDirection: rowDirection, backgroundColor: badgePalette.fill },
-          ]}
-        >
-          <Icon
-            name={SEMANTIC_TONE_ICONS[badge.tone]}
-            size={15}
-            color={badgePalette.text}
-          />
-          <AppText
-            style={[styles.tagLabel, { color: badgePalette.text }]}
-            maxLines={1}
+        {badge && badgePalette ? (
+          <View
+            style={[
+              styles.tag,
+              {
+                flexDirection: rowDirection,
+                backgroundColor: badgePalette.fill,
+              },
+            ]}
           >
-            {badge.label}
-          </AppText>
-        </View>
+            <Icon
+              name={SEMANTIC_TONE_ICONS[badge.tone]}
+              size={15}
+              color={badgePalette.text}
+            />
+            <AppText
+              style={[styles.tagLabel, { color: badgePalette.text }]}
+              maxLines={1}
+            >
+              {badge.label}
+            </AppText>
+          </View>
+        ) : null}
+      </View>
+      <AppText style={[styles.facts, { writingDirection }]} maxLines={1}>
+        {facts}
+      </AppText>
+      {clubCandidates.length > 0 ? (
+        <FirstFitText
+          candidates={clubCandidates}
+          suffix={clubNames.length > 1 ? `+${clubNames.length - 1}` : undefined}
+          style={[styles.facts, { writingDirection }]}
+          rowDirection={rowDirection}
+        />
       ) : null}
     </View>
   );
@@ -296,15 +306,15 @@ const styles = createLiveSheet(() =>
       opacity: 0.7,
     },
     top: {
-      alignItems: "flex-start",
+      alignItems: "center",
       gap: 10,
     },
     topText: {
-      flex: 1,
-      minWidth: 0,
       gap: 2,
     },
     time: {
+      flex: 1,
+      minWidth: 0,
       fontFamily: tennisFontFamily.heading,
       fontSize: 22,
       lineHeight: 28,
