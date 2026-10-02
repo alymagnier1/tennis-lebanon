@@ -1371,7 +1371,17 @@
       "courtReleaseError": "Could not release this court.",
       "expandMatchDetails": "Show match details",
       "collapseMatchDetails": "Hide match details",
-      "moreTitle": "More"
+      "moreTitle": "More",
+      "playedPrompt": {
+        "title": "Did this match happen?",
+        "body": "The agreed time has passed and no court was recorded in the app. Tell us, so the result can count.",
+        "yes": "Yes, we played",
+        "no": "No, it didn't happen",
+        "noConfirmTitle": "Close this match?",
+        "noConfirmBody": "Everyone in the match will be told it didn't happen, and it will be closed.",
+        "noConfirmAction": "Close the match",
+        "error": "We could not save your answer. Try again."
+      }
     },
     "rematch": {
       "milestone": "That is match number {{total}} for you.",

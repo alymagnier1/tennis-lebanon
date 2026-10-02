@@ -303,6 +303,23 @@ export async function removeMatchParticipant(
 }
 
 /**
+ * Whether the "Did your match happen?" question is open for this match: the
+ * agreed hour is over and no court was ever accepted in the app. The server
+ * owns the rule (`match_awaiting_played_answer`, migration 048) so the hub and
+ * the reminder that sent the player there cannot disagree.
+ */
+export async function isMatchAwaitingPlayedAnswer(
+  client: TennisSupabaseClient,
+  matchId: string,
+): Promise<boolean> {
+  const { data, error } = await client.rpc("match_awaiting_played_answer", {
+    p_match_id: matchId,
+  });
+  if (error) throw error;
+  return data === true;
+}
+
+/**
  * Answers the prompt raised when a match's hour passed with no court recorded.
  * `true` sends it to the attendance and result flow; `false` closes it.
  */

@@ -1229,7 +1229,17 @@
       "joinNoteLabel": "Ajouter une note pour l’hôte (facultatif)",
       "joinNotePlaceholder": "Partie conviviale — libre après 18 h.",
       "joinNoteHint": "L’hôte la voit avec votre demande.",
-      "moreTitle": "Plus"
+      "moreTitle": "Plus",
+      "playedPrompt": {
+        "title": "Ce match a-t-il eu lieu ?",
+        "body": "L'horaire convenu est passé et aucun court n'a été enregistré dans l'app. Dites-le-nous pour que le résultat compte.",
+        "yes": "Oui, nous avons joué",
+        "no": "Non, il n'a pas eu lieu",
+        "noConfirmTitle": "Clôturer ce match ?",
+        "noConfirmBody": "Tous les joueurs du match seront prévenus qu'il n'a pas eu lieu, et il sera clôturé.",
+        "noConfirmAction": "Clôturer le match",
+        "error": "Nous n'avons pas pu enregistrer votre réponse. Réessayez."
+      }
     },
     "rematch": {
       "milestone": "C'est votre match numéro {{total}}.",
