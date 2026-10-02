@@ -18,8 +18,12 @@ if (existsSync(localEnvPath)) {
 const nextConfig: NextConfig = {
   // Required when opening the dev server via 127.0.0.1.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  async rewrites() {
+    return [{ source: "/beirut", destination: "/beirut/index.html" }];
+  },
   outputFileTracingIncludes: {
     "/legal/[slug]": ["../../docs/legal/**/*"],
+    "/beirut/privacy": ["../../docs/legal/BEIRUT_WAITLIST_PRIVACY_DEV.md"],
   },
 };
 

@@ -1,0 +1,24 @@
+\set ON_ERROR_STOP on
+begin;
+create extension if not exists pgtap;
+select plan(10);
+select is(public.consume_prelaunch_signup_attempt(repeat('a',64)), 0, 'first attempt allowed');
+select public.consume_prelaunch_signup_attempt(repeat('a',64)) from generate_series(1,7);
+select ok(public.consume_prelaunch_signup_attempt(repeat('a',64)) between 1 and 3600, 'ninth attempt returns retry seconds');
+select is((select count(*) from public.prelaunch_signup_attempts where ip_hash=repeat('a',64)), 8::bigint, 'rejected attempts do not extend the window');
+select is(public.consume_prelaunch_signup_attempt(repeat('b',64)), 0, 'another address has its own budget');
+update public.prelaunch_signup_attempts set created_at=now()-interval '2 hours' where ip_hash=repeat('a',64);
+select is(public.consume_prelaunch_signup_attempt(repeat('a',64)), 0, 'expired attempts no longer count');
+insert into public.prelaunch_signup_attempts(ip_hash,created_at) values(repeat('c',64),now()-interval '26 hours');
+select public.prune_prelaunch_signup_attempts();
+select is((select count(*) from public.prelaunch_signup_attempts where ip_hash=repeat('c',64)), 0::bigint, 'cleanup removes expired records');
+select is((select count(*) from public.prelaunch_signup_attempts where ip_hash=repeat('b',64)), 1::bigint, 'cleanup preserves current rate window');
+set local role anon;
+select throws_ok($$select public.consume_prelaunch_signup_attempt(repeat('d',64))$$,'42501','permission denied for function consume_prelaunch_signup_attempt','anonymous callers cannot consume or inspect attempts');
+set local role authenticated;
+select throws_ok($$select public.prune_prelaunch_signup_attempts()$$,'42501','permission denied for function prune_prelaunch_signup_attempts','players cannot reset rate limits');
+set local role service_role;
+select is(public.consume_prelaunch_signup_attempt(repeat('e',64)), 0, 'service role can consume an attempt');
+reset role;
+select * from finish();
+rollback;

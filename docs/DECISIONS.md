@@ -20,6 +20,15 @@ Record decisions using this template:
 - Consequences: local development needs Node 24 (`nvm install 24.21.0` then `nvm use 24.21.0`); pnpm only warns on an engines mismatch, so Node 20 still installs but is no longer the tested version. Verified on 24.14.0: typecheck, lint, all tests, `format:check`, `db:validate`, a production `next build` of the dashboard, and an Android `expo export`. CI runs on 24.21.0 from `.nvmrc`. EAS cloud builds still use the image's default Node until `eas.json` pins one.
 - Owner: Founder
 
+## 2026-09-29 — A Beirut prelaunch signup is a waitlist row, not an account
+
+- Status: accepted
+- Context: The Beirut landing page asks for a name, one contact method, level, an optional court or area, and usual playing times. Creating an `auth.users` row from that form would store an unverified contact, contradict the page's "no account" promise, and show people in discovery who never confirmed they want to play.
+- Decision: A finished form inserts one `prelaunch_signups` row with status `waiting`. No account, profile, or password is created. An account is created only later, when that person accepts an invitation and verifies the same contact method. The public page cannot read the table. A repeat of the same idempotency key or the same contact returns success and does not insert a second row, and the response does not say whether the contact was already listed. Click and drop-off analytics stay off; the signup rows are the only visitor record.
+- Alternatives considered: creating the account up front and marking it unverified (rejected — the contact is not proven, and joining a list is not consent to a profile); reusing the match-invite screen for these signups (rejected — that screen accepts a match invitation, which this is not).
+- Consequences: Operators export or read the list to choose the first group and send invitations by hand. Unclaimed rows stay on the list until the person asks to be removed or the list is closed. Eight signup attempts per hashed IP address per hour are refused so the public route cannot be used to probe contacts.
+- Owner: Founder
+
 ## 2026-09-28 — The new icon and splash ship in app version 0.2.0
 
 - Status: accepted
