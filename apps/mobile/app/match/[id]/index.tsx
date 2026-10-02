@@ -19,8 +19,8 @@ import {
   withdrawJoinRequest,
   withdrawMatchTimeOption,
   type MatchHubTimeOption,
+  answerMatchPlayed,
   isMatchAwaitingPlayedAnswer,
-  reportMatchPlayed,
 } from "@tennis-lebanon/api";
 import {
   canCancelBookingRequest,
@@ -365,7 +365,7 @@ export default function MatchHubScreen() {
   const showPlayedPrompt =
     playedQuestionPossible && awaitingPlayedQuery.data === true;
   const playedMutation = useMutation({
-    mutationFn: (played: boolean) => reportMatchPlayed(supabase, id!, played),
+    mutationFn: (played: boolean) => answerMatchPlayed(supabase, id!, played),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["match-awaiting-played", id],

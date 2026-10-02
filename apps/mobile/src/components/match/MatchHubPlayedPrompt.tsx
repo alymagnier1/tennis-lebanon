@@ -15,8 +15,9 @@ import { tennisFontFamily } from "../../hooks/useTennisFonts";
  * The server sends a reminder with the same question (`match_played_prompt`,
  * migration 048), but the hub never showed a way to answer it, so a joined
  * player who tapped the reminder landed on a match still saying "ready to
- * book" with nothing to press (founder, 2026-10-02). Yes moves the match on to
- * attendance and the score; No closes it.
+ * book" with nothing to press (founder, 2026-10-02). Yes counts the player as
+ * having played and moves the match on to the score (`answerMatchPlayed`); No
+ * closes it.
  */
 export function MatchHubPlayedPrompt({
   pending,

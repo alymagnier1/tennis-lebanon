@@ -4,6 +4,7 @@ import type { Json } from "@tennis-lebanon/types";
 import type { MatchHubBooking } from "./bookings";
 import type { TennisSupabaseClient } from "./client";
 import type { MatchHubResult } from "./results";
+import { recordMatchAttendance } from "./results";
 
 function createMatchRpcArgs(input: CreateMatchInput) {
   return {
@@ -333,6 +334,29 @@ export async function reportMatchPlayed(
     p_played: played,
   });
   if (error) throw error;
+}
+
+/**
+ * The hub's answer to "Did this match happen?". A player who says yes has
+ * just said they played, so their own attendance is recorded with it rather
+ * than asking them "Did you play this match?" a second time (founder,
+ * 2026-10-02). The other players still confirm their own attendance.
+ *
+ * The two calls are separate: if recording attendance fails, the match has
+ * still moved on and the attendance step simply asks the player as before.
+ */
+export async function answerMatchPlayed(
+  client: TennisSupabaseClient,
+  matchId: string,
+  played: boolean,
+): Promise<void> {
+  await reportMatchPlayed(client, matchId, played);
+  if (!played) return;
+  try {
+    await recordMatchAttendance(client, matchId, "attended");
+  } catch {
+    // Left for the attendance step on the hub to ask.
+  }
 }
 
 export async function cancelMatch(

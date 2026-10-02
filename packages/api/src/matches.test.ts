@@ -3,6 +3,7 @@ import {
   acceptMatchInvitation,
   acceptMatchInvite,
   addMatchTimeOption,
+  answerMatchPlayed,
   cancelMatchInvite,
   castMatchTimeVote,
   createAndPublishMatch,
@@ -388,5 +389,56 @@ describe("matches API wrappers", () => {
       p_match_id: "match-id",
       p_played: true,
     });
+  });
+  it("records the answering player as played when they say yes", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    await answerMatchPlayed(client, "match-id", true);
+
+    expect(rpc).toHaveBeenNthCalledWith(1, "report_match_played", {
+      p_match_id: "match-id",
+      p_played: true,
+    });
+    expect(rpc).toHaveBeenNthCalledWith(2, "record_match_attendance", {
+      p_match_id: "match-id",
+      p_attendance: "attended",
+      p_note: undefined,
+    });
+  });
+
+  it("records no attendance when the match did not happen", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    await answerMatchPlayed(client, "match-id", false);
+
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith("report_match_played", {
+      p_match_id: "match-id",
+      p_played: false,
+    });
+  });
+
+  it("still succeeds when attendance cannot be recorded", async () => {
+    const { client, rpc } = createMockClient();
+    rpc
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: null, error: { message: "failed" } });
+
+    await expect(
+      answerMatchPlayed(client, "match-id", true),
+    ).resolves.toBeUndefined();
+  });
+
+  it("fails without recording attendance when the answer is refused", async () => {
+    const { client, rpc } = createMockClient();
+    const refusal = { message: "match_not_awaiting_played_answer" };
+    rpc.mockResolvedValue({ data: null, error: refusal });
+
+    await expect(answerMatchPlayed(client, "match-id", true)).rejects.toBe(
+      refusal,
+    );
+    expect(rpc).toHaveBeenCalledTimes(1);
   });
 });
