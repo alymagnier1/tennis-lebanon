@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../../theme/create-live-sheet";
 import type { CompatiblePlayerCard } from "@tennis-lebanon/api";
@@ -6,6 +6,7 @@ import { Avatar } from "../AppUi";
 import { AppText } from "../AppText";
 import { Icon, type IconName } from "../Icon";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
+import { shortPlayerName } from "../../lib/home-v5";
 import { useLayoutDirection } from "../../lib/layout-direction";
 import { skillBandColor, skillBandFill } from "../../lib/skill-band-theme";
 import { useTennisTheme } from "../../providers/ThemeProvider";
@@ -38,6 +39,49 @@ function FooterMetaItem({
       >
         {label}
       </AppText>
+    </View>
+  );
+}
+
+/**
+ * The full name when it fits on the line, otherwise "Alexandra J.". The full
+ * name is measured off-screen at its natural width; the visible line still
+ * ellipsizes if even the short form is too long.
+ */
+function FittingName({
+  name,
+  writingDirection,
+}: {
+  name: string;
+  writingDirection: "ltr" | "rtl";
+}) {
+  const [slotWidth, setSlotWidth] = useState(0);
+  const [fullWidth, setFullWidth] = useState(0);
+  const tooLong = slotWidth > 0 && fullWidth > slotWidth + 0.5;
+  const shown = tooLong ? shortPlayerName(name) : name;
+
+  return (
+    <View
+      style={styles.nameSlot}
+      onLayout={(event) => setSlotWidth(event.nativeEvent.layout.width)}
+    >
+      <AppText style={[styles.name, { writingDirection }]} maxLines={1}>
+        {shown}
+      </AppText>
+      <View
+        style={styles.nameMeasure}
+        pointerEvents="none"
+        aria-hidden
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        <AppText
+          style={styles.name}
+          onLayout={(event) => setFullWidth(event.nativeEvent.layout.width)}
+        >
+          {name}
+        </AppText>
+      </View>
     </View>
   );
 }
@@ -95,12 +139,7 @@ export const DiscoverPlayerCard = memo(function DiscoverPlayerCard({
             />
             <View style={styles.identity}>
               <View style={[styles.nameRow, { flexDirection: rowDirection }]}>
-                <AppText
-                  style={[styles.name, { writingDirection }]}
-                  maxLines={1}
-                >
-                  {name}
-                </AppText>
+                <FittingName name={name} writingDirection={writingDirection} />
                 <View
                   style={[styles.levelBadge, { backgroundColor: bandFill }]}
                 >
@@ -228,9 +267,20 @@ const styles = createLiveSheet(() =>
       alignItems: "center",
       gap: 8,
     },
-    name: {
+    nameSlot: {
       flex: 1,
       minWidth: 0,
+      overflow: "hidden",
+    },
+    nameMeasure: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: 10000,
+      flexDirection: "row",
+      opacity: 0,
+    },
+    name: {
       fontFamily: tennisFontFamily.heading,
       fontSize: 18,
       lineHeight: 23,
