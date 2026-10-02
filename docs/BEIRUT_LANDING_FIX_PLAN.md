@@ -28,6 +28,15 @@ Make `racketbound.com/beirut` convert the warm traffic it will get first: people
 | D1  | **Campaign identifier** on signups                                                                                          | Later, before any paid ad (Phase 3).                                                                                                                                                                                                  | Not now             |
 | D2  | **Contact-first signup**                                                                                                    | Only if people say they quit at step 2 (Phase 3).                                                                                                                                                                                     | Not now             |
 
+**Founder's answers (2026-10-02):**
+
+- **D0:** use the app's wording on the page.
+- **D3:** yes, add the offer line. The founder commits to helping founding players set up a first match.
+- **D4:** yes, add both the founder line (copy deck §9 draft) and the footer contact. The founder can reword the line before or after it ships.
+- **D1 and D2:** not now.
+
+Phase 1 therefore includes items 1.9 and 1.10.
+
 ## Phase 1 — page fixes and copy (one PR, Claude Code)
 
 Each item gives what changes, where, and how it is checked. The source is `apps/landing/page-template.html` unless stated.
