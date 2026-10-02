@@ -450,17 +450,17 @@
   },
   "skillBands": {
     "beginner": "مبتدئ",
-    "improving": "متوسط مبتدئ",
+    "improving": "في تحسّن",
     "intermediate": "متوسط",
-    "advanced": "متوسط متقدم",
-    "competitive": "متقدم"
+    "advanced": "متقدم",
+    "competitive": "خبير"
   },
   "skillBandsShort": {
     "beginner": "مبتدئ",
-    "improving": "متوسط−",
+    "improving": "في تحسّن",
     "intermediate": "متوسط",
-    "advanced": "متوسط+",
-    "competitive": "متقدم"
+    "advanced": "متقدم",
+    "competitive": "خبير"
   },
   "rating": {
     "provisionalBadge": "مبدئي",
