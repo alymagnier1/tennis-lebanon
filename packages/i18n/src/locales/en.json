@@ -56,6 +56,7 @@
       "onboarding": "Register club",
       "disputes": "Result disputes",
       "reports": "Safety reports",
+      "prelaunch": "Beirut list",
       "signOut": "Sign out",
       "pendingClubs": "Club approvals"
     },
@@ -90,6 +91,34 @@
       "matchId": "Match ID: {{id}}",
       "markResolved": "Mark resolved",
       "dismiss": "Dismiss report"
+    },
+    "prelaunch": {
+      "title": "Beirut waitlist",
+      "description": "People who asked for an invitation. This is not an account.",
+      "loading": "Loading the list…",
+      "empty": "Nobody has joined the list yet.",
+      "loadError": "We could not load the Beirut list.",
+      "name": "Name",
+      "contact": "Contact",
+      "level": "Level",
+      "court": "Court or area",
+      "times": "Usual times",
+      "status": "Status",
+      "joined": "Joined",
+      "slots": {
+        "wd-am": "Weekday morning",
+        "wd-pm": "Weekday afternoon",
+        "wd-ev": "Weekday evening",
+        "we-am": "Weekend morning",
+        "we-pm": "Weekend afternoon",
+        "we-ev": "Weekend evening"
+      },
+      "statuses": {
+        "waiting": "Waiting",
+        "invited": "Invited",
+        "claimed": "Joined the app",
+        "withdrawn": "Removed"
+      }
     },
     "bookings": {
       "title": "Booking requests",

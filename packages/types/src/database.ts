@@ -2331,6 +2331,20 @@ export type Database = {
         Args: { p_user_id: string };
         Returns: Json;
       };
+      list_prelaunch_signups: {
+        Args: { p_community?: string };
+        Returns: {
+          availability: string[];
+          channel: string;
+          contact: string;
+          court: string | null;
+          created_at: string;
+          first_name: string;
+          id: string;
+          level: string;
+          status: string;
+        }[];
+      };
       list_public_player_recent_matches: {
         Args: { p_limit?: number; p_user_id: string };
         Returns: {

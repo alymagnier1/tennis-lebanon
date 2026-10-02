@@ -13,8 +13,11 @@ export function isLegalSlug(value: string): value is LegalSlug {
   return value in FILES;
 }
 
-export function readLegalMarkdown(slug: LegalSlug): string {
-  const fileName = FILES[slug];
+export function readBeirutWaitlistPrivacy(): string {
+  return readLegalFile("BEIRUT_WAITLIST_PRIVACY_DEV.md");
+}
+
+function readLegalFile(fileName: string): string {
   const candidates = [
     path.join(process.cwd(), "docs", "legal", fileName),
     path.join(process.cwd(), "..", "..", "docs", "legal", fileName),
@@ -29,4 +32,8 @@ export function readLegalMarkdown(slug: LegalSlug): string {
   }
 
   throw new Error(`Legal document not found: ${fileName}`);
+}
+
+export function readLegalMarkdown(slug: LegalSlug): string {
+  return readLegalFile(FILES[slug]);
 }

@@ -56,6 +56,7 @@
       "onboarding": "Inscrire un club",
       "disputes": "Litiges de résultats",
       "reports": "Signalements",
+      "prelaunch": "Liste Beyrouth",
       "signOut": "Se déconnecter",
       "pendingClubs": "Validation des clubs"
     },
@@ -90,6 +91,34 @@
       "matchId": "ID du match : {{id}}",
       "markResolved": "Marquer comme résolu",
       "dismiss": "Rejeter le signalement"
+    },
+    "prelaunch": {
+      "title": "Liste d'attente de Beyrouth",
+      "description": "Personnes qui ont demandé une invitation. Ce n'est pas un compte.",
+      "loading": "Chargement de la liste…",
+      "empty": "Personne n'a encore rejoint la liste.",
+      "loadError": "Impossible de charger la liste de Beyrouth.",
+      "name": "Nom",
+      "contact": "Contact",
+      "level": "Niveau",
+      "court": "Court ou quartier",
+      "times": "Horaires habituels",
+      "status": "Statut",
+      "joined": "Inscrit le",
+      "slots": {
+        "wd-am": "Matin en semaine",
+        "wd-pm": "Après-midi en semaine",
+        "wd-ev": "Soir en semaine",
+        "we-am": "Matin le week-end",
+        "we-pm": "Après-midi le week-end",
+        "we-ev": "Soir le week-end"
+      },
+      "statuses": {
+        "waiting": "En attente",
+        "invited": "Invité",
+        "claimed": "A rejoint l'application",
+        "withdrawn": "Retiré"
+      }
     },
     "bookings": {
       "title": "Demandes de réservation",

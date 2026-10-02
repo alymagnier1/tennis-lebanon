@@ -82,6 +82,12 @@ export function DashboardShell({
                 >
                   {t("dashboard.nav.reports")}
                 </Link>
+                <Link
+                  href="/admin/prelaunch"
+                  style={{ color: colors.danger[700], textDecoration: "none" }}
+                >
+                  {t("dashboard.nav.prelaunch")}
+                </Link>
               </>
             ) : null}
             <Link
