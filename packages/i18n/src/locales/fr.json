@@ -491,6 +491,13 @@
     "advanced": "Avancé",
     "competitive": "Expert"
   },
+  "skillBandsRange": {
+    "beginner": "Déb.",
+    "improving": "En progrès",
+    "intermediate": "Interm.",
+    "advanced": "Av.",
+    "competitive": "Expert"
+  },
   "rating": {
     "provisionalBadge": "Provisoire",
     "ownBand": "Niveau",

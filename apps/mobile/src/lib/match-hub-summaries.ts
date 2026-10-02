@@ -9,9 +9,14 @@ import {
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;
 
+/**
+ * "Interm. – Expert". `spoken` uses the full names, for accessibility labels,
+ * since screen readers mangle "Interm." and "Adv.".
+ */
 export function matchHubLevelSummary(
   hub: Pick<MatchHubCard, "min_skill" | "max_skill">,
   t: Translate,
+  options?: { spoken?: boolean },
 ): string {
   const selected = skillBandsInRange(
     hub.min_skill as SkillBand,
@@ -23,7 +28,7 @@ export function matchHubLevelSummary(
   }
 
   return formatSkillBandSelection(selected, (band) =>
-    t(`skillBandsShort.${band}`),
+    t(`${options?.spoken ? "skillBands" : "skillBandsRange"}.${band}`),
   );
 }
 

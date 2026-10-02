@@ -15,6 +15,7 @@ export const CRITICAL_FLOW_KEY_PREFIXES = [
   "formats.",
   "skillBands.",
   "skillBandsShort.",
+  "skillBandsRange.",
   "playIntent.",
   "rating.",
   "discover.",

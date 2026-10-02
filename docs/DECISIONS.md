@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-10-02 — Level ranges on match cards use abbreviations; single levels do not
+
+- Status: accepted
+- Context: a match's level range ("Intermediate – Expert") wrapped onto two lines beside the host's photo and the Join button on open-match cards. The 10-02 one-word levels made single labels fit, but a range is two labels and a dash.
+- Decision: a new `skillBandsRange` set is used only where a range is shown (`matchHubLevelSummary`: open-match cards, Home's open matches, the match screen). English: Beg., Improving, Interm., Adv., Expert. French: Déb., En progrès, Interm., Av., Expert. Arabic keeps the full words, since dotted abbreviations do not read naturally in Arabic. Single-level badges and chips keep `skillBandsShort` (full words). The open-match card's accessibility label uses the full names.
+- Alternatives considered: abbreviating `skillBandsShort` everywhere (rejected by the founder — single badges already fit, and it would bring back the abbreviations the 10-02 entry removed); letting the range wrap (the reason for this change).
+- Consequences: the same band can read "Intermediate" on a player and "Interm." in a match range. The French abbreviations need a native speaker's check, with the 10-02 labels.
+- Owner: Founder
+
 ## 2026-10-02 — The Beirut signup route uses its own Supabase secret key on Vercel
 
 - Status: accepted

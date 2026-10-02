@@ -93,10 +93,9 @@ export const OpenMatchListCard = memo(function OpenMatchListCard({
   const hostLine = roster.hostOthers
     ? `${hostName} ${roster.hostOthers.label}`
     : hostName;
-  const level = matchHubLevelSummary(
-    { min_skill: match.min_skill, max_skill: match.max_skill },
-    t,
-  );
+  const levelRange = { min_skill: match.min_skill, max_skill: match.max_skill };
+  const level = matchHubLevelSummary(levelRange, t);
+  const spokenLevel = matchHubLevelSummary(levelRange, t, { spoken: true });
   const badge = openMatchScarcityBadges(match, {
     oneSpotLeft: t("discover.spotsRemaining", { count: 1 }),
     courtSecured: t("discover.courtSecuredBadge"),
@@ -116,7 +115,7 @@ export const OpenMatchListCard = memo(function OpenMatchListCard({
     dateTimeLabel,
     facts,
     clubNames.join(", "),
-    [roster.hostOthers?.accessibilityLabel ?? hostName, level]
+    [roster.hostOthers?.accessibilityLabel ?? hostName, spokenLevel]
       .filter(Boolean)
       .join(", "),
     badge?.label,
