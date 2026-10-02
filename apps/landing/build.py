@@ -26,7 +26,7 @@ template = template.replace(
 base = SITE_URL.rstrip("/")
 template = template.replace(
     '<meta property="og:image" content="racketbound-og.jpg">',
-    f'<meta property="og:url" content="{base}/">\n<meta property="og:image" content="{base}/racketbound-og.jpg">',
+    f'<meta property="og:url" content="{base}">\n<meta property="og:image" content="{base}/racketbound-og.jpg">',
 )
 page = template.replace("<!-- BALL -->", ball)
 public.mkdir(parents=True, exist_ok=True)

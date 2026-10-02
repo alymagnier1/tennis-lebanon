@@ -11,6 +11,33 @@ Record decisions using this template:
 - Consequences: the same band can read "Intermediate" on a player and "Interm." in a match range. The French abbreviations need a native speaker's check, with the 10-02 labels.
 - Owner: Founder
 
+## 2026-10-02 — The Beirut landing page names the problem, makes an offer, and uses the app's level wording
+
+- Status: accepted
+- Context: The audit of `racketbound.com/beirut` (`docs/audits/BEIRUT_LANDING_AUDIT_2026-10-02.md`) found:
+  - the promise line opened with "We're bringing together…" and never named the problem;
+  - "your group is ready" appeared five times and read as a fixed team or a WhatsApp group;
+  - nothing on the page said who was asking for a WhatsApp number;
+  - step 2 described the levels differently from the app's onboarding (Advanced "I place shots with control" vs "I play matches regularly"; Expert "I sustain rallies under pressure" vs "I train and compete");
+  - on phones the hero art sat behind the reassurance line at about 3:1 contrast.
+- Decision: Phase 1 of `docs/BEIRUT_LANDING_FIX_PLAN.md`, with the founder's answers:
+  - **D0:** the page uses the app's `onboarding.tennis.bands` wording.
+  - **D3:** add the offer "Founding players get in first, and we'll help set up your first match". The founder commits to helping founding players set up a first match.
+  - **D4:** add a founder line near the first button, and a footer contact.
+
+  The promise now leads with "Usual partner can't make it?", every "group is ready" becomes an app invite, the reassurance line says "Android first, iPhone later", and the link preview leads with the problem. The success screen makes the WhatsApp invite its main action. On phones the space reserved under the copy is 20 px taller than the art. A Vitest check (`apps/dashboard/src/app/beirut/landing-copy.test.ts`) fails if the page's level wording drifts from the app's.
+
+- Alternatives considered:
+  - the page's ability wording for both page and app (better self-description, but it changes onboarding for every player and three locales; it can still be done in its own PR);
+  - no offer (safer, but "Get my invite" alone gives no reason to join now);
+  - no founder line (the privacy notice already names the contact, so a visible name adds trust without new exposure).
+- Consequences:
+  - The offer is a promise the founder must keep for up to 50 people.
+  - The founder line is a draft in the founder's voice and can be reworded at any time.
+  - Signup collection, consent and the analytics rule (2026-09-29) are unchanged; campaign attribution and contact-first signup stay as Phase 3 decisions.
+  - WhatsApp caches link previews per URL, so the new preview can lag; append `?v=2` when testing.
+- Owner: Founder
+
 ## 2026-10-02 — The Beirut signup route uses its own Supabase secret key on Vercel
 
 - Status: accepted
