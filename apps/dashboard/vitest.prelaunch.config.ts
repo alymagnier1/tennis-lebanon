@@ -6,6 +6,7 @@ export default defineConfig({
     include: [
       "apps/dashboard/src/app/api/prelaunch-signup/route.test.ts",
       "apps/dashboard/src/app/beirut/landing-copy.test.ts",
+      "apps/dashboard/src/app/root-redirect.test.ts",
     ],
   },
 });
