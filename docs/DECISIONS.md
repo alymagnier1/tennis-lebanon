@@ -2,6 +2,18 @@
 
 Record decisions using this template:
 
+## 2026-10-03 — Native layout stays left to right; screens mirror Arabic themselves
+
+- Status: accepted. Supersedes the native-RTL part of the 2026-08-06 entry "Arabic RTL enabled in pilot locales"; Arabic stays a pilot locale.
+- Context: founder, 2026-10-03: after switching to Arabic and back to English, English stayed right-aligned until the app was restarted. `syncNativeLayoutDirection` called `I18nManager.forceRTL`, but:
+  - it restarted the app only in development builds, so in release builds the change took effect whenever Android next re-laid out the root (Fabric re-reads the flag in `updateRootLayoutSpecs`);
+  - switching back compared against `I18nManager.isRTL`, a snapshot taken at launch, so it skipped clearing the flag;
+  - the screens already mirror Arabic themselves through `useLayoutDirection` (247 `rowDirection` uses in 78 files), so native RTL on top would flip Arabic rows back to left to right;
+  - React Native also allows native RTL by default on a phone whose system language is right to left, which would mirror the app in English or French on Arabic-language phones.
+- Decision: native layout is always left to right: `allowRTL(false)` and `forceRTL(false)` at every launch, in `keepNativeLayoutLeftToRight` (`apps/mobile/src/lib/layout-rtl.ts`). Switching language changes direction at once, through the screens' own mirroring. A launch that still finds the native flag on (set by an earlier build) restarts once with `expo-updates`, guarded against a restart loop.
+- Alternatives considered: keep native RTL and restart the app on every switch (rejected — it doubles the screens' mirroring, and a language change would close the screen the player is on); keep native RTL and drop the screens' own mirroring (rejected — a rewrite of 78 files with no device to check Arabic on).
+- Consequences: anything the screens do not mirror themselves stays left to right in Arabic, for example plain `flexDirection: "row"` styles (39) and the stack's slide direction. Arabic still needs the device pass that the 08-06 and 08-27 entries ask for. Players whose phone kept the flag from an earlier build see one automatic restart on the first launch of this update.
+
 ## 2026-10-03 — Players contact support@racketbound.com, not the founder's personal address
 
 - Status: accepted

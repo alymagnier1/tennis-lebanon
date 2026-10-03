@@ -5,13 +5,12 @@ import { initReactI18next } from "react-i18next";
 import {
   DEFAULT_LOCALE,
   isPilotLocale,
-  isSupportedLocale,
   LOCALE_BUNDLE_ID,
   resources,
   SUPPORTED_LOCALES,
   type PilotLocale,
 } from "@tennis-lebanon/i18n";
-import { syncNativeLayoutDirection } from "./layout-rtl";
+import { keepNativeLayoutLeftToRight } from "./layout-rtl";
 
 const LOCALE_STORAGE_KEY = "tennis-lebanon.locale";
 
@@ -71,8 +70,8 @@ async function readStoredLocale(): Promise<string | null> {
  * on every launch, so a French user had to re-select it each time.
  */
 export async function persistLocale(locale: PilotLocale): Promise<void> {
+  // Direction follows at once: screens mirror themselves from the language.
   await i18next.changeLanguage(locale);
-  await syncNativeLayoutDirection(locale);
   try {
     if (Platform.OS === "web") {
       globalThis.localStorage?.setItem(LOCALE_STORAGE_KEY, locale);
@@ -94,10 +93,7 @@ export const localeReady: Promise<void> = (async () => {
   if (stored && isPilotLocale(stored) && stored !== i18next.language) {
     await i18next.changeLanguage(stored);
   }
-  const active = i18next.language;
-  if (isSupportedLocale(active)) {
-    await syncNativeLayoutDirection(active);
-  }
+  await keepNativeLayoutLeftToRight();
 })();
 
 export { i18next };
