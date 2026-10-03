@@ -27,7 +27,7 @@
         "EXPO_PUBLIC_AUTH_REDIRECT_URL": "tennislebanon://auth/callback",
         "EXPO_PUBLIC_SUPABASE_URL": "https://rvdzalxavpcijbiikkjz.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_9POdK5Sun72dCTNopLvOKg_6E314Ydc",
-        "EXPO_PUBLIC_SUPPORT_EMAIL": "aly.moghnieh@gmail.com"
+        "EXPO_PUBLIC_SUPPORT_EMAIL": "support@racketbound.com"
       }
     }
   },

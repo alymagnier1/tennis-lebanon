@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-10-03 — Players contact support@racketbound.com, not the founder's personal address
+
+- Status: accepted
+- Context: the landing footer, the privacy notice and the app's support links showed the founder's personal Gmail. `racketbound.com` had no MX records, so mail to the domain bounced; Resend only sends (from `support@racketbound.com`, on the `send.` subdomain).
+- Decision: Spaceship email forwarding on `racketbound.com` (MX `mx1/mx2.efwd.spaceship.net`, catch-all to the founder's inbox, tested 2026-10-03). The public contact becomes `support@racketbound.com`: the landing footer (template), `EXPO_PUBLIC_SUPPORT_EMAIL` in the EAS staging profile, and `NEXT_PUBLIC_SUPPORT_EMAIL` on Vercel (set by the founder in the Vercel dashboard).
+- Alternatives considered: a paid mailbox (Google Workspace, Zoho, Spacemail) — not needed until replies must come from the domain; a `support`-only forwarding rule instead of the catch-all — switch to it if catch-all spam becomes a problem.
+- Consequences: replies still go out from the founder's Gmail unless Gmail "Send mail as" is set up. Installed apps keep the old address until the next EAS update on `staging`. Internal docs and admin SQL that name the founder's account are unchanged.
+- Owner: Founder
+
 ## 2026-10-02 — Level ranges on match cards use abbreviations; single levels do not
 
 - Status: accepted
