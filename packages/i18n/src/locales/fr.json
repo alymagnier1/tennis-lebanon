@@ -1621,9 +1621,8 @@
       "openSettings": "Ouvrir les réglages",
       "dismiss": "Pas maintenant"
     },
-    "centerDescription": "Invitations, votes, réservations et rappels.",
     "loadError": "Impossible de charger vos notifications.",
-    "empty": "Vous êtes à jour.",
+    "empty": "Vous êtes à jour",
     "markAllRead": "Tout marquer comme lu",
     "fallbackTitle": "RacketBound",
     "fallbackBody": "Ouvrez l’application pour voir la mise à jour.",
@@ -1652,106 +1651,111 @@
     "kinds": {
       "match_invitation": {
         "title": "{{name}} vous invite à jouer",
-        "body": "Ouvrez pour accepter ou refuser."
+        "body": "Touchez pour accepter ou refuser."
       },
       "match_invitation_superseded": {
         "title": "Ce match est complet",
-        "body": "La place à laquelle vous étiez invité est prise. D'autres matchs près de chez vous cherchent encore des joueurs."
+        "body": "D'autres matchs près de chez vous cherchent des joueurs."
       },
       "match_seat_reopened": {
         "title": "Une place s'est libérée",
-        "body": "Un joueur s'est retiré d'un match auquel vous étiez invité. Votre invitation est de nouveau dans Matchs."
+        "body": "Un joueur s'est retiré. Votre invitation est de retour."
       },
       "stale_match_reminder": {
         "title": "Votre match expire bientôt",
-        "body": "Aucun créneau n'est encore fixé. Ajoutez-en un ou prolongez l'annonce."
+        "body": "Aucun horaire fixé. Ajoutez-en un ou gardez-le ouvert."
       },
       "match_expired": {
         "title": "Votre match a expiré",
-        "body": "Aucun créneau n'a été fixé. Créez-en un nouveau quand vous voulez jouer."
+        "body": "Aucun horaire n'a été fixé. Créez-en un quand vous voulez."
       },
       "match_cancelled": {
         "title": "Votre match a été annulé",
-        "body": "Ouvrez le match pour voir la raison."
+        "body": "Touchez pour voir pourquoi."
       },
       "booking_pending_club": {
-        "title": "Le club a répondu pour votre court",
-        "body": "Ouvrez le match pour voir si votre court est confirmé."
+        "title": "Le club a répondu",
+        "body": "Touchez pour voir si votre court est confirmé."
       },
       "booking_stale_participant": {
-        "title": "Votre court n'est toujours pas confirmé",
-        "body": "Le club n'a pas encore répondu. Relancez-le ou essayez un autre club."
+        "title": "Court pas encore confirmé",
+        "body": "Le club n'a pas répondu. Relancez-le ou essayez un autre club."
       },
       "attendance_prompt": {
-        "title": "Votre match vous attend",
-        "body": "Dites si vous avez joué pour que le résultat compte."
+        "title": "Avez-vous joué ?",
+        "body": "Dites-le-nous pour que le résultat compte."
       },
       "match_time_changed": {
-        "title": "L'organisateur a déplacé votre match",
-        "body": "Vérifiez le nouvel horaire et confirmez qu'il vous convient toujours."
+        "title": "Votre match a un nouvel horaire",
+        "body": "Vérifiez qu'il vous convient toujours."
       },
       "match_court_confirmed": {
         "title": "Votre court est réservé",
-        "body": "Le match est confirmé. Ouvrez-le pour vérifier les détails avant de partir."
+        "body": "Tout est prêt. Touchez pour les détails."
       },
       "match_court_released": {
         "title": "Votre court est tombé à l'eau",
-        "body": "{{clubName}} à {{startsAt}} n'est plus disponible. Le match a toujours besoin d'un court."
+        "body": "{{clubName}} à {{startsAt}} est annulé. Trouvez un autre court."
       },
       "court_first_roster_short": {
         "title": "Court réservé, joueurs manquants",
-        "body": "Votre court à {{clubName}} est le {{startsAt}}. Places encore libres : {{spotsLeft}}. Invitez quelqu'un ou libérez le court."
+        "body": "{{clubName}}, {{startsAt}}. Places libres : {{spotsLeft}}."
       },
       "match_played_prompt": {
         "title": "Votre match a-t-il eu lieu ?",
-        "body": "Votre match du {{startsAt}} n'a jamais eu de court dans l'application. Dites-nous s'il a eu lieu pour que le résultat compte."
+        "body": "Votre match du {{startsAt}} n'avait pas de court dans l'application. Avez-vous joué ?"
       },
       "match_played_confirmed": {
-        "title": "Votre match compte une fois confirmé",
-        "body": "Confirmez que vous avez joué et ajoutez le score pour qu'il soit retenu."
+        "title": "Confirmez que vous avez joué",
+        "body": "Ajoutez le score pour que le résultat compte."
       },
       "match_join_request": {
-        "title": "Un joueur demande à rejoindre votre match",
-        "body": "Un joueur attend votre réponse. Ouvrez le match pour accepter ou refuser."
+        "title": "Un joueur veut rejoindre",
+        "body": "Touchez pour accepter ou refuser."
       },
       "match_request_accepted": {
-        "title": "Vous êtes dans le match",
-        "body": "L'hôte a accepté votre demande. Ouvrez le match pour voir l'heure et le lieu."
+        "title": "Vous êtes dans le match !",
+        "body": "L'hôte vous a accepté. Touchez pour l'heure et le lieu."
       },
       "match_request_declined": {
-        "title": "Votre demande n'a pas été retenue",
-        "body": "L'hôte a choisi quelqu'un d'autre cette fois. D'autres matchs cherchent encore des joueurs."
+        "title": "Demande non retenue",
+        "body": "D'autres matchs cherchent encore des joueurs."
       },
       "match_request_withdrawn": {
-        "title": "Une demande a été retirée",
-        "body": "Un joueur qui voulait rejoindre votre match a changé d'avis."
+        "title": "Demande retirée",
+        "body": "Un joueur a changé d'avis."
       },
       "match_participant_joined": {
         "title": "Un joueur a rejoint votre match",
-        "body": "Quelqu'un a rejoint. Ouvrez le match pour voir la composition et avancer."
+        "body": "Votre match se remplit."
       },
       "match_participant_left": {
         "title": "Un joueur a quitté votre match",
-        "body": "Quelqu'un est parti. Invitez un remplaçant avant l'heure du match."
+        "body": "Invitez quelqu'un pour prendre sa place."
       },
       "match_participant_removed": {
         "title": "Vous avez été retiré d'un match",
         "body": "L'hôte vous a retiré. {{reason}}"
       },
       "match_message": {
-        "title": "Nouveau message dans votre match",
-        "body": "Ça discute dans le chat de votre match. Ouvrez-le pour suivre."
+        "title": "Nouveau message",
+        "body": "Ça discute dans votre match."
       },
       "result_confirm_request": {
-        "title": "Un score attend votre réponse",
-        "body": "Votre adversaire a saisi le score. Confirmez-le, ou signalez une erreur."
+        "title": "Confirmez le score",
+        "body": "Votre adversaire l'a saisi. Confirmez-le ou signalez une erreur."
       },
       "result_auto_confirmed": {
         "title": "Score confirmé",
-        "body": "Personne n'a contesté sous trois jours : ce score est désormais retenu."
+        "body": "Personne n'a contesté sous 3 jours : il est retenu."
       }
     },
-    "unreadItem": "Non lu"
+    "unreadItem": "Non lu",
+    "emptyBody": "Nous vous préviendrons quand on vous invite, qu'un joueur rejoint votre match ou que votre court est réservé.",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "unreadCount_one": "{{count}} non lue",
+    "unreadCount_other": "{{count}} non lues"
   },
   "invitePage": {
     "metaTitle": "Vous êtes invité à un match de tennis",
