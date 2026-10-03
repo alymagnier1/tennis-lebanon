@@ -4,6 +4,7 @@ import type { Json } from "@tennis-lebanon/types";
 import type { MatchHubBooking } from "./bookings";
 import type { TennisSupabaseClient } from "./client";
 import type { MatchHubResult } from "./results";
+import { recordMatchAttendance } from "./results";
 
 function createMatchRpcArgs(input: CreateMatchInput) {
   return {
@@ -303,6 +304,23 @@ export async function removeMatchParticipant(
 }
 
 /**
+ * Whether the "Did your match happen?" question is open for this match: the
+ * agreed hour is over and no court was ever accepted in the app. The server
+ * owns the rule (`match_awaiting_played_answer`, migration 048) so the hub and
+ * the reminder that sent the player there cannot disagree.
+ */
+export async function isMatchAwaitingPlayedAnswer(
+  client: TennisSupabaseClient,
+  matchId: string,
+): Promise<boolean> {
+  const { data, error } = await client.rpc("match_awaiting_played_answer", {
+    p_match_id: matchId,
+  });
+  if (error) throw error;
+  return data === true;
+}
+
+/**
  * Answers the prompt raised when a match's hour passed with no court recorded.
  * `true` sends it to the attendance and result flow; `false` closes it.
  */
@@ -316,6 +334,29 @@ export async function reportMatchPlayed(
     p_played: played,
   });
   if (error) throw error;
+}
+
+/**
+ * The hub's answer to "Did this match happen?". A player who says yes has
+ * just said they played, so their own attendance is recorded with it rather
+ * than asking them "Did you play this match?" a second time (founder,
+ * 2026-10-02). The other players still confirm their own attendance.
+ *
+ * The two calls are separate: if recording attendance fails, the match has
+ * still moved on and the attendance step simply asks the player as before.
+ */
+export async function answerMatchPlayed(
+  client: TennisSupabaseClient,
+  matchId: string,
+  played: boolean,
+): Promise<void> {
+  await reportMatchPlayed(client, matchId, played);
+  if (!played) return;
+  try {
+    await recordMatchAttendance(client, matchId, "attended");
+  } catch {
+    // Left for the attendance step on the hub to ask.
+  }
 }
 
 export async function cancelMatch(

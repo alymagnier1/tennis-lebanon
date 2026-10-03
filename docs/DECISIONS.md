@@ -13,6 +13,14 @@ Record decisions using this template:
 - Decision: native layout is always left to right: `allowRTL(false)` and `forceRTL(false)` at every launch, in `keepNativeLayoutLeftToRight` (`apps/mobile/src/lib/layout-rtl.ts`). Switching language changes direction at once, through the screens' own mirroring. A launch that still finds the native flag on (set by an earlier build) restarts once with `expo-updates`, guarded against a restart loop.
 - Alternatives considered: keep native RTL and restart the app on every switch (rejected — it doubles the screens' mirroring, and a language change would close the screen the player is on); keep native RTL and drop the screens' own mirroring (rejected — a rewrite of 78 files with no device to check Arabic on).
 - Consequences: anything the screens do not mirror themselves stays left to right in Arabic, for example plain `flexDirection: "row"` styles (39) and the stack's slide direction. Arabic still needs the device pass that the 08-06 and 08-27 entries ask for. Players whose phone kept the flag from an earlier build see one automatic restart on the first launch of this update.
+
+## 2026-10-03 — Players contact support@racketbound.com, not the founder's personal address
+
+- Status: accepted
+- Context: the landing footer, the privacy notice and the app's support links showed the founder's personal Gmail. `racketbound.com` had no MX records, so mail to the domain bounced; Resend only sends (from `support@racketbound.com`, on the `send.` subdomain).
+- Decision: Spaceship email forwarding on `racketbound.com` (MX `mx1/mx2.efwd.spaceship.net`, catch-all to the founder's inbox, tested 2026-10-03). The public contact becomes `support@racketbound.com`: the landing footer (template), `EXPO_PUBLIC_SUPPORT_EMAIL` in the EAS staging profile, and `NEXT_PUBLIC_SUPPORT_EMAIL` on Vercel (set by the founder in the Vercel dashboard).
+- Alternatives considered: a paid mailbox (Google Workspace, Zoho, Spacemail) — not needed until replies must come from the domain; a `support`-only forwarding rule instead of the catch-all — switch to it if catch-all spam becomes a problem.
+- Consequences: replies still go out from the founder's Gmail unless Gmail "Send mail as" is set up. Installed apps keep the old address until the next EAS update on `staging`. Internal docs and admin SQL that name the founder's account are unchanged.
 - Owner: Founder
 
 ## 2026-10-02 — Level ranges on match cards use abbreviations; single levels do not

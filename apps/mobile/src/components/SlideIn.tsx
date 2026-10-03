@@ -45,7 +45,13 @@ export function SlideIn({
   }, []);
 
   return (
-    <Animated.View style={{ opacity, transform: [{ translateX }] }}>
+    // One layer while fading: Android otherwise fades each card on its own but
+    // not its elevation shadow, so the shadows showed before the cards on a
+    // day switch (2026-10-03). The layer exists only while opacity is below 1.
+    <Animated.View
+      needsOffscreenAlphaCompositing
+      style={{ opacity, transform: [{ translateX }] }}
+    >
       {children}
     </Animated.View>
   );

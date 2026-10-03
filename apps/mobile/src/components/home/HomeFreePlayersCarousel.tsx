@@ -510,6 +510,10 @@ export function HomeFreePlayersCarousel({
 /**
  * Two placeholder cards with the real card's layout and text styles, so the
  * real cards replace them without the section changing height.
+ *
+ * Bars only: no card face, outline or shadow. Empty cards with their shadows
+ * read as the shadows arriving before the cards (founder, 2026-10-03); now the
+ * card, its outline and its shadow all appear together.
  */
 export function HomeFreePlayersSkeleton({
   layout = "classic",
@@ -518,7 +522,7 @@ export function HomeFreePlayersSkeleton({
 } = {}) {
   const { rowDirection } = useLayoutDirection();
   const tileV5 = (key: number) => (
-    <View key={key} style={styles.tileV5}>
+    <View key={key} style={[styles.tileV5, styles.skeletonFrame]}>
       <View style={[styles.whoV5, { flexDirection: rowDirection }]}>
         <View style={[styles.skeletonAvatar, styles.skeletonAvatarV5]} />
         <View style={styles.identity}>
@@ -546,7 +550,7 @@ export function HomeFreePlayersSkeleton({
     </View>
   );
   const card = (key: number) => (
-    <View key={key} style={styles.card}>
+    <View key={key} style={[styles.card, styles.skeletonFrame]}>
       <View style={[styles.header, { flexDirection: rowDirection }]}>
         <View style={styles.skeletonAvatar} />
         <View style={styles.identity}>
@@ -687,6 +691,13 @@ const styles = createLiveSheet(() =>
     skeletonStrip: {
       gap: HOME_FREE_PLAYER_CARD_GAP,
       overflow: "hidden",
+    },
+    // Keeps the card's size (the 1-point border included) but draws no card.
+    skeletonFrame: {
+      backgroundColor: "transparent",
+      borderColor: "transparent",
+      shadowOpacity: 0,
+      elevation: 0,
     },
     skeletonAvatar: {
       width: CARD_AVATAR,

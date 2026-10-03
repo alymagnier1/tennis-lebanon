@@ -18,6 +18,11 @@ if (existsSync(localEnvPath)) {
 const nextConfig: NextConfig = {
   // Required when opening the dev server via 127.0.0.1.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  // The site root sends visitors to the Beirut landing page. Temporary (307),
+  // so the root can become a city picker later. The health check is /health.
+  async redirects() {
+    return [{ source: "/", destination: "/beirut", permanent: false }];
+  },
   async rewrites() {
     return [{ source: "/beirut", destination: "/beirut/index.html" }];
   },
