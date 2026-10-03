@@ -19,6 +19,8 @@ import {
   withdrawJoinRequest,
   withdrawMatchTimeOption,
   type MatchHubTimeOption,
+  answerMatchPlayed,
+  isMatchAwaitingPlayedAnswer,
 } from "@tennis-lebanon/api";
 import {
   canCancelBookingRequest,
@@ -58,6 +60,7 @@ import { MatchHubActionBar } from "../../../src/components/match/MatchHubActionB
 import { MatchHubOverviewDetails } from "../../../src/components/match/MatchHubOverviewDetails";
 import { MatchHubConfirmedHero } from "../../../src/components/match/MatchHubConfirmedHero";
 import { MatchHubReadyHero } from "../../../src/components/match/MatchHubReadyHero";
+import { MatchHubPlayedPrompt } from "../../../src/components/match/MatchHubPlayedPrompt";
 import { MatchHubPreferredClubs } from "../../../src/components/match/MatchHubPreferredClubs";
 import { MatchHubPendingBookingSection } from "../../../src/components/match/MatchHubPendingBookingSection";
 import { MatchHubParticipants } from "../../../src/components/match/MatchHubParticipants";
@@ -347,6 +350,38 @@ export default function MatchHubScreen() {
 
   const hub = hubQuery.data;
   const booking = hub?.booking ?? null;
+
+  // "Did your match happen?": the server decides when it is open (agreed hour
+  // over, no court accepted in the app); only an accepted player can answer.
+  // Without this the reminder opened a hub with no way to reply.
+  const playedQuestionPossible =
+    hub?.viewer_status === "accepted" &&
+    (hub.status === "ready_to_book" || hub.status === "booking_pending");
+  const awaitingPlayedQuery = useQuery({
+    queryKey: ["match-awaiting-played", id],
+    queryFn: () => isMatchAwaitingPlayedAnswer(supabase, id!),
+    enabled: Boolean(id) && playedQuestionPossible,
+  });
+  const showPlayedPrompt =
+    playedQuestionPossible && awaitingPlayedQuery.data === true;
+  const playedMutation = useMutation({
+    mutationFn: (played: boolean) => answerMatchPlayed(supabase, id!, played),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["match-awaiting-played", id],
+      });
+      await invalidate();
+    },
+    onError: () => notify(t("matches.hub.playedPrompt.error")),
+  });
+  const handleNotPlayed = () =>
+    confirmAction({
+      title: t("matches.hub.playedPrompt.noConfirmTitle"),
+      message: t("matches.hub.playedPrompt.noConfirmBody"),
+      confirmLabel: t("matches.hub.playedPrompt.noConfirmAction"),
+      cancelLabel: t("common.cancel"),
+      onConfirm: () => playedMutation.mutate(false),
+    });
   const participants =
     (hub?.participants as HubParticipant[] | undefined) ?? [];
   const pendingRequests =
@@ -867,6 +902,20 @@ export default function MatchHubScreen() {
 
       {secondaryBannerBody ? (
         <StatusBanner body={secondaryBannerBody} tone="info" />
+      ) : null}
+
+      {showPlayedPrompt ? (
+        <MatchHubPlayedPrompt
+          pending={
+            playedMutation.isPending
+              ? playedMutation.variables
+                ? "played"
+                : "not_played"
+              : null
+          }
+          onPlayed={() => playedMutation.mutate(true)}
+          onNotPlayed={handleNotPlayed}
+        />
       ) : null}
 
       {primaryActionKind === "request_join" ? (

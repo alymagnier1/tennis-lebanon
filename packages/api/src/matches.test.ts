@@ -1,23 +1,26 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  acceptMatchInvite,
   acceptMatchInvitation,
+  acceptMatchInvite,
   addMatchTimeOption,
+  answerMatchPlayed,
+  cancelMatchInvite,
   castMatchTimeVote,
   createAndPublishMatch,
   createMatchDraft,
-  cancelMatchInvite,
   createMatchInvite,
   declineMatchInvitation,
   getMatchHub,
+  isMatchAwaitingPlayedAnswer,
   joinMatch,
   listAgreedTimeConflicts,
-  listMyMatchInvites,
-  listMyMatches,
   listMyCompletedMatches,
+  listMyMatches,
+  listMyMatchInvites,
   previewMatchInvite,
   publishMatch,
   removeMatchParticipant,
+  reportMatchPlayed,
   respondToJoinRequest,
   withdrawMatchTimeOption,
 } from "./matches";
@@ -353,5 +356,89 @@ describe("matches API wrappers", () => {
         endsAt: "2030-01-01T18:00:00.000Z",
       }),
     ).rejects.toEqual({ message: "boom" });
+  });
+
+  it("asks the server whether a match is awaiting a played answer", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: true, error: null });
+
+    await expect(isMatchAwaitingPlayedAnswer(client, "match-id")).resolves.toBe(
+      true,
+    );
+    expect(rpc).toHaveBeenCalledWith("match_awaiting_played_answer", {
+      p_match_id: "match-id",
+    });
+  });
+
+  it("treats anything but true as not awaiting", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    await expect(isMatchAwaitingPlayedAnswer(client, "match-id")).resolves.toBe(
+      false,
+    );
+  });
+
+  it("sends the played answer", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    await reportMatchPlayed(client, "match-id", true);
+
+    expect(rpc).toHaveBeenCalledWith("report_match_played", {
+      p_match_id: "match-id",
+      p_played: true,
+    });
+  });
+  it("records the answering player as played when they say yes", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    await answerMatchPlayed(client, "match-id", true);
+
+    expect(rpc).toHaveBeenNthCalledWith(1, "report_match_played", {
+      p_match_id: "match-id",
+      p_played: true,
+    });
+    expect(rpc).toHaveBeenNthCalledWith(2, "record_match_attendance", {
+      p_match_id: "match-id",
+      p_attendance: "attended",
+      p_note: undefined,
+    });
+  });
+
+  it("records no attendance when the match did not happen", async () => {
+    const { client, rpc } = createMockClient();
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    await answerMatchPlayed(client, "match-id", false);
+
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith("report_match_played", {
+      p_match_id: "match-id",
+      p_played: false,
+    });
+  });
+
+  it("still succeeds when attendance cannot be recorded", async () => {
+    const { client, rpc } = createMockClient();
+    rpc
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: null, error: { message: "failed" } });
+
+    await expect(
+      answerMatchPlayed(client, "match-id", true),
+    ).resolves.toBeUndefined();
+  });
+
+  it("fails without recording attendance when the answer is refused", async () => {
+    const { client, rpc } = createMockClient();
+    const refusal = { message: "match_not_awaiting_played_answer" };
+    rpc.mockResolvedValue({ data: null, error: refusal });
+
+    await expect(answerMatchPlayed(client, "match-id", true)).rejects.toBe(
+      refusal,
+    );
+    expect(rpc).toHaveBeenCalledTimes(1);
   });
 });
