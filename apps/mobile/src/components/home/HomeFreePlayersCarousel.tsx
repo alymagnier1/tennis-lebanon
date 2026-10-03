@@ -105,12 +105,12 @@ export function HomeFreePlayersCarousel({
   const positionedRef = useRef(false);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [stripWidth, setStripWidth] = useState(0);
-  // Native RTL mirrors the strip and its offsets; not verified on Android, so
-  // Arabic keeps the original edge (bounce and fling rewind only).
+  // Arabic keeps the original edge (bounce and fling rewind only): a mirrored
+  // strip has not been checked on a device.
   const leadingSlack = isRtl ? 0 : HOME_FREE_PLAYER_LEADING_SLACK_PX;
   const screenReaderEnabled = useScreenReaderEnabled();
-  // A screen reader must be able to scroll a focused card into view, and
-  // native RTL is unverified here, so both keep the ScrollView.
+  // A screen reader must be able to scroll a focused card into view, and the
+  // mirrored strip is unverified, so both keep the ScrollView.
   const useSnapStrip =
     Platform.OS === "android" && !isRtl && !screenReaderEnabled;
 
