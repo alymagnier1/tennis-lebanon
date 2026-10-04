@@ -38,6 +38,18 @@ describe("Beirut landing page copy", () => {
     expect(page).not.toContain("group is ready");
   });
 
+  it("ties the level hint and error to the level group", () => {
+    expect(page).toContain(
+      'id="level-field" aria-describedby="level-hint level-error"',
+    );
+  });
+
+  it("confirms only what a saved signup means, with no queue-jumping claim", () => {
+    expect(page).toContain("You’re on the Beirut list.");
+    expect(page).toContain("There’s nothing else you need to do.");
+    expect(page).not.toContain("sooner");
+  });
+
   it("uses the canonical URL for link previews", () => {
     expect(page).toContain(
       '<meta property="og:url" content="https://racketbound.com/beirut">',
