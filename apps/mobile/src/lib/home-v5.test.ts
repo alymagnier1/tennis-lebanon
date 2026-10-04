@@ -11,7 +11,6 @@ import {
   homeSetupNudge,
   homeTodoActions,
   homeTodoContext,
-  ratingPips,
   shortPlayerName,
 } from "./home-v5";
 
@@ -189,13 +188,5 @@ describe("beirutDayOffset", () => {
     expect(beirutDayOffset("2026-08-10T21:30:00.000Z", now)).toBe(1);
     expect(beirutDayOffset("2026-08-10T10:00:00.000Z", now)).toBe(0);
     expect(beirutDayOffset("2026-08-13T10:00:00.000Z", now)).toBe(3);
-  });
-});
-
-describe("ratingPips", () => {
-  it("fills one pip per rated match, clamped to the threshold", () => {
-    expect(ratingPips(2, 5)).toEqual([true, true, false, false, false]);
-    expect(ratingPips(9, 5)).toEqual([true, true, true, true, true]);
-    expect(ratingPips(-1, 3)).toEqual([false, false, false]);
   });
 });

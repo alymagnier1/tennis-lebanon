@@ -528,7 +528,6 @@
     "ratingProgress": {
       "title": "تقييمك",
       "progress": "{{done}} من {{threshold}} نتائج مؤكدة",
-      "short": "{{done}}/{{threshold}}",
       "remaining_one": "يتبقى مباراة واحدة حتى يظهر تقييمك.",
       "remaining_other": "يتبقى {{count}} مباريات حتى يظهر تقييمك.",
       "awaitingScore": "تُحتسب المباراة بعد تأكيد نتيجتها. مبارياتك المنتظِرة: {{pending}}.",

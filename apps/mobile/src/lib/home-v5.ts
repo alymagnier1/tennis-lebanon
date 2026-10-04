@@ -112,12 +112,3 @@ export function beirutDayOffset(iso: string, nowIso: string): number {
     toUtcMidnight(beirutDateKey(iso)) - toUtcMidnight(beirutDateKey(nowIso));
   return Math.round(diff / 86_400_000);
 }
-
-/** Filled pips for the provisional rating track. */
-export function ratingPips(
-  ratedMatchCount: number,
-  threshold: number,
-): boolean[] {
-  const done = Math.max(0, Math.min(threshold, Math.trunc(ratedMatchCount)));
-  return Array.from({ length: threshold }, (_, index) => index < done);
-}
