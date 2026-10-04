@@ -2,6 +2,15 @@
 
 Record decisions using this template:
 
+## 2026-10-04 — The Beirut landing page is shorter: one hero, one editorial note, one access answer
+
+- Status: accepted
+- Context: the page read like a generic startup waitlist (a partner-unavailable hook, a three-step process, FAQ accordions, a founder quote) and promised to help set up each player's first match.
+- Decision: hero "Find tennis players at your level." with one CTA; a short editorial section ("More options when you want to play."); a plain "When will I get access?" answer with two quiet notes; a closing "Join the first 50 players in Beirut." The contact-privacy line moves beside the contact field in the form. The first-match promise is removed from the hero and the success message. "First 50" is the community target, not a count of places left. On phones the artwork has its own row below the copy instead of sitting behind it.
+- Alternatives considered: keeping the steps or FAQ in a shorter form (rejected in the brief: more process than players need before joining).
+- Consequences: the privacy notice still says "when your group is ready" while the page says "when access is available"; align the notice at its next version. Signup behaviour, validation, consent, rate limiting and sharing are unchanged.
+- Owner: Founder
+
 ## 2026-10-03 — Native layout stays left to right; screens mirror Arabic themselves
 
 - Status: accepted. Supersedes the native-RTL part of the 2026-08-06 entry "Arabic RTL enabled in pilot locales"; Arabic stays a pilot locale.
