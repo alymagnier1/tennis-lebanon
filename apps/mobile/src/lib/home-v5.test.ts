@@ -7,6 +7,7 @@ import type {
 import type { HomeNextAction } from "./home-next-actions";
 import {
   beirutDayOffset,
+  greetingName,
   homeSetupNudge,
   homeTodoActions,
   homeTodoContext,
@@ -68,6 +69,18 @@ describe("shortPlayerName", () => {
 
   it("uppercases a lower-case initial", () => {
     expect(shortPlayerName("rami haddad")).toBe("rami H.");
+  });
+});
+
+describe("greetingName", () => {
+  it("greets by first name only", () => {
+    expect(greetingName("Bassem Khoury")).toBe("Bassem");
+    expect(greetingName("  Bassem  ")).toBe("Bassem");
+    expect(greetingName("Bassem")).toBe("Bassem");
+  });
+
+  it("returns nothing for no name", () => {
+    expect(greetingName("   ")).toBe("");
   });
 });
 

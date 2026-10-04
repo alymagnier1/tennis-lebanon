@@ -19,6 +19,15 @@ export function shortPlayerName(displayName: string): string {
 }
 
 /**
+ * "Bassem Khoury" → "Bassem", for "Hello, …" on Home. The greeting shares a
+ * row with the photo and the bell, which left room for about five letters of
+ * a name after "Hello, " (founder, 2026-10-04).
+ */
+export function greetingName(displayName: string): string {
+  return displayName.trim().split(/\s+/)[0] ?? "";
+}
+
+/**
  * The to-do card's list. Setup reminders are not to-dos here (they sit under
  * Who's free as one nudge), and a recruit prompt for the match already on the
  * board would repeat the board's own Invite button.

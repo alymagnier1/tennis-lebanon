@@ -42,6 +42,7 @@ import {
   type HomeNextAction,
 } from "../../lib/home-next-actions";
 import {
+  greetingName,
   homeSetupNudge,
   homeTodoActions,
   homeTodoContext,
@@ -296,8 +297,11 @@ export function HomeDashboardV5({ displayName }: { displayName: string }) {
               accessibilityRole="header"
               style={[styles.hello, { writingDirection }]}
               maxLines={1}
+              // Shrinks a long name before cutting it off.
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
             >
-              {t("home.greeting", { name: displayName })}
+              {t("home.greeting", { name: greetingName(displayName) })}
             </AppText>
             {playerProfile ? (
               <AppText
