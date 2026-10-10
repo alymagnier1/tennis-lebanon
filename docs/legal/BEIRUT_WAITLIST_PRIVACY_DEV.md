@@ -1,36 +1,48 @@
 # Beirut waitlist privacy notice
 
-Version: beirut-prelaunch-v1 · Updated 30 September 2026
+Updated 10 October 2026
 
-## About this list
+RacketBound brings together adult tennis players in Beirut. Completing the signup form adds you to our early-access list. It does not create an app account.
 
-RacketBound uses this form to bring together the first group of adult tennis players in Beirut. Joining creates a waitlist entry, not an account, and does not reserve a court.
+Your details are not visible to other players. We use them to organize app invitations, and we do not sell them or use them for advertising. You can ask us to remove your entry at any time.
+
+## Who is responsible
+
+Ali Moghnieh is responsible for RacketBound and the information collected through this waitlist. For questions about your information, email {{SUPPORT_EMAIL}}.
 
 ## What we collect
 
-- Your first name and chosen WhatsApp number or email address.
-- Your playing level, usual playing times, and court or Beirut area if you choose to provide it.
+- Your first name and the WhatsApp number or email address you choose for your invitation.
+- Your playing level, usual playing times, and the club or court you provide, if any.
 - Your confirmation that you are 18 or older and agree to receive a launch invitation.
-- The date you joined, the version of this notice, your invitation status and a request identifier used to avoid duplicate entries.
+- Your signup date, the privacy notice version, your invitation status and a request identifier that helps prevent duplicate entries.
+
+We save your waitlist entry only when you finish both steps and submit the form.
 
 ## How we use your details
 
-We use your playing preferences to form groups with overlapping levels, locations and availability. We contact you through your chosen method when your group is ready. Joining does not guarantee a match or immediate app access.
+We use your playing level, usual playing times and optional court information to plan the Beirut launch and decide when to send invitations. We will contact you by WhatsApp or email, whichever you selected. Joining the list does not guarantee a match or immediate app access.
 
-Other people on the list cannot see your details. We do not sell them or use them for advertising. Click and drop-off analytics are disabled on this page.
-
-## Keeping the form safe
-
-To limit repeated submissions, we keep a one-way hash derived from your connection’s IP address and the time of each allowed attempt. This table does not store your raw IP address or contact details. Attempts older than 24 hours are deleted by an hourly cleanup job, normally within 25 hours of collection.
+We do not track clicks or unfinished signups on the landing page.
 
 ## Who can access your details
 
-Authorized RacketBound operators can view the list to organize invitations. Our database provider, Supabase, processes the data for storage. Hosting providers may process connection information to deliver and protect the service, and processing may take place outside Lebanon. The list is not publicly accessible.
+RacketBound team members who manage invitations can access the list. Our database provider, Supabase, processes the information for storage. When we send an invitation, WhatsApp or the email service used to deliver it also processes the contact and message information needed for delivery.
 
-## How long we keep them
+Hosting providers may process connection information to deliver and protect the service. Processing may take place outside Lebanon. The waitlist is not publicly accessible.
 
-We keep your waitlist entry until you ask us to remove it or the Beirut prelaunch list closes. Closing the list requires RacketBound to remove its entries. You do not need an account to request removal.
+## Keeping the form safe
 
-## Your choices
+To prevent repeated or automated submissions, we temporarily store a coded identifier derived from your IP address and the time of each allowed submission attempt. These security records contain no raw IP address or contact details and are normally deleted within 25 hours.
 
-You can ask for your waitlist details to be corrected or removed using the contact address below. Use the email or WhatsApp number you joined with so we can identify your entry. We may ask you to confirm that the contact belongs to you before changing or deleting it.
+## How long we keep your details
+
+Your waitlist entry expires 12 months after signup. We automatically remove expired entries, normally within one hour of expiry. We remove your entry sooner if you ask us to, or when the Beirut prelaunch list closes, whichever happens first.
+
+This period applies to the waitlist entry. If you later create an app account, the app's privacy notice explains how account information is handled.
+
+## Update your details or leave the list
+
+To correct your details or leave the list, email {{SUPPORT_EMAIL}}. Include the email address or WhatsApp number you used to sign up. We may ask you to verify that contact before making changes. You do not need an app account to make a request.
+
+Version: beirut-prelaunch-v2

@@ -1,3 +1,4 @@
+import { PRELAUNCH_CONSENT_VERSION } from "@tennis-lebanon/domain";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,6 +23,15 @@ const en = JSON.parse(
 };
 
 describe("Beirut landing page copy", () => {
+  it("keeps the form and published privacy notice on the current consent version", () => {
+    const notice = readFileSync(
+      path.join(repo, "docs/legal/BEIRUT_WAITLIST_PRIVACY_DEV.md"),
+      "utf8",
+    );
+    expect(page).toContain(`consentVersion:'${PRELAUNCH_CONSENT_VERSION}'`);
+    expect(notice).toContain(`Version: ${PRELAUNCH_CONSENT_VERSION}`);
+  });
+
   it("describes each level exactly as the app's onboarding does", () => {
     const bands = en.onboarding.tennis.bands;
     for (const [band, description] of Object.entries(bands)) {

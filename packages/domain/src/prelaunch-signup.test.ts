@@ -43,6 +43,20 @@ describe("normalizePrelaunchPhone", () => {
 });
 
 describe("parsePrelaunchSignup", () => {
+  it("records the notice version actually shown, including an already-open v1 form", () => {
+    for (const consentVersion of [
+      PRELAUNCH_CONSENT_VERSION,
+      "beirut-prelaunch-v1",
+    ]) {
+      const parsed = parsePrelaunchSignup(body({ consentVersion }));
+      expect(parsed.ok).toBe(true);
+      if (parsed.ok) expect(parsed.row.consentVersion).toBe(consentVersion);
+    }
+    expect(
+      parsePrelaunchSignup(body({ consentVersion: "unknown-notice" })).ok,
+    ).toBe(false);
+  });
+
   it("normalizes a valid WhatsApp signup", () => {
     const parsed = parsePrelaunchSignup(body());
     expect(parsed.ok).toBe(true);

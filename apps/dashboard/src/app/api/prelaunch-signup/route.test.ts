@@ -63,6 +63,16 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 describe("public waitlist endpoint", () => {
+  it("stores the v2 notice version submitted by the current form", async () => {
+    const response = await POST(
+      request({ ...body, consentVersion: "beirut-prelaunch-v2" }),
+    );
+    expect(response.status).toBe(200);
+    expect(mocks.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ consent_version: "beirut-prelaunch-v2" }),
+    );
+  });
+
   it("returns a recoverable failure on connection loss", async () => {
     mocks.from.mockRejectedValue(new TypeError("offline"));
     expect((await POST(request())).status).toBe(503);

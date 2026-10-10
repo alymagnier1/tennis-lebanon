@@ -3,7 +3,10 @@
  * A valid result is a row to insert. It is not an account.
  */
 
-export const PRELAUNCH_CONSENT_VERSION = "beirut-prelaunch-v1";
+export const PRELAUNCH_CONSENT_VERSION = "beirut-prelaunch-v2";
+// Preserve the version shown in an already-open v1 form during rollout.
+type PrelaunchConsentVersion =
+  typeof PRELAUNCH_CONSENT_VERSION | "beirut-prelaunch-v1";
 export const PRELAUNCH_COMMUNITY = "beirut";
 
 /** Signup attempts allowed from one hashed address inside the window. */
@@ -44,7 +47,7 @@ export type PrelaunchSignupInsert = {
   court: string | null;
   availability: PrelaunchSlot[];
   community: typeof PRELAUNCH_COMMUNITY;
-  consentVersion: typeof PRELAUNCH_CONSENT_VERSION;
+  consentVersion: PrelaunchConsentVersion;
   idempotencyKey: string;
 };
 
@@ -137,7 +140,10 @@ export function parsePrelaunchSignup(
   if (body.community !== PRELAUNCH_COMMUNITY) {
     return { ok: false };
   }
-  if (body.consentVersion !== PRELAUNCH_CONSENT_VERSION) {
+  if (
+    body.consentVersion !== PRELAUNCH_CONSENT_VERSION &&
+    body.consentVersion !== "beirut-prelaunch-v1"
+  ) {
     return { ok: false };
   }
   if (
@@ -157,7 +163,7 @@ export function parsePrelaunchSignup(
       court: court || null,
       availability,
       community: PRELAUNCH_COMMUNITY,
-      consentVersion: PRELAUNCH_CONSENT_VERSION,
+      consentVersion: body.consentVersion,
       idempotencyKey: body.idempotencyKey,
     },
   };
