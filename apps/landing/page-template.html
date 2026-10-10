@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C382E">
 <title>RacketBound Beirut · Find tennis players at your level</title>
-<meta name="description" content="Meet more people to play tennis with in Beirut. Join early and get notified when app access opens. Free to join, 18+.">
+<meta name="description" content="Find tennis players at your level in Beirut. Join the RacketBound early-access list and get invited when the app opens. Free to join the list, 18+.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="RacketBound">
 <meta property="og:title" content="Find tennis players at your level in Beirut">
-<meta property="og:description" content="Meet more people to play tennis with in Beirut. Join early and get notified when app access opens. Free to join, 18+.">
+<meta property="og:description" content="Find tennis players at your level in Beirut. Join the RacketBound early-access list and get invited when the app opens. Free to join the list, 18+.">
 <meta property="og:image" content="racketbound-og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -98,6 +98,14 @@ dialog{width:min(570px,calc(100% - 40px));max-height:calc(100dvh - 48px);border:
 .done-badge{width:56px;height:56px;border-radius:16px;margin-bottom:12px}.done-logo{width:32px;height:27px}.done h3#done-title{font-size:28px}.done>#done-message{margin-top:10px}.invite{margin-top:20px}.done-close{margin-top:6px}
 /* Scroll motion: layered hero and gentle section reveals. CSS scroll-driven animations only (no script on scroll); off with reduced motion, and simply absent in browsers without support. */@keyframes rb-art{from{object-position:center 74%;transform:scale(1)}to{object-position:center 94%;transform:scale(1.03)}}@keyframes rb-copy{from{transform:translateY(0);opacity:1}to{transform:translateY(-56px);opacity:.25}}@keyframes rb-reveal{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}@media(prefers-reduced-motion:no-preference){@supports(animation-timeline:scroll()){.hero-art{transform-origin:60% 100%;will-change:transform;animation:rb-art linear both;animation-timeline:scroll(root);animation-range:0 60vh}.hero-copy{animation:rb-copy linear both;animation-timeline:scroll(root);animation-range:0 75vh}.story-copy,.access-layout>div,.closing .wrap>*{animation:rb-reveal linear both;animation-timeline:view();animation-range:entry 0% entry 100%}}}
 @keyframes rb-art-wide{from{object-position:54% 60%;transform:scale(1)}to{object-position:54% 86%;transform:scale(1.04)}}@media(min-width:761px) and (prefers-reduced-motion:no-preference){@supports(animation-timeline:scroll()){.hero-art{transform-origin:70% 100%;animation-name:rb-art-wide}}}
+/* Keep the approved why/how copy together, with a clear hierarchy on small screens. */
+.story-intro{margin-top:20px;max-width:42ch;font-size:17px;line-height:1.75;color:var(--muted)}
+.story-copy h3{font-size:clamp(25px,2.5vw,30px);font-weight:600;line-height:1.2}
+.story-copy .story-lead{margin-top:20px}
+.access-answer+.access-answer{margin-top:18px}
+.closing-copy{max-width:660px}.closing-copy>p{margin-top:20px;max-width:52ch;font-size:16px;line-height:1.7;color:#D0D9D1}
+.closing-action{flex:0 0 250px}.closing-action .button{width:100%}.closing-action>p{margin-top:12px;font-size:13px;line-height:1.6;color:#D0D9D1;text-align:center}
+@media(max-width:760px){.story-layout{gap:32px}.story-intro{font-size:16px;margin-top:18px}.story-copy .story-lead{margin-top:16px}.closing-action{max-width:300px}.closing-action>p{text-align:left}}
 </style>
 </head>
 <body>
@@ -108,20 +116,64 @@ dialog{width:min(570px,calc(100% - 40px));max-height:calc(100dvh - 48px);border:
   <div class="wrap hero-body"><div class="hero-grid"><div class="hero-copy">
     <p class="eyebrow">Beirut · Early access</p>
     <h1>Find tennis players <span>at your level.</span></h1>
-    <p class="promise">Meet more people to play with in Beirut through RacketBound. Join early and get notified when app access opens.</p>
+    <p class="promise">Meet more people to play with in Beirut. Join the RacketBound early-access list and get invited when the app opens.</p>
     <div class="actions"><a class="button lime" href="#join" data-join data-cta="hero">Get my invite <span class="arrow" aria-hidden="true">→</span></a></div>
-    <p class="micro">Free to join · 18+</p>
+    <p class="micro">Free to join the list · 18+</p>
   </div></div></div>
   <img class="hero-art" src="/beirut/racketbound-hero.webp" width="841" height="1870" alt="" aria-hidden="true" fetchpriority="high" decoding="async">
 </header>
 <main id="main">
-  <section class="section story" id="more-options" aria-labelledby="story-title"><div class="wrap story-layout"><h2 id="story-title">More options when you want to play.</h2><div class="story-copy"><p class="story-lead">A regular hitting partner. Someone for a casual match. A fourth for doubles.</p><p>RacketBound helps you meet other tennis players in Beirut, so your next game doesn’t depend on the same few people being free.</p></div></div></section>
-  <section class="section access" id="access" aria-labelledby="access-title"><div class="wrap access-layout"><h2 id="access-title">When will I get access?</h2><div><p class="access-answer">We’re inviting players as enough people at similar levels join in Beirut. We’ll contact you by your chosen method when access is available.</p><ul class="notes"><li>Court bookings and fees are arranged separately.</li></ul></div></div></section>
-  <section class="section next" id="whats-next" aria-labelledby="next-title"><div class="wrap"><p class="eyebrow">What’s next</p><h2 id="next-title">More ways to enjoy your tennis.</h2><p class="next-intro">We’re starting with helping Beirut players find each other. Here’s what we’re planning next.</p><ul class="next-list"><li><h3>Coach-verified levels</h3><p>An on-court Grip Test with a certified coach appointed by RacketBound, at a designated location.</p></li><li><h3>Local leagues</h3><p>More opportunities to compete and play regularly with the Beirut community.</p></li><li><h3>Find a coach</h3><p>Connect with coaches to work on your game.</p></li></ul><p class="next-note">These features are planned for later and aren’t included in initial access.</p></div></section>
-  <section class="closing" id="closing" aria-labelledby="closing-title"><div class="wrap"><h2 id="closing-title">Join early and get notified.</h2><a class="button lime" href="#join" data-join data-cta="closing">Get my invite <span class="arrow" aria-hidden="true">→</span></a></div></section>
+  <section class="section story" id="more-options" aria-labelledby="story-title">
+    <div class="wrap story-layout">
+      <div class="story-why">
+        <h2 id="story-title">Don’t let a game go unplayed.</h2>
+        <p class="story-intro">You have the time. You want to play. All that’s missing is someone on the other side of the net.</p>
+      </div>
+      <div class="story-copy">
+        <h3>Expand your tennis circle.</h3>
+        <p class="story-lead">A regular hitting partner. Someone for a singles match. A fourth for doubles.</p>
+        <p>RacketBound helps you connect with players at a similar level, find a time that works and make plans to play.</p>
+      </div>
+    </div>
+  </section>
+  <section class="section access" id="access" aria-labelledby="access-title">
+    <div class="wrap access-layout">
+      <h2 id="access-title">Beirut comes first.</h2>
+      <div>
+        <p class="access-answer">We’re starting in one city to build a community where players can actually meet on court.</p>
+        <p class="access-answer">We’ll open app access as enough players at similar levels join the list. When your invitation is ready, we’ll send it by WhatsApp or email—whichever you choose.</p>
+        <ul class="notes"><li>You arrange court bookings and pay any court fees separately.</li></ul>
+      </div>
+    </div>
+  </section>
+  <section class="section next" id="whats-next" aria-labelledby="next-title">
+    <div class="wrap">
+      <p class="eyebrow">Planned for later</p>
+      <h2 id="next-title">More ways to grow your game.</h2>
+      <p class="next-intro">As the community grows, we’re planning:</p>
+      <ul class="next-list">
+        <li><h3>Coach-verified levels</h3><p>Get a coach-verified playing level through the Grip Test: an on-court assessment with a certified coach appointed by RacketBound, held at a designated location.</p></li>
+        <li><h3>Local leagues</h3><p>Enjoy regular competition with other players in Beirut.</p></li>
+        <li><h3>Find a coach</h3><p>Connect with a coach to work on your game.</p></li>
+      </ul>
+      <p class="next-note">These features are planned for later and won’t be available at launch.</p>
+    </div>
+  </section>
+  <section class="closing" id="closing" aria-labelledby="closing-title">
+    <div class="wrap">
+      <div class="closing-copy">
+        <h2 id="closing-title">Your next game starts here.</h2>
+        <p>Join Beirut’s first RacketBound community. Tell us your level and when you usually play, and we’ll contact you when app access opens for you.</p>
+      </div>
+      <div class="closing-action">
+        <a class="button lime" href="#join" data-join data-cta="closing">Get my invite <span class="arrow" aria-hidden="true">→</span></a>
+        <p>Joining the list doesn’t create an account.</p>
+      </div>
+    </div>
+  </section>
 </main>
 <footer><div class="wrap"><div class="foot"><div><a href="#top" class="brand"><svg class="brand-mark" aria-hidden="true"><use href="#logo"/></svg>RacketBound</a></div><div class="footer-right"><a href="/beirut/privacy" target="_blank" rel="noopener" id="privacy-open">Privacy</a><p class="contact">Questions? <a href="mailto:support@racketbound.com">support@racketbound.com</a></p><p>© 2026 RacketBound · Beirut first</p></div></div></div></footer>
-<div class="sticky" id="sticky" hidden><p><b>RacketBound early access</b>Free to join · About a minute</p><a class="button green" href="#join" data-join data-cta="sticky">Get my invite</a></div>
+<div class="sticky" id="sticky" hidden><p><b>RacketBound early access</b>Free to join the list · 18+</p><a class="button green" href="#join" data-join data-cta="sticky">Get my invite</a></div>
 <noscript><p class="no-js">Please enable JavaScript to open the signup form.</p></noscript>
 
 <dialog id="join" aria-labelledby="join-title" aria-describedby="join-progress">
@@ -204,7 +256,7 @@ dialog{width:min(570px,calc(100% - 40px));max-height:calc(100dvh - 48px);border:
   form.addEventListener('input',e=>{const el=e.target;if(el.getAttribute('aria-invalid')==='true'){el.setAttribute('aria-invalid','false');const errorId=el.getAttribute('aria-describedby')?.split(' ').find(id=>id.endsWith('-error'));if(errorId)$('#'+errorId).hidden=true;}if(e.target.name==='availability')error('#availability-field','#availability-error',false);if(e.target.name==='level')error('#level-field','#level-error',false);});
   function complete(){track('signup_completed',{mode:live?'live':'preview'});saved=true;form.hidden=true;$('#preview-note').hidden=true;$('#done').hidden=false;join.classList.add('is-done');join.setAttribute('aria-labelledby','done-title');join.removeAttribute('aria-describedby');if(live){$('#done-eyebrow').hidden=true;$('#done-title').textContent='You’re on the Beirut list.';$('#done-message').textContent='We’ll send your app invitation by '+(channel==='email'?'email':'WhatsApp')+' when access opens for you. There’s nothing else you need to do.';if(CONFIG.shareUrl){$('#invite').hidden=false;$('#share').href='https://wa.me/?text='+encodeURIComponent('I’m on the RacketBound list for tennis players in Beirut. Have a look: '+CONFIG.shareUrl);}}join.scrollTop=0;$('#done-title').focus();}
   form.addEventListener('submit',async e=>{e.preventDefault();if(busy||saved)return;const valid=step===1?checkStep1():checkStep2();if(!valid){const n=$$('#step'+step+' [aria-invalid=true]').length,sum=$('#step'+step+'-summary');sum.textContent='';setTimeout(()=>{sum.textContent=n===1?'1 thing needs fixing.':n+' things need fixing.';},50);const bad=$('#step'+step+' [aria-invalid=true]');if(bad.matches('fieldset')){bad.scrollIntoView({block:'start'});bad.querySelector('input').focus({preventScroll:true});}else bad.focus();return;}if(step===1){track('signup_step1_completed');showStep(2);return;}if(!live){complete();return;}
-    const payload={firstName:$('#first-name').value.trim(),channel,contact:channel==='whatsapp'?normalizePhone($('#contact').value):$('#contact').value.trim(),level:$('input[name=level]:checked').value,court:$('#court').value.trim(),availability:$$('input[name=availability]:checked').map(i=>i.value),adultAndContactConsent:$('#consent').checked,community:'beirut',consentVersion:'beirut-prelaunch-v1',idempotencyKey:attemptId};
+    const payload={firstName:$('#first-name').value.trim(),channel,contact:channel==='whatsapp'?normalizePhone($('#contact').value):$('#contact').value.trim(),level:$('input[name=level]:checked').value,court:$('#court').value.trim(),availability:$$('input[name=availability]:checked').map(i=>i.value),adultAndContactConsent:$('#consent').checked,community:'beirut',consentVersion:'beirut-prelaunch-v2',idempotencyKey:attemptId};
     const fingerprint=JSON.stringify({...payload,idempotencyKey:undefined});if(lastPayload&&lastPayload!==fingerprint)attemptId=newAttemptId();lastPayload=fingerprint;payload.idempotencyKey=attemptId;
     busy=true;$('#submit-error').hidden=true;$('#finish').disabled=true;$('#back').disabled=true;$('#finish').textContent='Sending…';form.setAttribute('aria-busy','true');const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
     try{const response=await fetch(CONFIG.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':attemptId},body:JSON.stringify(payload),signal:controller.signal});if(response.status===429){const seconds=Number(response.headers.get('Retry-After'));const minutes=Number.isFinite(seconds)&&seconds>0?Math.ceil(seconds/60):60;throw new Error('Too many attempts from this connection. Your details are still here. Try again in '+minutes+' minute'+(minutes===1?'':'s')+'.');}if(response.status===503)throw new Error('Signups are temporarily unavailable. Your details are still here. Please try again later.');if(!response.ok)throw new Error('We couldn’t confirm your signup. Your details are still here. Please try again.');const result=await response.json();if(result.ok!==true)throw Error('Save not confirmed');complete();}catch(error){ track('signup_failed');$('#submit-error').textContent=error instanceof Error&&error.message.startsWith('Too many attempts')||error instanceof Error&&error.message.startsWith('Signups are temporarily')?error.message:'We couldn’t confirm your signup. Your details are still here. Please try again.';$('#submit-error').hidden=false;}finally{clearTimeout(timer);busy=false;$('#finish').disabled=false;$('#back').disabled=false;$('#finish').textContent='Get my invite';form.removeAttribute('aria-busy');}
