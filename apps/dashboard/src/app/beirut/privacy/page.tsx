@@ -4,6 +4,9 @@ import styles from "./privacy.module.css";
 
 export const metadata = {
   title: "Beirut waitlist privacy · RacketBound",
+  icons: {
+    icon: { url: "/beirut/racketbound-logo.svg", type: "image/svg+xml" },
+  },
   description:
     "How RacketBound uses and protects your Beirut waitlist details, how long we keep them, and how to leave the list.",
 };

@@ -25,13 +25,13 @@ template = template.replace(
 )
 base = SITE_URL.rstrip("/")
 template = template.replace(
-    '<meta property="og:image" content="racketbound-og.jpg">',
-    f'<meta property="og:url" content="{base}">\n<meta property="og:image" content="{base}/racketbound-og.jpg">',
+    '<meta property="og:image" content="racketbound-og-logo-v2.jpg">',
+    f'<meta property="og:url" content="{base}">\n<meta property="og:image" content="{base}/racketbound-og-logo-v2.jpg">',
 )
 page = template.replace("<!-- BALL -->", ball)
 public.mkdir(parents=True, exist_ok=True)
 (public / "index.html").write_text(page, encoding="utf-8")
-for name in ("racketbound-hero.webp", "racketbound-og.jpg"):
+for name in ("racketbound-hero.webp", "racketbound-og-logo-v2.jpg", "racketbound-logo.svg"):
     shutil.copyfile(root / name, public / name)
 (root / "syntax-check.js").write_text(
     re.search(r"<script>(.*?)</script>", template, re.S).group(1),
