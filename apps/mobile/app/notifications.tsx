@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { createLiveSheet } from "../src/theme/create-live-sheet";
 import { router } from "expo-router";
@@ -11,27 +11,31 @@ import {
   markAllNotificationsRead,
 } from "@tennis-lebanon/api";
 import { AppText } from "../src/components/AppText";
-import { Icon } from "../src/components/Icon";
-import { ListSkeleton } from "../src/components/AppUi";
+import { EmptyState, ListSkeleton } from "../src/components/AppUi";
 import { Screen, ScreenError } from "../src/components/FormUi";
-import { formatUtcInBeirut } from "../src/lib/beirut-time";
+import { NotificationCard } from "../src/components/notifications/NotificationCard";
+import { formatUtcTimeInBeirut } from "../src/lib/beirut-time";
+import { useLayoutDirection } from "../src/lib/layout-direction";
 import { resolveNotificationCopy } from "../src/lib/notification-copy";
 import { resolveNotificationHref } from "../src/lib/notification-deep-link";
+import {
+  groupNotificationsByDay,
+  notificationLook,
+  type NotificationDayLabel,
+} from "../src/lib/notification-list";
 import { supabase } from "../src/lib/supabase";
-import { tennisColors, tennisRadii } from "../src/theme/tennis-tokens";
+import { tennisColors } from "../src/theme/tennis-tokens";
 import { tennisFontFamily } from "../src/hooks/useTennisFonts";
 
-function notificationIcon(
-  kind: string,
-): "notifications" | "calendar" | "place" | "info" {
-  if (kind.includes("invite")) return "notifications";
-  if (kind.includes("vote") || kind.includes("time")) return "calendar";
-  if (kind.includes("booking") || kind.includes("court")) return "place";
-  return "info";
+/** A day key read at noon UTC, so no time zone can move it to another day. */
+function dayKeyDate(dateKey: string): Date {
+  return new Date(`${dateKey}T12:00:00Z`);
 }
 
 export default function NotificationsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage ?? i18n.language;
+  const { rowDirection, writingDirection } = useLayoutDirection();
   const queryClient = useQueryClient();
 
   const notificationsQuery = useQuery({
@@ -59,7 +63,7 @@ export default function NotificationsScreen() {
     await queryClient.invalidateQueries({
       queryKey: ["user-notifications-unread"],
     });
-  }, [notificationsQuery.data, queryClient]);
+  }, [queryClient]);
 
   const openNotification = useCallback(
     async (row: UserNotificationRow) => {
@@ -75,27 +79,68 @@ export default function NotificationsScreen() {
     [markReadMutation],
   );
 
-  const rows = notificationsQuery.data ?? [];
-  const hasUnread = rows.some((row) => !row.read_at);
+  const rows = useMemo(
+    () => notificationsQuery.data ?? [],
+    [notificationsQuery.data],
+  );
+  const unreadCount = rows.filter((row) => !row.read_at).length;
+  const groups = useMemo(
+    () => groupNotificationsByDay(rows, new Date().toISOString()),
+    [rows],
+  );
+
+  const dayHeading = (label: NotificationDayLabel): string => {
+    switch (label.kind) {
+      case "today":
+        return t("notifications.today");
+      case "yesterday":
+        return t("notifications.yesterday");
+      case "weekday":
+        return new Intl.DateTimeFormat(locale, {
+          weekday: "long",
+          timeZone: "UTC",
+        }).format(dayKeyDate(label.dateKey));
+      case "date":
+        return new Intl.DateTimeFormat(locale, {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          timeZone: "UTC",
+        }).format(dayKeyDate(label.dateKey));
+    }
+  };
+
+  const showEmpty =
+    !notificationsQuery.isLoading &&
+    !notificationsQuery.isError &&
+    rows.length === 0;
 
   return (
     <Screen
       onBack={() => router.back()}
       title={t("notifications.centerTitle")}
-      description={t("notifications.centerDescription")}
       refreshing={notificationsQuery.isRefetching}
       onRefresh={() => void notificationsQuery.refetch()}
       fixedHeader={
-        hasUnread ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => void markAllRead()}
-            style={styles.markAll}
-          >
-            <AppText style={styles.markAllLabel}>
-              {t("notifications.markAllRead")}
+        unreadCount > 0 ? (
+          <View style={[styles.unreadBar, { flexDirection: rowDirection }]}>
+            <AppText style={[styles.unreadCount, { writingDirection }]}>
+              {t("notifications.unreadCount", { count: unreadCount })}
             </AppText>
-          </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void markAllRead()}
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.markAll,
+                pressed && styles.markAllPressed,
+              ]}
+            >
+              <AppText style={styles.markAllLabel}>
+                {t("notifications.markAllRead")}
+              </AppText>
+            </Pressable>
+          </View>
         ) : null
       }
     >
@@ -109,54 +154,44 @@ export default function NotificationsScreen() {
         />
       ) : null}
 
-      {!notificationsQuery.isLoading &&
-      !notificationsQuery.isError &&
-      rows.length === 0 ? (
-        <AppText style={styles.empty}>{t("notifications.empty")}</AppText>
+      {showEmpty ? (
+        <EmptyState
+          icon="notifications"
+          title={t("notifications.empty")}
+          body={t("notifications.emptyBody")}
+        />
       ) : null}
 
-      <View style={styles.list}>
-        {rows.map((row) => {
-          const copy = resolveNotificationCopy(
-            { kind: row.kind, payload: row.payload },
-            t,
-          );
-          const timestamp = formatUtcInBeirut(row.sent_at ?? row.created_at);
-          return (
-            <Pressable
-              key={row.id}
-              accessibilityRole="button"
-              accessibilityLabel={[
-                row.read_at ? null : t("notifications.unreadItem"),
-                copy.title,
-                copy.body,
-                timestamp,
-              ]
-                .filter(Boolean)
-                .join(". ")}
-              onPress={() => void openNotification(row)}
-              style={({ pressed }) => [
-                styles.row,
-                !row.read_at && styles.rowUnread,
-                pressed && styles.rowPressed,
-              ]}
+      <View style={styles.days}>
+        {groups.map((group) => (
+          <View key={group.dateKey} style={styles.day}>
+            <AppText
+              accessibilityRole="header"
+              style={[styles.dayHeading, { writingDirection }]}
             >
-              <View style={styles.iconWrap}>
-                <Icon
-                  name={notificationIcon(row.kind)}
-                  size={18}
-                  color={tennisColors.primary}
-                />
-              </View>
-              <View style={styles.rowContent}>
-                <AppText style={styles.rowTitle}>{copy.title}</AppText>
-                <AppText style={styles.rowBody}>{copy.body}</AppText>
-                <AppText style={styles.rowTime}>{timestamp}</AppText>
-              </View>
-              {!row.read_at ? <View style={styles.unreadDot} /> : null}
-            </Pressable>
-          );
-        })}
+              {dayHeading(group.label)}
+            </AppText>
+            <View style={styles.cards}>
+              {group.rows.map((row) => {
+                const copy = resolveNotificationCopy(
+                  { kind: row.kind, payload: row.payload },
+                  t,
+                );
+                return (
+                  <NotificationCard
+                    key={row.id}
+                    title={copy.title}
+                    body={copy.body}
+                    time={formatUtcTimeInBeirut(row.scheduled_at)}
+                    unread={!row.read_at}
+                    look={notificationLook(row.kind)}
+                    onPress={() => void openNotification(row)}
+                  />
+                );
+              })}
+            </View>
+          </View>
+        ))}
       </View>
     </Screen>
   );
@@ -164,78 +199,43 @@ export default function NotificationsScreen() {
 
 const styles = createLiveSheet(() =>
   StyleSheet.create({
+    unreadBar: {
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+      marginBottom: 8,
+    },
+    unreadCount: {
+      fontFamily: tennisFontFamily.body,
+      fontSize: 13,
+      color: tennisColors.mutedForeground,
+    },
     markAll: {
-      alignSelf: "flex-start",
       minHeight: 36,
       justifyContent: "center",
-      marginBottom: 8,
+    },
+    markAllPressed: {
+      opacity: 0.7,
     },
     markAllLabel: {
       fontFamily: tennisFontFamily.bodySemi,
       fontSize: 13,
-      color: tennisColors.primary,
+      color: tennisColors.linkText,
     },
-    list: {
+    days: {
+      gap: 22,
+    },
+    day: {
       gap: 10,
     },
-    row: {
-      backgroundColor: tennisColors.card,
-      borderRadius: tennisRadii.lg,
-      borderWidth: 1,
-      borderColor: tennisColors.border,
-      padding: 14,
-      flexDirection: "row",
-      alignItems: "flex-start",
-      gap: 12,
-    },
-    rowUnread: {
-      borderColor: tennisColors.primary,
-      backgroundColor: tennisColors.secondary,
-    },
-    rowPressed: {
-      opacity: 0.92,
-    },
-    iconWrap: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: tennisColors.muted,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    rowContent: {
-      flex: 1,
-      gap: 4,
-    },
-    rowTitle: {
+    dayHeading: {
       fontFamily: tennisFontFamily.bodySemi,
-      fontSize: 15,
-      color: tennisColors.primaryDark,
-    },
-    rowBody: {
-      fontFamily: tennisFontFamily.body,
       fontSize: 13,
-      color: tennisColors.mutedForeground,
-      lineHeight: 18,
-    },
-    rowTime: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 11,
+      letterSpacing: 0.2,
       color: tennisColors.mutedForeground,
     },
-    unreadDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: tennisColors.lime,
-      marginTop: 6,
-    },
-    empty: {
-      fontFamily: tennisFontFamily.body,
-      fontSize: 14,
-      color: tennisColors.mutedForeground,
-      textAlign: "center",
-      paddingVertical: 24,
+    cards: {
+      gap: 8,
     },
   }),
 );

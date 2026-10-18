@@ -642,9 +642,8 @@
       "openSettings": "Open settings",
       "dismiss": "Not now"
     },
-    "centerDescription": "Updates about invites, votes, bookings, and reminders.",
     "loadError": "We could not load your notifications.",
-    "empty": "You are all caught up.",
+    "empty": "You're all caught up",
     "markAllRead": "Mark all read",
     "fallbackTitle": "RacketBound",
     "fallbackBody": "Open the app for an update.",
@@ -673,106 +672,111 @@
     "kinds": {
       "match_invitation": {
         "title": "{{name}} invited you to play",
-        "body": "Open it to accept or decline."
+        "body": "Tap to accept or decline."
       },
       "match_invitation_superseded": {
         "title": "That match filled up",
-        "body": "The spot you were invited to has gone. Other matches near you are still looking for players."
+        "body": "Other matches near you still need players."
       },
       "match_seat_reopened": {
         "title": "A spot opened up",
-        "body": "Someone dropped out of a match you were invited to. Your invite is back in Matches."
+        "body": "Someone dropped out. Your invite is back on."
       },
       "stale_match_reminder": {
         "title": "Your match expires soon",
-        "body": "Nobody has locked a time yet. Add one or extend the listing."
+        "body": "No time agreed yet. Add one or keep it open."
       },
       "match_expired": {
         "title": "Your match expired",
-        "body": "Nobody locked a time in. Create a new one when you are ready to play."
+        "body": "No time was agreed. Start a new one anytime."
       },
       "match_cancelled": {
         "title": "Your match was cancelled",
-        "body": "Open the match to see the reason."
+        "body": "Tap to see why."
       },
       "booking_pending_club": {
-        "title": "The club replied about your court",
-        "body": "Open the match to see whether your court is confirmed."
+        "title": "The club replied",
+        "body": "Tap to see if your court is confirmed."
       },
       "booking_stale_participant": {
-        "title": "Your court is still unconfirmed",
-        "body": "The club has not replied yet. Chase it or try another club."
+        "title": "Court not confirmed yet",
+        "body": "The club hasn't replied. Chase it or try another club."
       },
       "attendance_prompt": {
-        "title": "Your match is waiting on you",
-        "body": "Say whether you played so the result can count."
+        "title": "Did you play?",
+        "body": "Let us know so the result counts."
       },
       "match_time_changed": {
-        "title": "The host moved your match",
-        "body": "Check the new time and make sure it still works for you."
+        "title": "Your match has a new time",
+        "body": "Check it still works for you."
       },
       "match_court_confirmed": {
         "title": "Your court is booked",
-        "body": "The match is confirmed. Open it to check the details before you go."
+        "body": "You're all set. Tap for the details."
       },
       "match_court_released": {
         "title": "Your court fell through",
-        "body": "{{clubName}} at {{startsAt}} is gone. The match still needs a court."
+        "body": "{{clubName}} at {{startsAt}} is off. Find another court."
       },
       "court_first_roster_short": {
         "title": "Court booked, players missing",
-        "body": "Your court at {{clubName}} is on {{startsAt}}. Spots still open: {{spotsLeft}}. Invite someone or release the court."
+        "body": "{{clubName}}, {{startsAt}}. Spots open: {{spotsLeft}}."
       },
       "match_played_prompt": {
         "title": "Did your match happen?",
-        "body": "Your match on {{startsAt}} never got a court in the app. Tell us if it happened so the result still counts."
+        "body": "Your match on {{startsAt}} had no court in the app. Did you play?"
       },
       "match_played_confirmed": {
-        "title": "Your match counts once you confirm",
-        "body": "Confirm you played and add the score so the result stands."
+        "title": "Confirm you played",
+        "body": "Add the score so the result counts."
       },
       "match_join_request": {
-        "title": "Someone asked to join your match",
-        "body": "A player is waiting on your answer. Open it to accept or decline."
+        "title": "Someone wants to join",
+        "body": "Tap to accept or decline."
       },
       "match_request_accepted": {
-        "title": "You are in the match",
-        "body": "The host accepted your request. Open it to see the time and where you are playing."
+        "title": "You're in!",
+        "body": "The host accepted you. Tap for time and place."
       },
       "match_request_declined": {
-        "title": "Your request was not accepted",
-        "body": "The host went with someone else this time. Other matches are still looking for players."
+        "title": "Request not accepted",
+        "body": "Other matches are still looking for players."
       },
       "match_request_withdrawn": {
-        "title": "A join request was withdrawn",
-        "body": "Someone who asked to join your match has changed their mind."
+        "title": "Join request withdrawn",
+        "body": "A player changed their mind."
       },
       "match_participant_joined": {
-        "title": "Your match gained a player",
-        "body": "Someone joined. Open it to see the roster and keep it moving."
+        "title": "A player joined your match",
+        "body": "Your match is filling up."
       },
       "match_participant_left": {
-        "title": "Your match lost a player",
-        "body": "Someone left. Invite a replacement before the hour comes round."
+        "title": "A player left your match",
+        "body": "Invite someone to take the spot."
       },
       "match_participant_removed": {
         "title": "You were removed from a match",
         "body": "The host removed you. {{reason}}"
       },
       "match_message": {
-        "title": "New message in your match",
-        "body": "Your match group is talking. Open the chat to catch up."
+        "title": "New message",
+        "body": "Your match group is chatting."
       },
       "result_confirm_request": {
-        "title": "A score is waiting on you",
-        "body": "Your opponent added the score. Confirm it, or say it is wrong."
+        "title": "Confirm the score",
+        "body": "Your opponent added it. Confirm it or flag a mistake."
       },
       "result_auto_confirmed": {
         "title": "Score confirmed",
-        "body": "Nobody objected within three days, so this score now stands."
+        "body": "No one objected within 3 days, so it stands."
       }
     },
-    "unreadItem": "Unread"
+    "unreadItem": "Unread",
+    "emptyBody": "We'll let you know when someone invites you, joins your match, or your court is booked.",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "unreadCount_one": "{{count}} unread",
+    "unreadCount_other": "{{count}} unread"
   },
   "profile": {
     "title": "Profile",
