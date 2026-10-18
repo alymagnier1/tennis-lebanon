@@ -100,74 +100,85 @@ export function HomeNextMatchBoard({
         colors={[tennisHeroArt.heroGreen, tennisHeroArt.heroGreenDeep]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.board, { flexDirection: rowDirection }]}
+        style={styles.board}
       >
-        <View style={styles.left}>
-          <AppText style={[styles.eyebrow, { writingDirection }]} maxLines={1}>
-            {eyebrow}
-          </AppText>
-          <AppText
-            style={[
-              startsAt ? styles.clock : styles.clockPending,
-              { writingDirection },
-            ]}
-            maxLines={1}
-          >
-            {clock}
-          </AppText>
-          <AppText style={[styles.sub, { writingDirection }]} maxLines={1}>
-            {facts}
-          </AppText>
-          <AppText
-            style={[
-              styles.sub,
-              needsPlayers ? styles.need : styles.ok,
-              { writingDirection },
-            ]}
-            maxLines={1}
-          >
-            {statusText}
-          </AppText>
-        </View>
-
-        <View style={styles.right}>
-          <View
-            style={[styles.seats, { flexDirection: rowDirection }]}
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-          >
-            <View style={styles.seatRing}>
-              <Avatar
-                name={viewerName}
-                avatarPath={viewerAvatarPath}
-                size={SEAT}
-              />
-            </View>
-            {needsPlayers ? (
-              Array.from({ length: Math.min(spotsLeft, 3) }, (_, index) => (
-                <View key={index} style={[styles.openSeat, styles.overlap]} />
-              ))
-            ) : opponent ? (
-              <View style={[styles.seatRing, styles.overlap]}>
-                <Avatar name={opponent} size={SEAT} />
-              </View>
-            ) : null}
-          </View>
-          {opensInvite && action ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t(action.labelKey)}
-              onPress={() => router.push(matchInviteRoute(match.match_id))}
-              style={({ pressed }) => [styles.cta, pressed && styles.pressed]}
+        {/* The button has its own row: beside the text it took ~160pt, which
+            cut the day, the time and the club on smaller phones (founder,
+            2026-10-04). */}
+        <View style={[styles.top, { flexDirection: rowDirection }]}>
+          <View style={styles.left}>
+            <AppText
+              style={[styles.eyebrow, { writingDirection }]}
+              maxLines={1}
             >
-              <AppText style={styles.ctaLabel} maxLines={1}>
-                {t(action.labelKey)}
-              </AppText>
-            </Pressable>
-          ) : (
-            <Icon name="chevron" size={22} color={tennisHeroArt.heroMint} />
-          )}
+              {eyebrow}
+            </AppText>
+            <AppText
+              style={[
+                startsAt ? styles.clock : styles.clockPending,
+                { writingDirection },
+              ]}
+              maxLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+            >
+              {clock}
+            </AppText>
+            <AppText style={[styles.sub, { writingDirection }]} maxLines={1}>
+              {facts}
+            </AppText>
+            <AppText
+              style={[
+                styles.sub,
+                needsPlayers ? styles.need : styles.ok,
+                { writingDirection },
+              ]}
+              maxLines={1}
+            >
+              {statusText}
+            </AppText>
+          </View>
+
+          <View style={styles.right}>
+            <View
+              style={[styles.seats, { flexDirection: rowDirection }]}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+            >
+              <View style={styles.seatRing}>
+                <Avatar
+                  name={viewerName}
+                  avatarPath={viewerAvatarPath}
+                  size={SEAT}
+                />
+              </View>
+              {needsPlayers ? (
+                Array.from({ length: Math.min(spotsLeft, 3) }, (_, index) => (
+                  <View key={index} style={[styles.openSeat, styles.overlap]} />
+                ))
+              ) : opponent ? (
+                <View style={[styles.seatRing, styles.overlap]}>
+                  <Avatar name={opponent} size={SEAT} />
+                </View>
+              ) : null}
+            </View>
+            {opensInvite && action ? null : (
+              <Icon name="chevron" size={22} color={tennisHeroArt.heroMint} />
+            )}
+          </View>
         </View>
+        {opensInvite && action ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t(action.labelKey)}
+            onPress={() => router.push(matchInviteRoute(match.match_id))}
+            style={({ pressed }) => [styles.cta, pressed && styles.pressed]}
+          >
+            <AppText style={styles.ctaLabel} maxLines={1}>
+              {t(action.labelKey)}
+            </AppText>
+          </Pressable>
+        ) : null}
       </LinearGradient>
     </Pressable>
   );
@@ -186,6 +197,9 @@ const styles = createLiveSheet(() =>
       paddingVertical: 16,
       paddingStart: 18,
       paddingEnd: 16,
+      gap: 14,
+    },
+    top: {
       gap: 12,
       alignItems: "center",
     },
@@ -252,6 +266,7 @@ const styles = createLiveSheet(() =>
       marginStart: -10,
     },
     cta: {
+      alignSelf: "stretch",
       minHeight: minTouchTargetPx,
       paddingHorizontal: 18,
       alignItems: "center",

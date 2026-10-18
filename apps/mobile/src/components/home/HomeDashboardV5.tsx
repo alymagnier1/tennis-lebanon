@@ -18,10 +18,6 @@ import {
   listMyMatches,
   listOwnAvailability,
 } from "@tennis-lebanon/api";
-import {
-  PROVISIONAL_RATING_MATCH_THRESHOLD,
-  isProvisionalPlayerRating,
-} from "@tennis-lebanon/domain";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "../AppText";
 import { Avatar, EmptyState, ListSkeleton } from "../AppUi";
@@ -42,10 +38,10 @@ import {
   type HomeNextAction,
 } from "../../lib/home-next-actions";
 import {
+  greetingName,
   homeSetupNudge,
   homeTodoActions,
   homeTodoContext,
-  ratingPips,
 } from "../../lib/home-v5";
 import { homeFirstPlayKind } from "../../lib/home-first-play";
 import { matchCardAreaLabel } from "../../lib/match-clubs";
@@ -64,8 +60,6 @@ import { useLayoutDirection } from "../../lib/layout-direction";
 import { PROFILE_TAB_ROUTE } from "../../lib/navigation";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../providers/AuthProvider";
-import { notify } from "../../lib/confirm-action";
-import { profileScreenRatingStatValue } from "../../lib/profile-screen-copy";
 import { tennisColors, tennisSpacing } from "../../theme/tennis-tokens";
 import { tennisFontFamily } from "../../hooks/useTennisFonts";
 import { useHomeOpenMatchPicks } from "../../hooks/useHomeOpenMatchPicks";
@@ -171,23 +165,9 @@ export function HomeDashboardV5({ displayName }: { displayName: string }) {
   const showFirstPlay = firstPlayKind !== null;
 
   const playerProfile = profileQuery.data;
-  const ratedMatchCount = playerProfile?.rated_match_count ?? 0;
-  const provisional = isProvisionalPlayerRating(ratedMatchCount);
   const bandLabel = playerProfile
     ? t(`skillBands.${playerProfile.skill_band}`)
     : "";
-  const ratingValue = playerProfile
-    ? profileScreenRatingStatValue(
-        playerProfile.rated_match_count,
-        playerProfile.internal_rating,
-      )
-    : "";
-  const standingA11y = provisional
-    ? `${bandLabel}. ${t("home.ratingProgress.progress", {
-        done: Math.min(ratedMatchCount, PROVISIONAL_RATING_MATCH_THRESHOLD),
-        threshold: PROVISIONAL_RATING_MATCH_THRESHOLD,
-      })}. ${t("profile.ratingExplainerTitle")}`
-    : `${bandLabel}, ${ratingValue}. ${t("profile.ratingExplainerTitle")}`;
   const unreadCount = unreadQuery.data ?? 0;
 
   const todoFacts = (action: HomeNextAction): string | null => {
@@ -296,8 +276,11 @@ export function HomeDashboardV5({ displayName }: { displayName: string }) {
               accessibilityRole="header"
               style={[styles.hello, { writingDirection }]}
               maxLines={1}
+              // Shrinks a long name before cutting it off.
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
             >
-              {t("home.greeting", { name: displayName })}
+              {t("home.greeting", { name: greetingName(displayName) })}
             </AppText>
             {playerProfile ? (
               <AppText
@@ -328,43 +311,9 @@ export function HomeDashboardV5({ displayName }: { displayName: string }) {
             ) : null}
           </Pressable>
         </View>
-
-        {playerProfile ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={standingA11y}
-            onPress={() =>
-              notify(
-                t("profile.ratingExplainerTitle"),
-                t("profile.ratingExplainerBody"),
-              )
-            }
-            style={[styles.standing, { flexDirection: rowDirection }]}
-          >
-            {provisional ? (
-              <View style={[styles.pips, { flexDirection: rowDirection }]}>
-                {ratingPips(
-                  ratedMatchCount,
-                  PROVISIONAL_RATING_MATCH_THRESHOLD,
-                ).map((on, index) => (
-                  <View key={index} style={[styles.pip, on && styles.pipOn]} />
-                ))}
-              </View>
-            ) : null}
-            <AppText style={styles.standingRating} maxLines={1}>
-              {provisional
-                ? t("home.ratingProgress.short", {
-                    done: Math.min(
-                      ratedMatchCount,
-                      PROVISIONAL_RATING_MATCH_THRESHOLD,
-                    ),
-                    threshold: PROVISIONAL_RATING_MATCH_THRESHOLD,
-                  })
-                : ratingValue}
-            </AppText>
-            <Icon name="info" size={20} color={tennisColors.mutedForeground} />
-          </Pressable>
-        ) : null}
+        {/* No rating row here: with no confirmed results yet it read as five
+            empty bars and "0/5", and Profile already explains the rating
+            (founder, 2026-10-04). */}
       </View>
 
       {bodyError ? (
@@ -464,35 +413,10 @@ const styles = createLiveSheet(() =>
       lineHeight: 32,
       color: tennisColors.primaryDark,
     },
-    standing: {
-      alignItems: "center",
-      gap: 12,
-      minHeight: 44,
-    },
     standingText: {
       fontFamily: tennisFontFamily.body,
       fontSize: 14,
       color: tennisColors.mutedForeground,
-    },
-    standingRating: {
-      fontFamily: tennisFontFamily.headingExtra,
-      fontSize: 22,
-      lineHeight: 28,
-      color: tennisColors.primaryDark,
-    },
-    pips: {
-      flex: 1,
-      gap: 6,
-      alignItems: "center",
-    },
-    pip: {
-      flex: 1,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: tennisColors.linkUnderline,
-    },
-    pipOn: {
-      backgroundColor: tennisColors.violet,
     },
     bell: {
       width: 48,

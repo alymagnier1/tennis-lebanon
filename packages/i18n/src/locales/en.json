@@ -528,7 +528,6 @@
     "ratingProgress": {
       "title": "Your rating",
       "progress": "{{done}} of {{threshold}} confirmed results",
-      "short": "{{done}}/{{threshold}}",
       "remaining_one": "{{count}} more match until your rating is visible.",
       "remaining_other": "{{count}} more matches until your rating is visible.",
       "awaitingScore": "A match counts once its score is confirmed. Yours waiting: {{pending}}.",
