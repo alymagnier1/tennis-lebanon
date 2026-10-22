@@ -1,4 +1,9 @@
 import { createHash } from "node:crypto";
+import { after } from "next/server";
+import {
+  dispatchPrelaunchWelcome,
+  welcomeEnabled,
+} from "@/lib/prelaunch-welcome.server";
 import {
   isBenignPrelaunchConflict,
   parsePrelaunchSignup,
@@ -6,6 +11,7 @@ import {
 import { env, serverEnv } from "@/lib/env";
 
 export const runtime = "nodejs";
+export const maxDuration = 30;
 
 function clientAddress(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -105,6 +111,11 @@ export async function POST(request: Request): Promise<Response> {
         community: row.community,
         consent_version: row.consentVersion,
         idempotency_key: row.idempotencyKey,
+        ...(welcomeEnabled() &&
+        row.channel === "email" &&
+        row.consentVersion === "beirut-prelaunch-v3"
+          ? { welcome_status: "pending" }
+          : {}),
       }),
     });
     if (!inserted.ok) {
@@ -115,6 +126,16 @@ export async function POST(request: Request): Promise<Response> {
         !isBenignPrelaunchConflict(failure)
       )
         return json(false, 500);
+    }
+    if (
+      inserted.ok &&
+      welcomeEnabled() &&
+      row.channel === "email" &&
+      row.consentVersion === "beirut-prelaunch-v3"
+    ) {
+      // Return the same public result for new and duplicate contacts. Delivery
+      // failure never turns a persisted signup into a false signup failure.
+      after(() => dispatchPrelaunchWelcome(row.idempotencyKey).then(() => {}));
     }
     return json(true, 200);
   } catch {

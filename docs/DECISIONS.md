@@ -1,5 +1,11 @@
 # Architecture and Product Decisions
 
+## 2026-10-22 — Email-only welcome receipts for new Beirut signups
+
+- Decision: Send a transactional welcome through Resend for new email signups on notice v3 when the production feature is enabled. The owner explicitly chose email welcomes only; WhatsApp automation remains out of scope.
+- Alternatives: Synchronous best-effort sending would slow signup and lose failures. Emailing existing entries would be an unsolicited backfill. A durable status on the existing private waitlist row supports bounded retries without storing duplicate contact data.
+- Consequences: Migration 118, a protected scheduler endpoint and production sender credentials are required. Old v1/v2 forms remain accepted without welcome delivery. Resend acceptance is not proof of inbox delivery. No account creation, analytics or app-access invitation is added.
+
 Record decisions using this template:
 
 ## 2026-10-04 — The Beirut landing page is shorter: one hero, one editorial note, one access answer

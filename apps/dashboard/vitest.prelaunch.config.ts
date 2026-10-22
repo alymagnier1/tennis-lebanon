@@ -7,6 +7,8 @@ export default defineConfig({
       "apps/dashboard/src/app/api/prelaunch-signup/route.test.ts",
       "apps/dashboard/src/app/beirut/landing-copy.test.ts",
       "apps/dashboard/src/app/root-redirect.test.ts",
+      "apps/dashboard/src/lib/prelaunch-welcome.test.ts",
+      "apps/dashboard/src/app/api/internal/prelaunch-welcome/route.test.ts",
     ],
   },
 });
