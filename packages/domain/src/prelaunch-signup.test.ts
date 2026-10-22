@@ -47,6 +47,7 @@ describe("parsePrelaunchSignup", () => {
     for (const consentVersion of [
       PRELAUNCH_CONSENT_VERSION,
       "beirut-prelaunch-v1",
+      "beirut-prelaunch-v2",
     ]) {
       const parsed = parsePrelaunchSignup(body({ consentVersion }));
       expect(parsed.ok).toBe(true);

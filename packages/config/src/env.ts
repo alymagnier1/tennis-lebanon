@@ -86,6 +86,10 @@ export function loadClientEnv(
  */
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  PRELAUNCH_WELCOME_ENABLED: z.enum(["true", "false"]).default("false"),
+  RESEND_API_KEY: z.string().min(1).optional(),
+  PRELAUNCH_WELCOME_FROM: z.string().email().optional(),
+  PRELAUNCH_WELCOME_TOKEN: z.string().min(32).optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
@@ -96,6 +100,12 @@ export function loadServerEnv(
   const result = serverSchema.safeParse({
     SUPABASE_SERVICE_ROLE_KEY:
       source.SUPABASE_SERVICE_ROLE_KEY?.trim() || undefined,
+    PRELAUNCH_WELCOME_ENABLED:
+      source.PRELAUNCH_WELCOME_ENABLED?.trim() || "false",
+    RESEND_API_KEY: source.RESEND_API_KEY?.trim() || undefined,
+    PRELAUNCH_WELCOME_FROM: source.PRELAUNCH_WELCOME_FROM?.trim() || undefined,
+    PRELAUNCH_WELCOME_TOKEN:
+      source.PRELAUNCH_WELCOME_TOKEN?.trim() || undefined,
   });
 
   if (!result.success) {

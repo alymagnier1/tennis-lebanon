@@ -1,6 +1,6 @@
 # Beirut waitlist privacy notice
 
-Updated 10 October 2026
+Updated 22 October 2026
 
 RacketBound brings together adult tennis players in Beirut. Completing the signup form adds you to our early-access list. It does not create an app account.
 
@@ -23,11 +23,13 @@ We save your waitlist entry only when you finish both steps and submit the form.
 
 We use your playing level, usual playing times and optional court information to plan the Beirut launch and decide when to send invitations. We will contact you by WhatsApp or email, whichever you selected. Joining the list does not guarantee a match or immediate app access.
 
+If you choose email, we may also send a signup confirmation through Resend. We record the sending status and number of attempts so we can retry failures without repeatedly emailing you. A confirmation does not grant app access.
+
 We do not track clicks or unfinished signups on the landing page.
 
 ## Who can access your details
 
-RacketBound team members who manage invitations can access the list. Our database provider, Supabase, processes the information for storage. When we send an invitation, WhatsApp or the email service used to deliver it also processes the contact and message information needed for delivery.
+RacketBound team members who manage invitations can access the list. Our database provider, Supabase, processes the information for storage. When we send an invitation or signup confirmation, WhatsApp or the email service used to deliver it also processes the contact and message information needed for delivery. Resend processes confirmation emails, including your name, email address and message content.
 
 Hosting providers may process connection information to deliver and protect the service. Processing may take place outside Lebanon. The waitlist is not publicly accessible.
 
@@ -45,4 +47,4 @@ This period applies to the waitlist entry. If you later create an app account, t
 
 To correct your details or leave the list, email {{SUPPORT_EMAIL}}. Include the email address or WhatsApp number you used to sign up. We may ask you to verify that contact before making changes. You do not need an app account to make a request.
 
-Version: beirut-prelaunch-v2
+Version: beirut-prelaunch-v3
