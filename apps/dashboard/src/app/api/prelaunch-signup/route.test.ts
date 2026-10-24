@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
+  after: vi.fn(),
+  dispatch: vi.fn(),
+  welcomeEnabled: vi.fn(() => false),
   insert: vi.fn(),
   from: vi.fn(),
   env: {
@@ -10,6 +13,11 @@ const mocks = vi.hoisted(() => ({
   serverEnv: { SUPABASE_SERVICE_ROLE_KEY: "local-test-only" },
 }));
 vi.mock("@/lib/env", () => ({ env: mocks.env, serverEnv: mocks.serverEnv }));
+vi.mock("next/server", () => ({ after: mocks.after }));
+vi.mock("@/lib/prelaunch-welcome.server", () => ({
+  dispatchPrelaunchWelcome: mocks.dispatch,
+  welcomeEnabled: mocks.welcomeEnabled,
+}));
 import { POST } from "./route";
 const body = {
   firstName: "Preview",
@@ -36,6 +44,7 @@ function request(payload: unknown = body, key = body.idempotencyKey) {
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.welcomeEnabled.mockReturnValue(false);
   mocks.env.SUPPORT_EMAIL = "test@example.com";
   mocks.serverEnv.SUPABASE_SERVICE_ROLE_KEY = "local-test-only";
   mocks.rpc.mockResolvedValue({ data: 0, error: null });
@@ -63,6 +72,57 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 describe("public waitlist endpoint", () => {
+  it("queues a welcome only after saving a new v3 email signup", async () => {
+    mocks.welcomeEnabled.mockReturnValue(true);
+    const response = await POST(
+      request({ ...body, consentVersion: "beirut-prelaunch-v3" }),
+    );
+    expect(await response.json()).toEqual({ ok: true });
+    expect(mocks.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ welcome_status: "pending" }),
+    );
+    expect(mocks.after).toHaveBeenCalledOnce();
+    expect(mocks.dispatch).not.toHaveBeenCalled();
+  });
+  it("never schedules another welcome for a duplicate contact", async () => {
+    mocks.welcomeEnabled.mockReturnValue(true);
+    mocks.insert.mockResolvedValue({
+      error: {
+        code: "23505",
+        message:
+          'duplicate key value violates unique constraint "prelaunch_signups_community_contact"',
+      },
+    });
+    expect(
+      (await POST(request({ ...body, consentVersion: "beirut-prelaunch-v3" })))
+        .status,
+    ).toBe(200);
+    expect(mocks.after).not.toHaveBeenCalled();
+  });
+  it.each(["beirut-prelaunch-v1", "beirut-prelaunch-v2"])(
+    "does not email an old %s form",
+    async (consentVersion) => {
+      mocks.welcomeEnabled.mockReturnValue(true);
+      await POST(request({ ...body, consentVersion }));
+      expect(mocks.after).not.toHaveBeenCalled();
+      expect(mocks.insert.mock.calls[0]![0]).not.toHaveProperty(
+        "welcome_status",
+      );
+    },
+  );
+  it("does not queue WhatsApp messages", async () => {
+    mocks.welcomeEnabled.mockReturnValue(true);
+    await POST(
+      request({
+        ...body,
+        channel: "whatsapp",
+        contact: "+96171123456",
+        consentVersion: "beirut-prelaunch-v3",
+      }),
+    );
+    expect(mocks.after).not.toHaveBeenCalled();
+    expect(mocks.insert.mock.calls[0]![0]).not.toHaveProperty("welcome_status");
+  });
   it("stores the v2 notice version submitted by the current form", async () => {
     const response = await POST(
       request({ ...body, consentVersion: "beirut-prelaunch-v2" }),
