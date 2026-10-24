@@ -528,7 +528,6 @@
     "ratingProgress": {
       "title": "Votre note",
       "progress": "{{done}} sur {{threshold}} résultats confirmés",
-      "short": "{{done}}/{{threshold}}",
       "remaining_one": "Encore {{count}} match avant que votre note s'affiche.",
       "remaining_other": "Encore {{count}} matchs avant que votre note s'affiche.",
       "awaitingScore": "Un match compte dès que son score est confirmé. Les vôtres en attente : {{pending}}.",
