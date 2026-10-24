@@ -96,7 +96,7 @@ describe("waitlist welcome delivery", () => {
   it("keeps the welcome a receipt with no claim of immediate access", () => {
     const message = welcomeEmail("Rami\nTest", "support@example.com");
     expect(message.text).toContain("Hi Rami Test,");
-    expect(message.text).toContain("want to leave the list?");
-    expect(message.text).toContain("Privacy:");
+    expect(message.text).toContain("Questions? Contact support@example.com.");
+    expect(message.text).toMatch(/RacketBound$/);
   });
 });
